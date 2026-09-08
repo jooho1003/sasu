@@ -1,7 +1,7 @@
 # 아키텍처 — 사수 (SASU)
 
-- 문서 버전: 1.0
-- 작성일: 2026-09-08
+- 문서 버전: 1.1
+- 작성일: 2026-09-08 (1.1: LLM 공급자 Groq 교체 — ADR-028)
 - 지위: **파생 문서**. 구조 결정의 근거는 [PRD §6-11(아키텍처)·§6-12(데이터·상태)·§6-1(스키마)](PRD.md)에 있고, 결정의 이유·트레이드오프는 [ADR.md](ADR.md)에 있다.
 - 문서 충돌 시 우선순위: [PRD](PRD.md) → 이 문서 → [ADR](ADR.md). 이 문서와 PRD가 어긋나면 PRD가 옳다.
 - 현재 상태: **코드 착수 전(D1 9/8).** 아래 구조는 구현이 따라야 할 계약이며, 실제 디렉터리가 생긴 뒤에는 이 문서를 함께 갱신한다.
@@ -36,8 +36,8 @@
  └───────────────────────────────────┬─────────────────────────────────────────┘
                                      │ llm.structured(purpose, schema, prompt)
                                      ▼
-                       lib/llm.ts — 유일한 Anthropic 호출 지점
-                       (Opus 5 / Haiku 4.5, 재시도·refusal fallback·llm_calls 기록)
+                       lib/llm.ts — 유일한 Groq 호출 지점
+                       (gpt-oss-120b / gpt-oss-20b, 재시도·거절 처리·llm_calls 기록)
 ```
 
 **세 가지가 전부다.** ① 어댑터는 items를 먼저 저장하고 나머지는 job에 맡긴다. ② 무거운 일은 전부 워커가 한다. ③ 권한은 SQL이 판정하고 애플리케이션은 그 결과를 보여줄 뿐이다.
@@ -64,7 +64,7 @@ sasu/
 ├── components/                     # 표현 계층. 인용 칩·카드·원장 행 등 (TDD 비대상)
 ├── lib/
 │   ├── contracts.ts                # Zod 스키마·타입 단일 소스: IngestItem · Classification · CardDraft · AnswerDraft
-│   ├── llm.ts                      # Anthropic 게이트웨이 (§3.3)
+│   ├── llm.ts                      # Groq 게이트웨이 (§3.3)
 │   ├── jobs.ts                     # enqueue(kind, payload, {dedupeKey?}) · runOnce()
 │   ├── search.ts                   # search_as() 호출만. 권한 판정은 SQL 안
 │   ├── mask.ts · rules.ts          # 정규식 마스킹 · 규칙 분류 (순수 함수)
@@ -100,7 +100,9 @@ job 종류 9개: `classify` · `embed` · `summarize_meeting` · `make_card` · 
 
 ### 3.3 LLM 호출 지점은 하나
 
-`lib/llm.ts`의 `llm.structured(purpose, schema, prompt)`만 Anthropic을 부른다. 재시도(429·5xx·타임아웃 백오프 3회) · `stop_reason: refusal` fallback 1회 · 스키마 불일치 재생성 1회 · `llm_calls` 기록(purpose·model·tokens·cost_usd·duration_ms) · "프롬프트에 마스킹된 본문만" 확인을 여기서만 한다. Opus 5는 `budget_tokens`·prefill이 안 되므로 형식 제어는 structured output뿐이고, **필드 순서는 항상 citations → (background|reasoning) → 결론**이다. 근거를 먼저 쓰게 강제한다.
+`lib/llm.ts`의 `llm.structured(purpose, schema, prompt)`만 Groq을 부른다. 재시도(429·5xx·타임아웃 백오프 3회) · 거절 재시도 1회 · 스키마 불일치 재생성 1회 · `llm_calls` 기록(purpose·model·tokens·cost_usd·duration_ms) · "프롬프트에 마스킹된 본문만" 확인을 여기서만 한다.
+
+모델은 `openai/gpt-oss-120b`(생성)와 `openai/gpt-oss-20b`(분류) 둘뿐이고 **모듈이 아니라 `purpose`가 모델을 고른다** — 호출부는 모델 ID를 모른다. 형식 제어는 `response_format: {type: "json_schema", json_schema: {strict: true, ...}}` 하나뿐이며 세 가지 제약이 따라온다: ① strict는 모든 필드가 `required` + `additionalProperties: false`라 optional을 쓸 수 없다 — null이 정상인 필드는 nullable union으로 정의한다 ② properties 순서가 생성 순서를 보장하지 않으므로 **필드 순서 citations → (background|reasoning) → 결론**은 스키마와 시스템 프롬프트 양쪽에 적고, 실제 방어는 인용 문자열 검증(§3.5)이 한다 ③ `stop_reason: refusal`이 없으므로 거절은 `refused` 필드와 인용 0개로 판정한다.
 
 ### 3.4 권한은 SQL에서 판정한다
 
@@ -129,10 +131,10 @@ Slack → POST /api/slack/events
   서명 검증 → ingest_events(event_id) 멱등 → 봇/본문 없음/미동의 skip
   → mask() → items upsert(unique source_id+external_ref) → enqueue(classify) → after(runOnce) → 200 (3초 내)
 
-classify job: rules.ts(정량) → 결정 후보면 Haiku 정성 분류 → classifications 저장
+classify job: rules.ts(정량) → 결정 후보면 gpt-oss-20b 정성 분류 → classifications 저장
   → label=decision & confidence≥0.6 → enqueue(make_card) · 항상 enqueue(embed)
 
-make_card job: 유사 items 5 + 원칙 문서 + 원장 유사 결정 3 → Opus 5 CardDraft
+make_card job: 유사 items 5 + 원칙 문서 + 원장 유사 결정 3 → gpt-oss-120b CardDraft
   → 인용 검증 → 72h·0.85 병합 판정 → decision_requests + citations + conflicts
   → visibility 계산 → 담당자 결정(leads_only면 lead) → enqueue(send_slack)
 
@@ -159,7 +161,7 @@ send_slack job: Block Kit DM (헤더·마감·배경·인용 링크·충돌·[�
 
 answer job: 검색 권한 결정 — 채널이면 member, DM·웹이면 질문자
   → search_as(user, dept, embedding, k): items 8 + decisions 3 + 원칙 청크 3
-  → Opus 5 AnswerDraft(citations → answer) → 인용 문자열 검증 → 0개면 refused
+  → gpt-oss-120b AnswerDraft(citations → answer) → 인용 문자열 검증 → 0개면 refused
   → answers 갱신 → UI 2초 폴링 / 슬랙 메시지 갱신 · 고정 문구 "내 권한 범위 안의 부서 기록만 참고했습니다"
   → refused면 "카드로 보낼까요?" → 승락 시 make_card
 ```
@@ -170,7 +172,7 @@ answer job: 검색 권한 결정 — 채널이면 member, DM·웹이면 질문�
 S5 회의 URL 입력 → Recall.ai 봇 참석(참석 고지) → 웹훅 POST /api/meetings/transcript
   또는 lead가 .vtt/.txt 업로드(10MB 상한, 파싱 실패 시 줄 번호)
   → 발언 1건 = item 1건(화자 라벨·타임스탬프, 없으면 '화자 미상') → enqueue(summarize_meeting)
-summarize_meeting job: Opus 5 → meetings.summary {decisions[], deferred[], actions[]} (item_id 인용)
+summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[], actions[]} (item_id 인용)
   → deferred 항목 → enqueue(make_card)  (슬랙 질문과 72h 병합 → 데모 장면 3)
 ```
 
@@ -224,7 +226,7 @@ summarize_meeting job: Opus 5 → meetings.summary {decisions[], deferred[], act
 | 별도 백엔드 서버·외부 큐 서비스 | Route Handler + `jobs` 테이블 | ADR-007·009 |
 | 슬랙 OAuth "Add to Slack" 멀티 워크스페이스 | 단일 워크스페이스 수동 설치, 토큰 env | ADR-017 — 파일럿 2팀째는 별도 배포 인스턴스 |
 | 슬랙·노션 원본 권한 자동 상속, ACL 테이블 | lead가 소스별 `dept`/`leads_only` 수동 지정 | ADR-014 |
-| 인용 정합성 Haiku 심판(2차) | 문자열 포함 검증 | ADR-013 |
+| 인용 정합성 LLM 심판(2차) | 문자열 포함 검증 | ADR-013 |
 | `excluded_count` service role 2차 검색 · 감사 로그 화면 | `answers` 기록만 | PRD §8-0 |
 | 노션 폴링·웹훅·변경 감지 | 1회 가져오기 + [다시 가져오기] | ADR-004 |
 | 보류 재알림·마감 리마인드 cron | "마감 지남" 배지 | PRD §8-0 |

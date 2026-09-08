@@ -17,7 +17,8 @@
 | D0 9/8 오전 | Vercel 플랜 확인: Cron 최소 간격 · `after()` 상한 · `maxDuration` → **매분 트리거 결정**(Vercel Cron vs Supabase `pg_cron`) (§2) | ⬜ |
 | D0 9/8 오전 | Recall.ai 가입 · 가격 · 승인 소요 · 무료 크레딧 · 웹훅 서명 · 녹음 삭제 설정 (§5) | ⬜ |
 | D0 9/8 오전 | 슬랙 앱 생성 + 스코프 8개 + `users:read.email` 승인 가능 여부 (§4) | ⬜ |
-| D0 9/8 오전 | 임베딩 후보 2개(Voyage · OpenAI) 키 발급 (§8) | ⬜ |
+| D0 9/8 오전 | Groq 키 발급 + 단가·rate limit 확인 (§7) | ⬜ |
+| D0 9/8 오전 | 임베딩 후보 키 발급 — Groq `nomic-embed-text-v1_5` 제공 여부 확인 후 Voyage · OpenAI (§8) | ⬜ |
 | D0 9/8 | 두 번째 파일럿 팀 섭외 연락 (§9) | ⬜ |
 | D1 9/8 | Supabase 프로젝트 · Vercel 프로젝트 · GitHub 연동 · `.env` 채우고 커밋 안 되는지 확인 (§3·§2·§7) | ⬜ |
 | D1 9/8 | 우리 팀 **동의문 v1** 확정 + 전원 서면 동의 — 실사용 데이터가 걸리는 첫날 (§9) | ⬜ |
@@ -31,7 +32,7 @@
 | D9 9/16 | 파일럿 동의문 최종 · 컷 ⑤⑥⑦ 판정 | ⬜ |
 | D10 9/17 | 게스트 시드 실행·검증 · **기능 프리징** | ⬜ |
 | D11 9/18 (금) | (접수는 D0에 끝냄) · 부하 테스트 동시 100명 · 서비스명 "사수" 최종 · 도메인 결정 | ⬜ |
-| D12 9/19 (토) | 영상 · 스크린샷 · 제출서 · Anthropic 데이터 정책 문구 · **제출** (§11) | ⬜ |
+| D12 9/19 (토) | 영상 · 스크린샷 · 제출서 · Groq 데이터 정책 문구 · **제출** (§11) | ⬜ |
 | 9/20 (일) | 버그픽스만. 23:59 전 최종 제출 확인 | ⬜ |
 | 9/21~10/5 | 매일 1회 헬스체크 (시크릿 창 `/demo` 완주) | ⬜ |
 
@@ -45,13 +46,13 @@
 - 제출 양식 7항목과 500자 본문은 [submission-checklist.md](submission-checklist.md).
 
 ### AI 사용 고지 — 필수 항목
-"과제 제작에 사용한 주요 AI 도구의 명칭과 활용 방식을 반드시 기재"가 유의사항에 있다. 제품 안의 AI(Opus 5·Haiku 4.5)와 개발 과정의 AI(Claude 기획·리뷰, Codex 구현, Harness 로그)를 모두 적는다. 증거는 `phases/*/index.json`의 summary와 step 출력이다 — **지금부터 쌓인다.**
+"과제 제작에 사용한 주요 AI 도구의 명칭과 활용 방식을 반드시 기재"가 유의사항에 있다. 제품 안의 AI(Groq gpt-oss-120b·gpt-oss-20b)와 개발 과정의 AI(Claude 기획·리뷰, Codex 구현, Harness 로그)를 모두 적는다. 증거는 `phases/*/index.json`의 summary와 step 출력이다 — **지금부터 쌓인다.**
 
 ### 유의사항 중 우리에게 걸리는 것
 - 서비스 링크가 심사 기간에 죽으면 심사 제외 → 9/21~10/5 매일 헬스체크
 - 타인 개인정보·소속 기관 비밀정보 포함 금지 → 게스트 모드·스크린샷·영상은 **합성 데이터만**
 - 소속 회사 업무로 만든 결과물 제출 불가 → 팀원 전원 확인 (직무발명·업무상저작물)
-- 오픈소스·외부 API 라이선스 준수 → Recall.ai·Anthropic·Slack·Notion 약관 확인 (§5·§7)
+- 오픈소스·외부 API 라이선스 준수 → Recall.ai·Groq·Slack·Notion 약관 확인 (§5·§7)
 
 ---
 
@@ -63,13 +64,13 @@
 |---|---|---|
 | Cron 최소 간격이 **매분**인가 | 워커 `/api/jobs/run`을 매분 깨워야 `after()`가 죽은 job을 따라잡는다. Hobby는 하루 1회일 수 있다 | Supabase `pg_cron` + `pg_net`으로 `/api/jobs/run`을 HTTP 호출 (§3). 워커 코드는 동일 |
 | `after()`가 응답 후 얼마나 오래 도는가 | 슬랙 3초 ack 뒤 분류·카드 생성이 여기서 돈다 | 짧으면 `after()`는 enqueue만 하고 처리는 전부 매분 트리거에 |
-| 함수 `maxDuration` 상한 | Opus 5 호출 1회가 30초를 넘을 수 있다 | 회의 정리·카드를 더 잘게 job으로 쪼갠다. Edge Function은 쓰지 않는다 |
+| 함수 `maxDuration` 상한 | gpt-oss-120b 호출 1회가 30초를 넘을 수 있다 | 회의 정리·카드를 더 잘게 job으로 쪼갠다. Edge Function은 쓰지 않는다 |
 
 **판정 결과를 여기에 적는다**: `[ ] 플랜: ___ · Cron 간격: ___ · after() 상한: ___ · maxDuration: ___ → 매분 트리거: Vercel Cron / pg_cron`
 
 **설정**
 - GitHub 연동, `main` 푸시 = 프로덕션 배포. 하루 마지막 커밋은 항상 배포 가능 상태.
-- 환경 변수 (Production + Preview): `ANTHROPIC_API_KEY` · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · 임베딩 키(`VOYAGE_API_KEY` 또는 `OPENAI_API_KEY`) · `JOBS_TRIGGER_SECRET`
+- 환경 변수 (Production + Preview): `GROQ_API_KEY` · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · 임베딩 키(`VOYAGE_API_KEY` 또는 `OPENAI_API_KEY`) · `JOBS_TRIGGER_SECRET`
 - `NEXT_PUBLIC_` 접두사는 Supabase URL·anon key **둘뿐**. 그 외 키가 클라이언트 번들에 들어가면 안 된다 — 빌드 후 `.next/static`을 grep으로 확인.
 - 도메인: Vercel 기본 도메인으로 제출 가능. 커스텀 도메인은 D11까지 여유 있을 때만.
 - Vercel Cron을 택했으면 `vercel.json`에 `/api/jobs/run` 매분. 트리거 호출은 `JOBS_TRIGGER_SECRET` 헤더로 인증.
@@ -134,12 +135,13 @@ OAuth "Add to Slack"은 만들지 않는다(ADR-017). 파일럿 2팀째는 별�
 
 ---
 
-## 7. Anthropic API
+## 7. Groq API
 
-- console.anthropic.com → API 키 → `ANTHROPIC_API_KEY`. **공동 키 1개**(ADR-020).
-- 사용 한도(spend limit)를 **$100**으로 설정. `llm_calls`가 측정하고 S5 "이번 달 사용액"에 보인다.
-- 모델 ID: `claude-opus-5` · `claude-haiku-4-5`. Opus 5는 `budget_tokens`·prefill 불가 — structured output만.
-- **D12까지 약관 확인** (PRD §10 #6·#14): API 입력의 학습 미사용 기본 정책, 데이터 보존 기간(기본 30일?), ZDR(zero data retention) 옵션. 확인 결과를 제출서 "AI 활용" 문구와 파일럿 동의문에 반영한다. 확인 전에는 "학습에 쓰지 않는다"를 단정하지 않는다.
+- console.groq.com → API Keys → `GROQ_API_KEY`. **공동 키 1개**(ADR-020).
+- 모델 ID: 생성 `openai/gpt-oss-120b` · 분류 `openai/gpt-oss-20b`. 둘 다 production이고 strict `json_schema`를 지원한다 — 이게 선택 기준이다 (ADR-028). `llama-3.3-70b-versatile`은 strict 미지원이라 인용 강제가 무너지고, qwen·minimax 계열은 preview(평가 전용)라 심사 기간 9/21~10/5 가동 보장이 없다.
+- **D2까지 단가·rate limit 확인** (PRD §10 #19): 토큰 단가와 티어별 분당 요청·토큰 상한을 콘솔에서 확인해 §12 예산과 PRD §8-5의 $100 상한을 재계산한다. rate limit이 낮으면 워커 동시성을 올리지 말고 `jobs`의 지수 백오프로 흡수한다.
+- 지출 상한: Groq 콘솔에 Anthropic식 spend limit이 없으면 선불 크레딧 충전액을 상한으로 쓴다 `(확인 필요)`. 어느 쪽이든 실제 측정은 `llm_calls`이고 S5 "이번 달 사용액"에 보인다.
+- **D12까지 약관 확인** (PRD §10 #6·#14·#20): 입력의 학습 미사용 여부, 데이터 보존 기간. 확인 결과를 제출서 "AI 활용" 문구와 파일럿 동의문에 반영한다. 확인 전에는 "학습에 쓰지 않는다"를 단정하지 않는다.
 
 ---
 
@@ -211,7 +213,7 @@ D12(9/19)에 영상·스크린샷·제출서를 만들고 **제출** 버튼까�
 
 | 항목 | 지금 (파일럿 + 심사 기간) | 확인 |
 |---|---|---|
-| Anthropic API | 하루 ~200건 분류(Haiku) + 카드·답변·회의 정리 수십 건(Opus) → **$100 상한** | spend limit 설정 |
+| Groq API | 하루 ~200건 분류(gpt-oss-20b) + 카드·답변·회의 정리 수십 건(gpt-oss-120b) → **$100 상한** | 단가·상한 확인 (D2) ⬜ |
 | Recall.ai | `(확인 필요)` 회의 시간당 과금 — D0 | ⬜ |
 | Vercel | Hobby 무료, 매분 Cron이 필요하면 Pro `(확인 필요)` — D0 | ⬜ |
 | Supabase | 무료 티어 | — |
