@@ -72,7 +72,7 @@
       "status": "completed",
       "started_at": "2026-09-08T21:52:17+0900",
       "summary": "app/api/slack/events/route.ts에서 raw body 서명 검증 → URL challenge·event_id 멱등 → 수집 대상·동의 확인 → 마스킹 items upsert → classify enqueue·kickWorker 순서를 구현하고 verifySlackSignature·isCollectible·toIngestItem을 추가했다.",
-      "completed_at": "2026-09-08T22:02:10+0900"
+      "completed_at": "2026-09-08T22:03:57+0900"
     },
     {
       "step": 9,
