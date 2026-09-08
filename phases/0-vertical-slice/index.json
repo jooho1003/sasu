@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "rls-can-see",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T20:45:42+0900",
+      "summary": "can_see(p_user uuid, p_dept uuid, p_visibility text) 단일 판정 함수를 정의하고 15개 전체 테이블에 RLS를 활성화해 11개 사용자 데이터 테이블에 authenticated·anon 정책을 적용했다.",
+      "completed_at": "2026-09-08T20:56:56+0900"
     },
     {
       "step": 3,
