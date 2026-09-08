@@ -166,10 +166,13 @@ execute.py가 자동으로 처리하는 것:
 
 | task | D | 내용 | 게이트 |
 |---|---|---|---|
-| `0-vertical-slice` | D1~D3 | 리포·스키마 v1·jobs 워커·슬랙 어댑터·마스킹·규칙+Haiku 분류·S1·카드 생성·웹 카드 S2·웹 결정·원장 S3 | **D3 자정 사람 판정** |
+| `0-vertical-slice` | D1~D3 | 리포·스키마 v1·`can_see` RLS·jobs 워커·`llm.ts`·마스킹·규칙+gpt-oss-20b 분류·슬랙 어댑터·S1·카드 생성(인용 검증)·웹 카드 S2·웹 결정·원장 S3 | **D3 자정 사람 판정** |
+| `0b-embedding` | D2~ | 임베딩 모델 확정 → `items.embedding`+`embed_model` 마이그레이션 · `embed` job · `search_as()` · 카드 입력의 유사 items 5 · 72h·0.85 병합 | 모델 확정은 사람 판정 (setup-guide §8) |
 | `1-slack-dm-backfill` | D4 | Block Kit DM 버튼·모달·리드타임·7일 백필 | 컷 ① |
-| `2-meeting` | D5~D6 | 업로드 파서 → Recall.ai → 회의 정리 → 72h 병합 | **D6 봇 판정** · 컷 ③ |
-| `3-notion-ask-rls` | D7~D8 | 노션 가져오기·S4 Q&A·`can_see`/`search_as`·인용 검증·충돌 감지·@사수 | D8 사람 코드 리뷰 |
+| `2-meeting` | D5~D6 | 업로드 파서 → Recall.ai → 회의 정리 (72h 병합은 `0b-embedding`) | **D6 봇 판정** · 컷 ③ |
+| `3-notion-ask-rls` | D7~D8 | 노션 가져오기·S4 Q&A·권한 차등 답변·인용 검증·충돌 감지·@사수 (`can_see`는 task 0, `search_as`는 `0b-embedding`) | D8 사람 코드 리뷰 |
 | `4-settings-consent` | D9 | S5 체크리스트·visibility·S0 동의·채널 공지·ask 상한 | 컷 ⑤⑥⑦ |
 | `5-demo-seed` | D10 | seed-demo.ts 부서 2개·`/demo`·generic_answer | 프리징 |
 | `6-polish` | D11 | 부하 테스트·에러 화면·빈 상태 | — |
+
+`0b-embedding`은 PRD §9 D2의 "임베딩 모델 확정 → embedding 컬럼 마이그레이션"을 별도 task로 분리한 것이다. ADR-018이 확정 전 컬럼 고정을 금지하므로 task 0은 임베딩 없이 완주하고, 유사도가 필요한 기능(카드 입력의 유사 items 5·72h 병합·`search_as`)만 여기로 모았다.
