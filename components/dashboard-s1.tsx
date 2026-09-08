@@ -76,12 +76,26 @@ function needsReview(item: DashboardItem): boolean {
   return item.confidence !== null && item.confidence < 0.6;
 }
 
-async function requestPromotion(deptId: string, itemId: string): Promise<void> {
-  await fetch(`/api/d/${encodeURIComponent(deptId)}/cards`, {
+type PromotionResponse = {
+  card_id?: string;
+  error?: string;
+  message?: string;
+};
+
+async function requestPromotion(
+  deptId: string,
+  itemId: string,
+): Promise<PromotionResponse> {
+  const response = await fetch(`/api/d/${encodeURIComponent(deptId)}/cards`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ origin_item_id: itemId }),
   });
+  const body = (await response.json()) as PromotionResponse;
+  if (!response.ok) {
+    throw new Error(body.error ?? "카드 생성을 시작하지 못했습니다.");
+  }
+  return body;
 }
 
 export default function DashboardS1({
@@ -93,6 +107,9 @@ export default function DashboardS1({
   const [dashboard, setDashboard] = useState<LoadedDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [promotions, setPromotions] = useState<
+    Record<string, { pending: boolean; message: string; cardId?: string }>
+  >({});
 
   useEffect(() => {
     let cancelled = false;
@@ -180,6 +197,34 @@ export default function DashboardS1({
     setActiveLabel(label);
   };
   const settingsHref = `/d/${deptId}/settings`;
+  const promote = async (itemId: string) => {
+    setPromotions((current) => ({
+      ...current,
+      [itemId]: { pending: true, message: "카드 생성을 요청하는 중입니다." },
+    }));
+    try {
+      const result = await requestPromotion(deptId, itemId);
+      setPromotions((current) => ({
+        ...current,
+        [itemId]: {
+          pending: false,
+          message: result.message ?? "결정 카드 생성을 시작했습니다.",
+          ...(result.card_id ? { cardId: result.card_id } : {}),
+        },
+      }));
+    } catch (promotionError) {
+      setPromotions((current) => ({
+        ...current,
+        [itemId]: {
+          pending: false,
+          message:
+            promotionError instanceof Error
+              ? promotionError.message
+              : "카드 생성을 시작하지 못했습니다.",
+        },
+      }));
+    }
+  };
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-5 py-10 text-left sm:px-8">
@@ -315,6 +360,7 @@ export default function DashboardS1({
               {activeData.items.map((item) => (
                 <details
                   key={item.id}
+                  id={`item-${item.id}`}
                   className={`group rounded-2xl border-l-4 bg-[var(--surface)] p-5 shadow-sm ${
                     item.label === "decision"
                       ? "border-l-[var(--urgent)]"
@@ -354,16 +400,30 @@ export default function DashboardS1({
                         {item.content}
                       </p>
                     </div>
-                    {/* 카드 생성 API는 step 13에서 열리므로 404를 피하도록 비활성화한다. */}
-                    <button
-                      className="w-fit rounded-lg border border-black/10 px-4 py-2 text-sm font-bold text-[var(--muted)] opacity-60"
-                      disabled
-                      onClick={() => void requestPromotion(deptId, item.id)}
-                      title="카드 만들기는 다음 구현 단계에서 사용할 수 있습니다."
-                      type="button"
-                    >
-                      카드로 승격
-                    </button>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 text-sm font-bold text-[var(--accent)] disabled:opacity-50"
+                        disabled={promotions[item.id]?.pending === true}
+                        onClick={() => void promote(item.id)}
+                        type="button"
+                      >
+                        {promotions[item.id]?.pending
+                          ? "승격 중…"
+                          : "카드로 승격"}
+                      </button>
+                      {promotions[item.id] ? (
+                        <span className="text-sm text-[var(--muted)]">
+                          {promotions[item.id].message}{" "}
+                          {promotions[item.id].cardId ? (
+                            <Link
+                              href={`/d/${deptId}/cards/${promotions[item.id].cardId}`}
+                            >
+                              카드 보기
+                            </Link>
+                          ) : null}
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
                 </details>
               ))}

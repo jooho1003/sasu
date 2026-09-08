@@ -109,7 +109,10 @@
     {
       "step": 13,
       "name": "card-web-ledger",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T22:56:50+0900",
+      "summary": "POST /api/d/[dept]/cards·POST /api/cards/[id]/decide·GET /api/d/[dept]/ledger·POST /api/d/[dept]/decisions와 S2 카드 상세·S3 원장 페이지를 구현하고, 세션 유래 결정자·담당자/lead 권한·상태 전이·request_id unique 충돌 선조회/재조회로 중복 결정을 안내 응답 처리했다.",
+      "completed_at": "2026-09-08T23:19:17+0900"
     },
     {
       "step": 14,
