@@ -53,7 +53,10 @@
     {
       "step": 6,
       "name": "jobs-worker",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T21:27:32+0900",
+      "summary": "enqueue(kind, payload, opts?)·registerHandler(kind, fn)·runOnce(limit?)·kickWorker()를 구현하고, claim_jobs RPC 기반 SKIP LOCKED claim·지수 백오프·3회 실패 소유 상태 전이·2분 sweep을 추가했으며 현재 핸들러는 sweep만 등록했다.",
+      "completed_at": "2026-09-08T21:40:28+0900"
     },
     {
       "step": 7,
