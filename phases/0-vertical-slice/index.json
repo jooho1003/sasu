@@ -45,7 +45,10 @@
     {
       "step": 5,
       "name": "llm-gateway",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T21:18:30+0900",
+      "summary": "llm.structured(purpose, schema, prompt, opts) 단일 게이트웨이와 classify→gpt-oss-20b, make_card·answer·summarize_meeting·generic_answer→gpt-oss-120b 매핑을 구현했다.",
+      "completed_at": "2026-09-08T21:25:55+0900"
     },
     {
       "step": 6,
