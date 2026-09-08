@@ -80,7 +80,7 @@
       "status": "completed",
       "started_at": "2026-09-08T22:03:58+0900",
       "summary": "classifyItem(itemId: string): Promise<void>와 registerClassifyHandler(): void를 구현해 classify 핸들러를 등록하고, 규칙 1차·LLM 2차 분류와 confidence 0.6 이상 decision의 make_card 자동 승격을 적용했다.",
-      "completed_at": "2026-09-08T22:10:40+0900"
+      "completed_at": "2026-09-08T22:12:29+0900"
     },
     {
       "step": 10,
