@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "schema-v1",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T20:39:23+0900",
+      "summary": "PRD §6-1의 15개 테이블과 멱등 제약·인덱스를 supabase/migrations/0001_schema_v1.sql에 정의했다.",
+      "completed_at": "2026-09-08T20:44:24+0900"
     },
     {
       "step": 2,
