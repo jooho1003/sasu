@@ -85,7 +85,10 @@
     {
       "step": 10,
       "name": "auth-membership",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T22:12:29+0900",
+      "summary": "requireMembership(deptSlugOrId): Promise<{ userId; deptId; role; displayName }> 단일 멤버십 게이트와 /login·/auth/callback·/no-membership·/(auth)/d/[dept] 라우트, Next.js 16 proxy 세션 갱신을 구현했다.",
+      "completed_at": "2026-09-08T22:23:52+0900"
     },
     {
       "step": 11,
