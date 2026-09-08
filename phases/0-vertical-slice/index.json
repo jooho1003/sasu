@@ -7,7 +7,8 @@
       "name": "project-setup",
       "status": "completed",
       "started_at": "2026-09-08T18:43:21+0900",
-      "summary": "Next.js 16.3.4, React 19.2.8, TypeScript 6.0.3, Tailwind CSS 4.3.3, Vitest 5.0.0 기반 App Router 골격과 tsconfig.json, next.config.ts, eslint.config.mjs, postcss.config.mjs, vitest.config.ts, playwright.config.ts를 구성하고 lint·build·test AC를 통과했다."
+      "summary": "Next.js 16.3.4, React 19.2.8, TypeScript 6.0.3, Tailwind CSS 4.3.3, Vitest 5.0.0 기반 App Router 골격과 tsconfig.json, next.config.ts, eslint.config.mjs, postcss.config.mjs, vitest.config.ts, playwright.config.ts를 구성하고 lint·build·test AC를 통과했다.",
+      "completed_at": "2026-09-08T20:39:22+0900"
     },
     {
       "step": 1,
