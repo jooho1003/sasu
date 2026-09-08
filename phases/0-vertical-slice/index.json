@@ -37,7 +37,10 @@
     {
       "step": 4,
       "name": "supabase-clients",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T21:07:59+0900",
+      "summary": "createServerSupabaseClient·createBrowserSupabaseClient·createServiceSupabaseClient 호출 시점 팩토리 3종을 추가하고, ADR-024에 따라 service role import를 기본 금지하되 지정된 내부 경로만 허용하는 ESLint 규칙을 적용했다.",
+      "completed_at": "2026-09-08T21:16:12+0900"
     },
     {
       "step": 5,
