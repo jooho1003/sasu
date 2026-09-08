@@ -104,7 +104,7 @@
       "status": "completed",
       "started_at": "2026-09-08T22:44:25+0900",
       "summary": "makeCard(itemId: string): Promise<void>와 registerMakeCardHandler(): void, 순수 함수 verifyCitations·narrowestVisibility·resolveAssignee를 구현하고 결정 후보·같은 소스 최근 항목·원칙 문서·최근 결정 3건으로 카드 생성 입력을 구성해 인용 재검증·가시성 상속·담당자 강제·충돌 저장·승격 멱등을 적용했다.",
-      "completed_at": "2026-09-08T22:55:16+0900"
+      "completed_at": "2026-09-08T22:56:50+0900"
     },
     {
       "step": 13,
