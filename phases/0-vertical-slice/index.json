@@ -117,7 +117,9 @@
     {
       "step": 14,
       "name": "db-apply-seed",
-      "status": "pending"
+      "status": "blocked",
+      "started_at": "2026-09-08T23:20:38+0900",
+      "blocked_reason": "필수 환경 변수 NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY가 없고, 마이그레이션 수단인 SUPABASE_DB_URL 또는 SUPABASE_ACCESS_TOKEN(+ DB 비밀번호)도 없다. NEXT_PUBLIC_SUPABASE_ANON_KEY와 SUPABASE_SERVICE_ROLE_KEY는 Supabase Dashboard → Settings → API에서, SUPABASE_DB_URL과 DB 비밀번호는 Settings → Database에서, SUPABASE_ACCESS_TOKEN은 Supabase 계정 Access Tokens에서 발급해 .env.local에 설정해야 한다."
     },
     {
       "step": 15,
