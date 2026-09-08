@@ -1,0 +1,36 @@
+{
+  "description": "사수(SASU) 프로젝트 훅 (Codex). .claude/settings.json의 훅과 같은 스크립트를 공유한다. Codex의 편집 툴 이름은 apply_patch이므로 matcher에 함께 넣는다 — Edit|Write만 두면 가드가 한 번도 안 걸린다. 명령 경로는 워크스페이스 루트 기준 상대 경로다 (Codex에는 CLAUDE_PROJECT_DIR 같은 환경변수가 없다).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"./scripts/hooks/dangerous-command-guard.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"./scripts/hooks/tdd-guard.sh\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run lint 2>&1 && npm run build 2>&1 && npm run test 2>&1"
+          }
+        ]
+      }
+    ]
+  }
+}
