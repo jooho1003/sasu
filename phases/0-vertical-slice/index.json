@@ -61,7 +61,10 @@
     {
       "step": 7,
       "name": "mask-rules",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T21:41:58+0900",
+      "summary": "mask(text: string): string와 단일 MASK_PATTERNS로 전화·이메일·주민번호·계좌·카드를 마스킹하고, classifyByRules(input): RuleSignal에 요청 표현·KST 마감·보류 태그·12시간 무응답 질문 신호를 구현했다.",
+      "completed_at": "2026-09-08T21:50:53+0900"
     },
     {
       "step": 8,

@@ -6,6 +6,7 @@ import Groq, {
 import { z } from "zod";
 
 import { toStrictJsonSchema } from "@/lib/contracts";
+import { MASK_PATTERNS } from "@/lib/mask";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
 const CLASSIFICATION_MODEL = "openai/gpt-oss-20b";
@@ -28,14 +29,6 @@ const RETRY_BASE_DELAY_MS = 250;
 const GROQ_REQUEST_TIMEOUT_MS = 60_000;
 const FIELD_ORDER_INSTRUCTION =
   "응답 스키마에 citations가 있으면 citations를 먼저 채우고, 그다음 근거(background 또는 reasoning), 결론(answer 또는 recommendation)은 마지막에 작성하세요.";
-
-const UNMASKED_PROMPT_PATTERNS = [
-  /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i,
-  /(?<!\d)(?:(?:\+?82[-.\s]?)?0?1[016789]|0(?:2|[3-6][1-5]))[-.\s]?\d{3,4}[-.\s]?\d{4}(?!\d)/,
-  /(?<!\d)\d{6}[-\s]?[1-4]\d{6}(?!\d)/,
-  /(?:계좌(?:번호)?|account(?:\s+number)?)\s*[:：]?\s*\d{10,14}\b/i,
-  /(?<!\d)(?!(?:19|20)\d{2}-\d{1,2}-\d{1,2}\b)\d{2,6}(?:-\d{2,6}){2,4}(?!\d)/,
-];
 
 const REFUSAL_TEXT_PATTERNS = [
   /(?:도와|답변|제공|처리).{0,12}(?:드릴|할) 수 없(?:습니다|어요)/,
@@ -122,7 +115,7 @@ function modelForPurpose(purpose: LlmPurpose): ModelId {
 function assertPromptIsMasked(prompt: { system: string; user: string }): void {
   const combined = `${prompt.system}\n${prompt.user}`;
 
-  if (UNMASKED_PROMPT_PATTERNS.some((pattern) => pattern.test(combined))) {
+  if (MASK_PATTERNS.some(({ re }) => re.test(combined))) {
     throw new LlmGatewayError(
       "마스킹되지 않은 개인정보가 프롬프트에 남아 있습니다.",
       "unmasked_prompt",
