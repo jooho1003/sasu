@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "contracts-zod",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T20:58:41+0900",
+      "summary": "Zod 단일 계약 IngestItem·Classification·CardDraft·AnswerDraft·MeetingSummary와 toStrictJsonSchema(name: string, schema: z.ZodType): object를 구현해 Groq strict JSON Schema 요구를 재귀 보장했다.",
+      "completed_at": "2026-09-08T21:06:38+0900"
     },
     {
       "step": 4,
