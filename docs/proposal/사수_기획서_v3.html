@@ -1,0 +1,480 @@
+<title>사수 v2 기획서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@600;700&family=Gothic+A1:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #F6F7F5;
+    --surface: #FFFFFF;
+    --surface-2: #EDF1EC;
+    --ink: #1F2823;
+    --muted: #66716A;
+    --line: #DFE4DF;
+    --accent: #17614A;        /* 소나무 녹 — 신뢰·보안 */
+    --accent-soft: #E1EEE8;
+    --urgent: #B0611B;        /* 호박 — '지금 결정' 전용 */
+    --urgent-soft: #F7EBDD;
+    --code-bg: #EDF1EC;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141816;
+      --surface: #1C211E;
+      --surface-2: #232A26;
+      --ink: #E5EAE6;
+      --muted: #93A099;
+      --line: #313A34;
+      --accent: #6CBFA2;
+      --accent-soft: #1F3A30;
+      --urgent: #DB9A55;
+      --urgent-soft: #3A2C1B;
+      --code-bg: #232A26;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141816;
+    --surface: #1C211E;
+    --surface-2: #232A26;
+    --ink: #E5EAE6;
+    --muted: #93A099;
+    --line: #313A34;
+    --accent: #6CBFA2;
+    --accent-soft: #1F3A30;
+    --urgent: #DB9A55;
+    --urgent-soft: #3A2C1B;
+    --code-bg: #232A26;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    line-height: 1.8;
+    margin: 0;
+    font-size: 16px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 56px 24px 96px; }
+  .doc-head { border-bottom: 3px solid var(--accent); padding-bottom: 30px; margin-bottom: 14px; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); font-weight: 500; margin-bottom: 16px;
+  }
+  h1 {
+    font-family: "Hahmlet", serif;
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.3; margin: 0 0 14px; font-weight: 700;
+    text-wrap: balance;
+  }
+  .subtitle { color: var(--muted); font-size: 17px; max-width: 660px; margin: 0; }
+  .subtitle b { color: var(--ink); }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px 24px;
+    font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--muted);
+    padding: 14px 0 40px; border-bottom: 1px solid var(--line); margin-bottom: 48px;
+  }
+  .meta-row b { color: var(--ink); font-weight: 500; }
+  section { margin-bottom: 64px; }
+  .sec-label {
+    display: flex; align-items: baseline; gap: 14px;
+    border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 24px;
+  }
+  .sec-num {
+    font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--accent);
+    font-weight: 500; letter-spacing: .08em;
+  }
+  h2 { font-family: "Hahmlet", serif; font-size: 24px; margin: 0; font-weight: 700; }
+  h3 { font-size: 17px; margin: 30px 0 10px; font-weight: 700; }
+  p { margin: 0 0 14px; }
+  .note {
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 14px 18px; border-radius: 0 6px 6px 0; font-size: 14.5px; margin: 18px 0;
+  }
+  .note b { color: var(--accent); }
+  .warn {
+    background: var(--urgent-soft); border-left: 3px solid var(--urgent);
+    padding: 14px 18px; border-radius: 0 6px 6px 0; font-size: 14.5px; margin: 18px 0;
+  }
+  .warn b { color: var(--urgent); }
+  .quote-box {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 24px 28px; margin: 18px 0;
+  }
+  .quote-box .q-label {
+    font-family: "IBM Plex Mono", monospace; font-size: 11.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+  }
+  .hook {
+    font-family: "Hahmlet", serif; font-size: 21px; font-weight: 600;
+    line-height: 1.6; margin: 0; text-wrap: balance;
+  }
+  .hook em { color: var(--accent); font-style: normal; }
+  .table-scroll { overflow-x: auto; margin: 18px 0; }
+  table {
+    border-collapse: collapse; width: 100%; font-size: 14px;
+    background: var(--surface); min-width: 560px;
+  }
+  th {
+    text-align: left; font-weight: 700; font-size: 13px;
+    background: var(--surface-2); padding: 10px 14px;
+    border: 1px solid var(--line); white-space: nowrap;
+  }
+  td { padding: 10px 14px; border: 1px solid var(--line); vertical-align: top; }
+  .dim { color: var(--muted); }
+  .tag {
+    display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: 11.5px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  .tag.acc { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 18px 0; }
+  .steps li { counter-increment: step; position: relative; padding: 0 0 22px 52px; }
+  .steps li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: 2px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--accent); color: var(--accent);
+    font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li:not(:last-child)::after {
+    content: ""; position: absolute; left: 14.5px; top: 36px; bottom: 2px;
+    width: 1px; background: var(--line);
+  }
+  .steps b { display: block; margin-bottom: 2px; }
+  .steps .dim { font-size: 14px; }
+  code {
+    font-family: "IBM Plex Mono", monospace; font-size: 13px;
+    background: var(--code-bg); padding: 1px 6px; border-radius: 4px;
+  }
+  ul { padding-left: 22px; margin: 10px 0 16px; }
+  li { margin-bottom: 6px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 20px;
+  }
+  .card h4 { margin: 0 0 8px; font-size: 15px; }
+  .card h4 .k { color: var(--accent); font-family: "IBM Plex Mono", monospace; font-size: 12px; margin-right: 8px; }
+  .card p { font-size: 14px; color: var(--muted); margin: 0; }
+  pre.mermaid {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+    padding: 16px; overflow-x: auto; margin: 18px 0;
+  }
+  .footer-note {
+    border-top: 1px solid var(--line); padding-top: 24px; margin-top: 24px;
+    font-size: 13.5px; color: var(--muted);
+  }
+  /* 지금 결정 카드 목업 */
+  .decide-card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-top: 3px solid var(--urgent); border-radius: 8px;
+    padding: 18px 22px; margin: 18px 0; max-width: 560px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+  .decide-card .dc-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .decide-card .dc-badge {
+    font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .1em;
+    color: var(--urgent); background: var(--urgent-soft);
+    padding: 2px 8px; border-radius: 999px; font-weight: 500; white-space: nowrap;
+  }
+  .decide-card .dc-due { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--muted); }
+  .decide-card .dc-title { font-weight: 700; font-size: 15.5px; margin-bottom: 6px; }
+  .decide-card .dc-body { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+  .decide-card .dc-src {
+    font-size: 12.5px; font-family: "IBM Plex Mono", monospace;
+    color: var(--accent); border-top: 1px dashed var(--line); padding-top: 10px;
+  }
+  .flip {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch;
+    margin: 18px 0;
+  }
+  @media (max-width: 640px) { .flip { grid-template-columns: 1fr; } .flip .flip-arrow { transform: rotate(90deg); justify-self: center; } }
+  .flip .card p { font-size: 13.5px; }
+  .flip-arrow {
+    align-self: center; color: var(--accent); font-size: 22px; font-weight: 700;
+  }
+</style>
+
+<div class="wrap">
+  <header class="doc-head">
+    <div class="eyebrow">Wanted AI Championship 2026 · 컨셉 통합안 — 사수 × 사이 합본 v3 (부서별 결정 사수)</div>
+    <h1>우리 부서를 가장 잘 아는 사수</h1>
+    <p class="subtitle"><b>범용 AI는 세상을 압니다. 사수는 우리 부서를 압니다.</b><br>온라인 회의·슬랙·문서·메일을 상시 관찰해 분류하고, 어떤 직무든 "지금 무엇을 결정해야 하는지"와 "어느 방향이 맞는지"를 근거와 함께 답하는 부서별 AI 사수.</p>
+  </header>
+  <div class="meta-row">
+    <span>과제 제출 마감 <b>2026-09-20 (일) 23:59</b></span>
+    <span>벤치마크 <b>Lindy</b></span>
+    <span>원본 문서 <b>사수(SASU) 제출 킷 · 사이(SAI) 기획서</b></span>
+  </div>
+
+  <!-- ===================== 0. 컨셉 전환 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">00</span><h2>컨셉 전환 — 사수의 방향이 뒤집힙니다</h2></div>
+    <p>기존 두 기획은 각각 <b>"사람이 AI의 사수가 된다"</b>(사수 v1 — AI 팀원 관리)와 <b>"AI 협업 로그로 개인 역량을 증명한다"</b>(사이)였습니다. 합본 v2는 방향을 뒤집습니다.</p>
+    <div class="flip">
+      <div class="card">
+        <h4><span class="k">V1</span>사수 — 사람이 AI를 키운다</h4>
+        <p>JD로 AI 팀원을 채용하고, 인사평가·코칭 루프로 성장시키는 플랫폼. 관리 대상이 AI.</p>
+      </div>
+      <div class="flip-arrow">→</div>
+      <div class="card">
+        <h4><span class="k">V3</span>사수 — 부서의 모든 것을 아는 AI가 사람을 돕는다</h4>
+        <p>부서 단위로 세팅된 AI가 회의·슬랙·문서·메일을 상시 관찰해 분류하고, 어떤 직무든 결정이 필요한 순간을 잡아 방향을 제안하고 기록한다. 자산이 되는 것은 <b>부서별 결정 원장</b>.</p>
+      </div>
+    </div>
+    <div class="quote-box">
+      <div class="q-label">한 문장 훅</div>
+      <p class="hook">범용 AI는 세상을 알고, Lindy는 회사를 안다고 말합니다.<br>사수는 <em>우리 부서</em>를 알고, <em>결정</em>을 만듭니다.</p>
+    </div>
+    <p>"회사 내부 정보를 다 아는 AI"는 이제 차별점이 아닙니다 — Lindy의 메인 카피가 이미 "knows everything about your company"이고, Glean·티로·콜라보도 같은 방향입니다. 사수가 다른 곳은 두 가지입니다. ① <b>부서 단위 격리</b>: 회사 전체를 한 덩어리로 아는 AI는 영업의 맥락으로 개발 질문에 답하는 오류를 냅니다. 사수는 부서별로 세팅되어 그 부서의 회의·슬랙·문서·메일만 알고, 그 부서의 언어로 답합니다. ② <b>결정 레이어</b>: 상시 관찰한 모든 채널에서 "결정이 필요한 순간"을 감지해 담당자에게 요청하고, 방향을 제안하고, 내려진 결정을 근거와 함께 기록합니다. 이슈에 Jira가 있고 코드에 GitHub이 있듯, <b>결정에는 아직 아무 시스템도 없습니다.</b> 회의는 그 시스템의 입력 채널 중 하나일 뿐입니다.</p>
+  </section>
+
+  <!-- ===================== 1. 문제 정의 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">01</span><h2>문제 정의</h2></div>
+    <div class="quote-box">
+      <div class="q-label">타깃 시나리오 — 실제 상황</div>
+      <p class="hook">팀장님이 회의를 하고 왔지만, 깜빡하고 내용을 전달해주지 않습니다.<br>내가 다시 물어봐야 하고 — 나중엔 <em>"말해주지 않았냐"</em>는 말까지 듣습니다.</p>
+    </div>
+    <p>이건 한 장면일 뿐입니다. 회의는 결정이 새는 여러 구멍 중 하나이고, 같은 일이 모든 채널에서 매일 벌어집니다.</p>
+    <ul>
+      <li><b>슬랙에서</b> — 하루 수백 개 메시지 중 "지금 누군가 결정해야 하는 것"이 잡담과 섞여 스크롤 아래로 사라집니다. 질문은 던져졌지만 아무도 답하지 않은 채 묻힙니다.</li>
+      <li><b>온라인 회의에서</b> — 결정과 근거가 회의록 없이 흩어지고, 공유는 팀장의 기억력에 달려 있습니다. "말했다 / 못 들었다"의 공방에는 심판이 없습니다.</li>
+      <li><b>문서 더미에서</b> — 노션·드라이브에 답이 있지만 어디 있는지 모르고, 찾아도 "이게 최신인지, 우리 부서 기준이 맞는지"를 판단할 근거가 없습니다.</li>
+      <li><b>범용 AI에서</b> — ChatGPT에 물으면 세상의 정답은 주지만 우리 부서의 정답은 모릅니다. 영업의 맥락을 모른 채 영업 질문에 답하고, 지난달 결정된 원칙을 모른 채 방향을 제안합니다.</li>
+      <li><b>사람의 머릿속에서</b> — "왜 그때 그렇게 하기로 했었지?"에 답할 수 있는 사람이 퇴사하면, 그 지식은 회사에서 사라집니다.</li>
+    </ul>
+    <p>어떤 직무든 하루는 작은 결정의 연속이고, 그 결정의 근거는 부서 안에 흩어져 있습니다. 사수 v3는 그 채널들을 상시 관찰해 분류하고, 결정이 필요한 순간을 잡아주고, 물어보면 우리 부서의 맥락으로 방향을 답합니다. <b>"말해주지 않았냐"가 아니라 "사수한테 물어봐"</b>가 부서의 기본값이 됩니다.</p>
+    <p>신입에게 사수가 필요한 이유는 지식이 문서가 아니라 <b>맥락</b>이기 때문입니다. 그런데 정작 사수 역할을 해줄 시니어는 늘 부족하고, 팀장은 회의에 갇혀 있습니다. 물어볼 곳 없는 팀원과, 전달할 시간 없는 팀장 — 그 사이가 비어 있습니다.</p>
+    <div class="note"><b>한 문장 정의</b> — 사수 v3는 부서 단위로 세팅되어 온라인 회의·슬랙·문서·메일을 상시 관찰·분류하고, ① 지금 결정해야 할 것을 감지해 담당자에게 밀어주고 ② 물어보면 부서의 맥락과 과거 결정을 근거로 방향을 제안하고 ③ 내려진 모든 결정을 누가·왜·어떤 근거로 결정했는지 원장에 기록하는 <b>부서별 결정 사수</b>입니다. 회의 정리·문서 검색은 이 시스템의 입력이자 커머디티입니다.</div>
+  </section>
+
+  <!-- ===================== 2. 핵심 기능 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">02</span><h2>핵심 기능 4</h2></div>
+    <p>기능의 서열이 곧 포지셔닝입니다. 경쟁자 전원이 가진 것(기록·검색)은 입력으로 강등하고, 아무도 없는 것(상시 분류 → 결정 큐 → 방향 제안 → 원장)이 맨 앞으로.</p>
+    <div class="grid-2">
+      <div class="card">
+        <h4><span class="k">WATCH</span>상시 관찰·분류</h4>
+        <p>부서의 슬랙 채널·온라인 회의·메일·문서 변경을 실시간으로 읽고 모든 항목을 <b>결정 필요 / 액션 / 정보 / 잡담</b>으로 분류합니다. 하루 수백 건 중 담당자가 봐야 할 것만 남습니다. Lindy의 "지원 큐 분류" 패턴을 부서 전체 채널에 적용한 것.</p>
+      </div>
+      <div class="card">
+        <h4><span class="k">DECIDE</span>지금 결정 큐 + 방향 제안 <span class="tag acc">경쟁사 전무</span></h4>
+        <p>분류된 "결정 필요" 항목을 담당자에게 카드로 푸시 — 마감·배경·과거 결정 인용·<b>추천 방향과 그 근거</b>. "이 견적 받아도 돼요?"라고 물으면 부서 원칙과 선례를 근거로 방향을 답합니다. 어떤 직무든 같은 구조입니다.</p>
+      </div>
+      <div class="card">
+        <h4><span class="k">LEDGER</span>부서별 결정 원장 <span class="tag acc">해자</span></h4>
+        <p>내려진 모든 결정을 누가·언제·왜·어떤 근거로 결정했는지 기록하고, 새 결정이 과거 결정과 충돌하면 즉시 감지. 쓸수록 쌓이는 이 이력이 Lindy·Glean이 뒤늦게 인덱싱할 수 없는 유일한 데이터 — v1 "쓸수록 성장" DNA의 완성형입니다.</p>
+      </div>
+      <div class="card">
+        <h4><span class="k">ASK</span>부서 맥락 Q&amp;A (권한 인지)</h4>
+        <p>"우리 단가 정책 왜 바뀌었죠?", "이 고객사 재계약 조건 어떻게 잡죠?" — 부서의 회의·슬랙·문서·결정 원장만을 근거로, 질문자의 권한 안에서 인용해 답합니다. 인용 못 하는 답은 내지 않습니다. 회의 정리·문서 검색은 검증된 엔진을 쓰는 커머디티 입력입니다.</p>
+      </div>
+    </div>
+
+    <h3>지금 결정 카드 — 실물 예시</h3>
+    <div class="decide-card">
+      <div class="dc-head">
+        <span class="dc-badge">지금 결정</span>
+        <span class="dc-due">마감 오늘 17:00</span>
+      </div>
+      <div class="dc-title">외주사 B 견적 수락 여부 — 재무팀 회신 대기 중</div>
+      <div class="dc-body">오늘 10시 주간회의에서 보류된 건입니다. 견적은 지난달 대비 12% 인상. 참고: 3월 회의에서 "연 10% 이상 인상 시 재입찰" 원칙을 결정한 바 있습니다. 추천: 재입찰 검토.</div>
+      <div class="dc-src">근거 · 주간회의 2026-09-01 34:12 / 경영회의록 2026-03-14 §3</div>
+    </div>
+    <p class="dim" style="font-size:14px;">카드 한 장이 제품 전체를 설명합니다: 어느 채널에서든 감지·분류(WATCH) → 결정 요청 + 방향 제안(DECIDE) → 과거 결정 인용(ASK) → 그 결정이 다시 원장으로(LEDGER). 이 예시는 회의에서 나왔지만, 슬랙 스레드·메일·문서 코멘트에서 나와도 카드는 같습니다.</p>
+  </section>
+
+  <!-- ===================== 3. 회의 수집 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">03</span><h2>입력 채널과 부서별 세팅 — 회의는 그중 하나</h2></div>
+    <p>사수는 부서가 일하는 모든 채널을 입력으로 받습니다. 어느 채널이든 같은 파이프라인(수집 → 분류 → 결정 감지 → 원장)을 지나며, 회의는 그중 음성 처리가 붙은 한 채널일 뿐입니다.</p>
+    <div class="table-scroll"><table>
+      <tr><th>채널</th><th>수집 방식</th><th>사수가 뽑아내는 것</th><th>MVP</th></tr>
+      <tr><td><b>슬랙</b></td><td>Events API로 지정 채널 상시 수신, @사수 멘션·DM</td><td>묻힌 질문, 결정 요청, 액션, 분위기 변화(에스컬레이션 신호)</td><td>1순위</td></tr>
+      <tr><td><b>온라인 회의</b> (Meet/Zoom/Teams)</td><td>회의 봇 자동 참석 → 화자별 전사 (Lindy·Otter와 동일 방식)</td><td>결정·보류 안건, 발언자별 입장, 과거 결정과의 충돌</td><td>1순위</td></tr>
+      <tr><td><b>문서</b> (노션·드라이브)</td><td>커넥터로 변경 감지 + 권한 상속 인덱싱</td><td>부서 원칙·기준·템플릿, 최신본 판정, 방향 제안의 근거</td><td>1순위</td></tr>
+      <tr><td><b>메일</b></td><td>부서 공용함·개인 동의 계정 연동</td><td>고객·외주사와의 결정 요청, 마감</td><td>2순위</td></tr>
+      <tr><td><b>오프라인 회의</b></td><td>폰 원탭 녹음 + 캘린더 알림 (하드웨어 없음)</td><td>온라인 회의와 동일</td><td>2순위</td></tr>
+    </table></div>
+
+    <h3>부서별 사수 — "모든 것을 아는 AI"가 틀리는 이유</h3>
+    <p>회사 전체를 한 덩어리로 아는 AI는 <b>맥락 오염</b>으로 틀립니다: 영업팀의 "단가"와 개발팀의 "단가"가 다르고, 마케팅의 지난달 결정이 CS 질문에 잘못 인용됩니다. 사수는 <b>부서를 기본 단위</b>로 세팅합니다 — 영업 사수, 마케팅 사수, 개발 사수, CS 사수가 각자 자기 부서의 채널·문서·결정 원장만 알고, 자기 부서의 용어와 원칙으로 답합니다.</p>
+    <div class="grid-2">
+      <div class="card">
+        <h4><span class="k">SETUP</span>부서 세팅 = 30분 온보딩</h4>
+        <p>① 부서 선택(Lindy식 역할 템플릿: 영업·마케팅·개발·CS·운영·재무·HR) ② 채널 연결(슬랙 채널 N개, 회의 캘린더, 노션 스페이스) ③ 부서 원칙 문서 지정 ④ 결정권자·승인자 지정. 템플릿마다 "이 부서에서 결정 필요로 분류할 패턴"과 "방향 제안 시 우선 참조할 문서 유형"이 미리 정의되어 있습니다.</p>
+      </div>
+      <div class="card">
+        <h4><span class="k">CROSS</span>부서 사이의 결정</h4>
+        <p>부서 간에 걸친 결정(예: 영업이 약속한 납기 vs 개발 일정)은 각 부서 사수가 자기 원장을 근거로 입장을 내고, 결정 카드에 양쪽 근거가 나란히 붙습니다. 격리가 기본이고 교차는 명시적 — 이것이 "모든 것을 아는 하나의 AI"와의 구조적 차이입니다.</p>
+      </div>
+    </div>
+    <div class="note"><b>Lindy에서 가져온 것</b> — 역할별 템플릿, 트리거 3종(시간·이벤트·@멘션), 외부 영향 액션의 승인자 지정, 그리고 "투명한 메모리"(사수가 배운 부서 원칙을 편집 가능한 문서로 노출). <b>Lindy와 다른 것</b> — Lindy는 사용자 단위 메모리 + 회사 단위 지식이고, 사수는 부서 단위 격리 + 결정 원장이 기본 구조입니다.</div>
+    <p>화자 인식(음성 30초 등록 → 발언자 태깅)은 온·오프라인 회의 채널에 공통으로 붙습니다. "김 팀장: 재입찰로 가자 (34:12)"처럼 발언 주체가 남아야 결정의 책임자가 명확해지고 원장이 성립합니다 — 단, 정확도 한계를 인정해 교정 UI가 있는 보조 신호로 설계합니다.</p>
+    <div class="warn"><b>법적 전제 — 반드시 설계에 포함</b> — 회의 봇 참석이든 폰 녹음이든 참석자 전원에 대한 <b>고지·동의가 전제</b>되어야 하고(통신비밀보호법), 슬랙·메일 상시 수집은 채널 단위 고지와 구성원 동의 절차가 필요합니다. 봇 참석 알림·녹음 중 표시·오프더레코드 버튼·수집 채널 목록 공개를 제품 요구사항으로 명시합니다. 이 설계가 있어야 "부서의 모든 것을 아는 AI"가 "감시하는 AI"로 읽히지 않습니다 — 심사 Q&amp;A에서 반드시 나올 질문입니다.</div>
+  </section>
+
+  <!-- ===================== 4. Lindy 벤치마크 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">04</span><h2>경쟁 지형 — 붐비는 세 층, 비어 있는 한 층</h2></div>
+    <p>2026년 9월 딥 리서치 결과를 그대로 반영합니다. "회의 → 조직 기억 → Q&amp;A"는 더 이상 빈 시장이 아닙니다 — 그래서 사수는 그 층에서 싸우지 않습니다.</p>
+    <div class="table-scroll"><table>
+      <tr><th>레이어</th><th>플레이어 (2026.9 확인)</th><th>상태</th></tr>
+      <tr><td><b>기록</b> — 회의 전사·요약</td><td>Otter(ARR $100M)·Fathom·Granola·Fireflies / 클로바노트·다글로</td><td class="dim">포화. 커머디티 — 우리는 입력 단계로만 사용</td></tr>
+      <tr><td><b>지식</b> — 조직 Q&amp;A·검색</td><td>글로벌 4사 모두 크로스-미팅 Q&amp;A 출시 / 국내 티로("기록이 쌓이면 조직의 지식")·콜라보(권한·ISO 27001) / Glean(권한 인지, 단 연 $50K+ 대기업 전용)·라이너</td><td class="dim">포화 진행 중. 단 "세밀한 권한 × SMB 가격"만 얕음</td></tr>
+      <tr><td><b>실행</b> — 자동화 에이전트</td><td>Lindy·Zapier·Relevance AI</td><td class="dim">포화. Lindy의 SMB 가격대($49–199)만 차용</td></tr>
+      <tr><td><b>결정</b> — 감지·요청·기록·충돌 탐지</td><td><b>확인된 플레이어 없음</b></td><td><b>공백 — 사수의 전장</b></td></tr>
+    </table></div>
+    <p>이슈 추적은 Jira가, 코드 이력은 GitHub이, 고객 이력은 CRM이 시스템으로 만들었지만 <b>결정은 아직 어느 시스템에도 기록되지 않습니다.</b> 회의록 안에 묻혀 있을 뿐입니다. 사수는 "회의록의 더 나은 버전"이 아니라 <b>결정의 Jira</b>입니다 — 기록 레이어 회사가 이 층으로 올라오려면 제품 철학(요약 → 워크플로)을 통째로 바꿔야 하고, 검색 레이어 회사(Glean·라이너)는 결정이 내려지는 순간의 현장 데이터가 없어 원장을 소급 생성할 수 없습니다.</p>
+    <h3>Lindy 비교 — 벤치마크의 결론: 같은 층이 아니다</h3>
+    <div class="table-scroll"><table>
+      <tr><th></th><th>Lindy</th><th>사수 v2.1</th></tr>
+      <tr><td><b>정체</b></td><td>수평 플랫폼 — "회사의 모든 것을 알고 실제 일을 하는 AI 동료" (Lindy 카피 그대로)</td><td>수직 시스템 — 부서 단위로 격리된 결정의 기록 시스템(System of Record)</td></tr>
+      <tr><td><b>지식의 단위</b></td><td>사용자 메모리(개인) + 회사 지식(승인된 소스) — 회사를 한 덩어리로</td><td>부서 단위 격리가 기본, 부서 간 교차는 명시적</td></tr>
+      <tr><td><b>회의·슬랙의 위치</b></td><td>템플릿 중 하나 (노트테이커, 큐 분류, CRM 업데이트)</td><td>모든 채널이 같은 파이프라인의 입력. 그 위의 결정 큐·방향 제안·원장이 본체</td></tr>
+      <tr><td><b>쌓이는 자산</b></td><td>사용자가 만든 워크플로 + 편집 가능한 메모리 파일</td><td>부서별 결정 이력 — 누가·왜·무슨 근거로</td></tr>
+      <tr><td><b>과금</b></td><td>사용자당 $30–200/월 + 크레딧</td><td>부서 단위 과금 (Lindy의 사용자당 과금이 SMB 팀에 비싼 지점을 파고듦)</td></tr>
+      <tr><td><b>앞서는 곳</b></td><td>1,000+ 통합·40+ 스킬·제품 성숙도·자본 — 정면으로 붙으면 진다</td><td>결정 레이어(Lindy에 없음)·부서 격리·권한 인지 답변·한국 업무 도구(카카오워크·잔디·네이버웍스)와 문화</td></tr>
+    </table></div>
+    <p><b>정직한 검수 결과</b> — "회사 내부 정보를 모두 안다"는 사수만의 장점이 아닙니다. Lindy 메인 페이지의 문장이 정확히 "connects to all your tools, knows everything about your company, and does real work"입니다. 이 문장을 우리가 반복하면 심사위원은 "Lindy 한국판"으로 읽습니다. 그래서 v3의 차별점은 아는 <i>양</i>이 아니라 <b>아는 단위(부서)와 하는 일(결정)</b>입니다.</p>
+    <p>Lindy에서 <b>가져오는 것</b>은 다섯입니다: ① 역할별 템플릿(마케팅·영업·CS·운영·재무·제품·엔지니어링) → 부서 세팅 템플릿 ② 트리거 3종(시간·이벤트·@멘션) ③ 외부 영향 액션의 승인자 지정 → 결정권자 지정 ④ 투명한 메모리(편집 가능한 파일) → 사수가 배운 부서 원칙을 문서로 노출 ⑤ 검증된 지불 의사(사용자당 $30–200/월). 그리고 가장 중요한 교훈 — Lindy는 Zapier가 꽉 잡은 시장에서 <b>실행 속도</b>로 이겼습니다. 결정 레이어의 공백도 수명이 짧으니, 이기는 방법은 같습니다.</p>
+    <p><b>"Lindy가 이 기능을 넣으면요?"에 대한 답</b> — 수평 플랫폼은 구조적으로 기능을 만들지, 기록 시스템을 만들지 않습니다. 결정 원장이 가치를 가지려면 조직의 모든 결정이 강제로 한곳에 쌓이고 충돌이 감지되고 권한이 집행돼야 하는데, "무엇이든 하는 플랫폼"은 "한 가지를 강제하는 시스템"이 되기 어렵습니다 — Zapier가 있어도 Jira가 따로 존재하는 이유입니다. 장기적으로 Lindy는 경쟁자가 아니라 채널이 될 수 있습니다: 원장에 결정이 기록되는 순간 Lindy 워크플로를 트리거하는 식으로, 실행 레이어는 우리 위가 아니라 아래에 붙습니다.</p>
+    <div class="warn"><b>정직한 전제</b> — 이 공백도 영원하지 않습니다. 방어는 두 가지뿐입니다: ① 결정 원장은 쓰는 순간부터만 쌓이는 데이터라 선점자가 시간 우위를 가짐 ② 결정 요청→승인→기록이 워크플로가 되는 순간 Jira급 락인이 생김. 그래서 전략의 핵심은 포지셔닝 문구가 아니라 <b>가장 먼저 실사용 팀에 까는 실행 속도</b>입니다 (§06 파일럿 계획).</div>
+  </section>
+
+  <!-- ===================== 4. 보안 — 핵심이자 최대 리스크 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">05</span><h2>보안 설계 <span class="tag acc">핵심 = 최대 리스크</span></h2></div>
+    <p>"회사의 모든 업무 비밀을 알고 있다"가 가치 제안이라면, 보안은 기능이 아니라 <b>제품의 성립 조건</b>입니다. 사이(SAI) 기획의 3중 마스킹 설계를 그대로 계승하고, 조직용 권한 모델을 얹습니다.</p>
+    <ul>
+      <li><b>부서 격리가 보안의 첫 층</b> — 부서 사수는 자기 부서의 채널·문서·원장만 인덱싱합니다. 다른 부서 정보는 인용은 물론 존재도 알지 못하며, 부서 간 교차는 관리자가 명시적으로 연 경로로만 흐릅니다. 격리는 정확도(맥락 오염 방지)와 보안(유출 반경 축소)을 동시에 삽니다.</li>
+      <li><b>권한 인지 답변</b> — 질문자가 접근 권한을 가진 문서·채널만 인용해 답합니다. 인사 정보가 섞인 경영회의록은 팀장의 질문에는 인용되고, 신입의 질문에는 존재 자체가 드러나지 않습니다. 원본 시스템(슬랙·노션)의 권한을 그대로 상속하는 것이 원칙입니다.</li>
+      <li><b>3중 마스킹</b> — 수집 시 로컬 선(先)마스킹 → 서버 2차 마스킹(Presidio) → 원문 접근 최소화. 주민번호·급여 등 민감 필드는 인덱스에서 원천 제외.</li>
+      <li><b>감사 로그</b> — 누가 무엇을 물었고 사수가 어떤 문서를 인용했는지 전량 기록. 관리자가 열람 가능.</li>
+      <li><b>학습 미사용 계약</b> — 고객 데이터는 모델 학습에 쓰지 않음을 명시. 엔터프라이즈 확장 시 VPC/온프레미스 옵션을 로드맵에.</li>
+    </ul>
+    <div class="note"><b>발표에서의 위치</b> — 보안을 부록이 아니라 데모 한 장면으로 보여줍니다: 같은 질문을 팀장 계정과 신입 계정으로 던져 답이 달라지는 장면. "다 알고 있지만, 알 자격이 있는 사람에게만 말한다"가 사수의 인격입니다.</div>
+  </section>
+
+  <!-- ===================== 5. 데모 시나리오 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">06</span><h2>데모 시나리오 — 수직 슬라이스</h2></div>
+    <p>v1 킷의 원칙(한 줄기를 끝까지)을 유지하되, 슬라이스의 단위를 "회의 하나"에서 <b>"부서 하나 × 채널 셋(슬랙·온라인 회의·노션)"</b>으로 바꿉니다. 회의는 다섯 장면 중 한 장면의 입력으로만 등장합니다.</p>
+    <ol class="steps">
+      <li><b>부서 세팅 — 30분이면 사수가 출근한다</b><span class="dim">"영업 사수" 템플릿 선택 → 슬랙 채널 3개·회의 캘린더·노션 영업 스페이스 연결 → 부서 원칙 문서·결정권자 지정. 데모에서는 완료된 상태를 30초로 보여준다</span></li>
+      <li><b>하루의 입력이 분류된다 — "수집·검색까지는 남들도 합니다" (30초)</b><span class="dim">슬랙 120건·회의 1건·문서 변경 3건 → 결정 필요 2 / 액션 5 / 정보 / 잡담으로 자동 분류된 대시보드. 이 문장을 우리 입으로 말하고 다음 장면으로 넘어간다</span></li>
+      <li><b>사수만 하는 장면 ①: 채널이 달라도 같은 결정 카드</b><span class="dim">슬랙 스레드에 묻힌 "외주사 B 견적 받아도 돼요?"와 회의에서 보류된 안건이 같은 형식의 카드로 담당자에게 — 마감·배경·"3월 재입찰 원칙과 충돌" 인용·<b>추천 방향</b>. 카드에서 결정하면 부서 원장에 기록</span></li>
+      <li><b>사수만 하는 장면 ②: 방향을 묻는다, 권한 안에서 답한다</b><span class="dim">"고객사 C 재계약 조건 어떻게 잡죠?" → 부서 원칙 문서 + 과거 결정 #123을 인용한 방향 제안. 같은 질문을 신입 계정으로 → 권한 안의 근거만으로 답. 범용 AI에 같은 질문을 던진 화면을 옆에 나란히 — 세상의 답 vs 우리 부서의 답</span></li>
+      <li><b>클라이맥스: 파일럿 2팀의 4주 실데이터</b><span class="dim">분류된 항목 수, 발송된 결정 카드 수, 결정 리드타임 Δ, 원장에 쌓인 결정 그래프 — 컨셉이 아니라 이미 돌아가는 물건임을 숫자로 증명 (아래 파일럿 계획)</span></li>
+    </ol>
+    <h3>파일럿 계획 — 데모데이의 탄약</h3>
+    <p>제출(9/20)까지 수직 슬라이스를 완성하고, 예선 기간(9/21~10/5)을 개발 휴지기가 아니라 <b>파일럿 기간</b>으로 씁니다: 우리 팀 자신 + 지인 회사 1곳, 총 2팀에 실제로 깔아 데모데이(10/17)까지 4주치 실데이터(처리한 회의 수, 발송된 결정 카드 수, 결정 리드타임 변화)를 확보합니다. 이 숫자가 있으면 "아이디어"가 "이미 돌아가는 제품"이 되어 모든 심사 축의 점수가 한 단계 오릅니다.</p>
+    <div class="note"><b>투표 20% 대응 — 이중 장치</b> — ① 게스트 모드: 가상 회사 "온새미로 주식회사"의 3주치 회의·슬랙이 주입된 샘플 워크스페이스에서 방문자가 직접 사수에게 질문 ② <b>공유 카드(사이 DNA 부활)</b>: 게스트 모드 끝에 "우리 팀은 이번 주 몇 개의 결정을 미뤘을까?" 결정 습관 리포트 카드를 생성해 SNS 공유 — 투표 기간이 곧 확산 기간이 되도록 설계합니다.</div>
+  </section>
+
+  <!-- ===================== 6. 두 기획에서 가져온 자산 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">07</span><h2>합본 자산 지도 — 무엇을 살리고 무엇을 버렸나</h2></div>
+    <div class="table-scroll"><table>
+      <tr><th>출처</th><th>살린 자산</th><th>v2에서의 역할</th></tr>
+      <tr><td rowspan="4"><b>사수 v1</b></td><td>근거 인용 강제 (트레이스 스팬 인용)</td><td>모든 답변·카드에 출처 인용 필수 — 신뢰의 뼈대</td></tr>
+      <tr><td>"쓸수록 성장" 서사 + Δ 클라이맥스</td><td>개인 성장 → 조직 기억 성장으로 치환, 데모 5단계</td></tr>
+      <tr><td>수직 슬라이스 범위 통제</td><td>데모 시나리오 설계 원칙 그대로</td></tr>
+      <tr><td>LLM 심판 설계 (score-last·교차 검증)</td><td>답변 품질 검증기로 축소 이식 — 인용 정합성 자동 검사</td></tr>
+      <tr><td rowspan="4"><b>사이 (SAI)</b></td><td>로그 수집 파이프라인 (파서 어댑터 구조)</td><td>슬랙·노션·회의 전사 커넥터의 공통 스키마</td></tr>
+      <tr><td>3중 마스킹 + 원문 최소화</td><td>보안 설계의 근간 (§04)</td></tr>
+      <tr><td>정량 휴리스틱 먼저, LLM은 정성만</td><td>결정 추출·마감 감지는 규칙 우선 — 비용·일관성</td></tr>
+      <tr><td>심사위원별 공략 분석 방법론</td><td>본선 대비 문답 설계에 재사용</td></tr>
+      <tr><td><b>뒤로 미룬 것</b></td><td colspan="2" class="dim">v1의 인사평가 루브릭 → 로드맵의 회의 데이터 기반 인사평가 보조(§09)로 부활 · 사이의 B2C 개인 포트폴리오 → 로드맵의 "내 협업 기록 내보내기"로 부활 · v1의 AI 팀원 채용/JD 번역만 완전 제외. 첫 제품은 "조직의 기억" 한 점에 집중</td></tr>
+    </table></div>
+  </section>
+
+  <!-- ===================== 7. 기술 아키텍처 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">08</span><h2>기술 스택 &amp; 아키텍처</h2></div>
+    <pre class="mermaid">
+flowchart LR
+  SRC["Slack 상시 수신 · 온라인 회의 봇 · Notion/Drive · 메일 · 폰 녹음"] --> ING["수집 어댑터<br/>공통 스키마 + 분류(결정/액션/정보) + 3중 마스킹"]
+  ING --> MEM[("부서별 기억 (격리)<br/>Supabase Postgres + pgvector<br/>결정 원장 · 부서 원칙 · 권한 메타데이터")]
+  MEM --> PIPE["답변·정리 파이프라인<br/>Claude Opus 5 · 인용 강제 structured output"]
+  PIPE --> VER["인용 정합성 검증<br/>Haiku 4.5 심판"]
+  VER --> OUT["회의록 · 지금 결정 카드 · Q&A 답변"]
+  OUT --> MEM
+    </pre>
+    <div class="table-scroll"><table>
+      <tr><th>구성</th><th>선택</th><th>비고</th></tr>
+      <tr><td>프론트 / 배포</td><td>Next.js (App Router) + Vercel</td><td>대시보드 + 게스트 모드. 심사 기간 안정 접속</td></tr>
+      <tr><td>기억 저장소</td><td>Supabase (Postgres + pgvector + RLS)</td><td>RLS가 곧 권한 인지 답변의 물리적 구현</td></tr>
+      <tr><td>슬랙 수집</td><td>Slack Events API + Bolt — 지정 채널 상시 수신, @사수 멘션·DM 응답, 결정 카드 인터랙션</td><td>MVP 1순위 채널. 채널 단위 고지·동의 후 수집</td></tr>
+      <tr><td>온라인 회의 봇</td><td>회의 봇 API(Recall.ai 류) 또는 Meet 봇 자체 구현 → 오디오 → 전사</td><td>Lindy·Otter와 동일 방식. 봇 참석 알림 필수</td></tr>
+      <tr><td>문서 커넥터</td><td>Notion·Google Drive API — 변경 감지 + 원본 권한 상속 인덱싱</td><td>방향 제안의 근거 문서. 최신본 판정 메타데이터 보관</td></tr>
+      <tr><td>부서 네임스페이스</td><td>Supabase RLS에 부서 키 — 인덱스·원장·프롬프트 컨텍스트 모두 부서 단위 격리</td><td>부서 간 교차 질의는 명시적 허용 테이블로만</td></tr>
+      <tr><td>오프라인 녹음</td><td>모바일 웹(PWA) 원탭 녹음 + 캘린더 연동 알림</td><td>2순위 채널. 하드웨어 없음</td></tr>
+      <tr><td>회의 전사</td><td>Whisper 계열 STT + 화자 분리(pyannote 또는 상용 diarization API)</td><td>음성 등록 30초 → 화자 지문 대조로 발언자 식별</td></tr>
+      <tr><td>정리·답변</td><td>Claude Opus 5 <code>claude-opus-5</code>, 인용 스키마 강제</td><td>인용 없는 문장은 파기 후 재생성</td></tr>
+      <tr><td>검증·추출</td><td>Claude Haiku 4.5 <code>claude-haiku-4-5</code> + 규칙 휴리스틱</td><td>결정·마감 추출은 규칙 우선, 비동기 배치는 Batch API 50% 할인</td></tr>
+      <tr><td>마스킹</td><td>정규식 선마스킹 + Presidio</td><td>사이 기획의 파이프라인 이식</td></tr>
+    </table></div>
+  </section>
+
+  <!-- ===================== 8. 수익모델 · 심사 매핑 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">09</span><h2>수익모델 · 심사 기준 매핑</h2></div>
+    <p><b>로드맵</b> — ① 5–50인 팀 구독(팀당 월 과금, Lindy 검증 가격대 $49–199) : 첫 고객은 회의가 많고 문서화가 약한 에이전시·스타트업. 회의실 상주 기기는 수요 검증 후의 확장 옵션 → ② 부서 단위 확장: 결정 리드타임·질문 답변률을 성과 지표로 → ③ "맥락을 아는 실행": 쌓인 기억 위에 v1의 에이전트 실행력을 얹어 주간보고·브리핑 자동 작성 → ④ <b>인사평가 보조 (B2B)</b>: 누가 어떤 업무로 어떤 미팅을 했고 어떤 결과가 나왔는지가 데이터로 남으므로, v1의 과정 기반 루브릭을 사람에게 적용한 평가 참고 자료 생성. 회사가 어떤 인재를 찾는지도 데이터에서 드러남 → ⑤ <b>개인 포트폴리오 (B2C)</b>: 사이(SAI)의 설계 그대로 — 본인 동의 하에 "내 협업 기록"을 개인이 소유하는 커리어 증명으로 내보내기. B2B가 공급한 데이터가 B2C 상품이 되는 양면 구조.</p>
+    <div class="warn"><b>인사평가 확장의 조건</b> — 이 단계는 가장 큰 확장이자 가장 위험한 프레이밍입니다. "상시 녹음 + 인사평가"가 한 문장에 들어가는 순간 제품은 감시 도구로 읽힙니다. 원칙: ① 평가의 <b>보조 자료</b>이지 자동 평가가 아님 ② 본인 열람권 우선 — 내 데이터는 내가 먼저 봄(사이의 "개인 소유" 철학) ③ 발언량·회의 수 같은 활동량 지표가 아니라 결정·결과 중심 ④ 대회 발표에서는 로드맵 한 줄로만 언급하고 데모하지 않음. 심사위원 앞에서 이 순서를 지키는 것이 당락을 가릅니다.</div>
+    <div class="table-scroll"><table>
+      <tr><th>심사 기준</th><th>이 기획의 대응</th></tr>
+      <tr><td>기획력</td><td>공감 시나리오("말해주지 않았냐"는 한 장면, 모든 채널에서 반복) × 검증된 공백(결정 레이어 + 부서 격리, §04 리서치 기반) × 한 문장 훅 "범용 AI는 세상을 알고, 사수는 우리 부서를 안다"</td></tr>
+      <tr><td>실현 가능성</td><td>§06 수직 슬라이스 — 폰 녹음→화자별 회의록→카드→Q&amp;A 한 줄기. 하드웨어 배제로 범위 통제, STT·화자 분리·RAG·RLS 모두 검증된 기술</td></tr>
+      <tr><td>확장성</td><td>팀 → 부서 → 실행 → 조직 기억 자산의 4단 로드맵, 이탈 비용이 시간에 비례해 커지는 구조</td></tr>
+      <tr><td>AI 활용 적절성</td><td>규칙 우선 + LLM 정성 처리 분리, 인용 강제, 검증 심판 — 두 원본 기획의 방법론 결합</td></tr>
+      <tr><td>기술력 (본선)</td><td>권한 인지 RAG(RLS 상속) + 인용 정합성 자동 검증 + 결정 그래프</td></tr>
+      <tr><td>발표 전달력 (본선)</td><td>"범용 AI에 물어본 답 vs 우리 부서 사수의 답"을 나란히 → 채널이 달라도 같은 결정 카드 → 권한별 답변 차이 시연</td></tr>
+    </table></div>
+    <h3>예상 Q&amp;A — 본선 방어 3문답</h3>
+    <div class="table-scroll"><table>
+      <tr><th>예상 질문</th><th>답변 골자</th></tr>
+      <tr><td>"티로·콜라보·Otter 다 하는 거 아닌가요?" (강정구 예상 1순위)</td><td>맞습니다, 회의록과 조직 Q&amp;A는 그들도 합니다 — 그래서 우리는 그 층을 커머디티로 쓰고 결정 레이어에 섭니다. 결정 요청 카드, 결정 원장, 충돌 감지는 조사한 어느 경쟁사에도 없고, 결정 원장은 검색 회사가 소급 인덱싱할 수 없는 데이터입니다. Jira가 이슈에 한 일을 결정에 하는 겁니다.</td></tr>
+      <tr><td>"회사 기밀을 AI에 넣는 걸 기업이 허용하나요?"</td><td>허용 안 하는 게 정상이고, 그래서 보안이 제품입니다 — 권한 상속 RLS, 3중 마스킹, 감사 로그, 학습 미사용 계약. 데모에서 계정별로 답이 달라지는 장면을 직접 보여드립니다.</td></tr>
+      <tr><td>"콜드스타트는요? 쌓인 게 없으면 바보 아닌가요?"</td><td>첫날부터 가치가 나오는 진입점이 회의 정리입니다 — 기억이 없어도 오늘 회의는 정리해줍니다. 회의 정리를 쓰는 순간부터 기억이 쌓이는 구조라, 사용 자체가 온보딩입니다.</td></tr>
+    </table></div>
+  </section>
+
+  <!-- ===================== 10. 모의 심사 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">10</span><h2>모의 심사 — 8점 방어선</h2></div>
+    <p>실제 심사위원 5인(공개 발언·이력 리서치 기반 페르소나) + 극한 회의론자(엔비디아 젠슨 황 페르소나)로 모의 심사를 두 번 돌렸습니다: 재포지셔닝 전(v2.0, 조직 기억 중심)과 후(v2.1, 결정 중심). 점수를 올린 것은 문구가 아니라 <b>제품 무게중심 이동 + 파일럿 실데이터 계획</b>입니다.</p>
+    <div class="table-scroll"><table>
+      <tr><th>페르소나</th><th class="num">전</th><th class="num">후</th><th>8점 이상을 만드는 근거 (이행 조건)</th></tr>
+      <tr><td><b>정기수</b> — 원티드랩, "작동하는 실물" 중시</td><td class="num">8.0</td><td class="num">8.5</td><td>수직 슬라이스가 실제로 돌고, 데모데이에 파일럿 2팀의 4주 실데이터 제시. <b>조건: 9/20까지 동작하는 데모</b></td></tr>
+      <tr><td><b>강정구</b> — 라이너, 이 영역의 현업자</td><td class="num">6.5</td><td class="num">8.0</td><td>"티로·콜라보와 뭐가 다르냐"에 대한 답이 층 자체를 바꿈: 라이너·Glean이 못 가지는 결정 현장 데이터 + SMB 가격. <b>조건: §04 경쟁표를 발표에서 우리가 먼저 꺼낼 것</b></td></tr>
+      <tr><td><b>김호민</b> — 스파크랩, 투자자 렌즈</td><td class="num">7.0</td><td class="num">8.0</td><td>"붐비는 시장의 N번째"가 아니라 "새 카테고리(결정의 Jira) 선점" 서사 + 파일럿 트랙션 + 워크플로 락인 논리. <b>조건: 파일럿 2팀 확보</b></td></tr>
+      <tr><td><b>김덕중</b> — Firb, HR·실무 활용</td><td class="num">8.0</td><td class="num">8.5</td><td>결정 책임의 투명화는 조직문화 의제 그 자체. 인사평가 확장은 로드맵 한 줄 원칙 유지로 감시 프레임 차단</td></tr>
+      <tr><td><b>조정석</b> — 크래프톤, 과정 품질</td><td class="num">8.0</td><td class="num">8.5</td><td>규칙/LLM 분리·인용 강제·검증 심판 + 화자 인식을 "교정 UI가 있는 보조 신호"로 정직하게 설계. Claude Code 개발 로그를 부록으로</td></tr>
+      <tr><td><b>젠슨 황</b> — 엔비디아 페르소나, "기능이냐 회사냐"</td><td class="num">5.5</td><td class="num">8.0</td><td>기능(요약)이 아니라 워크플로(요청→결정→기록)라 락인이 생기고, 결정 원장은 복리로 쌓이는 독점 데이터이며, 3주 만에 실사용 2팀 — 실행 속도의 증명. <b>조건: 파일럿 실데이터 없으면 이 점수는 무효</b></td></tr>
+    </table></div>
+    <div class="warn"><b>이 점수의 성립 조건 3</b> — 8점은 약속이 아니라 조건부입니다: ① 9/20 동작하는 수직 슬라이스(부서 1개 × 채널 3개, 결정 카드 + 방향 제안 + 권한별 답변 필수) ② 10/17까지 파일럿 2팀 실데이터 ③ 발표에서 경쟁표를 우리가 먼저 꺼내고 "수집·검색까지는 남들도 합니다"를 우리 입으로 말할 것. 셋 중 하나라도 빠지면 강정구·젠슨 황 점수는 v2.0 수준으로 돌아갑니다.</div>
+    <div class="note"><b>v3 검수 메모 — 범위 확장의 대가</b> — 회의 중심(v2.1)에서 전 채널·부서별(v3)로 넓히면 기획력·확장성은 오르지만 <b>실현 가능성은 내려갑니다</b>(정기수 8.5 → 8.0 위험). 방어는 슬라이스를 "부서 1개 × 채널 3개"로 못 박고, 메일·오프라인 녹음·부서 간 교차는 로드맵으로 명시하는 것입니다. 또 Lindy가 "회사의 모든 것을 안다"를 이미 말하고 있으므로, 발표에서 그 문장을 우리 것처럼 쓰면 강정구 점수는 6점대로 떨어집니다 — 반드시 "부서 단위 + 결정"으로 말할 것.</div>
+  </section>
+
+  <!-- ===================== 11. 열린 질문 ===================== -->
+  <section>
+    <div class="sec-label"><span class="sec-num">11</span><h2>열린 질문 — 팀 결정 필요</h2></div>
+    <ul>
+      <li><b>서비스명</b> — "사수"를 유지하되 의미를 뒤집을 것인가(추천: 서사가 강해짐), 새 이름으로 갈 것인가. "사이"의 어감 자산(사람과 AI 사이 → 팀장과 팀원 사이)을 살리는 절충안도 가능.</li>
+      <li><b>서비스명</b> 항목과 별개로 — "부서별 사수"를 이름에 드러낼지(예: 영업 사수·개발 사수를 제품명 체계로) 브랜드 하나로 갈지.</li>
+      <li><b>첫 부서 선택</b> — 데모와 파일럿의 부서를 하나로 고정해야 합니다. 후보: 영업(결정이 잦고 금액이 걸려 카드의 가치가 선명함) vs 우리 팀 자신(데이터 확보가 가장 쉬움). 템플릿 7종 중 2종만 MVP에 넣고 나머지는 로드맵.</li>
+      <li><b>채널 우선순위 확정</b> — 슬랙·온라인 회의·노션 셋으로 갈지, 셋 중 하나를 더 빼고 깊이를 택할지. 온라인 회의 봇은 외부 API(Recall.ai 류) 비용·승인 이슈가 있어 자체 구현 시 1주가 더 든다.</li>
+      <li><b>화자 인식의 데모 범위</b> — 팀원 음성 등록 → 실시간 식별까지 시연할 것인가, 사전 처리된 샘플 회의로 보여줄 것인가. 정확도가 불안하면 후자가 안전.</li>
+      <li><b>파일럿 2팀 확보</b> — 우리 팀 외에 실사용해줄 지인 회사 1곳을 지금 섭외해야 합니다(§06). 모의 심사 8점의 성립 조건이므로 이번 주 안에 확정 필요.</li>
+    </ul>
+    <div class="footer-note">
+      프레이밍 주의 (v1 계승) — "사람을 감시한다/대체한다" 서사는 금지어. 사수 v2의 서사: <b>"팀장을 회의실에서 구출하고, 팀원에게 물어볼 선배를 준다."</b> 감사 로그·권한 설계는 감시가 아니라 신뢰의 언어로만 말합니다.
+    </div>
+  </section>
+</div>
