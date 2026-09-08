@@ -93,7 +93,10 @@
     {
       "step": 11,
       "name": "dashboard-s1",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-08T22:26:24+0900",
+      "summary": "GET /api/d/[dept]/items와 /d/[dept] S1 페이지를 추가해 오늘의 슬랙·회의·문서 입력 수, 결정 필요·액션·정보·잡담·분류 대기 탭, 원문 상세, 비활성 수동 승격, 10초 가시 탭 폴링과 두 빈 상태를 구현했다.",
+      "completed_at": "2026-09-08T22:42:39+0900"
     },
     {
       "step": 12,

@@ -75,7 +75,7 @@ export default function LoginForm({ initialError }: LoginFormProps) {
 
       {errorMessage ? (
         <p
-          className="m-0 rounded-xl border border-[var(--urgent)] p-4 text-[var(--urgent)]"
+          className="m-0 rounded-xl border border-red-700 p-4 text-red-700 dark:border-red-400 dark:text-red-400"
           role="alert"
         >
           {errorMessage}
