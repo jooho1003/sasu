@@ -26,12 +26,18 @@ ROOT = Path(__file__).resolve().parent.parent
 # 무인 실행용 에이전트 CLI. 프롬프트는 argv가 아니라 stdin으로 넘긴다.
 #   codex : `-`가 stdin에서 프롬프트를 읽으라는 표시.
 #           --dangerously-bypass-hook-trust 없이는 훅 신뢰 확인에서 멈춰 무인 실행이 깨진다.
+#           -m/-c로 모델을 못 박는다. ~/.codex/config.toml의 기본값에 맡기면 CLI가
+#           지원하지 않는 모델(예: gpt-6-astra on codex-cli 0.149.1)일 때 매 step이
+#           400 invalid_request_error로 즉사한다 — 재시도 3회가 몇 초 만에 소진된다.
+#           하네스가 어떤 모델로 돌았는지도 이 표에 남아야 재현이 된다.
 #   claude: `-p`가 비대화형 실행.
 AGENT_COMMANDS = {
     "codex": [
         "codex", "exec",
         "--dangerously-bypass-approvals-and-sandbox",
         "--dangerously-bypass-hook-trust",
+        "-m", "gpt-5.6-sol",
+        "-c", 'model_reasoning_effort="high"',
         "-",
     ],
     "claude": [
