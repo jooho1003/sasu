@@ -25,6 +25,7 @@ phases/**/step*-output.json
 .bkit/
 .superpowers/
 .playwright-mcp/
+test-results/
 
 # os / editor
 .DS_Store

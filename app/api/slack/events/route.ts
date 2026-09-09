@@ -1,5 +1,6 @@
 import { toIngestItem, isCollectible, type SlackMessageEvent } from "@/lib/adapters/slack";
 import { enqueue, kickWorker } from "@/lib/jobs";
+import { registerClassifyHandler } from "@/lib/pipeline/classify";
 import { verifySlackSignature } from "@/lib/slack/verify";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
@@ -119,6 +120,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "item_upsert_failed" }, { status: 500 });
   }
 
+  registerClassifyHandler();
   await enqueue("classify", { itemId: itemResult.data.id });
   kickWorker();
 

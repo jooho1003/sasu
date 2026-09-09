@@ -1,6 +1,8 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
 import { runOnce } from "@/lib/jobs";
+import { registerMakeCardHandler } from "@/lib/pipeline/card";
+import { registerClassifyHandler } from "@/lib/pipeline/classify";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +27,8 @@ export async function POST(request: Request) {
   }
 
   try {
+    registerClassifyHandler();
+    registerMakeCardHandler();
     return Response.json(await runOnce());
   } catch {
     return Response.json({ error: "worker_failed" }, { status: 500 });

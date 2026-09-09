@@ -1,0 +1,14 @@
+# 빌드에 필요 없는 것들 — 업로드 페이로드에서 제외
+.env
+.env.*
+!.env.example
+
+phases/
+docs/
+tests/
+supabase/
+playwright.config.ts
+vitest.config.ts
+vitest.rls.config.ts
+
+*.log

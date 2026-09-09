@@ -1,8 +1,12 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { existsSync } from "node:fs";
 import { loadEnvFile } from "node:process";
 import { beforeAll, describe, expect, it } from "vitest";
 
-loadEnvFile(".env.local");
+// 실값은 .env, Vercel CLI가 관리하는 값은 .env.local. 둘 다 있으면 둘 다 읽는다.
+for (const envFile of [".env", ".env.local"]) {
+  if (existsSync(envFile)) loadEnvFile(envFile);
+}
 
 const SEED_IDS = {
   org: "11111111-1111-4111-8111-111111111111",
@@ -71,7 +75,7 @@ describe("live Supabase RLS", () => {
     const publicItems = await member
       .from("items")
       .select("id")
-      .eq("source_id", SEED_IDS.publicSource);
+      .eq("id", SEED_IDS.publicItem);
     const privateItems = await member
       .from("items")
       .select("id")

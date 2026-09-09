@@ -2,7 +2,7 @@
   "phases": [
     {
       "dir": "0-vertical-slice",
-      "status": "pending"
+      "status": "blocked"
     }
   ]
 }
