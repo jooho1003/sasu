@@ -2,7 +2,8 @@
   "phases": [
     {
       "dir": "0-vertical-slice",
-      "status": "pending"
+      "status": "blocked",
+      "blocked_at": "2026-09-08T23:22:29+0900"
     }
   ]
 }

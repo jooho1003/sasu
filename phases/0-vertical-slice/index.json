@@ -119,7 +119,8 @@
       "name": "db-apply-seed",
       "status": "blocked",
       "started_at": "2026-09-08T23:20:38+0900",
-      "blocked_reason": "필수 환경 변수 NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY가 없고, 마이그레이션 수단인 SUPABASE_DB_URL 또는 SUPABASE_ACCESS_TOKEN(+ DB 비밀번호)도 없다. NEXT_PUBLIC_SUPABASE_ANON_KEY와 SUPABASE_SERVICE_ROLE_KEY는 Supabase Dashboard → Settings → API에서, SUPABASE_DB_URL과 DB 비밀번호는 Settings → Database에서, SUPABASE_ACCESS_TOKEN은 Supabase 계정 Access Tokens에서 발급해 .env.local에 설정해야 한다."
+      "blocked_reason": "앱 런타임 변수 NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, GROQ_API_KEY는 설정되어 있다. 그러나 살아 있는 Supabase DB에 마이그레이션을 적용할 비대화형 인증 정보가 없다: SUPABASE_DB_URL 또는 SUPABASE_ACCESS_TOKEN + SUPABASE_DB_PASSWORD 중 하나를 .env.local에 설정해야 한다. SUPABASE_DB_URL/DB 비밀번호는 Supabase Dashboard → Settings → Database에서, SUPABASE_ACCESS_TOKEN은 Supabase 계정 Access Tokens에서 발급한다. 현재 REST read-only 확인 결과 orgs 테이블이 없어 마이그레이션 미적용 상태다. 마이그레이션 인증 정보와 SEED_LEAD_EMAIL, SEED_LEAD_PASSWORD, SEED_MEMBER_EMAIL, SEED_MEMBER_PASSWORD를 설정한 뒤 step 14를 재개한다.",
+      "blocked_at": "2026-09-08T23:22:29+0900"
     },
     {
       "step": 15,
