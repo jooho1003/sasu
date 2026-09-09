@@ -1,8 +1,12 @@
 import { enqueue, kickWorker } from "@/lib/jobs";
 import { registerMakeCardHandler } from "@/lib/pipeline/card";
 import { registerClassifyHandler } from "@/lib/pipeline/classify";
+import { registerEmbedHandler } from "@/lib/pipeline/embed";
+import { registerAnswerHandler } from "@/lib/pipeline/answer";
 import { registerSendSlackHandler } from "@/lib/pipeline/send-slack";
 import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
+import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
+import { registerNotionImportHandler } from "@/lib/pipeline/notion-import";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -73,8 +77,12 @@ export async function POST(
   try {
     const jobId = await enqueue("make_card", { itemId: itemResult.data.id });
     registerClassifyHandler();
+    registerEmbedHandler();
+    registerAnswerHandler();
     registerMakeCardHandler();
-    registerSendSlackHandler();
+  registerSendSlackHandler();
+  registerMeetingSummaryHandler();
+  registerNotionImportHandler();
     registerSlackBackfillHandler();
     kickWorker();
 

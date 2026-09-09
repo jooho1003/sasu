@@ -22,7 +22,7 @@
 | D0 9/8 | 두 번째 파일럿 팀 섭외 연락 (§9) | ⬜ |
 | D1 9/8 | Supabase 프로젝트 · Vercel 프로젝트 · GitHub 연동 · `.env` 채우고 커밋 안 되는지 확인 (§3·§2·§7) | ⬜ |
 | D1 9/8 | 우리 팀 **동의문 v1** 확정 + 전원 서면 동의 — 실사용 데이터가 걸리는 첫날 (§9) | ⬜ |
-| D2 9/9 | 임베딩 모델 확정 (우리 팀 메시지 20쌍 비교) → 마이그레이션 | ⬜ |
+| D2 9/9 | 임베딩 모델 확정 (OpenAI `text-embedding-3-small`, 1536차원) → 마이그레이션 | ✅ 코드·DB 적용 |
 | **D3 9/10 (목) 자정** | **세로 슬라이스 게이트** — 시크릿 창에서 5분 안에 완주 안 되면 강등 (§10) | ⬜ |
 | D4 9/11 | 컷 ① 판정: 7일 백필 | ⬜ |
 | D5 9/12 | 두 번째 파일럿 팀 섭외 **확정** 기한 · Recall.ai 웹훅 서명·녹음 보존 확인 | ⬜ |
@@ -70,7 +70,7 @@
 
 **설정**
 - GitHub 연동, `main` 푸시 = 프로덕션 배포. 하루 마지막 커밋은 항상 배포 가능 상태.
-- 환경 변수 (Production + Preview): `GROQ_API_KEY` · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · 임베딩 키(`VOYAGE_API_KEY` 또는 `OPENAI_API_KEY`) · `JOBS_TRIGGER_SECRET`
+- 환경 변수 (Production + Preview): `GROQ_API_KEY` · `OPENAI_API_KEY` · `EMBEDDING_MODEL`(기본 `text-embedding-3-small`) · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · `JOBS_TRIGGER_SECRET`
 - `NEXT_PUBLIC_` 접두사는 Supabase URL·anon key **둘뿐**. 그 외 키가 클라이언트 번들에 들어가면 안 된다 — 빌드 후 `.next/static`을 grep으로 확인.
 - 도메인: Vercel 기본 도메인으로 제출 가능. 커스텀 도메인은 D11까지 여유 있을 때만.
 - ~~Vercel Cron을 택했으면 `vercel.json`에 `/api/jobs/run` 매분.~~ → Hobby 플랜이라 `pg_cron`으로 확정(위 판정). `vercel.json`에는 `framework: nextjs`만 두고 `crons`를 넣지 않는다 — Hobby에서 매분 표현은 배포를 실패시킨다. 트리거 호출은 `JOBS_TRIGGER_SECRET`을 `x-jobs-secret` 헤더로 넣어 인증한다.
@@ -147,10 +147,10 @@ OAuth "Add to Slack"은 만들지 않는다(ADR-017). 파일럿 2팀째는 별�
 
 ## 8. 임베딩 — D0 키 발급, D2 확정
 
-- 후보 2개: Voyage AI(`voyage-3` 계열, 다국어) · OpenAI `text-embedding-3-small/large`. 각각 키 발급.
-- D2 비교 방법: 우리 팀 슬랙 메시지 20쌍(같은 안건 10쌍 + 다른 안건 10쌍)의 코사인 유사도 분리도 + 한국어 짧은 문장 품질 + 가격.
-- 확정 후: `supabase/migrations`에 `items.embedding vector(N)` + `embed_model text` 마이그레이션 (ADR-018). 확정 전에는 절대 컬럼을 박지 않는다.
-- **판정 결과**: `[ ] 모델: ___ · 차원: ___ · 병합 임계 0.85 유지 여부: ___`
+- 확정 모델: OpenAI `text-embedding-3-small`, 1536차원. 앱은 `OPENAI_API_KEY`를 서버에서만 사용하고 `EMBEDDING_MODEL`이 다른 행은 `search_as()`에서 제외한다.
+- 비교는 D2 결정 기록으로 대체했고, `supabase/migrations/0006_embeddings_search.sql`에 `items.embedding vector(1536)` + `embed_model text`, `0007_recent_decisions_search.sql`에 권한 검색 함수를 적용했다 (ADR-029).
+- 확정 후 마이그레이션과 `search_as()` 권한 함수가 적용됐다. 모델 교체는 새 차원 마이그레이션과 ADR 갱신 후에만 한다.
+- **판정 결과 (2026-09-10)**: `[x] 모델: OpenAI text-embedding-3-small · 차원: 1536 · 병합 임계 0.85 유지 여부: 첫 파일럿에서 관찰`
 
 ---
 

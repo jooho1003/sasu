@@ -171,6 +171,11 @@
 - 되돌리는 비용은 낮다. `llm.ts`가 유일한 호출 지점이라 SDK 교체와 모델 상수 두 줄이면 원복된다. 그래서 프로바이더 추상화 계층은 만들지 않는다 — 지금 비용이 들고 이득은 없을지도 모르는 것은 만들지 않는다(철학 1).
 **기각한 대안**: ① `llama-3.3-70b-versatile`(strict 미지원 → 인용 강제 불성립) ② `qwen/qwen3.8-27b`(preview → 심사 기간 가동 보장 없음) ③ 분류만 Groq + 생성은 Anthropic(키가 없다) ④ 개발 중 Groq → 제출 전 Anthropic 교체를 전제로 한 프로바이더 추상화(두 경로를 다 검증해야 해서 12일 안에 비용이 이득을 넘는다).
 
+### ADR-029: 임베딩은 OpenAI `text-embedding-3-small` 1536차원으로 확정한다 (D2, 9/10)
+**결정**: `OPENAI_API_KEY`로 OpenAI Embeddings API의 `text-embedding-3-small`을 호출하고, `items.embedding vector(1536)`와 `embed_model`을 저장한다. `search_as()`는 `can_see()`를 호출하며 현재 모델과 일치하는 행만 반환한다. 모델명은 `EMBEDDING_MODEL`로 고정 가능하되 차원이 다른 모델은 마이그레이션 없이 선택하지 않는다.
+**이유**: MVP에서 한국어 짧은 발언·원칙 문서·Q&A 질문을 같은 벡터 공간으로 검색해야 하고, 별도 임베딩 공급자 키를 추가하지 않으면서 OpenAI의 안정적인 임베딩 엔드포인트를 사용할 수 있다. 데이터가 쌓인 뒤 모델을 바꾸더라도 `embed_model`로 혼합 검색을 막는다.
+**트레이드오프**: 현재 환경에 `OPENAI_API_KEY`가 없으면 embed job은 `embedding_not_configured`로 재시도 후 실패하며 해당 항목은 검색에서 빠진다. 배포 전 Production/Preview 환경에 키를 넣고 첫 파일럿 데이터의 임베딩 상태를 확인해야 한다. Voyage 비교 실험은 MVP 마감 뒤로 미룬다.
+
 ---
 
 ## 부록: 재검토되었으나 기각된 안

@@ -7,6 +7,10 @@
     {
       "dir": "1-slack-dm-backfill",
       "status": "completed"
+    },
+    {
+      "dir": "2-mvp-completion",
+      "status": "completed"
     }
   ]
 }

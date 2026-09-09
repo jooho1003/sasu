@@ -1,0 +1,11 @@
+{
+  "project": "sasu",
+  "phase": "2-mvp-completion",
+  "steps": [
+    { "step": 0, "name": "embedding-and-ask", "status": "completed", "summary": "OpenAI text-embedding-3-small 1536차원 임베딩 job, can_see 기반 search_as, 웹 S4 묻기와 인용 검증 answer job을 연결했다." },
+    { "step": 1, "name": "settings-and-inputs", "status": "completed", "summary": "S5 동의·Slack 계정 매핑·채널 연결·7일 백필·VTT/TXT 전사 업로드·Notion 원칙 문서 가져오기를 구현했다." },
+    { "step": 2, "name": "guest-demo", "status": "completed", "summary": "is_demo SQL 함수와 읽기 전용 /demo 동선, 영업·개발 2부서 합성 시드, 카드·원장·6개 사전 Q&A를 추가했다." },
+    { "step": 3, "name": "slack-ask", "status": "completed", "summary": "Slack app_mention을 동의한 멤버의 answer job과 스레드 회신으로 연결했다." },
+    { "step": 4, "name": "verification", "status": "completed", "summary": "Vitest 120개, lint, TypeScript, production build, RLS 6개, 원격 /demo HTTP smoke check를 통과했다. 실제 Slack 외부 전송 E2E는 실행하지 않았다." }
+  ]
+}

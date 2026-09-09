@@ -118,6 +118,11 @@ describe("classify pipeline", () => {
       assignee_hint: null,
       reasoning: "규칙상 결정 후보 신호가 없습니다.",
     });
+    expect(moduleMocks.enqueue).toHaveBeenCalledWith(
+      "embed",
+      { itemId: baseItem.id },
+      { dedupeKey: baseItem.id },
+    );
   });
 
   it("규칙이 잡으면 llm.structured 를 정확히 1회 호출한다", async () => {
@@ -144,7 +149,10 @@ describe("classify pipeline", () => {
 
     await classifyItem(baseItem.id);
 
-    expect(moduleMocks.enqueue).not.toHaveBeenCalled();
+    expect(moduleMocks.enqueue).not.toHaveBeenCalledWith(
+      "make_card",
+      expect.anything(),
+    );
   });
 
   it("label=decision & confidence 0.8 은 make_card 를 enqueue 한다", async () => {
@@ -153,7 +161,7 @@ describe("classify pipeline", () => {
 
     await classifyItem(baseItem.id);
 
-    expect(moduleMocks.enqueue).toHaveBeenCalledOnce();
+    expect(moduleMocks.enqueue).toHaveBeenCalledTimes(2);
     expect(moduleMocks.enqueue).toHaveBeenCalledWith("make_card", {
       itemId: baseItem.id,
     });
@@ -176,15 +184,16 @@ describe("classify pipeline", () => {
     });
   });
 
-  it("embed job 을 enqueue 하지 않는다", async () => {
+  it("분류 성공 시 embed job을 멱등 enqueue 한다", async () => {
     useItem();
     resolveLlm();
 
     await classifyItem(baseItem.id);
 
-    expect(moduleMocks.enqueue).not.toHaveBeenCalledWith(
+    expect(moduleMocks.enqueue).toHaveBeenCalledWith(
       "embed",
-      expect.anything(),
+      { itemId: baseItem.id },
+      { dedupeKey: baseItem.id },
     );
   });
 

@@ -27,6 +27,20 @@ type SlackResponse = {
   response_metadata?: { next_cursor?: string };
   channel?: string | { id?: string };
   ts?: string;
+  channels?: Array<{
+    id?: string;
+    name?: string;
+    is_private?: boolean;
+  }>;
+  members?: string[] | Array<{
+    id?: string;
+    name?: string;
+    real_name?: string;
+    deleted?: boolean;
+    is_bot?: boolean;
+    profile?: { display_name?: string; real_name?: string };
+  }>;
+  user_id?: string;
 };
 
 const SLACK_API_URL = "https://slack.com/api";
@@ -110,6 +124,7 @@ export async function postMessage(args: {
   channel: string;
   text: string;
   blocks: SlackBlock[];
+  thread_ts?: string;
 }): Promise<{ channel: string; ts: string }> {
   const response = await callSlack("chat.postMessage", args);
   if (!response.channel || typeof response.channel !== "string" || !response.ts) {
@@ -135,6 +150,56 @@ export async function updateMessage(args: {
   blocks: SlackBlock[];
 }): Promise<void> {
   await callSlack("chat.update", args);
+}
+
+export async function listConversations(): Promise<
+  Array<{ id: string; name: string; isPrivate: boolean }>
+> {
+  const response = await callSlack("conversations.list", {
+    limit: 200,
+    types: "public_channel,private_channel",
+    exclude_archived: true,
+  });
+  return (response.channels ?? []).flatMap((channel) =>
+    channel.id && channel.name
+      ? [{ id: channel.id, name: channel.name, isPrivate: channel.is_private === true }]
+      : [],
+  );
+}
+
+export async function conversationMembers(channel: string): Promise<string[]> {
+  const response = await callSlack("conversations.members", {
+    channel,
+    limit: 1_000,
+  });
+  return (response.members ?? []).filter((member): member is string => typeof member === "string");
+}
+
+export type SlackDirectoryUser = {
+  id: string;
+  displayName: string;
+};
+
+export async function listUsers(): Promise<SlackDirectoryUser[]> {
+  const response = await callSlack("users.list", { limit: "200" });
+  const members = Array.isArray(response.members) ? response.members : [];
+  return members.flatMap((member) => {
+    if (typeof member === "string" || !member.id || member.deleted || member.is_bot) return [];
+    const displayName = member.profile?.display_name || member.profile?.real_name || member.real_name || member.name || member.id;
+    return [{ id: member.id, displayName }];
+  });
+}
+
+export async function authenticatedBotUserId(): Promise<string | null> {
+  const response = await callSlack("auth.test", {});
+  return response.user_id ?? null;
+}
+
+export async function postChannelMessage(args: {
+  channel: string;
+  text: string;
+}): Promise<{ channel: string; ts: string }> {
+  return postMessage({ channel: args.channel, text: args.text, blocks: [] });
 }
 
 export type SlackHistoryPage = {

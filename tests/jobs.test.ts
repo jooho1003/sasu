@@ -181,6 +181,12 @@ describe("jobs worker", () => {
       ownerStatus: { item_id: "item-1", label: "unclassified" },
     },
     {
+      kind: "embed" as const,
+      payload: { itemId: "item-1" },
+      ownerTable: "items",
+      ownerStatus: { embed_status: "failed" },
+    },
+    {
       kind: "make_card" as const,
       payload: { requestId: "request-1" },
       ownerTable: "decision_requests",
@@ -233,7 +239,7 @@ describe("jobs worker", () => {
 
   it("등록되지 않은 kind는 unknown_kind로 즉시 failed가 된다", async () => {
     const fake = createFakeClient([
-      [{ id: "job-unknown", kind: "embed", payload: {}, attempts: 1 }],
+      [{ id: "job-unknown", kind: "not_a_real_kind", payload: {}, attempts: 1 }],
     ]);
     moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
 

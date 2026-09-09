@@ -31,7 +31,7 @@ type OwnerReference = {
 };
 
 type FailureOwnerMapping = {
-  table: "classifications" | "decision_requests" | "answers";
+  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources";
   references: OwnerReference[];
   write: "update" | "upsert";
   values: (ownerId: string, errorCode: string) => Record<string, unknown>;
@@ -47,6 +47,9 @@ const SWEEP_TIMEOUT_MS = 2 * 60 * 1_000;
 const SAFE_ERROR_CODES = new Set([
   "auth",
   "citation_invalid",
+  "embedding_api_failed",
+  "embedding_not_configured",
+  "embedding_rate_limited",
   "job_failed",
   "llm_refusal",
   "llm_request_failed",
@@ -57,6 +60,9 @@ const SAFE_ERROR_CODES = new Set([
   "slack_dm_unavailable",
   "slack_not_configured",
   "slack_rate_limited",
+  "notion_api_failed",
+  "notion_not_configured",
+  "notion_rate_limited",
   "unknown_kind",
   "unmasked_prompt",
 ]);
@@ -81,6 +87,15 @@ const FAILURE_OWNER_MAPPINGS: Partial<
       assignee_hint: null,
       reasoning: null,
     }),
+  },
+  embed: {
+    table: "items",
+    references: [
+      { payloadKey: "itemId", column: "id" },
+      { payloadKey: "item_id", column: "id" },
+    ],
+    write: "update",
+    values: () => ({ embed_status: "failed" }),
   },
   make_card: {
     table: "decision_requests",
@@ -116,6 +131,18 @@ const FAILURE_OWNER_MAPPINGS: Partial<
       status: "failed",
       error_code: errorCode,
     }),
+  },
+  notion_import: {
+    table: "sources",
+    references: [{ payloadKey: "sourceId", column: "id" }],
+    write: "update",
+    values: (_sourceId, errorCode) => ({ last_error: errorCode }),
+  },
+  summarize_meeting: {
+    table: "meetings",
+    references: [{ payloadKey: "meetingId", column: "id" }],
+    write: "update",
+    values: (_meetingId, errorCode) => ({ status: "summary_failed", status_reason: errorCode }),
   },
 };
 

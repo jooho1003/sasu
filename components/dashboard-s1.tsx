@@ -9,9 +9,11 @@ const TABS = [
   { label: "info", name: "정보" },
   { label: "chatter", name: "잡담" },
   { label: "unclassified", name: "분류 대기" },
+  { label: "meeting", name: "회의" },
 ] as const;
 
-type ItemLabel = (typeof TABS)[number]["label"];
+type PanelLabel = (typeof TABS)[number]["label"];
+type ItemLabel = Exclude<PanelLabel, "meeting">;
 type MemberRole = "lead" | "member";
 
 type DashboardItem = {
@@ -45,7 +47,7 @@ type DashboardS1Props = {
 };
 
 type LoadedDashboard = {
-  label: ItemLabel;
+  label: PanelLabel;
   data: DashboardData;
 };
 
@@ -103,7 +105,7 @@ export default function DashboardS1({
   displayName,
   role,
 }: DashboardS1Props) {
-  const [activeLabel, setActiveLabel] = useState<ItemLabel>("decision");
+  const [activeLabel, setActiveLabel] = useState<PanelLabel>("decision");
   const [dashboard, setDashboard] = useState<LoadedDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -124,7 +126,7 @@ export default function DashboardS1({
       inFlight = true;
       try {
         const response = await fetch(
-          `/api/d/${encodeURIComponent(deptId)}/items?label=${activeLabel}`,
+          `/api/d/${encodeURIComponent(deptId)}/items?${activeLabel === "meeting" ? "source=meeting" : `label=${activeLabel}`}`,
           { cache: "no-store" },
         );
         const body = (await response.json()) as DashboardData & {
@@ -192,7 +194,7 @@ export default function DashboardS1({
     setError(null);
     setRefreshKey((value) => value + 1);
   };
-  const selectLabel = (label: ItemLabel) => {
+  const selectLabel = (label: PanelLabel) => {
     setError(null);
     setActiveLabel(label);
   };
@@ -236,9 +238,12 @@ export default function DashboardS1({
             {displayName}님 · {role === "lead" ? "팀장" : "팀원"}
           </p>
         </div>
-        <p className="m-0 text-sm text-[var(--muted)]" data-meta>
-          화면을 보고 있을 때 10초마다 갱신
-        </p>
+        <div className="flex items-center gap-4 text-sm">
+          <Link href={`/d/${deptId}/ask`}>묻기</Link>
+          <Link href={`/d/${deptId}/ledger`}>원장</Link>
+          <Link href={settingsHref}>세팅</Link>
+          <span className="text-[var(--muted)]" data-meta>10초마다 갱신</span>
+        </div>
       </header>
 
       <section aria-labelledby="today-inputs-heading" className="grid gap-4">
@@ -335,12 +340,9 @@ export default function DashboardS1({
               <p className="m-0 text-[var(--muted)]">
                 채널 연결 상태는 부서 세팅에서 확인할 수 있습니다.
               </p>
-              {/* S5는 task 4에서 구현하므로 목적지는 표시하되 지금은 이동을 막는다. */}
               <Link
-                aria-disabled="true"
-                className="pointer-events-none w-fit opacity-50"
+                className="w-fit"
                 href={settingsHref}
-                tabIndex={-1}
               >
                 세팅으로
               </Link>

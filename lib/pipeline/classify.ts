@@ -43,6 +43,10 @@ async function saveClassification(
   }
 }
 
+async function enqueueEmbedding(itemId: string): Promise<void> {
+  await enqueue("embed", { itemId }, { dedupeKey: itemId });
+}
+
 function unclassifiedValues(itemId: string): ClassificationValues {
   // lib/jobs.ts의 classify 최종 실패 매핑과 같은 사용자 표시 상태다.
   return {
@@ -103,6 +107,7 @@ export async function classifyItem(itemId: string): Promise<void> {
       assignee_hint: null,
       reasoning: "규칙상 결정 후보 신호가 없습니다.",
     });
+    await enqueueEmbedding(itemId);
     return;
   }
 
@@ -123,6 +128,7 @@ export async function classifyItem(itemId: string): Promise<void> {
     );
   } catch {
     await saveClassification(unclassifiedValues(itemId));
+    await enqueueEmbedding(itemId);
     return;
   }
 
@@ -139,6 +145,7 @@ export async function classifyItem(itemId: string): Promise<void> {
     assignee_hint: classification.assignee_hint,
     reasoning: classification.reasoning,
   });
+  await enqueueEmbedding(itemId);
 
   if (
     classification.label === "decision" &&

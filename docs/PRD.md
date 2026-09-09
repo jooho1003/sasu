@@ -2,14 +2,17 @@
 
 > **부서별 결정 사수.** 부서 단위로 세팅된 AI가 슬랙·온라인 회의를 상시 관찰해 분류하고, 노션의 부서 원칙 문서를 근거로 삼아, "지금 결정해야 할 것"을 담당자에게 밀어주고, 물어보면 부서의 맥락과 과거 결정을 근거로 답하고, 내려진 결정을 원장에 기록한다. (노션 상시 관찰은 로드맵 — MVP는 원칙 문서 가져오기)
 >
-> - 문서 버전: 1.1 · 작성일: 2026-09-08 (마감까지 **12일**)
+> - 문서 버전: 1.2 · 작성일: 2026-09-10 (마감까지 **10일**)
 > - 지위: **구현의 입력이 되는 확정 계획.** 이 문서가 문서 체계의 최상위다. 범위와 완료 조건은 여기서 정하고, 구현 중 결정이 바뀌면 이 문서를 함께 고친다 — 특히 §3(기능), §8(범위·컷 라인), §4(기술 스택). 결정의 이유와 포기한 대안은 [ADR.md](ADR.md)에, 구조·불변식·테스트 경계는 [ARCHITECTURE.md](ARCHITECTURE.md)에 있다.
 > - 문서 충돌 시 우선순위: **본 문서의 범위·완료 조건·컷 라인 → [ARCHITECTURE.md](ARCHITECTURE.md)의 구조·불변식 → [ADR.md](ADR.md)의 결정 이유 → [setup-guide.md](setup-guide.md)·[submission-checklist.md](submission-checklist.md)의 절차.** 하위 문서가 상위 문서를 암묵적으로 바꾸지 않는다. bkit PDCA용 `01-plan/`·`02-design/` 문서는 이 문서를 가리키는 어댑터이고 새 결정을 담지 않는다.
 > - 대회: 원티드 AI Championship 2026 · **참가 접수 9/18(금) · 과제 제출 9/20(일) 23:59**
 > - 개발 체제: 1인 · 기획 Claude · 구현 Codex (Harness `phases/` step 실행 — `.claude/commands/harness.md`)
 > - 상위 문서: `proposal/사수_기획서_v3.html` (컨셉·경쟁·보안·심사 전략) · `submission/원티드 지원서.md` (양식·유의사항) · [submission-checklist.md](submission-checklist.md) (제출물·문안·스크린샷)
 > - 대체된 문서: `archive/MVP_SPEC_v1.md`(v1, AI 팀원 평가 — 폐기) · `archive/sasumvp3weekplan_v2.1.md`(v2.1, 회의 중심 — §9 일정으로 대체) · `archive/sasusubmissionform_v2.1.md`·`archive/sasusubmissiondraft_v1.md`·`archive/sasuwantedsubmissionplan_v2.1.md`(v2.1 제출 문서 — 폰 녹음·화자 식별 서술이 v3와 어긋나 submission-checklist.md로 대체) · 루트 `plan.md`(plan-forge 확정 계획 — **1.0에서 이 문서가 흡수**, 원문은 Git `63b4134`)
+
+> - 이력: **1.2 (2026-09-10)** — 임베딩을 OpenAI `text-embedding-3-small`(1536차원)으로 확정하고 `items.embedding`·`embed_model`·`search_as()`를 추가(ADR-029). S4 묻기, S5 채널·동의·회의 전사·Notion 가져오기, S6 게스트 시드 동선을 구현했다.
 > - 이력: **1.1 (2026-09-08)** — LLM 공급자를 Anthropic에서 Groq으로 전면 교체(ADR-028). 카드·답변·회의 정리 `openai/gpt-oss-120b`, 분류 `openai/gpt-oss-20b`. §4·§6-2·§6-3·§6-5·§6-7·§6-9·§6-10·§8-4·§8-5·§9·§10·§11 갱신. §12 렌즈 반영 이력은 당시 기록이라 옛 모델명을 그대로 둔다. / **1.0 (2026-09-08)** — `plan.md`를 흡수하고 최상위 지위를 이관했다(ADR-001). plan §6 기술 결정 표 → ADR-002~027 · plan §8 보안 12조 → ARCHITECTURE §6 불변식 · plan §7 실패 경로 → §6-10(이미 있었음) · plan §11 비용 → §8-5 · plan §9 가설별 영향 → §10-1 · plan §10 검증 추가분 → §11 · plan §13 외부 리뷰 상세 → §12-1. 리포지토리 구조는 §6-11에서 ARCHITECTURE §2로 이관. / **0.x** — plan-forge Phase 2 PRD → Phase 3 렌즈 5개 → Phase 4 삭감 → Phase 5 외부 리뷰(Codex + 맥락 없는 세션) 반영 (§12).
+
 >
 > **표기 규칙** — `(확인 필요)`: 추측이거나 직접 확인이 필요한 사실. `미정`: 아직 결정하지 않은 것(빈칸이 아니라 결정 보류). 둘 다 §10에 모아 둔다.
 
@@ -189,12 +192,12 @@ flowchart TD
 | 노션 | **Notion API** — 지정 페이지 1회 가져오기 + [다시 가져오기] | 부서 원칙 문서. 폴링·웹훅은 나중(8-0) |
 | 정리·답변·카드 | **Groq `openai/gpt-oss-120b`** + strict json_schema | 인용 스키마 강제. 인용 없는 문장은 파기 후 재생성. production 모델 중 strict structured output이 되는 둘 중 큰 쪽 (ADR-028) |
 | 분류·검증 | **Groq `openai/gpt-oss-20b`** + 규칙 휴리스틱 | 결정·마감 감지는 규칙 우선, LLM은 정성 판단만. 분류도 structured output이므로 strict를 지원하는 모델이어야 한다 |
-| 임베딩 | `미정` — Voyage / OpenAI text-embedding 중 택1 | 충돌 감지·Q&A 검색용. D2에 확정 |
+| 임베딩 | **OpenAI `text-embedding-3-small` · 1536차원** | 충돌 감지·Q&A 검색용. `EMBEDDING_MODEL`로 모델명을 고정하고 `embed_model`이 다른 행은 검색에서 제외 (ADR-029) |
 | 비동기 처리 | **Postgres `jobs` 테이블 + `/api/jobs/run` 워커** (6-11). 요청은 job을 넣고 즉시 응답, 워커는 `after()`로 즉시 1회 + **매분 트리거** | 매분 트리거는 플랜에 따라 둘 중 하나로 D0에 확정: Vercel Cron(Pro) 또는 **Supabase `pg_cron` + `pg_net`이 `/api/jobs/run`을 HTTP 호출**(무료 티어, 외부 의존성 없음). 워커 코드는 트리거와 무관하게 동일 |
 | 마스킹 | 정규식 선마스킹 (전화·이메일·주민번호·계좌) | Presidio 2차 마스킹은 **나중** |
 | 개발 도구 | Codex (구현) · Claude (기획·리뷰) | 세션 로그를 제출서 "AI 활용" 부록으로 |
 
-**환경 변수**: `GROQ_API_KEY`, `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `NOTION_TOKEN`, `RECALL_API_KEY`(선택), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, 임베딩 키, `JOBS_TRIGGER_SECRET`. `NEXT_PUBLIC_` 두 개(Supabase URL·anon key)만 클라이언트에 노출되고 나머지는 서버 전용. 그 외 키가 클라이언트 번들에 들어가면 안 된다.
+**환경 변수**: `GROQ_API_KEY`, `OPENAI_API_KEY`, `EMBEDDING_MODEL`(기본 `text-embedding-3-small`), `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `NOTION_TOKEN`, `RECALL_API_KEY`(선택), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `JOBS_TRIGGER_SECRET`. `NEXT_PUBLIC_` 두 개(Supabase URL·anon key)만 클라이언트에 노출되고 나머지는 서버 전용. 그 외 키가 클라이언트 번들에 들어가면 안 된다.
 
 **결정 이유와 포기한 대안** → [ADR.md](ADR.md) ADR-003~020 (채널 3개 · 노션 1회 · 회의 봇 D6 판정 · Next.js · Supabase · jobs 워커 · 매분 트리거 · LLM 역할 분리 · structured output 순서 · 인용 문자열 검증 · 가시성 2단계 · 게시 위치 권한 · 이메일 매핑 · 단일 워크스페이스 · 임베딩 D2 · 게스트 합성 데이터 · 공동 키).
 
@@ -260,7 +263,7 @@ create table items   (id uuid primary key default gen_random_uuid(), source_id u
                       external_ref text,                  -- slack ts / 전사 구간 / notion block id
                       author_ext_id text,                 -- 슬랙 user id / 전사 화자 라벨. 어댑터가 동의 여부를 판별하는 키(미동의면 저장 안 함)
                       author text, spoken_at timestamptz, content text not null,   -- author는 당시 표시명 스냅샷, content는 마스킹 후 본문
-                      -- embedding vector(N), embed_model text  ← 이 두 컬럼은 스키마 v1에 넣지 않는다. D2에 임베딩 모델을 확정한 뒤 별도 마이그레이션으로 추가(차원 N은 모델에 따름). 모델이 바뀌면 embed_model이 다른 행은 검색에서 제외
+                      embedding vector(1536), embed_model text, -- D2 확정 모델을 별도 마이그레이션으로 추가. 모델이 바뀌면 embed_model이 다른 행은 검색에서 제외
                       embed_status text not null default 'pending',   -- pending|done|failed (실패는 재시도 큐)
                       deleted_at timestamptz,             -- 원문 삭제·채널 제거 시 소프트 삭제 (인용 유지용)
                       created_at timestamptz default now(),
@@ -301,7 +304,7 @@ create table answers (id uuid primary key default gen_random_uuid(), dept_id uui
                       status text not null default 'pending',   -- pending|done|refused|failed (failed는 error_code 필수)
                       error_code text,                          -- llm_timeout|llm_refusal|schema_invalid|citation_invalid|rate_limited
                       refused boolean default false, excluded_count int default 0,   -- 권한 밖 제외 건수 (감사 로그 전용)
-                      verified boolean, created_at timestamptz default now());
+                      verified boolean, generic_answer text, question_key text, created_at timestamptz default now());
 
 -- 비동기 작업과 비용 (아키텍처 렌즈 반영)
 create table jobs    (id uuid primary key default gen_random_uuid(), kind text not null,
@@ -760,9 +763,9 @@ Phase 4에서 이미 뺀 것(8-0)은 여기 없다. 아래는 **최종 범위 �
 
 | D | 날짜 | 작업 | 완료 기준 / 자동 컷 기준 |
 |---|---|---|---|
-| **D0** | 9/8 (화) 오전 | **구현 전 확인**: Vercel 플랜의 Cron 최소 간격·`after()` 상한 → 매분 불가면 Supabase `pg_cron`+`pg_net`으로 워커 트리거 확정 · Recall.ai 가입·가격·승인 소요 · 슬랙 앱 생성 + `users:read.email` 스코프 · 임베딩 모델 후보 2개 키 발급 | §10 #1·#15·#16이 "확인됨"으로 바뀜 |
+| **D0** | 9/8 (화) 오전 | **구현 전 확인**: Vercel 플랜의 Cron 최소 간격·`after()` 상한 → 매분 불가면 Supabase `pg_cron`+`pg_net`으로 워커 트리거 확정 · Recall.ai 가입·가격·승인 소요 · 슬랙 앱 생성 + `users:read.email` 스코프 | §10 #1·#15·#16이 "확인됨"으로 바뀜 |
 | D1 | 9/8 (화) | 리포·Supabase·Vercel 셋업, 스키마 v1, **jobs 워커 골격**(enqueue/runOnce + 트리거), 슬랙 이벤트 수신 200 | `main` 푸시 → 배포, 슬랙 메시지가 items에 쌓이고 job이 done으로 바뀜 |
-| D2 | 9/9 (수) | 어댑터 공통 스키마, `llm.ts` 게이트웨이(+llm_calls), 정규식 마스킹, 규칙 분류 + gpt-oss-20b 분류, 임베딩 모델 확정 → embedding 컬럼 마이그레이션 | 우리 팀 채널 1개 하루치가 4분류로 대시보드(S1)에 보임 |
+| D2 | 9/9 (수) | 어댑터 공통 스키마, `llm.ts` 게이트웨이(+llm_calls), 정규식 마스킹, 규칙 분류 + gpt-oss-20b 분류, OpenAI text-embedding-3-small(1536차원) 확정 → embedding 컬럼 마이그레이션 | 코드·원격 DB 적용 완료 |
 | D3 | 9/10 (목) | 결정 카드 생성(gpt-oss-120b, 인용 강제·검증), 웹 카드(S2). **병행: 게스트 합성 데이터 시나리오 작성 시작**(영업팀·개발팀 3주치 대화·회의·원칙 문서 텍스트) | 실제 슬랙 질문 1건이 카드가 되고 인용 링크가 원문으로 감 |
 | D4 | 9/11 (금) | 슬랙 DM Block Kit + 버튼·모달 → 원장 기록, 원장 화면(S3), 리드타임, 7일 백필 | DM에서 결정 → 원장에 남고 스레드에 공지. **컷 ①**: 백필 미완이면 버림 |
 | D5 | 9/12 (토) | **전사 업로드 파서 먼저** → Recall.ai 봇 연동, 회의 정리 생성. 합성 데이터 시나리오 완성 | 우리 팀 회의 1건이 화자 라벨 items로 들어옴(업로드든 봇이든) |
@@ -784,7 +787,7 @@ Codex가 만든 코드 중 **RLS 정책·워커·슬랙 서명 검증**은 D8 �
 | # | 항목 | 종류 | 다음 행동 | 기한 |
 |---|---|---|---|---|
 | 1 | Recall.ai 가격·승인 소요·무료 크레딧 | 확인 필요 | 가입·문서 확인, 안 되면 대체 API 또는 전사 업로드 | D1 |
-| 2 | 임베딩 모델 (Voyage vs OpenAI) | 미정 | 한국어 품질·가격 비교 후 확정 | D2 |
+| 2 | 임베딩 모델 | **확정** | OpenAI `text-embedding-3-small`, 1536차원. 키를 Vercel Production에 등록하고 첫 파일럿 데이터를 임베딩 | D2 완료 |
 | 3 | Notion 웹훅 지원 여부 | 확인 필요 | 문서 확인, MVP는 폴링으로 시작 | D7 |
 | 4 | Vercel 함수 `maxDuration` 상한 | 확인 필요 | D0 플랜 확인. 초과 시 긴 작업(회의 정리·카드)을 더 잘게 job으로 쪼갠다. Edge Function은 쓰지 않는다(6-11) | D0 |
 | 5 | 통신비밀보호법상 봇 참석 고지 요건 | 확인 필요 | 고지 + 이의 시 제외를 기본값으로, 자문은 대회 후 | 대회 후 |
@@ -814,7 +817,7 @@ Codex가 만든 코드 중 **RLS 정책·워커·슬랙 서명 검증**은 D8 �
 | Recall.ai 가격·승인·웹훅 서명이 12일 안에 쓸 만하다 (#1·#13) | 회의 채널이 전사 업로드로 격하, 데모 장면 3의 "회의 보류 안건"은 업로드로 재현 | D1 가입·문서 확인, **D6(9/13) 최종 판정** | 구현 전에 확인 |
 | Vercel 플랜에서 Cron 매분 + `after()`가 된다 (#4·#16) | 워커가 못 돌아 비동기 전체 불성립 | **D0(오늘 오전)** 플랜 확인. 안 되면 Supabase pg_cron 트리거로 확정(대체안 설계 완료, ADR-010) | **구현 전에 확인** |
 | 슬랙 `users:read.email` 스코프가 승인된다 (#15) | 신원 매핑 불가 → 슬랙 Q&A·버튼 거절 | D1 앱 생성 시 | 구현 전에 확인 |
-| 임베딩 모델 한국어 품질이 병합·검색에 충분하다 (#2) | 병합 오탐·검색 누락 | D2 두 모델로 우리 팀 메시지 20쌍 비교 | 구현 전에 확인 |
+| 임베딩 모델 한국어 품질이 병합·검색에 충분하다 (#2) | 병합 오탐·검색 누락 | D2 결정 기록. 첫 파일럿에서 검색 누락을 관찰 | OpenAI text-embedding-3-small로 MVP 진행 |
 | 규칙 분류의 "결정 필요" 재현율 ≥ 0.7 (#8) | 카드가 안 생겨 데모가 수동 승격에 의존 | D3 하루치 20건 수동 채점 | 틀려도 감당 가능 (수동 승격 경로 존재) |
 | 카드 추천 방향을 팀장이 채택한다 (#9) | 카드 가치 약화, 데모데이 지표 부진 | 파일럿 기간 채택률 기록 | 틀려도 감당 가능 |
 | 두 번째 파일럿 팀을 9/12까지 섭외한다 (#7) | 데모데이 "2팀 실데이터" 불성립 → 서사를 "1팀 4주 실데이터 + 게스트 2부서"로 조정하고 약해진 조건을 숨기지 않는다 | 이번 주 지인 회사 1곳 | 구현과 무관, **즉시 행동** |

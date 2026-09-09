@@ -24,6 +24,7 @@ type OriginItemRow = {
   content: string;
   deleted_at: string | null;
   created_at: string | null;
+  embedding: string | number[] | null;
   source: { visibility: string } | { visibility: string }[] | null;
 };
 
@@ -32,6 +33,13 @@ type ItemRow = {
   source_id: string;
   content: string;
   created_at: string | null;
+  visibility?: string;
+};
+
+type SimilarItemRow = {
+  id: string;
+  content: string;
+  source_visibility: string;
 };
 
 type PrincipleSourceRow = {
@@ -60,7 +68,7 @@ type MemberRow = {
 
 type CardInput = {
   originItem: { item_id: string; content: string };
-  sameSourceItems: { item_id: string; content: string }[];
+  similarItems: { item_id: string; content: string }[];
   principleItems: { item_id: string; content: string }[];
   recentDecisions: {
     decision_id: string;
@@ -237,7 +245,7 @@ export async function makeCard(itemId: string): Promise<void> {
   const originResult = await client
     .from("items")
     .select(
-      "id, source_id, dept_id, content, deleted_at, created_at, source:sources!inner(visibility)",
+      "id, source_id, dept_id, content, deleted_at, created_at, embedding, source:sources!inner(visibility)",
     )
     .eq("id", itemId)
     .maybeSingle<OriginItemRow>();
@@ -324,9 +332,32 @@ export async function makeCard(itemId: string): Promise<void> {
       role: member.role as Member["role"],
     }));
 
+  let similarItems = sameSourceItems;
+  const lead = members.find((member) => member.role === "lead");
+  if (origin.embedding && lead && typeof client.rpc === "function") {
+    const similarityResult = await client.rpc("search_as", {
+      p_user: lead.userId,
+      p_dept: origin.dept_id,
+      p_query: origin.embedding,
+      p_limit: 6,
+    });
+    if (!similarityResult.error && Array.isArray(similarityResult.data)) {
+      similarItems = (similarityResult.data as SimilarItemRow[])
+        .filter((item) => item.id !== origin.id)
+        .slice(0, 5)
+        .map((item) => ({
+          id: item.id,
+          source_id: "",
+          content: item.content,
+          created_at: null,
+          visibility: item.source_visibility,
+        }));
+    }
+  }
+
   const input: CardInput = {
     originItem: { item_id: origin.id, content: origin.content },
-    sameSourceItems: sameSourceItems.map((item) => ({
+    similarItems: similarItems.map((item) => ({
       item_id: item.id,
       content: item.content,
     })),
@@ -354,9 +385,9 @@ export async function makeCard(itemId: string): Promise<void> {
     ]),
   );
 
-  for (const item of sameSourceItems) {
+  for (const item of similarItems) {
     texts.set(item.id, item.content);
-    visibilities.set(item.id, originVisibility);
+    visibilities.set(item.id, visibilityOf(item.visibility ?? originVisibility));
   }
   texts.set(origin.id, origin.content);
   visibilities.set(origin.id, originVisibility);

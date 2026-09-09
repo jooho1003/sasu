@@ -68,7 +68,8 @@ sasu/
 │   ├── jobs.ts                     # enqueue(kind, payload, {dedupeKey?}) · runOnce()
 │   ├── search.ts                   # search_as() 호출만. 권한 판정은 SQL 안
 │   ├── mask.ts · rules.ts          # 정규식 마스킹 · 규칙 분류 (순수 함수)
-│   ├── adapters/{slack,meeting,notion}.ts      # 외부 → IngestItem. 분류·LLM을 모른다
+│   ├── adapters/{slack,transcript}.ts          # 외부 → IngestItem. 분류·LLM을 모른다
+│   ├── notion.ts                               # Notion API 페이지·블록 어댑터
 │   ├── pipeline/{classify,card,answer,summarize,merge,conflict}.ts   # job 본체
 │   ├── slack/{verify,blocks,post}.ts           # 서명 검증 · Block Kit · postMessage
 │   └── supabase/{server,rls-client,service}.ts # 클라이언트 팩토리 3종 (§6 불변식 2)
@@ -169,9 +170,9 @@ answer job: 검색 권한 결정 — 채널이면 member, DM·웹이면 질문�
 ### 4.4 회의 한 건의 여정
 
 ```text
-S5 회의 URL 입력 → Recall.ai 봇 참석(참석 고지) → 웹훅 POST /api/meetings/transcript
+S5 회의 URL 입력 → Recall.ai 봇 참석(참석 고지) → 웹훅 또는 lead 전사 업로드
   또는 lead가 .vtt/.txt 업로드(10MB 상한, 파싱 실패 시 줄 번호)
-  → 발언 1건 = item 1건(화자 라벨·타임스탬프, 없으면 '화자 미상') → enqueue(summarize_meeting)
+  → 발언 1건 = item 1건(동의한 멤버로 매칭된 화자만 저장) → enqueue(summarize_meeting)
 summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[], actions[]} (item_id 인용)
   → deferred 항목 → enqueue(make_card)  (슬랙 질문과 72h 병합 → 데모 장면 3)
 ```

@@ -74,12 +74,16 @@ export async function GET(
   const { dept } = await params;
   const membership = await requireMembership(dept);
   const requestedLabel = request.nextUrl.searchParams.get("label");
+  const requestedSource = request.nextUrl.searchParams.get("source");
 
   if (requestedLabel !== null && !isItemLabel(requestedLabel)) {
     return Response.json(
       { error: "지원하지 않는 분류입니다." },
       { status: 400 },
     );
+  }
+  if (requestedSource !== null && requestedSource !== "meeting") {
+    return Response.json({ error: "지원하지 않는 입력 유형입니다." }, { status: 400 });
   }
 
   const supabase = await createServerSupabaseClient();
@@ -98,6 +102,9 @@ export async function GET(
 
   if (requestedLabel !== null) {
     itemsQuery = itemsQuery.eq("classifications.label", requestedLabel);
+  }
+  if (requestedSource === "meeting") {
+    itemsQuery = itemsQuery.eq("sources.kind", "meeting");
   }
 
   const todayStart = startOfTodayInKst();
