@@ -4,36 +4,62 @@
 
 ## 배포
 
-- 배포 URL: `______________________________________________`
-- 배포 커밋 해시: `_______________________________________`
-- 확인 일시(KST): `_______________________________________`
-- Vercel CLI 버전: `_______________________________________`
+- 배포 URL: `https://sasu-alpha.vercel.app` (프로덕션 alias · 인증 벽 없음, 시크릿 창에서 200 확인)
+- 배포 커밋 해시: `6fa6555` (워킹트리 clean 상태의 스냅샷)
+- 확인 일시(KST): `2026-09-10 03:2x`
+- Vercel CLI 버전: `59.14.0`
+
+> 배포 방식 주의 — Hobby 플랜은 **커밋 작성자가 Vercel 계정 소유자가 아니면 배포를 `BLOCKED`로 막는다**
+> ("The deployment was blocked because the commit author did not have contributing access to the project on Vercel.
+> The Hobby Plan does not support collaboration for private repositories.").
+> 이 리포의 커밋 작성자는 `wade0528 <wade@uzen.net>`이고 Vercel 계정은 `wadelee1005@gmail.com`이라 정면으로 걸린다.
+> 현재는 git 메타데이터 없는 소스 스냅샷을 CLI로 올려 우회했다. **항구 대책 둘 중 하나를 D4까지 정한다**:
+> ① Vercel 계정에 `wade@uzen.net`을 보조 이메일로 추가(검증 메일 클릭 필요) ② 커밋 작성자 이메일을 Vercel 계정 이메일로 변경.
+> 정하기 전에는 GitHub 연동 자동 배포를 켜면 안 된다 — 전부 BLOCKED 된다.
 
 ## 워커 트리거 판정
 
 setup-guide §2의 판정 결과를 기록한다.
 
-- 플랜: `____________`
-- Cron 간격: `____________`
-- `after()` 상한: `____________`
-- `maxDuration`: `____________`
-- 매분 트리거: `[ ] Vercel Cron  [ ] Supabase pg_cron`
-- 판정 근거 또는 확인 화면: `______________________________`
+- 플랜: `Hobby` (Vercel API `/v2/teams/team_zKvH3LpgiM9aftxjgdOUcPzE` → `billing.plan = "hobby"`)
+- Cron 간격: `하루 1회` — 더 잦은 표현은 배포 단계에서 실패
+- `after()` 상한: `문서에 별도 표기 없음` — 함수 maxDuration에 묶이는 것으로 가정(300초)
+- `maxDuration`: `기본 300초 / 최대 300초`
+- 매분 트리거: `[ ] Vercel Cron  [x] Supabase pg_cron`
+- 판정 근거: Vercel 문서 *Usage & Pricing for Cron Jobs* 플랜별 표(Hobby = Minimum interval "Once per day", 정밀도 ±59분) · *Configuring Maximum Duration* 지속시간 표(Hobby 기본 300s / 최대 300s)
 
-판정이 기록되기 전에는 매분 트리거를 임의로 배선하지 않는다. 세로 슬라이스는 `/api/jobs/run`을 시크릿 헤더로 직접 호출해 판정할 수 있다.
+**배선 완료 (2026-09-10 / D3)**
+
+- `supabase/migrations/0004_worker_cron.sql` 적용됨 — `pg_cron`·`pg_net` 확장, `public.worker_config`(RLS 켜고 정책 0개 = service role 전용), `public.run_jobs_tick()`(SECURITY DEFINER), `cron.schedule('sasu-jobs-tick', '* * * * *', ...)`
+- `npx tsx scripts/setup-worker-cron.ts https://sasu-alpha.vercel.app` 실행됨 — `jobs_run_url`·`jobs_trigger_secret` 주입 완료
+- `vercel.json`에는 `crons`를 넣지 않는다 (Hobby에서 매분 표현은 배포 실패)
+
+**동작 검증 (2026-09-10 03:1x KST)** — `[통과]`
+
+`jobs` 테이블에 `kind='sweep'`·`status='queued'`·`run_after` 과거인 프로브 row를 service role로 직접 넣고,
+`/api/jobs/run`을 **사람이 한 번도 호출하지 않은 상태**로 15초 간격 폴링했다.
+45초 만에 `queued → done`(attempts=1, last_error=null)으로 바뀌었다.
+즉 `pg_cron(매분) → public.run_jobs_tick() → net.http_post → https://sasu-alpha.vercel.app/api/jobs/run
+(x-jobs-secret 인증) → runOnce()` 전 구간이 실제로 동작한다. 프로브 row는 검증 후 삭제했다.
+
+(Vercel 런타임 로그는 이 플랜에서 403이라 로그 기반 확인은 불가. 위 큐 처리 결과가 그 대체 증거다.)
 
 ## Slack 앱 설정
 
-- [ ] Event Subscriptions 활성화
-- [ ] Request URL 등록: `https://<배포도메인>/api/slack/events`
-- [ ] URL verification challenge가 200으로 응답
-- [ ] `message.channels` 구독
-- [ ] `message.groups` 구독
-- [ ] `app_mention` 구독
-- [ ] `message.im` 구독
-- [ ] Interactivity Request URL 등록: `https://<배포도메인>/api/slack/interactions`
-- [ ] 수집 채널에 봇 초대
+앱: `SASU` · App ID `A0C0JSWAJHK` · 워크스페이스 `새 워크스페이스` (`T0870U4PE90`, 1인) · 봇 `sasu` (`U0C1J2C4CTS`)
+
+- [x] Event Subscriptions 활성화 (App Manifest로 일괄 설정, 저장 성공)
+- [x] Request URL 등록: `https://sasu-alpha.vercel.app/api/slack/events`
+- [x] URL verification challenge가 200으로 응답 — 매니페스트 저장이 성공했다는 것이 곧 서명된 challenge 통과의 증거다. 서명 없는 POST는 `401` 확인
+- [x] `message.channels` 구독
+- [x] `message.groups` 구독
+- [x] `app_mention` 구독
+- [x] `message.im` 구독
+- [ ] Interactivity Request URL 등록 — **미등록**. `/api/slack/interactions` 라우트가 아직 없다(DM 버튼은 D4 `1-slack-dm-backfill`). 매니페스트에 `interactivity.is_enabled = false`로 두었다
+- [ ] 수집 채널에 봇 초대 — **남음**. 봇 스코프에 `channels:read`·`channels:join`이 없어 API로 못 넣는다(setup-guide §4의 8개 스코프에 없음). 채널에서 `/invite @SASU`를 직접 실행해야 한다
 - 마지막 Slack 이벤트 수신 시각: `__________________________`
+
+봇 토큰(`SLACK_BOT_TOKEN`)·서명 시크릿(`SLACK_SIGNING_SECRET`)은 `.env`와 Vercel(Production·Preview) 양쪽에 주입 완료. `auth.test` 200 확인.
 
 ## 자동 검증
 
