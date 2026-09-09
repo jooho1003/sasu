@@ -3,6 +3,10 @@
     {
       "dir": "0-vertical-slice",
       "status": "blocked"
+    },
+    {
+      "dir": "1-slack-dm-backfill",
+      "status": "completed"
     }
   ]
 }

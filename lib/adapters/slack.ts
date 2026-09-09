@@ -20,6 +20,11 @@ type SlackIngestContext = {
   author?: string;
 };
 
+export type SlackMemberConsent = {
+  displayName: string;
+  consented: boolean;
+};
+
 const NON_MESSAGE_SUBTYPES = new Set([
   "bot_message",
   "channel_join",
@@ -78,5 +83,32 @@ export function toIngestItem(
     author: ctx.author ?? event.user,
     spoken_at: slackTimestampToIso(event.ts as string),
     content: mask(event.text as string),
+  });
+}
+
+export function collectBackfillItems(
+  events: SlackMessageEvent[],
+  ctx: {
+    sourceId: string;
+    deptId: string;
+    members: Map<string, SlackMemberConsent>;
+  },
+): IngestItemValue[] {
+  return events.flatMap((event) => {
+    if (!event.user) {
+      return [];
+    }
+
+    const member = ctx.members.get(event.user);
+    if (!member?.consented) {
+      return [];
+    }
+
+    const item = toIngestItem(event, {
+      sourceId: ctx.sourceId,
+      deptId: ctx.deptId,
+      author: member.displayName,
+    });
+    return item ? [item] : [];
   });
 }

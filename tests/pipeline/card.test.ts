@@ -457,14 +457,18 @@ describe("makeCard", () => {
     );
   });
 
-  it("embed / send_slack job 을 enqueue 하지 않는다", async () => {
+  it("검증된 open 카드의 send_slack job을 멱등 enqueue 한다", async () => {
     const fake = createFakeClient();
     moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
     resolveDrafts(defaultDraft);
 
     await makeCard(originItem.id);
 
-    expect(moduleMocks.enqueue).not.toHaveBeenCalled();
+    expect(moduleMocks.enqueue).toHaveBeenCalledWith(
+      "send_slack",
+      { requestId: "card-1" },
+      { dedupeKey: "card-1" },
+    );
   });
 
   it("make_card handler 를 등록하고 payload itemId 로 makeCard 를 실행한다", async () => {

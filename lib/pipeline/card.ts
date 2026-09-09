@@ -1,5 +1,5 @@
 import { CardDraft, type CardDraft as CardDraftValue } from "@/lib/contracts";
-import { registerHandler } from "@/lib/jobs";
+import { enqueue, registerHandler } from "@/lib/jobs";
 import { llm } from "@/lib/llm";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
@@ -449,6 +449,14 @@ export async function makeCard(itemId: string): Promise<void> {
   if (conflicts.length > 0) {
     const conflictResult = await client.from("conflicts").insert(conflicts);
     ensureNoDatabaseError(conflictResult.error);
+  }
+
+  if (status === "open") {
+    await enqueue(
+      "send_slack",
+      { requestId: cardId },
+      { dedupeKey: cardId },
+    );
   }
 }
 

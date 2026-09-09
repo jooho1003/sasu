@@ -1,5 +1,8 @@
 import { enqueue, kickWorker } from "@/lib/jobs";
 import { registerMakeCardHandler } from "@/lib/pipeline/card";
+import { registerClassifyHandler } from "@/lib/pipeline/classify";
+import { registerSendSlackHandler } from "@/lib/pipeline/send-slack";
+import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -69,7 +72,10 @@ export async function POST(
 
   try {
     const jobId = await enqueue("make_card", { itemId: itemResult.data.id });
+    registerClassifyHandler();
     registerMakeCardHandler();
+    registerSendSlackHandler();
+    registerSlackBackfillHandler();
     kickWorker();
 
     return Response.json({

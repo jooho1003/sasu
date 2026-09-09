@@ -1,0 +1,18 @@
+{
+  "project": "sasu",
+  "phase": "1-slack-dm-backfill",
+  "steps": [
+    {
+      "step": 0,
+      "name": "slack-dm-delivery",
+      "status": "completed",
+      "summary": "결정 카드 생성 뒤 send_slack job을 멱등 enqueue하고, 동의한 담당자에게 검증된 인용·링크·결정/보류/반려 버튼이 있는 Block Kit DM을 보낸다. Slack Interactivity 서명 검증, 담당자/lead 권한 재검증, 모달 제출의 append-only 원장 기록과 delivery 상태 마이그레이션을 추가했다."
+    },
+    {
+      "step": 1,
+      "name": "slack-backfill",
+      "status": "completed",
+      "summary": "lead 전용 백필 API와 slack_backfill job을 추가해 최근 7일 Slack history를 페이지네이션하고, 동의한 멤버의 메시지만 기존 마스킹·멱등·분류 파이프라인으로 넣는다."
+    }
+  ]
+}

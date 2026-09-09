@@ -192,6 +192,15 @@ describe("jobs worker", () => {
       ownerTable: "answers",
       ownerStatus: { status: "failed", error_code: "llm_timeout" },
     },
+    {
+      kind: "send_slack" as const,
+      payload: { requestId: "request-1" },
+      ownerTable: "decision_requests",
+      ownerStatus: {
+        slack_delivery_status: "failed",
+        slack_delivery_error: "llm_timeout",
+      },
+    },
   ])(
     "3회 실패한 $kind job은 failed이고 소유 row 상태도 바뀐다",
     async ({ kind, payload, ownerTable, ownerStatus }) => {

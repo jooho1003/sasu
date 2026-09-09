@@ -26,6 +26,7 @@ phases/**/step*-output.json
 .superpowers/
 .playwright-mcp/
 test-results/
+tsconfig.tsbuildinfo
 
 # os / editor
 .DS_Store

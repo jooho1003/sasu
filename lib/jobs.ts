@@ -53,6 +53,10 @@ const SAFE_ERROR_CODES = new Set([
   "llm_timeout",
   "rate_limited",
   "schema_invalid",
+  "slack_api_failed",
+  "slack_dm_unavailable",
+  "slack_not_configured",
+  "slack_rate_limited",
   "unknown_kind",
   "unmasked_prompt",
 ]);
@@ -88,6 +92,18 @@ const FAILURE_OWNER_MAPPINGS: Partial<
     ],
     write: "update",
     values: () => ({ status: "needs_review" }),
+  },
+  send_slack: {
+    table: "decision_requests",
+    references: [
+      { payloadKey: "requestId", column: "id" },
+      { payloadKey: "request_id", column: "id" },
+    ],
+    write: "update",
+    values: (_requestId, errorCode) => ({
+      slack_delivery_status: "failed",
+      slack_delivery_error: errorCode,
+    }),
   },
   answer: {
     table: "answers",

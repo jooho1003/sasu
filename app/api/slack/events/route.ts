@@ -1,6 +1,9 @@
 import { toIngestItem, isCollectible, type SlackMessageEvent } from "@/lib/adapters/slack";
 import { enqueue, kickWorker } from "@/lib/jobs";
+import { registerMakeCardHandler } from "@/lib/pipeline/card";
 import { registerClassifyHandler } from "@/lib/pipeline/classify";
+import { registerSendSlackHandler } from "@/lib/pipeline/send-slack";
+import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
 import { verifySlackSignature } from "@/lib/slack/verify";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
@@ -121,6 +124,9 @@ export async function POST(request: Request) {
   }
 
   registerClassifyHandler();
+  registerMakeCardHandler();
+  registerSendSlackHandler();
+  registerSlackBackfillHandler();
   await enqueue("classify", { itemId: itemResult.data.id });
   kickWorker();
 
