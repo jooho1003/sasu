@@ -61,10 +61,13 @@
 **이유**: 아키텍처 렌즈 지적 — 서버리스에서 "200 보내고 계속 처리"는 저절로 되지 않는다. Supabase Edge Function은 런타임 2개를 1인이 관리하게 되고, 외부 큐 서비스는 의존성을 추가한다.
 **트레이드오프**: 워커가 단일 레인이라 부서 10개부터 분당 처리량 한계. 지금 규모(하루 ~200 job)에선 여유.
 
-### ADR-010: 매분 트리거는 Vercel Cron(Pro) 또는 Supabase `pg_cron`+`pg_net`, D0에 확정
-**결정**: 플랜 확인 후 둘 중 하나. 워커 코드는 트리거와 무관하게 동일하다. 트리거 호출은 시크릿 헤더로 인증.
+### ADR-010: 매분 트리거는 Supabase `pg_cron`+`pg_net` (D3 확정)
+> **확정 (2026-09-10 / D3)**: Vercel 팀 `wadelee1005-3954s-projects`의 플랜이 **Hobby**로 확인됐다(`billing.plan = "hobby"`). Vercel 공식 문서 *Usage & Pricing for Cron Jobs*의 플랜별 표에서 Hobby의 Minimum interval은 **"Once per day"**이고, 더 잦은 cron 표현은 *"배포 단계에서 실패"*한다고 명시돼 있다. 따라서 Vercel Cron은 후보에서 탈락하고 **Supabase `pg_cron` + `pg_net`**으로 확정한다. 구현은 `supabase/migrations/0004_worker_cron.sql`(스케줄·함수)과 `scripts/setup-worker-cron.ts`(시크릿 주입) 두 곳이다.
+> 같은 문서의 함수 지속시간 표에서 Hobby의 `maxDuration`은 기본 300초·최대 300초다. `after()`의 별도 상한은 문서에 표기가 없어 함수 실행 시간에 묶이는 것으로 본다 — 300초를 상한으로 가정하고 설계한다.
+
+**결정**: Supabase `pg_cron`이 매분 `public.run_jobs_tick()`을 돌리고, 이 함수가 `net.http_post`로 `/api/jobs/run`을 호출한다. 워커 코드는 트리거와 무관하게 동일하다. 트리거 호출은 `x-jobs-secret` 헤더로 인증한다.
 **이유**: 외부 리뷰 지적 — Hobby 플랜은 Cron이 하루 1회일 수 있어 설계 기반이 미검증이었다. `pg_cron`은 무료 티어·외부 의존성 없음.
-**트레이드오프**: cron-job.org 외부 핑(의존성 추가)·QStash(비용)를 포기. 판정 결과는 `setup-guide.md` §2에 기록한다.
+**트레이드오프**: cron-job.org 외부 핑(의존성 추가)·QStash(비용)를 포기. 시크릿이 `public.worker_config`에 평문으로 앉는다 — RLS를 켜고 정책을 만들지 않아 anon·authenticated는 전면 거부이고 service role만 읽는다. service role 키를 가진 쪽은 어차피 DB 전체를 읽으므로 노출면이 늘지 않는다. 판정 결과는 `setup-guide.md` §2에 기록한다.
 
 ### ADR-011: LLM 역할 분리 — 큰 모델 = 카드·답변·회의 정리 / 작은 모델 = 분류 / 규칙 = 정량 신호
 > **갱신 (1.1)**: 모델이 Opus 5 / Haiku 4.5에서 Groq `openai/gpt-oss-120b` / `openai/gpt-oss-20b`로 바뀌었다 (ADR-028). 역할 분리 구조 자체는 그대로다.

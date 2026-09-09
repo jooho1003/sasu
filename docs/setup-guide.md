@@ -66,14 +66,14 @@
 | `after()`가 응답 후 얼마나 오래 도는가 | 슬랙 3초 ack 뒤 분류·카드 생성이 여기서 돈다 | 짧으면 `after()`는 enqueue만 하고 처리는 전부 매분 트리거에 |
 | 함수 `maxDuration` 상한 | gpt-oss-120b 호출 1회가 30초를 넘을 수 있다 | 회의 정리·카드를 더 잘게 job으로 쪼갠다. Edge Function은 쓰지 않는다 |
 
-**판정 결과를 여기에 적는다**: `[ ] 플랜: ___ · Cron 간격: ___ · after() 상한: ___ · maxDuration: ___ → 매분 트리거: Vercel Cron / pg_cron`
+**판정 결과 (2026-09-10 / D3 확정)**: `[x]` 플랜: **Hobby** · Cron 최소 간격: **하루 1회**(더 잦은 표현은 배포 실패) · `after()` 상한: **문서에 별도 표기 없음 — 함수 maxDuration에 묶이는 것으로 가정** · `maxDuration`: **기본 300초 / 최대 300초** → 매분 트리거: **Supabase `pg_cron` + `pg_net`** (ADR-010). 출처: Vercel 문서 *Usage & Pricing for Cron Jobs* · *Configuring Maximum Duration*. 구현: `supabase/migrations/0004_worker_cron.sql` + `npx tsx scripts/setup-worker-cron.ts <배포URL>`.
 
 **설정**
 - GitHub 연동, `main` 푸시 = 프로덕션 배포. 하루 마지막 커밋은 항상 배포 가능 상태.
 - 환경 변수 (Production + Preview): `GROQ_API_KEY` · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · 임베딩 키(`VOYAGE_API_KEY` 또는 `OPENAI_API_KEY`) · `JOBS_TRIGGER_SECRET`
 - `NEXT_PUBLIC_` 접두사는 Supabase URL·anon key **둘뿐**. 그 외 키가 클라이언트 번들에 들어가면 안 된다 — 빌드 후 `.next/static`을 grep으로 확인.
 - 도메인: Vercel 기본 도메인으로 제출 가능. 커스텀 도메인은 D11까지 여유 있을 때만.
-- Vercel Cron을 택했으면 `vercel.json`에 `/api/jobs/run` 매분. 트리거 호출은 `JOBS_TRIGGER_SECRET` 헤더로 인증.
+- ~~Vercel Cron을 택했으면 `vercel.json`에 `/api/jobs/run` 매분.~~ → Hobby 플랜이라 `pg_cron`으로 확정(위 판정). `vercel.json`에는 `framework: nextjs`만 두고 `crons`를 넣지 않는다 — Hobby에서 매분 표현은 배포를 실패시킨다. 트리거 호출은 `JOBS_TRIGGER_SECRET`을 `x-jobs-secret` 헤더로 넣어 인증한다.
 
 ---
 
