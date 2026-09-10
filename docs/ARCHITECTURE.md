@@ -206,7 +206,7 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 4. 카드 visibility = 인용 소스 중 가장 좁은 것. `leads_only` 카드는 lead에게만 DM. 병합은 visibility를 좁히지 않는다.
 5. 채널 답변은 member 권한, DM·웹은 질문자 권한. "N건 제외"는 어디에도 표시하지 않는다.
 6. 결정 공지 스레드는 결과 한 줄 + 원장 링크만.
-7. 슬랙 서명 검증, 봇 웹훅 시크릿, 최소 스코프 8개, 전사 업로드는 lead만(10MB).
+7. 슬랙 서명 검증, 봇 웹훅 시크릿, 최소 스코프 10개, 전사 업로드는 lead만(10MB).
 8. 동의가 수집보다 먼저다. 채널 멤버 전원 동의 후에만 채널 연결. 미동의 멤버의 발언은 저장하지 않는다. 미매핑 슬랙 사용자·미동의 멤버는 질문·DM 대상에서 제외. RLS는 접근 통제이지 수집의 법적 근거가 아니다.
 9. 로그에 이벤트 본문·전사·질문 원문 금지. `items.content`는 마스킹 후만 저장(금액·날짜·수량은 마스킹하지 않는다).
 10. 게스트 판별은 `orgs.is_demo`. 게스트 라우트는 LLM 호출 0회. `/api/d/[dept]/ask`는 사용자당 하루 50회.
@@ -214,7 +214,7 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 12. `jobs`·`ingest_events`·`llm_calls`·`orgs`는 사용자 접근 없음(service role 전용). `citations`·`conflicts`는 소유 객체 join으로 판정.
 13. 멱등 장치 4개 — `ingest_events.event_id` · `unique(source_id, external_ref)` · `decisions.request_id unique` · `one_open_request_per_item` — 를 우회하는 insert 경로를 만들지 않는다.
 14. 결정은 append-only. `supersedes_id`로만 정정한다.
-15. 임베딩 컬럼은 D2 모델 확정 후 마이그레이션으로만 추가한다. `embed_model`이 다른 행은 검색에서 제외.
+15. 임베딩 컬럼은 D2 모델 확정 후 마이그레이션으로만 추가한다. 현재 기본 provider는 Voyage `voyage-4-lite` 1024차원이며 `embed_model`이 다른 행은 검색에서 제외한다. OpenAI 경로는 명시적 호환 설정에서만 사용한다.
 
 ---
 

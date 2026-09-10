@@ -16,13 +16,13 @@
 | **D0 9/8 (화) 오전** | **참가 접수 제출** (§1) — 양식뿐이라 마감일까지 미룰 이유가 없다 | ⬜ |
 | D0 9/8 오전 | Vercel 플랜 확인: Cron 최소 간격 · `after()` 상한 · `maxDuration` → **매분 트리거 결정**(Vercel Cron vs Supabase `pg_cron`) (§2) | ⬜ |
 | D0 9/8 오전 | Recall.ai 가입 · 가격 · 승인 소요 · 무료 크레딧 · 웹훅 서명 · 녹음 삭제 설정 (§5) | ⬜ |
-| D0 9/8 오전 | 슬랙 앱 생성 + 스코프 8개 + `users:read.email` 승인 가능 여부 (§4) | ⬜ |
+| D0 9/8 오전 | 슬랙 앱 생성 + 스코프 10개 + `users:read.email` 승인 가능 여부 (§4) | ⬜ |
 | D0 9/8 오전 | Groq 키 발급 + 단가·rate limit 확인 (§7) | ⬜ |
 | D0 9/8 오전 | 임베딩 후보 키 발급 — Groq `nomic-embed-text-v1_5` 제공 여부 확인 후 Voyage · OpenAI (§8) | ⬜ |
 | D0 9/8 | 두 번째 파일럿 팀 섭외 연락 (§9) | ⬜ |
 | D1 9/8 | Supabase 프로젝트 · Vercel 프로젝트 · GitHub 연동 · `.env` 채우고 커밋 안 되는지 확인 (§3·§2·§7) | ⬜ |
 | D1 9/8 | 우리 팀 **동의문 v1** 확정 + 전원 서면 동의 — 실사용 데이터가 걸리는 첫날 (§9) | ⬜ |
-| D2 9/9 | 임베딩 모델 확정 (OpenAI `text-embedding-3-small`, 1536차원) → 마이그레이션 | ✅ 코드·DB 적용 |
+| D2 9/9 | 임베딩 모델 확정 (Voyage `voyage-4-lite`, 1024차원) → 마이그레이션 | ✅ 코드·DB 적용 |
 | **D3 9/10 (목) 자정** | **세로 슬라이스 게이트** — 시크릿 창에서 5분 안에 완주 안 되면 강등 (§10) | ⬜ |
 | D4 9/11 | 컷 ① 판정: 7일 백필 | ⬜ |
 | D5 9/12 | 두 번째 파일럿 팀 섭외 **확정** 기한 · Recall.ai 웹훅 서명·녹음 보존 확인 | ⬜ |
@@ -70,7 +70,7 @@
 
 **설정**
 - GitHub 연동, `main` 푸시 = 프로덕션 배포. 하루 마지막 커밋은 항상 배포 가능 상태.
-- 환경 변수 (Production + Preview): `GROQ_API_KEY` · `OPENAI_API_KEY` · `EMBEDDING_MODEL`(기본 `text-embedding-3-small`) · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · `JOBS_TRIGGER_SECRET`
+- 환경 변수 (Production + Preview): `GROQ_API_KEY` · `EMBEDDING_PROVIDER=voyage` · `VOYAGE_API_KEY` · `EMBEDDING_MODEL=voyage-4-lite` · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · `JOBS_TRIGGER_SECRET`
 - `NEXT_PUBLIC_` 접두사는 Supabase URL·anon key **둘뿐**. 그 외 키가 클라이언트 번들에 들어가면 안 된다 — 빌드 후 `.next/static`을 grep으로 확인.
 - 도메인: Vercel 기본 도메인으로 제출 가능. 커스텀 도메인은 D11까지 여유 있을 때만.
 - ~~Vercel Cron을 택했으면 `vercel.json`에 `/api/jobs/run` 매분.~~ → Hobby 플랜이라 `pg_cron`으로 확정(위 판정). `vercel.json`에는 `framework: nextjs`만 두고 `crons`를 넣지 않는다 — Hobby에서 매분 표현은 배포를 실패시킨다. 트리거 호출은 `JOBS_TRIGGER_SECRET`을 `x-jobs-secret` 헤더로 넣어 인증한다.
@@ -99,7 +99,7 @@
 ## 4. 슬랙 앱 — D0 생성, 배포 후 URL 등록
 
 1. api.slack.com/apps → Create New App (from scratch) → 우리 워크스페이스.
-2. **Bot Token Scopes 8개 (최소)**: `channels:history` · `groups:history` · `app_mentions:read` · `im:history` · `im:write` · `chat:write` · `users:read` · `users:read.email`. 파일·이메일 본문 스코프는 요청하지 않는다.
+2. **Bot Token Scopes 10개 (최소)**: `channels:history` · `groups:history` · `app_mentions:read` · `im:history` · `im:write` · `chat:write` · `users:read` · `users:read.email` · `channels:read` · `groups:read`. 뒤의 두 개는 `conversations.list`·`conversations.members`(채널 연결 화면·전원 동의 확인)에 필요하다. 파일·이메일 본문 스코프는 요청하지 않는다.
 3. `users:read.email`이 승인되는지 확인 — 워크스페이스 관리자 설치 시 가능한지 (PRD §10 #15). 안 되면 세팅 화면에 수동 매핑 표를 넣는다(ADR-016 대안).
 4. Install to Workspace (관리자 권한 필요) → `SLACK_BOT_TOKEN`(xoxb-) · Basic Information의 `Signing Secret` → Vercel env.
 5. **배포 후** (D1 저녁): Event Subscriptions 켜고 Request URL `https://<도메인>/api/slack/events` (URL 검증 challenge에 200). Subscribe to bot events: `message.channels` · `message.groups` · `app_mention` · `message.im`.
@@ -145,12 +145,11 @@ OAuth "Add to Slack"은 만들지 않는다(ADR-017). 파일럿 2팀째는 별�
 
 ---
 
-## 8. 임베딩 — D0 키 발급, D2 확정
+## 8. 임베딩 — Voyage 키 발급, D2 확정
 
-- 확정 모델: OpenAI `text-embedding-3-small`, 1536차원. 앱은 `OPENAI_API_KEY`를 서버에서만 사용하고 `EMBEDDING_MODEL`이 다른 행은 `search_as()`에서 제외한다.
-- 비교는 D2 결정 기록으로 대체했고, `supabase/migrations/0006_embeddings_search.sql`에 `items.embedding vector(1536)` + `embed_model text`, `0007_recent_decisions_search.sql`에 권한 검색 함수를 적용했다 (ADR-029).
-- 확정 후 마이그레이션과 `search_as()` 권한 함수가 적용됐다. 모델 교체는 새 차원 마이그레이션과 ADR 갱신 후에만 한다.
-- **판정 결과 (2026-09-10)**: `[x] 모델: OpenAI text-embedding-3-small · 차원: 1536 · 병합 임계 0.85 유지 여부: 첫 파일럿에서 관찰`
+- 확정 모델: Voyage AI `voyage-4-lite`, 1024차원. 앱은 `VOYAGE_API_KEY`를 서버에서만 사용하고 문서에는 `input_type=document`, 질문에는 `input_type=query`를 보낸다. `EMBEDDING_MODEL`이 다른 행은 `search_as()`에서 제외한다.
+- `supabase/migrations/0006_embeddings_search.sql`에서 시작한 검색 함수는 `0009_voyage_embeddings_search.sql`로 `vector(1024)`와 Voyage 모델 필터로 전환된다. 마이그레이션은 기존 벡터를 비우고 활성 실데이터에 `embed` job을 다시 만든다.
+- **판정 결과 (2026-09-10)**: `[x] 모델: Voyage voyage-4-lite · 차원: 1024 · 병합 임계 0.85 유지 여부: 첫 파일럿에서 관찰`
 
 ---
 

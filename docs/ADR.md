@@ -1,7 +1,7 @@
 # Architecture Decision Records — 사수 (SASU)
 
-- 문서 버전: 1.1
-- 작성일: 2026-09-08 (1.1: ADR-028 추가, ADR-011·012·013·020 갱신)
+- 문서 버전: 1.2
+- 작성일: 2026-09-08 (1.2: ADR-031 추가 · 1.1: ADR-028 추가, ADR-011·012·013·020 갱신)
 - 지위: **파생 문서**. 여기 적힌 결정은 [PRD](PRD.md)에서 이미 확정된 것이고, 이 문서는 **결정의 이유와 포기한 것**을 한곳에 모은다. 결정을 바꾸려면 PRD를 고치고 여기에 ADR을 추가한다. **코드만 바꾸고 문서를 두지 않는다.**
 - 출처: plan-forge Phase 2~5 (렌즈 5개 → Phase 4 삭감 → 외부 리뷰 2곳). 옛 `plan.md` §6 "기술 결정과 이유" 표를 이 문서가 흡수했다.
 - 기록 순서는 결정 순서가 아니라 영향 범위 순이다.
@@ -175,6 +175,20 @@
 **결정**: `OPENAI_API_KEY`로 OpenAI Embeddings API의 `text-embedding-3-small`을 호출하고, `items.embedding vector(1536)`와 `embed_model`을 저장한다. `search_as()`는 `can_see()`를 호출하며 현재 모델과 일치하는 행만 반환한다. 모델명은 `EMBEDDING_MODEL`로 고정 가능하되 차원이 다른 모델은 마이그레이션 없이 선택하지 않는다.
 **이유**: MVP에서 한국어 짧은 발언·원칙 문서·Q&A 질문을 같은 벡터 공간으로 검색해야 하고, 별도 임베딩 공급자 키를 추가하지 않으면서 OpenAI의 안정적인 임베딩 엔드포인트를 사용할 수 있다. 데이터가 쌓인 뒤 모델을 바꾸더라도 `embed_model`로 혼합 검색을 막는다.
 **트레이드오프**: 현재 환경에 `OPENAI_API_KEY`가 없으면 embed job은 `embedding_not_configured`로 재시도 후 실패하며 해당 항목은 검색에서 빠진다. 배포 전 Production/Preview 환경에 키를 넣고 첫 파일럿 데이터의 임베딩 상태를 확인해야 한다. Voyage 비교 실험은 MVP 마감 뒤로 미룬다.
+
+### ADR-030: 임베딩은 Voyage AI `voyage-4-lite` 1024차원으로 재확정한다 (D2 갱신, 9/10)
+**결정**: `EMBEDDING_PROVIDER=voyage`를 기본으로 하고 `VOYAGE_API_KEY`로 Voyage Embeddings API의 `voyage-4-lite`를 호출한다. 검색 문서는 `input_type=document`, 질문은 `input_type=query`로 구분한다. `items.embedding`은 `vector(1024)`로 재생성하고, `search_as()`는 `embed_model = 'voyage-4-lite'`인 행만 반환한다. `EMBEDDING_PROVIDER=openai`를 선택하면 기존 OpenAI `text-embedding-3-small` 호환 경로를 유지한다.
+
+**이유**: Voyage의 최신 경량 범용 모델을 사용하면 한국어 부서 기록 검색에 맞는 다국어 임베딩과 query/document 검색 지시를 사용할 수 있고, MVP의 비용·지연을 낮출 수 있다. 기본 차원이 OpenAI 경로와 달라 스키마를 억지로 혼합하지 않고 D2 마이그레이션으로 명시적으로 전환한다.
+
+**트레이드오프**: 기존 1536차원 임베딩은 재사용할 수 없어 실데이터를 전량 재임베딩해야 한다. 마이그레이션은 기존 벡터를 비우고 `embed` job을 다시 만든다. Voyage 키가 없으면 job은 `embedding_not_configured`로 실패하므로 Vercel Production/Preview와 로컬 환경에 키를 넣어야 한다. OpenAI 호환 경로는 남겨 두지만 두 provider의 벡터를 한 검색 공간에 섞지 않는다.
+
+### ADR-031: 슬랙 최소 스코프를 8개에서 10개로 늘린다 — `channels:read`·`groups:read` 추가 (D3, 9/10)
+**결정**: 봇 토큰 스코프에 `channels:read`·`groups:read`를 더해 최소 10개로 한다. PRD §4의 "최소 스코프 8개"는 이 두 개를 포함한 10개로 갱신한다.
+
+**이유**: `lib/slack/post.ts`의 `listConversations()`(`conversations.list`)와 `conversationMembers()`(`conversations.members`)가 이 스코프를 요구한다. 8개만으로는 두 호출이 `missing_scope`로 죽고, 그러면 세팅 화면의 **채널 연결 목록**과 **채널 멤버 전원 동의 확인**(ARCHITECTURE §불변식 8 · ADR-016)이 성립하지 않는다. 즉 이 두 스코프는 기능 추가가 아니라 이미 확정된 동의 게이트를 집행하기 위한 최소 조건이다. 실측으로 확인했다 — `conversations.list`가 `needed: channels:read,groups:read`를 반환했다.
+
+**트레이드오프**: 읽기 범위가 "채널 목록과 채널 기본 정보"만큼 넓어진다. 메시지 본문 접근은 `channels:history`·`groups:history`가 이미 담당하므로 실질적 확대는 채널 메타데이터와 멤버 ID 목록에 그친다. 파일·이메일 본문 스코프는 여전히 요청하지 않는다. `channels:join`은 **추가하지 않는다** — 봇의 채널 진입은 사람이 초대하는 경로만 남겨, 수집 범위가 코드로 넓어지지 않게 한다.
 
 ---
 
