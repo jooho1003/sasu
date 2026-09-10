@@ -3,10 +3,12 @@
 .env.*
 !.env.example
 
-phases/
-docs/
-tests/
-supabase/
+# 앞의 "/"가 없으면 하위 경로의 동명 디렉터리까지 제외된다 —
+# supabase/ 는 lib/supabase/ 도 지워버려 CLI 배포가 Module not found 로 깨진다.
+/phases/
+/docs/
+/tests/
+/supabase/
 playwright.config.ts
 vitest.config.ts
 vitest.rls.config.ts
