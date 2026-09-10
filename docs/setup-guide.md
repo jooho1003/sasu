@@ -148,7 +148,7 @@ OAuth "Add to Slack"은 만들지 않는다(ADR-017). 파일럿 2팀째는 별�
 ## 8. 임베딩 — Voyage 키 발급, D2 확정
 
 - 확정 모델: Voyage AI `voyage-4-lite`, 1024차원. 앱은 `VOYAGE_API_KEY`를 서버에서만 사용하고 문서에는 `input_type=document`, 질문에는 `input_type=query`를 보낸다. `EMBEDDING_MODEL`이 다른 행은 `search_as()`에서 제외한다.
-- `supabase/migrations/0006_embeddings_search.sql`에서 시작한 검색 함수는 `0009_voyage_embeddings_search.sql`로 `vector(1024)`와 Voyage 모델 필터로 전환된다. 마이그레이션은 기존 벡터를 비우고 활성 실데이터에 `embed` job을 다시 만든다.
+- `supabase/migrations/0006_embeddings_search.sql`에서 시작한 검색 함수는 `0009_voyage_embeddings_search.sql`로 `vector(1024)`와 Voyage 모델 필터로 전환된다. `0010_requeue_embedding_jobs.sql`은 전환 중 구버전 워커가 남긴 실패 job을 다시 큐에 넣는다. 마이그레이션은 기존 벡터를 비우고 활성 실데이터를 재임베딩한다.
 - **판정 결과 (2026-09-10)**: `[x] 모델: Voyage voyage-4-lite · 차원: 1024 · 병합 임계 0.85 유지 여부: 첫 파일럿에서 관찰`
 
 ---

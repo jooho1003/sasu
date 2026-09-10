@@ -207,7 +207,7 @@ export async function answerQuestion(answerId: string, slackReply: SlackReply | 
   }
 
   const question = mask(answer.question).slice(0, 1_000);
-  const embedding = await embedText(question);
+  const embedding = await embedText(question, { inputType: "query" });
   const [items, decisions] = await Promise.all([
     searchAs(client, {
       userId: answer.asked_by,

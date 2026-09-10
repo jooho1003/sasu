@@ -46,7 +46,7 @@ export async function embedItem(itemId: string): Promise<void> {
     return;
   }
 
-  const result = await embedText(item.content);
+  const result = await embedText(item.content, { inputType: "document" });
   const updateResult = await client
     .from("items")
     .update({

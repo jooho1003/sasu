@@ -70,7 +70,10 @@ describe("embed pipeline", () => {
 
     await embedItem("item-1");
 
-    expect(moduleMocks.embedText).toHaveBeenCalledWith("외주사 견적을 확인합니다.");
+    expect(moduleMocks.embedText).toHaveBeenCalledWith(
+      "외주사 견적을 확인합니다.",
+      { inputType: "document" },
+    );
     expect(fake.updates).toEqual([
       {
         embedding: "[0.1,0.2]",

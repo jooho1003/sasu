@@ -4,9 +4,12 @@ export type EmbeddingResult = {
   inputTokens: number | null;
 };
 
+export type EmbeddingProvider = "voyage" | "openai";
+export type EmbeddingInputType = "query" | "document";
+
 type EmbeddingResponse = {
   data?: Array<{ embedding?: unknown }>;
-  usage?: { prompt_tokens?: unknown };
+  usage?: { prompt_tokens?: unknown; total_tokens?: unknown };
   error?: unknown;
 };
 
@@ -28,8 +31,23 @@ export class EmbeddingError extends Error {
   }
 }
 
+export function embeddingProvider(): EmbeddingProvider {
+  return process.env.EMBEDDING_PROVIDER?.trim().toLowerCase() === "openai"
+    ? "openai"
+    : "voyage";
+}
+
 export function embeddingModel(): string {
-  return process.env.EMBEDDING_MODEL?.trim() || "text-embedding-3-small";
+  return (
+    process.env.EMBEDDING_MODEL?.trim() ||
+    (embeddingProvider() === "voyage"
+      ? "voyage-4-lite"
+      : "text-embedding-3-small")
+  );
+}
+
+export function embeddingDimension(): number {
+  return embeddingProvider() === "voyage" ? 1024 : 1536;
 }
 
 export function formatVector(vector: number[]): string {
@@ -42,26 +60,48 @@ export function formatVector(vector: number[]): string {
   return `[${vector.join(",")}]`;
 }
 
-function apiKey(): string {
-  const value = process.env.OPENAI_API_KEY?.trim();
+function apiKey(provider: EmbeddingProvider): string {
+  const value =
+    provider === "voyage"
+      ? process.env.VOYAGE_API_KEY?.trim()
+      : process.env.OPENAI_API_KEY?.trim();
   if (!value) {
     throw new EmbeddingError("embedding_not_configured");
   }
   return value;
 }
 
-export async function embedText(input: string): Promise<EmbeddingResult> {
-  const key = apiKey();
+export async function embedText(
+  input: string,
+  options: { inputType?: EmbeddingInputType } = {},
+): Promise<EmbeddingResult> {
+  const provider = embeddingProvider();
+  const key = apiKey(provider);
   const model = embeddingModel();
-  const response = await fetch("https://api.openai.com/v1/embeddings", {
+  const body =
+    provider === "voyage"
+      ? {
+          input,
+          model,
+          ...(options.inputType ? { input_type: options.inputType } : {}),
+          output_dimension: embeddingDimension(),
+          output_dtype: "float",
+        }
+      : { input, model };
+  const response = await fetch(
+    provider === "voyage"
+      ? "https://api.voyageai.com/v1/embeddings"
+      : "https://api.openai.com/v1/embeddings",
+    {
     method: "POST",
     headers: {
       authorization: `Bearer ${key}`,
       "content-type": "application/json",
     },
-    body: JSON.stringify({ input, model }),
+    body: JSON.stringify(body),
     signal: AbortSignal.timeout(30_000),
-  });
+    },
+  );
 
   let payload: EmbeddingResponse;
   try {
@@ -86,9 +126,10 @@ export async function embedText(input: string): Promise<EmbeddingResult> {
     throw new EmbeddingError("embedding_api_failed");
   }
 
-  const inputTokens =
-    typeof payload.usage?.prompt_tokens === "number"
-      ? payload.usage.prompt_tokens
-      : null;
+  const tokenCount =
+    provider === "voyage"
+      ? payload.usage?.total_tokens
+      : payload.usage?.prompt_tokens;
+  const inputTokens = typeof tokenCount === "number" ? tokenCount : null;
   return { vector: vector as number[], model, inputTokens };
 }
