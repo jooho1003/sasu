@@ -148,11 +148,13 @@ export async function classifyItem(itemId: string): Promise<void> {
   });
   await enqueueEmbedding(itemId);
 
-  if (
+  const shouldAutoPromote =
     classification.label === "decision" &&
-    classification.confidence !== null &&
-    classification.confidence >= AUTO_PROMOTION_CONFIDENCE
-  ) {
+    (classification.confidence === null
+      ? ruleSignal.isDecisionCandidate
+      : classification.confidence >= AUTO_PROMOTION_CONFIDENCE);
+
+  if (shouldAutoPromote) {
     await enqueue("make_card", { itemId });
   }
 }

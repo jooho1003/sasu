@@ -187,6 +187,17 @@ describe("classify pipeline", () => {
     });
   });
 
+  it("규칙이 결정 후보로 잡고 llm이 decision을 반환하면 confidence null이어도 승격한다", async () => {
+    useItem();
+    resolveLlm({ label: "decision", confidence: null });
+
+    await classifyItem(baseItem.id);
+
+    expect(moduleMocks.enqueue).toHaveBeenCalledWith("make_card", {
+      itemId: baseItem.id,
+    });
+  });
+
   it("LLM 실패 시 label=unclassified 로 저장하고 항목을 버리지 않는다", async () => {
     const fake = useItem();
     moduleMocks.llmStructured.mockRejectedValue(new Error("Groq unavailable"));
