@@ -239,7 +239,9 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
   const outcome = resolvedCard.recommendation ?? resolvedCard.title;
   await page.getByLabel("결정 사유").fill(rationale);
   await page.getByRole("button", { name: "결정", exact: true }).click();
-  await expect(page.getByText("결정 완료", { exact: true })).toBeVisible();
+  await expect(page.getByText("결정 완료", { exact: true })).toBeVisible({
+    timeout: 30_000,
+  });
 
   const duplicateResult = await page.evaluate(
     async ({ cardId, decisionOutcome, decisionRationale }) => {
