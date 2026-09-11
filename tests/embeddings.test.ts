@@ -96,6 +96,16 @@ describe("embedding gateway", () => {
     );
   });
 
+  it("네트워크 오류도 안전한 embedding_api_failed 코드로 변환한다", async () => {
+    process.env.EMBEDDING_PROVIDER = "voyage";
+    process.env.VOYAGE_API_KEY = "voyage-test";
+    vi.spyOn(globalThis, "fetch").mockRejectedValue(new TypeError("network down"));
+
+    await expect(embedText("테스트 문장")).rejects.toMatchObject({
+      error_code: "embedding_api_failed",
+    });
+  });
+
   it("D2 기본 모델·차원과 pgvector 문자열 형식을 고정한다", () => {
     expect(embeddingProvider()).toBe("voyage");
     expect(embeddingModel()).toBe("voyage-4-lite");

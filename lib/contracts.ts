@@ -34,6 +34,17 @@ const MeetingSummaryItem = z.strictObject({
   text: NonEmptyString,
 });
 
+export const DocumentSummary = z.strictObject({
+  citations: z.array(Citation).min(1),
+  overview: NonEmptyString,
+  key_points: z.array(MeetingSummaryItem),
+  decisions: z.array(MeetingSummaryItem),
+  actions: z.array(MeetingSummaryItem),
+  open_questions: z.array(MeetingSummaryItem),
+});
+
+export type DocumentSummary = z.infer<typeof DocumentSummary>;
+
 export const IngestItem = z.strictObject({
   source_id: NonEmptyString,
   external_ref: NullableString,

@@ -258,6 +258,7 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
         <nav className="flex flex-wrap gap-4 text-sm">
           <Link href={`/d/${deptId}`}>대시보드</Link>
           <Link href={`/d/${deptId}/ask`}>묻기</Link>
+          <Link href={`/d/${deptId}/documents`}>문서</Link>
           <Link href={`/d/${deptId}/ledger`}>원장</Link>
         </nav>
         <p className="m-0 text-sm font-bold text-[var(--accent)]">S5 · 부서 세팅</p>

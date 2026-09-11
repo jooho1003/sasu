@@ -6,6 +6,7 @@ import { createServiceSupabaseClient } from "@/lib/supabase/service";
 type MeetingRow = { id: string; dept_id: string; source_id: string; status: string };
 type ItemRow = { id: string; content: string };
 type SummaryGroup = keyof MeetingSummaryValue;
+export const MEETING_SUMMARY_CHUNK_SIZE = 12;
 
 export function verifyMeetingSummary(
   summary: MeetingSummaryValue,
@@ -24,6 +25,40 @@ export function verifyMeetingSummary(
     });
   }
   return { valid, dropped };
+}
+
+export function chunkMeetingItems(items: ItemRow[], size = MEETING_SUMMARY_CHUNK_SIZE): ItemRow[][] {
+  if (!Number.isInteger(size) || size < 1) {
+    throw new Error("meeting_summary_chunk_size_invalid");
+  }
+
+  const chunks: ItemRow[][] = [];
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+  return chunks;
+}
+
+export function mergeMeetingSummaries(summaries: MeetingSummaryValue[]): MeetingSummaryValue {
+  const merged: MeetingSummaryValue = {
+    decisions: [],
+    deferred: [],
+    actions: [],
+  };
+  const seen = new Set<string>();
+
+  for (const summary of summaries) {
+    for (const group of ["decisions", "deferred", "actions"] as SummaryGroup[]) {
+      for (const entry of summary[group]) {
+        const key = `${group}:${entry.item_id}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        merged[group].push(entry);
+      }
+    }
+  }
+
+  return merged;
 }
 
 function meetingIdFromPayload(payload: unknown): string {
@@ -46,17 +81,40 @@ export async function summarizeMeeting(meetingId: string): Promise<void> {
     await client.from("meetings").update({ status: "summary_failed", status_reason: "no_transcript_items" }).eq("id", meeting.id);
     return;
   }
-  const result = await llm.structured("summarize_meeting", MeetingSummary, {
-    system: "회의 기록을 decisions, deferred, actions로 정리하세요. 각 항목의 text는 반드시 제공된 item 원문에 포함된 문자열을 그대로 사용하세요.",
-    user: JSON.stringify({ items: items.map((item) => ({ item_id: item.id, content: item.content })) }),
-  }, { deptId: meeting.dept_id });
-  const verified = verifyMeetingSummary(result.data, new Map(items.map((item) => [item.id, item.content])));
-  if (verified.dropped > 0) {
-    const error = new Error("meeting_summary_citation_invalid");
-    Reflect.set(error, "error_code", "citation_invalid");
-    throw error;
+  const summaries: MeetingSummaryValue[] = [];
+  for (const [chunkIndex, chunk] of chunkMeetingItems(items).entries()) {
+    try {
+      const result = await llm.structured("summarize_meeting", MeetingSummary, {
+        system: "회의 기록을 decisions, deferred, actions로 정리하세요. 긴 회의는 일부 발언만 주어질 수 있습니다. 각 항목의 text는 반드시 제공된 item 원문에 포함된 문자열을 그대로 사용하세요.",
+        user: JSON.stringify({ items: chunk.map((item) => ({ item_id: item.id, content: item.content })) }),
+      }, { deptId: meeting.dept_id });
+      summaries.push(result.data);
+    } catch (error) {
+      const wrapped = new Error(`meeting_summary_chunk_failed:${chunkIndex}`, { cause: error });
+      Reflect.set(wrapped, "error_code", error instanceof Error && "error_code" in error ? Reflect.get(error, "error_code") : "unknown");
+      throw wrapped;
+    }
   }
-  const updateResult = await client.from("meetings").update({ status: "summarized", summary: verified.valid, status_reason: null }).eq("id", meeting.id);
+  const summary = mergeMeetingSummaries(summaries);
+  const verified = verifyMeetingSummary(summary, new Map(items.map((item) => [item.id, item.content])));
+  const validCount = Object.values(verified.valid).reduce((count, group) => count + group.length, 0);
+  if (validCount === 0) {
+    const updateResult = await client
+      .from("meetings")
+      .update({ status: "summary_failed", summary: verified.valid, status_reason: "citation_invalid" })
+      .eq("id", meeting.id);
+    if (updateResult.error) throw new Error("meeting_summary_database_failed");
+    return;
+  }
+
+  const updateResult = await client
+    .from("meetings")
+    .update({
+      status: "summarized",
+      summary: verified.valid,
+      status_reason: verified.dropped > 0 ? "citation_invalid_dropped" : null,
+    })
+    .eq("id", meeting.id);
   if (updateResult.error) throw new Error("meeting_summary_database_failed");
 }
 

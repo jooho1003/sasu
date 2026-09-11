@@ -6,6 +6,7 @@ import { registerClassifyHandler } from "@/lib/pipeline/classify";
 import { registerEmbedHandler } from "@/lib/pipeline/embed";
 import { registerAnswerHandler } from "@/lib/pipeline/answer";
 import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
+import { registerDocumentSummaryHandler } from "@/lib/pipeline/document-summary";
 import { registerNotionImportHandler } from "@/lib/pipeline/notion-import";
 import { registerSendSlackHandler } from "@/lib/pipeline/send-slack";
 import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
@@ -36,7 +37,8 @@ export async function POST(request: Request) {
     registerClassifyHandler();
     registerEmbedHandler();
   registerAnswerHandler();
-  registerMeetingSummaryHandler();
+    registerMeetingSummaryHandler();
+    registerDocumentSummaryHandler();
   registerNotionImportHandler();
     registerMakeCardHandler();
     registerSendSlackHandler();

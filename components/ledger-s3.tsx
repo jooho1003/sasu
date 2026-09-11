@@ -267,6 +267,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
           <p className="m-0 text-[var(--muted)]">부서의 결정과 근거를 최신순으로 봅니다.</p>
         </div>
         <Link href={`/d/${deptId}`}>대시보드로</Link>
+        <Link href={`/d/${deptId}/documents`}>문서</Link>
       </header>
 
       <details id="direct-record" className="rounded-2xl bg-[var(--surface)] p-5 shadow-sm">

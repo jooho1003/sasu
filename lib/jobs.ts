@@ -8,6 +8,7 @@ export type JobKind =
   | "classify"
   | "embed"
   | "summarize_meeting"
+  | "summarize_document"
   | "make_card"
   | "answer"
   | "send_slack"
@@ -31,7 +32,7 @@ type OwnerReference = {
 };
 
 type FailureOwnerMapping = {
-  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources";
+  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "document_summaries";
   references: OwnerReference[];
   write: "update" | "upsert";
   values: (ownerId: string, errorCode: string) => Record<string, unknown>;
@@ -65,6 +66,7 @@ const SAFE_ERROR_CODES = new Set([
   "notion_rate_limited",
   "unknown_kind",
   "unmasked_prompt",
+  "voice_transcription_empty",
 ]);
 
 // 3회 실패가 사용자에게 보이는 상태로 이어지는 규칙은 이 표 한 곳에 둔다.
@@ -143,6 +145,12 @@ const FAILURE_OWNER_MAPPINGS: Partial<
     references: [{ payloadKey: "meetingId", column: "id" }],
     write: "update",
     values: (_meetingId, errorCode) => ({ status: "summary_failed", status_reason: errorCode }),
+  },
+  summarize_document: {
+    table: "document_summaries",
+    references: [{ payloadKey: "documentId", column: "source_id" }],
+    write: "update",
+    values: (_documentId, errorCode) => ({ status: "summary_failed", status_reason: errorCode }),
   },
 };
 
@@ -262,6 +270,16 @@ async function sweepPendingRows(): Promise<void> {
     .lt("created_at", cutoff);
 
   if (answerResult.error) {
+    throw new JobWorkerDatabaseError();
+  }
+
+  const documentResult = await client
+    .from("document_summaries")
+    .update({ status: "summary_failed", status_reason: "llm_timeout", updated_at: new Date().toISOString() })
+    .eq("status", "processing")
+    .lt("created_at", cutoff);
+
+  if (documentResult.error) {
     throw new JobWorkerDatabaseError();
   }
 

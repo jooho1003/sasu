@@ -2,7 +2,7 @@ import { after } from "next/server";
 
 import { verifySlackSignature } from "@/lib/slack/verify";
 import { buildDecisionModal } from "@/lib/slack/blocks";
-import { openModal, updateMessage } from "@/lib/slack/post";
+import { openModal, postMessage, updateMessage } from "@/lib/slack/post";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +25,7 @@ type InteractionPayload = {
 type CardRow = {
   id: string;
   dept_id: string;
+  origin_item_id: string | null;
   title: string;
   recommendation: string | null;
   assignee_id: string | null;
@@ -43,6 +44,18 @@ type DecisionRow = {
   id: string;
   decided_by_name: string;
   decided_at: string | null;
+};
+
+type OriginThread = {
+  channelId: string;
+  messageTs: string;
+};
+
+type OriginItemRow = {
+  external_ref: string | null;
+  sources:
+    | { kind: string; external_id: string }
+    | { kind: string; external_id: string }[];
 };
 
 type DecisionStatus = "decided" | "deferred" | "rejected";
@@ -84,6 +97,40 @@ function isDecisionStatus(value: unknown): value is DecisionStatus {
   return value === "decided" || value === "deferred" || value === "rejected";
 }
 
+function relation<T>(value: T | T[]): T {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function appBaseUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (configured) return configured.replace(/\/$/u, "");
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) return `https://${vercelUrl}`;
+  return "http://localhost:3000";
+}
+
+async function originThreadForCard(
+  client: ReturnType<typeof createServiceSupabaseClient>,
+  card: CardRow,
+): Promise<OriginThread | null> {
+  if (!card.origin_item_id) return null;
+
+  const result = await client
+    .from("items")
+    .select("external_ref, sources!inner(kind, external_id)")
+    .eq("id", card.origin_item_id)
+    .maybeSingle<OriginItemRow>();
+  if (result.error) {
+    throw new SlackInteractionError("원문 스레드 정보를 확인하지 못했습니다.");
+  }
+
+  if (!result.data?.external_ref) return null;
+  const source = relation(result.data.sources);
+  return source.kind === "slack_channel"
+    ? { channelId: source.external_id, messageTs: result.data.external_ref }
+    : null;
+}
+
 async function authorizedCard(
   client: ReturnType<typeof createServiceSupabaseClient>,
   requestId: string,
@@ -91,7 +138,7 @@ async function authorizedCard(
 ): Promise<{ card: CardRow; member: MemberRow }> {
   const cardResult = await client
     .from("decision_requests")
-    .select("id, dept_id, title, recommendation, assignee_id, status, opened_at")
+    .select("id, dept_id, origin_item_id, title, recommendation, assignee_id, status, opened_at")
     .eq("id", requestId)
     .maybeSingle<CardRow>();
   if (cardResult.error || !cardResult.data) {
@@ -140,7 +187,7 @@ async function recordDecision(args: {
   status: DecisionStatus;
   outcome: string;
   rationale: string;
-}): Promise<{ decisionId: string | null; message: string }> {
+}): Promise<{ decisionId: string | null; message: string; created: boolean; origin: OriginThread | null }> {
   const client = createServiceSupabaseClient();
   const { card, member } = await authorizedCard(
     client,
@@ -152,6 +199,8 @@ async function recordDecision(args: {
     return {
       decisionId: existing.id,
       message: `이미 ${existing.decided_by_name}이(가) 결정한 카드입니다.`,
+      created: false,
+      origin: null,
     };
   }
 
@@ -189,6 +238,8 @@ async function recordDecision(args: {
     return {
       decisionId: null,
       message: args.status === "deferred" ? "카드를 보류했습니다." : "카드를 반려했습니다.",
+      created: true,
+      origin: await originThreadForCard(client, card),
     };
   }
 
@@ -217,6 +268,8 @@ async function recordDecision(args: {
         return {
           decisionId: duplicate.id,
           message: `이미 ${duplicate.decided_by_name}이(가) 결정한 카드입니다.`,
+          created: false,
+          origin: null,
         };
       }
     }
@@ -235,6 +288,8 @@ async function recordDecision(args: {
   return {
     decisionId: insertResult.data.id,
     message: "결정을 원장에 기록했습니다.",
+    created: true,
+    origin: await originThreadForCard(client, card),
   };
 }
 
@@ -308,21 +363,33 @@ async function handleViewSubmission(payload: InteractionPayload): Promise<Respon
     });
 
     if (typeof metadata.channelId === "string" && typeof metadata.messageTs === "string") {
-      const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/u, "");
+      const baseUrl = appBaseUrl();
       const deptPath = typeof metadata.deptId === "string" ? `/d/${metadata.deptId}` : "";
       const ledgerHref = `${baseUrl}${deptPath}/ledger#decision-${result.decisionId ?? metadata.requestId}`;
       after(() =>
-        updateMessage({
-          channel: metadata.channelId as string,
-          ts: metadata.messageTs as string,
-          text: result.message,
-          blocks: [
-            {
-              type: "section",
-              text: { type: "mrkdwn", text: `✅ ${result.message}\n<${ledgerHref}|원장에서 보기>` },
-            },
-          ],
-        }).catch(() => undefined),
+        Promise.all([
+          updateMessage({
+            channel: metadata.channelId as string,
+            ts: metadata.messageTs as string,
+            text: result.message,
+            blocks: [
+              {
+                type: "section",
+                text: { type: "mrkdwn", text: `✅ ${result.message}\n<${ledgerHref}|원장에서 보기>` },
+              },
+            ],
+          }),
+          ...(result.created && result.origin
+            ? [
+                postMessage({
+                  channel: result.origin.channelId,
+                  thread_ts: result.origin.messageTs,
+                  text: `✅ ${result.message} · <${ledgerHref}|원장에서 보기>`,
+                  blocks: [],
+                }),
+              ]
+            : []),
+        ]).catch(() => undefined),
       );
     }
     return Response.json({ response_action: "clear" });

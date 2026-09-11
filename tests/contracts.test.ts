@@ -4,6 +4,7 @@ import {
   AnswerDraft,
   CardDraft,
   Classification,
+  DocumentSummary,
   IngestItem,
   MeetingSummary,
   toStrictJsonSchema,
@@ -253,12 +254,32 @@ describe("MeetingSummary", () => {
   });
 });
 
+describe("DocumentSummary", () => {
+  const valid = {
+    citations: [itemCitation],
+    overview: "정산 정책과 담당 업무를 정리한 문서입니다.",
+    key_points: [{ item_id: ITEM_ID, text: "정산일은 매월 25일입니다." }],
+    decisions: [],
+    actions: [{ item_id: ITEM_ID, text: "담당자는 세금계산서를 확인합니다." }],
+    open_questions: [],
+  };
+
+  it("인용과 업무 섹션을 파싱한다", () => {
+    expect(DocumentSummary.parse(valid)).toEqual(valid);
+  });
+
+  it("인용이 없으면 거부한다", () => {
+    expect(DocumentSummary.safeParse({ ...valid, citations: [] }).success).toBe(false);
+  });
+});
+
 describe("toStrictJsonSchema", () => {
   const schemas = [
     toStrictJsonSchema("classification", Classification),
     toStrictJsonSchema("card_draft", CardDraft),
     toStrictJsonSchema("answer_draft", AnswerDraft),
     toStrictJsonSchema("meeting_summary", MeetingSummary),
+    toStrictJsonSchema("document_summary", DocumentSummary),
   ] as JsonSchemaNode[];
 
   it("산출물의 모든 object에 additionalProperties:false가 있다", () => {

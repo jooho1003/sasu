@@ -197,19 +197,29 @@ async function generateDraft(
   return result.data;
 }
 
-async function findExistingOpenCard(
+async function findExistingCard(
   client: ReturnType<typeof createServiceSupabaseClient>,
   itemId: string,
 ): Promise<string | null> {
-  const { data, error } = await client
+  const openResult = await client
     .from("decision_requests")
     .select("id")
     .eq("origin_item_id", itemId)
     .eq("status", "open")
     .maybeSingle<{ id: string }>();
 
-  ensureNoDatabaseError(error);
-  return data?.id ?? null;
+  ensureNoDatabaseError(openResult.error);
+  if (openResult.data?.id) return openResult.data.id;
+
+  const reviewResult = await client
+    .from("decision_requests")
+    .select("id")
+    .eq("origin_item_id", itemId)
+    .eq("status", "needs_review")
+    .maybeSingle<{ id: string }>();
+
+  ensureNoDatabaseError(reviewResult.error);
+  return reviewResult.data?.id ?? null;
 }
 
 async function insertCard(
@@ -231,7 +241,7 @@ async function insertCard(
   }
 
   if (error.code === "23505") {
-    const existingId = await findExistingOpenCard(client, itemId);
+    const existingId = await findExistingCard(client, itemId);
     if (existingId !== null) {
       return null;
     }
@@ -256,7 +266,7 @@ export async function makeCard(itemId: string): Promise<void> {
     return;
   }
 
-  if ((await findExistingOpenCard(client, itemId)) !== null) {
+  if ((await findExistingCard(client, itemId)) !== null) {
     return;
   }
 
@@ -417,7 +427,28 @@ export async function makeCard(itemId: string): Promise<void> {
     verified = verifyCitations(citationReferences(draft), texts);
   }
 
-  const status = verified.valid.length === 0 ? "needs_review" : "open";
+  const originCitationIndex = verified.valid.findIndex(
+    (citation) => citation.itemId === origin.id,
+  );
+  if (verified.valid.length > 0 && origin.content.length > 0 && originCitationIndex >= 0) {
+    verified = {
+      ...verified,
+      valid: verified.valid.map((citation, index) =>
+        index === originCitationIndex
+          ? { ...citation, quote: origin.content }
+          : citation,
+      ),
+    };
+  } else if (verified.valid.length > 0 && origin.content.length > 0) {
+    verified = {
+      ...verified,
+      valid: [
+        { itemId: origin.id, quote: origin.content },
+        ...verified.valid,
+      ],
+    };
+  }
+
   const visibility =
     verified.valid.length === 0
       ? originVisibility
@@ -444,7 +475,7 @@ export async function makeCard(itemId: string): Promise<void> {
       deadline: draft.deadline,
       assignee_id: assigneeId,
       visibility,
-      status,
+      status: "needs_review",
       origin_item_id: origin.id,
     },
     origin.id,
@@ -465,6 +496,12 @@ export async function makeCard(itemId: string): Promise<void> {
       })),
     );
     ensureNoDatabaseError(citationResult.error);
+
+    const publishResult = await client
+      .from("decision_requests")
+      .update({ status: "open" })
+      .eq("id", cardId);
+    ensureNoDatabaseError(publishResult.error);
   }
 
   const realDecisionIds = new Set(recentDecisions.map((decision) => decision.id));
@@ -482,7 +519,7 @@ export async function makeCard(itemId: string): Promise<void> {
     ensureNoDatabaseError(conflictResult.error);
   }
 
-  if (status === "open") {
+  if (verified.valid.length > 0) {
     await enqueue(
       "send_slack",
       { requestId: cardId },

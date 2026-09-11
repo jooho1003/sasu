@@ -2,7 +2,7 @@
 
 > **부서별 결정 사수.** 부서 단위로 세팅된 AI가 슬랙·온라인 회의를 상시 관찰해 분류하고, 노션의 부서 원칙 문서를 근거로 삼아, "지금 결정해야 할 것"을 담당자에게 밀어주고, 물어보면 부서의 맥락과 과거 결정을 근거로 답하고, 내려진 결정을 원장에 기록한다. (노션 상시 관찰은 로드맵 — MVP는 원칙 문서 가져오기)
 >
-> - 문서 버전: 1.3 · 작성일: 2026-09-10 (마감까지 **10일**)
+> - 문서 버전: 1.4 · 작성일: 2026-09-11 (마감까지 **9일**)
 > - 지위: **구현의 입력이 되는 확정 계획.** 이 문서가 문서 체계의 최상위다. 범위와 완료 조건은 여기서 정하고, 구현 중 결정이 바뀌면 이 문서를 함께 고친다 — 특히 §3(기능), §8(범위·컷 라인), §4(기술 스택). 결정의 이유와 포기한 대안은 [ADR.md](ADR.md)에, 구조·불변식·테스트 경계는 [ARCHITECTURE.md](ARCHITECTURE.md)에 있다.
 > - 문서 충돌 시 우선순위: **본 문서의 범위·완료 조건·컷 라인 → [ARCHITECTURE.md](ARCHITECTURE.md)의 구조·불변식 → [ADR.md](ADR.md)의 결정 이유 → [setup-guide.md](setup-guide.md)·[submission-checklist.md](submission-checklist.md)의 절차.** 하위 문서가 상위 문서를 암묵적으로 바꾸지 않는다. bkit PDCA용 `01-plan/`·`02-design/` 문서는 이 문서를 가리키는 어댑터이고 새 결정을 담지 않는다.
 > - 대회: 원티드 AI Championship 2026 · **참가 접수 9/18(금) · 과제 제출 9/20(일) 23:59**
@@ -172,6 +172,8 @@ flowchart TD
 | P0 | **DECIDE 지금 결정 카드** | "결정 필요" 항목을 담당자에게 카드로 푸시(웹 + 슬랙 DM). 마감·배경·과거 결정 인용·추천 방향. 카드에서 결정 | U3, U7 |
 | P0 | **LEDGER 결정 원장** | 누가·언제·왜·어떤 근거로 결정했는지 기록. 리드타임 자동 계산 | U8 |
 | P0 | **ASK 권한 인지 Q&A** | 부서의 채널·문서·원장만을 근거로, 질문자 권한 안에서 인용해 답한다. 인용 못 하면 답하지 않는다 | U5, U6 |
+| P0 | **VOICE ASK 음성 업무 입력** | 브라우저 음성을 한국어 전사하고, 사용자가 확인·수정한 뒤 기존 ASK/분류 흐름으로 보낸다. 원본 음성은 저장하지 않는다 | U5, U6 |
+| P0 | **DOCUMENT ASSISTANT 문서 업무 정리** | lead가 TXT·MD·CSV·JSON·PDF·DOCX를 업로드하면 마스킹된 근거 chunk와 인용 가능한 요약·결정·액션·열린 질문을 만든다 | U2, U5, U6 |
 | P1 | **충돌 감지** | 카드 생성 시 과거 원장과 충돌하면 배지 + 인용 (결정 후 재검사는 나중) | U4 |
 | P0 | **부서 세팅** | 멤버 동의 수집(0단계) → 채널 연결·원칙 문서 지정·소스 visibility·결정권자 지정. 데모 장면 1이라 P0 | U1, U9 |
 | P0 | **게스트 모드** | 로그인 없이 가상 회사 샘플 워크스페이스 열람. 심사·투표가 보는 것이라 P0 | — |
@@ -189,7 +191,7 @@ flowchart TD
 | 프론트·API | **Next.js (App Router) + Vercel** | 대시보드·원장·Q&A·게스트 모드. Route Handler가 슬랙 이벤트 수신 |
 | DB·인증·벡터 | **Supabase** (Postgres + pgvector + RLS + Auth) | RLS가 곧 권한 인지 답변의 물리적 구현. 부서 키로 네임스페이스 격리 |
 | 슬랙 | **Slack Events API + Block Kit** (HTTP 모드) | 지정 채널 상시 수신, @사수 멘션·DM, 카드 버튼 인터랙션. 3초 내 200 응답 후 비동기 처리 |
-| 온라인 회의 봇 | **Recall.ai** 류 회의 봇 API → 화자 라벨 전사 `(확인 필요: 가격·승인 소요·무료 크레딧)` | 봇 참석 알림 필수. **대체 경로**: Zoom/Meet 기본 전사 파일(.vtt/.txt) 업로드 — 봇이 D6까지 안 되면 이 경로로 확정 |
+| 음성·온라인 회의 | **Groq Whisper `whisper-large-v3-turbo`** 음성 업무 입력 + **Recall.ai** 류 회의 봇 API → 화자 라벨 전사 | 음성 업무 입력 원본은 저장하지 않는다. 회의 봇 실패 시 Zoom/Meet 기본 전사(.vtt/.txt) 업로드 |
 | 노션 | **Notion API** — 지정 페이지 1회 가져오기 + [다시 가져오기] | 부서 원칙 문서. 폴링·웹훅은 나중(8-0) |
 | 정리·답변·카드 | **Groq `openai/gpt-oss-120b`** + strict json_schema | 인용 스키마 강제. 인용 없는 문장은 파기 후 재생성. production 모델 중 strict structured output이 되는 둘 중 큰 쪽 (ADR-028) |
 | 분류·검증 | **Groq `openai/gpt-oss-20b`** + 규칙 휴리스틱 | 결정·마감 감지는 규칙 우선, LLM은 정성 판단만. 분류도 structured output이므로 strict를 지원하는 모델이어야 한다 |
@@ -216,12 +218,13 @@ flowchart TD
 | S1 | **부서 대시보드** | `/d/[dept]` | 오늘의 입력 카운트(슬랙/회의/문서) · 분류별 탭(결정 필요/액션/정보/잡담/분류 대기) · **회의 탭**(회의별 정리·보류 안건·봇 상태) · 항목 클릭 → 원문 · "카드로 승격" 버튼 | U2, U7 |
 | S2 | **결정 카드** (웹 상세 + 슬랙 DM) | `/d/[dept]/cards/[id]` + Slack Block Kit | "지금 결정" 배지 · 마감 · 배경 · 근거 인용(원문 링크) · 충돌 경고 · 추천 방향 · [결정 / 보류 / 반려] + 사유 입력 | U3, U4 |
 | S3 | **결정 원장** | `/d/[dept]/ledger` | 결정 목록(상태·담당자·리드타임) · 상세(누가·언제·왜·근거 링크) · 충돌 배지 · "직접 기록" 버튼 | U8, U4 |
-| S4 | **사수에게 묻기** | `/d/[dept]/ask` + 슬랙 @멘션 | 질문 입력 · 인용 붙은 답변(발언자·시각·문서) · "내 권한 범위 안의 기록만 참고" 고정 문구 · 인용 불가 시 "모릅니다 → 카드로 보낼까요?" (질문 이력은 나중, §8-0) | U5, U6 |
+| S4 | **사수에게 묻기** | `/d/[dept]/ask` + 슬랙 @멘션 | 텍스트·음성 질문 입력 · 인용 붙은 답변(발언자·시각·문서) · "내 권한 범위 안의 기록만 참고" 고정 문구 · 인용 불가 시 "모릅니다 → 카드로 보낼까요?" | U5, U6 |
 | S5 | **부서 세팅** | `/d/[dept]/settings` | **온보딩 체크리스트(멤버 동의·채널·회의·원칙 문서 4단계)** · 슬랙 채널 선택(단일 워크스페이스, 앱은 수동 설치) · 회의 연결(회의 URL 입력 or 전사 업로드) · 노션 원칙 문서 · 결정권자 · 소스별 visibility · 동의 상태 · 이번 달 LLM 사용액 | U1, U9 |
 | S6 | **게스트 모드** | `/demo` | 가상 회사 "온새미로 주식회사" 워크스페이스를 S1→S2→S3→S4 순으로 읽기 전용 렌더. Q&A는 사전 실행 응답 세트 + 범용 AI 답 나란히. 끝에 CTA(파일럿 문의·투표 링크) | 심사·투표 동선 (스토리 밖) |
 | S0 | **동의 화면** (첫 로그인) | `/consent` | 수집 범위·원장 인용 보존·질문 기록 고지 · [동의] → `consented_at`. 슬랙 DM의 [동의] 버튼과 같은 기록 | U9 |
+| S7 | **문서 어시스턴트** | `/d/[dept]/documents` | lead 문서 업로드 · 문서 처리 상태 · 권한별 요약·결정·액션·열린 질문 · 원문 인용 · 문서 기반 ASK 진입 | U2, U5, U6 |
 
-S6은 유저 스토리가 아니라 심사 동선을 위한 화면이다. 그 외 매핑 안 되는 화면·스토리 없음. 오프라인 녹음 화면(v2.1 S-폰 원탭)은 **제외** (§8).
+S6은 유저 스토리가 아니라 심사 동선을 위한 화면이다. S7은 문서 업무 정리를 위한 P0 화면이다. 음성 생체 식별이나 화자 지문 등록 화면은 만들지 않는다 (§8).
 
 ---
 
@@ -245,7 +248,7 @@ alter table orgs add column is_demo boolean not null default false;             
 
 -- 입력 소스와 항목 (모든 채널의 공통 스키마)
 create table sources (id uuid primary key default gen_random_uuid(), dept_id uuid references departments not null,
-                      kind text not null,                 -- slack_channel|meeting|notion_page
+                      kind text not null,                 -- slack_channel|meeting|notion_page|document
                       external_id text not null,          -- 채널 ID / 회의 ID / 페이지 ID
                       title text, visibility text not null default 'dept',   -- dept|leads_only
                       is_principles boolean not null default false,          -- 부서 원칙 문서 (departments 배열 대신 여기 플래그)
@@ -259,6 +262,12 @@ create table meetings (id uuid primary key default gen_random_uuid(), source_id 
                       status_reason text, started_at timestamptz,
                       summary jsonb,                      -- {decisions[], deferred[], actions[]} 각 항목에 item_id 인용
                       created_at timestamptz default now());
+create table document_summaries (source_id uuid primary key references sources on delete cascade,
+                      dept_id uuid references departments not null,
+                      status text not null default 'processing', -- processing|summarized|summary_failed
+                      summary jsonb, status_reason text,
+                      extracted_chars int not null default 0, chunk_count int not null default 0,
+                      created_at timestamptz default now(), updated_at timestamptz default now());
 create table items   (id uuid primary key default gen_random_uuid(), source_id uuid references sources not null,
                       dept_id uuid references departments not null,
                       external_ref text,                  -- slack ts / 전사 구간 / notion block id
@@ -413,6 +422,8 @@ Slack Events / 회의 전사 / Notion 폴링
 | `POST /api/d/[dept]/cards` · `POST /api/cards/[id]/decide` | 카드 생성(수동 승격)·결정 |
 | `GET /api/d/[dept]/ledger` · `POST /api/d/[dept]/decisions` | 원장·직접 기록 |
 | `POST /api/d/[dept]/ask` | Q&A |
+| `POST /api/d/[dept]/voice` | 음성 파일을 메모리에서 한국어 전사. 원본 음성 저장 없음 |
+| `GET/POST /api/d/[dept]/documents` | 문서 목록·업로드 및 정리 job 시작 |
 | `GET /api/demo/*` | 게스트 스냅샷 (캐시) |
 
 ### 6-9. 권한 모델 (보안·권한 렌즈 반영)
@@ -558,7 +569,7 @@ flowchart LR
 **컴포넌트 경계와 계약 (TypeScript 타입으로 `lib/contracts.ts`에 고정)**
 - `IngestItem` — 모든 어댑터의 출력. `{source_id, external_ref, author, spoken_at, content}`. 어댑터는 이것만 만들고 분류·LLM을 모른다.
 - `Classification`, `CardDraft`, `AnswerDraft` — LLM structured output 스키마. Zod로 정의해 `llm.ts`의 `parse()`와 DB insert가 같은 타입을 쓴다.
-- `llm.ts` — 유일한 Groq 호출 지점. 재시도·거절 처리·`llm_calls` 기록·마스킹 확인을 여기서만 한다. 다른 모듈은 `llm.structured(purpose, schema, prompt)` 하나만 호출한다.
+- `llm.ts` — 유일한 Groq 호출 지점. 텍스트는 `llm.structured(purpose, schema, prompt)`, 음성은 `llm.transcribeAudio()`만 호출한다. 재시도·거절 처리·`llm_calls` 기록·마스킹 확인을 여기서만 한다.
 - `jobs.ts` — `enqueue(kind, payload, {dedupeKey?})`와 `runOnce()`. `FOR UPDATE SKIP LOCKED`로 job을 집고, 실패는 `attempts`·지수 백오프로 `run_after` 갱신, 3회 실패 시 `failed` + 소유 row의 status 갱신(6-10의 `unclassified`/`needs_review`/`failed`가 여기서 나온다).
 - `search.ts` — `search_as(user_id, dept_id, query_embedding, k)` SQL 함수 호출만. 권한 판정은 SQL 안(`can_see`).
 
@@ -683,17 +694,17 @@ flowchart LR
 | 부서 템플릿 2종 | 플로우 | 가중치 차이를 보여줄 장면 없음 | 1종 |
 | 슬랙 편집 이벤트 재분류 | 엣지 | 드물고 카드에 영향 없음 | 본문만 갱신 |
 | `decision_metrics` 뷰 | 데이터 | 지표 화면 없음 | insert 시 `lead_time_min` |
-| 온라인 회의 봇 (조건부) | — | **D6(9/13)까지 전사가 items로 들어오지 않으면** 전사 업로드로 확정 | .vtt/.txt 업로드 |
+| 음성 업무 입력 | 사용자 요청 | 브라우저 녹음 → Groq Whisper 전사 → 사용자가 확인 후 ASK 실행 | 원본 음성 저장 없음 |
 
-**남은 범위가 한 사람이 감당 가능한가** — 화면 7개(S0~S6), job 9종, 외부 연동 3개(슬랙·Recall·노션 1회), 데모 장면 5. 외부 리뷰 두 곳(Codex, 맥락 없는 세션) 모두 "전체 범위 그대로는 비현실적"으로 판정했다. 사용자가 채널 3개를 선택했으므로 범위는 유지하되, **D3 세로 슬라이스 게이트**(8-2)로 12일 중 3일 안에 강등 여부를 강제 판정한다. 그 게이트가 없으면 이 범위는 감당 불가다.
+**남은 범위가 한 사람이 감당 가능한가** — 화면 8개(S0~S7), job 10종, 외부 연동 3개(슬랙·Recall·노션 1회) + Groq 음성 전사, 데모 장면 5. 문서 업로드와 음성 입력은 원본 저장 없이 기존 items/ASK 파이프라인을 재사용해 추가한다.
 
 ### 8-1. 이번에 만들지 않는 것 (나중)
 
 | 항목 | 이유 | 대체 |
 |---|---|---|
 | 메일 채널 | 기획서 2순위 | 로드맵 |
-| 오프라인 회의 폰 원탭 녹음·캘린더 알림 (v2.1 핵심이었음) | 온라인 봇으로 대체, STT 자체 운영 제거 | 로드맵 |
-| 음성 30초 등록 → 화자 지문 식별 | 봇 전사의 플랫폼 화자 라벨로 충분 | 화자 이름 수동 교정 UI만 |
+| 음성 30초 등록 → 화자 지문 식별 | 생체정보 동의·식별 모델·오인식 대응이 별도 제품 범위 | 화자 라벨 전사 + 음성 업무 입력 |
+| 오프라인 회의 폰 원탭 녹음·캘린더 알림 (v2.1 핵심이었음) | 온라인 봇·전사 업로드로 대체 | 로드맵 |
 | 부서 간 교차 결정 (CROSS) | 부서 1개 슬라이스 | 로드맵 |
 | 부서 템플릿 7종 | 2종만 | 로드맵 |
 | Presidio 2차 마스킹 | 정규식 선마스킹만 | 로드맵 |
@@ -738,7 +749,8 @@ Phase 4에서 이미 뺀 것(8-0)은 여기 없다. 아래는 **최종 범위 �
 
 ### 8-4. 기술 제약
 
-- Vercel 함수 타임아웃: 슬랙은 3초 내 ack, 무거운 처리는 분리. gpt-oss-120b 호출 1회가 30초를 넘을 수 있으므로 `maxDuration` 확인 `(확인 필요: 현재 플랜의 상한)`.
+- Vercel 함수 타임아웃: 슬랙은 3초 내 ack, 무거운 처리는 분리. gpt-oss-120b 호출 1회가 30초를 넘을 수 있으므로 `maxDuration` 확인 `(확인 필요: 현재 플랜의 상한)`. 음성 전사는 10MB 상한으로 받고 원본을 저장하지 않는다.
+- 문서 업로드: 20MB 상한, TXT·MD·CSV·JSON·PDF·DOCX만 허용한다. PDF/DOCX에서 추출한 텍스트와 마스킹된 chunk만 저장한다.
 - Groq strict json_schema: 모든 필드 `required` + `additionalProperties: false`가 강제되고 optional 필드를 쓸 수 없다 — null이 정상인 필드는 nullable union으로 정의한다. properties 순서가 생성 순서를 보장하지 않으므로 "citations 먼저"는 프롬프트로 요구하고 인용 문자열 검증으로 확인한다. `stop_reason: refusal`이 없으므로 거절은 `refused` 필드·인용 0개로 판정한다.
 - 임베딩 차원은 모델 확정 전까지 스키마에 고정하지 않는다(D2 확정). 현재는 Voyage `voyage-4-lite`의 1024차원으로 고정한다.
 - 1인 개발: 하루 마지막 커밋은 항상 배포 가능 상태. 9/17 이후 신기능 금지.
@@ -843,6 +855,7 @@ Codex가 만든 코드 중 **RLS 정책·워커·슬랙 서명 검증**은 D8 �
 | 게스트 | 시크릿 창에서 `/demo` 완주, 우리 팀 실데이터 문자열이 응답에 없음(grep), 게스트 라우트의 LLM 호출 0회(`llm_calls` 증가 없음), 동시 100명 무사 |
 | 게스트 부서 격리 | 같은 질문("단가 정책 어떻게 잡죠?")을 영업·개발 사수에게 → 각자 자기 부서 원칙만 인용, 상대 부서 items 인용 0건 (장면 4') |
 | 엣지·에러 | 같은 슬랙 이벤트 2회 전송 → items 1건. 결정 버튼 연타 → decisions 1건 + "이미 결정됨" 응답. Groq 키를 잘못 넣고 질문 → 2분 내 `failed(llm_timeout|auth)` + 재시도 버튼. 잘못된 .vtt 업로드 → 줄 번호 포함 에러. items 0건 부서에서 질문 → LLM 호출 0회 |
+| 음성·문서 | 음성 webm 녹음 → 전사 텍스트를 확인·수정 후 ASK가 `202`로 접수되고 원본 음성 row/파일이 없음. PDF/DOCX 업로드 → `summarize_document`가 `summarized`로 끝나며 요약 문장·액션의 인용 quote가 원문 chunk에 포함됨. leads_only 문서는 member에게 0건 |
 | 운영 | 9/21~10/5 매일 1회 헬스체크. **우리가 통제 가능한 장애 0**(배포 실패·키 만료·시드 오류). Vercel·Supabase 플랫폼 장애는 상태 페이지 기록으로 구분해 두고 통제 밖으로 본다 |
 | 제출 | 참가 접수 D0(9/8) 완료. 과제 제출은 "임시저장"이 아니라 **제출** 버튼까지(D12). 제출서·스크린샷에 컷된 기능이 "만든 것처럼" 없음 ([submission-checklist.md](submission-checklist.md) 제출 전 확인) |
 

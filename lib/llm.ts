@@ -3,6 +3,7 @@ import Groq, {
   APIConnectionTimeoutError,
   APIError,
 } from "groq-sdk";
+import { toFile } from "groq-sdk/uploads";
 import { z } from "zod";
 
 import { toStrictJsonSchema } from "@/lib/contracts";
@@ -11,8 +12,12 @@ import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
 const CLASSIFICATION_MODEL = "openai/gpt-oss-20b";
 const GENERATION_MODEL = "openai/gpt-oss-120b";
+const TRANSCRIPTION_MODEL = "whisper-large-v3-turbo";
 
-type ModelId = typeof CLASSIFICATION_MODEL | typeof GENERATION_MODEL;
+type ModelId =
+  | typeof CLASSIFICATION_MODEL
+  | typeof GENERATION_MODEL
+  | typeof TRANSCRIPTION_MODEL;
 type TokenPrice = { input: number; output: number };
 
 // PRD §10 #19가 확인되기 전에는 비용을 추정하지 않는다.
@@ -22,6 +27,7 @@ const GROQ_PRICING_USD_PER_MILLION_TOKENS: Record<
 > = {
   [CLASSIFICATION_MODEL]: null,
   [GENERATION_MODEL]: null,
+  [TRANSCRIPTION_MODEL]: null,
 };
 
 const MAX_TRANSIENT_ATTEMPTS = 3;
@@ -42,6 +48,8 @@ export type LlmPurpose =
   | "make_card"
   | "answer"
   | "summarize_meeting"
+  | "summarize_document"
+  | "transcribe_voice"
   | "generic_answer";
 
 export type LlmResult<T> = {
@@ -61,6 +69,7 @@ export type LlmErrorCode =
   | "rate_limited"
   | "auth"
   | "unmasked_prompt"
+  | "voice_transcription_empty"
   | "llm_request_failed";
 
 export class LlmGatewayError extends Error {
@@ -109,7 +118,9 @@ type CompletionUsage = {
 };
 
 function modelForPurpose(purpose: LlmPurpose): ModelId {
-  return purpose === "classify" ? CLASSIFICATION_MODEL : GENERATION_MODEL;
+  if (purpose === "classify") return CLASSIFICATION_MODEL;
+  if (purpose === "transcribe_voice") return TRANSCRIPTION_MODEL;
+  return GENERATION_MODEL;
 }
 
 function assertPromptIsMasked(prompt: { system: string; user: string }): void {
@@ -409,4 +420,78 @@ async function structured<T>(
   }
 }
 
-export const llm = { structured };
+export type AudioTranscriptionInput = {
+  bytes: Uint8Array;
+  filename: string;
+  mimeType: string;
+};
+
+async function transcribeAudio(
+  input: AudioTranscriptionInput,
+  opts?: LlmOptions,
+): Promise<LlmResult<{ text: string }>> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new LlmGatewayError(
+      "GROQ_API_KEY가 설정되지 않았습니다.",
+      "auth",
+    );
+  }
+
+  const client = new Groq({
+    apiKey,
+    maxRetries: 0,
+    timeout: GROQ_REQUEST_TIMEOUT_MS,
+  });
+  const startedAt = performance.now();
+  try {
+    let transcription;
+    for (let attempt = 1; attempt <= MAX_TRANSIENT_ATTEMPTS; attempt += 1) {
+      try {
+        const file = await toFile(input.bytes, input.filename, {
+          type: input.mimeType || "application/octet-stream",
+        });
+        transcription = await client.audio.transcriptions.create({
+          file,
+          model: TRANSCRIPTION_MODEL,
+          language: "ko",
+          response_format: "json",
+          temperature: 0,
+        });
+        break;
+      } catch (error) {
+        if (!isRetryableError(error) || attempt === MAX_TRANSIENT_ATTEMPTS) {
+          throw sanitizedError(error);
+        }
+        await delay(RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
+      }
+    }
+
+    const text = transcription?.text?.trim() ?? "";
+    if (!text) {
+      throw new LlmGatewayError(
+        "음성에서 질문을 확인하지 못했습니다.",
+        "voice_transcription_empty",
+      );
+    }
+    return {
+      data: { text },
+      meta: {
+        model: TRANSCRIPTION_MODEL,
+        inputTokens: 0,
+        outputTokens: 0,
+        durationMs: Math.round(performance.now() - startedAt),
+      },
+    };
+  } finally {
+    await recordLlmCall(
+      "transcribe_voice",
+      TRANSCRIPTION_MODEL,
+      null,
+      Math.round(performance.now() - startedAt),
+      opts,
+    );
+  }
+}
+
+export const llm = { structured, transcribeAudio };

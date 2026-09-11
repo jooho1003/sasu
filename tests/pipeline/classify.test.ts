@@ -103,25 +103,45 @@ describe("classify pipeline", () => {
     moduleMocks.registerHandler.mockReset();
   });
 
-  it("규칙이 결정 후보로 잡지 않으면 llm.structured 를 호출하지 않는다", async () => {
-    const fake = useItem({ ...baseItem, content: "배포가 완료되었습니다." });
+  it("결정 후보가 아닌 실행 요청은 action으로 저장하고 llm을 호출하지 않는다", async () => {
+    const fake = useItem({ ...baseItem, content: "다음 주까지 QA 업체 견적을 받아 주세요." });
 
     await classifyItem(baseItem.id);
 
     expect(moduleMocks.llmStructured).not.toHaveBeenCalled();
     expect(fake.classificationUpsert).toHaveBeenCalledWith({
       item_id: baseItem.id,
-      label: "info",
+      label: "action",
       method: "rule",
       confidence: null,
       deadline_hint: null,
       assignee_hint: null,
-      reasoning: "규칙상 결정 후보 신호가 없습니다.",
+      reasoning: "담당자에게 실행을 요청하는 표현입니다.",
     });
     expect(moduleMocks.enqueue).toHaveBeenCalledWith(
       "embed",
       { itemId: baseItem.id },
       { dedupeKey: baseItem.id },
+    );
+  });
+
+  it("결정 후보가 아닌 현황 공유는 info로 저장한다", async () => {
+    const fake = useItem({ ...baseItem, content: "배포가 완료되었습니다." });
+
+    await classifyItem(baseItem.id);
+
+    expect(fake.classificationUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ label: "info", method: "rule" }),
+    );
+  });
+
+  it("일상 대화는 chatter로 저장한다", async () => {
+    const fake = useItem({ ...baseItem, content: "오늘 점심은 김치찌개 어때요?" });
+
+    await classifyItem(baseItem.id);
+
+    expect(fake.classificationUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ label: "chatter", method: "rule" }),
     );
   });
 

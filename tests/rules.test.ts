@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyByRules } from "@/lib/rules";
+import { classifyByRules, classifyNonDecisionByRules } from "@/lib/rules";
 
 describe("classifyByRules", () => {
   const spokenAt = new Date("2026-09-08T01:00:00.000Z"); // 화요일 10:00 KST
@@ -126,5 +126,25 @@ describe("classifyByRules", () => {
     expect(
       classifyByRules({ content: "다음 스프린트에 정리", spokenAt }).deadlineHint,
     ).toBeNull();
+  });
+});
+
+describe("classifyNonDecisionByRules", () => {
+  it("실행 요청을 action으로 분류한다", () => {
+    expect(
+      classifyNonDecisionByRules("다음 주 월요일까지 QA 업체 세 곳의 견적을 받아 주세요."),
+    ).toMatchObject({ label: "action" });
+  });
+
+  it("업무 현황 공유를 info로 분류한다", () => {
+    expect(
+      classifyNonDecisionByRules("이번 분기 릴리스 창구는 매주 수요일 오후 2시입니다."),
+    ).toMatchObject({ label: "info" });
+  });
+
+  it("일상 대화를 chatter로 분류한다", () => {
+    expect(classifyNonDecisionByRules("오늘 점심은 김치찌개 어때요?")).toMatchObject({
+      label: "chatter",
+    });
   });
 });

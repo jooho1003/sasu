@@ -4,11 +4,17 @@ export type RuleSignal = {
   deadlineHint: Date | null;
 };
 
+export type NonDecisionLabel = "action" | "info" | "chatter";
+
 const KST_OFFSET_MS = 9 * 60 * 60 * 1_000;
 const QUESTION_MARK = /[?？]/;
 const REQUEST_EXPRESSION =
   /(?:할까요|(?:해|아|어)도\s*(?:돼요|되나요|될까요)|확인\s*부탁|검토\s*부탁)/;
 const DEFERRED_TAG = /(?:^|[\s[#])보류(?=$|[\s\]#:：-])/;
+const ACTION_EXPRESSION =
+  /(?:해s*주세요|받아s*주세요|확인해s*주세요|검토해s*주세요|정리해s*주세요|공유해s*주세요|보내s*주세요|예약해s*주세요|진행해s*주세요|제출해s*주세요|담당자는|담당자\s*[:：]|까지\s+[^.!?？\n]*(?:받아|확인|정리|공유|제출|예약|완료|진행))/;
+const CHATTER_EXPRESSION =
+  /(?:점심|저녁|아침|커피|간식|날씨|주말|퇴근|맛점|ㅋㅋ|ㅎㅎ|어때요\??)\s*$/;
 
 type KstDateParts = { year: number; month: number; day: number; weekday: number };
 
@@ -162,4 +168,25 @@ export function classifyByRules(input: {
     reasons,
     deadlineHint: deadline.deadline,
   };
+}
+
+/**
+ * 결정 후보가 아닌 짧은 기록을 값싼 규칙으로 더 세분화한다.
+ * 결정 후보는 기존 신호를 우선하고, 이 함수는 카드 승격을 만들지 않는다.
+ */
+export function classifyNonDecisionByRules(content: string): {
+  label: NonDecisionLabel;
+  reasoning: string;
+} {
+  const normalized = content.trim();
+
+  if (CHATTER_EXPRESSION.test(normalized)) {
+    return { label: "chatter", reasoning: "일상 대화 또는 가벼운 잡담 표현입니다." };
+  }
+
+  if (ACTION_EXPRESSION.test(normalized)) {
+    return { label: "action", reasoning: "담당자에게 실행을 요청하는 표현입니다." };
+  }
+
+  return { label: "info", reasoning: "결정·실행 요청 없이 현황이나 참고 정보를 공유합니다." };
 }

@@ -88,20 +88,25 @@ export async function embedText(
           output_dtype: "float",
         }
       : { input, model };
-  const response = await fetch(
-    provider === "voyage"
-      ? "https://api.voyageai.com/v1/embeddings"
-      : "https://api.openai.com/v1/embeddings",
-    {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${key}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(30_000),
-    },
-  );
+  let response: Response;
+  try {
+    response = await fetch(
+      provider === "voyage"
+        ? "https://api.voyageai.com/v1/embeddings"
+        : "https://api.openai.com/v1/embeddings",
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${key}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(30_000),
+      },
+    );
+  } catch {
+    throw new EmbeddingError("embedding_api_failed");
+  }
 
   let payload: EmbeddingResponse;
   try {

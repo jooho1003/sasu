@@ -17,13 +17,14 @@
  │ Interactions    │            │         → items upsert → jobs enqueue     │
  │ Recall.ai 웹훅 · │──────────▶ │         → after(runOnce) → 200            │
  │ 전사 업로드      │            ├───────────────────────────────────────────┤
+ │ 음성·문서 업로드 │──────────▶ │         (음성 원본 저장 없음)             │
  │ Notion 가져오기  │──────────▶ │ UI API: 대시보드·카드·원장·묻기            │
  └─────────────────┘            │         (세션 클라이언트 = RLS)            │
                                 └───────────────┬───────────────────────────┘
                                                 │ enqueue / select
                                                 ▼
  ┌───────────────────────────── Supabase Postgres ─────────────────────────────┐
- │ items · classifications · meetings · sources · members                      │
+ │ items · classifications · meetings · document_summaries · sources · members │
  │ decision_requests · decisions · citations · conflicts · answers             │
  │ jobs · llm_calls · ingest_events · orgs         RLS: can_see() 하나로 판정  │
  └───────────────────────────────────┬─────────────────────────────────────────┘
@@ -32,12 +33,12 @@
  ┌──────────── 워커 /api/jobs/run (after() 즉시 1회 + 매분 트리거) ────────────┐
  │ classify → embed                                                             │
  │ classify → make_card → send_slack        summarize_meeting → make_card      │
- │ answer · notion_import · slack_backfill · sweep(2분 초과 pending 정리)      │
+ │ summarize_document · answer · notion_import · slack_backfill · sweep       │
  └───────────────────────────────────┬─────────────────────────────────────────┘
                                      │ llm.structured(purpose, schema, prompt)
                                      ▼
                        lib/llm.ts — 유일한 Groq 호출 지점
-                       (gpt-oss-120b / gpt-oss-20b, 재시도·거절 처리·llm_calls 기록)
+                       (gpt-oss-120b / gpt-oss-20b / Whisper, 재시도·llm_calls 기록)
 ```
 
 **세 가지가 전부다.** ① 어댑터는 items를 먼저 저장하고 나머지는 job에 맡긴다. ② 무거운 일은 전부 워커가 한다. ③ 권한은 SQL이 판정하고 애플리케이션은 그 결과를 보여줄 뿐이다.
@@ -49,7 +50,7 @@
 ```text
 sasu/
 ├── app/
-│   ├── (auth)/d/[dept]/            # S1 page.tsx · cards/[id] · ledger · ask · settings  (멤버십 검증 후 진입)
+│   ├── (auth)/d/[dept]/            # S1 page.tsx · cards/[id] · ledger · ask · documents · settings
 │   ├── consent/                    # S0 동의 화면
 │   ├── demo/                       # S6 게스트 (읽기 전용, revalidate 캐시, LLM 호출 0)
 │   └── api/
@@ -58,7 +59,7 @@ sasu/
 │       ├── notion/import/route.ts
 │       ├── consent/route.ts
 │       ├── jobs/run/route.ts       # 워커. 시크릿 헤더 인증
-│       ├── d/[dept]/{items,cards,ledger,decisions,ask}/route.ts
+│       ├── d/[dept]/{items,cards,ledger,decisions,ask,voice,documents}/route.ts
 │       ├── cards/[id]/decide/route.ts
 │       └── demo/[...]/route.ts
 ├── components/                     # 표현 계층. 인용 칩·카드·원장 행 등 (TDD 비대상)
@@ -68,9 +69,9 @@ sasu/
 │   ├── jobs.ts                     # enqueue(kind, payload, {dedupeKey?}) · runOnce()
 │   ├── search.ts                   # search_as() 호출만. 권한 판정은 SQL 안
 │   ├── mask.ts · rules.ts          # 정규식 마스킹 · 규칙 분류 (순수 함수)
-│   ├── adapters/{slack,transcript}.ts          # 외부 → IngestItem. 분류·LLM을 모른다
+│   ├── adapters/{slack,transcript,document,voice}.ts # 입력 검증·파싱
 │   ├── notion.ts                               # Notion API 페이지·블록 어댑터
-│   ├── pipeline/{classify,card,answer,summarize,merge,conflict}.ts   # job 본체
+│   ├── pipeline/{classify,card,answer,meeting-summary,document-summary}.ts # job 본체
 │   ├── slack/{verify,blocks,post}.ts           # 서명 검증 · Block Kit · postMessage
 │   └── supabase/{server,rls-client,service}.ts # 클라이언트 팩토리 3종 (§6 불변식 2)
 ├── supabase/migrations/            # 6-1 스키마 · can_see()/search_as() · RLS 정책 · (D2) embedding 컬럼
@@ -97,13 +98,13 @@ sasu/
 
 요청 핸들러는 (1) 검증 (2) DB 쓰기 (3) `enqueue` (4) `after(() => runOnce())` (5) 응답 — 슬랙 3초 규칙과 Vercel 함수 수명 안에서 끝난다. `runOnce()`는 `FOR UPDATE SKIP LOCKED`로 job을 집고, 실패는 `attempts`·지수 백오프로 `run_after`를 갱신하며, 3회 실패 시 `failed` + 소유 row의 status를 `unclassified` / `needs_review` / `failed(error_code)`로 바꾼다. 매분 트리거가 `after()`가 죽었거나 재시도 대기 중인 job을 집는다. `sweep` job이 2분 넘게 pending인 answers·cards를 `failed(llm_timeout)`으로 정리한다 — 영원한 스피너는 없다.
 
-job 종류 9개: `classify` · `embed` · `summarize_meeting` · `make_card` · `answer` · `send_slack` · `notion_import` · `slack_backfill` · `sweep`. 새 종류를 추가하면 이 목록과 PRD §6-1의 주석을 함께 고친다.
+job 종류 10개: `classify` · `embed` · `summarize_meeting` · `summarize_document` · `make_card` · `answer` · `send_slack` · `notion_import` · `slack_backfill` · `sweep`. 새 종류를 추가하면 이 목록과 PRD §6-1의 주석을 함께 고친다.
 
 ### 3.3 LLM 호출 지점은 하나
 
-`lib/llm.ts`의 `llm.structured(purpose, schema, prompt)`만 Groq을 부른다. 재시도(429·5xx·타임아웃 백오프 3회) · 거절 재시도 1회 · 스키마 불일치 재생성 1회 · `llm_calls` 기록(purpose·model·tokens·cost_usd·duration_ms) · "프롬프트에 마스킹된 본문만" 확인을 여기서만 한다.
+텍스트 생성·분류는 `lib/llm.ts`의 `llm.structured(purpose, schema, prompt)`로만 Groq을 부른다. 음성 입력은 같은 파일의 `llm.transcribeAudio()`만 사용하며 원본을 저장하지 않는다. 재시도(429·5xx·타임아웃 백오프 3회) · 거절/스키마 처리 · `llm_calls` 기록(purpose·model·tokens·cost_usd·duration_ms)은 여기서만 한다.
 
-모델은 `openai/gpt-oss-120b`(생성)와 `openai/gpt-oss-20b`(분류) 둘뿐이고 **모듈이 아니라 `purpose`가 모델을 고른다** — 호출부는 모델 ID를 모른다. 형식 제어는 `response_format: {type: "json_schema", json_schema: {strict: true, ...}}` 하나뿐이며 세 가지 제약이 따라온다: ① strict는 모든 필드가 `required` + `additionalProperties: false`라 optional을 쓸 수 없다 — null이 정상인 필드는 nullable union으로 정의한다 ② properties 순서가 생성 순서를 보장하지 않으므로 **필드 순서 citations → (background|reasoning) → 결론**은 스키마와 시스템 프롬프트 양쪽에 적고, 실제 방어는 인용 문자열 검증(§3.5)이 한다 ③ `stop_reason: refusal`이 없으므로 거절은 `refused` 필드와 인용 0개로 판정한다.
+텍스트 모델은 `openai/gpt-oss-120b`(생성)와 `openai/gpt-oss-20b`(분류), 음성 전사는 `whisper-large-v3-turbo`다. **모듈이 아니라 `purpose`가 모델을 고른다** — 호출부는 모델 ID를 모른다. 형식 제어는 `response_format: {type: "json_schema", json_schema: {strict: true, ...}}` 하나뿐이며 세 가지 제약이 따라온다: ① strict는 모든 필드가 `required` + `additionalProperties: false`라 optional을 쓸 수 없다 — null이 정상인 필드는 nullable union으로 정의한다 ② properties 순서가 생성 순서를 보장하지 않으므로 **필드 순서 citations → (background|reasoning) → 결론**은 스키마와 시스템 프롬프트 양쪽에 적고, 실제 방어는 인용 문자열 검증(§3.5)이 한다 ③ `stop_reason: refusal`이 없으므로 거절은 `refused` 필드와 인용 0개로 판정한다.
 
 ### 3.4 권한은 SQL에서 판정한다
 
@@ -115,7 +116,7 @@ job 종류 9개: `classify` · `embed` · `summarize_meeting` · `make_card` · 
 
 ### 3.6 계약은 `contracts.ts` Zod 단일 소스
 
-`IngestItem` · `Classification` · `CardDraft` · `AnswerDraft` · `MeetingSummary`를 Zod로 정의하고, `llm.ts`의 `parse()`와 DB insert가 같은 타입을 쓴다. 어댑터 출력과 LLM 출력의 타입이 코드 두 곳에 있으면 반드시 어긋난다.
+`IngestItem` · `Classification` · `CardDraft` · `AnswerDraft` · `MeetingSummary` · `DocumentSummary`를 Zod로 정의하고, `llm.ts`의 parse와 DB insert가 같은 타입을 쓴다. 어댑터 출력과 LLM 출력의 타입이 코드 두 곳에 있으면 반드시 어긋난다.
 
 ### 3.7 파생물은 원본 중 가장 좁은 것을 상속한다
 
@@ -193,7 +194,8 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 | `decisions` | 생성만 | 정정은 `supersedes_id` 새 행. 삭제·수정 없음 |
 | `meetings` | `scheduled → bot_joined → transcribed → summarized` / `bot_failed`(→ 업로드) / `summary_failed`(재시도) | |
 | `jobs` | `queued → running → done` / `running → queued`(재시도) / `→ failed`(3회) | 워커만 바꾼다 |
-| `answers` | `pending → done/refused/failed(error_code)` | 2분 스윕 |
+ | `answers` | `pending → done/refused/failed(error_code)` | 2분 스윕 |
+| `document_summaries` | `processing → summarized/summary_failed` | 2분 스윕 |
 | 동의 | `null → consented_at` · `consent_version` 불일치면 재동의 · 철회는 `null` + 이후 발언 미저장 | 과거 저장분 유지(동의문 명시) |
 
 ---
@@ -231,7 +233,7 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 | `excluded_count` service role 2차 검색 · 감사 로그 화면 | `answers` 기록만 | PRD §8-0 |
 | 노션 폴링·웹훅·변경 감지 | 1회 가져오기 + [다시 가져오기] | ADR-004 |
 | 보류 재알림·마감 리마인드 cron | "마감 지남" 배지 | PRD §8-0 |
-| Presidio 2차 마스킹 · 음성 화자 지문 · 폰 원탭 녹음 | 정규식 마스킹 · 봇 전사 화자 라벨 · 온라인 봇/업로드 | PRD §8-1 (v2.1 폐기) |
+| Presidio 2차 마스킹 · 음성 화자 지문 · 폰 원탭 녹음 | 정규식 마스킹 · 봇 전사 화자 라벨 · Whisper 음성 업무 입력 | PRD §8-1 · ADR-032 |
 | 실시간 스트리밍(SSE) | 폴링(대시보드 10초·답변 2초) | PRD §8-1 |
 | 사용자별 API 키·과금 | 공동 키 1개 | ADR-020 |
 | 부서 간 교차 결정 · 부서 템플릿 2종 이상 · 부서 전환 UI | 부서 1개 슬라이스, `general` 1종 | PRD §8-0·8-1 |

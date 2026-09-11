@@ -31,7 +31,7 @@ create table members (
 create table sources (
   id uuid primary key default gen_random_uuid(),
   dept_id uuid references departments not null,
-  kind text not null, -- slack_channel|meeting|notion_page
+  kind text not null, -- slack_channel|meeting|notion_page|document
   external_id text not null, -- 채널 ID / 회의 ID / 페이지 ID
   title text,
   visibility text not null default 'dept', -- dept|leads_only

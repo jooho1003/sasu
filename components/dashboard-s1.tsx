@@ -25,7 +25,7 @@ type DashboardItem = {
   confidence: number | null;
   source: {
     title: string | null;
-    kind: "slack_channel" | "meeting" | "notion_page";
+    kind: "slack_channel" | "meeting" | "notion_page" | "document";
   };
 };
 
@@ -55,6 +55,7 @@ const SOURCE_KIND_LABELS: Record<DashboardItem["source"]["kind"], string> = {
   slack_channel: "슬랙",
   meeting: "회의",
   notion_page: "문서",
+  document: "업로드 문서",
 };
 
 const DATE_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
@@ -240,6 +241,7 @@ export default function DashboardS1({
         </div>
         <div className="flex items-center gap-4 text-sm">
           <Link href={`/d/${deptId}/ask`}>묻기</Link>
+          <Link href={`/d/${deptId}/documents`}>문서</Link>
           <Link href={`/d/${deptId}/ledger`}>원장</Link>
           <Link href={settingsHref}>세팅</Link>
           <span className="text-[var(--muted)]" data-meta>10초마다 갱신</span>

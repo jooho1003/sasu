@@ -277,8 +277,8 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
   await page.goto(`${baseURL}/d/${DEPARTMENT_ID}/ledger`, {
     waitUntil: "domcontentloaded",
   });
-  await expect(page.getByText(rationale, { exact: true })).toBeVisible();
-  await expect(page.getByText("리드타임", { exact: true })).toBeVisible();
+  await expect(page.getByText(rationale, { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("리드타임", { exact: true }).first()).toBeVisible();
 
   await postSlackEvent(request, baseURL, envelope);
   const items = await supabase

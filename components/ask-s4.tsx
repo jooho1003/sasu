@@ -23,11 +23,72 @@ export default function AskS4({ deptId }: { deptId: string }) {
   const [answer, setAnswer] = useState<AnswerState | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [voiceState, setVoiceState] = useState<"idle" | "recording" | "transcribing">("idle");
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const voiceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recorder = useRef<MediaRecorder | null>(null);
+  const recordingChunks = useRef<Blob[]>([]);
 
   useEffect(() => () => {
     if (pollTimer.current !== null) clearInterval(pollTimer.current);
+    if (voiceTimer.current !== null) clearTimeout(voiceTimer.current);
+    recorder.current?.stream.getTracks().forEach((track) => track.stop());
   }, []);
+
+  const startVoice = async () => {
+    setError(null);
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setError("이 브라우저에서는 음성 입력을 지원하지 않습니다. 질문을 직접 입력해주세요.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/mp4";
+      const nextRecorder = new MediaRecorder(stream, { mimeType });
+      recordingChunks.current = [];
+      nextRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recordingChunks.current.push(event.data);
+      };
+      nextRecorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setVoiceState("transcribing");
+        const blob = new Blob(recordingChunks.current, { type: nextRecorder.mimeType || "audio/webm" });
+        const form = new FormData();
+        const filename = blob.type.includes("mp4") ? "voice.mp4" : "voice.webm";
+        form.set("file", new File([blob], filename, { type: blob.type || "audio/webm" }));
+        void fetch(`/api/d/${encodeURIComponent(deptId)}/voice`, { method: "POST", body: form })
+          .then(async (response) => {
+            const body = (await response.json()) as { text?: string; error?: string };
+            if (!response.ok || !body.text) throw new Error(body.error ?? "음성을 변환하지 못했습니다.");
+            setQuestion(body.text);
+            setVoiceState("idle");
+          })
+          .catch((voiceError) => {
+            setVoiceState("idle");
+            setError(voiceError instanceof Error ? voiceError.message : "음성을 변환하지 못했습니다.");
+          });
+      };
+      nextRecorder.start();
+      recorder.current = nextRecorder;
+      setVoiceState("recording");
+      voiceTimer.current = setTimeout(() => {
+        if (nextRecorder.state === "recording") nextRecorder.stop();
+      }, 60_000);
+    } catch {
+      setError("마이크 권한을 허용하지 못했습니다. 질문을 직접 입력해주세요.");
+    }
+  };
+
+  const stopVoice = () => {
+    if (voiceTimer.current !== null) clearTimeout(voiceTimer.current);
+    voiceTimer.current = null;
+    if (recorder.current?.state === "recording") recorder.current.stop();
+    recorder.current = null;
+  };
 
   const loadAnswer = async (answerId: string): Promise<AnswerState> => {
     const response = await fetch(
@@ -95,6 +156,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
         </div>
         <div className="flex gap-4 text-sm">
           <Link href={`/d/${deptId}`}>대시보드</Link>
+          <Link href={`/d/${deptId}/documents`}>문서</Link>
           <Link href={`/d/${deptId}/ledger`}>원장</Link>
         </div>
       </header>
@@ -111,6 +173,17 @@ export default function AskS4({ deptId }: { deptId: string }) {
             value={question}
           />
         </label>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            className={`rounded-lg border px-4 py-2 text-sm font-bold disabled:opacity-50 ${voiceState === "recording" ? "border-[var(--urgent)] text-[var(--urgent)]" : "border-[var(--accent)] text-[var(--accent)]"}`}
+            disabled={busy || voiceState === "transcribing"}
+            onClick={() => voiceState === "recording" ? stopVoice() : void startVoice()}
+            type="button"
+          >
+            {voiceState === "recording" ? "■ 녹음 끝내기" : voiceState === "transcribing" ? "음성 변환 중…" : "🎙 음성으로 입력"}
+          </button>
+          <span className="text-sm text-[var(--muted)]">최대 60초 · 원본 음성은 저장하지 않습니다.</span>
+        </div>
         <button
           className="w-fit rounded-lg bg-[var(--accent)] px-5 py-3 font-bold text-white disabled:opacity-50"
           disabled={busy}

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
-type Source = { id: string; kind: "slack_channel" | "meeting" | "notion_page"; title: string | null };
+type Source = { id: string; kind: "slack_channel" | "meeting" | "notion_page" | "document"; title: string | null };
 type Item = { id: string; source_id: string; author: string | null; spoken_at: string | null; content: string };
 type Classification = { item_id: string; label: "decision" | "action" | "info" | "chatter" | "unclassified" };
 type Card = { id: string; title: string; status: string; visibility: string };
@@ -52,7 +52,10 @@ export default async function DemoDashboardPage({
   const sourceCounts = {
     slack_channel: items.filter((item) => sourceMap.get(item.source_id)?.kind === "slack_channel").length,
     meeting: items.filter((item) => sourceMap.get(item.source_id)?.kind === "meeting").length,
-    notion_page: items.filter((item) => sourceMap.get(item.source_id)?.kind === "notion_page").length,
+    notion_page: items.filter((item) => {
+      const kind = sourceMap.get(item.source_id)?.kind;
+      return kind === "notion_page" || kind === "document";
+    }).length,
   };
 
   return (

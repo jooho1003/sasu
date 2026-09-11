@@ -24,7 +24,7 @@ type CitationRow = {
 };
 
 type SourceRow = {
-  kind: "slack_channel" | "meeting" | "notion_page";
+  kind: "slack_channel" | "meeting" | "notion_page" | "document";
   external_id: string;
   title: string | null;
 };

@@ -1,7 +1,7 @@
 import { Classification } from "@/lib/contracts";
 import { enqueue, registerHandler } from "@/lib/jobs";
 import { llm } from "@/lib/llm";
-import { classifyByRules } from "@/lib/rules";
+import { classifyByRules, classifyNonDecisionByRules } from "@/lib/rules";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
 const CLASSIFICATION_CONTENT_LIMIT = 4_000;
@@ -98,14 +98,15 @@ export async function classifyItem(itemId: string): Promise<void> {
   });
 
   if (!ruleSignal.isDecisionCandidate) {
+    const nonDecision = classifyNonDecisionByRules(content);
     await saveClassification({
       item_id: itemId,
-      label: "info",
+      label: nonDecision.label,
       method: "rule",
       confidence: null,
       deadline_hint: null,
       assignee_hint: null,
-      reasoning: "규칙상 결정 후보 신호가 없습니다.",
+      reasoning: nonDecision.reasoning,
     });
     await enqueueEmbedding(itemId);
     return;

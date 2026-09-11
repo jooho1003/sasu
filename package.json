@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "start": "next start",
     "build": "next build",
     "lint": "eslint .",
     "test": "vitest run --passWithNoTests",
@@ -13,8 +14,11 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
+    "ai": "7.0.97",
     "groq-sdk": "^1.6.0",
+    "mammoth": "1.12.2",
     "next": "^16.3.4",
+    "pdf-parse": "2.4.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zod": "^4.5.4"

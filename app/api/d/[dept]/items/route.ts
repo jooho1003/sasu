@@ -12,7 +12,7 @@ const ITEM_LABELS = [
 ] as const;
 
 type ItemLabel = (typeof ITEM_LABELS)[number];
-type SourceKind = "slack_channel" | "meeting" | "notion_page";
+type SourceKind = "slack_channel" | "meeting" | "notion_page" | "document";
 
 type SourceRow = {
   title: string | null;
@@ -152,7 +152,7 @@ export async function GET(
       counts.slack += 1;
     } else if (source.kind === "meeting") {
       counts.meeting += 1;
-    } else if (source.kind === "notion_page") {
+    } else if (source.kind === "notion_page" || source.kind === "document") {
       counts.document += 1;
     }
   }

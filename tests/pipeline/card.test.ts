@@ -125,8 +125,9 @@ function createFakeClient(options: FakeOptions = {}) {
   };
 
   class QueryBuilder implements PromiseLike<{ data: unknown; error: unknown }> {
-    private action: "select" | "insert" = "select";
+    private action: "select" | "insert" | "update" = "select";
     private inserted: Row | Row[] | null = null;
+    private updated: Row | null = null;
     private filters = new Map<string, unknown>();
     private inFilters = new Map<string, unknown[]>();
 
@@ -139,6 +140,12 @@ function createFakeClient(options: FakeOptions = {}) {
     insert(values: Row | Row[]) {
       this.action = "insert";
       this.inserted = values;
+      return this;
+    }
+
+    update(values: Row) {
+      this.action = "update";
+      this.updated = values;
       return this;
     }
 
@@ -187,6 +194,15 @@ function createFakeClient(options: FakeOptions = {}) {
     }
 
     private execute(): { data: unknown; error: unknown } {
+      if (this.action === "update") {
+        if (this.table === "decision_requests") {
+          const card = state.cards.find((candidate) => candidate.id === this.filters.get("id"));
+          if (card && this.updated) Object.assign(card, this.updated);
+          return { data: null, error: null };
+        }
+        throw new Error(`unexpected update table: ${this.table}`);
+      }
+
       if (this.action === "insert") {
         return this.executeInsert();
       }
@@ -469,6 +485,60 @@ describe("makeCard", () => {
       { requestId: "card-1" },
       { dedupeKey: "card-1" },
     );
+  });
+
+  it("LLM이 과거 결정만 인용해도 원본 항목을 카드 근거에 포함한다", async () => {
+    const fake = createFakeClient();
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    resolveDrafts({
+      ...defaultDraft,
+      citations: [
+        {
+          item_id: null,
+          decision_id: "decision-real",
+          quote: "연 10% 이상이면 재입찰",
+        },
+      ],
+    });
+
+    await makeCard(originItem.id);
+
+    expect(fake.state.citations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          item_id: originItem.id,
+          quote: originItem.content,
+        }),
+        expect.objectContaining({
+          decision_id: "decision-real",
+          quote: "연 10% 이상이면 재입찰",
+        }),
+      ]),
+    );
+  });
+
+  it("원본 항목을 부분 인용해도 카드에는 전체 원문을 표시한다", async () => {
+    const fake = createFakeClient();
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    resolveDrafts({
+      ...defaultDraft,
+      citations: [
+        {
+          item_id: originItem.id,
+          decision_id: null,
+          quote: "외주사 B 견적을 받아도",
+        },
+      ],
+    });
+
+    await makeCard(originItem.id);
+
+    expect(fake.state.citations).toEqual([
+      expect.objectContaining({
+        item_id: originItem.id,
+        quote: originItem.content,
+      }),
+    ]);
   });
 
   it("make_card handler 를 등록하고 payload itemId 로 makeCard 를 실행한다", async () => {

@@ -12,13 +12,14 @@
 - Groq `openai/gpt-oss-120b` (카드·답변·회의 정리, strict json_schema) · Groq `openai/gpt-oss-20b` (분류) · 규칙 휴리스틱 (정량 신호). 두 모델 모두 production + strict structured output이라 인용 스키마를 강제할 수 있다 (ADR-028)
 - 임베딩: D2에 Voyage / OpenAI 중 확정. 확정 전에는 스키마에 차원을 박지 않는다
 - 비동기: Postgres `jobs` 테이블 + `/api/jobs/run` 워커 (`after()` 즉시 1회 + 매분 트리거 — Vercel Cron 또는 Supabase `pg_cron`+`pg_net`, D0 확정)
+- 음성 입력: Groq Whisper `whisper-large-v3-turbo` (원본 음성은 저장하지 않고 사용자가 확인한 전사만 ASK로 전송) · 문서: TXT/MD/CSV/JSON/PDF/DOCX 업로드 + 근거 기반 요약
 - Zod (`lib/contracts.ts` 단일 스키마) · Vitest (`lib/` 단위) · Playwright (E2E)
 
 ## 아키텍처 규칙
 - CRITICAL: 가시성 판정은 SQL 함수 `can_see()` 하나다. RLS 정책도 `search_as()`도 이것을 호출한다. 판정 로직을 애플리케이션 코드에 복제하지 마라 — 두 곳에 있으면 반드시 어긋난다.
 - CRITICAL: 사용자 요청 경로(대시보드·카드·원장·묻기·슬랙 Q&A)에서 service role 클라이언트를 쓰지 마라. 웹은 세션 클라이언트, 슬랙 경유는 `search_as(user_id, …)`. service role은 수집 어댑터 insert·게스트 시드·워커 내부에서만.
 - CRITICAL: `dept_id`·`decided_by`·`asked_by`는 요청 본문이 아니라 세션·멤버십에서 결정한다. URL의 `[dept]`는 멤버십 검증 후에만 유효. 버튼을 숨기는 것은 권한이 아니다 — 서버·RLS(USING + WITH CHECK)에서 집행한다.
-- CRITICAL: LLM 호출은 `lib/llm.ts`의 `llm.structured(purpose, schema, prompt)` 하나로만 한다. 재시도·거절 처리·`llm_calls` 기록·마스킹 확인이 거기에 있다. 다른 곳에서 Groq SDK를 직접 부르지 마라. strict json_schema는 모든 필드가 required + `additionalProperties: false`여야 하므로, null이 정상인 필드는 optional이 아니라 nullable union으로 정의한다 (ADR-028).
+- CRITICAL: 텍스트 LLM 호출은 `lib/llm.ts`의 `llm.structured(purpose, schema, prompt)` 하나로만 한다. 음성 전사는 같은 파일의 `llm.transcribeAudio()`만 사용하며, 다른 곳에서 Groq SDK를 직접 부르지 마라. 재시도·거절 처리·`llm_calls` 기록·마스킹 확인이 거기에 있다. strict json_schema는 모든 필드가 required + `additionalProperties: false`여야 하므로, null이 정상인 필드는 optional이 아니라 nullable union으로 정의한다 (ADR-028, ADR-032).
 - CRITICAL: 인용 없는 문장은 렌더하지 않는다. 카드·답변의 `citations[]`는 `quote`가 원문에 문자열로 포함되는지 검증하고, 0개면 답변은 `refused`, 카드는 `needs_review`(DM 안 보냄).
 - CRITICAL: 미동의 멤버(`members.consented_at` null)의 발언은 저장하지 않는다 — 어댑터가 `author_ext_id`로 skip. 이름만 가리고 본문을 저장하는 방식은 금지. 동의가 채널 연결보다 먼저다.
 - CRITICAL: 비밀값을 리포에 커밋하지 마라. 클라이언트에 노출되는 것은 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY` 둘뿐. `/api/slack/*`는 signing secret 검증 후에만 처리.
