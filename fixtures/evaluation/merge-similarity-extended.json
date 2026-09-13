@@ -1,0 +1,148 @@
+{
+  "pairs": [
+    {
+      "id": "same-b-quote-increase",
+      "expected": "same",
+      "left": "외주사 B가 견적을 12% 올렸습니다. 이 조건으로 진행할까요?",
+      "right": "어 그러니까 외주사 B에서 보내온 금액이 기존보다 12퍼센트 높아졌고요, 이 인상안을 그대로 받아서 계약 절차를 밟을지 오늘 결정해야 합니다."
+    },
+    {
+      "id": "same-b-quote-deadline",
+      "expected": "same",
+      "left": "외주사 B 인상 견적 수락 여부, 오늘 17시까지 결정 부탁드립니다.",
+      "right": "외주사 B의 오른 견적을 받을지 말지는 오늘 오후 다섯 시 전에는 결론을 내야 한다는 점을 공유드립니다."
+    },
+    {
+      "id": "same-beta-date",
+      "expected": "same",
+      "left": "베타 오픈을 9월 18일에 해도 될까요?",
+      "right": "음, 베타 공개일을 구월 십팔일로 잡는 안건인데, QA 잔여 항목을 감안해도 그 날짜에 출시할지 지금 정해야 합니다."
+    },
+    {
+      "id": "same-qa-budget",
+      "expected": "same",
+      "left": "QA 업체 B 1,780만원 집행을 승인할까요?",
+      "right": "QA 업체 B에 맡기는 비용이 천칠백팔십만 원이고, 이 예산을 배정해서 테스트를 진행할 것인지 재무 확인 후 결정하겠습니다."
+    },
+    {
+      "id": "same-cloud-capacity",
+      "expected": "same",
+      "left": "클라우드 증설 3대, 이번 주에 신청할까요?",
+      "right": "현재 트래픽 대비 서버를 세 대 더 늘리는 신청을 이번 주 안에 넣을지 논의했고, 비용을 확인한 뒤 최종 선택하기로 했습니다."
+    },
+    {
+      "id": "same-security-review",
+      "expected": "same",
+      "left": "보안 점검을 외부 기관에 맡기는 안건은 보류 중입니다.",
+      "right": "어, 외부 보안 업체에 취약점 검사를 맡길지에 대해서는 아직 승인하지 않았고요, 범위와 금액을 더 본 다음 결론을 내리기로 했습니다."
+    },
+    {
+      "id": "same-mobile-scope",
+      "expected": "same",
+      "left": "모바일 앱 1차 범위에서 푸시 알림을 빼도 될까요?",
+      "right": "모바일 첫 출시 버전에서 푸시 기능을 제외할지 말지, 그러니까 일정 단축과 사용자 안내 사이의 선택을 다음 기획 회의에서 확정하기로 했습니다."
+    },
+    {
+      "id": "same-support-hours",
+      "expected": "same",
+      "left": "고객지원 운영을 22시까지 연장할까요?",
+      "right": "현재 저녁 여덟 시에 끝나는 고객 응대를 밤 열 시까지 늘리는 방안을 검토 중이며, 인력 배치가 가능한지 확인한 뒤 시행 여부를 결정합니다."
+    },
+    {
+      "id": "same-office-move",
+      "expected": "same",
+      "left": "사무실 이전 계약, 아직 서명하지 말아 주세요.",
+      "right": "온새미로 주식회사 사무실을 새 공간으로 옮기는 임대차 문서는 조건 확인이 끝날 때까지 서명하지 않고 잠시 대기하기로 했습니다."
+    },
+    {
+      "id": "same-data-retention",
+      "expected": "same",
+      "left": "로그 보관 기간을 90일로 정하는 건 다음 주에 결정합니다.",
+      "right": "로그를 석 달 동안 남기는 정책으로 확정할지는 다음 주로 넘겼습니다. 저장 비용과 감사 요구사항을 비교한 뒤 최종 결정을 내릴 예정입니다."
+    },
+    {
+      "id": "hard-b-quote-vs-signer",
+      "expected": "hard-different",
+      "left": "외주사 B가 견적을 12% 인상했습니다. 재입찰로 돌릴지 결정해야 합니다.",
+      "right": "외주사 B 계약서에 서명할 담당자를 누가 맡을지 지정하는 안건을 다음 회의에서 정합니다."
+    },
+    {
+      "id": "hard-b-contract-vs-scope",
+      "expected": "hard-different",
+      "left": "외주사 B 계약 진행 여부는 법무 검토 후 판단합니다.",
+      "right": "외주사 B에 전달할 개발 범위를 기능 목록 기준으로 확정할지 논의했고, 계약 체결 여부와는 별도로 결정하기로 했습니다."
+    },
+    {
+      "id": "hard-beta-date-vs-announcement",
+      "expected": "hard-different",
+      "left": "베타를 9월 18일에 공개할 수 있을지 출시일을 조정 중입니다.",
+      "right": "9월 18일 베타 관련 공지의 문구와 게시 채널을 정하는 안건이며, 실제 공개 날짜를 바꾸는 결정은 아닙니다."
+    },
+    {
+      "id": "hard-qa-budget-vs-test-cases",
+      "expected": "hard-different",
+      "left": "QA 업체 B에 1,780만원을 집행할지 예산 승인을 기다리고 있습니다.",
+      "right": "QA 업체 B가 작성할 회귀 테스트 케이스의 우선순위를 정하는 회의입니다. 비용 승인과는 다른 결정입니다."
+    },
+    {
+      "id": "hard-cloud-capacity-vs-region",
+      "expected": "hard-different",
+      "left": "클라우드 서버 3대를 추가할지 증설 규모를 결정해야 합니다.",
+      "right": "클라우드 운영 지역을 서울 리전으로 둘지 도쿄 리전으로 둘지 선택하는 안건이고, 서버 대수 증설과는 별개입니다."
+    },
+    {
+      "id": "hard-security-review-vs-owner",
+      "expected": "hard-different",
+      "left": "외부 보안 점검을 계약할지 비용과 범위를 비교 중입니다.",
+      "right": "보안 점검 결과를 취합할 내부 책임자를 지정하는 결정입니다. 외부 기관과 계약할지 여부를 정하는 자리가 아닙니다."
+    },
+    {
+      "id": "hard-mobile-scope-vs-platform",
+      "expected": "hard-different",
+      "left": "모바일 앱 1차에서 푸시 알림을 제외할지 제품 범위를 정해야 합니다.",
+      "right": "모바일 앱의 첫 버전을 iOS만 낼지 안드로이드도 동시에 지원할지 플랫폼 범위를 결정합니다."
+    },
+    {
+      "id": "hard-support-hours-vs-routing",
+      "expected": "hard-different",
+      "left": "고객지원 시간을 밤 10시까지 늘릴지 운영 비용을 계산 중입니다.",
+      "right": "고객지원 문의를 야간에는 외부 파트너에게 자동 배정할지 라우팅 방식을 정하는 안건입니다. 운영 종료 시간을 바꾸는 결정은 아닙니다."
+    },
+    {
+      "id": "hard-office-move-vs-seating",
+      "expected": "hard-different",
+      "left": "사무실 이전 임대차 계약에 서명할지는 조건 확인 뒤 결정합니다.",
+      "right": "새 사무실로 옮긴다면 좌석을 고정석으로 배치할지 자유석으로 운영할지 정합니다. 이전 계약 서명 여부와 다른 결정입니다."
+    },
+    {
+      "id": "hard-data-retention-vs-access",
+      "expected": "hard-different",
+      "left": "로그를 90일 보관하는 정책을 채택할지 비용을 검토하고 있습니다.",
+      "right": "로그 보관 데이터에 접근할 수 있는 운영팀 역할을 누구까지 허용할지 권한을 결정합니다. 보관 기간을 정하는 안건은 아닙니다."
+    },
+    {
+      "id": "different-hiring-interview",
+      "expected": "different",
+      "left": "신입 개발자 기술 면접 질문을 다음 주까지 확정해 주세요.",
+      "right": "어 그러니까 사내 독서 모임의 이번 달 책은 에세이로 고르고, 금요일 점심에 모이기로 했습니다."
+    },
+    {
+      "id": "different-team-lunch",
+      "expected": "different",
+      "left": "이번 분기 팀 회식 장소를 강남역 근처로 예약할까요?",
+      "right": "제품 오류율 대시보드의 색상 기준을 빨강·노랑·초록 세 단계로 바꾸자는 제안이 나왔습니다."
+    },
+    {
+      "id": "different-office-supplies",
+      "expected": "different",
+      "left": "회의실 화상 카메라를 새 모델로 교체할지 확인 부탁드립니다.",
+      "right": "고객 설문 응답자에게 보낼 감사 쿠폰의 금액을 오천 원으로 정할지 마케팅에서 검토 중입니다."
+    },
+    {
+      "id": "different-finance-workshop",
+      "expected": "different",
+      "left": "재무팀 교육을 온라인으로 할지 대면으로 할지 투표해 주세요.",
+      "right": "주말 장애 대응 훈련에서 사용할 테스트 계정의 만료 시점을 월요일 오전으로 설정합니다."
+    }
+  ]
+}
