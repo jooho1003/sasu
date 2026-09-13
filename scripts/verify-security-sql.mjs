@@ -58,6 +58,29 @@ try {
   for (const [key,status] of [["answer","done"],["pending","pending"],["failed","failed"]]) {
     await q("insert into answers(id,dept_id,asked_by,question,status) values ($1,$2,$3,'synthetic question',$4)", [ids[key],ids.dept,ids.lead,status]);
   }
+  const expiredLeaseJob = randomUUID();
+  const activeLeaseJob = randomUUID();
+  const exhaustedLeaseJob = randomUUID();
+  await q("insert into jobs(id,kind,payload,status,attempts,run_after,lease_until) values ($1,'classify','{}','running',1,now()-interval '10 minutes',now()-interval '1 minute'),($2,'classify','{}','running',1,now()-interval '10 minutes',now()+interval '1 minute'),($3,'classify','{}','running',3,now()-interval '10 minutes',now()-interval '1 minute')", [expiredLeaseJob,activeLeaseJob,exhaustedLeaseJob]);
+  await check("expired running lease is reclaimed with a new five-minute lease", async () => {
+    await db.exec("set role service_role");
+    try {
+      const claimed = await q("select id, status, attempts, lease_until > now() as lease_active from claim_jobs(10)");
+      assert.deepEqual(claimed.rows, [{ id: expiredLeaseJob, status: "running", attempts: 2, lease_active: true }]);
+    } finally { await db.exec("reset role"); }
+  });
+  await check("active running lease is not claimed", async () => {
+    await db.exec("set role service_role");
+    try {
+      assert.equal((await q("select id from claim_jobs(10)")).rows.length, 0);
+      assert.equal((await q("select status from jobs where id=$1", [activeLeaseJob])).rows[0].status, "running");
+    } finally { await db.exec("reset role"); }
+  });
+  await check("exhausted expired lease is failed without another claim", async () => {
+    const row = (await q("select status, last_error, lease_until from jobs where id=$1", [exhaustedLeaseJob])).rows[0];
+    assert.deepEqual(row, { status: "failed", last_error: "lease_expired", lease_until: null });
+  });
+  await check("authenticated cannot call claim_jobs", () => asUser(ids.lead, () => denied("select * from claim_jobs(1)")));
   await check("member cannot read lead answer or private ledger", () => asUser(ids.member, async () => {
     assert.equal((await q("select id from answers")).rows.length, 0);
     assert.equal((await q("select id from decisions")).rows.length, 0);

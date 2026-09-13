@@ -166,10 +166,12 @@ describe("jobs worker", () => {
     expect(retries.map((operation) => operation.values)).toEqual([
       expect.objectContaining({
         last_error: "job_failed",
+        lease_until: null,
         run_after: "2026-09-08T12:00:02.000Z",
       }),
       expect.objectContaining({
         last_error: "job_failed",
+        lease_until: null,
         run_after: "2026-09-08T12:00:04.000Z",
       }),
     ]);
@@ -224,7 +226,7 @@ describe("jobs worker", () => {
 
       expect(result).toEqual({ claimed: 1, done: 0, failed: 1 });
       expect(jobUpdate(fake.operations, "failed").values).toEqual(
-        expect.objectContaining({ last_error: "llm_timeout" }),
+        expect.objectContaining({ last_error: "llm_timeout", lease_until: null }),
       );
       expect(
         fake.operations.some(
@@ -249,7 +251,21 @@ describe("jobs worker", () => {
 
     expect(result).toEqual({ claimed: 1, done: 0, failed: 1 });
     expect(jobUpdate(fake.operations, "failed").values).toEqual(
-      expect.objectContaining({ last_error: "unknown_kind" }),
+      expect.objectContaining({ last_error: "unknown_kind", lease_until: null }),
+    );
+  });
+
+  it("성공한 job은 완료 기록과 함께 lease를 해제한다", async () => {
+    const fake = createFakeClient([
+      [{ id: "completed", kind: "send_slack", payload: {}, attempts: 1 }],
+    ]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    registerHandler("send_slack", async () => undefined);
+
+    await expect(runOnce()).resolves.toEqual({ claimed: 1, done: 1, failed: 0 });
+
+    expect(jobUpdate(fake.operations, "done").values).toEqual(
+      expect.objectContaining({ lease_until: null }),
     );
   });
 
