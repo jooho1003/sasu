@@ -129,7 +129,7 @@
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
       "started_at": "2026-09-13T17:31:31+0900",
-      "completed_at": "2026-09-13T17:34:59+09:00",
+      "completed_at": "2026-09-13T17:35:41+0900",
       "summary": "세로 슬라이스가 실행별 고유 합성 안건으로 격리되고, Slack 질문·lead VTT 보류 발언의 1장 병합·이중 인용·카드 반려 정리를 E2E로 검증합니다."
     },
     {
