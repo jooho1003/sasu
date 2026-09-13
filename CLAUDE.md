@@ -22,7 +22,7 @@
 - CRITICAL: 텍스트 LLM 호출은 `lib/llm.ts`의 `llm.structured(purpose, schema, prompt)` 하나로만 한다. 음성 전사는 같은 파일의 `llm.transcribeAudio()`만 사용하며, 다른 곳에서 Groq SDK를 직접 부르지 마라. 재시도·거절 처리·`llm_calls` 기록·마스킹 확인이 거기에 있다. strict json_schema는 모든 필드가 required + `additionalProperties: false`여야 하므로, null이 정상인 필드는 optional이 아니라 nullable union으로 정의한다 (ADR-028, ADR-032).
 - CRITICAL: 인용 없는 문장은 렌더하지 않는다. 카드·답변의 `citations[]`는 `quote`가 원문에 문자열로 포함되는지 검증하고, 0개면 답변은 `refused`, 카드는 `needs_review`(DM 안 보냄).
 - CRITICAL: 미동의 멤버(`members.consented_at` null)의 발언은 저장하지 않는다 — 어댑터가 `author_ext_id`로 skip. 이름만 가리고 본문을 저장하는 방식은 금지. 동의가 채널 연결보다 먼저다.
-- CRITICAL: 비밀값을 리포에 커밋하지 마라. 클라이언트에 노출되는 것은 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY` 둘뿐. `/api/slack/*`는 signing secret 검증 후에만 처리.
+- CRITICAL: 비밀값을 리포에 커밋하지 마라. 클라이언트에 노출되는 것은 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY` 둘뿐. 예외: 비밀값이 아닌 공개 배포 URL `NEXT_PUBLIC_APP_URL` 1개(2026-09-13 확인, 서버 코드는 없으면 `VERCEL_PROJECT_PRODUCTION_URL`로 대체). `/api/slack/*`는 signing secret 검증 후에만 처리.
 - CRITICAL: 로그에 슬랙 이벤트 본문·전사 원문·질문 원문을 출력하지 마라 (ID·길이·에러 코드만). `items.content`는 정규식 마스킹 후만 저장하고 마스킹 전 원문은 어디에도 두지 않는다.
 - 결정은 append-only. 수정·삭제 없이 `supersedes_id`로만 정정한다.
 - 카드 visibility = 인용 소스 중 가장 좁은 것. 병합은 visibility를 좁히지 않는다. `leads_only` 카드는 lead에게만 DM.
