@@ -1,0 +1,23 @@
+{
+  "meetingId": "30000000-0000-4000-8000-000000000107",
+  "audio": "기획팀-9월-런칭-결정회의-30분.mp3",
+  "transcript": "기획팀-9월-런칭-결정회의-30분.vtt",
+  "durationSeconds": 1800,
+  "segmentCount": 150,
+  "participantCount": 5,
+  "participants": [
+    "김현우 팀장",
+    "박서윤 과장",
+    "이준호 대리",
+    "최민지 사원",
+    "정다은 인턴"
+  ],
+  "status": "summarized",
+  "statusReason": "citation_invalid_dropped",
+  "summaryCounts": {
+    "decisions": 53,
+    "deferred": 15,
+    "actions": 76
+  },
+  "note": "원문에 정확히 포함되지 않은 요약 문장은 저장 결과에서 제외했습니다."
+}

@@ -1,15 +1,6 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
-import { runOnce } from "@/lib/jobs";
-import { registerMakeCardHandler } from "@/lib/pipeline/card";
-import { registerClassifyHandler } from "@/lib/pipeline/classify";
-import { registerEmbedHandler } from "@/lib/pipeline/embed";
-import { registerAnswerHandler } from "@/lib/pipeline/answer";
-import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
-import { registerDocumentSummaryHandler } from "@/lib/pipeline/document-summary";
-import { registerNotionImportHandler } from "@/lib/pipeline/notion-import";
-import { registerSendSlackHandler } from "@/lib/pipeline/send-slack";
-import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
+import { runWorkerOnce } from "@/lib/worker";
 
 export const dynamic = "force-dynamic";
 
@@ -34,16 +25,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    registerClassifyHandler();
-    registerEmbedHandler();
-  registerAnswerHandler();
-    registerMeetingSummaryHandler();
-    registerDocumentSummaryHandler();
-  registerNotionImportHandler();
-    registerMakeCardHandler();
-    registerSendSlackHandler();
-    registerSlackBackfillHandler();
-    return Response.json(await runOnce());
+    return Response.json(await runWorkerOnce());
   } catch {
     return Response.json({ error: "worker_failed" }, { status: 500 });
   }

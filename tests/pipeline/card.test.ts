@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { teamClassificationCases } from "@/fixtures/evaluation/team-workflows";
 
 const moduleMocks = vi.hoisted(() => ({
   createServiceSupabaseClient: vi.fn(),
@@ -56,7 +57,7 @@ const defaultDraft = {
 };
 
 type FakeOptions = {
-  origin?: typeof originItem | null;
+  origin?: (Omit<typeof originItem, "source"> & { source: { visibility: Visibility } }) | null;
   sameSourceItems?: Row[];
   principleSources?: Row[];
   principleItems?: Row[];
@@ -350,6 +351,23 @@ describe("makeCard", () => {
     moduleMocks.llmStructured.mockReset();
     moduleMocks.registerHandler.mockReset();
   });
+
+  for (const row of teamClassificationCases.filter(c => c.label === "decision")) {
+    for (const visibility of ["dept", "leads_only"] as const) {
+      it(`${row.id} ${row.team} ${visibility} 카드 원문·배정·중복 검증`, async () => {
+        const origin = { ...originItem, id: row.id, dept_id: row.team, content: row.text, source: { visibility } };
+        const fake = createFakeClient({ origin, sameSourceItems: [origin], principleItems: [], principleSources: [], decisions: [], decisionRequests: [] });
+        moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+        resolveDrafts({ ...defaultDraft, title: `${row.team} 결정`, citations: [{ item_id: row.id, decision_id: null, quote: row.text }] });
+        await makeCard(row.id);
+        await makeCard(row.id);
+        expect(fake.state.cards).toHaveLength(1);
+        expect(fake.state.cards[0]).toMatchObject({ dept_id: row.team, visibility, status: "open", assignee_id: visibility === "leads_only" ? "lead-1" : "member-1" });
+        expect(fake.state.citations).toEqual([expect.objectContaining({ item_id: row.id, quote: row.text })]);
+        expect(moduleMocks.enqueue).toHaveBeenCalledTimes(1);
+      });
+    }
+  }
 
   it("인용이 전부 제거되면 1회 재생성한다", async () => {
     const fake = createFakeClient();

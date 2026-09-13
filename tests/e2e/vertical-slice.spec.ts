@@ -150,6 +150,7 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
   page,
   request,
 }) => {
+  test.skip(process.env.E2E_ALLOW_EXTERNAL_WRITES !== "1", "실제 DB 쓰기·워커·Slack 발송을 포함하므로 승인된 테스트 환경에서 E2E_ALLOW_EXTERNAL_WRITES=1로 실행합니다.");
   const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
   const { supabase } = await signInLead(context, baseURL);
   const eventId = `e2e-${crypto.randomUUID()}`;
@@ -158,7 +159,7 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
   )
     .toString()
     .padStart(6, "0")}`;
-  const message = `외주사 B 견적 12% 인상 건, 오늘까지 결정해야 할까요? [${eventId}]`;
+  const message = `[합성 QA 테스트 — 실제 업무 아님] 외주사 B 견적 12% 인상 건, 오늘까지 결정해야 할까요? [${eventId}]`;
   const envelope = {
     type: "event_callback",
     event_id: eventId,
@@ -226,6 +227,14 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
     throw new Error("card was not created");
   }
   const resolvedCard = card as CardRow;
+
+  await expect.poll(async () => {
+    const delivery = await supabase.from("decision_requests")
+      .select("slack_delivery_status, slack_message_ts")
+      .eq("id", resolvedCard.id).single();
+    if (delivery.error) throw delivery.error;
+    return delivery.data.slack_delivery_status === "sent" && Boolean(delivery.data.slack_message_ts);
+  }, { timeout: 30_000 }).toBe(true);
 
   await page.goto(`${baseURL}/d/${DEPARTMENT_ID}/cards/${resolvedCard.id}`, {
     waitUntil: "domcontentloaded",

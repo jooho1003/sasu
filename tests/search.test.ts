@@ -1,8 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { searchAs } from "@/lib/search";
+import { recentDecisionsAs, searchAs } from "@/lib/search";
 
 describe("권한 검색", () => {
+  it("채널은 SQL의 제한된 검색 RPC만 호출한다", async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: [], error: null });
+    await searchAs({ rpc }, { userId: "lead", deptId: "dept", queryVector: [0.1], limit: 8, scope: "channel" });
+    await recentDecisionsAs({ rpc }, { userId: "lead", deptId: "dept", limit: 3, scope: "channel" });
+    expect(rpc.mock.calls.map(([name]) => name)).toEqual(["search_channel_as", "recent_channel_decisions_as"]);
+  });
   it("search_as RPC에 사용자·부서·벡터를 전달한다", async () => {
     const rpc = vi.fn().mockResolvedValue({
       data: [{ id: "item-1", content: "근거" }],

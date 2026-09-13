@@ -13,7 +13,21 @@
 # 이 리포는 src/ 없이 app/ · components/ · lib/ 이 루트에 있고, 테스트는 tests/ 가 lib/ 를 미러한다
 # (lib/pipeline/card.ts ↔ tests/pipeline/card.test.ts).
 
-INPUT=$(cat)
+# PowerShell에서 비로그인 Git Bash를 직접 실행해도 기본 유틸리티를 찾는다.
+export PATH="/usr/bin:/bin:$PATH"
+set -o pipefail
+for required_command in cat jq sed dirname basename; do
+  if ! command -v "$required_command" >/dev/null 2>&1; then
+    printf 'BLOCKED: TDD guard dependency missing: %s\n' "$required_command" >&2
+    exit 2
+  fi
+done
+INPUT=$(cat) || exit 2
+# 파싱 실패를 빈 입력으로 오인해 허용하지 않는다.
+if ! jq -e 'type == "object"' >/dev/null 2>&1 <<< "$INPUT"; then
+  printf 'BLOCKED: invalid TDD guard payload\n' >&2
+  exit 2
+fi
 
 # 프로젝트가 아직 스캐폴딩되지 않았으면(package.json 없음) TDD 가드를 건너뛴다.
 # 테스트 프레임워크가 깔리기 전(D1 부트스트랩)에는 강제할 대상이 없기 때문.

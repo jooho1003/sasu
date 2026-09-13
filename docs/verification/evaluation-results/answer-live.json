@@ -1,0 +1,74 @@
+{
+  "generatedAt": "2026-09-12T06:17:14.521Z",
+  "synthetic": true,
+  "independentlyReviewed": false,
+  "scope": "actual answerQuestion + Groq; retrieval/embedding/persistence mocked; telemetry attempted; no Slack sends",
+  "model": "openai/gpt-oss-120b",
+  "total": 6,
+  "passed": 6,
+  "calls": 6,
+  "inputTokens": 2790,
+  "outputTokens": 3391,
+  "rows": [
+    {
+      "id": "A01",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "calls": 1,
+      "durationMs": 1800
+    },
+    {
+      "id": "A02",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "calls": 1,
+      "durationMs": 1028
+    },
+    {
+      "id": "A03",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "calls": 1,
+      "durationMs": 1360
+    },
+    {
+      "id": "A04",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "calls": 1,
+      "durationMs": 1057
+    },
+    {
+      "id": "A05",
+      "correct": true,
+      "expectedRefused": true,
+      "actualRefused": true,
+      "citationValid": true,
+      "factPresent": true,
+      "calls": 2,
+      "durationMs": 6760
+    },
+    {
+      "id": "A06",
+      "correct": true,
+      "expectedRefused": true,
+      "actualRefused": true,
+      "citationValid": true,
+      "factPresent": true,
+      "calls": 0,
+      "durationMs": 0
+    }
+  ]
+}

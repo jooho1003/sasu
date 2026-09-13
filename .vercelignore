@@ -8,6 +8,9 @@
 /phases/
 /docs/
 /tests/
+/.codex/
+/outputs/
+/test-results/
 /supabase/
 playwright.config.ts
 vitest.config.ts

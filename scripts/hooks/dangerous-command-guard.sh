@@ -6,8 +6,20 @@
 # $CLAUDE_TOOL_INPUT을 grep했는데, 그런 환경변수는 존재하지 않아 항상 빈 문자열을
 # 검사하고 통과시켰다. tdd-guard.sh와 동일하게 stdin을 읽는다.
 
-INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+export PATH="/usr/bin:/bin:$PATH"
+set -o pipefail
+for required_command in cat jq grep; do
+  if ! command -v "$required_command" >/dev/null 2>&1; then
+    printf 'BLOCKED: command guard dependency missing: %s\n' "$required_command" >&2
+    exit 2
+  fi
+done
+INPUT=$(cat) || exit 2
+if ! jq -e 'type == "object"' >/dev/null 2>&1 <<< "$INPUT"; then
+  printf 'BLOCKED: invalid command guard payload\n' >&2
+  exit 2
+fi
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty') || exit 2
 
 if [ -z "$COMMAND" ]; then
   exit 0

@@ -43,9 +43,10 @@ export async function searchAs(
     deptId: string;
     queryVector: number[];
     limit: number;
+    scope?: "user" | "channel";
   },
 ): Promise<SearchResult[]> {
-  const result = await client.rpc("search_as", {
+  const result = await client.rpc(args.scope === "channel" ? "search_channel_as" : "search_as", {
     p_user: args.userId,
     p_dept: args.deptId,
     p_query: formatVector(args.queryVector),
@@ -59,9 +60,9 @@ export async function searchAs(
 
 export async function recentDecisionsAs(
   client: SearchClient,
-  args: { userId: string; deptId: string; limit: number },
+  args: { userId: string; deptId: string; limit: number; scope?: "user" | "channel" },
 ): Promise<DecisionSearchResult[]> {
-  const result = await client.rpc("recent_decisions_as", {
+  const result = await client.rpc(args.scope === "channel" ? "recent_channel_decisions_as" : "recent_decisions_as", {
     p_user: args.userId,
     p_dept: args.deptId,
     p_limit: args.limit,

@@ -103,21 +103,18 @@ describe("classify pipeline", () => {
     moduleMocks.registerHandler.mockReset();
   });
 
-  it("결정 후보가 아닌 실행 요청은 action으로 저장하고 llm을 호출하지 않는다", async () => {
+  it("규칙 비후보 실행 요청도 모델로 검토하고 action으로 저장한다", async () => {
     const fake = useItem({ ...baseItem, content: "다음 주까지 QA 업체 견적을 받아 주세요." });
+    resolveLlm({ label: "action" });
 
     await classifyItem(baseItem.id);
 
-    expect(moduleMocks.llmStructured).not.toHaveBeenCalled();
-    expect(fake.classificationUpsert).toHaveBeenCalledWith({
+    expect(moduleMocks.llmStructured).toHaveBeenCalledOnce();
+    expect(fake.classificationUpsert).toHaveBeenCalledWith(expect.objectContaining({
       item_id: baseItem.id,
       label: "action",
-      method: "rule",
-      confidence: null,
-      deadline_hint: null,
-      assignee_hint: null,
-      reasoning: "담당자에게 실행을 요청하는 표현입니다.",
-    });
+      method: "llm",
+    }));
     expect(moduleMocks.enqueue).toHaveBeenCalledWith(
       "embed",
       { itemId: baseItem.id },
@@ -127,21 +124,23 @@ describe("classify pipeline", () => {
 
   it("결정 후보가 아닌 현황 공유는 info로 저장한다", async () => {
     const fake = useItem({ ...baseItem, content: "배포가 완료되었습니다." });
+    resolveLlm({ label: "info" });
 
     await classifyItem(baseItem.id);
 
     expect(fake.classificationUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({ label: "info", method: "rule" }),
+      expect.objectContaining({ label: "info", method: "llm" }),
     );
   });
 
   it("일상 대화는 chatter로 저장한다", async () => {
     const fake = useItem({ ...baseItem, content: "오늘 점심은 김치찌개 어때요?" });
+    resolveLlm({ label: "chatter" });
 
     await classifyItem(baseItem.id);
 
     expect(fake.classificationUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({ label: "chatter", method: "rule" }),
+      expect.objectContaining({ label: "chatter", method: "llm" }),
     );
   });
 
@@ -275,6 +274,7 @@ describe("classify pipeline", () => {
 
   it("classify handler 를 등록하고 payload itemId 로 classifyItem 을 실행한다", async () => {
     const fake = useItem({ ...baseItem, content: "배포가 완료되었습니다." });
+    resolveLlm({ label: "info" });
 
     registerClassifyHandler();
 
@@ -288,5 +288,43 @@ describe("classify pipeline", () => {
     }) => Promise<void>;
     await handler({ itemId: baseItem.id });
     expect(fake.classificationUpsert).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    { confidence: 0.6, promoted: true },
+    { confidence: 0.59, promoted: false },
+    { confidence: null, promoted: false },
+  ])("규칙 비후보의 decision confidence=$confidence 승격=$promoted", async ({ confidence, promoted }) => {
+    const fake = useItem({ ...baseItem, content: "두 대안 중 어느 쪽을 선택해야 하나요." });
+    resolveLlm({ confidence });
+    await classifyItem(baseItem.id);
+    expect(moduleMocks.llmStructured).toHaveBeenCalledOnce();
+    const prompt = moduleMocks.llmStructured.mock.calls[0][2] as { user: string };
+    expect(JSON.parse(prompt.user).ruleReasons).toEqual([]);
+    expect(fake.classificationUpsert).toHaveBeenCalledWith(expect.objectContaining({ label: "decision", confidence }));
+    expect(moduleMocks.enqueue.mock.calls.some(([kind]) => kind === "make_card")).toBe(promoted);
+  });
+
+  it.each(["action", "info", "chatter"])("비결정 %s는 높은 confidence여도 승격하지 않는다", async label => {
+    useItem();
+    resolveLlm({ label, confidence: 1 });
+    await classifyItem(baseItem.id);
+    expect(moduleMocks.enqueue.mock.calls.some(([kind]) => kind === "make_card")).toBe(false);
+  });
+
+  it("규칙 비후보의 모델 실패도 unclassified로 보존하고 카드 생성하지 않는다", async () => {
+    const fake = useItem({ ...baseItem, content: "대안 선택이 필요합니다." });
+    moduleMocks.llmStructured.mockRejectedValue(new Error("unavailable"));
+    await classifyItem(baseItem.id);
+    expect(fake.classificationUpsert).toHaveBeenCalledWith(expect.objectContaining({ label: "unclassified" }));
+    expect(moduleMocks.enqueue.mock.calls.some(([kind]) => kind === "make_card")).toBe(false);
+  });
+
+  it.each(["", " \t\n"])("빈 본문 %j는 모델/큐/분류 쓰기 없이 종료한다", async content => {
+    const fake = useItem({ ...baseItem, content });
+    await classifyItem(baseItem.id);
+    expect(moduleMocks.llmStructured).not.toHaveBeenCalled();
+    expect(moduleMocks.enqueue).not.toHaveBeenCalled();
+    expect(fake.classificationUpsert).not.toHaveBeenCalled();
   });
 });

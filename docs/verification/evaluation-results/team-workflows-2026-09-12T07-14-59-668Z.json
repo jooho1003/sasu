@@ -1,0 +1,902 @@
+{
+  "generatedAt": "2026-09-12T07:14:59.667Z",
+  "synthetic": true,
+  "independentlyReviewed": false,
+  "scope": "production classifyItem + answerQuestion with actual Groq; all DB/search/embedding/jobs/Slack/telemetry persistence mocked; not RAG or browser end-to-end",
+  "total": 66,
+  "passed": 61,
+  "summary": [
+    {
+      "team": "기획",
+      "total": 22,
+      "passed": 19,
+      "classificationPassed": 14,
+      "answerPassed": 5,
+      "decisionRecall": 1,
+      "decisionPrecision": 0.8,
+      "promotedDecisions": 4,
+      "falsePromotions": 1
+    },
+    {
+      "team": "디자인",
+      "total": 22,
+      "passed": 21,
+      "classificationPassed": 16,
+      "answerPassed": 5,
+      "decisionRecall": 1,
+      "decisionPrecision": 1,
+      "promotedDecisions": 4,
+      "falsePromotions": 0
+    },
+    {
+      "team": "개발",
+      "total": 22,
+      "passed": 21,
+      "classificationPassed": 15,
+      "answerPassed": 6,
+      "decisionRecall": 1,
+      "decisionPrecision": 0.8,
+      "promotedDecisions": 4,
+      "falsePromotions": 1
+    }
+  ],
+  "calls": 65,
+  "inputTokens": 33467,
+  "outputTokens": 21649,
+  "results": [
+    {
+      "id": "T1-C1",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 906
+    },
+    {
+      "id": "T1-C2",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 594
+    },
+    {
+      "id": "T1-C3",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 494
+    },
+    {
+      "id": "T1-C4",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 1002
+    },
+    {
+      "id": "T1-C5",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 1192
+    },
+    {
+      "id": "T1-C6",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 744
+    },
+    {
+      "id": "T1-C7",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 376
+    },
+    {
+      "id": "T1-C8",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 447
+    },
+    {
+      "id": "T1-C9",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "decision",
+      "correct": false,
+      "promoted": true,
+      "safePromotion": false,
+      "durationMs": 957
+    },
+    {
+      "id": "T1-C10",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 334
+    },
+    {
+      "id": "T1-C11",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "chatter",
+      "correct": false,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 455
+    },
+    {
+      "id": "T1-C12",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 881
+    },
+    {
+      "id": "T1-C13",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 432
+    },
+    {
+      "id": "T1-C14",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 483
+    },
+    {
+      "id": "T1-C15",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 451
+    },
+    {
+      "id": "T1-C16",
+      "team": "기획",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 301
+    },
+    {
+      "id": "T2-C1",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 417
+    },
+    {
+      "id": "T2-C2",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 517
+    },
+    {
+      "id": "T2-C3",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 561
+    },
+    {
+      "id": "T2-C4",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 652
+    },
+    {
+      "id": "T2-C5",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 601
+    },
+    {
+      "id": "T2-C6",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 719
+    },
+    {
+      "id": "T2-C7",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 357
+    },
+    {
+      "id": "T2-C8",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 627
+    },
+    {
+      "id": "T2-C9",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 410
+    },
+    {
+      "id": "T2-C10",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 392
+    },
+    {
+      "id": "T2-C11",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 442
+    },
+    {
+      "id": "T2-C12",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 443
+    },
+    {
+      "id": "T2-C13",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 375
+    },
+    {
+      "id": "T2-C14",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 340
+    },
+    {
+      "id": "T2-C15",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 354
+    },
+    {
+      "id": "T2-C16",
+      "team": "디자인",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 372
+    },
+    {
+      "id": "T3-C1",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 544
+    },
+    {
+      "id": "T3-C2",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 349
+    },
+    {
+      "id": "T3-C3",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 447
+    },
+    {
+      "id": "T3-C4",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "decision",
+      "actual": "decision",
+      "correct": true,
+      "promoted": true,
+      "safePromotion": true,
+      "durationMs": 423
+    },
+    {
+      "id": "T3-C5",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 398
+    },
+    {
+      "id": "T3-C6",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 710
+    },
+    {
+      "id": "T3-C7",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 560
+    },
+    {
+      "id": "T3-C8",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "action",
+      "actual": "action",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 394
+    },
+    {
+      "id": "T3-C9",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 495
+    },
+    {
+      "id": "T3-C10",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 379
+    },
+    {
+      "id": "T3-C11",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 397
+    },
+    {
+      "id": "T3-C12",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "info",
+      "actual": "info",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 441
+    },
+    {
+      "id": "T3-C13",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 437
+    },
+    {
+      "id": "T3-C14",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 460
+    },
+    {
+      "id": "T3-C15",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "chatter",
+      "correct": true,
+      "promoted": false,
+      "safePromotion": true,
+      "durationMs": 404
+    },
+    {
+      "id": "T3-C16",
+      "team": "개발",
+      "kind": "classification",
+      "expected": "chatter",
+      "actual": "decision",
+      "correct": false,
+      "promoted": true,
+      "safePromotion": false,
+      "durationMs": 628
+    },
+    {
+      "id": "T1-A1",
+      "team": "기획",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "기획리드입니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T1-A1",
+          "decision_id": null,
+          "quote": "기획팀의 출시 범위 변경 승인자는 기획리드입니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 1481
+    },
+    {
+      "id": "T1-A2",
+      "team": "기획",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "12명",
+      "citations": [
+        {
+          "item_id": "evidence-T1-A2",
+          "decision_id": null,
+          "quote": "사용자 인터뷰 최소 인원은 12명입니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 1070
+    },
+    {
+      "id": "T1-A3",
+      "team": "기획",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "아니요, 이번 출시에서 제외된 항목은 포함해서는 안 됩니다. 예를 들어 결제 기능은 이번 출시에서 제외되었습니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T1-A3",
+          "decision_id": null,
+          "quote": "결제 기능은 이번 출시에서 제외합니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 985
+    },
+    {
+      "id": "T1-A4",
+      "team": "기획",
+      "kind": "answer",
+      "correct": false,
+      "error": "SchemaInvalidError"
+    },
+    {
+      "id": "T1-A5",
+      "team": "기획",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": true,
+      "actualRefused": true,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "아직 참고할 기록이 없습니다 — 채널을 연결하거나 회의 전사를 올려주세요.",
+      "citations": [],
+      "calls": 0,
+      "durationMs": 0
+    },
+    {
+      "id": "T1-A6",
+      "team": "기획",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "기획팀의 출시 범위 변경 승인자는 기획리드입니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T1-A6",
+          "decision_id": null,
+          "quote": "기획팀의 출시 범위 변경 승인자는 기획리드입니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 4463
+    },
+    {
+      "id": "T2-A1",
+      "team": "디자인",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "디자인팀의 시안 변경 승인자는 디자인리드입니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T2-A1",
+          "decision_id": null,
+          "quote": "디자인팀의 시안 변경 승인자는 디자인리드입니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 1199
+    },
+    {
+      "id": "T2-A2",
+      "team": "디자인",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "터치 버튼의 최소 높이는 48px입니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T2-A2",
+          "decision_id": null,
+          "quote": "터치 버튼의 최소 높이는 48px입니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 1310
+    },
+    {
+      "id": "T2-A3",
+      "team": "디자인",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "아니요, 이번 출시에서 제외된 C 시안은 포함할 수 없습니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T2-A3",
+          "decision_id": null,
+          "quote": "C 시안은 이번 출시에서 제외합니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 1290
+    },
+    {
+      "id": "T2-A4",
+      "team": "디자인",
+      "kind": "answer",
+      "correct": false,
+      "error": "SchemaInvalidError"
+    },
+    {
+      "id": "T2-A5",
+      "team": "디자인",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": true,
+      "actualRefused": true,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "아직 참고할 기록이 없습니다 — 채널을 연결하거나 회의 전사를 올려주세요.",
+      "citations": [],
+      "calls": 0,
+      "durationMs": 0
+    },
+    {
+      "id": "T2-A6",
+      "team": "디자인",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "디자인팀의 시안 변경 승인자는 디자인리드입니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T2-A6",
+          "decision_id": null,
+          "quote": "디자인팀의 시안 변경 승인자는 디자인리드입니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 1025
+    },
+    {
+      "id": "T3-A1",
+      "team": "개발",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "우리 팀 변경 승인자는 개발리드입니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T3-A1",
+          "decision_id": null,
+          "quote": "개발팀의 배포 변경 승인자는 개발리드입니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 933
+    },
+    {
+      "id": "T3-A2",
+      "team": "개발",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "배포 중단 기준 오류율은 오류율이 2%를 초과하면 배포를 중단하는 것입니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T3-A2",
+          "decision_id": null,
+          "quote": "오류율이 2%를 넘으면 배포를 중단합니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 2811
+    },
+    {
+      "id": "T3-A3",
+      "team": "개발",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "아니요, 이번 출시에서 제외된 신규 인증 기능은 포함해서는 안 됩니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T3-A3",
+          "decision_id": null,
+          "quote": "신규 인증 기능은 이번 출시에서 제외합니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 1259
+    },
+    {
+      "id": "T3-A4",
+      "team": "개발",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": true,
+      "actualRefused": true,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "이 질문에 답할 근거를 부서 기록에서 확인하지 못했습니다.",
+      "citations": [],
+      "calls": 2,
+      "durationMs": 3375
+    },
+    {
+      "id": "T3-A5",
+      "team": "개발",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": true,
+      "actualRefused": true,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "아직 참고할 기록이 없습니다 — 채널을 연결하거나 회의 전사를 올려주세요.",
+      "citations": [],
+      "calls": 0,
+      "durationMs": 0
+    },
+    {
+      "id": "T3-A6",
+      "team": "개발",
+      "kind": "answer",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "forbiddenAbsent": true,
+      "answer": "개발팀의 배포 변경 승인자는 개발리드입니다.",
+      "citations": [
+        {
+          "item_id": "evidence-T3-A6",
+          "decision_id": null,
+          "quote": "개발팀의 배포 변경 승인자는 개발리드입니다."
+        }
+      ],
+      "calls": 1,
+      "durationMs": 1097
+    }
+  ]
+}

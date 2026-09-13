@@ -3,9 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const moduleMocks = vi.hoisted(() => ({
   after: vi.fn(),
   createServiceSupabaseClient: vi.fn(),
+  runWorkerOnce: vi.fn(),
 }));
 
 vi.mock("next/server", () => ({ after: moduleMocks.after }));
+vi.mock("@/lib/worker", () => ({ runWorkerOnce: moduleMocks.runWorkerOnce }));
 vi.mock("@/lib/supabase/service", () => ({
   createServiceSupabaseClient: moduleMocks.createServiceSupabaseClient,
 }));
@@ -335,10 +337,25 @@ describe("jobs worker", () => {
     );
   });
 
-  it("kickWorker는 Next.js after에 runOnce 작업을 예약한다", () => {
+  it("kickWorker는 Next.js after에서 공통 워커 진입점을 실행한다", async () => {
     kickWorker();
 
     expect(moduleMocks.after).toHaveBeenCalledOnce();
     expect(moduleMocks.after).toHaveBeenCalledWith(expect.any(Function));
+    await moduleMocks.after.mock.calls[0][0]();
+    expect(moduleMocks.runWorkerOnce).toHaveBeenCalledOnce();
+  });
+
+  it("작업 성공 후 완료 상태 저장 실패를 작업 실패로 오인해 재큐잉하지 않는다", async () => {
+    const fake = createFakeClient([[{ id: "delivered", kind: "send_slack", payload: {}, attempts: 1 }]]);
+    const update = vi.fn(() => ({ eq: async () => ({ error: { code: "XX000" }, data: null }) }));
+    fake.client.from.mockReturnValue({ update } as unknown as ReturnType<typeof fake.client.from>);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    const handler = vi.fn(async () => undefined);
+    registerHandler("send_slack", handler);
+    await expect(runOnce()).rejects.toThrow("database operation failed");
+    expect(handler).toHaveBeenCalledOnce();
+    expect(update).toHaveBeenCalledOnce();
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ status: "done" }));
   });
 });

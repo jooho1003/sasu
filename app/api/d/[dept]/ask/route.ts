@@ -9,6 +9,7 @@ import { registerSendSlackHandler } from "@/lib/pipeline/send-slack";
 import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { mask } from "@/lib/mask";
 
 export async function POST(
   request: Request,
@@ -29,7 +30,7 @@ export async function POST(
   }
 
   const originalQuestion = body.question.trim();
-  const question = originalQuestion.slice(0, 1_000);
+  const question = mask(originalQuestion).slice(0, 1_000);
   const supabase = await createServerSupabaseClient();
   const insertResult = await supabase
     .from("answers")
@@ -64,7 +65,7 @@ export async function POST(
       ok: true,
       answer_id: insertResult.data.id,
       job_id: jobId,
-      truncated: originalQuestion.length > question.length,
+      truncated: originalQuestion.length > 1_000,
     },
     { status: 202 },
   );

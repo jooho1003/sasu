@@ -39,13 +39,13 @@ TDD_GUARD = "tdd-guard.sh"
 DANGER_GUARD = "dangerous-command-guard.sh"
 
 
-def run_hook(script_name: str, payload: dict, cwd: Path) -> subprocess.CompletedProcess:
+def run_hook(script_name: str, payload: dict | str, cwd: Path) -> subprocess.CompletedProcess:
     # 훅 스크립트는 cwd에 복사된 사본을 상대 경로로 실행한다.
     # 리포 경로에 한글이 들어 있어(개발/바이브코딩) 절대 경로를 argv로 넘기면
     # bash가 인코딩이 깨진 경로를 받아 'No such file or directory'로 죽는다.
     return subprocess.run(
         [_bash(), f"./.hooks/{script_name}"],
-        input=json.dumps(payload),
+        input=payload if isinstance(payload, str) else json.dumps(payload),
         cwd=cwd,
         capture_output=True,
         text=True,
@@ -96,6 +96,11 @@ def repo():
 
 def posix(p: Path) -> str:
     return p.as_posix()
+
+
+@pytest.mark.parametrize("script", [TDD_GUARD, DANGER_GUARD])
+def test_malformed_payload_fails_closed(repo, script):
+    assert run_hook(script, "{malformed", repo).returncode == 2
 
 
 # ---------------------------------------------------------------------------

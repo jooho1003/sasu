@@ -1,0 +1,69 @@
+{"kind":"deck","id":"pr/i5skzz","name":"Deck"}
+{"kind":"layout","layoutId":"fc2e8627-afed-490b-8d9a-b09a02fce1f5","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"8a9cc93c-bd62-466d-ac0b-d992b55a7100","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/jnda4j","slide":1,"title":"기획팀 9월 런칭 의사결정","textShapes":3}
+{"kind":"textbox","id":"sh/58z2l0ri","slide":1,"text":"기획팀 9월 런칭 의사결정","textPreview":"기획팀 9월 런칭 의사결정","textChars":14,"textLines":1,"bbox":[84,150,1110,100]}
+{"kind":"textbox","id":"sh/i5oja5sr","slide":1,"text":"Slack · 회의 · Excel · PPT 목업 데이터","textPreview":"Slack · 회의 · Excel · PPT 목업 데이터","textChars":31,"textLines":1,"bbox":[88,275,900,48]}
+{"kind":"textbox","id":"sh/36xkjq9c","slide":1,"text":"팀장부터 인턴까지 역할이 다른 다자간 대화에서 결정·액션·정보·잡담을 나누고, 근거를 카드와 원장으로 남기는 장면","textPreview":"팀장부터 인턴까지 역할이 다른 다자간 대화에서 결정·액션·정보·잡담을 나누고, 근거를 카드와 원장으로 남기는 장면","textChars":63,"textLines":1,"bbox":[88,430,980,90]}
+{"kind":"notes","id":"nt/jnda4j","slide":1,"text":"합성 목업 데이터. 실제 회사 정보가 아닙니다."}
+{"kind":"slide","id":"sl/aklehq","slide":2,"title":"01  참여 구조","textShapes":18}
+{"kind":"textbox","id":"sh/qx4j2lk3","slide":2,"text":"01  참여 구조","textPreview":"01  참여 구조","textChars":9,"textLines":1,"bbox":[72,36,1120,24]}
+{"kind":"textbox","id":"sh/d0vid0je","slide":2,"text":"역할별 발언과 결정 권한","textPreview":"역할별 발언과 결정 권한","textChars":13,"textLines":1,"bbox":[72,72,1136,64]}
+{"kind":"textbox","id":"sh/szm14v29","slide":2,"text":"팀장","textPreview":"팀장","textChars":2,"textLines":1,"bbox":[90,170,100,48]}
+{"kind":"textbox","id":"sh/fmd0fa1k","slide":2,"text":"김현우  ·  최종 승인","textPreview":"김현우  ·  최종 승인","textChars":13,"textLines":1,"bbox":[220,170,350,48]}
+{"kind":"textbox","id":"sh/e14j65kz","slide":2,"text":"예산·일정 결정","textPreview":"예산·일정 결정","textChars":8,"textLines":1,"bbox":[620,170,450,48]}
+{"kind":"textbox","id":"sh/1ofih0jq","slide":2,"text":"과장","textPreview":"과장","textChars":2,"textLines":1,"bbox":[90,258,100,48]}
+{"kind":"textbox","id":"sh/0nm18f25","slide":2,"text":"박서윤  ·  1차 검토","textPreview":"박서윤  ·  1차 검토","textChars":13,"textLines":1,"bbox":[220,258,350,48]}
+{"kind":"textbox","id":"sh/nqx0ja1w","slide":2,"text":"예산·리스크 검토","textPreview":"예산·리스크 검토","textChars":9,"textLines":1,"bbox":[620,258,450,48]}
+{"kind":"textbox","id":"sh/2poja50b","slide":2,"text":"대리","textPreview":"대리","textChars":2,"textLines":1,"bbox":[90,346,100,48]}
+{"kind":"textbox","id":"sh/4zu1kbid","slide":2,"text":"이준호  ·  실무 조율","textPreview":"이준호  ·  실무 조율","textChars":13,"textLines":1,"bbox":[220,346,350,48]}
+{"kind":"textbox","id":"sh/5032tgjy","slide":2,"text":"일정·업체 커뮤니케이션","textPreview":"일정·업체 커뮤니케이션","textChars":12,"textLines":1,"bbox":[620,346,450,48]}
+{"kind":"textbox","id":"sh/ixcji107","slide":2,"text":"사원","textPreview":"사원","textChars":2,"textLines":1,"bbox":[90,434,100,48]}
+{"kind":"textbox","id":"sh/jylkr61s","slide":2,"text":"최민지  ·  검증 담당","textPreview":"최민지  ·  검증 담당","textChars":13,"textLines":1,"bbox":[220,434,350,48]}
+{"kind":"textbox","id":"sh/s3ulovi9","slide":2,"text":"자료·테스트 케이스","textPreview":"자료·테스트 케이스","textChars":10,"textLines":1,"bbox":[620,434,450,48]}
+{"kind":"textbox","id":"sh/t4n2xgju","slide":2,"text":"인턴","textPreview":"인턴","textChars":2,"textLines":1,"bbox":[90,522,100,48]}
+{"kind":"textbox","id":"sh/61c3ml03","slide":2,"text":"정다은  ·  자료 지원","textPreview":"정다은  ·  자료 지원","textChars":13,"textLines":1,"bbox":[220,522,350,48]}
+{"kind":"textbox","id":"sh/r2lkvq1o","slide":2,"text":"조사·회의·문서 정리","textPreview":"조사·회의·문서 정리","textChars":11,"textLines":1,"bbox":[620,522,450,48]}
+{"kind":"textbox","id":"sh/grelsvil","slide":2,"text":"대화 64건  ·  결정 후보 7건  ·  액션 19건  ·  정보 28건  ·  잡담 10건","textPreview":"대화 64건  ·  결정 후보 7건  ·  액션 19건  ·  정보 28건  ·  잡담 10건","textChars":52,"textLines":1,"bbox":[90,635,1000,35]}
+{"kind":"notes","id":"nt/aklehq","slide":2,"text":""}
+{"kind":"slide","id":"sl/xe53vx","slide":3,"title":"02  Slack·회의 목업","textShapes":11}
+{"kind":"textbox","id":"sh/x8jypcz2","slide":3,"text":"02  Slack·회의 목업","textPreview":"02  Slack·회의 목업","textChars":15,"textLines":1,"bbox":[72,36,1120,24]}
+{"kind":"textbox","id":"sh/a58fex0r","slide":3,"text":"결정으로 수렴하는 대화","textPreview":"결정으로 수렴하는 대화","textChars":12,"textLines":1,"bbox":[72,72,1136,64]}
+{"kind":"textbox","id":"sh/v6hgn2hc","slide":3,"text":"09:20  김현우 팀장","textPreview":"09:20  김현우 팀장","textChars":13,"textLines":1,"bbox":[90,168,260,34]}
+{"kind":"textbox","id":"sh/83qxcnil","slide":3,"text":"외주 QA 예산 1,800만원을 승인하고 9월 18일 베타를 진행해도 될까요? 금요일 17시까지 결정이 필요합니다.","textPreview":"외주 QA 예산 1,800만원을 승인하고 9월 18일 베타를 진행해도 될까요? 금요일 17시까지 결정이 필요합니다.","textChars":64,"textLines":1,"bbox":[90,204,1060,66]}
+{"kind":"textbox","id":"sh/94zylsz6","slide":3,"text":"09:29  이준호 대리","textPreview":"09:29  이준호 대리","textChars":13,"textLines":1,"bbox":[90,310,260,34]}
+{"kind":"textbox","id":"sh/m18fad0f","slide":3,"text":"민지님은 QA 업체 세 곳의 견적과 투입 가능일을 오늘 15시까지 받아 주세요.","textPreview":"민지님은 QA 업체 세 곳의 견적과 투입 가능일을 오늘 15시까지 받아 주세요.","textChars":44,"textLines":1,"bbox":[90,346,1060,50]}
+{"kind":"textbox","id":"sh/n2hgjih0","slide":3,"text":"14:10  김현우 팀장","textPreview":"14:10  김현우 팀장","textChars":13,"textLines":1,"bbox":[90,438,260,34]}
+{"kind":"textbox","id":"sh/szuhorip","slide":3,"text":"업체 B를 우선협상 대상으로 두고, 리포트 샘플 확인 후 최종 승인하겠습니다.","textPreview":"업체 B를 우선협상 대상으로 두고, 리포트 샘플 확인 후 최종 승인하겠습니다.","textChars":43,"textLines":1,"bbox":[90,474,1060,50]}
+{"kind":"textbox","id":"sh/t03yxwza","slide":3,"text":"결정 요청","textPreview":"결정 요청","textChars":5,"textLines":1,"bbox":[1010,168,150,34]}
+{"kind":"textbox","id":"sh/14rmhs3a","slide":3,"text":"액션 요청","textPreview":"액션 요청","textChars":5,"textLines":1,"bbox":[1010,310,150,34]}
+{"kind":"textbox","id":"sh/03il8n25","slide":3,"text":"후속 결정","textPreview":"후속 결정","textChars":5,"textLines":1,"bbox":[1010,438,150,34]}
+{"kind":"notes","id":"nt/xe53vx","slide":3,"text":""}
+{"kind":"slide","id":"sl/3l493h","slide":4,"title":"03  문서 입력","textShapes":7}
+{"kind":"textbox","id":"sh/ra9cne1k","slide":4,"text":"03  문서 입력","textPreview":"03  문서 입력","textChars":9,"textLines":1,"bbox":[72,36,1120,24]}
+{"kind":"textbox","id":"sh/cbidwzip","slide":4,"text":"Excel과 PPT가 근거가 되는 장면","textPreview":"Excel과 PPT가 근거가 되는 장면","textChars":21,"textLines":1,"bbox":[72,72,1136,64]}
+{"kind":"textbox","id":"sh/dwrep4za","slide":4,"text":"런칭 예산안.xlsx","textPreview":"런칭 예산안.xlsx","textChars":11,"textLines":1,"bbox":[90,170,400,45]}
+{"kind":"textbox","id":"sh/25gvqp0n","slide":4,"text":"외주 QA 상한 2,000만원\n선택안 1,780만원\n잔여 예비비 220만원","textPreview":"외주 QA 상한 2,000만원 | 선택안 1,780만원 | 잔여 예비비 220만원","textChars":41,"textLines":3,"bbox":[90,230,420,160]}
+{"kind":"textbox","id":"sh/369cju18","slide":4,"text":"런칭 의사결정 자료.pptx","textPreview":"런칭 의사결정 자료.pptx","textChars":15,"textLines":1,"bbox":[650,170,480,45]}
+{"kind":"textbox","id":"sh/47idszit","slide":4,"text":"9월 18일 베타 목표\nQA 업체 비교와 리스크\n고객 공지·장애 대응 기준","textPreview":"9월 18일 베타 목표 | QA 업체 비교와 리스크 | 고객 공지·장애 대응 기준","textChars":41,"textLines":3,"bbox":[650,230,500,160]}
+{"kind":"textbox","id":"sh/p8rul4je","slide":4,"text":"사수는 문서의 숫자·일정·원칙을 Slack/회의 발언과 함께 검색하고, 인용 가능한 문장만 답변에 사용합니다.","textPreview":"사수는 문서의 숫자·일정·원칙을 Slack/회의 발언과 함께 검색하고, 인용 가능한 문장만 답변에 사용합니다.","textChars":61,"textLines":1,"bbox":[90,500,1050,72]}
+{"kind":"notes","id":"nt/3l493h","slide":4,"text":""}
+{"kind":"slide","id":"sl/ashx58","slide":5,"title":"04  카드·원장·Q&A","textShapes":8}
+{"kind":"textbox","id":"sh/98zmt4rm","slide":5,"text":"04  카드·원장·Q&A","textPreview":"04  카드·원장·Q&A","textChars":13,"textLines":1,"bbox":[72,36,1120,24]}
+{"kind":"textbox","id":"sh/m583i9sv","slide":5,"text":"사수가 만들어야 하는 결과","textPreview":"사수가 만들어야 하는 결과","textChars":14,"textLines":1,"bbox":[72,72,1136,64]}
+{"kind":"textbox","id":"sh/n6h4re9g","slide":5,"text":"지금 결정","textPreview":"지금 결정","textChars":5,"textLines":1,"bbox":[90,180,250,42]}
+{"kind":"textbox","id":"sh/wbalojax","slide":5,"text":"외주 QA 업체 B와 1,780만원으로 계약할까요?\n마감: 금요일 17시\n근거: 대화 09:20, 예산안.xlsx, 업체 비교표","textPreview":"외주 QA 업체 B와 1,780만원으로 계약할까요? | 마감: 금요일 17시 | 근거: 대화 09:20, 예산안.xlsx, 업체 비교표","textChars":71,"textLines":3,"bbox":[90,230,480,150]}
+{"kind":"textbox","id":"sh/xcjmxori","slide":5,"text":"결정 원장","textPreview":"결정 원장","textChars":5,"textLines":1,"bbox":[650,180,250,42]}
+{"kind":"textbox","id":"sh/a983m9s7","slide":5,"text":"결정: 업체 B 우선협상\n담당: 김현우 팀장\n후속: 계약 초안·범위 변경 사전 승인","textPreview":"결정: 업체 B 우선협상 | 담당: 김현우 팀장 | 후속: 계약 초안·범위 변경 사전 승인","textChars":46,"textLines":3,"bbox":[650,230,480,150]}
+{"kind":"textbox","id":"sh/vah4ve9s","slide":5,"text":"묻기","textPreview":"묻기","textChars":2,"textLines":1,"bbox":[90,470,250,42]}
+{"kind":"textbox","id":"sh/cf6lcfat","slide":5,"text":"“왜 업체 B를 선택했나요?” → 예산 상한, 투입일, 야간 테스트 범위를 함께 인용해 답변","textPreview":"“왜 업체 B를 선택했나요?” → 예산 상한, 투입일, 야간 테스트 범위를 함께 인용해 답변","textChars":51,"textLines":1,"bbox":[90,520,1040,58]}
+{"kind":"notes","id":"nt/ashx58","slide":5,"text":""}
+{"kind":"slide","id":"sl/99jmei","slide":6,"title":"05  테스트 준비","textShapes":7}
+{"kind":"textbox","id":"sh/1ovi9kj6","slide":6,"text":"05  테스트 준비","textPreview":"05  테스트 준비","textChars":10,"textLines":1,"bbox":[72,36,1120,24]}
+{"kind":"textbox","id":"sh/elkje5kf","slide":6,"text":"검증용 목업 데이터 패키지","textPreview":"검증용 목업 데이터 패키지","textChars":14,"textLines":1,"bbox":[72,72,1136,64]}
+{"kind":"textbox","id":"sh/fmd07a10","slide":6,"text":"기획팀_9월_런칭_의사결정_목업.xlsx","textPreview":"기획팀_9월_런칭_의사결정_목업.xlsx","textChars":22,"textLines":1,"bbox":[90,190,1080,46]}
+{"kind":"textbox","id":"sh/sj21cf2p","slide":6,"text":"요약 · 대화 원문 64건 · 액션 추적","textPreview":"요약 · 대화 원문 64건 · 액션 추적","textChars":22,"textLines":1,"bbox":[90,240,1080,38]}
+{"kind":"textbox","id":"sh/dkbi50ju","slide":6,"text":"기획팀_9월_런칭_의사결정_목업.pptx","textPreview":"기획팀_9월_런칭_의사결정_목업.pptx","textChars":22,"textLines":1,"bbox":[90,345,1080,46]}
+{"kind":"textbox","id":"sh/qxkja5kj","slide":6,"text":"역할 구조 · 대화 수렴 · 문서 근거 · 사수 결과 화면","textPreview":"역할 구조 · 대화 수렴 · 문서 근거 · 사수 결과 화면","textChars":32,"textLines":1,"bbox":[90,395,1080,38]}
+{"kind":"textbox","id":"sh/rit03a14","slide":6,"text":"합성 데이터로 Slack 메시지, 회의 전사, 문서 근거, Q&A를 반복 검증할 수 있습니다.","textPreview":"합성 데이터로 Slack 메시지, 회의 전사, 문서 근거, Q&A를 반복 검증할 수 있습니다.","textChars":52,"textLines":1,"bbox":[90,545,1080,54]}
+{"kind":"notes","id":"nt/99jmei","slide":6,"text":""}

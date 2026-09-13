@@ -260,7 +260,7 @@ async function updateFailureOwner(
   }
 }
 
-async function sweepPendingRows(): Promise<void> {
+export async function sweepPendingRows(): Promise<void> {
   const client = createServiceSupabaseClient();
   const cutoff = new Date(Date.now() - SWEEP_TIMEOUT_MS).toISOString();
   const answerResult = await client
@@ -367,12 +367,6 @@ export async function runOnce(
 
     try {
       await handler(job.payload);
-      await updateJob(client, job.id, {
-        status: "done",
-        last_error: null,
-        updated_at: new Date().toISOString(),
-      });
-      done += 1;
     } catch (handlerError) {
       const errorCode = sanitizeErrorCode(handlerError);
 
@@ -393,14 +387,27 @@ export async function runOnce(
         last_error: errorCode,
         updated_at: new Date().toISOString(),
       });
+      continue;
     }
+    // 처리 성공 뒤 완료 기록 실패는 외부 작업의 실패가 아니다.
+    // 자동 재큐잉하지 않고 오류를 상위로 전달해 중복 실행을 피한다.
+    await updateJob(client, job.id, {
+      status: "done",
+      last_error: null,
+      updated_at: new Date().toISOString(),
+    });
+    done += 1;
   }
 
   return { claimed: jobs.length, done, failed };
 }
 
 export function kickWorker(): void {
-  after(() => runOnce());
+  // 동적 import로 jobs ↔ 파이프라인의 초기화 순환을 피한다.
+  after(async () => {
+    const { runWorkerOnce } = await import("@/lib/worker");
+    return runWorkerOnce();
+  });
 }
 
 registerHandler("sweep", sweepPendingRows);
