@@ -40,9 +40,12 @@ type MemberRow = {
   consented_at: string | null;
 };
 
-type DecisionRow = {
-  id: string;
-  decided_by_name: string;
+type DecisionRpcResult = {
+  ok: boolean;
+  duplicate: boolean;
+  status: "decided" | "deferred" | "rejected" | "open";
+  decision_id: string | null;
+  decided_by_name: string | null;
   decided_at: string | null;
 };
 
@@ -166,19 +169,13 @@ async function authorizedCard(
   return { card: cardResult.data, member };
 }
 
-async function existingDecision(
-  client: ReturnType<typeof createServiceSupabaseClient>,
-  requestId: string,
-): Promise<DecisionRow | null> {
-  const result = await client
-    .from("decisions")
-    .select("id, decided_by_name, decided_at")
-    .eq("request_id", requestId)
-    .maybeSingle<DecisionRow>();
-  if (result.error) {
-    throw new SlackInteractionError("기존 원장 기록을 확인하지 못했습니다.");
-  }
-  return result.data;
+function formatDecisionTime(value: string | null): string {
+  if (!value) return "시각 미상";
+  return new Intl.DateTimeFormat("ko-KR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Seoul",
+  }).format(new Date(value));
 }
 
 async function recordDecision(args: {
@@ -194,15 +191,6 @@ async function recordDecision(args: {
     args.requestId,
     args.slackUserId,
   );
-  const existing = await existingDecision(client, card.id);
-  if (existing) {
-    return {
-      decisionId: existing.id,
-      message: `이미 ${existing.decided_by_name}이(가) 결정한 카드입니다.`,
-      created: false,
-      origin: null,
-    };
-  }
 
   if (card.status !== "open") {
     throw new SlackInteractionError("현재 처리할 수 없는 카드 상태입니다.");
@@ -220,21 +208,44 @@ async function recordDecision(args: {
     throw new SlackInteractionError("입력은 1,000자 이내로 작성해주세요.");
   }
 
-  const now = new Date();
-  if (args.status !== "decided") {
-    const updateResult = await client
-      .from("decision_requests")
-      .update({
-        status: args.status,
-        closed_at: args.status === "rejected" ? now.toISOString() : null,
-      })
-      .eq("id", card.id)
-      .eq("status", "open")
-      .select("id")
-      .maybeSingle<{ id: string }>();
-    if (updateResult.error || !updateResult.data) {
+  const action = args.status === "decided"
+    ? "decide"
+    : args.status === "deferred"
+      ? "defer"
+      : "reject";
+  const decisionResult = await client.rpc("decide_request_as", {
+    p_user: member.user_id,
+    p_request: card.id,
+    p_action: action,
+    p_outcome: outcome,
+    p_rationale: rationale,
+  });
+
+  if (decisionResult.error) {
+    if (decisionResult.error.code === "42501") {
+      throw new SlackInteractionError("이 카드를 처리할 권한이 없습니다.");
+    }
+    if (decisionResult.error.code === "23514") {
       throw new SlackInteractionError("카드 상태가 이미 바뀌었습니다.");
     }
+    throw new SlackInteractionError("카드를 처리하지 못했습니다.");
+  }
+
+  const result = decisionResult.data as DecisionRpcResult | null;
+  if (!result?.ok) {
+    throw new SlackInteractionError("카드를 처리하지 못했습니다.");
+  }
+
+  if (result.duplicate && result.decision_id && result.decided_by_name) {
+    return {
+      decisionId: result.decision_id,
+      message: `이미 ${result.decided_by_name}이(가) ${formatDecisionTime(result.decided_at)}에 결정했습니다 → 원장 #${result.decision_id.slice(0, 8)}`,
+      created: false,
+      origin: null,
+    };
+  }
+
+  if (args.status !== "decided") {
     return {
       decisionId: null,
       message: args.status === "deferred" ? "카드를 보류했습니다." : "카드를 반려했습니다.",
@@ -243,50 +254,12 @@ async function recordDecision(args: {
     };
   }
 
-  const openedAt = card.opened_at ? new Date(card.opened_at).getTime() : now.getTime();
-  const leadTimeMin = Math.max(0, Math.floor((now.getTime() - openedAt) / 60_000));
-  const insertResult = await client
-    .from("decisions")
-    .insert({
-      dept_id: card.dept_id,
-      request_id: card.id,
-      decided_by: member.user_id,
-      decided_by_name: member.display_name,
-      decided_at: now.toISOString(),
-      outcome,
-      rationale,
-      supersedes_id: null,
-      lead_time_min: leadTimeMin,
-    })
-    .select("id")
-    .single<{ id: string }>();
-
-  if (insertResult.error) {
-    if (insertResult.error.code === "23505") {
-      const duplicate = await existingDecision(client, card.id);
-      if (duplicate) {
-        return {
-          decisionId: duplicate.id,
-          message: `이미 ${duplicate.decided_by_name}이(가) 결정한 카드입니다.`,
-          created: false,
-          origin: null,
-        };
-      }
-    }
+  if (!result.decision_id) {
     throw new SlackInteractionError("결정을 원장에 기록하지 못했습니다.");
   }
 
-  const closeResult = await client
-    .from("decision_requests")
-    .update({ status: "decided", closed_at: now.toISOString() })
-    .eq("id", card.id)
-    .eq("status", "open");
-  if (closeResult.error) {
-    throw new SlackInteractionError("결정은 기록됐지만 카드 상태를 닫지 못했습니다.");
-  }
-
   return {
-    decisionId: insertResult.data.id,
+    decisionId: result.decision_id,
     message: "결정을 원장에 기록했습니다.",
     created: true,
     origin: await originThreadForCard(client, card),

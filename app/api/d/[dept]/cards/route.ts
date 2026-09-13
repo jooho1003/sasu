@@ -1,12 +1,4 @@
-import { enqueue, kickWorker } from "@/lib/jobs";
-import { registerMakeCardHandler } from "@/lib/pipeline/card";
-import { registerClassifyHandler } from "@/lib/pipeline/classify";
-import { registerEmbedHandler } from "@/lib/pipeline/embed";
-import { registerAnswerHandler } from "@/lib/pipeline/answer";
-import { registerSendSlackHandler } from "@/lib/pipeline/send-slack";
-import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
-import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
-import { registerNotionImportHandler } from "@/lib/pipeline/notion-import";
+import { kickWorker } from "@/lib/jobs";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -74,27 +66,38 @@ export async function POST(
     });
   }
 
-  try {
-    const jobId = await enqueue("make_card", { itemId: itemResult.data.id });
-    registerClassifyHandler();
-    registerEmbedHandler();
-    registerAnswerHandler();
-    registerMakeCardHandler();
-  registerSendSlackHandler();
-  registerMeetingSummaryHandler();
-  registerNotionImportHandler();
-    registerSlackBackfillHandler();
-    kickWorker();
-
-    return Response.json({
-      job_id: jobId,
-      existing: false,
-      message: "결정 카드 생성을 시작했습니다.",
-    }, { status: 202 });
-  } catch {
+  const promotionResult = await supabase.rpc("promote_item", {
+    p_item: itemResult.data.id,
+  });
+  if (promotionResult.error || typeof promotionResult.data !== "string") {
     return Response.json(
       { error: "카드 생성을 시작하지 못했습니다. 잠시 후 다시 시도해주세요." },
       { status: 500 },
     );
   }
+
+  const racedCardResult = await supabase
+    .from("decision_requests")
+    .select("id")
+    .eq("origin_item_id", itemResult.data.id)
+    .eq("status", "open")
+    .maybeSingle<{ id: string }>();
+
+  if (!racedCardResult.error && racedCardResult.data) {
+    return Response.json({
+      card_id: racedCardResult.data.id,
+      existing: true,
+      message: "이미 열린 결정 카드가 있습니다.",
+    });
+  }
+
+  kickWorker();
+  return Response.json(
+    {
+      job_id: promotionResult.data,
+      existing: false,
+      message: "결정 카드 생성을 시작했습니다.",
+    },
+    { status: 202 },
+  );
 }

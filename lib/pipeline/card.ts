@@ -50,14 +50,10 @@ type PrincipleSourceRow = {
 type DecisionRow = {
   id: string;
   request_id: string | null;
+  visibility: string;
   outcome: string;
   rationale: string;
   decided_at: string | null;
-};
-
-type RequestVisibilityRow = {
-  id: string;
-  visibility: string;
 };
 
 type MemberRow = {
@@ -288,7 +284,7 @@ export async function makeCard(itemId: string): Promise<void> {
         .eq("active", true),
       client
         .from("decisions")
-        .select("id, request_id, outcome, rationale, decided_at")
+        .select("id, request_id, visibility, outcome, rationale, decided_at")
         .eq("dept_id", origin.dept_id)
         .order("decided_at", { ascending: false })
         .limit(3),
@@ -309,31 +305,18 @@ export async function makeCard(itemId: string): Promise<void> {
   const memberRows = (membersResult.data ?? []) as MemberRow[];
 
   const principleSourceIds = principleSources.map((source) => source.id);
-  const requestIds = recentDecisions.flatMap((decision) =>
-    decision.request_id === null ? [] : [decision.request_id],
-  );
-  const [principleItemsResult, requestVisibilitiesResult] = await Promise.all([
-    principleSourceIds.length === 0
-      ? Promise.resolve({ data: [] as ItemRow[], error: null })
-      : client
-          .from("items")
-          .select("id, source_id, content, created_at")
-          .in("source_id", principleSourceIds)
-          .is("deleted_at", null)
-          .order("created_at", { ascending: false }),
-    requestIds.length === 0
-      ? Promise.resolve({ data: [] as RequestVisibilityRow[], error: null })
-      : client
-          .from("decision_requests")
-          .select("id, visibility")
-          .in("id", requestIds),
-  ]);
+  const principleItemsResult = principleSourceIds.length === 0
+    ? { data: [] as ItemRow[], error: null }
+    : await client
+        .from("items")
+        .select("id, source_id, content, created_at")
+        .in("source_id", principleSourceIds)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false });
 
   ensureNoDatabaseError(principleItemsResult.error);
-  ensureNoDatabaseError(requestVisibilitiesResult.error);
 
   const principleItems = (principleItemsResult.data ?? []) as ItemRow[];
-  const requestVisibilities = (requestVisibilitiesResult.data ?? []) as RequestVisibilityRow[];
   const members: Member[] = memberRows
     .filter((member) => member.role === "lead" || member.role === "member")
     .map((member) => ({
@@ -388,12 +371,6 @@ export async function makeCard(itemId: string): Promise<void> {
   const principleVisibility = new Map(
     principleSources.map((source) => [source.id, visibilityOf(source.visibility)]),
   );
-  const requestVisibility = new Map(
-    requestVisibilities.map((request) => [
-      request.id,
-      visibilityOf(request.visibility),
-    ]),
-  );
 
   for (const item of similarItems) {
     texts.set(item.id, item.content);
@@ -412,12 +389,7 @@ export async function makeCard(itemId: string): Promise<void> {
 
   for (const decision of recentDecisions) {
     texts.set(decision.id, `${decision.outcome}\n${decision.rationale}`);
-    visibilities.set(
-      decision.id,
-      decision.request_id === null
-        ? "dept"
-        : (requestVisibility.get(decision.request_id) ?? "dept"),
-    );
+    visibilities.set(decision.id, visibilityOf(decision.visibility));
   }
 
   let draft = await generateDraft(input, origin.dept_id, false);

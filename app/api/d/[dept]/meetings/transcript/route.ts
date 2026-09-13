@@ -68,8 +68,6 @@ export async function POST(
   const sourceResult = await supabase.from("sources").insert({ id: sourceId, dept_id: membership.deptId, kind: "meeting", external_id: `upload:${sourceId}`, title, visibility, active: true }).select("id").single<{ id: string }>();
   if (sourceResult.error || !sourceResult.data) return Response.json({ error: "회의 소스를 저장하지 못했습니다." }, { status: 500 });
   const meetingId = randomUUID();
-  const meetingResult = await supabase.from("meetings").insert({ id: meetingId, source_id: sourceId, dept_id: membership.deptId, status: "scheduled", status_reason: null }).select("id").single<{ id: string }>();
-  if (meetingResult.error || !meetingResult.data) return Response.json({ error: "회의를 저장하지 못했습니다." }, { status: 500 });
 
   const itemResult = await supabase.from("items").insert(accepted.map(({ segment, member }) => ({
     source_id: sourceId,
@@ -81,7 +79,8 @@ export async function POST(
     content: mask(segment.content),
   }))).select("id");
   if (itemResult.error) return Response.json({ error: "전사 발언을 저장하지 못했습니다." }, { status: 500 });
-  await supabase.from("meetings").update({ status: "transcribed" }).eq("id", meetingId);
+  const meetingResult = await supabase.from("meetings").insert({ id: meetingId, source_id: sourceId, dept_id: membership.deptId, status: "transcribed", status_reason: null }).select("id").single<{ id: string }>();
+  if (meetingResult.error || !meetingResult.data) return Response.json({ error: "회의를 저장하지 못했습니다." }, { status: 500 });
 
   registerClassifyHandler();
   registerEmbedHandler();

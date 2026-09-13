@@ -104,6 +104,7 @@ function createFakeClient(options: FakeOptions = {}) {
         {
           id: "decision-real",
           request_id: "request-prior",
+          visibility: "leads_only" satisfies Visibility,
           outcome: "연 10% 이상이면 재입찰",
           rationale: "원가 원칙을 따른다.",
           decided_at: "2026-09-01T03:00:00.000Z",
@@ -533,6 +534,42 @@ describe("makeCard", () => {
         }),
       ]),
     );
+  });
+
+  it("직접 기록한 과거 결정은 decisions.visibility를 카드 가시성에 상속한다", async () => {
+    const fake = createFakeClient({
+      decisions: [
+        {
+          id: "decision-direct-private",
+          request_id: null,
+          visibility: "leads_only" satisfies Visibility,
+          outcome: "비공개 공급 조건을 유지한다.",
+          rationale: "팀장 전용 원가 근거를 따른다.",
+          decided_at: "2026-09-02T03:00:00.000Z",
+        },
+      ],
+      decisionRequests: [],
+    });
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    resolveDrafts({
+      ...defaultDraft,
+      citations: [
+        {
+          item_id: null,
+          decision_id: "decision-direct-private",
+          quote: "비공개 공급 조건을 유지한다.",
+        },
+      ],
+    });
+
+    await makeCard(originItem.id);
+
+    expect(fake.state.cards).toEqual([
+      expect.objectContaining({
+        visibility: "leads_only",
+        assignee_id: "lead-1",
+      }),
+    ]);
   });
 
   it("원본 항목을 부분 인용해도 카드에는 전체 원문을 표시한다", async () => {

@@ -13,7 +13,8 @@ const { pgcrypto } = require("@electric-sql/pglite/contrib/pgcrypto");
 const { vector } = require("@electric-sql/pglite-pgvector");
 const db = new PGlite({ extensions: { pgcrypto, vector } });
 let passed = 0;
-const ids = Object.fromEntries(["org", "dept", "lead", "member", "publicSource", "privateSource", "publicItem", "privateItem", "card", "decision", "answer", "pending", "failed"].map(key => [key, randomUUID()]));
+const ids = Object.fromEntries(["org", "dept", "lead", "member", "publicSource", "privateSource", "publicItem", "privateItem", "card", "publicCard", "deferredCard", "slackCard", "meeting", "conflict", "decision", "publicDecision", "answer", "pending", "failed"].map(key => [key, randomUUID()]));
+const backfillIds = Object.fromEntries(["org", "dept", "privateSource", "privateItem", "card", "cardDecision", "directDecision"].map(key => [key, randomUUID()]));
 const q = (sql, params = []) => db.query(sql, params);
 async function check(name, fn) {
   await fn();
@@ -43,9 +44,29 @@ try {
     alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
     alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
   `);
-  for (const file of readdirSync("supabase/migrations").filter(name => name.endsWith(".sql") && !name.startsWith("0004_")).sort()) {
+  const migrations = readdirSync("supabase/migrations")
+    .filter(name => name.endsWith(".sql") && !name.startsWith("0004_"))
+    .sort();
+  const boundaryMigration = "0017_card_decision_boundaries.sql";
+  for (const file of migrations.filter(name => name < boundaryMigration)) {
     await db.exec(readFileSync(resolve("supabase/migrations", file), "utf8"));
   }
+  await q("insert into orgs(id,name) values ($1,'backfill fixture')", [backfillIds.org]);
+  await q("insert into departments(id,org_id,name) values ($1,$2,'backfill fixture')", [backfillIds.dept,backfillIds.org]);
+  await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$2,'document','backfill-private','leads_only')", [backfillIds.privateSource,backfillIds.dept]);
+  await q("insert into items(id,source_id,dept_id,content) values ($1,$2,$3,'backfill private evidence')", [backfillIds.privateItem,backfillIds.privateSource,backfillIds.dept]);
+  await q("insert into decision_requests(id,dept_id,title,background,visibility) values ($1,$2,'backfill card','backfill card','leads_only')", [backfillIds.card,backfillIds.dept]);
+  await q("insert into decisions(id,dept_id,request_id,decided_by_name,outcome,rationale) values ($1,$2,$3,'backfill actor','backfill card outcome','backfill reason'),($4,$2,null,'backfill actor','backfill direct outcome','backfill reason')", [backfillIds.cardDecision,backfillIds.dept,backfillIds.card,backfillIds.directDecision]);
+  await q("insert into citations(owner_kind,owner_id,item_id,quote) values ('decision',$1,$2,'backfill private evidence')", [backfillIds.directDecision,backfillIds.privateItem]);
+  await db.exec(readFileSync(resolve("supabase/migrations", boundaryMigration), "utf8"));
+  for (const file of migrations.filter(name => name > boundaryMigration)) {
+    await db.exec(readFileSync(resolve("supabase/migrations", file), "utf8"));
+  }
+  await check("0017 backfills card and direct decision visibility from their evidence", async () => {
+    const rows = await q("select id,visibility from decisions where id in ($1,$2) order by id", [backfillIds.cardDecision,backfillIds.directDecision]);
+    assert.equal(rows.rows.length, 2);
+    assert.equal(rows.rows.every(row => row.visibility === "leads_only"), true);
+  });
   await q("insert into auth.users values ($1),($2)", [ids.lead, ids.member]);
   await q("insert into orgs(id,name) values ($1,'SQL fixture')", [ids.org]);
   await q("insert into departments(id,org_id,name) values ($1,$2,'SQL fixture')", [ids.dept,ids.org]);
@@ -53,8 +74,13 @@ try {
   await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$3,'slack_channel','public','dept'),($2,$3,'slack_channel','private','leads_only')", [ids.publicSource,ids.privateSource,ids.dept]);
   const embedding = JSON.stringify(Array(1024).fill(0.01));
   await q("insert into items(id,source_id,dept_id,content,embedding,embed_model) values ($1,$3,$5,'public evidence',$6,'voyage-4-lite'),($2,$4,$5,'private evidence',$6,'voyage-4-lite')", [ids.publicItem,ids.privateItem,ids.publicSource,ids.privateSource,ids.dept,embedding]);
-  await q("insert into decision_requests(id,dept_id,title,background,visibility,assignee_id) values ($1,$2,'private card','private background','leads_only',$3)", [ids.card,ids.dept,ids.lead]);
-  await q("insert into decisions(id,dept_id,request_id,decided_by,decided_by_name,outcome,rationale) values ($1,$2,$3,$4,'lead','private outcome','private rationale')", [ids.decision,ids.dept,ids.card,ids.lead]);
+  await q("insert into decision_requests(id,dept_id,title,background,visibility,assignee_id) values ($1,$3,'private card','private background','leads_only',$4),($2,$3,'public card','public background','dept',$4)", [ids.card,ids.publicCard,ids.dept,ids.lead]);
+  await q("insert into decision_requests(id,dept_id,title,background,visibility,assignee_id,status) values ($1,$2,'deferred card','deferred background','dept',$3,'deferred')", [ids.deferredCard,ids.dept,ids.member]);
+  await q("insert into decision_requests(id,dept_id,title,background,visibility,assignee_id) values ($1,$2,'slack card','slack background','dept',$3)", [ids.slackCard,ids.dept,ids.member]);
+  await q("insert into decisions(id,dept_id,request_id,decided_by,decided_by_name,outcome,rationale,visibility) values ($1,$2,$3,$4,'lead','private outcome','private rationale','leads_only')", [ids.decision,ids.dept,ids.card,ids.lead]);
+  await q("insert into decisions(id,dept_id,decided_by,decided_by_name,outcome,rationale,visibility) values ($1,$2,$3,'lead','public outcome','public rationale','dept')", [ids.publicDecision,ids.dept,ids.lead]);
+  await q("insert into meetings(id,source_id,dept_id,status) values ($1,$2,$3,'transcribed')", [ids.meeting,ids.publicSource,ids.dept]);
+  await q("insert into conflicts(id,request_id,prior_decision_id,explanation) values ($1,$2,$3,'synthetic conflict')", [ids.conflict,ids.publicCard,ids.publicDecision]);
   for (const [key,status] of [["answer","done"],["pending","pending"],["failed","failed"]]) {
     await q("insert into answers(id,dept_id,asked_by,question,status) values ($1,$2,$3,'synthetic question',$4)", [ids[key],ids.dept,ids.lead,status]);
   }
@@ -83,15 +109,15 @@ try {
   await check("authenticated cannot call claim_jobs", () => asUser(ids.lead, () => denied("select * from claim_jobs(1)")));
   await check("member cannot read lead answer or private ledger", () => asUser(ids.member, async () => {
     assert.equal((await q("select id from answers")).rows.length, 0);
-    assert.equal((await q("select id from decisions")).rows.length, 0);
-    assert.equal((await q("select * from recent_decisions_as($1,$2,3)",[ids.member,ids.dept])).rows.length,0);
+    assert.equal((await q("select id from decisions where id=$1", [ids.decision])).rows.length, 0);
+    assert.equal((await q("select * from recent_decisions_as($1,$2,3) where id=$3",[ids.member,ids.dept,ids.decision])).rows.length,0);
   }));
   await check("lead user search sees private evidence; channel search does not", () => asUser(ids.lead, async () => {
     assert.equal((await q("select * from search_as($1,$2,$3,8)",[ids.lead,ids.dept,embedding])).rows.length,2);
     const channel = await q("select * from search_channel_as($1,$2,$3,8)",[ids.lead,ids.dept,embedding]);
     assert.deepEqual(channel.rows.map(row => row.id),[ids.publicItem]);
-    assert.equal((await q("select * from recent_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,1);
-    assert.equal((await q("select * from recent_channel_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,0);
+    assert.equal((await q("select * from recent_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,2);
+    assert.equal((await q("select * from recent_channel_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,1);
   }));
   await check("RPC caller cannot impersonate lead", () => asUser(ids.member, async () => {
     assert.equal((await q("select * from search_channel_as($1,$2,$3,8)",[ids.lead,ids.dept,embedding])).rows.length,0);
@@ -122,9 +148,101 @@ try {
     await asUser(ids.lead, async () => { assert.equal((await q("update members set slack_user_id='TEST_MEMBER' where user_id=$1 returning user_id",[ids.member])).rows.length,1); });
   });
   await check("ledger is append only for authenticated", () => asUser(ids.lead, async () => {
+    await denied("insert into decisions(dept_id,decided_by,decided_by_name,outcome,rationale) values($1,$2,'forged','forged','forged')",[ids.dept,ids.lead]);
     await denied("update decisions set outcome='forged' where id=$1",[ids.decision]);
     await denied("delete from decisions where id=$1",[ids.decision]);
   }));
+  await check("card, conflict, and meeting writes are command-scoped", async () => {
+    await asUser(ids.member, async () => {
+      await denied("insert into decision_requests(dept_id,title,background,visibility) values($1,'forged','forged','dept')", [ids.dept]);
+      await denied("update decision_requests set assignee_id=$1 where id=$2", [ids.member,ids.publicCard]);
+      await denied("delete from decision_requests where id=$1", [ids.publicCard]);
+      await denied("insert into conflicts(request_id,prior_decision_id,explanation) values($1,$2,'forged')", [ids.publicCard,ids.publicDecision]);
+      await denied("insert into meetings(source_id,dept_id,status) values($1,$2,'transcribed')", [ids.publicSource,ids.dept]);
+    });
+    await asUser(ids.lead, async () => {
+      await denied("update conflicts set explanation='forged' where id=$1", [ids.conflict]);
+      await denied("delete from conflicts where id=$1", [ids.conflict]);
+      await denied("update meetings set status='summarized' where id=$1", [ids.meeting]);
+      await denied("delete from meetings where id=$1", [ids.meeting]);
+      assert.equal((await q("insert into meetings(source_id,dept_id,status) values($1,$2,'transcribed') returning id", [ids.publicSource,ids.dept])).rows.length, 1);
+    });
+  });
+  await check("only assignee or lead can decide and only lead can reopen", async () => {
+    await asUser(ids.member, () => denied("select decide_request($1,'decide','forged','forged')", [ids.publicCard]));
+    await asUser(ids.member, () => denied("select decide_request($1,'reopen','','')", [ids.deferredCard]));
+    await asUser(ids.lead, async () => {
+      const reopened = (await q("select decide_request($1,'reopen','','') as result", [ids.deferredCard])).rows[0].result;
+      assert.equal(reopened.status, "open");
+    });
+  });
+  await check("promotion is visible-item-only, enqueues make_card, and reuses an open card", async () => {
+    let promotionJob;
+    await asUser(ids.member, async () => {
+      await denied("select promote_item($1)", [ids.privateItem]);
+      promotionJob = (await q("select promote_item($1) as id", [ids.publicItem])).rows[0].id;
+    });
+    await q("update decision_requests set origin_item_id=$1 where id=$2", [ids.publicItem,ids.publicCard]);
+    await asUser(ids.member, async () => {
+      assert.equal((await q("select promote_item($1) as id", [ids.publicItem])).rows[0].id, ids.publicCard);
+    });
+    assert.equal((await q("select id from jobs where id=$1 and kind='make_card' and payload->>'itemId'=$2", [promotionJob,ids.publicItem])).rows.length, 1);
+  });
+  await check("command RPC execution grants exclude anon and the Slack actor RPC excludes authenticated", async () => {
+    await db.exec("set role anon");
+    try {
+      await denied("select promote_item($1)", [ids.publicItem]);
+      await denied("select decide_request($1,'defer','','')", [ids.slackCard]);
+      await denied("select record_direct_decision($1,'forged','forged','[]')", [ids.dept]);
+    } finally { await db.exec("reset role"); }
+    await asUser(ids.member, () => denied("select decide_request_as($1,$2,'defer','','')", [ids.member,ids.slackCard]));
+  });
+  await check("service-only Slack decision RPC shares the same transition rules", async () => {
+    await db.exec("set role service_role");
+    try {
+      const result = (await q("select decide_request_as($1,$2,'defer','','') as result", [ids.member,ids.slackCard])).rows[0].result;
+      assert.equal(result.status, "deferred");
+    } finally { await db.exec("reset role"); }
+  });
+  await check("direct private evidence fixes decision visibility and stays hidden from members", async () => {
+    let directDecision;
+    await asUser(ids.lead, async () => {
+      directDecision = (await q("select record_direct_decision($1,'private direct','private reason',$2) as id", [ids.dept,JSON.stringify([{item_id:ids.privateItem,quote:"private evidence"}])])).rows[0].id;
+      assert.equal((await q("select visibility from decisions where id=$1", [directDecision])).rows[0].visibility, "leads_only");
+      assert.equal((await q("select * from recent_decisions_as($1,$2,20) where id=$3", [ids.lead,ids.dept,directDecision])).rows.length, 1);
+    });
+    await asUser(ids.member, async () => {
+      assert.equal((await q("select id from decisions where id=$1", [directDecision])).rows.length, 0);
+      assert.equal((await q("select * from recent_decisions_as($1,$2,20) where id=$3", [ids.member,ids.dept,directDecision])).rows.length, 0);
+    });
+  });
+  await check("direct decisions reject invisible evidence and mismatched quotes", async () => {
+    await asUser(ids.member, () => denied("select record_direct_decision($1,'forged','forged',$2)", [ids.dept,JSON.stringify([{item_id:ids.privateItem,quote:"private evidence"}])]))
+    await asUser(ids.lead, async () => {
+      await assert.rejects(
+        () => q("select record_direct_decision($1,'forged','forged',$2)", [ids.dept,JSON.stringify([{item_id:ids.publicItem,quote:"not in evidence"}])]),
+        error => error.code === "22023",
+      );
+    });
+  });
+  await check("citation insertion failure rolls back the direct decision", async () => {
+    await db.exec("create function fail_direct_citation() returns trigger language plpgsql as $$ begin if new.quote='public evidence' then raise exception 'synthetic_citation_failure'; end if; return new; end $$; create trigger fail_direct_citation before insert on citations for each row execute function fail_direct_citation();");
+    await asUser(ids.lead, async () => {
+      await assert.rejects(() => q("select record_direct_decision($1,'rollback outcome','rollback reason',$2)", [ids.dept,JSON.stringify([{item_id:ids.publicItem,quote:"public evidence"}])]));
+    });
+    assert.equal((await q("select id from decisions where outcome='rollback outcome'")).rows.length, 0);
+    await db.exec("drop trigger fail_direct_citation on citations; drop function fail_direct_citation()");
+  });
+  await check("deciding twice returns the original decision and inserts one row", async () => {
+    await asUser(ids.lead, async () => {
+      const first = (await q("select decide_request($1,'decide','approved','because') as result", [ids.publicCard])).rows[0].result;
+      const second = (await q("select decide_request($1,'decide','approved again','because again') as result", [ids.publicCard])).rows[0].result;
+      assert.equal(first.duplicate, false);
+      assert.equal(second.duplicate, true);
+      assert.equal(second.decision_id, first.decision_id);
+    });
+    assert.equal((await q("select id from decisions where request_id=$1", [ids.publicCard])).rows.length, 1);
+  });
   await check("users cannot manufacture completed AI answers", () => asUser(ids.lead, async () => {
     await denied("update answers set answer='forged' where id=$1",[ids.answer]);
     await denied("insert into answers(dept_id,asked_by,question,status,answer) values($1,$2,'forged','done','forged')",[ids.dept,ids.lead]);
@@ -191,7 +309,7 @@ try {
         await q("insert into items(id,source_id,dept_id,content,embedding,embed_model) values($1,$3,$5,'synthetic public',$6,'voyage-4-lite'),($2,$4,$5,'synthetic private',$6,'voyage-4-lite')",[randomUUID(),itemIndex===0?dept.privateItem:randomUUID(),dept.publicSource,dept.privateSource,dept.id,embedding]);
       }
       await q("insert into decision_requests(id,dept_id,title,background,visibility,assignee_id) values($1,$2,'synthetic private','synthetic private','leads_only',$3)",[dept.card,dept.id,dept.lead]);
-      await q("insert into decisions(dept_id,request_id,decided_by,decided_by_name,outcome,rationale) values($1,$2,$3,'synthetic-lead','synthetic outcome','synthetic rationale')",[dept.id,dept.card,dept.lead]);
+      await q("insert into decisions(dept_id,request_id,decided_by,decided_by_name,outcome,rationale,visibility) values($1,$2,$3,'synthetic-lead','synthetic outcome','synthetic rationale','leads_only')",[dept.id,dept.card,dept.lead]);
       await q("insert into citations(owner_kind,owner_id,item_id,quote) values('decision_request',$1,$2,'synthetic private')",[dept.card,dept.privateItem]);
       await q("insert into answers(dept_id,asked_by,question) values($1,$2,'synthetic question'),($1,$3,'synthetic question')",[dept.id,dept.lead,dept.member]);
     }
