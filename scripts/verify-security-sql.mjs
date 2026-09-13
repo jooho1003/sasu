@@ -15,7 +15,18 @@ const db = new PGlite({ extensions: { pgcrypto, vector } });
 let passed = 0;
 const ids = Object.fromEntries(["org", "dept", "lead", "member", "publicSource", "privateSource", "publicItem", "privateItem", "card", "publicCard", "deferredCard", "slackCard", "meeting", "conflict", "decision", "publicDecision", "answer", "pending", "failed"].map(key => [key, randomUUID()]));
 const backfillIds = Object.fromEntries(["org", "dept", "privateSource", "privateItem", "card", "cardDecision", "directDecision"].map(key => [key, randomUUID()]));
+const mergeIds = Object.fromEntries([
+  "boundaryDept", "boundarySource", "exactItem", "belowItem", "oldItem", "closedItem",
+  "exactCard", "belowCard", "oldCard", "closedCard", "visibilityDept", "visibilitySource",
+  "deptItem", "leadItem", "deptCard", "leadCard",
+].map(key => [key, randomUUID()]));
 const q = (sql, params = []) => db.query(sql, params);
+const cosineVector = similarity => {
+  const values = Array(1024).fill(0);
+  values[0] = similarity;
+  values[1] = Math.sqrt(1 - similarity ** 2);
+  return JSON.stringify(values);
+};
 async function check(name, fn) {
   await fn();
   passed++;
@@ -84,6 +95,47 @@ try {
   for (const [key,status] of [["answer","done"],["pending","pending"],["failed","failed"]]) {
     await q("insert into answers(id,dept_id,asked_by,question,status) values ($1,$2,$3,'synthetic question',$4)", [ids[key],ids.dept,ids.lead,status]);
   }
+  const mergeQuery = cosineVector(1);
+  await check("find_merge_target includes the 72h/0.85 boundaries and rejects stale, closed, or sub-threshold cards", async () => {
+    await db.exec("begin");
+    try {
+      await q("insert into departments(id,org_id,name) values ($1,$3,'merge-boundary'),($2,$3,'merge-visibility')", [mergeIds.boundaryDept,mergeIds.visibilityDept,ids.org]);
+      await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$3,'document','merge-boundary','dept'),($2,$4,'document','merge-visibility','dept')", [mergeIds.boundarySource,mergeIds.visibilitySource,mergeIds.boundaryDept,mergeIds.visibilityDept]);
+      await q("insert into items(id,source_id,dept_id,content,embedding,embed_model) values ($1,$5,$6,'exact boundary',$9,'voyage-4-lite'),($2,$5,$6,'below threshold',$10,'voyage-4-lite'),($3,$5,$6,'stale candidate',$11,'voyage-4-lite'),($4,$5,$6,'closed candidate',$11,'voyage-4-lite'),($7,$8,$12,'dept candidate',$11,'voyage-4-lite'),($13,$8,$12,'lead candidate',$14,'voyage-4-lite')", [mergeIds.exactItem,mergeIds.belowItem,mergeIds.oldItem,mergeIds.closedItem,mergeIds.boundarySource,mergeIds.boundaryDept,mergeIds.deptItem,mergeIds.visibilitySource,cosineVector(0.85),cosineVector(0.849),mergeQuery,mergeIds.visibilityDept,mergeIds.leadItem,cosineVector(0.9)]);
+      await q("insert into decision_requests(id,dept_id,title,background,visibility,status,opened_at) values ($1,$7,'exact','exact','dept','open',now()-interval '72 hours'),($2,$7,'below','below','dept','open',now()-interval '1 hour'),($3,$7,'old','old','dept','open',now()-interval '72 hours 1 second'),($4,$7,'closed','closed','dept','decided',now()-interval '1 hour'),($5,$8,'dept','dept','dept','open',now()-interval '1 hour'),($6,$8,'lead','lead','leads_only','open',now()-interval '1 hour')", [mergeIds.exactCard,mergeIds.belowCard,mergeIds.oldCard,mergeIds.closedCard,mergeIds.deptCard,mergeIds.leadCard,mergeIds.boundaryDept,mergeIds.visibilityDept]);
+      await q("insert into citations(owner_kind,owner_id,item_id,quote) values ('decision_request',$1,$7,'exact boundary'),('decision_request',$2,$8,'below threshold'),('decision_request',$3,$9,'stale candidate'),('decision_request',$4,$10,'closed candidate'),('decision_request',$5,$11,'dept candidate'),('decision_request',$6,$12,'lead candidate')", [mergeIds.exactCard,mergeIds.belowCard,mergeIds.oldCard,mergeIds.closedCard,mergeIds.deptCard,mergeIds.leadCard,mergeIds.exactItem,mergeIds.belowItem,mergeIds.oldItem,mergeIds.closedItem,mergeIds.deptItem,mergeIds.leadItem]);
+      await db.exec("set role service_role");
+      const boundary = await q("select * from find_merge_target($1,$2,'dept',$3)", [mergeIds.boundaryDept,mergeQuery,randomUUID()]);
+      assert.equal(boundary.rows.length, 1);
+      assert.equal(boundary.rows[0].request_id, mergeIds.exactCard);
+      assert.ok(Math.abs(boundary.rows[0].similarity - 0.85) < 0.00001);
+      assert.equal((await q("select * from find_merge_target($1,$2,'dept',$3)", [mergeIds.boundaryDept,mergeQuery,mergeIds.exactItem])).rows.length, 0);
+      await db.exec("reset role");
+      await db.exec("commit");
+    } catch (error) {
+      await db.exec("reset role").catch(() => undefined);
+      await db.exec("rollback").catch(() => undefined);
+      throw error;
+    }
+  });
+  await check("find_merge_target refuses visibility narrowing and remains service-role-only", async () => {
+    await db.exec("set role service_role");
+    try {
+      const privateOrigin = await q("select * from find_merge_target($1,$2,'leads_only',$3)", [mergeIds.visibilityDept,mergeQuery,randomUUID()]);
+      assert.equal(privateOrigin.rows[0].request_id, mergeIds.leadCard);
+      const publicOrigin = await q("select * from find_merge_target($1,$2,'dept',$3)", [mergeIds.visibilityDept,mergeQuery,randomUUID()]);
+      assert.equal(publicOrigin.rows[0].request_id, mergeIds.deptCard);
+    } finally {
+      await db.exec("reset role");
+    }
+    await asUser(ids.lead, () => denied("select * from find_merge_target($1,$2,'dept',$3)", [mergeIds.visibilityDept,mergeQuery,randomUUID()]));
+  });
+  await check("citation owner/item partial unique index rejects duplicate evidence", async () => {
+    await assert.rejects(
+      () => q("insert into citations(owner_kind,owner_id,item_id,quote) values ('decision_request',$1,$2,'duplicate')", [mergeIds.exactCard,mergeIds.exactItem]),
+      error => error.code === "23505",
+    );
+  });
   const expiredLeaseJob = randomUUID();
   const activeLeaseJob = randomUUID();
   const exhaustedLeaseJob = randomUUID();

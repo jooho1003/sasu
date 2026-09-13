@@ -1,9 +1,14 @@
 import { CardDraft, type CardDraft as CardDraftValue } from "@/lib/contracts";
+import { embedText, formatVector } from "@/lib/embeddings";
 import { enqueue, registerHandler } from "@/lib/jobs";
 import { llm } from "@/lib/llm";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
 type Visibility = "dept" | "leads_only";
+
+// PRD §6-3 ⑥. 이 수치를 바꾸려면 먼저 ADR을 추가해야 한다.
+export const MERGE_WINDOW_HOURS = 72;
+export const MERGE_SIMILARITY_THRESHOLD = 0.85;
 
 type CitationReference = {
   itemId?: string;
@@ -40,6 +45,11 @@ type SimilarItemRow = {
   id: string;
   content: string;
   source_visibility: string;
+};
+
+type MergeTargetRow = {
+  request_id: string;
+  similarity: number;
 };
 
 type PrincipleSourceRow = {
@@ -246,7 +256,93 @@ async function insertCard(
   throw new CardPipelineDatabaseError();
 }
 
-export async function makeCard(itemId: string): Promise<void> {
+async function prepareOriginEmbedding(
+  client: ReturnType<typeof createServiceSupabaseClient>,
+  origin: OriginItemRow,
+): Promise<string | number[] | null> {
+  if (origin.embedding !== null) {
+    return origin.embedding;
+  }
+
+  try {
+    const result = await embedText(origin.content, { inputType: "document" });
+    const embedding = formatVector(result.vector);
+    const updateResult = await client
+      .from("items")
+      .update({
+        embedding,
+        embed_model: result.model,
+        embed_status: "done",
+      })
+      .eq("id", origin.id);
+    if (updateResult.error) {
+      return null;
+    }
+    return embedding;
+  } catch {
+    // 병합은 최적화다. 임베딩 장애가 새 카드 생성까지 막아서는 안 된다.
+    return null;
+  }
+}
+
+async function findMergeTarget(
+  client: ReturnType<typeof createServiceSupabaseClient>,
+  origin: OriginItemRow,
+  originVisibility: Visibility,
+  embedding: string | number[],
+): Promise<MergeTargetRow | null> {
+  if (typeof client.rpc !== "function") {
+    return null;
+  }
+
+  const result = await client.rpc("find_merge_target", {
+    p_dept: origin.dept_id,
+    p_query: embedding,
+    p_origin_visibility: originVisibility,
+    p_exclude_item: origin.id,
+  });
+  if (result.error || !Array.isArray(result.data)) {
+    return null;
+  }
+
+  const target = result.data[0] as Partial<MergeTargetRow> | undefined;
+  return typeof target?.request_id === "string" &&
+    typeof target.similarity === "number"
+    ? { request_id: target.request_id, similarity: target.similarity }
+    : null;
+}
+
+async function appendMergeCitation(
+  client: ReturnType<typeof createServiceSupabaseClient>,
+  requestId: string,
+  origin: OriginItemRow,
+): Promise<void> {
+  const existingResult = await client
+    .from("citations")
+    .select("id")
+    .eq("owner_kind", "decision_request")
+    .eq("owner_id", requestId)
+    .eq("item_id", origin.id)
+    .maybeSingle<{ id: string }>();
+  ensureNoDatabaseError(existingResult.error);
+  if (existingResult.data !== null) {
+    return;
+  }
+
+  const insertResult = await client.from("citations").insert({
+    owner_kind: "decision_request",
+    owner_id: requestId,
+    item_id: origin.id,
+    decision_id: null,
+    quote: origin.content,
+  });
+  if (insertResult.error?.code === "23505") {
+    return;
+  }
+  ensureNoDatabaseError(insertResult.error);
+}
+
+export async function makeCard(itemId: string): Promise<string | undefined> {
   const client = createServiceSupabaseClient();
   const originResult = await client
     .from("items")
@@ -264,6 +360,21 @@ export async function makeCard(itemId: string): Promise<void> {
 
   if ((await findExistingCard(client, itemId)) !== null) {
     return;
+  }
+
+  const originVisibility = sourceVisibility(origin);
+  const originEmbedding = await prepareOriginEmbedding(client, origin);
+  if (originEmbedding !== null) {
+    const mergeTarget = await findMergeTarget(
+      client,
+      origin,
+      originVisibility,
+      originEmbedding,
+    );
+    if (mergeTarget !== null) {
+      await appendMergeCitation(client, mergeTarget.request_id, origin);
+      return `merged_into=${mergeTarget.request_id}`;
+    }
   }
 
   const [sameSourceResult, principleSourcesResult, decisionsResult, membersResult] =
@@ -367,7 +478,6 @@ export async function makeCard(itemId: string): Promise<void> {
 
   const texts = new Map<string, string>();
   const visibilities = new Map<string, Visibility>();
-  const originVisibility = sourceVisibility(origin);
   const principleVisibility = new Map(
     principleSources.map((source) => [source.id, visibilityOf(source.visibility)]),
   );
