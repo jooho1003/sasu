@@ -95,8 +95,8 @@ export default function AskS4({ deptId }: { deptId: string }) {
       `/api/d/${encodeURIComponent(deptId)}/answers/${encodeURIComponent(answerId)}`,
       { cache: "no-store" },
     );
-    const body = (await response.json()) as AnswerState & { error?: string };
-    if (!response.ok) throw new Error(body.error ?? "답변 상태를 확인하지 못했습니다.");
+    const body = (await response.json()) as AnswerState & { error?: string; message?: string };
+    if (!response.ok) throw new Error(body.message ?? body.error ?? "답변 상태를 확인하지 못했습니다.");
     return body;
   };
 
@@ -115,8 +115,8 @@ export default function AskS4({ deptId }: { deptId: string }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ question }),
       });
-      const body = (await response.json()) as { answer_id?: string; error?: string };
-      if (!response.ok || !body.answer_id) throw new Error(body.error ?? "질문을 저장하지 못했습니다.");
+      const body = (await response.json()) as { answer_id?: string; error?: string; message?: string };
+      if (!response.ok || !body.answer_id) throw new Error(body.message ?? body.error ?? "질문을 저장하지 못했습니다.");
 
       const poll = async (): Promise<AnswerState | null> => {
         try {

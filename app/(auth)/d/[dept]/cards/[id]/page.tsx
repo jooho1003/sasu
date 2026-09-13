@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import CardActions from "@/components/card-actions";
+import { formatConflictBadge } from "@/lib/conflicts";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -262,6 +263,9 @@ export default async function CardDetailPage({
                       <p className="m-0 leading-7">{conflict.explanation}</p>
                       {prior ? (
                         <div className="grid gap-1">
+                          <Link className="w-fit text-sm font-bold text-[var(--urgent)]" href={`/d/${membership.deptId}/ledger#decision-${prior.id}`}>
+                            {formatConflictBadge(prior.decided_at)}
+                          </Link>
                           <q className="text-sm text-[var(--muted)]">
                             {prior.outcome} — {prior.rationale}
                           </q>

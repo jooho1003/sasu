@@ -66,6 +66,21 @@ def _resolve_agent_command(agent: str) -> list:
     return argv
 
 
+def _apply_step_model(argv: list, agent: str, step: dict) -> list:
+    """step의 `codex_model`·`effort`(플랜 티어)가 있으면 codex의 -m/-c 값을 바꾼다.
+
+    바이브코딩 CLAUDE.md §4 — 티어별 모델을 step 단위로 배정한다. 없으면 표의 기본값.
+    """
+    if agent != "codex":
+        return argv
+    argv = list(argv)
+    if step.get("codex_model"):
+        argv[argv.index("-m") + 1] = step["codex_model"]
+    if step.get("effort"):
+        argv[argv.index("-c") + 1] = f'model_reasoning_effort="{step["effort"]}"'
+    return argv
+
+
 @contextlib.contextmanager
 def progress_indicator(label: str):
     """터미널 진행 표시기. with 문으로 사용하며 .elapsed 로 경과 시간을 읽는다."""
@@ -296,9 +311,9 @@ class StepExecutor:
         # 가드레일(AGENTS.md + docs/*.md)이 주입되면 프롬프트가 8만 자를 넘는데,
         # Windows CreateProcess의 명령줄 상한은 32,767자라 argv로는 WinError 206으로 죽는다.
         result = subprocess.run(
-            _resolve_agent_command(self._agent),
+            _apply_step_model(_resolve_agent_command(self._agent), self._agent, step),
             input=prompt,
-            cwd=self._root, capture_output=True, text=True, timeout=1800,
+            cwd=self._root, capture_output=True, text=True, timeout=3600,
             encoding="utf-8", errors="replace",
         )
 

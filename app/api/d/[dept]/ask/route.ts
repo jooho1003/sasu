@@ -11,6 +11,12 @@ import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { mask } from "@/lib/mask";
 
+const ASK_DAILY_LIMIT_MESSAGE = "오늘 질문 한도(50회)를 모두 사용했습니다. 내일 다시 물어봐 주세요.";
+
+function isAskDailyLimit(error: { code?: string; message?: string } | null): boolean {
+  return error?.code === "P0001" && error.message === "ask_daily_limit";
+}
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ dept: string }> },
@@ -44,6 +50,13 @@ export async function POST(
     })
     .select("id")
     .single<{ id: string }>();
+
+  if (isAskDailyLimit(insertResult.error)) {
+    return Response.json(
+      { error: "ask_daily_limit", message: ASK_DAILY_LIMIT_MESSAGE },
+      { status: 429 },
+    );
+  }
 
   if (insertResult.error || !insertResult.data) {
     return Response.json({ error: "질문을 저장하지 못했습니다." }, { status: 500 });

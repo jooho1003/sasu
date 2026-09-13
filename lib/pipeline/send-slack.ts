@@ -43,7 +43,9 @@ type ItemRow = {
     | { kind: string; external_id: string; title?: string | null }[];
 };
 
-type ConflictRow = { explanation: string };
+type ConflictRow = { prior_decision_id: string; explanation: string };
+
+type ConflictDecisionRow = { id: string; decided_at: string | null };
 
 type CardViewInput = {
   id: string;
@@ -53,7 +55,7 @@ type CardViewInput = {
   deadline: string | null;
   visibility: "dept" | "leads_only";
   citations: SlackCardCitation[];
-  conflicts: { explanation: string }[];
+  conflicts: { explanation: string; decided_at: string | null; href: string }[];
 };
 
 class SendSlackDatabaseError extends Error {
@@ -187,12 +189,16 @@ export async function sendSlackCard(requestId: string): Promise<void> {
       .select("quote, item_id, decision_id")
       .eq("owner_kind", "decision_request")
       .eq("owner_id", card.id),
-    client.from("conflicts").select("explanation").eq("request_id", card.id),
+    client
+      .from("conflicts")
+      .select("prior_decision_id, explanation")
+      .eq("request_id", card.id),
   ]);
   ensureNoDatabaseError(citationsResult.error);
   ensureNoDatabaseError(conflictsResult.error);
 
   const citations = (citationsResult.data ?? []) as CitationRow[];
+  const conflictRows = (conflictsResult.data ?? []) as ConflictRow[];
   if (citations.length === 0) {
     await updateDelivery(client, card.id, {
       slack_delivery_status: "skipped",
@@ -211,8 +217,21 @@ export async function sendSlackCard(requestId: string): Promise<void> {
           .in("id", itemIds(citations));
   ensureNoDatabaseError(itemsResult.error);
 
+  const conflictDecisionIds = [...new Set(conflictRows.map((conflict) => conflict.prior_decision_id))];
+  const conflictDecisionsResult = conflictDecisionIds.length === 0
+    ? { data: [] as ConflictDecisionRow[], error: null }
+    : await client
+        .from("decisions")
+        .select("id, decided_at")
+        .in("id", conflictDecisionIds);
+  ensureNoDatabaseError(conflictDecisionsResult.error);
+
   const itemMap = new Map(
     ((itemsResult.data ?? []) as ItemRow[]).map((item) => [item.id, item]),
+  );
+  const conflictDecisionMap = new Map(
+    ((conflictDecisionsResult.data ?? []) as ConflictDecisionRow[])
+      .map((decision) => [decision.id, decision]),
   );
   const visibleCitations = citations.flatMap((citation) => {
     if (!citation.item_id) {
@@ -241,7 +260,15 @@ export async function sendSlackCard(requestId: string): Promise<void> {
       deadline: card.deadline,
       visibility: card.visibility,
       citations: visibleCitations,
-      conflicts: (conflictsResult.data ?? []) as ConflictRow[],
+      conflicts: conflictRows.flatMap((conflict) => {
+        const decision = conflictDecisionMap.get(conflict.prior_decision_id);
+        if (!decision) return [];
+        return [{
+          explanation: conflict.explanation,
+          decided_at: decision.decided_at,
+          href: `${appBaseUrl()}/d/${card.dept_id}/ledger#decision-${decision.id}`,
+        }];
+      }),
     },
     webUrl: cardUrl,
   });

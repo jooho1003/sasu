@@ -1,3 +1,6 @@
+import { CONSENT_SECTIONS } from "@/lib/consent";
+import { formatConflictBadge } from "@/lib/conflicts";
+
 export type SlackBlock = Record<string, unknown>;
 
 export type SlackCardCitation = {
@@ -14,13 +17,44 @@ export type SlackCardView = {
   visibility: "dept" | "leads_only";
   webUrl: string;
   citations: SlackCardCitation[];
-  conflicts: { explanation: string }[];
+  conflicts: { explanation: string; decided_at: string | null; href: string }[];
 };
 
 type DecisionStatus = "decided" | "deferred" | "rejected";
 
 function escapeSlackText(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+const SLACK_SECTION_TEXT_LIMIT = 3000;
+const SLACK_BLOCK_LIMIT = 50;
+
+function splitSlackSectionText(text: string): string[] {
+  const chunks: string[] = [];
+  let remaining = text;
+
+  while (remaining.length > SLACK_SECTION_TEXT_LIMIT) {
+    const newlineIndex = remaining.lastIndexOf(
+      "\n",
+      SLACK_SECTION_TEXT_LIMIT,
+    );
+    const splitIndex = newlineIndex > 0 ? newlineIndex : SLACK_SECTION_TEXT_LIMIT;
+    chunks.push(remaining.slice(0, splitIndex));
+    remaining = remaining.slice(splitIndex + (newlineIndex > 0 ? 1 : 0));
+  }
+
+  if (remaining.length > 0) {
+    chunks.push(remaining);
+  }
+
+  return chunks;
+}
+
+function consentSectionBlocks(text: string): SlackBlock[] {
+  return splitSlackSectionText(text).map((chunk) => ({
+    type: "section",
+    text: { type: "mrkdwn", text: chunk },
+  }));
 }
 
 function formatDeadline(value: string | null): string {
@@ -94,7 +128,10 @@ export function buildCardBlocks(card: SlackCardView): SlackBlock[] {
       text: {
         type: "mrkdwn",
         text: `:warning: *과거 결정과 충돌*\n${card.conflicts
-          .map((conflict) => `• ${escapeSlackText(conflict.explanation)}`)
+          .map(
+            (conflict) =>
+              `• <${conflict.href}|${escapeSlackText(formatConflictBadge(conflict.decided_at))}> — ${escapeSlackText(conflict.explanation)}`,
+          )
           .join("\n")}`,
       },
     });
@@ -195,4 +232,55 @@ export function buildDecisionModal(args: {
       },
     ],
   };
+}
+
+export function consentBlocks(args: {
+  deptId: string;
+  consentUrl: string;
+}): SlackBlock[] {
+  const noticeBlocks: SlackBlock[] = [
+    {
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: CONSENT_SECTIONS.title,
+        emoji: true,
+      },
+    },
+    ...consentSectionBlocks(escapeSlackText(CONSENT_SECTIONS.introduction)),
+    ...CONSENT_SECTIONS.items.flatMap((item, index) =>
+      consentSectionBlocks(
+        [
+          `*${index + 1}. ${escapeSlackText(item.title)}*`,
+          ...(item.body ? [escapeSlackText(item.body)] : []),
+          ...item.details.map((detail) => `• ${escapeSlackText(detail)}`),
+        ].join("\n"),
+      ),
+    ),
+  ];
+
+  if (noticeBlocks.length + 1 > SLACK_BLOCK_LIMIT) {
+    throw new Error("Slack consent notice exceeds the block limit");
+  }
+
+  return [
+    ...noticeBlocks,
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          action_id: "sasu_consent",
+          text: { type: "plain_text", text: "동의합니다", emoji: true },
+          style: "primary",
+          value: args.deptId,
+        },
+        {
+          type: "button",
+          text: { type: "plain_text", text: "전문 보기", emoji: true },
+          url: args.consentUrl,
+        },
+      ],
+    },
+  ];
 }

@@ -1,0 +1,40 @@
+{
+  "pairs": [
+    {
+      "id": "same-vendor-quote",
+      "expected": "same",
+      "left": "외주사 B 견적이 12% 올랐는데 이번 제안을 받아도 될까요? 오늘 17시까지 결정이 필요합니다.",
+      "right": "외주사 B의 12% 인상 견적 수락 여부는 재무 회신 전까지 보류하기로 했습니다."
+    },
+    {
+      "id": "same-qa-contract",
+      "expected": "same",
+      "left": "9월 18일 베타를 위해 QA 업체 B와 1,780만원에 계약을 진행해도 될까요?",
+      "right": "QA 업체 B 1,780만원 계약 안건은 예산 승인 전까지 보류했습니다."
+    },
+    {
+      "id": "same-release-rollback",
+      "expected": "same",
+      "left": "오늘 배포를 진행해도 될까요? 영향 범위와 롤백 계획 확인이 필요합니다.",
+      "right": "영향 범위와 롤백 계획을 확인하기 전까지 오늘 배포는 보류했습니다."
+    },
+    {
+      "id": "different-vendor-interview",
+      "expected": "different",
+      "left": "외주사 B 견적이 12% 올랐는데 이번 제안을 받아도 될까요?",
+      "right": "신규 고객 인터뷰는 다음 주 화요일 오전으로 확정했습니다."
+    },
+    {
+      "id": "different-release-lunch",
+      "expected": "different",
+      "left": "오늘 배포를 진행해도 될까요? 롤백 계획 확인이 필요합니다.",
+      "right": "오늘 점심 메뉴는 김치찌개로 정하고 회의실 간식은 커피만 준비합니다."
+    },
+    {
+      "id": "different-qa-hiring",
+      "expected": "different",
+      "left": "QA 업체 B와 1,780만원에 계약하는 안건을 승인해 주세요.",
+      "right": "신입 백엔드 개발자 채용 공고의 기술 면접 질문을 다음 주까지 확정합니다."
+    }
+  ]
+}

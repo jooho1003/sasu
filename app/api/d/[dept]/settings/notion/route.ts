@@ -12,12 +12,31 @@ export async function POST(
   const membership = await requireMembership(dept);
   if (membership.role !== "lead") return Response.json({ error: "Notion 원칙 문서는 팀장만 연결할 수 있습니다." }, { status: 403 });
 
-  let body: { page_id?: unknown; title?: unknown; visibility?: unknown };
+  let body: { source_id?: unknown; page_id?: unknown; title?: unknown; visibility?: unknown };
   try {
-    body = (await request.json()) as { page_id?: unknown; title?: unknown; visibility?: unknown };
+    body = (await request.json()) as { source_id?: unknown; page_id?: unknown; title?: unknown; visibility?: unknown };
   } catch {
     return Response.json({ error: "요청 형식이 올바르지 않습니다." }, { status: 400 });
   }
+  const supabase = await createServerSupabaseClient();
+  if (typeof body.source_id === "string") {
+    const sourceResult = await supabase
+      .from("sources")
+      .select("id, kind, active")
+      .eq("id", body.source_id)
+      .eq("dept_id", membership.deptId)
+      .maybeSingle<{ id: string; kind: string; active: boolean }>();
+    if (sourceResult.error) return Response.json({ error: "Notion 연결을 확인하지 못했습니다." }, { status: 500 });
+    if (!sourceResult.data || sourceResult.data.kind !== "notion_page" || !sourceResult.data.active) {
+      return Response.json({ error: "활성 Notion 원칙 문서를 찾지 못했습니다." }, { status: 404 });
+    }
+
+    registerNotionImportHandler();
+    const jobId = await enqueue("notion_import", { sourceId: sourceResult.data.id }, { dedupeKey: `${sourceResult.data.id}:${Date.now()}` });
+    kickWorker();
+    return Response.json({ ok: true, source_id: sourceResult.data.id, job_id: jobId }, { status: 202 });
+  }
+
   if (typeof body.page_id !== "string") return Response.json({ error: "Notion 페이지 ID를 입력해주세요." }, { status: 400 });
 
   let pageId: string;
@@ -28,7 +47,6 @@ export async function POST(
   }
   const title = typeof body.title === "string" && body.title.trim() ? body.title.trim().slice(0, 120) : "Notion 원칙 문서";
   const visibility = body.visibility === "leads_only" ? "leads_only" : "dept";
-  const supabase = await createServerSupabaseClient();
   const existing = await supabase.from("sources").select("id").eq("dept_id", membership.deptId).eq("kind", "notion_page").eq("external_id", pageId).maybeSingle<{ id: string }>();
   if (existing.error) return Response.json({ error: "기존 Notion 연결을 확인하지 못했습니다." }, { status: 500 });
   const sourceResult = existing.data

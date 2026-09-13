@@ -1,8 +1,10 @@
 import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ rpc: vi.fn(), from: vi.fn(), kick: vi.fn() }));
+const mocks = vi.hoisted(() => ({ rpc: vi.fn(), from: vi.fn(), kick: vi.fn(), post: vi.fn(), after: vi.fn() }));
 vi.mock("@/lib/supabase/service", () => ({ createServiceSupabaseClient: () => mocks }));
 vi.mock("@/lib/jobs", () => ({ kickWorker: mocks.kick }));
+vi.mock("@/lib/slack/post", () => ({ postMessage: mocks.post }));
+vi.mock("next/server", () => ({ after: mocks.after }));
 import { POST } from "@/app/api/slack/events/route";
 
 function request(type = "message") {
@@ -41,6 +43,18 @@ describe("Slack 이벤트의 원자 저장 배선", () => {
     mocks.rpc.mockResolvedValue({ data: false, error: null });
     expect((await POST(request())).status).toBe(200);
     expect(mocks.kick).not.toHaveBeenCalled();
+  });
+  it("슬랙 질문 한도 초과는 이벤트를 보존하고 한 번만 스레드에 안내한다", async () => {
+    mocks.rpc.mockResolvedValue({ data: { status: "rate_limited" }, error: null });
+    mocks.post.mockResolvedValue({ channel: "C_TEST", ts: "1" });
+    mocks.after.mockImplementation((callback: () => unknown) => callback());
+
+    expect((await POST(request("app_mention"))).status).toBe(200);
+    expect(mocks.kick).not.toHaveBeenCalled();
+    expect(mocks.post).toHaveBeenCalledWith(expect.objectContaining({
+      channel: "C_TEST", thread_ts: "1726123456.123",
+      text: "오늘 질문 한도(50회)를 모두 사용했습니다. 내일 다시 물어봐 주세요.",
+    }));
   });
   it("트랜잭션 실패는 500이고 재전송에서 다시 저장을 시도한다", async () => {
     mocks.rpc.mockResolvedValueOnce({ data: null, error: { code: "XX000" } });

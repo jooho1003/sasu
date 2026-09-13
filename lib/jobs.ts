@@ -7,6 +7,7 @@ import { createServiceSupabaseClient } from "@/lib/supabase/service";
 export type JobKind =
   | "classify"
   | "embed"
+  | "embed_decision"
   | "summarize_meeting"
   | "summarize_document"
   | "make_card"
@@ -38,7 +39,8 @@ type FailureOwnerMapping = {
   values: (ownerId: string, errorCode: string) => Record<string, unknown>;
 };
 
-const MAX_ATTEMPTS = 3;
+// supabase/migrations/0016_jobs_lease.sql의 claim_jobs()와 반드시 같은 값이어야 한다.
+export const MAX_ATTEMPTS = 3;
 const DEFAULT_CLAIM_LIMIT = 10;
 const MAX_CLAIM_LIMIT = 100;
 const RETRY_BASE_DELAY_MS = 1_000;
@@ -359,6 +361,7 @@ export async function runOnce(
       await updateJob(client, job.id, {
         status: "failed",
         last_error: "unknown_kind",
+        lease_until: null,
         updated_at: new Date().toISOString(),
       });
       failed += 1;
@@ -375,6 +378,7 @@ export async function runOnce(
         await updateJob(client, job.id, {
           status: "failed",
           last_error: errorCode,
+          lease_until: null,
           updated_at: new Date().toISOString(),
         });
         failed += 1;
@@ -385,15 +389,18 @@ export async function runOnce(
         status: "queued",
         run_after: retryAt(job.attempts),
         last_error: errorCode,
+        lease_until: null,
         updated_at: new Date().toISOString(),
       });
       continue;
     }
     // 처리 성공 뒤 완료 기록 실패는 외부 작업의 실패가 아니다.
     // 자동 재큐잉하지 않고 오류를 상위로 전달해 중복 실행을 피한다.
+    // 이 경우 lease 만료 뒤 동일 job이 회수될 수 있으므로 handler는 멱등이어야 한다.
     await updateJob(client, job.id, {
       status: "done",
       last_error: null,
+      lease_until: null,
       updated_at: new Date().toISOString(),
     });
     done += 1;

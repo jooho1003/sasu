@@ -20,6 +20,16 @@ type MemberRow = {
 
 type ItemIdRow = { id: string };
 
+type BackfillItem = {
+  source_id: string;
+  dept_id: string;
+  external_ref: string | null;
+  author_ext_id: string | null;
+  author: string | null;
+  spoken_at: string | null;
+  content: string;
+};
+
 class SlackBackfillDatabaseError extends Error {
   constructor() {
     super("Slack backfill database operation failed");
@@ -46,6 +56,16 @@ function payloadSourceId(payload: unknown): string {
     throw new Error("slack_backfill job payload is invalid");
   }
   return sourceId;
+}
+
+export function prepareBackfillUpsertItems(items: BackfillItem[]) {
+  return items.map((item) => ({
+    ...item,
+    deleted_at: null,
+    embedding: null,
+    embed_model: null,
+    embed_status: "pending",
+  }));
 }
 
 export async function backfillSlackChannel(sourceId: string): Promise<number> {
@@ -96,7 +116,7 @@ export async function backfillSlackChannel(sourceId: string): Promise<number> {
       const itemResult = await client
         .from("items")
         .upsert(
-          items.map((item) => ({ ...item, dept_id: source.dept_id })),
+          prepareBackfillUpsertItems(items.map((item) => ({ ...item, dept_id: source.dept_id }))),
           { onConflict: "source_id,external_ref" },
         )
         .select("id");

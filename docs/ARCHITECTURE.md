@@ -104,7 +104,7 @@ sasu/
 
 요청 핸들러는 (1) 검증 (2) DB 쓰기 (3) `enqueue` (4) `after(() => runOnce())` (5) 응답 — 슬랙 3초 규칙과 Vercel 함수 수명 안에서 끝난다. `runOnce()`는 `FOR UPDATE SKIP LOCKED`로 job을 집고, 실패는 `attempts`·지수 백오프로 `run_after`를 갱신하며, 3회 실패 시 `failed` + 소유 row의 status를 `unclassified` / `needs_review` / `failed(error_code)`로 바꾼다. 매분 트리거가 `after()`가 죽었거나 재시도 대기 중인 job을 집는다. `sweep` job이 2분 넘게 pending인 answers·cards를 `failed(llm_timeout)`으로 정리한다 — 영원한 스피너는 없다.
 
-job 종류 10개: `classify` · `embed` · `summarize_meeting` · `summarize_document` · `make_card` · `answer` · `send_slack` · `notion_import` · `slack_backfill` · `sweep`. 새 종류를 추가하면 이 목록과 PRD §6-1의 주석을 함께 고친다.
+job 종류 11개: `classify` · `embed` · `embed_decision` · `summarize_meeting` · `summarize_document` · `make_card` · `answer` · `send_slack` · `notion_import` · `slack_backfill` · `sweep`. 새 종류를 추가하면 이 목록과 PRD §6-1의 주석을 함께 고친다.
 
 ### 3.3 LLM 호출 지점은 하나
 

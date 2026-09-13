@@ -8,6 +8,12 @@ type ItemRow = {
   deleted_at: string | null;
 };
 
+type DecisionRow = {
+  id: string;
+  outcome: string;
+  rationale: string;
+};
+
 class EmbedPipelineDatabaseError extends Error {
   constructor() {
     super("Embed pipeline database operation failed");
@@ -30,6 +36,17 @@ function itemIdFromPayload(payload: unknown): string {
     throw new Error("embed job payload is invalid");
   }
   return itemId;
+}
+
+function decisionIdFromPayload(payload: unknown): string {
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("embed_decision job payload is invalid");
+  }
+  const decisionId = Reflect.get(payload, "decisionId");
+  if (typeof decisionId !== "string" || decisionId.length === 0) {
+    throw new Error("embed_decision job payload is invalid");
+  }
+  return decisionId;
 }
 
 export async function embedItem(itemId: string): Promise<void> {
@@ -58,8 +75,38 @@ export async function embedItem(itemId: string): Promise<void> {
   ensureNoDatabaseError(updateResult.error);
 }
 
+export async function embedDecision(decisionId: string): Promise<void> {
+  const client = createServiceSupabaseClient();
+  const decisionResult = await client
+    .from("decisions")
+    .select("id, outcome, rationale")
+    .eq("id", decisionId)
+    .maybeSingle<DecisionRow>();
+  ensureNoDatabaseError(decisionResult.error);
+
+  const decision = decisionResult.data;
+  if (!decision) {
+    return;
+  }
+
+  const result = await embedText(`${decision.outcome}\n${decision.rationale}`, {
+    inputType: "document",
+  });
+  const updateResult = await client
+    .from("decisions")
+    .update({
+      embedding: formatVector(result.vector),
+      embed_model: result.model,
+    })
+    .eq("id", decision.id);
+  ensureNoDatabaseError(updateResult.error);
+}
+
 export function registerEmbedHandler(): void {
   registerHandler("embed", async (payload: unknown) => {
     await embedItem(itemIdFromPayload(payload));
+  });
+  registerHandler("embed_decision", async (payload: unknown) => {
+    await embedDecision(decisionIdFromPayload(payload));
   });
 }

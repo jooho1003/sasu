@@ -330,7 +330,7 @@ create table answers (id uuid primary key default gen_random_uuid(), dept_id uui
 
 -- 비동기 작업과 비용 (아키텍처 렌즈 반영)
 create table jobs    (id uuid primary key default gen_random_uuid(), kind text not null,
-                      -- classify|embed|summarize_meeting|make_card|answer|send_slack|notion_import|slack_backfill|sweep
+                      -- classify|embed|embed_decision|summarize_meeting|make_card|answer|send_slack|notion_import|slack_backfill|sweep
                       payload jsonb not null, status text not null default 'queued',   -- queued|running|done|failed
                       attempts int default 0, run_after timestamptz default now(),
                       last_error text, created_at timestamptz default now(), updated_at timestamptz);
@@ -374,7 +374,7 @@ Slack Events / 회의 전사 / Notion 폴링
 3. 담당자 결정: `assignee_hint`가 멤버와 매칭되면 그 사람, 아니면 부서 결정권자(lead). **단, 카드의 `visibility`가 `leads_only`(인용 소스 중 하나라도 leads_only)이면 담당자는 lead로 강제한다** — 경영회의 내용이 담긴 카드가 팀원 DM으로 가면 안 된다.
 4. 발송: 웹 카드 생성 + 슬랙 DM (Block Kit: 헤더·마감·배경·근거 링크·충돌 경고·[결정][보류][반려] 버튼). 버튼 → 모달로 사유 입력. DM은 담당자 1인에게만. 버튼 클릭 시 서버가 **클릭한 Slack 사용자 = 담당자 또는 lead**인지 검증한다.
 5. 결정 시: `decisions` insert, `decision_requests.status` 갱신, 리드타임 계산, 원 스레드에 **결과 한 줄 + 원장 링크만** 공지("결정됨: 재입찰 검토 → 원장 #57"), 질문자 멘션. 사유·배경·인용은 스레드에 쓰지 않는다 — 스레드는 채널 전원이 보고, 카드에는 leads_only 근거가 섞일 수 있다.
-6. **동일 안건 병합**: 새 후보가 최근 72시간 내 open 카드와 유사도 임계(0.85) 이상이면 새 카드를 만들지 않고 기존 카드에 근거를 추가한다 (슬랙 질문 + 회의 보류가 같은 카드가 되는 장면). LLM 확인 호출과 lead의 근거 제거 UI는 나중(Phase 4) — 오병합은 lead가 카드를 반려하고 원본을 다시 승격한다. **병합은 카드의 visibility를 좁히지 않는다** — 새 후보의 소스가 기존 카드보다 좁으면(leads_only → 이미 member에게 DM된 dept 카드) 병합하지 않고 별도 카드를 만든다. 파생값이 원본보다 늦게 바뀌는 드리프트를 원천 차단.
+6. **동일 안건 병합**: 새 후보가 최근 72시간 내 open 카드와 유사도 0.55 이상이면 후보로 두고, gpt-oss-20b에 "같은 미결 결정인가"를 1회 확인해 참일 때만 새 카드를 만들지 않고 기존 카드에 근거를 추가한다 (슬랙 질문 + 회의 보류가 같은 카드가 되는 장면). 확인 호출이 실패하면 병합하지 않는다 (ADR-037 — 임베딩 단독 0.85는 실측상 병합이 일어나지 않고, 낮추면 같은 대상의 다른 결정이 섞인다). lead의 근거 제거 UI는 나중(Phase 4) — 오병합은 lead가 카드를 반려하고 원본을 다시 승격한다. **병합은 카드의 visibility를 좁히지 않는다** — 새 후보의 소스가 기존 카드보다 좁으면(leads_only → 이미 member에게 DM된 dept 카드) 병합하지 않고 별도 카드를 만든다. 파생값이 원본보다 늦게 바뀌는 드리프트를 원천 차단.
 7. **발송 실패 처리**: 담당자가 미동의(`consented_at` null)이거나 봇이 DM을 열 수 없으면 웹 카드만 만들고 lead에게 "DM 발송 불가: 사유"를 알린다. 슬랙 `chat.postMessage` 429는 1초 대기 후 재시도 3회.
 8. **보류와 마감 경과**: [보류]는 상태만 바꾼다(`deferred`). 마감이 지난 open·deferred 카드는 대시보드와 원장에 "마감 지남" 배지로 보인다. 재알림 날짜·리마인드 DM은 나중(Phase 4) — 12일 안에 검증할 수 없는 기능이다.
 9. **결정 멱등성**: 결정 버튼·모달 제출은 `decisions.request_id unique`로 1건만 허용. 두 번째 시도(더블클릭·동시 결정·슬랙 재전송)는 "이미 {이름}이(가) {시각}에 결정했습니다 → 원장 #N"으로 응답한다. 승격 버튼도 `one_open_request_per_item`으로 같은 원본의 open 카드는 1장.
@@ -750,6 +750,11 @@ Phase 4에서 이미 뺀 것(8-0)은 여기 없다. 아래는 **최종 범위 �
 | 5 | 슬랙 DM 카드 버튼·모달 | 웹 카드에서만 결정, DM은 링크만. **주의**: 이 컷은 2-4의 이탈 방지 원칙(DM 안에서 결정 완료)을 되돌린다 — 발동 시 데모 장면 3은 웹 카드로 촬영하고 매직링크 왕복 이탈을 감수 | D9 |
 | 6 | S0 동의 화면 | 슬랙 공지 버튼만 | D9 |
 | 7 | 소스별 visibility 지정 UI | 시드로 leads_only 소스 1개 고정 (데모 장면 4 유지) | D9 |
+
+**D6 판정 기록 (2026-09-13, ADR-036)**
+- **컷 ② 발동**: 판정일까지 Recall.ai 계정·API 키가 없고, 봇 전사가 items로 들어온 실행 증거가 0건이다. 회의 입력은 `.vtt/.txt` 전사 업로드로 확정한다. 봇 연동·`/api/meetings/transcript` 웹훅은 로드맵(§8-1)으로 내린다. 제출물 §5·§6·§7에서 봇을 "만든 것처럼" 쓰지 않는다.
+- **병합 방식 변경 (ADR-037)**: Voyage 실측(24쌍)에서 같은 안건 0.58~0.78, 같은 대상·다른 결정 0.54~0.84로 분포가 겹쳐 임베딩 임계값만으로는 오병합 없이 병합할 수 없다. §6-3 ⑥을 "72h·유사도 0.55 이상 후보 → gpt-oss-20b 동일 안건 확인(`llm.structured`) → 확인된 경우만 병합"으로 바꾼다. §8-0의 "병합 LLM 확인은 나중"을 이 항목만큼 앞당긴다. 게이트: 같은 fixture에서 오병합 0건 · 같은 안건 7/10 이상.
+- **컷 ③ 보류**: 72h 유사도 병합은 D6~D7 Codex step으로 구현을 시도한다. 9/14(D7) 자정까지 "슬랙 질문 1건 + 전사 보류 1건 → 카드 1장"(§11 DECIDE)이 로컬 테스트에서 성립하지 않으면 컷 ③을 발동하고 데모 장면 3을 "같은 형식의 카드 2장"으로 조정한다.
 
 **절대 안 버리는 것**: 결정 카드 · 결정 원장 · 권한별 답변 차이 · 근거 인용 · 게스트 모드. 이 다섯이 빠지면 Otter·Lindy와 다를 게 없다.
 

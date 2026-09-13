@@ -34,6 +34,7 @@ type DemoDepartment = {
   request: {
     id: string;
     origin_item_id: string;
+    citation_item_ids: string[];
     title: string;
     background: string;
     recommendation: string;
@@ -69,7 +70,7 @@ const SALES: DemoDepartment = {
     { id: "10000000-0000-4000-8000-000000000113", source_id: "10000000-0000-4000-8000-000000000103", external_ref: "sales-meeting-1", author: "영업 리드", content: "경영회의 원칙에 따라 10% 이상 인상은 재입찰을 우선 검토하기로 보류했습니다.", label: "decision" },
     { id: "10000000-0000-4000-8000-000000000114", source_id: "10000000-0000-4000-8000-000000000102", external_ref: "sales-slack-2", author: "지후", content: "고객 인터뷰 일정은 다음 주 화요일 오전으로 잡았습니다.", label: "action" },
   ],
-  request: { id: "10000000-0000-4000-8000-000000000121", origin_item_id: "10000000-0000-4000-8000-000000000112", title: "외주사 B 12% 인상 견적을 받아들일까요?", background: "슬랙에서 외주사 B의 견적 인상에 대한 결정을 요청했고, 오늘 17시까지 방향이 필요합니다.", recommendation: "부서 원칙에 따라 재입찰을 우선 검토하고, 예외 사유가 있으면 근거를 남기는 방향을 권합니다.", visibility: "leads_only" },
+  request: { id: "10000000-0000-4000-8000-000000000121", origin_item_id: "10000000-0000-4000-8000-000000000112", citation_item_ids: ["10000000-0000-4000-8000-000000000112", "10000000-0000-4000-8000-000000000113"], title: "외주사 B 12% 인상 견적을 받아들일까요?", background: "슬랙에서 외주사 B의 견적 인상에 대한 결정을 요청했고, 오늘 17시까지 방향이 필요합니다.", recommendation: "부서 원칙에 따라 재입찰을 우선 검토하고, 예외 사유가 있으면 근거를 남기는 방향을 권합니다.", visibility: "leads_only" },
   priorDecision: { id: "10000000-0000-4000-8000-000000000122", outcome: "고객 인터뷰를 다음 주로 확정", rationale: "신규 고객군의 요구를 먼저 확인한 뒤 제안 범위를 좁히기로 했습니다.", item_id: "10000000-0000-4000-8000-000000000114" },
   answers: [
     { id: "10000000-0000-4000-8000-000000000131", question_key: "vendor-price", question: "외주사 B 견적을 받아도 되나요?", answer: "현재 기록에는 12% 인상안이 있고, 영업 원칙은 10% 이상 인상 시 재입찰 검토입니다. 예외가 필요하다면 팀장 결정이 먼저입니다.", generic_answer: "견적을 비교하고 예산과 일정 영향을 확인한 뒤 담당자 승인을 받으세요.", item_id: "10000000-0000-4000-8000-000000000112" },
@@ -95,7 +96,7 @@ const DEVELOPMENT: DemoDepartment = {
     { id: "20000000-0000-4000-8000-000000000113", source_id: "20000000-0000-4000-8000-000000000103", external_ref: "dev-meeting-1", author: "개발 리드", content: "영향 범위가 확인되기 전에는 배포하지 않는 방향으로 보류했습니다.", label: "decision" },
     { id: "20000000-0000-4000-8000-000000000114", source_id: "20000000-0000-4000-8000-000000000102", external_ref: "dev-slack-2", author: "서연", content: "스테이징 로그 대시보드 링크를 문서에 추가했습니다.", label: "action" },
   ],
-  request: { id: "20000000-0000-4000-8000-000000000121", origin_item_id: "20000000-0000-4000-8000-000000000112", title: "롤백 플랜 확인 전 배포를 진행할까요?", background: "개발 채널에서 오늘 배포 여부를 물었고, 영향 범위와 롤백 계획 확인이 남아 있습니다.", recommendation: "영향 범위와 롤백 가능 여부를 확인한 뒤 배포하는 방향을 권합니다.", visibility: "leads_only" },
+  request: { id: "20000000-0000-4000-8000-000000000121", origin_item_id: "20000000-0000-4000-8000-000000000112", citation_item_ids: ["20000000-0000-4000-8000-000000000112", "20000000-0000-4000-8000-000000000113"], title: "롤백 플랜 확인 전 배포를 진행할까요?", background: "개발 채널에서 오늘 배포 여부를 물었고, 영향 범위와 롤백 계획 확인이 남아 있습니다.", recommendation: "영향 범위와 롤백 가능 여부를 확인한 뒤 배포하는 방향을 권합니다.", visibility: "leads_only" },
   priorDecision: { id: "20000000-0000-4000-8000-000000000122", outcome: "스테이징 로그 대시보드 추가", rationale: "운영 배포 전에 확인 가능한 관측성을 확보하기로 했습니다.", item_id: "20000000-0000-4000-8000-000000000114" },
   answers: [
     { id: "20000000-0000-4000-8000-000000000131", question_key: "vendor-price", question: "외주사 B 견적을 받아도 되나요?", answer: "개발 사수에는 외주사 견적에 관한 기록이 없습니다. 개발 부서 원칙과 관련된 질문을 선택해 주세요.", generic_answer: "견적을 비교하고 예산과 일정 영향을 확인한 뒤 담당자 승인을 받으세요.", item_id: "20000000-0000-4000-8000-000000000111" },
@@ -213,7 +214,7 @@ const PLANNING: DemoDepartment = {
     { id: planningItemId(102), source_id: PLANNING_SOURCE_IDS.budget, external_ref: "xlsx:summary", author: "런칭 예산안.xlsx", content: "외주 QA 예산 상한은 2,000만원이며, 선택안은 업체 B 1,780만원입니다. 잔여 220만원은 장애 대응 예비비입니다.", label: "info" },
     { id: planningItemId(103), source_id: PLANNING_SOURCE_IDS.deck, external_ref: "pptx:slide-3", author: "런칭 의사결정 자료.pptx", content: "9월 18일 베타 목표, QA 업체 비교, 고객 공지, 장애 대응 기준을 함께 검토합니다.", label: "info" },
   ],
-  request: { id: planningItemId(121), origin_item_id: planningItemId(5), title: "외주 QA 업체 B와 1,780만원으로 계약할까요?", background: "기획팀 Slack과 런칭 예산안에서 9월 18일 베타를 위해 외주 QA를 검토했습니다. 금요일 17시까지 결정이 필요합니다.", recommendation: "예산 상한 2,000만원 안에서 일정과 야간 테스트 범위를 충족하는 업체 B를 우선협상 대상으로 두고, 계약 범위 변경은 사전 승인으로 제한하는 방향을 권합니다.", visibility: "leads_only" },
+  request: { id: planningItemId(121), origin_item_id: planningItemId(5), citation_item_ids: [planningItemId(5)], title: "외주 QA 업체 B와 1,780만원으로 계약할까요?", background: "기획팀 Slack과 런칭 예산안에서 9월 18일 베타를 위해 외주 QA를 검토했습니다. 금요일 17시까지 결정이 필요합니다.", recommendation: "예산 상한 2,000만원 안에서 일정과 야간 테스트 범위를 충족하는 업체 B를 우선협상 대상으로 두고, 계약 범위 변경은 사전 승인으로 제한하는 방향을 권합니다.", visibility: "leads_only" },
   priorDecision: { id: planningItemId(122), outcome: "업체 B와 1,780만원으로 계약 진행", rationale: "베타 일정과 야간 테스트 범위를 함께 충족했고, 예산 상한 안에서 예비비 220만원을 남겼습니다.", item_id: planningItemId(44) },
   answers: [
     { id: planningItemId(131), question_key: "planning-vendor", question: "QA 업체 B를 선택한 이유는 무엇인가요?", answer: "기록상 업체 B는 1,780만원으로 예산 상한 2,000만원 안에 있고, 9월 18일 투입과 야간 테스트를 함께 충족합니다.", generic_answer: "업체별 일정·범위·비용을 비교하고 최종 승인자를 확인하세요.", item_id: planningItemId(44) },
@@ -320,14 +321,17 @@ async function seedDepartment(
   });
   if (decisionError) throw new Error("demo decision seed failed");
 
-  const requestCitation = department.items.find((item) => item.id === department.request.origin_item_id);
-  if (!requestCitation) throw new Error("demo request citation seed failed");
-  const { error: requestCitationError } = await client.from("citations").insert({
-    owner_kind: "decision_request",
-    owner_id: department.request.id,
-    item_id: requestCitation.id,
-    quote: requestCitation.content,
+  const requestCitations = department.request.citation_item_ids.map((itemId) => {
+    const item = department.items.find((candidate) => candidate.id === itemId);
+    if (!item) throw new Error("demo request citation seed failed");
+    return {
+      owner_kind: "decision_request",
+      owner_id: department.request.id,
+      item_id: item.id,
+      quote: item.content,
+    };
   });
+  const { error: requestCitationError } = await client.from("citations").insert(requestCitations);
   if (requestCitationError) throw new Error("demo request citation seed failed");
 
   const priorItem = department.items.find((item) => item.id === department.priorDecision.item_id);

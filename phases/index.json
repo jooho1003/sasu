@@ -11,6 +11,11 @@
     {
       "dir": "2-mvp-completion",
       "status": "completed"
+    },
+    {
+      "dir": "3-d6-d10-completion",
+      "status": "completed",
+      "completed_at": "2026-09-13T12:00:31+09:00"
     }
   ]
 }
