@@ -9,7 +9,8 @@
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
       "started_at": "2026-09-13T09:56:46+0900",
-      "summary": "VTT/TXT 전사 파서가 줄 번호 포함 구조화 오류를 반환하고 업로드 UI가 422 안내를 표시합니다."
+      "summary": "VTT/TXT 전사 파서가 줄 번호 포함 구조화 오류를 반환하고 업로드 UI가 422 안내를 표시합니다.",
+      "completed_at": "2026-09-13T10:05:48+0900"
     },
     {
       "step": 1,
