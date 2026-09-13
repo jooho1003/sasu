@@ -1,4 +1,4 @@
--- PRD §6-3 ⑥: 최근 72시간 open 카드 중 코사인 유사도 0.85 이상만 병합한다.
+-- ADR-037: 최근 72시간 open 카드에서 임베딩 후보만 고르고 LLM이 최종 확인한다.
 -- 운영 적용 전 아래 읽기 쿼리가 0행인지 확인한다. 중복이 있으면 정리 방침 승인 전 중단한다.
 -- select owner_kind, owner_id, item_id, count(*)
 -- from public.citations
@@ -10,11 +10,13 @@ create unique index citations_owner_item_unique
   on public.citations (owner_kind, owner_id, item_id)
   where item_id is not null;
 
-create or replace function public.find_merge_target(
+create or replace function public.find_merge_candidates(
   p_dept uuid,
   p_query vector(1024),
   p_origin_visibility text,
-  p_exclude_item uuid
+  p_exclude_item uuid,
+  p_min_similarity real,
+  p_limit int
 )
 returns table (
   request_id uuid,
@@ -49,12 +51,16 @@ as $$
       )
     group by request.id
   ) as candidate
-  where candidate.similarity >= 0.85
+  where candidate.similarity >= p_min_similarity
   order by candidate.similarity desc, candidate.request_id
-  limit 1;
+  limit least(greatest(coalesce(p_limit, 0), 0), 3);
 $$;
 
-revoke all on function public.find_merge_target(uuid, vector(1024), text, uuid)
+revoke all on function public.find_merge_candidates(
+  uuid, vector(1024), text, uuid, real, int
+)
   from public, anon, authenticated;
-grant execute on function public.find_merge_target(uuid, vector(1024), text, uuid)
+grant execute on function public.find_merge_candidates(
+  uuid, vector(1024), text, uuid, real, int
+)
   to service_role;

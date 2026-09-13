@@ -108,16 +108,19 @@
       "status": "completed",
       "codex_model": "gpt-5.6-sol",
       "effort": "xhigh",
-      "started_at": "2026-09-13T16:43:06+0900",
+      "started_at": "2026-09-13T16:43:06+09:00",
       "summary": "동의문 문서·S0·Slack DM 전문을 동기화하고 답변 인용을 질문자에게 격리하며, 비활성 소스 INSERT 거부·삭제 item 후속 처리 허용을 검증했습니다.",
-      "completed_at": "2026-09-13T16:56:03+0900"
+      "completed_at": "2026-09-13T16:56:03+09:00"
     },
     {
       "step": 11,
       "name": "merge-confirm",
-      "status": "pending",
+      "status": "completed",
       "codex_model": "gpt-5.6-sol",
-      "effort": "xhigh"
+      "effort": "xhigh",
+      "started_at": "2026-09-13T16:56:04+09:00",
+      "completed_at": "2026-09-13T17:15:00+0900",
+      "summary": "find_merge_candidates(≥0.55, ≤3) + merge_confirm(gpt-oss-20b strict) 병합 확인. 24쌍 게이트 통과: same 10/10, 오병합 0 (LLM 19회). 하네스가 메모리 부족으로 종료돼 AC(lint·tsc·test 691·build·SQL 48/48)는 오케스트레이터가 재실행해 확인."
     }
   ],
   "created_at": "2026-09-13T09:56:46+09:00",

@@ -45,6 +45,7 @@ const REFUSAL_TEXT_PATTERNS = [
 
 export type LlmPurpose =
   | "classify"
+  | "merge_confirm"
   | "make_card"
   | "answer"
   | "summarize_meeting"
@@ -118,7 +119,9 @@ type CompletionUsage = {
 };
 
 function modelForPurpose(purpose: LlmPurpose): ModelId {
-  if (purpose === "classify") return CLASSIFICATION_MODEL;
+  if (purpose === "classify" || purpose === "merge_confirm") {
+    return CLASSIFICATION_MODEL;
+  }
   if (purpose === "transcribe_voice") return TRANSCRIPTION_MODEL;
   return GENERATION_MODEL;
 }

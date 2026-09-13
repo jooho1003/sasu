@@ -7,6 +7,7 @@ import {
   DocumentSummary,
   IngestItem,
   MeetingSummary,
+  MergeConfirmation,
   toStrictJsonSchema,
 } from "@/lib/contracts";
 
@@ -204,6 +205,26 @@ describe("CardDraft", () => {
   });
 });
 
+describe("MergeConfirmation", () => {
+  const valid = {
+    same_decision: true,
+    reason: "두 기록 모두 외주사 B의 12% 인상 견적 수락 여부를 다룹니다.",
+  };
+
+  it("동일 미결 결정 판정과 이유를 파싱한다", () => {
+    expect(MergeConfirmation.parse(valid)).toEqual(valid);
+  });
+
+  it("모든 필드가 필수이고 추가 필드를 거부한다", () => {
+    expect(
+      MergeConfirmation.safeParse(withoutKey(valid, "reason")).success,
+    ).toBe(false);
+    expect(
+      MergeConfirmation.safeParse({ ...valid, ignored: true }).success,
+    ).toBe(false);
+  });
+});
+
 describe("AnswerDraft", () => {
   const valid = {
     citations: [itemCitation],
@@ -280,6 +301,7 @@ describe("toStrictJsonSchema", () => {
     toStrictJsonSchema("answer_draft", AnswerDraft),
     toStrictJsonSchema("meeting_summary", MeetingSummary),
     toStrictJsonSchema("document_summary", DocumentSummary),
+    toStrictJsonSchema("merge_confirmation", MergeConfirmation),
   ] as JsonSchemaNode[];
 
   it("산출물의 모든 object에 additionalProperties:false가 있다", () => {

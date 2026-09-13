@@ -66,6 +66,13 @@ export const Classification = z.strictObject({
 
 export type Classification = z.infer<typeof Classification>;
 
+export const MergeConfirmation = z.strictObject({
+  same_decision: z.boolean(),
+  reason: NonEmptyString,
+});
+
+export type MergeConfirmation = z.infer<typeof MergeConfirmation>;
+
 // citations가 첫 필드인 것은 모델에게 근거 우선 작성을 유도하는 관행일 뿐이다.
 // JSON Schema의 properties 순서는 생성 순서를 보장하지 않으며, 실제 방어는
 // 카드 파이프라인의 원문 문자열 포함 검증이 맡는다.
