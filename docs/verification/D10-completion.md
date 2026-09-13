@@ -2,20 +2,20 @@
 
 - 검증일: 2026-09-13 (KST)
 - 범위: Step 9 `local-verification`
-- 판정: **AC 실패** — 클라이언트 번들에서 `SUPABASE_SERVICE_ROLE_KEY` 앞 8자가 1건 발견됨
+- 판정: **AC 통과**
 - 원문 질문·전사·슬랙 본문·비밀값은 이 기록에 남기지 않는다.
 
 ## 실행 결과
 
 | 명령 | 결과 | 비고 |
 |---|---|---|
-| `npm run lint` | PASS | 종료 코드 0, 10.27초 |
-| `npx tsc --noEmit` | PASS | 종료 코드 0, 6.25초 |
-| `npm run test` | PASS | 40개 파일, 685개 테스트, 4.92초. Vite 설정 관련 경고만 출력 |
-| `npm run build` | PASS | Next.js 16.3.4 Turbopack 빌드 성공, 8.43초 |
-| `node scripts/verify-security-sql.mjs "D:/바이브코딩/.sasu-qa-db"` | PASS | 45/45 시나리오, 2,016 assertions. `0004_worker_cron.sql`은 PGlite에서 pg_cron/pg_net을 지원하지 않아 제외 |
-| `npm run e2e -- tests/e2e/guest.spec.ts` | PASS | 4/4, 11.1초. 데스크톱·모바일 완주, 실제 부서 접근 거부, 게스트 무쓰기·무 LLM 호출 확인 |
-| 클라이언트 번들 비밀값 검사 | **FAIL** | `GROQ_API_KEY`: 0건, `SLACK_BOT_TOKEN`: 0건, `VOYAGE_API_KEY`: 0건, `NOTION_TOKEN`: 0건. `SUPABASE_SERVICE_ROLE_KEY`: 1건 (`.next/static/chunks/3g7up9zty27uy.js`) |
+| `npm run lint` | PASS | 종료 코드 0, 6.62초 |
+| `npx tsc --noEmit` | PASS | 종료 코드 0, 3.06초 |
+| `npm run test` | PASS | 40개 파일, 685개 테스트, 3.52초. Vite 설정 관련 경고만 출력 |
+| `npm run build` | PASS | Next.js 16.3.4 Turbopack 빌드 성공, 8.01초 |
+| `node scripts/verify-security-sql.mjs "D:/바이브코딩/.sasu-qa-db"` | PASS | 45/45 시나리오, 2,016 assertions, 3.92초. `0004_worker_cron.sql`은 PGlite에서 pg_cron/pg_net을 지원하지 않아 제외 |
+| `npm run e2e -- tests/e2e/guest.spec.ts` | PASS | 4/4, 11.23초. 데스크톱·모바일 완주, 실제 부서 접근 거부, 게스트 무쓰기·무 LLM 호출 확인 |
+| 클라이언트 번들 비밀값 검사 | PASS | `SUPABASE_SERVICE_ROLE_KEY`, `GROQ_API_KEY`, `SLACK_BOT_TOKEN`, `VOYAGE_API_KEY`, `NOTION_TOKEN` 각 0건 |
 
 ## PRD §11 완료 판정 매핑
 
@@ -55,6 +55,6 @@
 
 운영 적용은 승인 노드 이후에만 수행한다. `0004_worker_cron.sql`의 pg_cron/pg_net 설정은 Supabase 운영 환경에서 별도로 확인한다.
 
-## 실패 및 후속 조치
+## 이전 시도와 비교
 
-번들 검사 실패 원인은 `.next/static/chunks/3g7up9zty27uy.js`에 `SUPABASE_SERVICE_ROLE_KEY` 값의 앞 8자가 포함된 것이다. Step 9의 지시대로 이 단계에서는 코드를 수정하지 않았다. 해당 누출을 수정하고 빌드를 다시 만든 뒤 번들 검사를 재실행해야 한다. AC 실패로 Step 9는 `error`로 닫는다.
+이전 실행에서 클라이언트 번들 검사에 실패 기록이 있었으나, 이번 production build 후 동일한 5개 키의 앞 8자 검색은 모두 0건으로 재검증됐다. 이번 단계에서는 코드를 수정하지 않았다.

@@ -95,13 +95,12 @@
     {
       "step": 9,
       "name": "local-verification",
-      "status": "error",
+      "status": "completed",
       "codex_model": "gpt-5.6-luna",
       "effort": "medium",
       "started_at": "2026-09-13T11:49:15+0900",
-      "summary": "lint·tsc·Vitest(40 files/685 tests)·build·보안 SQL(45/45)·게스트 E2E(4/4)는 통과했으나 클라이언트 번들에서 SUPABASE_SERVICE_ROLE_KEY 앞 8자 1건이 발견되었습니다.",
-      "error_message": "AC 실패: .next/static/chunks/3g7up9zty27uy.js에 SUPABASE_SERVICE_ROLE_KEY 앞 8자가 1건 포함되었습니다. 코드 수정 없이 docs/verification/D10-completion.md에 기록했습니다.",
-      "completed_at": "2026-09-13T12:00:00+0900"
+      "summary": "lint·tsc·Vitest(40 files/685 tests)·build·보안 SQL(45/45, 2,016 assertions)·게스트 E2E(4/4)·클라이언트 번들 비밀값 5종(각 0건) 검증을 통과하고 D10 실행 기록을 갱신했습니다.",
+      "completed_at": "2026-09-13T12:08:00+0900"
     }
   ],
   "created_at": "2026-09-13T09:56:46+0900"
