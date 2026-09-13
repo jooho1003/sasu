@@ -9,13 +9,13 @@
 
 | 명령 | 결과 | 비고 |
 |---|---|---|
-| `npm run lint` | PASS | 종료 코드 0, 약 7.1초 |
-| `npx tsc --noEmit` | PASS | 종료 코드 0, 약 3.5초 |
-| `npm run test` | PASS | 40개 파일, 685개 테스트, 약 2.6초. Vite 설정 관련 경고만 출력 |
-| `npm run build` | PASS | Next.js 16.3.4 Turbopack 빌드 성공, 약 9.6초 |
+| `npm run lint` | PASS | 종료 코드 0, 10.27초 |
+| `npx tsc --noEmit` | PASS | 종료 코드 0, 6.25초 |
+| `npm run test` | PASS | 40개 파일, 685개 테스트, 4.92초. Vite 설정 관련 경고만 출력 |
+| `npm run build` | PASS | Next.js 16.3.4 Turbopack 빌드 성공, 8.43초 |
 | `node scripts/verify-security-sql.mjs "D:/바이브코딩/.sasu-qa-db"` | PASS | 45/45 시나리오, 2,016 assertions. `0004_worker_cron.sql`은 PGlite에서 pg_cron/pg_net을 지원하지 않아 제외 |
-| `npm run e2e -- tests/e2e/guest.spec.ts` | PASS | 4/4, 약 10.1초. 데스크톱·모바일 완주, 실제 부서 접근 거부, 게스트 무쓰기·무 LLM 호출 확인 |
-| 클라이언트 번들 비밀값 검사 | **FAIL** | `GROQ_API_KEY`, `SLACK_BOT_TOKEN`, `VOYAGE_API_KEY`, `NOTION_TOKEN`: 각 0건. `SUPABASE_SERVICE_ROLE_KEY`: 1건 (`.next/static/chunks/3g7up9zty27uy.js`) |
+| `npm run e2e -- tests/e2e/guest.spec.ts` | PASS | 4/4, 11.1초. 데스크톱·모바일 완주, 실제 부서 접근 거부, 게스트 무쓰기·무 LLM 호출 확인 |
+| 클라이언트 번들 비밀값 검사 | **FAIL** | `GROQ_API_KEY`: 0건, `SLACK_BOT_TOKEN`: 0건, `VOYAGE_API_KEY`: 0건, `NOTION_TOKEN`: 0건. `SUPABASE_SERVICE_ROLE_KEY`: 1건 (`.next/static/chunks/3g7up9zty27uy.js`) |
 
 ## PRD §11 완료 판정 매핑
 
@@ -57,4 +57,4 @@
 
 ## 실패 및 후속 조치
 
-번들 검사 실패 원인은 `.next/static/chunks/3g7up9zty27uy.js`에 `SUPABASE_SERVICE_ROLE_KEY` 값의 앞 8자가 포함된 것이다. Step 9의 지시대로 이 단계에서는 코드를 수정하지 않았다. 해당 누출을 수정하고 빌드를 다시 만든 뒤 번들 검사를 재실행해야 한다.
+번들 검사 실패 원인은 `.next/static/chunks/3g7up9zty27uy.js`에 `SUPABASE_SERVICE_ROLE_KEY` 값의 앞 8자가 포함된 것이다. Step 9의 지시대로 이 단계에서는 코드를 수정하지 않았다. 해당 누출을 수정하고 빌드를 다시 만든 뒤 번들 검사를 재실행해야 한다. AC 실패로 Step 9는 `error`로 닫는다.
