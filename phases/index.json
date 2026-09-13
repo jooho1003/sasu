@@ -11,6 +11,10 @@
     {
       "dir": "2-mvp-completion",
       "status": "completed"
+    },
+    {
+      "dir": "3-d6-d10-completion",
+      "status": "pending"
     }
   ]
 }
