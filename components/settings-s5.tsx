@@ -41,9 +41,9 @@ type ActionState = { kind: "idle" | "pending" | "success" | "error"; message: st
 const IDLE_ACTION: ActionState = { kind: "idle", message: "" };
 
 async function readResponse<T>(response: Response): Promise<T> {
-  const body = (await response.json()) as T & { error?: string };
+  const body = (await response.json()) as T & { error?: string; message?: string };
   if (!response.ok) {
-    throw new Error(body.error ?? "요청을 처리하지 못했습니다.");
+    throw new Error(body.message ?? body.error ?? "요청을 처리하지 못했습니다.");
   }
   return body;
 }

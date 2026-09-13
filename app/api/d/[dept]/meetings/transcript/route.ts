@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { parseTranscript } from "@/lib/adapters/transcript";
+import { parseTranscript, TranscriptParseError } from "@/lib/adapters/transcript";
 import { enqueue, kickWorker } from "@/lib/jobs";
 import { mask } from "@/lib/mask";
 import { registerClassifyHandler } from "@/lib/pipeline/classify";
@@ -10,6 +10,21 @@ import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+function transcriptParseMessage(error: TranscriptParseError): string {
+  switch (error.code) {
+    case "invalid_vtt_header":
+      return "첫 번째 줄에서 WEBVTT 헤더를 찾지 못했습니다. 파일을 확인한 뒤 다시 올려주세요.";
+    case "invalid_timestamp":
+      return `${error.line}번째 줄의 시간 형식을 읽을 수 없습니다. 파일을 확인한 뒤 다시 올려주세요.`;
+    case "empty_cue":
+      return "발언 내용이 비어 있습니다. 파일을 확인한 뒤 다시 올려주세요.";
+    case "no_speech":
+      return "전사에서 발언을 찾지 못했습니다. 파일을 확인한 뒤 다시 올려주세요.";
+    case "unsupported_transcript_format":
+      return "VTT 또는 TXT 파일만 업로드할 수 있습니다.";
+  }
+}
 
 export async function POST(
   request: Request,
@@ -30,7 +45,10 @@ export async function POST(
   try {
     segments = parseTranscript(fileValue.name, await fileValue.text());
   } catch (error) {
-    return Response.json({ error: error instanceof Error && error.message === "unsupported_transcript_format" ? "VTT 또는 TXT 파일만 업로드할 수 있습니다." : "전사 파일을 읽지 못했습니다." }, { status: 400 });
+    if (error instanceof TranscriptParseError) {
+      return Response.json({ error: error.code, line: error.line, message: transcriptParseMessage(error) }, { status: 422 });
+    }
+    return Response.json({ error: "전사 파일을 읽지 못했습니다." }, { status: 400 });
   }
   if (segments.length === 0) return Response.json({ error: "전사에서 발언을 찾지 못했습니다." }, { status: 400 });
 

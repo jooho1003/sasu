@@ -2,15 +2,78 @@
   "project": "sasu",
   "phase": "3-d6-d10-completion",
   "steps": [
-    { "step": 0, "name": "transcript-line-errors", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 1, "name": "jobs-lease", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 2, "name": "write-boundaries", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 3, "name": "card-merge", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 4, "name": "conflict-relevance", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 5, "name": "source-removal", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 6, "name": "ask-daily-limit", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 7, "name": "notion-reimport", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 8, "name": "consent-flow", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 9, "name": "local-verification", "status": "pending", "codex_model": "gpt-5.6-luna", "effort": "medium" }
-  ]
+    {
+      "step": 0,
+      "name": "transcript-line-errors",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "started_at": "2026-09-13T09:56:46+0900",
+      "summary": "VTT/TXT 전사 파서가 줄 번호 포함 구조화 오류를 반환하고 업로드 UI가 422 안내를 표시합니다."
+    },
+    {
+      "step": 1,
+      "name": "jobs-lease",
+      "status": "pending",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 2,
+      "name": "write-boundaries",
+      "status": "pending",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh"
+    },
+    {
+      "step": 3,
+      "name": "card-merge",
+      "status": "pending",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh"
+    },
+    {
+      "step": 4,
+      "name": "conflict-relevance",
+      "status": "pending",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 5,
+      "name": "source-removal",
+      "status": "pending",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 6,
+      "name": "ask-daily-limit",
+      "status": "pending",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 7,
+      "name": "notion-reimport",
+      "status": "pending",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 8,
+      "name": "consent-flow",
+      "status": "pending",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh"
+    },
+    {
+      "step": 9,
+      "name": "local-verification",
+      "status": "pending",
+      "codex_model": "gpt-5.6-luna",
+      "effort": "medium"
+    }
+  ],
+  "created_at": "2026-09-13T09:56:46+0900"
 }
