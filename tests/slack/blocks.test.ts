@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildCardBlocks,
   buildDecisionModal,
+  consentBlocks,
   type SlackCardView,
 } from "@/lib/slack/blocks";
 
@@ -53,5 +54,28 @@ describe("Slack Block Kit 카드", () => {
     );
     expect(JSON.stringify(modal)).toContain("결정 사유");
     expect(JSON.stringify(modal)).toContain("sasu_rationale");
+  });
+
+  it("동의 DM은 문서 항목과 전문 링크, 본인 동의 액션을 포함한다", () => {
+    const blocks = consentBlocks({
+      deptId: "22222222-2222-4222-8222-222222222222",
+      consentUrl: "https://sasu.example/consent?next=%2Fd%2Fdept",
+    });
+    const serialized = JSON.stringify(blocks);
+
+    for (const title of [
+      "모으는 것",
+      "쓰는 목적",
+      "보관 기간",
+      "원장에 남는 것",
+      "누가 보나",
+      "외부 처리",
+      "철회",
+    ]) {
+      expect(serialized).toContain(title);
+    }
+    expect(serialized).toContain("sasu_consent");
+    expect(serialized).toContain("22222222-2222-4222-8222-222222222222");
+    expect(serialized).toContain("https://sasu.example/consent");
   });
 });

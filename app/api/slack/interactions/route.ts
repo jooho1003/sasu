@@ -169,6 +169,15 @@ async function authorizedCard(
   return { card: cardResult.data, member };
 }
 
+function messageBlocks(message: string): Array<Record<string, unknown>> {
+  return [
+    {
+      type: "section",
+      text: { type: "mrkdwn", text: message },
+    },
+  ];
+}
+
 function formatDecisionTime(value: string | null): string {
   if (!value) return "시각 미상";
   return new Intl.DateTimeFormat("ko-KR", {
@@ -300,6 +309,47 @@ async function handleBlockAction(payload: InteractionPayload): Promise<Response>
   return responseOk();
 }
 
+async function handleConsentAction(
+  payload: InteractionPayload,
+): Promise<Response> {
+  const action = payload.actions?.[0];
+  const slackUserId = payload.user?.id;
+  const deptId = action?.value;
+  if (action?.action_id !== "sasu_consent" || !slackUserId || !deptId) {
+    return responseOk();
+  }
+
+  const client = createServiceSupabaseClient();
+  const result = await client.rpc("consent_via_slack", {
+    p_slack_user: slackUserId,
+    p_dept: deptId,
+  });
+  const message = result.error
+    ? "동의 상태를 확인하지 못했습니다. 잠시 후 다시 시도해주세요."
+    : result.data === true
+      ? "동의가 기록되었습니다. 이제부터 연결된 채널의 내 발언이 사수에 저장됩니다."
+      : "Slack 계정이 사수 멤버십에 연결되어 있지 않습니다. 부서 세팅에서 계정 연결이 필요합니다.";
+  const channel = payload.container?.channel_id;
+  const messageTs = payload.container?.message_ts;
+
+  if (channel && messageTs) {
+    after(() =>
+      updateMessage({
+        channel,
+        ts: messageTs,
+        text: message,
+        blocks: messageBlocks(message),
+      }).catch(() => undefined),
+    );
+    return responseOk();
+  }
+
+  return Response.json({
+    replace_original: true,
+    text: message,
+  });
+}
+
 async function handleViewSubmission(payload: InteractionPayload): Promise<Response> {
   const slackUserId = payload.user?.id;
   const view = payload.view;
@@ -404,6 +454,9 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     if (payload.type === "block_actions") {
+      if (payload.actions?.[0]?.action_id === "sasu_consent") {
+        return await handleConsentAction(payload);
+      }
       return await handleBlockAction(payload);
     }
     if (payload.type === "view_submission") {

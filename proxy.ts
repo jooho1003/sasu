@@ -44,6 +44,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/login",
+    "/consent",
     "/auth/:path*",
     "/no-membership",
     "/d/:path*",

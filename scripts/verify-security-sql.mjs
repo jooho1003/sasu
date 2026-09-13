@@ -85,6 +85,20 @@ try {
   await q("insert into orgs(id,name) values ($1,'SQL fixture')", [ids.org]);
   await q("insert into departments(id,org_id,name) values ($1,$2,'SQL fixture')", [ids.dept,ids.org]);
   await q("insert into members(user_id,dept_id,role,display_name,consented_at) values ($1,$3,'lead','lead',now()),($2,$3,'member','member',now())", [ids.lead,ids.member,ids.dept]);
+  await q("update members set slack_user_id=case when user_id=$1 then 'U_CONSENT_LEAD' else 'U_CONSENT_MEMBER' end, consented_at=case when user_id=$1 then consented_at else null end, consent_version=null where dept_id=$2", [ids.lead, ids.dept]);
+  await check("authenticated cannot invoke Slack consent RPC", () => asUser(ids.member, () => denied("select consent_via_slack('U_CONSENT_MEMBER',$1)", [ids.dept])));
+  await check("Slack consent updates only the clicked user's matching department membership", async () => {
+    const leadBefore = (await q("select consented_at from members where user_id=$1 and dept_id=$2", [ids.lead, ids.dept])).rows[0].consented_at;
+    await db.exec("set role service_role");
+    try {
+      assert.equal((await q("select consent_via_slack('U_CONSENT_MEMBER',$1) as consented", [ids.dept])).rows[0].consented, true);
+      assert.equal((await q("select consent_via_slack('U_CONSENT_MEMBER',$1) as consented", [randomUUID()])).rows[0].consented, false);
+    } finally { await db.exec("reset role"); }
+    const member = (await q("select consented_at is not null as consented, consent_version from members where user_id=$1 and dept_id=$2", [ids.member, ids.dept])).rows[0];
+    const leadAfter = (await q("select consented_at from members where user_id=$1 and dept_id=$2", [ids.lead, ids.dept])).rows[0].consented_at;
+    assert.deepEqual(member, { consented: true, consent_version: 1 });
+    assert.deepEqual(leadAfter, leadBefore);
+  });
   await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$3,'slack_channel','public','dept'),($2,$3,'slack_channel','private','leads_only')", [ids.publicSource,ids.privateSource,ids.dept]);
   const embedding = JSON.stringify(Array(1024).fill(0.01));
   await q("insert into items(id,source_id,dept_id,content,embedding,embed_model) values ($1,$3,$5,'public evidence',$6,'voyage-4-lite'),($2,$4,$5,'private evidence',$6,'voyage-4-lite')", [ids.publicItem,ids.privateItem,ids.publicSource,ids.privateSource,ids.dept,embedding]);

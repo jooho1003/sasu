@@ -69,6 +69,8 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
   const [meetingFile, setMeetingFile] = useState<File | null>(null);
   const [memberMappings, setMemberMappings] = useState<Record<string, string>>({});
   const [mappingState, setMappingState] = useState<ActionState>(IDLE_ACTION);
+  const [consentRequestState, setConsentRequestState] =
+    useState<ActionState>(IDLE_ACTION);
 
   const currentMember = useMemo(
     () => data?.members.find((member) => member.user_id === data.current_user_id) ?? null,
@@ -272,6 +274,34 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
     }
   };
 
+  const sendConsentRequests = async () => {
+    setConsentRequestState({
+      kind: "pending",
+      message: "미동의 멤버에게 동의 요청을 보내는 중입니다.",
+    });
+    try {
+      const result = await readResponse<{ message: string }>(
+        await fetch(
+          `/api/d/${encodeURIComponent(deptId)}/settings/consent`,
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ action: "request" }),
+          },
+        ),
+      );
+      setConsentRequestState({ kind: "success", message: result.message });
+    } catch (error) {
+      setConsentRequestState({
+        kind: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "동의 요청을 보내지 못했습니다.",
+      });
+    }
+  };
+
   if (loadError) {
     return (
       <main className="mx-auto grid min-h-screen w-full max-w-4xl gap-5 px-5 py-10 sm:px-8">
@@ -344,6 +374,18 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
             Slack 채널을 연결하려면 채널 멤버가 모두 계정에 연결되고 동의해야 합니다.
           </p>
         </div>
+        {data.role === "lead" ? (
+          <button
+            className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 text-sm font-bold text-[var(--accent)] disabled:opacity-50"
+            disabled={consentRequestState.kind === "pending"}
+            onClick={() => void sendConsentRequests()}
+            type="button"
+          >
+            {consentRequestState.kind === "pending"
+              ? "보내는 중…"
+              : "미동의 멤버에게 동의 요청 보내기"}
+          </button>
+        ) : null}
         <ul className="m-0 grid gap-2 p-0">
           {data.members.map((member) => (
             <li key={member.user_id} className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 py-3 last:border-b-0">
@@ -366,6 +408,11 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
           ))}
         </ul>
         {mappingState.message ? <p className="m-0 text-sm text-[var(--muted)]">{mappingState.message}</p> : null}
+        {consentRequestState.message ? (
+          <p className="m-0 text-sm text-[var(--muted)]">
+            {consentRequestState.message}
+          </p>
+        ) : null}
       </section>
 
       {data.role === "lead" ? (

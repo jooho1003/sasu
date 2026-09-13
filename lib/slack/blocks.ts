@@ -1,3 +1,6 @@
+import { CONSENT_SECTIONS } from "@/lib/consent";
+import { formatConflictBadge } from "@/lib/conflicts";
+
 export type SlackBlock = Record<string, unknown>;
 
 export type SlackCardCitation = {
@@ -199,4 +202,55 @@ export function buildDecisionModal(args: {
     ],
   };
 }
-import { formatConflictBadge } from "@/lib/conflicts";
+
+export function consentBlocks(args: {
+  deptId: string;
+  consentUrl: string;
+}): SlackBlock[] {
+  return [
+    {
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: CONSENT_SECTIONS.title,
+        emoji: true,
+      },
+    },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: escapeSlackText(CONSENT_SECTIONS.introduction),
+      },
+    },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: [
+          "*확인할 내용*",
+          ...CONSENT_SECTIONS.items.map(
+            (item, index) => `${index + 1}. ${escapeSlackText(item.title)}`,
+          ),
+        ].join("\n"),
+      },
+    },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          action_id: "sasu_consent",
+          text: { type: "plain_text", text: "동의합니다", emoji: true },
+          style: "primary",
+          value: args.deptId,
+        },
+        {
+          type: "button",
+          text: { type: "plain_text", text: "전문 보기", emoji: true },
+          url: args.consentUrl,
+        },
+      ],
+    },
+  ];
+}
