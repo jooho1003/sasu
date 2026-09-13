@@ -7,6 +7,7 @@ import { createServiceSupabaseClient } from "@/lib/supabase/service";
 export type JobKind =
   | "classify"
   | "embed"
+  | "embed_decision"
   | "summarize_meeting"
   | "summarize_document"
   | "make_card"

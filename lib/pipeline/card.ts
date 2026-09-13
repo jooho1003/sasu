@@ -66,6 +66,8 @@ type DecisionRow = {
   decided_at: string | null;
 };
 
+export type PriorDecision = DecisionRow;
+
 type MemberRow = {
   user_id: string;
   display_name: string;
@@ -256,6 +258,52 @@ async function insertCard(
   throw new CardPipelineDatabaseError();
 }
 
+export function prioritizeSimilarDecisions(
+  similar: PriorDecision[],
+  recent: PriorDecision[],
+  limit = 3,
+): PriorDecision[] {
+  const selected: PriorDecision[] = [];
+  const seen = new Set<string>();
+
+  for (const decision of [...similar, ...recent]) {
+    if (seen.has(decision.id)) continue;
+    seen.add(decision.id);
+    selected.push(decision);
+    if (selected.length === limit) break;
+  }
+
+  return selected;
+}
+
+async function findSimilarDecisions(
+  client: ReturnType<typeof createServiceSupabaseClient>,
+  deptId: string,
+  embedding: string | number[] | null,
+): Promise<PriorDecision[]> {
+  if (embedding === null || typeof client.rpc !== "function") {
+    return [];
+  }
+
+  const result = await client.rpc("similar_decisions_for_card", {
+    p_dept: deptId,
+    p_query: embedding,
+    p_limit: 3,
+  });
+  if (result.error || !Array.isArray(result.data)) {
+    return [];
+  }
+
+  return result.data.filter((decision): decision is PriorDecision =>
+    typeof decision === "object" &&
+    decision !== null &&
+    typeof Reflect.get(decision, "id") === "string" &&
+    typeof Reflect.get(decision, "visibility") === "string" &&
+    typeof Reflect.get(decision, "outcome") === "string" &&
+    typeof Reflect.get(decision, "rationale") === "string",
+  );
+}
+
 async function prepareOriginEmbedding(
   client: ReturnType<typeof createServiceSupabaseClient>,
   origin: OriginItemRow,
@@ -377,7 +425,7 @@ export async function makeCard(itemId: string): Promise<string | undefined> {
     }
   }
 
-  const [sameSourceResult, principleSourcesResult, decisionsResult, membersResult] =
+  const [sameSourceResult, principleSourcesResult, decisionsResult, membersResult, similarDecisions] =
     await Promise.all([
       client
         .from("items")
@@ -403,6 +451,7 @@ export async function makeCard(itemId: string): Promise<string | undefined> {
         .from("members")
         .select("user_id, display_name, role")
         .eq("dept_id", origin.dept_id),
+      findSimilarDecisions(client, origin.dept_id, originEmbedding),
     ]);
 
   ensureNoDatabaseError(sameSourceResult.error);
@@ -412,7 +461,10 @@ export async function makeCard(itemId: string): Promise<string | undefined> {
 
   const sameSourceItems = (sameSourceResult.data ?? []) as ItemRow[];
   const principleSources = (principleSourcesResult.data ?? []) as PrincipleSourceRow[];
-  const recentDecisions = (decisionsResult.data ?? []) as DecisionRow[];
+  const recentDecisions = prioritizeSimilarDecisions(
+    similarDecisions,
+    (decisionsResult.data ?? []) as DecisionRow[],
+  );
   const memberRows = (membersResult.data ?? []) as MemberRow[];
 
   const principleSourceIds = principleSources.map((source) => source.id);

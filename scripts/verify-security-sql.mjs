@@ -90,6 +90,10 @@ try {
   await q("insert into decision_requests(id,dept_id,title,background,visibility,assignee_id) values ($1,$2,'slack card','slack background','dept',$3)", [ids.slackCard,ids.dept,ids.member]);
   await q("insert into decisions(id,dept_id,request_id,decided_by,decided_by_name,outcome,rationale,visibility) values ($1,$2,$3,$4,'lead','private outcome','private rationale','leads_only')", [ids.decision,ids.dept,ids.card,ids.lead]);
   await q("insert into decisions(id,dept_id,decided_by,decided_by_name,outcome,rationale,visibility) values ($1,$2,$3,'lead','public outcome','public rationale','dept')", [ids.publicDecision,ids.dept,ids.lead]);
+  const supersededDecision = randomUUID();
+  const currentDecision = randomUUID();
+  await q("insert into decisions(id,dept_id,decided_by,decided_by_name,outcome,rationale,visibility,embedding,embed_model) values ($1,$2,$3,'lead','old similar','old rationale','dept',$4,'voyage-4-lite'),($5,$2,$3,'lead','current similar','current rationale','dept',$4,'voyage-4-lite')", [supersededDecision,ids.dept,ids.lead,embedding,currentDecision]);
+  await q("update decisions set supersedes_id=$1 where id=$2", [supersededDecision,currentDecision]);
   await q("insert into meetings(id,source_id,dept_id,status) values ($1,$2,$3,'transcribed')", [ids.meeting,ids.publicSource,ids.dept]);
   await q("insert into conflicts(id,request_id,prior_decision_id,explanation) values ($1,$2,$3,'synthetic conflict')", [ids.conflict,ids.publicCard,ids.publicDecision]);
   for (const [key,status] of [["answer","done"],["pending","pending"],["failed","failed"]]) {
@@ -136,6 +140,8 @@ try {
       error => error.code === "23505",
     );
   });
+  // decision embedding trigger 검증은 아래에서 별도로 하고, lease fixture에는 신규 작업을 섞지 않는다.
+  await q("update jobs set status='done' where kind='embed_decision'");
   const expiredLeaseJob = randomUUID();
   const activeLeaseJob = randomUUID();
   const exhaustedLeaseJob = randomUUID();
@@ -164,12 +170,23 @@ try {
     assert.equal((await q("select id from decisions where id=$1", [ids.decision])).rows.length, 0);
     assert.equal((await q("select * from recent_decisions_as($1,$2,3) where id=$3",[ids.member,ids.dept,ids.decision])).rows.length,0);
   }));
+  await check("similar decision RPC excludes superseded rows and is service-role-only", async () => {
+    await db.exec("set role service_role");
+    try {
+      const rows = (await q("select id from similar_decisions_for_card($1,$2,3)", [ids.dept,embedding])).rows;
+      assert.deepEqual(rows.map(row => row.id), [currentDecision]);
+    } finally { await db.exec("reset role"); }
+    await asUser(ids.lead, () => denied("select * from similar_decisions_for_card($1,$2,3)", [ids.dept,embedding]));
+  });
+  await check("decision insert queues an embed_decision job", async () => {
+    assert.equal((await q("select id from jobs where kind='embed_decision' and payload->>'decisionId'=$1", [currentDecision])).rows.length, 1);
+  });
   await check("lead user search sees private evidence; channel search does not", () => asUser(ids.lead, async () => {
     assert.equal((await q("select * from search_as($1,$2,$3,8)",[ids.lead,ids.dept,embedding])).rows.length,2);
     const channel = await q("select * from search_channel_as($1,$2,$3,8)",[ids.lead,ids.dept,embedding]);
     assert.deepEqual(channel.rows.map(row => row.id),[ids.publicItem]);
-    assert.equal((await q("select * from recent_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,2);
-    assert.equal((await q("select * from recent_channel_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,1);
+    assert.equal((await q("select * from recent_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,3);
+    assert.equal((await q("select * from recent_channel_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,3);
   }));
   await check("RPC caller cannot impersonate lead", () => asUser(ids.member, async () => {
     assert.equal((await q("select * from search_channel_as($1,$2,$3,8)",[ids.lead,ids.dept,embedding])).rows.length,0);

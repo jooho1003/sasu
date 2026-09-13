@@ -30,6 +30,7 @@ import {
   MERGE_WINDOW_HOURS,
   makeCard,
   narrowestVisibility,
+  prioritizeSimilarDecisions,
   registerMakeCardHandler,
   resolveAssignee,
   verifyCitations,
@@ -90,6 +91,7 @@ type FakeOptions = {
   members?: Row[];
   mergeTarget?: Row | null;
   mergeRpcError?: unknown;
+  similarDecisions?: Row[];
   existingCitations?: Row[];
   raceOnFirstInsert?: boolean;
 };
@@ -148,6 +150,7 @@ function createFakeClient(options: FakeOptions = {}) {
       ],
     mergeTarget: options.mergeTarget ?? null,
     mergeRpcError: options.mergeRpcError ?? null,
+    similarDecisions: options.similarDecisions ?? [],
     cards: [] as Row[],
     citations: options.existingCitations ?? ([] as Row[]),
     conflicts: [] as Row[],
@@ -349,6 +352,9 @@ function createFakeClient(options: FakeOptions = {}) {
     if (name === "search_as") {
       return Promise.resolve({ data: null, error: { code: "not_configured" } });
     }
+    if (name === "similar_decisions_for_card") {
+      return Promise.resolve({ data: state.similarDecisions, error: null });
+    }
     throw new Error(`unexpected rpc: ${name}`);
   });
 
@@ -411,6 +417,26 @@ describe("card pipeline pure rules", () => {
         visibility: "leads_only",
       }),
     ).toBe("lead-1");
+  });
+
+  it("유사 결정 우선으로 최대 3건을 고르고 최근 결정으로 부족분만 채운다", () => {
+    const selected = prioritizeSimilarDecisions(
+      [
+        { id: "similar-1", request_id: null, visibility: "dept", outcome: "유사 1", rationale: "근거", decided_at: null },
+        { id: "recent-1", request_id: null, visibility: "dept", outcome: "중복", rationale: "근거", decided_at: null },
+      ],
+      [
+        { id: "recent-1", request_id: null, visibility: "dept", outcome: "최근 1", rationale: "근거", decided_at: null },
+        { id: "recent-2", request_id: null, visibility: "dept", outcome: "최근 2", rationale: "근거", decided_at: null },
+        { id: "recent-3", request_id: null, visibility: "dept", outcome: "최근 3", rationale: "근거", decided_at: null },
+      ],
+    );
+
+    expect(selected.map((decision) => decision.id)).toEqual([
+      "similar-1",
+      "recent-1",
+      "recent-2",
+    ]);
   });
 });
 

@@ -80,6 +80,7 @@ type SerializedDecision = {
     id: string;
     explanation: string;
     prior_decision_id: string;
+    prior_decided_at: string | null;
   }[];
   history: SerializedDecision[];
 };
@@ -330,6 +331,8 @@ export async function GET(
         id: conflict.id,
         explanation: conflict.explanation,
         prior_decision_id: conflict.prior_decision_id,
+        prior_decided_at:
+          decisionMap.get(conflict.prior_decision_id)?.decided_at ?? null,
       }));
 
     const history: SerializedDecision[] = [];

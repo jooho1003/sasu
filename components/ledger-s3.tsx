@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { formatConflictBadge } from "@/lib/conflicts";
+
 type LedgerCitation = {
   quote: string;
   author: string;
@@ -15,6 +17,7 @@ type LedgerConflict = {
   id: string;
   explanation: string;
   prior_decision_id: string;
+  prior_decided_at: string | null;
 };
 
 type LedgerDecision = {
@@ -157,9 +160,12 @@ function DecisionDetail({ decision, historical = false }: { decision: LedgerDeci
       {decision.conflicts.length > 0 ? (
         <div className="grid gap-2 rounded-xl bg-[var(--urgent)]/5 p-4">
           {decision.conflicts.map((conflict) => (
-            <p key={conflict.id} className="m-0 text-sm leading-6">
-              {conflict.explanation}
-            </p>
+            <div key={conflict.id} className="grid gap-1">
+              <a className="w-fit text-sm font-bold text-[var(--urgent)]" href={`#decision-${conflict.prior_decision_id}`}>
+                {formatConflictBadge(conflict.prior_decided_at)}
+              </a>
+              <p className="m-0 text-sm leading-6">{conflict.explanation}</p>
+            </div>
           ))}
         </div>
       ) : null}

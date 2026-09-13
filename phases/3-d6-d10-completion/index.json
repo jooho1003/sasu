@@ -45,9 +45,12 @@
     {
       "step": 4,
       "name": "conflict-relevance",
-      "status": "pending",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium"
+      "effort": "medium",
+      "started_at": "2026-09-13T11:00:33+0900",
+      "summary": "결정 임베딩·유사 원장 결정 상위 3 조회·최근 결정 보완과 KST 충돌 배지/원장 링크를 적용했습니다.",
+      "completed_at": "2026-09-13T11:08:00+0900"
     },
     {
       "step": 5,

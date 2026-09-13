@@ -14,7 +14,7 @@ export type SlackCardView = {
   visibility: "dept" | "leads_only";
   webUrl: string;
   citations: SlackCardCitation[];
-  conflicts: { explanation: string }[];
+  conflicts: { explanation: string; decided_at: string | null; href: string }[];
 };
 
 type DecisionStatus = "decided" | "deferred" | "rejected";
@@ -94,7 +94,10 @@ export function buildCardBlocks(card: SlackCardView): SlackBlock[] {
       text: {
         type: "mrkdwn",
         text: `:warning: *과거 결정과 충돌*\n${card.conflicts
-          .map((conflict) => `• ${escapeSlackText(conflict.explanation)}`)
+          .map(
+            (conflict) =>
+              `• <${conflict.href}|${escapeSlackText(formatConflictBadge(conflict.decided_at))}> — ${escapeSlackText(conflict.explanation)}`,
+          )
           .join("\n")}`,
       },
     });
@@ -196,3 +199,4 @@ export function buildDecisionModal(args: {
     ],
   };
 }
+import { formatConflictBadge } from "@/lib/conflicts";

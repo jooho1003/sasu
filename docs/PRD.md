@@ -330,7 +330,7 @@ create table answers (id uuid primary key default gen_random_uuid(), dept_id uui
 
 -- 비동기 작업과 비용 (아키텍처 렌즈 반영)
 create table jobs    (id uuid primary key default gen_random_uuid(), kind text not null,
-                      -- classify|embed|summarize_meeting|make_card|answer|send_slack|notion_import|slack_backfill|sweep
+                      -- classify|embed|embed_decision|summarize_meeting|make_card|answer|send_slack|notion_import|slack_backfill|sweep
                       payload jsonb not null, status text not null default 'queued',   -- queued|running|done|failed
                       attempts int default 0, run_after timestamptz default now(),
                       last_error text, created_at timestamptz default now(), updated_at timestamptz);

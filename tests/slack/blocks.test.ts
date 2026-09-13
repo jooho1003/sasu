@@ -20,7 +20,11 @@ const card: SlackCardView = {
       href: "https://slack.com/archives/C123/p123",
     },
   ],
-  conflicts: [{ explanation: "과거 원칙과 충돌할 수 있습니다." }],
+  conflicts: [{
+    explanation: "과거 원칙과 충돌할 수 있습니다.",
+    decided_at: "2026-03-13T15:30:00.000Z",
+    href: "https://sasu.example/d/dept-1/ledger#decision-prior",
+  }],
 };
 
 describe("Slack Block Kit 카드", () => {
