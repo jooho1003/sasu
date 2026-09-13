@@ -176,10 +176,18 @@ test("lead와 member의 ASK는 leads_only 근거를 다르게 반환한다", asy
     expect(JSON.stringify(memberAnswer)).not.toContain("excluded");
     expect(JSON.stringify(memberAnswer)).not.toContain("제외");
 
-    await page.goto(`${baseURL}/d/${DEPARTMENT_ID}/ask`, { waitUntil: "domcontentloaded" });
-    await memberPage.goto(`${baseURL}/d/${DEPARTMENT_ID}/ask`, { waitUntil: "domcontentloaded" });
-    await expect(page.getByText(FIXED_NOTICE, { exact: true })).toBeVisible();
-    await expect(memberPage.getByText(FIXED_NOTICE, { exact: true })).toBeVisible();
+    await memberPage.goto(`${baseURL}/d/${DEPARTMENT_ID}/ask`, { waitUntil: "networkidle" });
+    let submitted = false;
+    await expect(async () => {
+      if (!submitted) {
+        await memberPage.getByRole("textbox", { name: "무엇이 궁금한가요?" }).fill(question);
+        await memberPage.getByRole("button", { name: "묻기", exact: true }).click();
+        submitted = true;
+      }
+      await runWorker(memberPage, baseURL);
+      await expect(memberPage.getByText(FIXED_NOTICE, { exact: true })).toBeVisible();
+      await expect(memberPage.locator("article")).not.toContainText("4,200");
+    }).toPass({ timeout: 90_000 });
   } finally {
     for (const sourceId of [departmentSourceId, leadOnlySourceId]) {
       if (!sourceId) continue;
