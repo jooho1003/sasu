@@ -4,6 +4,8 @@ import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 type DemoDepartment = { id: string; name: string };
 
+export const revalidate = 60;
+
 export default async function DemoLandingPage() {
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase.rpc("demo_departments");

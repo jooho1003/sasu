@@ -40,12 +40,27 @@ type DemoDepartment = {
     recommendation: string;
     visibility: "dept" | "leads_only";
   };
+  extraRequests?: Array<{
+    id: string;
+    origin_item_id: string;
+    citation_item_ids: string[];
+    title: string;
+    background: string;
+    recommendation: string;
+    visibility: "dept" | "leads_only";
+  }>;
   priorDecision: {
     id: string;
     outcome: string;
     rationale: string;
     item_id: string;
   };
+  extraPriorDecisions?: Array<{
+    id: string;
+    outcome: string;
+    rationale: string;
+    item_id: string;
+  }>;
   answers: Array<{
     id: string;
     question_key: string;
@@ -226,7 +241,82 @@ const PLANNING: DemoDepartment = {
   ],
 };
 
-const DEMO_DEPARTMENTS = [SALES, DEVELOPMENT, PLANNING];
+const DESIGN_SOURCE_IDS = {
+  principles: "40000000-0000-4000-8000-000000000101",
+  slack: "40000000-0000-4000-8000-000000000102",
+  meeting: "40000000-0000-4000-8000-000000000103",
+  brand: "40000000-0000-4000-8000-000000000104",
+} as const;
+
+const designItemId = (number: number): string =>
+  `40000000-0000-4000-8000-${String(number).padStart(12, "0")}`;
+
+const DESIGN_DIALOGUE: Array<[author: string, label: "decision" | "action" | "info" | "chatter", content: string]> = [
+  ["윤아 디자이너", "info", "디자인 원칙은 주요 터치 영역을 최소 48px로 만들고, 색상만으로 상태를 구분하지 않는 것입니다."],
+  ["현 디자이너", "info", "신규 화면 시안은 44px 아이콘 버튼을 사용하고 있어 접근성 검토가 필요합니다."],
+  ["도하 리드", "decision", "출시 일정에 맞춰 44px 버튼 시안을 승인할까요? 오늘 16시까지 결정이 필요합니다."],
+  ["윤아 디자이너", "action", "48px 대안 시안과 작은 화면 비교 이미지를 오후 2시까지 올리겠습니다."],
+  ["현 디자이너", "info", "브랜드 가이드는 좁은 카드에서는 로고 여백을 줄일 수 있지만, 최소 터치 영역 예외는 승인 기록이 필요하다고 적고 있습니다."],
+  ["도하 리드", "decision", "접근성 기준을 유지하고 출시용 시안은 48px 버튼으로 교체하겠습니다."],
+  ["윤아 디자이너", "info", "외주 일러스트 스튜디오는 캐릭터 12종을 다음 주 월요일까지 납품할 수 있다고 답했습니다."],
+  ["현 디자이너", "decision", "외주 일러스트 계약을 이번 주에 진행할까요? 수정 2회와 원본 파일 전달 조건을 넣어야 합니다."],
+  ["도하 리드", "action", "계약서에 원본 파일과 수정 횟수 조건을 반영해 검토 요청을 올리겠습니다."],
+  ["윤아 디자이너", "info", "출시 범위를 맞추려면 온보딩 일러스트 4종은 이번 릴리스에서 제외할 수 있습니다."],
+  ["현 디자이너", "decision", "출시 일정을 지키기 위해 온보딩 일러스트 4종을 이번 시안 컷에서 제외할까요?"],
+  ["도하 리드", "info", "브랜드 가이드 예외는 고객 노출 화면에서만 승인자와 근거를 남기면 됩니다."],
+  ["윤아 디자이너", "action", "Figma 파일에 접근성 점검표와 예외 승인 영역을 추가했습니다."],
+  ["현 디자이너", "chatter", "오늘 디자인 리뷰는 회의실 B에서 할게요."],
+  ["도하 리드", "info", "외주 일러스트 견적은 수정 2회와 원본 파일 포함 조건에서 예산 범위 안입니다."],
+  ["윤아 디자이너", "action", "계약 후보의 납기와 저작권 이전 조건을 표로 정리하겠습니다."],
+  ["현 디자이너", "info", "48px 버튼 시안은 기존 레이아웃에서도 한 줄 줄바꿈 없이 적용됩니다."],
+  ["도하 리드", "decision", "48px 접근성 기준을 유지한 시안으로 출시하고, 브랜드 여백 예외는 적용하지 않겠습니다."],
+  ["윤아 디자이너", "info", "회의에서 온보딩 일러스트 4종은 다음 릴리스로 미루기로 보류했습니다."],
+  ["현 디자이너", "action", "제외한 일러스트 목록과 다음 릴리스 후보를 Figma 전달 문서에 표시하겠습니다."],
+  ["도하 리드", "chatter", "점심 전에 시안 코멘트만 정리해 주세요."],
+  ["윤아 디자이너", "info", "외주 계약 초안에 수정 2회, 원본 파일, 저작권 이전 조건이 모두 들어갔습니다."],
+];
+
+const DESIGN: DemoDepartment = {
+  id: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+  name: "디자인팀 사수",
+  sources: [
+    { id: DESIGN_SOURCE_IDS.principles, kind: "notion_page", external_id: "demo-design-principles", title: "디자인팀 원칙 문서", visibility: "dept", is_principles: true },
+    { id: DESIGN_SOURCE_IDS.slack, kind: "slack_channel", external_id: "demo-design-channel", title: "#디자인-결정", visibility: "dept", is_principles: false },
+    { id: DESIGN_SOURCE_IDS.meeting, kind: "meeting", external_id: "demo-design-meeting", title: "주간 디자인 리뷰", visibility: "leads_only", is_principles: false },
+    { id: DESIGN_SOURCE_IDS.brand, kind: "document", external_id: "demo-design-brand-guide", title: "브랜드 가이드 예외 기준", visibility: "dept", is_principles: false },
+  ],
+  items: [
+    ...DESIGN_DIALOGUE.map(([author, label, content], index) => ({
+      id: designItemId(index + 1),
+      source_id: index < 18 ? DESIGN_SOURCE_IDS.slack : DESIGN_SOURCE_IDS.meeting,
+      external_ref: index < 18 ? `design-slack-${index + 1}` : `design-meeting-${index + 1}`,
+      author,
+      content,
+      label,
+    })),
+    { id: designItemId(101), source_id: DESIGN_SOURCE_IDS.principles, external_ref: "design-principle-1", author: "디자인팀 원칙", content: "주요 터치 영역은 최소 48px로 만들고, 브랜드 가이드 예외는 승인자와 근거를 기록합니다.", label: "info" },
+    { id: designItemId(102), source_id: DESIGN_SOURCE_IDS.brand, external_ref: "design-brand-1", author: "브랜드 가이드 예외 기준", content: "출시 일정으로 시안을 줄일 때에도 접근성 기준은 낮추지 않고, 제외 범위와 다음 릴리스 계획을 남깁니다.", label: "info" },
+  ],
+  request: { id: designItemId(121), origin_item_id: designItemId(3), citation_item_ids: [designItemId(3), designItemId(19)], title: "출시 시안의 48px 접근성 기준을 유지할까요?", background: "슬랙의 44px 버튼 승인 요청과 회의의 출시 보류 안건이 같은 접근성 결정으로 모였습니다.", recommendation: "출시 일정과 무관하게 48px 기준을 유지하고 시안을 교체하는 방향을 권합니다.", visibility: "leads_only" },
+  extraRequests: [
+    { id: designItemId(123), origin_item_id: designItemId(8), citation_item_ids: [designItemId(8), designItemId(22)], title: "외주 일러스트 계약을 진행할까요?", background: "외주 일러스트 납기와 수정·원본 파일 조건을 확인해 계약 결정을 요청했습니다.", recommendation: "수정 2회와 원본 파일·저작권 이전 조건을 계약서에 남긴 뒤 진행합니다.", visibility: "dept" },
+  ],
+  priorDecision: { id: designItemId(122), outcome: "48px 접근성 기준으로 출시", rationale: "출시 일정이 있어도 최소 터치 영역 기준은 낮추지 않기로 했습니다.", item_id: designItemId(18) },
+  extraPriorDecisions: [
+    { id: designItemId(124), outcome: "온보딩 일러스트 4종을 다음 릴리스로 이관", rationale: "핵심 출시 범위를 지키되 제외 범위와 다음 계획을 기록했습니다.", item_id: designItemId(19) },
+    { id: designItemId(125), outcome: "외주 일러스트 계약 조건 승인", rationale: "수정 2회와 원본 파일 전달 조건을 포함해 계약하기로 했습니다.", item_id: designItemId(22) },
+  ],
+  answers: [
+    { id: designItemId(131), question_key: "design-accessibility-lead", question: "팀장이 보는 출시 시안의 접근성 기준은 무엇인가요?", answer: "주요 터치 영역은 최소 48px로 만들고, 44px 승인 요청은 회의에서 보류한 뒤 48px 시안으로 출시하기로 했습니다.", generic_answer: "접근성 가이드와 출시 일정 영향을 함께 확인하세요.", item_id: designItemId(18) },
+    { id: designItemId(132), question_key: "design-accessibility-member", question: "팀원이 보는 출시 시안의 접근성 기준은 무엇인가요?", answer: "주요 터치 영역은 최소 48px로 만들고, 접근성 기준은 출시 일정 때문에 낮추지 않습니다.", generic_answer: "접근성 가이드와 출시 일정 영향을 함께 확인하세요.", item_id: designItemId(101) },
+    { id: designItemId(133), question_key: "design-brand", question: "브랜드 가이드 예외는 어떻게 처리하나요?", answer: "브랜드 가이드 예외는 승인자와 근거를 기록하며, 접근성 기준 자체는 예외로 낮추지 않습니다.", generic_answer: "브랜드 가이드와 승인 절차를 확인하세요.", item_id: designItemId(101) },
+    { id: designItemId(134), question_key: "design-cut", question: "출시에서 제외한 시안은 무엇인가요?", answer: "온보딩 일러스트 4종은 출시 일정을 지키기 위해 다음 릴리스로 이관했습니다.", generic_answer: "출시 우선순위와 다음 일정을 확인하세요.", item_id: designItemId(19) },
+    { id: designItemId(135), question_key: "design-vendor", question: "외주 일러스트 계약 조건은 무엇인가요?", answer: "외주 계약은 수정 2회와 원본 파일·저작권 이전 조건을 포함해 진행합니다.", generic_answer: "납기와 저작권 조건을 계약서에 명시하세요.", item_id: designItemId(22) },
+    { id: designItemId(136), question_key: "design-figma", question: "Figma 전달 전에 무엇을 확인하나요?", answer: "Figma 파일에는 접근성 점검표와 예외 승인 영역을 함께 기록합니다.", generic_answer: "검토 기준과 승인 이력을 파일에 남기세요.", item_id: designItemId(13) },
+  ],
+};
+
+export const DEMO_DEPARTMENTS = [SALES, DEVELOPMENT, PLANNING, DESIGN];
 
 async function removeExistingDemoData(
   client: ReturnType<typeof createServiceSupabaseClient>,
@@ -234,10 +324,15 @@ async function removeExistingDemoData(
   const departmentIds = DEMO_DEPARTMENTS.map((department) => department.id);
   const citationOwnerIds = DEMO_DEPARTMENTS.flatMap((department) => [
     department.request.id,
+    ...(department.extraRequests ?? []).map((request) => request.id),
     department.priorDecision.id,
+    ...(department.extraPriorDecisions ?? []).map((decision) => decision.id),
     ...department.answers.map((answer) => answer.id),
   ]);
-  const conflictRequestIds = DEMO_DEPARTMENTS.map((department) => department.request.id);
+  const conflictRequestIds = DEMO_DEPARTMENTS.flatMap((department) => [
+    department.request.id,
+    ...(department.extraRequests ?? []).map((request) => request.id),
+  ]);
   const itemIds = DEMO_DEPARTMENTS.flatMap((department) => department.items.map((item) => item.id));
   const { error: citationError } = await client.from("citations").delete().in("owner_id", citationOwnerIds);
   if (citationError) throw new Error("demo citation cleanup failed");
@@ -299,49 +394,48 @@ async function seedDepartment(
   );
   if (classificationError) throw new Error("demo classification seed failed");
 
-  const { error: requestError } = await client.from("decision_requests").insert({
-    id: department.request.id,
-    dept_id: department.id,
-    title: department.request.title,
-    background: department.request.background,
-    recommendation: department.request.recommendation,
-    visibility: department.request.visibility,
-    status: "open",
-    origin_item_id: department.request.origin_item_id,
-  });
+  const requests = [department.request, ...(department.extraRequests ?? [])];
+  const { error: requestError } = await client.from("decision_requests").insert(
+    requests.map((request) => ({
+      id: request.id,
+      dept_id: department.id,
+      title: request.title,
+      background: request.background,
+      recommendation: request.recommendation,
+      visibility: request.visibility,
+      status: "open",
+      origin_item_id: request.origin_item_id,
+    })),
+  );
   if (requestError) throw new Error("demo request seed failed");
 
-  const { error: decisionError } = await client.from("decisions").insert({
-    id: department.priorDecision.id,
-    dept_id: department.id,
-    decided_by_name: `${department.name} 리드`,
-    outcome: department.priorDecision.outcome,
-    rationale: department.priorDecision.rationale,
-    lead_time_min: 42,
-  });
+  const priorDecisions = [department.priorDecision, ...(department.extraPriorDecisions ?? [])];
+  const { error: decisionError } = await client.from("decisions").insert(
+    priorDecisions.map((decision) => ({
+      id: decision.id,
+      dept_id: department.id,
+      decided_by_name: `${department.name} 리드`,
+      outcome: decision.outcome,
+      rationale: decision.rationale,
+      lead_time_min: 42,
+    })),
+  );
   if (decisionError) throw new Error("demo decision seed failed");
 
-  const requestCitations = department.request.citation_item_ids.map((itemId) => {
+  const requestCitations = requests.flatMap((request) => request.citation_item_ids.map((itemId) => {
     const item = department.items.find((candidate) => candidate.id === itemId);
     if (!item) throw new Error("demo request citation seed failed");
-    return {
-      owner_kind: "decision_request",
-      owner_id: department.request.id,
-      item_id: item.id,
-      quote: item.content,
-    };
-  });
+    return { owner_kind: "decision_request", owner_id: request.id, item_id: item.id, quote: item.content };
+  }));
   const { error: requestCitationError } = await client.from("citations").insert(requestCitations);
   if (requestCitationError) throw new Error("demo request citation seed failed");
 
-  const priorItem = department.items.find((item) => item.id === department.priorDecision.item_id);
-  if (!priorItem) throw new Error("demo decision citation seed failed");
-  const { error: decisionCitationError } = await client.from("citations").insert({
-    owner_kind: "decision",
-    owner_id: department.priorDecision.id,
-    item_id: priorItem.id,
-    quote: priorItem.content,
+  const decisionCitations = priorDecisions.map((decision) => {
+    const item = department.items.find((candidate) => candidate.id === decision.item_id);
+    if (!item) throw new Error("demo decision citation seed failed");
+    return { owner_kind: "decision", owner_id: decision.id, item_id: item.id, quote: item.content };
   });
+  const { error: decisionCitationError } = await client.from("citations").insert(decisionCitations);
   if (decisionCitationError) throw new Error("demo decision citation seed failed");
 
   const { error: conflictError } = await client.from("conflicts").insert({
@@ -387,7 +481,7 @@ async function main(): Promise<void> {
   for (const department of DEMO_DEPARTMENTS) {
     await seedDepartment(client, department);
   }
-  console.log("seed-demo complete: demo_org=1 departments=3 prepared_answers=18 planning_items=68");
+  console.log("seed-demo complete: demo_org=1 departments=4 prepared_answers=24 planning_items=68 design_items=24");
 }
 
 const isEntrypoint = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
