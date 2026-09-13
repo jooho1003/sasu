@@ -1,7 +1,9 @@
 import { toIngestItem, isCollectible, type SlackMessageEvent } from "@/lib/adapters/slack";
+import { after } from "next/server";
 import { kickWorker } from "@/lib/jobs";
 import { verifySlackSignature } from "@/lib/slack/verify";
 import { mask } from "@/lib/mask";
+import { postMessage } from "@/lib/slack/post";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +17,16 @@ type SlackEventEnvelope = {
 
 function ok() {
   return Response.json({ ok: true });
+}
+
+const ASK_DAILY_LIMIT_MESSAGE = "오늘 질문 한도(50회)를 모두 사용했습니다. 내일 다시 물어봐 주세요.";
+
+function ingestStatus(data: unknown): string | null {
+  if (data === true) return "saved";
+  if (data === false) return "duplicate";
+  if (typeof data !== "object" || data === null) return null;
+  const status = Reflect.get(data, "status");
+  return typeof status === "string" ? status : null;
 }
 
 export async function POST(request: Request) {
@@ -55,11 +67,13 @@ export async function POST(request: Request) {
 
   const client = createServiceSupabaseClient();
   if (envelope.event.type === "app_mention" && envelope.event.channel && envelope.event.user && envelope.event.text) {
+    const channel = envelope.event.channel;
+    const threadTs = envelope.event.thread_ts ?? envelope.event.ts ?? "";
     const sourceResult = await client
       .from("sources")
       .select("id, dept_id")
       .eq("kind", "slack_channel")
-      .eq("external_id", envelope.event.channel)
+      .eq("external_id", channel)
       .eq("active", true)
       .maybeSingle();
     if (sourceResult.error) return Response.json({ error: "source_lookup_failed" }, { status: 500 });
@@ -78,10 +92,21 @@ export async function POST(request: Request) {
       p_event_id: envelope.event_id, p_source_id: sourceResult.data.id,
       p_author_ext_id: envelope.event.user, p_kind: "answer", p_content: question,
       p_external_ref: envelope.event.ts ?? null, p_spoken_at: null,
-      p_thread_ts: envelope.event.thread_ts ?? envelope.event.ts ?? "",
+      p_thread_ts: threadTs,
     });
     if (answerResult.error) return Response.json({ error: "answer_create_failed" }, { status: 500 });
-    if (answerResult.data === true) kickWorker();
+    const status = ingestStatus(answerResult.data);
+    if (status === "rate_limited") {
+      // Slack 재전송을 막기 위해 3초 ack를 기다리지 않는다. 중복 이벤트는 RPC가 duplicate로 끝낸다.
+      after(() => postMessage({
+        channel,
+        thread_ts: threadTs,
+        text: ASK_DAILY_LIMIT_MESSAGE,
+        blocks: [],
+      }).catch(() => undefined));
+    } else if (status === "saved") {
+      kickWorker();
+    }
     return ok();
   }
 
@@ -137,7 +162,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "item_upsert_failed" }, { status: 500 });
   }
 
-  if (itemResult.data === true) kickWorker();
+  if (ingestStatus(itemResult.data) === "saved") kickWorker();
 
   return ok();
 }

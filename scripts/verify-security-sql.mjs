@@ -133,7 +133,7 @@ try {
     await db.exec("set role service_role");
     try {
       const result = await q("select ingest_slack_atomic('removed-source-event',$1,'U_REMOVED_SOURCE','item','masked body','removed.1',null,null) as saved", [removalIds.source]);
-      assert.equal(result.rows[0].saved, false);
+      assert.equal(result.rows[0].saved.status, 'skipped');
     } finally { await db.exec("reset role"); }
     assert.equal((await q("select id from items where source_id=$1 and external_ref='removed.1'", [removalIds.source])).rows.length, 0);
   });
@@ -359,8 +359,8 @@ try {
   const ingest = (event, kind = 'item', content = 'synthetic masked body', ext = '123.45') =>
     q("select ingest_slack_atomic($1,$2,'U_ATOMIC',$3,$4,$5,null,'123.45') as saved", [event, ids.publicSource, kind, content, ext]);
   await check("Slack event/item/job commit atomically and duplicate delivery is a no-op", async () => {
-    assert.equal((await ingest('atomic-1')).rows[0].saved, true);
-    assert.equal((await ingest('atomic-1')).rows[0].saved, false);
+    assert.equal((await ingest('atomic-1')).rows[0].saved.status, 'saved');
+    assert.equal((await ingest('atomic-1')).rows[0].saved.status, 'duplicate');
     assert.equal((await q("select id from items where source_id=$1 and external_ref='123.45'", [ids.publicSource])).rows.length, 1);
     assert.equal((await q("select id from jobs where kind='classify' and payload->>'itemId' in (select id::text from items where source_id=$1 and external_ref='123.45')", [ids.publicSource])).rows.length, 1);
   });
@@ -370,17 +370,47 @@ try {
     assert.equal((await q("select event_id from ingest_events where event_id='atomic-retry'")).rows.length, 0);
     assert.equal((await q("select id from items where source_id=$1 and external_ref='123.46'", [ids.publicSource])).rows.length, 0);
     await db.exec("alter table jobs disable trigger fail_qa_job");
-    assert.equal((await ingest('atomic-retry', 'item', 'synthetic retry', '123.46')).rows[0].saved, true);
+    assert.equal((await ingest('atomic-retry', 'item', 'synthetic retry', '123.46')).rows[0].saved.status, 'saved');
   });
   await check("Slack mention answer and job are idempotent", async () => {
-    assert.equal((await ingest('atomic-ask', 'answer', 'synthetic masked question')).rows[0].saved, true);
-    assert.equal((await ingest('atomic-ask', 'answer', 'synthetic masked question')).rows[0].saved, false);
+    assert.equal((await ingest('atomic-ask', 'answer', 'synthetic masked question')).rows[0].saved.status, 'saved');
+    assert.equal((await ingest('atomic-ask', 'answer', 'synthetic masked question')).rows[0].saved.status, 'duplicate');
     assert.equal((await q("select id from answers where question='synthetic masked question'")).rows.length, 1);
     assert.equal((await q("select id from jobs where kind='answer' and payload->'slackReply'->>'channel'='public'")).rows.length, 1);
   });
+  await check("daily ASK limit allows 50, rejects 51, resets at KST midnight, and is isolated by user", async () => {
+    const limitUser = randomUUID();
+    const otherUser = randomUUID();
+    await q("insert into auth.users values($1),($2)", [limitUser, otherUser]);
+    await q("insert into members(user_id,dept_id,role,display_name,consented_at) values($1,$3,'member','limit user',now()),($2,$3,'member','other user',now())", [limitUser, otherUser, ids.dept]);
+    for (let index = 0; index < 50; index += 1) {
+      await q("insert into answers(dept_id,asked_by,question,created_at) values($1,$2,$3,now())", [ids.dept, limitUser, `daily-limit-${index}`]);
+    }
+    await assert.rejects(
+      () => q("insert into answers(dept_id,asked_by,question) values($1,$2,'daily-limit-51')", [ids.dept, limitUser]),
+      error => error.code === 'P0001' && error.message === 'ask_daily_limit',
+    );
+    assert.equal((await q("insert into answers(dept_id,asked_by,question) values($1,$2,'other-user') returning id", [ids.dept, otherUser])).rows.length, 1);
+    const yesterdayKst = "date_trunc('day', now() at time zone 'Asia/Seoul') at time zone 'Asia/Seoul' - interval '1 second'";
+    await q(`update answers set created_at=${yesterdayKst} where asked_by=$1 and question like 'daily-limit-%'`, [limitUser]);
+    assert.equal((await q("insert into answers(dept_id,asked_by,question) values($1,$2,'after-kst-midnight') returning id", [ids.dept, limitUser])).rows.length, 1);
+  });
+  await check("rate-limited Slack ASK records its event without creating an answer or job", async () => {
+    const limitedSlackUser = randomUUID();
+    await q("insert into auth.users values($1)", [limitedSlackUser]);
+    await q("insert into members(user_id,dept_id,role,display_name,slack_user_id,consented_at) values($1,$2,'member','limited slack','U_LIMITED',now())", [limitedSlackUser, ids.dept]);
+    for (let index = 0; index < 50; index += 1) {
+      await q("insert into answers(dept_id,asked_by,question) values($1,$2,$3)", [ids.dept, limitedSlackUser, `slack-limit-${index}`]);
+    }
+    const result = await q("select ingest_slack_atomic('atomic-limit',$1,'U_LIMITED','answer','limited slack question',null,null,'123.99') as saved", [ids.publicSource]);
+    assert.deepEqual(result.rows[0].saved, { status: 'rate_limited' });
+    assert.equal((await q("select event_id from ingest_events where event_id='atomic-limit'")).rows.length, 1);
+    assert.equal((await q("select id from answers where asked_by=$1 and question='limited slack question'", [limitedSlackUser])).rows.length, 0);
+    assert.equal((await q("select id from jobs where payload->'slackReply'->>'threadTs'='123.99'")).rows.length, 0);
+  });
   await check("consent rechecked inside transaction; no unconsented body persists", async () => {
     await q("update members set consented_at=null where user_id=$1", [ids.member]);
-    assert.equal((await ingest('atomic-no-consent', 'item', 'synthetic unconsented', '123.47')).rows[0].saved, false);
+    assert.equal((await ingest('atomic-no-consent', 'item', 'synthetic unconsented', '123.47')).rows[0].saved.status, 'skipped');
     assert.equal((await q("select id from items where content='synthetic unconsented'")).rows.length, 0);
     await q("update members set consented_at=now() where user_id=$1", [ids.member]);
   });
