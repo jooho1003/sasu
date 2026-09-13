@@ -14,7 +14,8 @@
     },
     {
       "dir": "3-d6-d10-completion",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-09-13T12:00:31+0900"
     }
   ]
 }
