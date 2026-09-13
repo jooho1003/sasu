@@ -128,8 +128,8 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-09-13T17:31:31+0900",
-      "completed_at": "2026-09-13T17:35:41+0900",
+      "started_at": "2026-09-13T17:31:31+09:00",
+      "completed_at": "2026-09-13T17:35:41+09:00",
       "summary": "세로 슬라이스가 실행별 고유 합성 안건으로 격리되고, Slack 질문·lead VTT 보류 발언의 1장 병합·이중 인용·카드 반려 정리를 E2E로 검증합니다."
     },
     {
@@ -138,11 +138,18 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-09-13T17:35:42+0900",
-      "completed_at": "2026-09-13T17:40:25+0900",
+      "started_at": "2026-09-13T17:35:42+09:00",
+      "completed_at": "2026-09-13T17:40:25+09:00",
       "summary": "디자인팀 합성 시드(24개 항목·이중 인용 카드 포함 열린 카드 2건·원장 3건·준비 답변 6건)와 시드 인용 구조 검증을 추가하고 게스트 부서 목록을 60초 재검증합니다."
+    },
+    {
+      "step": 14,
+      "name": "ask-permission-e2e",
+      "status": "pending",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
     }
   ],
   "created_at": "2026-09-13T09:56:46+09:00",
-  "completed_at": "2026-09-13T17:40:26+0900"
+  "completed_at": "2026-09-13T17:40:26+09:00"
 }
