@@ -20,7 +20,7 @@
       "effort": "medium",
       "started_at": "2026-09-13T10:05:49+0900",
       "summary": "jobs lease 만료 회수·최대 시도 lease_expired 종료와 service_role 전용 claim 검증을 추가했습니다.",
-      "completed_at": "2026-09-13T10:16:00+0900"
+      "completed_at": "2026-09-13T10:15:43+0900"
     },
     {
       "step": 2,
