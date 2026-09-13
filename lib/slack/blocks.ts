@@ -26,6 +26,37 @@ function escapeSlackText(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+const SLACK_SECTION_TEXT_LIMIT = 3000;
+const SLACK_BLOCK_LIMIT = 50;
+
+function splitSlackSectionText(text: string): string[] {
+  const chunks: string[] = [];
+  let remaining = text;
+
+  while (remaining.length > SLACK_SECTION_TEXT_LIMIT) {
+    const newlineIndex = remaining.lastIndexOf(
+      "\n",
+      SLACK_SECTION_TEXT_LIMIT,
+    );
+    const splitIndex = newlineIndex > 0 ? newlineIndex : SLACK_SECTION_TEXT_LIMIT;
+    chunks.push(remaining.slice(0, splitIndex));
+    remaining = remaining.slice(splitIndex + (newlineIndex > 0 ? 1 : 0));
+  }
+
+  if (remaining.length > 0) {
+    chunks.push(remaining);
+  }
+
+  return chunks;
+}
+
+function consentSectionBlocks(text: string): SlackBlock[] {
+  return splitSlackSectionText(text).map((chunk) => ({
+    type: "section",
+    text: { type: "mrkdwn", text: chunk },
+  }));
+}
+
 function formatDeadline(value: string | null): string {
   if (!value) {
     return "마감 미정";
@@ -207,7 +238,7 @@ export function consentBlocks(args: {
   deptId: string;
   consentUrl: string;
 }): SlackBlock[] {
-  return [
+  const noticeBlocks: SlackBlock[] = [
     {
       type: "header",
       text: {
@@ -216,25 +247,24 @@ export function consentBlocks(args: {
         emoji: true,
       },
     },
-    {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: escapeSlackText(CONSENT_SECTIONS.introduction),
-      },
-    },
-    {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: [
-          "*확인할 내용*",
-          ...CONSENT_SECTIONS.items.map(
-            (item, index) => `${index + 1}. ${escapeSlackText(item.title)}`,
-          ),
+    ...consentSectionBlocks(escapeSlackText(CONSENT_SECTIONS.introduction)),
+    ...CONSENT_SECTIONS.items.flatMap((item, index) =>
+      consentSectionBlocks(
+        [
+          `*${index + 1}. ${escapeSlackText(item.title)}*`,
+          ...(item.body ? [escapeSlackText(item.body)] : []),
+          ...item.details.map((detail) => `• ${escapeSlackText(detail)}`),
         ].join("\n"),
-      },
-    },
+      ),
+    ),
+  ];
+
+  if (noticeBlocks.length + 1 > SLACK_BLOCK_LIMIT) {
+    throw new Error("Slack consent notice exceeds the block limit");
+  }
+
+  return [
+    ...noticeBlocks,
     {
       type: "actions",
       elements: [

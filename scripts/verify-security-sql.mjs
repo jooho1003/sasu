@@ -13,7 +13,7 @@ const { pgcrypto } = require("@electric-sql/pglite/contrib/pgcrypto");
 const { vector } = require("@electric-sql/pglite-pgvector");
 const db = new PGlite({ extensions: { pgcrypto, vector } });
 let passed = 0;
-const ids = Object.fromEntries(["org", "dept", "lead", "member", "publicSource", "privateSource", "publicItem", "privateItem", "card", "publicCard", "deferredCard", "slackCard", "meeting", "conflict", "decision", "publicDecision", "answer", "pending", "failed"].map(key => [key, randomUUID()]));
+const ids = Object.fromEntries(["org", "dept", "lead", "member", "memberB", "publicSource", "privateSource", "publicItem", "privateItem", "card", "publicCard", "deferredCard", "slackCard", "meeting", "conflict", "decision", "publicDecision", "answer", "memberAnswer", "memberBAnswer", "pending", "failed"].map(key => [key, randomUUID()]));
 const backfillIds = Object.fromEntries(["org", "dept", "privateSource", "privateItem", "card", "cardDecision", "directDecision"].map(key => [key, randomUUID()]));
 const mergeIds = Object.fromEntries([
   "boundaryDept", "boundarySource", "exactItem", "belowItem", "oldItem", "closedItem",
@@ -99,6 +99,8 @@ try {
     assert.deepEqual(member, { consented: true, consent_version: 1 });
     assert.deepEqual(leadAfter, leadBefore);
   });
+  await q("insert into auth.users values ($1)", [ids.memberB]);
+  await q("insert into members(user_id,dept_id,role,display_name,consented_at) values ($1,$2,'member','member B',now())", [ids.memberB,ids.dept]);
   await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$3,'slack_channel','public','dept'),($2,$3,'slack_channel','private','leads_only')", [ids.publicSource,ids.privateSource,ids.dept]);
   const embedding = JSON.stringify(Array(1024).fill(0.01));
   await q("insert into items(id,source_id,dept_id,content,embedding,embed_model) values ($1,$3,$5,'public evidence',$6,'voyage-4-lite'),($2,$4,$5,'private evidence',$6,'voyage-4-lite')", [ids.publicItem,ids.privateItem,ids.publicSource,ids.privateSource,ids.dept,embedding]);
@@ -116,6 +118,8 @@ try {
   for (const [key,status] of [["answer","done"],["pending","pending"],["failed","failed"]]) {
     await q("insert into answers(id,dept_id,asked_by,question,status) values ($1,$2,$3,'synthetic question',$4)", [ids[key],ids.dept,ids.lead,status]);
   }
+  await q("insert into answers(id,dept_id,asked_by,question,status) values ($1,$3,$4,'member A question','done'),($2,$3,$5,'member B question','done')", [ids.memberAnswer,ids.memberBAnswer,ids.dept,ids.member,ids.memberB]);
+  await q("insert into citations(owner_kind,owner_id,item_id,quote) values ('answer',$1,$3,'public evidence'),('answer',$2,$3,'public evidence')", [ids.memberAnswer,ids.memberBAnswer,ids.publicItem]);
   await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$2,'slack_channel','removal-source','dept')", [removalIds.source, ids.dept]);
   await q("insert into items(id,source_id,dept_id,content,embedding,embed_model) values ($1,$2,$3,'removal evidence',$4,'voyage-4-lite')", [removalIds.item, removalIds.source, ids.dept, embedding]);
   await q("insert into classifications(item_id,label,method) values ($1,'decision','llm')", [removalIds.item]);
@@ -141,6 +145,21 @@ try {
     await asUser(ids.lead, async () => {
       assert.equal((await q("select * from search_as($1,$2,$3,8) where id=$4", [ids.lead, ids.dept, embedding, removalIds.item])).rows.length, 0);
     });
+  });
+  await check("removed item remains updateable for worker cleanup", async () => {
+    await db.exec("set role service_role");
+    try {
+      assert.equal((await q("update items set embed_status='deleted' where id=$1 returning id", [removalIds.item])).rows.length, 1);
+    } finally { await db.exec("reset role"); }
+  });
+  await check("inactive source rejects direct item inserts", async () => {
+    await db.exec("set role service_role");
+    try {
+      await assert.rejects(
+        () => q("insert into items(source_id,dept_id,external_ref,content) values($1,$2,'removed.direct','masked body')", [removalIds.source,ids.dept]),
+        error => error.code === "23514" && error.message === "inactive_source",
+      );
+    } finally { await db.exec("reset role"); }
   });
   await check("inactive source rejects Slack ingestion before an item can persist", async () => {
     await q("update members set slack_user_id='U_REMOVED_SOURCE' where user_id=$1 and dept_id=$2", [ids.lead, ids.dept]);
@@ -218,10 +237,20 @@ try {
   });
   await check("authenticated cannot call claim_jobs", () => asUser(ids.lead, () => denied("select * from claim_jobs(1)")));
   await check("member cannot read lead answer or private ledger", () => asUser(ids.member, async () => {
-    assert.equal((await q("select id from answers")).rows.length, 0);
+    assert.equal((await q("select id from answers where id=$1", [ids.answer])).rows.length, 0);
     assert.equal((await q("select id from decisions where id=$1", [ids.decision])).rows.length, 0);
     assert.equal((await q("select * from recent_decisions_as($1,$2,3) where id=$3",[ids.member,ids.dept,ids.decision])).rows.length,0);
   }));
+  await check("answer citations are visible only to their own questioner", async () => {
+    await asUser(ids.member, async () => {
+      assert.equal((await q("select id from citations where owner_id=$1", [ids.memberAnswer])).rows.length, 1);
+      assert.equal((await q("select id from citations where owner_id=$1", [ids.memberBAnswer])).rows.length, 0);
+    });
+    await asUser(ids.memberB, async () => {
+      assert.equal((await q("select id from citations where owner_id=$1", [ids.memberBAnswer])).rows.length, 1);
+      assert.equal((await q("select id from citations where owner_id=$1", [ids.memberAnswer])).rows.length, 0);
+    });
+  });
   await check("similar decision RPC excludes superseded rows and is service-role-only", async () => {
     await db.exec("set role service_role");
     try {

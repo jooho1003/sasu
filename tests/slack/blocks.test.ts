@@ -6,6 +6,7 @@ import {
   consentBlocks,
   type SlackCardView,
 } from "@/lib/slack/blocks";
+import { CONSENT_SECTIONS } from "@/lib/consent";
 
 const card: SlackCardView = {
   id: "card-1",
@@ -56,24 +57,42 @@ describe("Slack Block Kit 카드", () => {
     expect(JSON.stringify(modal)).toContain("sasu_rationale");
   });
 
-  it("동의 DM은 문서 항목과 전문 링크, 본인 동의 액션을 포함한다", () => {
+  it("동의 DM은 전문을 먼저 고지하고 마지막 블록에서 본인 동의를 받는다", () => {
     const blocks = consentBlocks({
       deptId: "22222222-2222-4222-8222-222222222222",
       consentUrl: "https://sasu.example/consent?next=%2Fd%2Fdept",
     });
     const serialized = JSON.stringify(blocks);
+    const sectionTexts = blocks.flatMap((block) => {
+      if (block.type !== "section") {
+        return [];
+      }
+      const text = block.text;
+      if (
+        typeof text !== "object" ||
+        text === null ||
+        !("text" in text) ||
+        typeof text.text !== "string"
+      ) {
+        return [];
+      }
+      return [text.text];
+    });
+    const fullNotice = sectionTexts.join("\n");
 
-    for (const title of [
-      "모으는 것",
-      "쓰는 목적",
-      "보관 기간",
-      "원장에 남는 것",
-      "누가 보나",
-      "외부 처리",
-      "철회",
-    ]) {
-      expect(serialized).toContain(title);
+    expect(fullNotice).toContain(CONSENT_SECTIONS.introduction);
+    for (const item of CONSENT_SECTIONS.items) {
+      expect(fullNotice).toContain(item.title);
+      if (item.body) {
+        expect(fullNotice).toContain(item.body);
+      }
+      for (const detail of item.details) {
+        expect(fullNotice).toContain(detail);
+      }
     }
+    expect(sectionTexts.every((text) => text.length <= 3000)).toBe(true);
+    expect(blocks.length).toBeLessThanOrEqual(50);
+    expect(blocks.at(-1)?.type).toBe("actions");
     expect(serialized).toContain("sasu_consent");
     expect(serialized).toContain("22222222-2222-4222-8222-222222222222");
     expect(serialized).toContain("https://sasu.example/consent");

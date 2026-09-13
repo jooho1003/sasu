@@ -27,7 +27,11 @@ function makeBuilder(data: unknown, error: unknown = null) {
   return builder;
 }
 
-function createClient() {
+function createClient(itemOverrides: Partial<{
+  id: string;
+  content: string;
+  deleted_at: string | null;
+}> = {}) {
   const updates: Record<string, unknown>[] = [];
   const from = vi.fn((table: string) => {
     if (table === "items") {
@@ -38,6 +42,7 @@ function createClient() {
               id: "item-1",
               content: "외주사 견적을 확인합니다.",
               deleted_at: null,
+              ...itemOverrides,
             }),
           }),
         }),
@@ -98,6 +103,19 @@ describe("embed pipeline", () => {
         embed_status: "done",
       },
     ]);
+  });
+
+  it("삭제된 item은 임베딩 호출과 후속 update 없이 종료한다", async () => {
+    const fake = createClient({
+      content: "삭제 전에 저장됐던 본문",
+      deleted_at: "2026-09-13T07:00:00.000Z",
+    });
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+
+    await embedItem("item-1");
+
+    expect(moduleMocks.embedText).not.toHaveBeenCalled();
+    expect(fake.updates).toEqual([]);
   });
 
   it("embed handler를 등록한다", () => {

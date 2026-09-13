@@ -150,7 +150,7 @@ using (
         select 1
         from public.answers as answer
         where answer.id = citations.owner_id
-          and public.can_see(auth.uid(), answer.dept_id, 'dept')
+          and answer.asked_by = auth.uid()
       ))
     )
     and (

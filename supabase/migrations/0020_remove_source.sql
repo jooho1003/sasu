@@ -24,7 +24,7 @@ $$;
 
 drop trigger if exists items_active_source_guard on public.items;
 create trigger items_active_source_guard
-before insert or update on public.items
+before insert on public.items
 for each row execute function public.guard_active_item_source();
 
 create or replace function public.remove_source(p_source uuid)
