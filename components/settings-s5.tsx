@@ -209,6 +209,25 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
     }
   };
 
+  const reimportNotion = async (sourceId: string) => {
+    setNotionState({ kind: "pending", message: "Notion 다시 가져오기를 시작하는 중입니다." });
+    try {
+      await readResponse(await fetch(`/api/d/${encodeURIComponent(deptId)}/settings/notion`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source_id: sourceId }),
+      }));
+      setNotionState({ kind: "success", message: "다시 가져오기를 시작했습니다. 완료되면 마지막 가져오기 시간이 갱신됩니다." });
+      await load();
+    } catch (error) {
+      setNotionState({ kind: "error", message: error instanceof Error ? error.message : "Notion 다시 가져오기를 시작하지 못했습니다." });
+    }
+  };
+
+  const formatKst = (value: string | null) => value
+    ? new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Seoul" }).format(new Date(value))
+    : "아직 가져오지 않음";
+
   const uploadMeeting = async () => {
     if (!meetingFile) {
       setMeetingState({ kind: "error", message: "VTT 또는 TXT 전사 파일을 선택해주세요." });
@@ -448,6 +467,7 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
               <div className="grid gap-1">
                 <strong>{source.title ?? source.external_id}</strong>
                 <span className="text-sm text-[var(--muted)]">{source.kind === "slack_channel" ? "Slack" : source.kind === "meeting" ? "회의" : "Notion"} · {source.visibility === "leads_only" ? "팀장만" : "부서 전체"}</span>
+                {source.kind === "notion_page" ? <span className="text-sm text-[var(--muted)]">마지막 가져오기: {formatKst(source.last_synced_at)}</span> : null}
                 {source.last_error ? <span className="text-sm text-[var(--urgent)]">마지막 오류: {source.last_error}</span> : null}
               </div>
               {data.role === "lead" ? (
@@ -455,6 +475,11 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
                   {source.kind === "slack_channel" ? (
                     <button className="rounded-lg border border-[var(--accent)] px-3 py-2 text-sm font-bold text-[var(--accent)] disabled:opacity-50" disabled={backfillState.kind === "pending"} onClick={() => void startBackfill(source.id)} type="button">
                       7일 백필 시작
+                    </button>
+                  ) : null}
+                  {source.kind === "notion_page" && source.active ? (
+                    <button className="rounded-lg border border-[var(--accent)] px-3 py-2 text-sm font-bold text-[var(--accent)] disabled:opacity-50" disabled={notionState.kind === "pending"} onClick={() => void reimportNotion(source.id)} type="button">
+                      {notionState.kind === "pending" ? "가져오는 중…" : "다시 가져오기"}
                     </button>
                   ) : null}
                   {source.active ? (
@@ -471,6 +496,7 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
         </div>
         {backfillState.message ? <p className="m-0 text-sm text-[var(--muted)]">{backfillState.message}</p> : null}
         {removalState.message ? <p className="m-0 text-sm text-[var(--muted)]">{removalState.message}</p> : null}
+        {notionState.message ? <p className="m-0 text-sm text-[var(--muted)]">{notionState.message}</p> : null}
       </section>
     </main>
   );
