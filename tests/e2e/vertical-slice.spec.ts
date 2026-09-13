@@ -35,6 +35,14 @@ type CardRow = {
   recommendation: string | null;
 };
 
+type MeetingRow = {
+  source_id: string;
+};
+
+type ClassificationRow = {
+  label: string;
+};
+
 type DuplicateResponse = {
   duplicate?: boolean;
   message?: string;
@@ -145,6 +153,58 @@ async function runWorker(
   }
 }
 
+function syntheticAgenda(eventId: string): {
+  code: string;
+  slackMessage: string;
+  transcriptMessage: string;
+} {
+  const code = eventId.replace("e2e-", "").slice(-8).toUpperCase();
+  return {
+    code,
+    slackMessage: `[합성 QA 테스트 — 실제 업무 아님] 합성 품목 QA-${code} 월 구독 증액 38만원을 오늘 승인할까요?`,
+    transcriptMessage: `[합성 QA 테스트 — 실제 업무 아님] 합성 품목 QA-${code} 월 구독 증액 38만원 안건은 오늘까지 보류입니다. 승인 여부를 결정해주세요.`,
+  };
+}
+
+async function waitForOpenCard(
+  supabase: SupabaseClient,
+  itemId: string,
+): Promise<CardRow> {
+  const deadline = Date.now() + 60_000;
+  while (Date.now() < deadline) {
+    const result = await supabase
+      .from("decision_requests")
+      .select("id, title, recommendation")
+      .eq("origin_item_id", itemId)
+      .eq("status", "open")
+      .maybeSingle<CardRow>();
+    if (result.error) throw result.error;
+    if (result.data) return result.data;
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+  }
+
+  const mergedResult = await supabase
+    .from("citations")
+    .select("owner_id")
+    .eq("owner_kind", "decision_request")
+    .eq("item_id", itemId)
+    .maybeSingle<{ owner_id: string }>();
+  if (mergedResult.error) throw mergedResult.error;
+  throw new Error(
+    `card was not created for item_id=${itemId}; merged_into=${mergedResult.data?.owner_id ?? "none"}`,
+  );
+}
+
+async function rejectCard(supabase: SupabaseClient, cardId: string): Promise<void> {
+  const result = await supabase.rpc("decide_request", {
+    p_request: cardId,
+    p_action: "reject",
+    p_outcome: "",
+    p_rationale: "합성 E2E 테스트 정리",
+  });
+  if (result.error) throw result.error;
+}
+
 test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 흐른다", async ({
   context,
   page,
@@ -154,12 +214,13 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
   const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
   const { supabase } = await signInLead(context, baseURL);
   const eventId = `e2e-${crypto.randomUUID()}`;
+  const agenda = syntheticAgenda(eventId);
   const slackTimestamp = `${Math.floor(Date.now() / 1_000)}.${Math.floor(
     Math.random() * 1_000_000,
   )
     .toString()
     .padStart(6, "0")}`;
-  const message = `[합성 QA 테스트 — 실제 업무 아님] 외주사 B 견적 12% 인상 건, 오늘까지 결정해야 할까요? [${eventId}]`;
+  const message = agenda.slackMessage;
   const envelope = {
     type: "event_callback",
     event_id: eventId,
@@ -205,28 +266,7 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
 
   await runWorker(request, baseURL);
 
-  let card: CardRow | null = null;
-  await expect
-    .poll(
-      async () => {
-        const result = await supabase
-          .from("decision_requests")
-          .select("id, title, recommendation")
-          .eq("origin_item_id", itemId)
-          .eq("status", "open")
-          .maybeSingle<CardRow>();
-        if (result.error) throw result.error;
-        card = result.data;
-        return card?.id ?? "";
-      },
-      { timeout: 60_000, intervals: [500, 1_000, 2_000] },
-    )
-    .not.toBe("");
-
-  if (!card) {
-    throw new Error("card was not created");
-  }
-  const resolvedCard = card as CardRow;
+  const resolvedCard = await waitForOpenCard(supabase, itemId);
 
   await expect.poll(async () => {
     const delivery = await supabase.from("decision_requests")
@@ -298,4 +338,136 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
     .eq("external_ref", slackTimestamp);
   expect(items.error).toBeNull();
   expect(items.count).toBe(1);
+});
+
+test("슬랙 질문과 회의 보류가 카드 1장으로 병합된다", async ({
+  context,
+  page,
+  request,
+}) => {
+  test.skip(process.env.E2E_ALLOW_EXTERNAL_WRITES !== "1", "실제 DB 쓰기·워커·Slack 발송을 포함하므로 승인된 테스트 환경에서 E2E_ALLOW_EXTERNAL_WRITES=1로 실행합니다.");
+  const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
+  const { supabase } = await signInLead(context, baseURL);
+  const eventId = `e2e-${crypto.randomUUID()}`;
+  const agenda = syntheticAgenda(eventId);
+  const slackTimestamp = `${Math.floor(Date.now() / 1_000)}.${Math.floor(
+    Math.random() * 1_000_000,
+  )
+    .toString()
+    .padStart(6, "0")}`;
+  const envelope = {
+    type: "event_callback",
+    event_id: eventId,
+    event: {
+      type: "message",
+      channel: PUBLIC_CHANNEL_ID,
+      user: "seed-member",
+      text: agenda.slackMessage,
+      ts: slackTimestamp,
+    },
+  };
+
+  await postSlackEvent(request, baseURL, envelope);
+  await runWorker(request, baseURL);
+
+  const slackItemResult = await supabase
+    .from("items")
+    .select("id")
+    .eq("external_ref", slackTimestamp)
+    .maybeSingle<{ id: string }>();
+  if (slackItemResult.error || !slackItemResult.data) {
+    throw slackItemResult.error ?? new Error("slack test item was not created");
+  }
+  const slackItemId = slackItemResult.data.id;
+  const card = await waitForOpenCard(supabase, slackItemId);
+  try {
+    const transcript = [
+      "WEBVTT",
+      "",
+      "00:00:01.000 --> 00:00:08.000",
+      `사수 파일럿 팀장: ${agenda.transcriptMessage}`,
+    ].join("\n");
+    const upload = await page.request.post(
+      `${baseURL}/api/d/${DEPARTMENT_ID}/meetings/transcript`,
+      {
+        multipart: {
+          title: `합성 QA 회의 ${agenda.code}`,
+          file: {
+            name: `synthetic-merge-${agenda.code}.vtt`,
+            mimeType: "text/vtt",
+            buffer: Buffer.from(transcript, "utf8"),
+          },
+        },
+      },
+    );
+    expect(upload.status()).toBe(202);
+    const uploadBody = (await upload.json()) as { meeting_id: string };
+
+    const meetingResult = await supabase
+      .from("meetings")
+      .select("source_id")
+      .eq("id", uploadBody.meeting_id)
+      .maybeSingle<MeetingRow>();
+    if (meetingResult.error || !meetingResult.data) {
+      throw meetingResult.error ?? new Error("uploaded meeting was not created");
+    }
+    const meetingItemResult = await supabase
+      .from("items")
+      .select("id")
+      .eq("source_id", meetingResult.data.source_id)
+      .maybeSingle<{ id: string }>();
+    if (meetingItemResult.error || !meetingItemResult.data) {
+      throw meetingItemResult.error ?? new Error("uploaded transcript item was not created");
+    }
+    const meetingItemId = meetingItemResult.data.id;
+
+    await runWorker(request, baseURL);
+    await expect.poll(async () => {
+      const result = await supabase
+        .from("classifications")
+        .select("label")
+        .eq("item_id", meetingItemId)
+        .maybeSingle<ClassificationRow>();
+      if (result.error) throw result.error;
+      return result.data?.label ?? "";
+    }, { timeout: 60_000, intervals: [500, 1_000, 2_000] }).toBe("decision");
+
+    await runWorker(request, baseURL);
+    await expect.poll(async () => {
+      const result = await supabase
+        .from("citations")
+        .select("item_id")
+        .eq("owner_kind", "decision_request")
+        .eq("owner_id", card.id);
+      if (result.error) throw result.error;
+      const itemIds = new Set((result.data ?? []).map((citation) => citation.item_id));
+      return itemIds.has(slackItemId) && itemIds.has(meetingItemId);
+    }, { timeout: 60_000, intervals: [500, 1_000, 2_000] }).toBe(true);
+
+    const mergedCardCitations = await supabase
+      .from("citations")
+      .select("item_id")
+      .eq("owner_kind", "decision_request")
+      .eq("owner_id", card.id);
+    expect(mergedCardCitations.error).toBeNull();
+    const citedItemIds = new Set((mergedCardCitations.data ?? []).map((citation) => citation.item_id));
+    expect(citedItemIds.has(slackItemId)).toBe(true);
+    expect(citedItemIds.has(meetingItemId)).toBe(true);
+
+    const newCardResult = await supabase
+      .from("decision_requests")
+      .select("id")
+      .eq("origin_item_id", meetingItemId)
+      .maybeSingle<{ id: string }>();
+    expect(newCardResult.error).toBeNull();
+    expect(newCardResult.data).toBeNull();
+
+    await page.goto(`${baseURL}/d/${DEPARTMENT_ID}/cards/${card.id}`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect(page.locator("q").filter({ hasText: agenda.slackMessage })).toBeVisible();
+    await expect(page.locator("q").filter({ hasText: agenda.transcriptMessage })).toBeVisible();
+  } finally {
+    await rejectCard(supabase, card.id);
+  }
 });
