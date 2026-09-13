@@ -20,6 +20,9 @@ const mergeIds = Object.fromEntries([
   "exactCard", "belowCard", "oldCard", "closedCard", "visibilityDept", "visibilitySource",
   "deptItem", "leadItem", "deptCard", "leadCard",
 ].map(key => [key, randomUUID()]));
+const removalIds = Object.fromEntries([
+  "source", "item", "request", "demoOrg", "demoDept", "demoSource",
+].map(key => [key, randomUUID()]));
 const q = (sql, params = []) => db.query(sql, params);
 const cosineVector = similarity => {
   const values = Array(1024).fill(0);
@@ -99,6 +102,41 @@ try {
   for (const [key,status] of [["answer","done"],["pending","pending"],["failed","failed"]]) {
     await q("insert into answers(id,dept_id,asked_by,question,status) values ($1,$2,$3,'synthetic question',$4)", [ids[key],ids.dept,ids.lead,status]);
   }
+  await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$2,'slack_channel','removal-source','dept')", [removalIds.source, ids.dept]);
+  await q("insert into items(id,source_id,dept_id,content,embedding,embed_model) values ($1,$2,$3,'removal evidence',$4,'voyage-4-lite')", [removalIds.item, removalIds.source, ids.dept, embedding]);
+  await q("insert into classifications(item_id,label,method) values ($1,'decision','llm')", [removalIds.item]);
+  await q("insert into decision_requests(id,dept_id,title,background,visibility) values ($1,$2,'removal card','removal card','dept')", [removalIds.request, ids.dept]);
+  await q("insert into citations(owner_kind,owner_id,item_id,quote) values ('decision_request',$1,$2,'removal evidence')", [removalIds.request, removalIds.item]);
+  await q("insert into orgs(id,name,is_demo) values ($1,'demo removal',true)", [removalIds.demoOrg]);
+  await q("insert into departments(id,org_id,name) values ($1,$2,'demo removal')", [removalIds.demoDept, removalIds.demoOrg]);
+  await q("insert into members(user_id,dept_id,role,display_name,consented_at) values ($1,$2,'lead','demo lead',now())", [ids.lead, removalIds.demoDept]);
+  await q("insert into sources(id,dept_id,kind,external_id) values ($1,$2,'slack_channel','demo-removal-source')", [removalIds.demoSource, removalIds.demoDept]);
+  await check("member cannot remove a source and demo sources are never removable", async () => {
+    await asUser(ids.member, () => denied("select remove_source($1)", [removalIds.source]));
+    await asUser(ids.lead, () => denied("select remove_source($1)", [removalIds.demoSource]));
+  });
+  await check("lead source removal erases searchable evidence but preserves ledger quotes", async () => {
+    await asUser(ids.lead, async () => {
+      const result = (await q("select remove_source($1) as result", [removalIds.source])).rows[0].result;
+      assert.deepEqual(result, { removed_items: 1 });
+    });
+    const item = (await q("select content, embedding, embed_status, deleted_at is not null as deleted from items where id=$1", [removalIds.item])).rows[0];
+    assert.deepEqual(item, { content: "", embedding: null, embed_status: "deleted", deleted: true });
+    assert.equal((await q("select item_id from classifications where item_id=$1", [removalIds.item])).rows.length, 0);
+    assert.equal((await q("select quote from citations where owner_id=$1", [removalIds.request])).rows[0].quote, "removal evidence");
+    await asUser(ids.lead, async () => {
+      assert.equal((await q("select * from search_as($1,$2,$3,8) where id=$4", [ids.lead, ids.dept, embedding, removalIds.item])).rows.length, 0);
+    });
+  });
+  await check("inactive source rejects Slack ingestion before an item can persist", async () => {
+    await q("update members set slack_user_id='U_REMOVED_SOURCE' where user_id=$1 and dept_id=$2", [ids.lead, ids.dept]);
+    await db.exec("set role service_role");
+    try {
+      const result = await q("select ingest_slack_atomic('removed-source-event',$1,'U_REMOVED_SOURCE','item','masked body','removed.1',null,null) as saved", [removalIds.source]);
+      assert.equal(result.rows[0].saved, false);
+    } finally { await db.exec("reset role"); }
+    assert.equal((await q("select id from items where source_id=$1 and external_ref='removed.1'", [removalIds.source])).rows.length, 0);
+  });
   const mergeQuery = cosineVector(1);
   await check("find_merge_target includes the 72h/0.85 boundaries and rejects stale, closed, or sub-threshold cards", async () => {
     await db.exec("begin");

@@ -54,6 +54,7 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
   const [consentState, setConsentState] = useState<ActionState>(IDLE_ACTION);
   const [sourceState, setSourceState] = useState<ActionState>(IDLE_ACTION);
   const [backfillState, setBackfillState] = useState<ActionState>(IDLE_ACTION);
+  const [removalState, setRemovalState] = useState<ActionState>(IDLE_ACTION);
   const [notionState, setNotionState] = useState<ActionState>(IDLE_ACTION);
   const [meetingState, setMeetingState] = useState<ActionState>(IDLE_ACTION);
   const [selectedChannel, setSelectedChannel] = useState("");
@@ -170,6 +171,22 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
         kind: "error",
         message: error instanceof Error ? error.message : "백필을 시작하지 못했습니다.",
       });
+    }
+  };
+
+  const removeSource = async (sourceId: string) => {
+    if (!window.confirm("제거하면 이 채널의 저장된 본문과 검색 데이터가 삭제됩니다. 원장에 인용된 문장은 남습니다. 다시 연결하면 최근 7일만 복구됩니다.")) return;
+    setRemovalState({ kind: "pending", message: "입력 소스를 제거하는 중입니다." });
+    try {
+      const result = await readResponse<{ removed_items: number }>(
+        await fetch(`/api/d/${encodeURIComponent(deptId)}/settings/source?id=${encodeURIComponent(sourceId)}`, {
+          method: "DELETE",
+        }),
+      );
+      setRemovalState({ kind: "success", message: `${result.removed_items}개 항목의 본문과 검색 데이터를 삭제했습니다.` });
+      await load();
+    } catch (error) {
+      setRemovalState({ kind: "error", message: error instanceof Error ? error.message : "입력 소스를 제거하지 못했습니다." });
     }
   };
 
@@ -433,15 +450,27 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
                 <span className="text-sm text-[var(--muted)]">{source.kind === "slack_channel" ? "Slack" : source.kind === "meeting" ? "회의" : "Notion"} · {source.visibility === "leads_only" ? "팀장만" : "부서 전체"}</span>
                 {source.last_error ? <span className="text-sm text-[var(--urgent)]">마지막 오류: {source.last_error}</span> : null}
               </div>
-              {data.role === "lead" && source.kind === "slack_channel" ? (
-                <button className="rounded-lg border border-[var(--accent)] px-3 py-2 text-sm font-bold text-[var(--accent)] disabled:opacity-50" disabled={backfillState.kind === "pending"} onClick={() => void startBackfill(source.id)} type="button">
-                  7일 백필 시작
-                </button>
+              {data.role === "lead" ? (
+                <div className="flex flex-wrap gap-2">
+                  {source.kind === "slack_channel" ? (
+                    <button className="rounded-lg border border-[var(--accent)] px-3 py-2 text-sm font-bold text-[var(--accent)] disabled:opacity-50" disabled={backfillState.kind === "pending"} onClick={() => void startBackfill(source.id)} type="button">
+                      7일 백필 시작
+                    </button>
+                  ) : null}
+                  {source.active ? (
+                    <button className="rounded-lg border border-[var(--urgent)] px-3 py-2 text-sm font-bold text-[var(--urgent)] disabled:opacity-50" disabled={removalState.kind === "pending"} onClick={() => void removeSource(source.id)} type="button">
+                      {removalState.kind === "pending" ? "제거 중…" : "제거"}
+                    </button>
+                  ) : (
+                    <span className="rounded-lg bg-black/5 px-3 py-2 text-sm text-[var(--muted)]">제거됨</span>
+                  )}
+                </div>
               ) : null}
             </div>
           ))}
         </div>
         {backfillState.message ? <p className="m-0 text-sm text-[var(--muted)]">{backfillState.message}</p> : null}
+        {removalState.message ? <p className="m-0 text-sm text-[var(--muted)]">{removalState.message}</p> : null}
       </section>
     </main>
   );

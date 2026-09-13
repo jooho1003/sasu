@@ -134,3 +134,28 @@ export async function POST(
 
   return Response.json({ ok: true, source_id: sourceResult.data.id, job_id: jobId }, { status: 201 });
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ dept: string }> },
+) {
+  const { dept } = await params;
+  const membership = await requireMembership(dept);
+  if (membership.role !== "lead") {
+    return Response.json({ error: "입력 소스 제거는 팀장만 할 수 있습니다." }, { status: 403 });
+  }
+
+  const sourceId = new URL(request.url).searchParams.get("id")?.trim() ?? "";
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(sourceId)) {
+    return Response.json({ error: "제거할 입력 소스를 확인해주세요." }, { status: 400 });
+  }
+
+  const supabase = await createServerSupabaseClient();
+  const result = await supabase.rpc("remove_source", { p_source: sourceId });
+  if (result.error || !result.data) {
+    return Response.json({ error: "입력 소스를 제거하지 못했습니다." }, { status: 500 });
+  }
+
+  const removedItems = Reflect.get(result.data, "removed_items");
+  return Response.json({ ok: true, removed_items: typeof removedItems === "number" ? removedItems : 0 });
+}
