@@ -30,7 +30,7 @@
       "effort": "xhigh",
       "started_at": "2026-09-13T10:15:44+0900",
       "summary": "카드·결정·회의 쓰기를 auth.uid()/can_see RPC 경계로 원자화하고 직접 결정 visibility 상속·RLS 검증을 추가했습니다.",
-      "completed_at": "2026-09-13T10:43:26+0900"
+      "completed_at": "2026-09-13T10:45:00+0900"
     },
     {
       "step": 3,
