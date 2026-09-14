@@ -57,7 +57,7 @@ describe("파일럿 동의문 상수", () => {
 
   it("공급자별 확인 결과를 문서와 다르게 축약하지 않는다", () => {
     expect(JSON.stringify(CONSENT_SECTIONS)).toContain(
-      "[확인 대기: 조직 Data Controls·ZDR 설정]",
+      "2026-09-14부터 조직 Data Controls의 Global ZDR·Inference APIs ZDR을 켜",
     );
     expect(JSON.stringify(CONSENT_SECTIONS)).toContain(
       "2026-09-13부터 학습 사용 거부(opt-out)가 설정되어 처리 후 즉시 삭제됩니다.",

@@ -1,0 +1,2 @@
+주문 처리 API를 TypeScript와 PostgreSQL로 설계하고 구현했습니다.
+개인 학습 프로젝트의 기능을 구현했습니다.

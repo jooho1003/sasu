@@ -2,11 +2,76 @@
   "project": "sasu",
   "phase": "4-agent-roles",
   "steps": [
-    { "step": 0, "name": "agent-roles-schema", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 1, "name": "agent-role-pipeline", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 2, "name": "agent-role-routes", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 3, "name": "agent-role-ui", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 4, "name": "agent-role-demo-seed", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 5, "name": "agent-role-verification", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" }
-  ]
+    {
+      "step": 0,
+      "name": "agent-roles-schema",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "started_at": "2026-09-14T13:48:57+0900",
+      "summary": "agent_roles·agent_role_results 테이블과 request_agent_role_run RPC를 추가하고 보안 SQL 검증 11개를 통과했다.",
+      "completed_at": "2026-09-14T13:59:52+0900"
+    },
+    {
+      "step": 1,
+      "name": "agent-role-pipeline",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "started_at": "2026-09-14T13:59:53+0900",
+      "summary": "역할 기준표 인용 검증·가중 점수 계산 파이프라인과 run_agent_role 워커 배선을 구현했다.",
+      "completed_at": "2026-09-14T14:04:35+0900"
+    },
+    {
+      "step": 2,
+      "name": "agent-role-routes",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "started_at": "2026-09-14T14:04:35+0900",
+      "summary": "세션·RLS 경계를 지키는 역할 생성·보관·문서 실행 API와 라우트 테스트 20개를 구현했다.",
+      "completed_at": "2026-09-14T14:16:20+0900"
+    },
+    {
+      "step": 3,
+      "name": "agent-role-ui",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "started_at": "2026-09-14T14:16:20+0900",
+      "summary": "S8 역할 생성·보관·문서 적용·근거 기반 점수표 UI와 내비게이션을 추가했다. lint·tsc·unit·build 통과, 인증 E2E 환경 부재로 역할 E2E 2건은 skipped.",
+      "completed_at": "2026-09-14T14:27:03+0900"
+    },
+    {
+      "step": 4,
+      "name": "agent-role-demo-seed",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "started_at": "2026-09-14T14:27:04+0900",
+      "summary": "개발팀 합성 지원서 3건·역할 점수표 시드와 읽기 전용 게스트 역할 화면을 추가하고 시드 검증을 통과했다.",
+      "completed_at": "2026-09-14T14:36:57+0900"
+    },
+    {
+      "step": 5,
+      "name": "agent-role-scoring-fix",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "started_at": "2026-09-14T14:45:18+0900",
+      "summary": "전체 기준 가중치 기준 점수와 nullable rationale 검증, 근거 없음 0점 반영 UI를 적용하고 AC를 통과했다.",
+      "completed_at": "2026-09-14T19:41:28+0900"
+    },
+    {
+      "step": 6,
+      "name": "agent-role-verification",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "started_at": "2026-09-14T19:41:29+0900",
+      "completed_at": "2026-09-14T19:56:00+0900",
+      "summary": "실제 Groq 평가 5개 판정(P1 5.00>P2 2.50, P3/P4 차이 0)·RLS 59/59·test 729·게스트 E2E 통과. 번들 비밀값 검사의 service-role prefix 1건은 anon JWT 헤더 겹침 오탐으로 Claude 재판정."
+    }
+  ],
+  "created_at": "2026-09-14T13:48:57+0900"
 }

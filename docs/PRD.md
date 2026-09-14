@@ -298,7 +298,7 @@ create table agent_role_results (id uuid primary key default gen_random_uuid(),
                       status text not null default 'processing', -- processing|completed|failed
                       status_reason text,
                       result jsonb,                        -- {criteria:[{key, score 0~5|null, rationale, citations[]}], summary}
-                      weighted_score numeric,              -- 코드가 근거 있는 기준만으로 계산 (0~5). 모델 출력 아님
+                      weighted_score numeric,              -- 코드가 계산 (0~5) = Σ(근거 있는 기준 점수×가중치) / Σ(전체 기준 가중치). 근거 없음 = 0점. 모델 출력 아님
                       requested_by uuid references auth.users not null,
                       created_at timestamptz default now(), updated_at timestamptz default now(),
                       unique (role_id, source_id));

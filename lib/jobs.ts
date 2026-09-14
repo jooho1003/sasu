@@ -10,6 +10,7 @@ export type JobKind =
   | "embed_decision"
   | "summarize_meeting"
   | "summarize_document"
+  | "run_agent_role"
   | "make_card"
   | "answer"
   | "send_slack"
@@ -33,7 +34,7 @@ type OwnerReference = {
 };
 
 type FailureOwnerMapping = {
-  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "document_summaries";
+  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "document_summaries" | "agent_role_results";
   references: OwnerReference[];
   write: "update" | "upsert";
   values: (ownerId: string, errorCode: string) => Record<string, unknown>;
@@ -46,6 +47,7 @@ const MAX_CLAIM_LIMIT = 100;
 const RETRY_BASE_DELAY_MS = 1_000;
 const RETRY_JITTER_MS = 1_000;
 const SWEEP_TIMEOUT_MS = 2 * 60 * 1_000;
+const AGENT_ROLE_SWEEP_TIMEOUT_MS = 20 * 60 * 1_000;
 
 const SAFE_ERROR_CODES = new Set([
   "auth",
@@ -153,6 +155,12 @@ const FAILURE_OWNER_MAPPINGS: Partial<
     references: [{ payloadKey: "documentId", column: "source_id" }],
     write: "update",
     values: (_documentId, errorCode) => ({ status: "summary_failed", status_reason: errorCode }),
+  },
+  run_agent_role: {
+    table: "agent_role_results",
+    references: [{ payloadKey: "resultId", column: "id" }],
+    write: "update",
+    values: (_resultId, errorCode) => ({ status: "failed", status_reason: errorCode }),
   },
 };
 
@@ -282,6 +290,18 @@ export async function sweepPendingRows(): Promise<void> {
     .lt("created_at", cutoff);
 
   if (documentResult.error) {
+    throw new JobWorkerDatabaseError();
+  }
+
+  // 역할 실행은 한 번에 최대 20건이 순차 처리되고 같은 행을 재실행하므로,
+  // 생성 시각이 아니라 마지막 요청 시각(updated_at) 기준으로 더 길게 기다린다.
+  const agentRoleResult = await client
+    .from("agent_role_results")
+    .update({ status: "failed", status_reason: "llm_timeout", updated_at: new Date().toISOString() })
+    .eq("status", "processing")
+    .lt("updated_at", new Date(Date.now() - AGENT_ROLE_SWEEP_TIMEOUT_MS).toISOString());
+
+  if (agentRoleResult.error) {
     throw new JobWorkerDatabaseError();
   }
 

@@ -50,6 +50,7 @@ export type LlmPurpose =
   | "answer"
   | "summarize_meeting"
   | "summarize_document"
+  | "run_agent_role"
   | "transcribe_voice"
   | "generic_answer";
 

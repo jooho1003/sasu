@@ -211,6 +211,12 @@ describe("jobs worker", () => {
         slack_delivery_error: "llm_timeout",
       },
     },
+    {
+      kind: "run_agent_role" as const,
+      payload: { resultId: "result-1" },
+      ownerTable: "agent_role_results",
+      ownerStatus: { status: "failed", status_reason: "llm_timeout" },
+    },
   ])(
     "3회 실패한 $kind job은 failed이고 소유 row 상태도 바뀐다",
     async ({ kind, payload, ownerTable, ownerStatus }) => {
@@ -303,6 +309,33 @@ describe("jobs worker", () => {
         table: "decision_requests",
         values: expect.objectContaining({ status: "needs_review" }),
       }),
+    );
+  });
+
+  it("sweep은 역할 결과를 재실행 시각(updated_at) 기준 20분이 지나야 failed로 바꾼다", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-08T12:30:00.000Z"));
+    const fake = createFakeClient([
+      [{ id: "sweep-job", kind: "sweep", payload: {}, attempts: 1 }],
+    ]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+
+    await runOnce();
+
+    const operation = fake.operations.find(
+      (candidate) => candidate.table === "agent_role_results" && candidate.method === "update",
+    );
+    expect(operation?.values).toEqual(
+      expect.objectContaining({ status: "failed", status_reason: "llm_timeout" }),
+    );
+    expect(operation?.filters).toEqual(
+      expect.arrayContaining([
+        { operator: "eq", column: "status", value: "processing" },
+        { operator: "lt", column: "updated_at", value: "2026-09-08T12:10:00.000Z" },
+      ]),
+    );
+    expect(operation?.filters).not.toContainEqual(
+      expect.objectContaining({ column: "created_at" }),
     );
   });
 

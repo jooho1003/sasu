@@ -5,6 +5,7 @@ import { registerEmbedHandler } from "@/lib/pipeline/embed";
 import { registerAnswerHandler } from "@/lib/pipeline/answer";
 import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
 import { registerDocumentSummaryHandler } from "@/lib/pipeline/document-summary";
+import { registerAgentRoleHandler } from "@/lib/pipeline/agent-role";
 import { registerNotionImportHandler } from "@/lib/pipeline/notion-import";
 import { registerSendSlackHandler } from "@/lib/pipeline/send-slack";
 import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
@@ -16,6 +17,7 @@ export async function runWorkerOnce(limit?: number) {
   registerAnswerHandler();
   registerMeetingSummaryHandler();
   registerDocumentSummaryHandler();
+  registerAgentRoleHandler();
   registerNotionImportHandler();
   registerMakeCardHandler();
   registerSendSlackHandler();

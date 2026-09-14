@@ -25,7 +25,13 @@ const mergeIds = Object.fromEntries([
 const removalIds = Object.fromEntries([
   "source", "item", "request", "demoOrg", "demoDept", "demoSource",
 ].map(key => [key, randomUUID()]));
+const roleIds = Object.fromEntries([
+  "deptRole", "privateRole", "archivedRole", "publicDocument", "privateDocument",
+  "nonDocumentSource", "otherOrg", "otherDept", "otherDocument", "demoRole",
+].map(key => [key, randomUUID()]));
+const oversizedRoleSources = Array.from({ length: 21 }, () => randomUUID());
 const q = (sql, params = []) => db.query(sql, params);
+const uuidArray = values => `{${values.join(",")}}`;
 const cosineVector = similarity => {
   const values = Array(1024).fill(0);
   values[0] = similarity;
@@ -131,6 +137,96 @@ try {
   await q("insert into departments(id,org_id,name) values ($1,$2,'demo removal')", [removalIds.demoDept, removalIds.demoOrg]);
   await q("insert into members(user_id,dept_id,role,display_name,consented_at) values ($1,$2,'lead','demo lead',now())", [ids.lead, removalIds.demoDept]);
   await q("insert into sources(id,dept_id,kind,external_id) values ($1,$2,'slack_channel','demo-removal-source')", [removalIds.demoSource, removalIds.demoDept]);
+  const roleCriteria = JSON.stringify([{ key: "evidence", label: "근거", description: "문서 근거", weight: 1 }]);
+  await q("insert into orgs(id,name) values ($1,'role other org')", [roleIds.otherOrg]);
+  await q("insert into departments(id,org_id,name) values ($1,$2,'role other dept')", [roleIds.otherDept, roleIds.otherOrg]);
+  await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$5,'document','role-public','dept'),($2,$5,'document','role-private','leads_only'),($3,$5,'slack_channel','role-not-document','dept'),($4,$6,'document','role-other-dept','dept')", [roleIds.publicDocument, roleIds.privateDocument, roleIds.nonDocumentSource, roleIds.otherDocument, ids.dept, roleIds.otherDept]);
+  await q("insert into document_summaries(source_id,dept_id) values ($1,$5),($2,$5),($3,$5),($4,$6)", [roleIds.publicDocument, roleIds.privateDocument, roleIds.nonDocumentSource, roleIds.otherDocument, ids.dept, roleIds.otherDept]);
+  await q("insert into agent_roles(id,dept_id,name,instruction,criteria,visibility,created_by) values ($1,$2,'demo role','demo instruction',$3::jsonb,'leads_only',$4)", [roleIds.demoRole, removalIds.demoDept, roleCriteria, ids.lead]);
+  await check("member cannot insert agent roles", () => asUser(ids.member, () => denied(
+    "insert into agent_roles(dept_id,name,instruction,criteria,visibility,created_by) values($1,'forged','forged',$2::jsonb,'dept',$3)",
+    [ids.dept, roleCriteria, ids.member],
+  )));
+  await check("lead cannot forge an agent role creator", () => asUser(ids.lead, () => denied(
+    "insert into agent_roles(dept_id,name,instruction,criteria,visibility,created_by) values($1,'forged creator','forged',$2::jsonb,'dept',$3)",
+    [ids.dept, roleCriteria, ids.member],
+  )));
+  await check("lead can insert valid agent roles", () => asUser(ids.lead, async () => {
+    const inserted = await q("insert into agent_roles(id,dept_id,name,instruction,criteria,visibility,created_by) values($1,$4,'department role','department instruction',$6::jsonb,'dept',$5),($2,$4,'private role','private instruction',$6::jsonb,'leads_only',$5),($3,$4,'archivable role','archive instruction',$6::jsonb,'leads_only',$5) returning id", [roleIds.deptRole, roleIds.privateRole, roleIds.archivedRole, ids.dept, ids.lead, roleCriteria]);
+    assert.equal(inserted.rows.length, 3);
+  }));
+  await check("agent role visibility hides leads-only roles from members", () => asUser(ids.member, async () => {
+    assert.equal((await q("select id from agent_roles where id=$1", [roleIds.privateRole])).rows.length, 0);
+    assert.equal((await q("select id from agent_roles where id=$1", [roleIds.deptRole])).rows.length, 1);
+  }));
+  await check("agent roles only allow one-way archival updates", () => asUser(ids.lead, async () => {
+    await assert.rejects(
+      () => q("update agent_roles set name='rewritten' where id=$1", [roleIds.archivedRole]),
+      error => error.code === "42501" && error.message === "agent_role_update_forbidden",
+    );
+    assert.equal((await q("update agent_roles set archived_at=clock_timestamp() where id=$1 returning id", [roleIds.archivedRole])).rows.length, 1);
+  }));
+  await check("members cannot request agent role runs", () => asUser(ids.member, async () => {
+    await assert.rejects(
+      () => q("select * from request_agent_role_run($1,$2::uuid[])", [roleIds.deptRole, uuidArray([roleIds.publicDocument])]),
+      error => error.code === "42501" && error.message === "agent_role_forbidden",
+    );
+  }));
+  await check("agent role runs reject cross-department, non-document, and oversized source sets", () => asUser(ids.lead, async () => {
+    for (const sources of [[roleIds.otherDocument], [roleIds.nonDocumentSource], oversizedRoleSources]) {
+      await assert.rejects(
+        () => q("select * from request_agent_role_run($1,$2::uuid[])", [roleIds.deptRole, uuidArray(sources)]),
+        error => error.code === "22023" && error.message === "agent_role_sources_invalid",
+      );
+    }
+  }));
+  let publicRoleResult;
+  let privateRoleResult;
+  await check("agent role runs upsert results with narrowest visibility and fresh timestamps", () => asUser(ids.lead, async () => {
+    const sources = uuidArray([roleIds.publicDocument, roleIds.privateDocument]);
+    const first = await q("select * from request_agent_role_run($1,$2::uuid[])", [roleIds.deptRole, sources]);
+    assert.equal(first.rows.length, 2);
+    const firstUpdatedAt = new Map(first.rows.map(row => [row.source_id, new Date(row.updated_at).getTime()]));
+    const stored = await q("select id,source_id,visibility from agent_role_results where role_id=$1 order by source_id", [roleIds.deptRole]);
+    assert.equal(stored.rows.length, 2);
+    publicRoleResult = stored.rows.find(row => row.source_id === roleIds.publicDocument)?.id;
+    privateRoleResult = stored.rows.find(row => row.source_id === roleIds.privateDocument)?.id;
+    assert.equal(stored.rows.find(row => row.source_id === roleIds.publicDocument)?.visibility, "dept");
+    assert.equal(stored.rows.find(row => row.source_id === roleIds.privateDocument)?.visibility, "leads_only");
+
+    const second = await q("select * from request_agent_role_run($1,$2::uuid[])", [roleIds.deptRole, sources]);
+    assert.equal(second.rows.length, 2);
+    assert.equal((await q("select id from agent_role_results where role_id=$1", [roleIds.deptRole])).rows.length, 2);
+    for (const row of second.rows) {
+      assert.ok(new Date(row.updated_at).getTime() > firstUpdatedAt.get(row.source_id));
+    }
+  }));
+  await check("members cannot write agent role results or read leads-only results", () => asUser(ids.member, async () => {
+    await denied(
+      "insert into agent_role_results(role_id,source_id,dept_id,visibility,requested_by) values($1,$2,$3,'leads_only',$4)",
+      [roleIds.privateRole, roleIds.publicDocument, ids.dept, ids.member],
+    );
+    await denied("update agent_role_results set status='completed' where id=$1", [publicRoleResult]);
+    assert.equal((await q("select id from agent_role_results where id=$1", [privateRoleResult])).rows.length, 0);
+  }));
+  await check("archived roles cannot be run", () => asUser(ids.lead, async () => {
+    await assert.rejects(
+      () => q("select * from request_agent_role_run($1,$2::uuid[])", [roleIds.archivedRole, uuidArray([roleIds.publicDocument])]),
+      error => error.code === "42501" && error.message === "agent_role_forbidden",
+    );
+  }));
+  await check("demo department roles cannot be run", () => asUser(ids.lead, async () => {
+    await assert.rejects(
+      () => q("select * from request_agent_role_run($1,$2::uuid[])", [roleIds.demoRole, uuidArray([roleIds.publicDocument])]),
+      error => error.code === "42501" && error.message === "agent_role_forbidden",
+    );
+  }));
+  await check("removing a document source deletes its agent role results", async () => {
+    assert.ok((await q("select id from agent_role_results where source_id=$1", [roleIds.privateDocument])).rows.length > 0);
+    await asUser(ids.lead, () => q("select remove_source($1)", [roleIds.privateDocument]));
+    assert.equal((await q("select id from agent_role_results where source_id=$1", [roleIds.privateDocument])).rows.length, 0);
+    assert.equal((await q("select id from agent_role_results where source_id=$1", [roleIds.publicDocument])).rows.length, 1);
+  });
   await check("member cannot remove a source and demo sources are never removable", async () => {
     await asUser(ids.member, () => denied("select remove_source($1)", [removalIds.source]));
     await asUser(ids.lead, () => denied("select remove_source($1)", [removalIds.demoSource]));
