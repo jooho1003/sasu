@@ -71,7 +71,8 @@
       "started_at": "2026-09-14T19:41:29+0900",
       "completed_at": "2026-09-14T19:56:00+0900",
       "summary": "실제 Groq 평가 5개 판정·RLS·게스트 E2E는 통과했으나 production client bundle 비밀값 검사에서 service-role 키 prefix 1건이 재검출됐다.",
-      "error_message": "SUPABASE_SERVICE_ROLE_KEY 앞 8자가 .next/static 프로덕션 클라이언트 번들 1개에서 검출됨; 이 검증 step에서는 원인 수정 금지."
+      "error_message": "[3회 시도 후 실패] SUPABASE_SERVICE_ROLE_KEY 앞 8자가 .next/static 프로덕션 클라이언트 번들 1개에서 검출됨; 이 검증 step에서는 원인 수정 금지.",
+      "failed_at": "2026-09-14T20:00:04+0900"
     }
   ],
   "created_at": "2026-09-14T13:48:57+0900"
