@@ -97,9 +97,10 @@ needs_test() {
       ;;
   esac
 
-  # Next.js 프레임워크 파일은 허용 (layout, page, loading, error, not-found, global styles)
+  # Next.js 프레임워크 파일은 허용 (layout, page, loading, error, not-found, global styles).
+  # Next.js 16은 middleware.ts를 proxy.ts로 바꿨고, robots·sitemap·아이콘·OG 이미지와 app/** 안의 보조 TSX(예: login-form.tsx)는 프레임워크 배선·표현 계층이라 ARCHITECTURE §8에 따라 TDD 비대상이다.
   case "$FILE_PATH" in
-    */layout.tsx|*/layout.ts|*/page.tsx|*/page.ts|*/loading.tsx|*/error.tsx|*/not-found.tsx|*/globals.css)
+    */layout.tsx|*/layout.ts|*/page.tsx|*/page.ts|*/loading.tsx|*/error.tsx|*/not-found.tsx|*/globals.css|*/proxy.ts|*/app/robots.ts|*/app/sitemap.ts|*/app/manifest.ts|*/app/icon.*|*/app/apple-icon.*|*/app/opengraph-image.*|*/app/twitter-image.*|*/app/*.tsx)
       return 0
       ;;
   esac

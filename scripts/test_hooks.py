@@ -163,6 +163,22 @@ class TestTddGuardCodexShape:
         r = run_hook(TDD_GUARD, patch_payload("Update File: components/Panel.tsx"), repo)
         assert not denied(r)
 
+    def test_allows_nextjs16_proxy(self, repo):
+        r = run_hook(TDD_GUARD, patch_payload("Update File: proxy.ts"), repo)
+        assert not denied(r)
+
+    def test_allows_app_metadata_routes(self, repo):
+        r = run_hook(TDD_GUARD, patch_payload("Add File: app/robots.ts"), repo)
+        assert not denied(r)
+
+    def test_allows_app_colocated_client_component(self, repo):
+        r = run_hook(TDD_GUARD, patch_payload("Update File: app/login/login-form.tsx"), repo)
+        assert not denied(r)
+
+    def test_still_denies_lib_module_named_like_framework_file(self, repo):
+        r = run_hook(TDD_GUARD, patch_payload("Add File: lib/robots.ts"), repo)
+        assert denied(r)
+
     def test_allows_delete(self, repo):
         """삭제는 구현 코드 작성이 아니므로 TDD 대상이 아니다."""
         r = run_hook(TDD_GUARD, patch_payload("Delete File: lib/pipeline/card.ts"), repo)

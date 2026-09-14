@@ -280,7 +280,7 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 | `lib/rules.ts` · `lib/mask.ts` · `lib/pipeline/*` · `lib/jobs.ts` · `lib/adapters/*`(파서) · `lib/slack/verify.ts` | 순수 로직. 분류 규칙, 마스킹이 금액을 지우지 않는지, 인용 문자열 검증, 병합 임계, visibility 최솟값, 백오프, .vtt 파서 줄 번호 에러, 서명 검증 | Vitest. `llm.ts`·Supabase는 mock. 파일별 미러 `tests/<path>/<name>.test.ts` | **대상** — 테스트 없이 구현 파일 편집 차단 |
 | `supabase/migrations` RLS · `can_see()` · `search_as()` | member 세션으로 `leads_only` select 0건·insert 거부, lead는 보임, anon은 `is_demo`만, 퍼블릭 채널 질문은 member 권한 | `tests/rls/*.test.ts` — 서로 다른 JWT 3개(anon·member·lead)로 같은 쿼리 실행 | 대상 아님 (SQL) — 단 D8 사람이 직접 읽는다 |
 | `app/api/**/route.ts` · `lib/supabase/*` · `lib/slack/{blocks,post}.ts` · `lib/llm.ts` | SDK 어댑터·배선·프레젠테이션. 우리 로직이 아니라 SDK를 테스트하는 꼴이 된다 | E2E로 간접 검증 | **비대상** |
-| `components/` · `app/**/page.tsx` | 표현 | Playwright | 비대상 |
+| `components/` · `app/**`의 TSX(page·layout·보조 클라이언트 컴포넌트) · Next.js 프록시·메타데이터 파일(`proxy.ts`·`app/robots.ts`·`app/sitemap.ts`·아이콘·OG 이미지) | 표현 | Playwright | 비대상 |
 | E2E `tests/e2e/` | ① 게스트 `/demo` 시크릿 창 완주 + 우리 팀 실데이터 문자열 grep 0건 + LLM 호출 0 ② D3 세로 슬라이스: 슬랙 메시지 → 분류 → 카드 → 웹 결정 → 원장 5분 ③ 같은 질문 lead/member 답 차이 ④ 결정 버튼 연타 → decisions 1건 | Playwright, 배포 URL 대상 | 비대상 |
 
 `tdd-guard.sh`의 허용 목록은 이 표를 그대로 옮긴 것이다. 표를 바꾸면 훅도 바꾼다. **완료는 이 테스트가 실제로 실행된 기록으로 판정한다** (PRD §11). Codex의 "완료했습니다"는 신호가 아니다.
