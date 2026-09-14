@@ -1,0 +1,12 @@
+{
+  "project": "sasu",
+  "phase": "4-agent-roles",
+  "steps": [
+    { "step": 0, "name": "agent-roles-schema", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
+    { "step": 1, "name": "agent-role-pipeline", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 2, "name": "agent-role-routes", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
+    { "step": 3, "name": "agent-role-ui", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 4, "name": "agent-role-demo-seed", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 5, "name": "agent-role-verification", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" }
+  ]
+}

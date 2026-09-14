@@ -202,6 +202,7 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 | `jobs` | `queued → running → done` / `running → queued`(재시도) / `→ failed`(3회) | 워커만 바꾼다 |
  | `answers` | `pending → done/refused/failed(error_code)` | 2분 스윕 |
 | `document_summaries` | `processing → summarized/summary_failed` | 2분 스윕 |
+| `agent_role_results` (ADR-038) | `processing → completed/failed(status_reason)` · lead 재실행은 같은 (role, source) 행을 `processing`으로 되돌림 | 2분 스윕. 역할 `archived_at` 이후 새 실행 거부 |
 | 동의 | `null → consented_at` · `consent_version` 불일치면 재동의 · 철회는 `null` + 이후 발언 미저장 | 과거 저장분 유지(동의문 명시) |
 
 ---

@@ -186,6 +186,7 @@ Slack 서명 검증·동의 확인·선마스킹 후에는 `ingest_slack_atomic(
 | P0 | **ASK 권한 인지 Q&A** | 부서의 채널·문서·원장만을 근거로, 질문자 권한 안에서 인용해 답한다. 인용 못 하면 답하지 않는다 | U5, U6 |
 | P0 | **VOICE ASK 음성 업무 입력** | 브라우저 음성을 한국어 전사하고, 사용자가 확인·수정한 뒤 기존 ASK/분류 흐름으로 보낸다. 원본 음성은 저장하지 않는다 | U5, U6 |
 | P0 | **DOCUMENT ASSISTANT 문서 업무 정리** | lead가 TXT·MD·CSV·JSON·PDF·DOCX를 업로드하면 마스킹된 근거 chunk와 인용 가능한 요약·결정·액션·열린 질문을 만든다 | U2, U5, U6 |
+| P1 | **ROLES 부서 에이전트 역할** (ADR-038) | lead가 역할 지시문과 평가 기준표를 저장하고, S7 문서에 적용하면 문서별로 기준 점수·이유·원문 인용이 붙은 점수표를 만든다. 합불 판정·자동 발송 없음, 최종 판단은 사람 | U2, U5 |
 | P1 | **충돌 감지** | 카드 생성 시 과거 원장과 충돌하면 배지 + 인용 (결정 후 재검사는 나중) | U4 |
 | P0 | **부서 세팅** | 멤버 동의 수집(0단계) → 채널 연결·원칙 문서 지정·소스 visibility·결정권자 지정. 데모 장면 1이라 P0 | U1, U9 |
 | P0 | **게스트 모드** | 로그인 없이 가상 회사 샘플 워크스페이스 열람. 심사·투표가 보는 것이라 P0 | — |
@@ -236,6 +237,8 @@ Slack 서명 검증·동의 확인·선마스킹 후에는 `ingest_slack_atomic(
 | S0 | **동의 화면** (첫 로그인) | `/consent` | 수집 범위·원장 인용 보존·질문 기록 고지 · [동의] → `consented_at`. 슬랙 DM의 [동의] 버튼과 같은 기록 | U9 |
 | S7 | **문서 어시스턴트** | `/d/[dept]/documents` | lead 문서 업로드 · 문서 처리 상태 · 권한별 요약·결정·액션·열린 질문 · 원문 인용 · 문서 기반 ASK 진입 | U2, U5, U6 |
 
+| S8 | **부서 에이전트 역할** (ADR-038) | `/d/[dept]/roles` | lead 역할 만들기(이름·지시문·기준 1~10개·가중치) · 문서 선택 → 역할 적용 · 점수표(문서별 가중 점수 정렬, 기준별 점수·이유·원문 인용 펼치기, "근거 없음" 표시) · "참고용 · 최종 판단은 담당자" 고정 문구 · 개인정보 동의 고지 | U2, U5 |
+
 S6은 유저 스토리가 아니라 심사 동선을 위한 화면이다. S7은 문서 업무 정리를 위한 P0 화면이다. 음성 생체 식별이나 화자 지문 등록 화면은 만들지 않는다 (§8).
 
 ---
@@ -280,6 +283,25 @@ create table document_summaries (source_id uuid primary key references sources o
                       summary jsonb, status_reason text,
                       extracted_chars int not null default 0, chunk_count int not null default 0,
                       created_at timestamptz default now(), updated_at timestamptz default now());
+-- ADR-038 부서 에이전트 역할 (0023). 역할 = 지시문 + 기준표. 결과 = 문서 1건당 기준별 점수·인용
+create table agent_roles (id uuid primary key default gen_random_uuid(), dept_id uuid references departments not null,
+                      name text not null,                  -- 1~60자
+                      instruction text not null,           -- 1~2000자. 시스템 고정 가드를 덮어쓸 수 없다
+                      criteria jsonb not null,             -- [{key, label, description, weight 1~5}] 1~10개, key 중복 금지
+                      visibility text not null default 'leads_only',
+                      created_by uuid references auth.users not null,   -- auth.uid()로만 채움
+                      archived_at timestamptz, created_at timestamptz default now());
+create table agent_role_results (id uuid primary key default gen_random_uuid(),
+                      role_id uuid references agent_roles not null, source_id uuid references sources on delete cascade not null,
+                      dept_id uuid references departments not null,
+                      visibility text not null,            -- 역할·문서 중 좁은 것
+                      status text not null default 'processing', -- processing|completed|failed
+                      status_reason text,
+                      result jsonb,                        -- {criteria:[{key, score 0~5|null, rationale, citations[]}], summary}
+                      weighted_score numeric,              -- 코드가 근거 있는 기준만으로 계산 (0~5). 모델 출력 아님
+                      requested_by uuid references auth.users not null,
+                      created_at timestamptz default now(), updated_at timestamptz default now(),
+                      unique (role_id, source_id));
 create table items   (id uuid primary key default gen_random_uuid(), source_id uuid references sources not null,
                       dept_id uuid references departments not null,
                       external_ref text,                  -- slack ts / 전사 구간 / notion block id
@@ -730,7 +752,8 @@ flowchart LR
 | 슬랙 OAuth "Add to Slack" 멀티 워크스페이스 설치 | 단일 워크스페이스 수동 설치, 토큰 env | 파일럿 2팀째는 별도 배포 인스턴스 |
 | 캘린더 연동 자동 봇 참석 | 회의 URL 수동 입력 | 로드맵 |
 | 공유 카드("이번 주 미룬 결정 N개") 자동 생성 | 투표 캠페인용 | 디자인 툴로 정적 카드 3종 |
-| 인사평가 보조·개인 포트폴리오 | 감시 프레임 위험 | 발표에서 로드맵 한 줄만 |
+| 인사평가 보조·개인 포트폴리오 | 감시 프레임 위험 | 발표에서 로드맵 한 줄만. **구성원** 대상 평가는 계속 제외한다. 외부 지원자 서류 검토 보조는 ADR-038 조건(점수·근거만, 합불 없음, 직무 무관 특성 가드, leads_only)으로 S8에서 허용 |
+| 역할을 슬랙·회의 관찰·카드 생성까지 반영하는 범용 부서 에이전트 | 기존 파이프라인 회귀 위험, 3일 안에 검증 불가 | S8 문서 기준표 평가만 (ADR-038) |
 | 결제·멀티 조직·초대 플로우 | 파일럿 2팀은 수동 시드 | 로드맵 |
 | 실시간 스트리밍(SSE) | 폴링으로 충분 | 여유 시 |
 | Lindy식 시간 트리거(주간 브리핑) | 이벤트 트리거만 | 로드맵 |
@@ -743,6 +766,7 @@ Phase 4에서 이미 뺀 것(8-0)은 여기 없다. 아래는 **최종 범위 �
 
 | 순위 | 기능 | 대체 | 판정 시점 |
 |---|---|---|---|
+| 0 | S8 부서 에이전트 역할 (ADR-038, 9/14 추가) | 라우트·내비게이션 숨김, 제출서에는 로드맵으로 기재. 마이그레이션 0023은 남겨도 무해 | **9/16 자정** — §11 "부서 역할" 행 로컬 통과 여부 |
 | 1 | 채널 연결 7일 백필 | 연결 시점부터 수집. 개발 테스트는 우리 팀 실시간 메시지로 | D4 |
 | 2 | **온라인 회의 봇** | Zoom/Meet 기본 전사 파일 업로드 | **D6 (9/13)** |
 | 3 | 72h 유사도 병합 | 슬랙·회의가 각각 카드. 데모 장면 3은 "같은 형식의 카드 2장"으로 서사 조정 | D6 |
@@ -823,6 +847,8 @@ Codex가 만든 코드 중 **RLS 정책·워커·슬랙 서명 검증**은 D8 �
 - 남은 사람 작업: 슬랙 DM 버튼(결정·동의) 실클릭 · Groq Data Controls 확인 · 파일럿 구성원 서면 동의(D9) · 실제 채널 20건 재현율 채점 · 9/18 참가 접수. D10(9/17) 프리징은 유지한다 — 9/14~9/17은 버그픽스·폴리싱·부하 테스트만.
 - 게스트 부서는 §8-0의 2개에서 4개(영업·개발·기획·디자인)로 늘었다(9/12 QA 요구).
 
+**범위 추가 (2026-09-14, ADR-038)** — 사용자 결정으로 S8 부서 에이전트 역할(문서 기준표 평가)을 9/14~9/16에 구현한다. "9/14~9/17 버그픽스만"의 예외는 이 1건뿐이고 D10(9/17) 프리징은 유지한다. 판정: 9/16 자정 §11 "부서 역할" 행 로컬 통과, 미달 시 컷 ⓪. 같은 날 Groq 조직 Data Controls의 Global ZDR·Inference ZDR을 켰다(§10 #14·#20 확인, `docs/pilot-consent.md` 6번 반영).
+
 ---
 
 ## 10. 미확인 가설과 미결정 (구현 전·중에 풀 것)
@@ -842,13 +868,13 @@ Codex가 만든 코드 중 **RLS 정책·워커·슬랙 서명 검증**은 D8 �
 | 11 | 서비스명 "사수" 유지 여부 (기획서 §11) | 미정 | 유지로 가정하고 진행, 제출 전 최종 | D11 |
 | 12 | 커스텀 도메인 | 미정 | Vercel 기본 도메인으로 제출 가능 | D11 |
 | 13 | Recall.ai 웹훅 서명 지원 여부·녹음 파일 보존 기간 | 확인 필요 | 문서 확인, 서명 없으면 URL 시크릿 + IP 제한. 전사 후 녹음 삭제 설정 | D5 |
-| 14 | Groq API 데이터 보존 기간·삭제 옵션 | 확인 필요 | 약관 확인 → 제출서 "학습 미사용" 문구 근거 | D12 |
+| 14 | Groq API 데이터 보존 기간·삭제 옵션 | **확인됨 (9/14)** — 조직 Data Controls의 Global ZDR·Inference APIs ZDR 켬. 그 전 전송분은 최대 30일 보존 가능 | 약관 확인 → 제출서 "학습 미사용" 문구 근거 | D12 |
 | 15 | 슬랙 `users:read.email` 스코프 승인 조건 | 확인 필요 | 워크스페이스 관리자 설치 시 가능한지 확인 | D1 |
 | 16 | Vercel `after()` 지속 시간 상한, Cron 최소 간격(Hobby는 하루 1회일 수 있음) | 확인 필요 | 플랜 확인. 매분 Cron 불가면 Pro 전환 또는 외부 핑(cron-job.org) | D1 |
 | 17 | 퇴사자 이름을 원장에 보존하는 법적 근거 | 확인 필요 | 파일럿 동의문에 "업무 기록으로 보존" 명시, 자문은 대회 후 | 대회 후 |
 | 18 | 슬랙 `conversations.history` 백필의 레이트 리밋(Tier 3, 분당 50) | 확인 필요 | 7일치 채널 3개면 수 분 — job 1개, 페이지네이션 | D4 |
 | 19 | Groq 토큰 단가·무료 티어·rate limit (gpt-oss-120b / 20b) | 확인 필요 | console.groq.com에서 확인 → §8-5 $100 상한 재계산. 티어 rate limit이 낮으면 워커 동시성이 아니라 `jobs` 백오프로 흡수 | D2 |
-| 20 | Groq API 데이터 보존·학습 미사용 정책 | 확인 필요 | 약관 확인 → 제출서 문구·파일럿 동의문 (#6·#14와 같은 확인) | D12 |
+| 20 | Groq API 데이터 보존·학습 미사용 정책 | 보존은 **확인됨 (9/14, ZDR)** · 학습 미사용 문구는 #6에서 약관 확인 | 약관 확인 → 제출서 문구·파일럿 동의문 (#6·#14와 같은 확인) | D12 |
 | 21 | gpt-oss-120b의 한국어 생성 품질이 카드·답변에 충분한가 | 가설 | D3 카드 생성 시 우리 팀 실메시지로 육안 판정. 미달이면 순서는 ① 시스템 프롬프트 한국어 지시 강화 ② 인용 quote를 원문 그대로 쓰게 강제 ③ 그래도 미달이면 §8-2 컷이 아니라 모델 교체(같은 Groq 안에서) | D3 |
 
 ### 10-1. 가설별 영향과 판정 — 틀리면 무슨 일이 생기나
@@ -886,6 +912,7 @@ Codex가 만든 코드 중 **RLS 정책·워커·슬랙 서명 검증**은 D8 �
 | 게스트 부서 격리 | 같은 질문("단가 정책 어떻게 잡죠?")을 영업·개발 사수에게 → 각자 자기 부서 원칙만 인용, 상대 부서 items 인용 0건 (장면 4') |
 | 엣지·에러 | 같은 슬랙 이벤트 2회 전송 → items 1건. 결정 버튼 연타 → decisions 1건 + "이미 결정됨" 응답. Groq 키를 잘못 넣고 질문 → 2분 내 `failed(llm_timeout|auth)` + 재시도 버튼. 잘못된 .vtt 업로드 → 줄 번호 포함 에러. items 0건 부서에서 질문 → LLM 호출 0회 |
 | 음성·문서 | 음성 webm 녹음 → 전사 텍스트를 확인·수정 후 ASK가 `202`로 접수되고 원본 음성 row/파일이 없음. PDF/DOCX 업로드 → `summarize_document`가 `summarized`로 끝나며 요약 문장·액션의 인용 quote가 원문 chunk에 포함됨. leads_only 문서는 member에게 0건 |
+| 부서 역할 (ADR-038) | member 세션으로 `agent_roles`·`agent_role_results` insert 거부, leads_only 결과 select 0건(RLS). lead가 기준 3개 역할을 합성 지원서 3건에 적용 → 3행 모두 `completed`, 렌더되는 모든 기준 점수에 원문 chunk에 포함된 quote가 1개 이상. 직무 무관 특성(나이·성별)만 다른 합성 지원서 2건의 가중 점수 차이 ≤ 0.5. 결과 JSON에 합불 필드 없음. 게스트 `/demo`의 역할 점수표는 사전 시드이며 `llm_calls` 증가 0 |
 | 운영 | 9/21~10/5 매일 1회 헬스체크. **우리가 통제 가능한 장애 0**(배포 실패·키 만료·시드 오류). Vercel·Supabase 플랫폼 장애는 상태 페이지 기록으로 구분해 두고 통제 밖으로 본다 |
 | 제출 | 참가 접수 D0(9/8) 완료. 과제 제출은 "임시저장"이 아니라 **제출** 버튼까지(D12). 제출서·스크린샷에 컷된 기능이 "만든 것처럼" 없음 ([submission-checklist.md](submission-checklist.md) 제출 전 확인) |
 

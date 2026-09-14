@@ -16,6 +16,10 @@
       "dir": "3-d6-d10-completion",
       "status": "completed",
       "completed_at": "2026-09-13T17:54:53+0900"
+    },
+    {
+      "dir": "4-agent-roles",
+      "status": "pending"
     }
   ]
 }
