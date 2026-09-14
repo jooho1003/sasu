@@ -65,9 +65,12 @@
     {
       "step": 6,
       "name": "agent-role-verification",
-      "status": "pending",
+      "status": "error",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium"
+      "effort": "medium",
+      "started_at": "2026-09-14T19:41:29+0900",
+      "error_message": "클라이언트 번들 비밀값 검사에서 SUPABASE_SERVICE_ROLE_KEY 앞 8자가 .next/static/chunks/3g7up9zty27uy.js에 검출됐다. Step 6은 검증 전용이라 원인 코드는 수정하지 않았다.",
+      "completed_at": "2026-09-14T19:45:09+0900"
     }
   ],
   "created_at": "2026-09-14T13:48:57+0900"
