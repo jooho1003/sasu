@@ -227,6 +227,30 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 
 ---
 
+### 6-1. 채용 예고편 첫 슬라이스 (ADR-040)
+
+- `app/trailers/page.tsx`는 서버 환경 변수로 활성 여부를 판정하는 동적 페이지다. 기본 404, noindex. 게스트 부서 판별과 다른 기능 활성화 경계이며 Supabase에 접근하지 않는다.
+- 서버에서 검증한 합성 콘텐츠만 `components/recruitment-trailer.tsx`에 직렬화한다. 계약은 `lib/contracts.ts`, 사실집 인용·선택 근거 검증은 `lib/trailer.ts`, 입력은 `fixtures/trailer/scenarios.ts`다.
+- NPC·기록실의 모든 근거는 사실집 ID 존재와 quote 문자열 포함을 검증한다. 잘못된 콘텐츠는 fail-closed로 거부하고 문장을 렌더하지 않는다. 원시 발언·원장 데이터·실제 부서 ID를 합성 fixture에 넣지 않는다.
+- 진행·결정·이유·단서는 React 상태로만 유지한다. API·Server Action·스토리지·쿠키·LLM·행동 로그를 추가하지 않는다. 새로고침과 재시작은 기록을 지운다.
+- 맵과 목록은 동일한 상태·콘텐츠·제출 검증을 공유한다. 이동 시간과 경로는 수집/채점하지 않는다. 기록실의 사례 선택과 다르더라도 실패로 처리하지 않는다.
+- ADR-041: `lib/trailer-world.ts`는 좌표·충돌·경로·근접 규칙을 담당한다. `components/trailer-office.tsx`의 Canvas RAF 루프는 React 폼 상태와 분리하고 cleanup에서 프레임·이벤트를 해제한다. 창 포커스 상실·모달/목록 전환 시 키 상태와 이동을 정지한다. 배경 이미지와 충돌 좌표를 같은 1536×1024 월드 기준으로 관리한다.
+- 후속 실데이터 발행에는 기존 `can_see()`·RLS, 최신 `dept` 원장만의 입력, 원문 겹침/고유명사/마스킹 검사, lead 승인 및 공개 payload 분리가 필수다. 이 첫 슬라이스는 그 게이트를 대신하지 않는다.
+
+### 6-2. 제출 범위 확대의 불변식 (ADR-042~046, PRD §3-2)
+
+위 1~15에 더한다. 상세 계약은 [planning/메인웹사이트_관리자콘솔_설계.md](planning/메인웹사이트_관리자콘솔_설계.md) §B·§C.
+
+16. **authenticated·anon의 직접 쓰기는 의도한 테이블에만 열린다.** `departments`는 SELECT 전용이다. `items`에 authenticated INSERT는 없고, 수집 어댑터(문서·전사 업로드 포함)가 세션으로 권한을 검증하고 TS에서 마스킹한 뒤 service role로 insert한다. 보안 하니스는 Supabase 기본 GRANT를 재현한 상태에서 전 테이블의 쓰기 경계를 검사한다.
+17. **조직 관리 판정은 `is_org_admin()` 하나.** 관리 RPC는 조직 id를 요청 본문·URL이 아니라 `auth.uid()`에서 SQL로 정하고, 대상 행의 조직 일치를 SQL에서 확인한다. 관리 RPC는 메타데이터만 반환한다(질문 원문·질문자·본문·카드·원장 내용 없음, 답변은 일별·부서별 집계만). **조직 관리자 권한은 `can_see()`에 아무것도 더하지 않는다.**
+18. **권한을 올리는 작업은 이미 그 부서 내용을 볼 수 있는 부서장만 한다.** 조직 관리자는 멤버 0명인 부서의 첫 부서장 초대(자기 이메일 금지)와 권한 축소만 한다. 초대는 토큰 해시·7일·1회용·`auth.jwt()` 이메일 일치.
+19. **신규 SQL 함수는 전부 `revoke all … from public, anon, authenticated, service_role` 후 최소 grant.** 여러 게이트가 공유하는 내부 함수는 `private` 스키마에 둔다. SECURITY DEFINER 함수는 `set search_path = public, pg_temp`.
+20. **예고편은 세 조건이 SQL에서 모두 참일 때만 발행된다**: 현재 시나리오 해시 = `gate_passed_hash`(service_role 워커가 검사 통과 시에만 기록) = `approval_hash`(항목별 공개 승인) · `orgs.trailer_publish_enabled`. 공개 조회는 `{scenarios, apply_url}`만 반환하고 부서·조직·원장 id를 내보내지 않는다. 생성 입력에 원시 발언·카드 배경·인용 quote를 넣지 않는다.
+21. **실제 지원자 채점은 `orgs.trailer_assessment_enabled`가 true일 때만 가능하고, 그 값은 운영 스크립트만 바꾼다**(불변식 12의 `orgs` 사용자 접근 없음). 점수의 모든 근거는 지원자 본인의 이유 문자열·이벤트·선택 사실 id로 검증하고 총점은 코드가 계산한다. 합불·추천·순위 필드는 없다.
+22. **각 phase의 마이그레이션은 그 phase의 보안 하니스·DB 무관 E2E·리뷰가 통과한 뒤에만 운영 DB에 적용한다. DB가 필요한 E2E는 적용 직후 기능 플래그를 끈 상태에서 QA 조직으로 돌리고, 통과한 뒤에만 플래그를 켠다(ADR-047).** 컷된 기능은 플래그 뒤에 숨기는 것으로 끝나지 않는다. 적용 전이면 적용하지 않고, 적용 후면 롤백 SQL로 테이블·RPC를 제거한다.
+
+**상태 추가** — `member_invites`: 대기 → 수락/철회(만료는 `expires_at` 파생, 수락·철회 시 토큰 해시 무효화) · `trailers`: `generating → checking → review ⇄ checking → published → unpublished → (수정) checking`, `generating/checking → failed`, 10분 스윕 `failed(timeout)` · `trailer_attempts`: `scoring → scored/failed`.
+
 ## 7. 만들지 않는 것 (되살리지 말 것)
 
 | 항목 | 대신 | 근거 |
