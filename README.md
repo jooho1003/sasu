@@ -1,35 +1,87 @@
-# 사수 (SASU) v3 — 부서별 결정 사수
+# 사수 · SASU
 
-> 범용 AI는 세상을 알고, Lindy는 회사를 안다고 말합니다. 사수는 우리 부서를 알고, 결정을 만듭니다.
+> 회의가 끝나면 회의록보다 결정 요청이 먼저 도착합니다.
 
-원티드 AI Championship 2026 제출용 MVP. 참가 접수 **9/18(금)** · 과제 제출 **2026-09-20 (일) 23:59** · 심사 기간 9/21~10/5 배포 URL 유지.
+사수는 슬랙과 온라인 회의를 관찰해 **지금 결정해야 할 안건**을 찾아 담당자에게 보내고,
+내려진 결정을 근거와 함께 원장에 남기는 부서별 의사결정 AI입니다. 같은 질문에도 질문자의
+권한과 부서 문맥에 맞는 근거만 사용해 답합니다.
+
+![회의에서 결정 요청까지 이어지는 사수](docs/readme/decision-queue.png)
+
+## 문제
+
+회의록은 남아도 실제 결정은 미뤄지고, 나중에는 “누가·언제·왜 그렇게 결정했는지”를 찾기
+어렵습니다. 사수는 문서를 요약하는 데서 끝나지 않고 결정이 필요한 순간부터 실행합니다.
+
+1. 슬랙 대화·회의 전사·부서 원칙 문서를 수집합니다.
+2. 보류·미결·충돌 신호에서 결정 필요 안건을 추출합니다.
+3. 담당자에게 마감·배경·과거 결정 인용이 담긴 카드를 보냅니다.
+4. 카드에서 내린 결정을 append-only 결정 원장에 기록합니다.
+5. 이후 질문에는 질문자가 볼 수 있는 근거만 인용해 답합니다.
+
+## 핵심 기능
+
+| 기능 | 설명 |
+|---|---|
+| 결정 큐 | 지금 결정할 안건, 담당자, 마감, 상태를 한눈에 정리 |
+| Slack 카드 | 담당자 DM에서 수락·보류·결정하고 원장에 자동 반영 |
+| 회의 수집 | 원탭 녹음 또는 전사 파일로 회의를 수집·정리 |
+| 결정 원장 | 누가·언제·왜·어떤 근거로 결정했는지 append-only 기록 |
+| 권한 인지 Q&A | RLS와 동일한 가시성 규칙으로 질문자별 답변 생성 |
+| 과거 결정 충돌 | 새 안건이 기존 원칙·결정과 충돌하면 먼저 알림 |
+| 게스트 모드 | 로그인과 외부 연동 없이 합성 데이터로 전체 흐름 체험 |
+
+![질문자의 권한에 따라 달라지는 근거 기반 답변](docs/readme/permission-aware-qa.png)
+
+## 설계 원칙
+
+- **인용 없는 문장은 렌더하지 않습니다.**
+- **권한 판정은 SQL `can_see()` 하나로 집행합니다.**
+- 사용자 요청 경로에서 service role로 RLS를 우회하지 않습니다.
+- 결정은 수정·삭제 대신 `supersedes_id`로 정정하는 append-only 모델입니다.
+- 미동의 구성원의 발언은 저장하지 않습니다.
+- 게스트 모드는 LLM 호출과 DB 쓰기 없이 사전 계산 데이터만 사용합니다.
+
+## 기술 스택
+
+Next.js App Router · React · TypeScript · Supabase(Postgres, pgvector, RLS, Auth) ·
+Slack Events API · Block Kit · Groq · Zod · Vitest · Playwright · Vercel
+
+## 로컬 실행
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+검증:
+
+```bash
+npm run lint
+npm run build
+npm run test
+npm run test:rls
+npm run e2e
+```
+
+게스트 합성 데이터:
+
+```bash
+npx tsx scripts/seed-demo.ts
+```
 
 ## 문서
 
-구현의 입력이 되는 확정 계획은 `docs/PRD.md` 하나다. 충돌 시 우선순위: **PRD → ARCHITECTURE → ADR → setup-guide·submission-checklist**. 규칙은 [CLAUDE.md](CLAUDE.md)(= [AGENTS.md](AGENTS.md), Codex용 동일본).
+구현의 최상위 입력은 [`docs/PRD.md`](docs/PRD.md)입니다.
 
 | 문서 | 용도 |
 |---|---|
-| [CLAUDE.md](CLAUDE.md) / [AGENTS.md](AGENTS.md) | 프로젝트 헌장 — 스택, CRITICAL 규칙, 문서 우선순위, TDD·훅, 명령어 |
-| [docs/PRD.md](docs/PRD.md) | **최상위.** 범위·완료 조건·컷 라인·스키마·파이프라인·API·화면·일정·가설·검증·렌즈/외부 리뷰 이력 (옛 `plan.md` 흡수) |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 구조·디렉토리·패턴·데이터 흐름·불변식 15개·만들지 않는 것·테스트 경계 |
-| [docs/ADR.md](docs/ADR.md) | 결정 27개의 이유와 포기한 대안, 기각된 안 부록 |
-| [docs/setup-guide.md](docs/setup-guide.md) | 사람이 직접 해야 하는 일 — D0 확인 4건, 계정·플랜·키, 동의문, 게이트 판정(D3·D6·D8·D9) |
-| [docs/submission-checklist.md](docs/submission-checklist.md) | 제출 양식 7항목, 500자 본문, 스크린샷 5장, 영상 구간, AI 활용 증거, 투표·본선 |
-| [docs/01-plan/](docs/01-plan/features/sasu-mvp.plan.md) · [docs/02-design/](docs/02-design/features/sasu-mvp.design.md) | bkit PDCA용 얇은 어댑터 — PRD·ARCHITECTURE를 가리킨다. 새 결정을 적지 않는다 |
-| [docs/proposal/](docs/proposal/) | 기획서 v3 (컨셉·경쟁·보안·심사 전략), 사이(SAI) 기획서 |
-| [docs/submission/](docs/submission/) | 양식 원문·유의사항, 썸네일, 스크린샷 파일 |
-| [docs/archive/](docs/archive/) | 폐기된 v1·v2.1 문서, 옛 제출 초안 — 참조하지 않음 |
+| [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) | 보안·인용·개발 규칙 |
+| [PRD](docs/PRD.md) | 범위, 완료 조건, 스키마, 화면, 일정 |
+| [ARCHITECTURE](docs/ARCHITECTURE.md) | 구조, 데이터 흐름, 불변식 |
+| [ADR](docs/ADR.md) | 기술 결정과 포기한 대안 |
+| [설정 가이드](docs/setup-guide.md) | 계정·환경 변수·외부 서비스 설정 |
+| [제출 체크리스트](docs/submission-checklist.md) | 데모·스크린샷·영상·제출 항목 |
 
-## 착수 순서
-
-1. `docs/setup-guide.md` §0 — D0 사람 작업 (참가 접수, Vercel 플랜, Recall.ai, 슬랙 스코프, 임베딩 키, 파일럿 섭외)
-2. `.claude/commands/harness.md` §F 순서대로 `phases/0-vertical-slice` step 작성 → `python scripts/execute.py 0-vertical-slice`
-3. D3(9/10) 세로 슬라이스 게이트 · D6(9/13) 회의 봇 판정 · D8(9/15) 코드 리뷰 — 사람이 판정한다
-4. 구현 중 결정이 바뀌면 PRD §3·§8·§4를 먼저 고치고 ADR을 추가한다
-
-## 도구
-
-- 훅: `scripts/hooks/tdd-guard.sh`(lib/ 테스트 선행 강제) · `dangerous-command-guard.sh` — `.claude/settings.json`·`.codex/hooks.json` 공유. 확인: `python -m pytest scripts/test_hooks.py`
-- 슬래시 커맨드: `/harness`(step 설계·실행) · `/review`(변경 리뷰 체크리스트)
-- bkit: `/pdca analyze sasu-mvp` (D3 게이트 후)
+원티드 AI Championship 2026 제출용 MVP로 제작되었습니다.
