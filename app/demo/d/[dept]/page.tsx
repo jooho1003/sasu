@@ -32,7 +32,7 @@ export default async function DemoDashboardPage({
     supabase.from("decision_requests").select("id, title, status, visibility").eq("dept_id", dept).order("opened_at", { ascending: false }),
   ]);
   if (sourcesResult.error || itemsResult.error || cardsResult.error) {
-    return <main className="mx-auto max-w-6xl px-5 py-10">데모 데이터를 불러오지 못했습니다.</main>;
+    throw new Error("데모 대시보드 조회 실패");
   }
 
   const sources = (sourcesResult.data ?? []) as Source[];
@@ -77,7 +77,9 @@ export default async function DemoDashboardPage({
 
       <section className="grid gap-4" aria-labelledby="demo-items-heading">
         <div><p className="m-0 text-sm text-[var(--muted)]">WATCH</p><h2 id="demo-items-heading" className="m-0 text-2xl">분류된 기록</h2></div>
-        {Array.from(grouped.entries()).map(([label, group]) => (
+        {grouped.size === 0 ? (
+          <p className="m-0 rounded-2xl border border-dashed border-black/20 p-6 text-[var(--muted)]">아직 분류된 기록이 없습니다.</p>
+        ) : Array.from(grouped.entries()).map(([label, group]) => (
           <div key={label} className="grid gap-3">
             <h3 className="m-0 text-lg">{LABELS[label as Classification["label"]] ?? label} <span className="text-sm text-[var(--muted)]">{group.length}건</span></h3>
             {group.map((item) => {
@@ -91,7 +93,9 @@ export default async function DemoDashboardPage({
       <section className="grid gap-4" aria-labelledby="demo-cards-heading">
         <div><p className="m-0 text-sm text-[var(--muted)]">DECIDE</p><h2 id="demo-cards-heading" className="m-0 text-2xl">결정 카드</h2></div>
         <div className="grid gap-3 sm:grid-cols-2">
-          {cards.map((card) => <Link key={card.id} className="grid gap-2 rounded-2xl border-l-4 border-l-[var(--urgent)] bg-[var(--surface)] p-5 shadow-sm" href={`/demo/d/${dept}/cards/${card.id}`}><span className="text-xs text-[var(--muted)]">{card.visibility === "leads_only" ? "팀장 근거 포함" : "부서 전체"} · {card.status === "open" ? "결정 필요" : card.status}</span><strong className="text-lg">{card.title}</strong><span className="text-sm text-[var(--accent)]">카드 상세 보기 →</span></Link>)}
+          {cards.length === 0 ? (
+            <p className="m-0 rounded-2xl border border-dashed border-black/20 p-6 text-[var(--muted)] sm:col-span-2">지금 결정할 카드가 없습니다.</p>
+          ) : cards.map((card) => <Link key={card.id} className="grid gap-2 rounded-2xl border-l-4 border-l-[var(--urgent)] bg-[var(--surface)] p-5 shadow-sm" href={`/demo/d/${dept}/cards/${card.id}`}><span className="text-xs text-[var(--muted)]">{card.visibility === "leads_only" ? "팀장 근거 포함" : "부서 전체"} · {card.status === "open" ? "결정 필요" : card.status}</span><strong className="text-lg">{card.title}</strong><span className="text-sm text-[var(--accent)]">카드 상세 보기 →</span></Link>)}
         </div>
       </section>
     </main>

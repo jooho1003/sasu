@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "test": "vitest run --passWithNoTests",
     "test:rls": "vitest run --config vitest.rls.config.ts",
+    "test:load:demo": "node scripts/load-test-demo.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {
