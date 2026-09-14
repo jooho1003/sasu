@@ -8,6 +8,7 @@ vi.mock("@/lib/pipeline/answer", () => ({ registerAnswerHandler: () => mocks.reg
 vi.mock("@/lib/pipeline/card", () => ({ registerMakeCardHandler: () => mocks.register("make_card") }));
 vi.mock("@/lib/pipeline/meeting-summary", () => ({ registerMeetingSummaryHandler: () => mocks.register("summarize_meeting") }));
 vi.mock("@/lib/pipeline/document-summary", () => ({ registerDocumentSummaryHandler: () => mocks.register("summarize_document") }));
+vi.mock("@/lib/pipeline/agent-role", () => ({ registerAgentRoleHandler: () => mocks.register("run_agent_role") }));
 vi.mock("@/lib/pipeline/notion-import", () => ({ registerNotionImportHandler: () => mocks.register("notion_import") }));
 vi.mock("@/lib/pipeline/send-slack", () => ({ registerSendSlackHandler: () => mocks.register("send_slack") }));
 vi.mock("@/lib/pipeline/slack-backfill", () => ({ registerSlackBackfillHandler: () => mocks.register("slack_backfill") }));
@@ -23,7 +24,7 @@ describe("공통 워커 진입점", () => {
   it("큐를 claim하기 전에 모든 파이프라인을 등록하고 독립 sweep을 실행한다", async () => {
     await runWorkerOnce();
     expect(mocks.register.mock.calls.map(([kind]) => kind).sort()).toEqual([
-      "answer", "classify", "embed", "make_card", "notion_import", "send_slack", "slack_backfill", "summarize_document", "summarize_meeting",
+      "answer", "classify", "embed", "make_card", "notion_import", "run_agent_role", "send_slack", "slack_backfill", "summarize_document", "summarize_meeting",
     ].sort());
     expect(mocks.sweep).toHaveBeenCalledOnce();
     expect(mocks.sweep.mock.invocationCallOrder[0]).toBeLessThan(mocks.run.mock.invocationCallOrder[0]);

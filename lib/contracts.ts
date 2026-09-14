@@ -8,7 +8,7 @@ const NullableString = z
     message: "빈 문자열은 허용하지 않습니다.",
   });
 
-const Citation = z
+export const Citation = z
   .strictObject({
     item_id: NullableString,
     decision_id: NullableString,
@@ -23,6 +23,8 @@ const Citation = z
     }
   })
   .describe("item_id와 decision_id 중 정확히 하나만 값이어야 합니다.");
+
+export type Citation = z.infer<typeof Citation>;
 
 const Conflict = z.strictObject({
   decision_id: NonEmptyString,
@@ -44,6 +46,50 @@ export const DocumentSummary = z.strictObject({
 });
 
 export type DocumentSummary = z.infer<typeof DocumentSummary>;
+
+export const AgentRoleCriterion = z.strictObject({
+  key: z.string().regex(/^[a-z0-9_]{1,40}$/),
+  label: z.string().min(1).max(40),
+  description: z.string().min(1).max(300),
+  weight: z.number().int().min(1).max(5),
+});
+
+export type AgentRoleCriterion = z.infer<typeof AgentRoleCriterion>;
+
+export const AgentRoleDefinition = z
+  .strictObject({
+    name: z.string().min(1).max(60),
+    instruction: z.string().min(1).max(2000),
+    visibility: z.enum(["dept", "leads_only"]),
+    criteria: z.array(AgentRoleCriterion).min(1).max(10),
+  })
+  .superRefine(({ criteria }, context) => {
+    const keys = new Set<string>();
+    for (const [index, criterion] of criteria.entries()) {
+      if (keys.has(criterion.key)) {
+        context.addIssue({
+          code: "custom",
+          path: ["criteria", index, "key"],
+          message: "기준 key는 중복될 수 없습니다.",
+        });
+      }
+      keys.add(criterion.key);
+    }
+  });
+
+export type AgentRoleDefinition = z.infer<typeof AgentRoleDefinition>;
+
+export const AgentRoleEvaluation = z.strictObject({
+  criteria: z.array(z.strictObject({
+    key: NonEmptyString,
+    score: z.number().int().min(0).max(5).nullable(),
+    rationale: NonEmptyString,
+    citations: z.array(Citation),
+  })),
+  summary: NonEmptyString,
+});
+
+export type AgentRoleEvaluation = z.infer<typeof AgentRoleEvaluation>;
 
 export const IngestItem = z.strictObject({
   source_id: NonEmptyString,

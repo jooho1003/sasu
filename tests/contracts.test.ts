@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   AnswerDraft,
+  AgentRoleDefinition,
+  AgentRoleEvaluation,
   CardDraft,
   Classification,
   DocumentSummary,
@@ -302,6 +304,7 @@ describe("toStrictJsonSchema", () => {
     toStrictJsonSchema("meeting_summary", MeetingSummary),
     toStrictJsonSchema("document_summary", DocumentSummary),
     toStrictJsonSchema("merge_confirmation", MergeConfirmation),
+    toStrictJsonSchema("agent_role_evaluation", AgentRoleEvaluation),
   ] as JsonSchemaNode[];
 
   it("산출물의 모든 object에 additionalProperties:false가 있다", () => {
@@ -356,5 +359,29 @@ describe("toStrictJsonSchema", () => {
       "string",
       "null",
     ]);
+  });
+});
+
+describe("AgentRole contracts", () => {
+  const valid = {
+    name: "지원서 검토",
+    instruction: "직무 경험을 검토합니다.",
+    visibility: "leads_only" as const,
+    criteria: [{ key: "experience", label: "경험", description: "관련 경험", weight: 3 }],
+  };
+
+  it("기준 key 중복과 범위를 거부한다", () => {
+    expect(AgentRoleDefinition.safeParse(valid).success).toBe(true);
+    expect(AgentRoleDefinition.safeParse({ ...valid, criteria: [...valid.criteria, valid.criteria[0]] }).success).toBe(false);
+    expect(AgentRoleDefinition.safeParse({ ...valid, criteria: [{ ...valid.criteria[0], key: "대문자" }] }).success).toBe(false);
+  });
+
+  it("평가에는 점수·근거·인용만 있고 모든 필드가 필수다", () => {
+    const evaluation = {
+      criteria: [{ key: "experience", score: 4, rationale: "근거", citations: [itemCitation] }],
+      summary: "요약",
+    };
+    expect(AgentRoleEvaluation.safeParse(evaluation).success).toBe(true);
+    expect(AgentRoleEvaluation.safeParse({ ...evaluation, recommendation: "합격" }).success).toBe(false);
   });
 });

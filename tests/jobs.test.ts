@@ -211,6 +211,12 @@ describe("jobs worker", () => {
         slack_delivery_error: "llm_timeout",
       },
     },
+    {
+      kind: "run_agent_role" as const,
+      payload: { resultId: "result-1" },
+      ownerTable: "agent_role_results",
+      ownerStatus: { status: "failed", status_reason: "llm_timeout" },
+    },
   ])(
     "3회 실패한 $kind job은 failed이고 소유 row 상태도 바뀐다",
     async ({ kind, payload, ownerTable, ownerStatus }) => {

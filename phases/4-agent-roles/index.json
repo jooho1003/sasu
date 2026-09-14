@@ -15,9 +15,12 @@
     {
       "step": 1,
       "name": "agent-role-pipeline",
-      "status": "pending",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium"
+      "effort": "medium",
+      "started_at": "2026-09-14T13:59:53+0900",
+      "summary": "역할 기준표 인용 검증·가중 점수 계산 파이프라인과 run_agent_role 워커 배선을 구현했다.",
+      "completed_at": "2026-09-14T14:04:00+0900"
     },
     {
       "step": 2,
