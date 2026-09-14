@@ -54,13 +54,17 @@
     },
     {
       "step": 5,
-      "name": "agent-role-verification",
-      "status": "error",
+      "name": "agent-role-scoring-fix",
+      "status": "pending",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium",
-      "started_at": "2026-09-14T14:36:58+0900",
-      "completed_at": "2026-09-14T14:40:40+0900",
-      "error_message": "실제 Groq 평가 재실행에서 P1과 P2의 가중 점수가 모두 5.00으로 PRD §11의 P1 > P2 판정이 실패했다. 이전 실행의 P2 schema_invalid와 함께 docs/verification/D7-agent-roles.md에 기록했다."
+      "effort": "medium"
+    },
+    {
+      "step": 6,
+      "name": "agent-role-verification",
+      "status": "pending",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
     }
   ],
   "created_at": "2026-09-14T13:48:57+0900"
