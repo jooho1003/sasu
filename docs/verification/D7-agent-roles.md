@@ -1,6 +1,6 @@
 # D7 부서 에이전트 역할 검증 기록
 
-- 검증일: 2026-09-14 (KST)
+- 검증일: 2026-09-14 (KST, 재실행)
 - 범위: phase `4-agent-roles` step 6 `agent-role-verification` 재실행
 - 판정: **FAIL — 프로덕션 클라이언트 번들에서 `SUPABASE_SERVICE_ROLE_KEY` 앞 8자가 1건 검출**
 - 원문 지원서·모델 원문 응답·질문·비밀값은 이 기록과 결과 JSON에 남기지 않는다.
@@ -13,12 +13,12 @@
 
 | 명령 | 결과 | 비고 |
 |---|---|---|
-| `npm run lint` | PASS | 종료 코드 0, 9.25초 |
-| `npx tsc --noEmit` | PASS | 종료 코드 0, 4.17초 |
-| `npm run test` | PASS | 44개 파일, 729개 테스트, 4.99초. Vite 설정 경고만 출력 |
-| `npm run build` | PASS | Next.js 16.3.4 production build 성공, 9.29초 |
+| `npm run lint` | PASS | 종료 코드 0, 21.2초 |
+| `npx tsc --noEmit` | PASS | 종료 코드 0, 10.1초 |
+| `npm run test` | PASS | 44개 파일, 729개 테스트, 3.66초. Vite 설정 경고만 출력 |
+| `npm run build` | PASS | 종료 코드 0, Next.js 16.3.4 production build 완료 |
 | `node scripts/verify-security-sql.mjs "D:/바이브코딩/.sasu-qa-db"` | PASS | 59/59 시나리오, 2,016 assertions. `0004_worker_cron.sql`은 PGlite에서 제외 |
-| `npx vitest run --config vitest.eval.config.ts tests/evals/agent-role.eval.ts` | PASS | 실제 Groq 평가 4/4 통과. 결과: `evaluation-results/agent-role-2026-09-14T10-48-53-505Z.json` |
+| `npx vitest run --config vitest.eval.config.ts tests/evals/agent-role.eval.ts` | PASS | 실제 Groq 평가 4/4 통과. 결과: `evaluation-results/agent-role-2026-09-14T10-55-59-155Z.json` (입력 3,483 / 출력 4,048 토큰, 4회 호출) |
 | `npm run e2e -- tests/e2e/guest.spec.ts tests/e2e/agent-roles.spec.ts` | PASS (부분) | 게스트 4/4 통과. 인증 E2E 환경 부재로 역할 UI 2건 skipped |
 | 클라이언트 번들 비밀값 검사 | **FAIL** | service-role 키 prefix 1건. 나머지 4개 키 prefix는 각 0건 |
 
