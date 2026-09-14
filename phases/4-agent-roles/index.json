@@ -40,7 +40,7 @@
       "effort": "medium",
       "started_at": "2026-09-14T14:16:20+0900",
       "summary": "S8 역할 생성·보관·문서 적용·근거 기반 점수표 UI와 내비게이션을 추가했다. lint·tsc·unit·build 통과, 인증 E2E 환경 부재로 역할 E2E 2건은 skipped.",
-      "completed_at": "2026-09-14T14:25:31+0900"
+      "completed_at": "2026-09-14T14:27:03+0900"
     },
     {
       "step": 4,
