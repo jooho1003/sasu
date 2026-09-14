@@ -25,9 +25,12 @@
     {
       "step": 2,
       "name": "agent-role-routes",
-      "status": "pending",
+      "status": "completed",
       "codex_model": "gpt-5.6-sol",
-      "effort": "xhigh"
+      "effort": "xhigh",
+      "started_at": "2026-09-14T14:04:35+0900",
+      "summary": "세션·RLS 경계를 지키는 역할 생성·보관·문서 실행 API와 라우트 테스트 20개를 구현했다.",
+      "completed_at": "2026-09-14T14:13:16+0900"
     },
     {
       "step": 3,
