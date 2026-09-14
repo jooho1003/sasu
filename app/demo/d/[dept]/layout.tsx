@@ -34,6 +34,7 @@ export default async function DemoDepartmentLayout({
             <Link href={`/demo/d/${dept}`}>대시보드</Link>
             <Link href={`/demo/d/${dept}/ledger`}>원장</Link>
             <Link href={`/demo/d/${dept}/ask`}>묻기</Link>
+            <Link href={`/demo/d/${dept}/roles`}>역할</Link>
           </nav>
         </div>
       </header>

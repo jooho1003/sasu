@@ -1,6 +1,7 @@
 import { loadEnvConfig } from "@next/env";
 import { fileURLToPath } from "node:url";
 
+import { weightedScore, type VerifiedCriterion } from "../lib/agent-role";
 import { createServiceSupabaseClient } from "../lib/supabase/service";
 
 loadEnvConfig(process.cwd());
@@ -11,6 +12,8 @@ const IDS = {
   devDept: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
   planningDept: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
 } as const;
+
+const DEMO_DEV_LEAD_ID = "cccccccc-cccc-4ccc-8ccc-cccccccccc01";
 
 type DemoDepartment = {
   id: string;
@@ -104,12 +107,22 @@ const DEVELOPMENT: DemoDepartment = {
     { id: "20000000-0000-4000-8000-000000000101", kind: "notion_page", external_id: "demo-dev-principles", title: "개발 원칙 문서", visibility: "dept", is_principles: true },
     { id: "20000000-0000-4000-8000-000000000102", kind: "slack_channel", external_id: "demo-dev-channel", title: "#개발-결정", visibility: "dept", is_principles: false },
     { id: "20000000-0000-4000-8000-000000000103", kind: "meeting", external_id: "demo-dev-meeting", title: "주간 개발회의", visibility: "leads_only", is_principles: false },
+    { id: "20000000-0000-4000-8000-000000000104", kind: "document", external_id: "demo-dev-applicant-a", title: "지원서 — 지원자 A (합성)", visibility: "dept", is_principles: false },
+    { id: "20000000-0000-4000-8000-000000000105", kind: "document", external_id: "demo-dev-applicant-b", title: "지원서 — 지원자 B (합성)", visibility: "dept", is_principles: false },
+    { id: "20000000-0000-4000-8000-000000000106", kind: "document", external_id: "demo-dev-applicant-c", title: "지원서 — 지원자 C (합성)", visibility: "dept", is_principles: false },
   ],
   items: [
     { id: "20000000-0000-4000-8000-000000000111", source_id: "20000000-0000-4000-8000-000000000101", external_ref: "dev-principle-1", author: "개발 원칙", content: "장애 대응은 원인 분석보다 먼저 영향 범위와 롤백 가능 여부를 확인합니다.", label: "info" },
     { id: "20000000-0000-4000-8000-000000000112", source_id: "20000000-0000-4000-8000-000000000102", external_ref: "dev-slack-1", author: "도윤", content: "이번 배포를 오늘 진행해도 될까요? 롤백 플랜 확인이 필요합니다.", label: "decision" },
     { id: "20000000-0000-4000-8000-000000000113", source_id: "20000000-0000-4000-8000-000000000103", external_ref: "dev-meeting-1", author: "개발 리드", content: "영향 범위가 확인되기 전에는 배포하지 않는 방향으로 보류했습니다.", label: "decision" },
     { id: "20000000-0000-4000-8000-000000000114", source_id: "20000000-0000-4000-8000-000000000102", external_ref: "dev-slack-2", author: "서연", content: "스테이징 로그 대시보드 링크를 문서에 추가했습니다.", label: "action" },
+    { id: "20000000-0000-4000-8000-000000000141", source_id: "20000000-0000-4000-8000-000000000104", external_ref: "applicant-a-1", author: "지원자 A", content: "Next.js App Router와 Supabase RLS로 사내 승인 도구를 만들었습니다.", label: "info" },
+    { id: "20000000-0000-4000-8000-000000000142", source_id: "20000000-0000-4000-8000-000000000104", external_ref: "applicant-a-2", author: "지원자 A", content: "결정 기록을 문서화하고 변경 이유를 팀과 함께 검토하는 습관이 있습니다.", label: "info" },
+    { id: "20000000-0000-4000-8000-000000000143", source_id: "20000000-0000-4000-8000-000000000104", external_ref: "applicant-a-3", author: "지원자 A", content: "운영 중에는 영향 범위와 롤백 절차를 체크리스트로 남겼습니다.", label: "info" },
+    { id: "20000000-0000-4000-8000-000000000144", source_id: "20000000-0000-4000-8000-000000000105", external_ref: "applicant-b-1", author: "지원자 B", content: "여러 서비스의 API와 데이터 처리 작업을 맡아 백엔드 운영 경험을 쌓았습니다.", label: "info" },
+    { id: "20000000-0000-4000-8000-000000000145", source_id: "20000000-0000-4000-8000-000000000105", external_ref: "applicant-b-2", author: "지원자 B", content: "운영 이슈의 원인과 대응 과정을 짧은 문서로 정리해 공유했습니다.", label: "info" },
+    { id: "20000000-0000-4000-8000-000000000146", source_id: "20000000-0000-4000-8000-000000000106", external_ref: "applicant-c-1", author: "지원자 C", content: "사용자 화면의 컴포넌트 구조와 인터랙션을 개선하는 프론트엔드 작업을 주로 했습니다.", label: "info" },
+    { id: "20000000-0000-4000-8000-000000000147", source_id: "20000000-0000-4000-8000-000000000106", external_ref: "applicant-c-2", author: "지원자 C", content: "시각적 완성도와 사용 흐름을 다듬는 데 집중했습니다.", label: "info" },
   ],
   request: { id: "20000000-0000-4000-8000-000000000121", origin_item_id: "20000000-0000-4000-8000-000000000112", citation_item_ids: ["20000000-0000-4000-8000-000000000112", "20000000-0000-4000-8000-000000000113"], title: "롤백 플랜 확인 전 배포를 진행할까요?", background: "개발 채널에서 오늘 배포 여부를 물었고, 영향 범위와 롤백 계획 확인이 남아 있습니다.", recommendation: "영향 범위와 롤백 가능 여부를 확인한 뒤 배포하는 방향을 권합니다.", visibility: "leads_only" },
   priorDecision: { id: "20000000-0000-4000-8000-000000000122", outcome: "스테이징 로그 대시보드 추가", rationale: "운영 배포 전에 확인 가능한 관측성을 확보하기로 했습니다.", item_id: "20000000-0000-4000-8000-000000000114" },
@@ -121,6 +134,76 @@ const DEVELOPMENT: DemoDepartment = {
     { id: "20000000-0000-4000-8000-000000000135", question_key: "deadline", question: "언제까지 결정해야 하나요?", answer: "현재 기록에는 오늘 배포 여부를 결정해야 한다는 요청이 있습니다.", generic_answer: "요청자와 마감 시각을 합의해 기록하세요.", item_id: "20000000-0000-4000-8000-000000000112" },
     { id: "20000000-0000-4000-8000-000000000136", question_key: "principle", question: "장애 대응 원칙은 무엇인가요?", answer: "원인 분석보다 먼저 영향 범위와 롤백 가능 여부를 확인합니다.", generic_answer: "팀의 최신 원칙 문서를 확인하고 예외 조건을 기록하세요.", item_id: "20000000-0000-4000-8000-000000000111" },
   ],
+};
+
+const AGENT_ROLE_CRITERIA = [
+  { key: "talent_fit", label: "인재상 부합", description: "영향 범위와 롤백 가능성을 먼저 확인하는 개발 원칙에 맞는 경험", weight: 3 },
+  { key: "stack_usage", label: "프로젝트 스택 활용", description: "Next.js App Router와 Supabase RLS를 프로젝트에서 활용한 근거", weight: 4 },
+  { key: "collaboration", label: "협업·문서화", description: "결정과 운영 맥락을 문서로 남기고 팀과 검토한 근거", weight: 2 },
+] as const;
+
+const roleCriteria = (values: Array<Omit<VerifiedCriterion, "key" | "label" | "weight">>): VerifiedCriterion[] =>
+  values.map((value, index) => ({ ...AGENT_ROLE_CRITERIA[index], ...value }));
+
+const DEMO_AGENT_ROLE_SEED = {
+  id: "20000000-0000-4000-8000-000000000151",
+  dept_id: IDS.devDept,
+  name: "백엔드 개발자 서류 검토 (합성)",
+  instruction: "개발팀은 영향 범위와 롤백 가능성을 먼저 확인하는 사람을 중요하게 봅니다. Next.js App Router와 Supabase RLS를 실제 프로젝트에 활용한 경험을 확인합니다. 결정과 운영 맥락을 팀과 문서로 나누는 습관도 근거가 있을 때만 평가합니다.",
+  visibility: "dept" as const,
+  created_by: DEMO_DEV_LEAD_ID,
+  criteria: AGENT_ROLE_CRITERIA,
+  documents: [
+    { source_id: "20000000-0000-4000-8000-000000000104", summary: { overview: "지원자 A는 사내 도구 구현과 운영 문서화 경험을 제시했습니다." } },
+    { source_id: "20000000-0000-4000-8000-000000000105", summary: { overview: "지원자 B는 백엔드 운영 경험을 제시했지만 프로젝트 스택 근거는 없습니다." } },
+    { source_id: "20000000-0000-4000-8000-000000000106", summary: { overview: "지원자 C는 프론트엔드 작업 경험을 제시했고 협업 문서화 근거는 없습니다." } },
+  ],
+  results: [
+    {
+      id: "20000000-0000-4000-8000-000000000161",
+      source_id: "20000000-0000-4000-8000-000000000104",
+      result: {
+        criteria: roleCriteria([
+          { score: 5, rationale: "운영 원칙과 맞는 사내 도구·체크리스트 경험이 확인됩니다.", citations: [{ item_id: "20000000-0000-4000-8000-000000000143", decision_id: null, quote: "영향 범위와 롤백 절차를 체크리스트로 남겼습니다." }], evidence: "ok" },
+          { score: 5, rationale: "프로젝트 스택을 실제 사내 도구에 활용한 근거가 있습니다.", citations: [{ item_id: "20000000-0000-4000-8000-000000000141", decision_id: null, quote: "Next.js App Router와 Supabase RLS로 사내 승인 도구를 만들었습니다." }], evidence: "ok" },
+          { score: 5, rationale: "결정 이유를 문서화하고 팀과 검토한 근거가 있습니다.", citations: [{ item_id: "20000000-0000-4000-8000-000000000142", decision_id: null, quote: "결정 기록을 문서화하고 변경 이유를 팀과 함께 검토하는 습관이 있습니다." }], evidence: "ok" },
+        ]),
+        summary: "사내 도구 구현, 운영 체크리스트, 결정 기록 문서화의 근거가 모두 확인됩니다.",
+      },
+    },
+    {
+      id: "20000000-0000-4000-8000-000000000162",
+      source_id: "20000000-0000-4000-8000-000000000105",
+      result: {
+        criteria: roleCriteria([
+          { score: 3, rationale: "백엔드 운영 경험은 확인되지만 개발 원칙의 직접 근거는 제한적입니다.", citations: [{ item_id: "20000000-0000-4000-8000-000000000144", decision_id: null, quote: "여러 서비스의 API와 데이터 처리 작업을 맡아 백엔드 운영 경험을 쌓았습니다." }], evidence: "ok" },
+          { score: null, rationale: null, citations: [], evidence: "no_evidence" },
+          { score: 3, rationale: "운영 이슈의 대응 과정을 문서로 공유한 근거가 있습니다.", citations: [{ item_id: "20000000-0000-4000-8000-000000000145", decision_id: null, quote: "운영 이슈의 원인과 대응 과정을 짧은 문서로 정리해 공유했습니다." }], evidence: "ok" },
+        ]),
+        summary: "백엔드 운영과 문서화 근거는 있으나 프로젝트 스택 활용 근거는 제시되지 않았습니다.",
+      },
+    },
+    {
+      id: "20000000-0000-4000-8000-000000000163",
+      source_id: "20000000-0000-4000-8000-000000000106",
+      result: {
+        criteria: roleCriteria([
+          { score: 2, rationale: "프론트엔드 중심 경험은 확인되지만 백엔드 역할과 직접 맞닿은 근거는 제한적입니다.", citations: [{ item_id: "20000000-0000-4000-8000-000000000146", decision_id: null, quote: "사용자 화면의 컴포넌트 구조와 인터랙션을 개선하는 프론트엔드 작업을 주로 했습니다." }], evidence: "ok" },
+          { score: null, rationale: null, citations: [], evidence: "no_evidence" },
+          { score: null, rationale: null, citations: [], evidence: "no_evidence" },
+        ]),
+        summary: "프론트엔드 작업 근거는 있으나 프로젝트 스택과 협업·문서화 근거는 제시되지 않았습니다.",
+      },
+    },
+  ],
+} as const;
+
+export const DEMO_AGENT_ROLE = {
+  ...DEMO_AGENT_ROLE_SEED,
+  results: DEMO_AGENT_ROLE_SEED.results.map((result) => ({
+    ...result,
+    weighted_score: weightedScore(result.result.criteria.map((criterion) => ({ ...criterion }))),
+  })),
 };
 
 const PLANNING_SOURCE_IDS = {
@@ -334,6 +417,12 @@ async function removeExistingDemoData(
     ...(department.extraRequests ?? []).map((request) => request.id),
   ]);
   const itemIds = DEMO_DEPARTMENTS.flatMap((department) => department.items.map((item) => item.id));
+  const { error: roleResultError } = await client.from("agent_role_results").delete().in("dept_id", departmentIds);
+  if (roleResultError) throw new Error("demo agent role result cleanup failed");
+  const { error: roleError } = await client.from("agent_roles").delete().in("dept_id", departmentIds);
+  if (roleError) throw new Error("demo agent role cleanup failed");
+  const { error: documentSummaryError } = await client.from("document_summaries").delete().in("dept_id", departmentIds);
+  if (documentSummaryError) throw new Error("demo document summary cleanup failed");
   const { error: citationError } = await client.from("citations").delete().in("owner_id", citationOwnerIds);
   if (citationError) throw new Error("demo citation cleanup failed");
   const { error: conflictError } = await client.from("conflicts").delete().in("request_id", conflictRequestIds);
@@ -349,6 +438,17 @@ async function removeExistingDemoData(
   if (departmentError) throw new Error("demo department cleanup failed");
   const { error: orgError } = await client.from("orgs").delete().eq("id", IDS.org);
   if (orgError) throw new Error("demo org cleanup failed");
+  await client.auth.admin.deleteUser(DEMO_DEV_LEAD_ID);
+}
+
+async function seedDemoDevLead(client: ReturnType<typeof createServiceSupabaseClient>): Promise<void> {
+  const { error } = await client.auth.admin.createUser({
+    id: DEMO_DEV_LEAD_ID,
+    email: `${DEMO_DEV_LEAD_ID}@demo.invalid`,
+    email_confirm: true,
+    user_metadata: { display_name: "개발팀 리드" },
+  });
+  if (error) throw new Error("demo development lead seed failed");
 }
 
 async function seedDepartment(
@@ -367,6 +467,18 @@ async function seedDepartment(
     department.sources.map((source) => ({ dept_id: department.id, ...source, active: true })),
   );
   if (sourceError) throw new Error("demo source seed failed");
+
+  if (department.id === IDS.devDept) {
+    const { error: memberError } = await client.from("members").insert({
+      user_id: DEMO_DEV_LEAD_ID,
+      dept_id: department.id,
+      role: "lead",
+      display_name: "개발팀 리드",
+      consented_at: new Date().toISOString(),
+      consent_version: 1,
+    });
+    if (memberError) throw new Error("demo development lead membership seed failed");
+  }
 
   const { error: itemError } = await client.from("items").insert(
     department.items.map((item) => ({
@@ -393,6 +505,20 @@ async function seedDepartment(
     })),
   );
   if (classificationError) throw new Error("demo classification seed failed");
+
+  if (department.id === IDS.devDept) {
+    const { error: documentSummaryError } = await client.from("document_summaries").insert(
+      DEMO_AGENT_ROLE.documents.map((document) => ({
+        source_id: document.source_id,
+        dept_id: department.id,
+        status: "summarized",
+        summary: document.summary,
+        extracted_chars: department.items.filter((item) => item.source_id === document.source_id).reduce((total, item) => total + item.content.length, 0),
+        chunk_count: department.items.filter((item) => item.source_id === document.source_id).length,
+      })),
+    );
+    if (documentSummaryError) throw new Error("demo document summary seed failed");
+  }
 
   const requests = [department.request, ...(department.extraRequests ?? [])];
   const { error: requestError } = await client.from("decision_requests").insert(
@@ -469,6 +595,34 @@ async function seedDepartment(
   if (answerCitationError) throw new Error("demo answer citation seed failed");
 }
 
+async function seedDemoAgentRole(client: ReturnType<typeof createServiceSupabaseClient>): Promise<void> {
+  const { error: roleError } = await client.from("agent_roles").insert({
+    id: DEMO_AGENT_ROLE.id,
+    dept_id: DEMO_AGENT_ROLE.dept_id,
+    name: DEMO_AGENT_ROLE.name,
+    instruction: DEMO_AGENT_ROLE.instruction,
+    criteria: DEMO_AGENT_ROLE.criteria,
+    visibility: DEMO_AGENT_ROLE.visibility,
+    created_by: DEMO_AGENT_ROLE.created_by,
+  });
+  if (roleError) throw new Error("demo agent role seed failed");
+
+  const { error: resultError } = await client.from("agent_role_results").insert(
+    DEMO_AGENT_ROLE.results.map((result) => ({
+      id: result.id,
+      role_id: DEMO_AGENT_ROLE.id,
+      source_id: result.source_id,
+      dept_id: DEMO_AGENT_ROLE.dept_id,
+      visibility: DEMO_AGENT_ROLE.visibility,
+      status: "completed",
+      result: result.result,
+      weighted_score: result.weighted_score,
+      requested_by: DEMO_AGENT_ROLE.created_by,
+    })),
+  );
+  if (resultError) throw new Error("demo agent role result seed failed");
+}
+
 async function main(): Promise<void> {
   const client = createServiceSupabaseClient();
   await removeExistingDemoData(client);
@@ -478,9 +632,11 @@ async function main(): Promise<void> {
     is_demo: true,
   });
   if (orgError) throw new Error("demo org seed failed");
+  await seedDemoDevLead(client);
   for (const department of DEMO_DEPARTMENTS) {
     await seedDepartment(client, department);
   }
+  await seedDemoAgentRole(client);
   console.log("seed-demo complete: demo_org=1 departments=4 prepared_answers=24 planning_items=68 design_items=24");
 }
 
