@@ -312,6 +312,33 @@ describe("jobs worker", () => {
     );
   });
 
+  it("sweep은 역할 결과를 재실행 시각(updated_at) 기준 20분이 지나야 failed로 바꾼다", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-08T12:30:00.000Z"));
+    const fake = createFakeClient([
+      [{ id: "sweep-job", kind: "sweep", payload: {}, attempts: 1 }],
+    ]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+
+    await runOnce();
+
+    const operation = fake.operations.find(
+      (candidate) => candidate.table === "agent_role_results" && candidate.method === "update",
+    );
+    expect(operation?.values).toEqual(
+      expect.objectContaining({ status: "failed", status_reason: "llm_timeout" }),
+    );
+    expect(operation?.filters).toEqual(
+      expect.arrayContaining([
+        { operator: "eq", column: "status", value: "processing" },
+        { operator: "lt", column: "updated_at", value: "2026-09-08T12:10:00.000Z" },
+      ]),
+    );
+    expect(operation?.filters).not.toContainEqual(
+      expect.objectContaining({ column: "created_at" }),
+    );
+  });
+
   it("last_error에는 원문이 아니라 허용된 에러 코드만 기록한다", async () => {
     const fake = createFakeClient([
       [

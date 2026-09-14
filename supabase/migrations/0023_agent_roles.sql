@@ -266,6 +266,28 @@ begin
 end;
 $$;
 
+-- 소스 제거(remove_source → active=false)는 지원자 문서의 인용·이유가 담긴 평가 결과도 지운다.
+create or replace function public.purge_agent_role_results_on_source_removal()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if old.active is true and new.active is false then
+    delete from public.agent_role_results where source_id = new.id;
+  end if;
+  return new;
+end;
+$$;
+
+revoke all on function public.purge_agent_role_results_on_source_removal()
+  from public, anon, authenticated;
+
+create trigger sources_purge_agent_role_results
+after update of active on public.sources
+for each row execute function public.purge_agent_role_results_on_source_removal();
+
 revoke all on function public.request_agent_role_run(uuid, uuid[])
   from public, anon, service_role;
 grant execute on function public.request_agent_role_run(uuid, uuid[])

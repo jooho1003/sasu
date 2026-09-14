@@ -221,6 +221,12 @@ try {
       error => error.code === "42501" && error.message === "agent_role_forbidden",
     );
   }));
+  await check("removing a document source deletes its agent role results", async () => {
+    assert.ok((await q("select id from agent_role_results where source_id=$1", [roleIds.privateDocument])).rows.length > 0);
+    await asUser(ids.lead, () => q("select remove_source($1)", [roleIds.privateDocument]));
+    assert.equal((await q("select id from agent_role_results where source_id=$1", [roleIds.privateDocument])).rows.length, 0);
+    assert.equal((await q("select id from agent_role_results where source_id=$1", [roleIds.publicDocument])).rows.length, 1);
+  });
   await check("member cannot remove a source and demo sources are never removable", async () => {
     await asUser(ids.member, () => denied("select remove_source($1)", [removalIds.source]));
     await asUser(ids.lead, () => denied("select remove_source($1)", [removalIds.demoSource]));
