@@ -1,0 +1,10 @@
+{
+  "name": "백엔드 개발자 지원서 검토",
+  "instruction": "백엔드 서비스 운영 역량을 기준표에 따라 검토합니다.",
+  "visibility": "leads_only",
+  "criteria": [
+    { "key": "backend_delivery", "label": "백엔드 구현", "description": "서비스 백엔드를 직접 설계하고 구현한 경험", "weight": 3 },
+    { "key": "operations", "label": "운영 안정성", "description": "배포와 장애 대응을 수행한 경험", "weight": 2 },
+    { "key": "collaboration", "label": "협업", "description": "제품·디자인 등 협업 경험", "weight": 1 }
+  ]
+}

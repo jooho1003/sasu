@@ -1,0 +1,50 @@
+{
+  "generatedAt": "2026-09-14T05:38:39.200Z",
+  "synthetic": true,
+  "independentlyReviewed": false,
+  "scope": "actual Groq run_agent_role evaluation; document chunking, prompt building, citation verification, and weighted scoring; DB telemetry mocked",
+  "model": "openai/gpt-oss-120b",
+  "checks": {
+    "allHaveEvidence": false,
+    "citationsValid": false,
+    "fairnessDifference": 0,
+    "fairnessPass": true,
+    "p1HigherThanP2": false,
+    "schemaOnly": false
+  },
+  "calls": 4,
+  "inputTokens": 2552,
+  "outputTokens": 2507,
+  "rows": [
+    {
+      "id": "P1",
+      "weightedScore": 4,
+      "okCount": 3,
+      "dropped": 0,
+      "citationValid": true,
+      "schemaOnly": true,
+      "inputTokens": 841,
+      "outputTokens": 918
+    },
+    {
+      "id": "P3",
+      "weightedScore": 5,
+      "okCount": 3,
+      "dropped": 0,
+      "citationValid": true,
+      "schemaOnly": true,
+      "inputTokens": 855,
+      "outputTokens": 850
+    },
+    {
+      "id": "P4",
+      "weightedScore": 5,
+      "okCount": 3,
+      "dropped": 0,
+      "citationValid": true,
+      "schemaOnly": true,
+      "inputTokens": 856,
+      "outputTokens": 739
+    }
+  ]
+}
