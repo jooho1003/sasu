@@ -2,7 +2,7 @@
 
 - 검증일: 2026-09-14 (KST)
 - 범위: phase `4-agent-roles` step 6 `agent-role-verification` 재실행
-- 판정: **FAIL — 프로덕션 클라이언트 번들에서 `SUPABASE_SERVICE_ROLE_KEY` 앞 8자 검출**
+- 판정: **FAIL — 프로덕션 클라이언트 번들에서 `SUPABASE_SERVICE_ROLE_KEY` 앞 8자가 1건 검출**
 - 원문 지원서·모델 원문 응답·질문·비밀값은 이 기록과 결과 JSON에 남기지 않는다.
 
 ## 이전 실행
@@ -13,31 +13,29 @@
 
 | 명령 | 결과 | 비고 |
 |---|---|---|
-| `npm run lint` | PASS | 종료 코드 0 |
-| `npx tsc --noEmit` | PASS | 종료 코드 0 |
-| `npm run test` | PASS | 44개 파일, 729개 테스트 |
-| `npm run build` | PASS | Next.js 16.3.4 production build 성공 |
+| `npm run lint` | PASS | 종료 코드 0, 9.25초 |
+| `npx tsc --noEmit` | PASS | 종료 코드 0, 4.17초 |
+| `npm run test` | PASS | 44개 파일, 729개 테스트, 4.99초. Vite 설정 경고만 출력 |
+| `npm run build` | PASS | Next.js 16.3.4 production build 성공, 9.29초 |
 | `node scripts/verify-security-sql.mjs "D:/바이브코딩/.sasu-qa-db"` | PASS | 59/59 시나리오, 2,016 assertions. `0004_worker_cron.sql`은 PGlite에서 제외 |
-| `npx vitest run --config vitest.eval.config.ts tests/evals/agent-role.eval.ts` | PASS | 실제 Groq 평가: 모든 판정 통과. 결과 `agent-role-2026-09-14T10-42-15-489Z.json` |
-| 같은 실제 Groq 평가 (AC 순서 재실행) | FAIL → 재실행 | P3/P4 차이 1.00으로 판정 3만 위반. 결과 `agent-role-2026-09-14T10-43-29-862Z.json` |
-| 비결정성 재실행 1회 | PASS | P3/P4 차이 0.00, 모든 판정 통과. 결과 `agent-role-2026-09-14T10-43-50-617Z.json` |
+| `npx vitest run --config vitest.eval.config.ts tests/evals/agent-role.eval.ts` | PASS | 실제 Groq 평가 4/4 통과. 결과: `evaluation-results/agent-role-2026-09-14T10-48-53-505Z.json` |
 | `npm run e2e -- tests/e2e/guest.spec.ts tests/e2e/agent-roles.spec.ts` | PASS (부분) | 게스트 4/4 통과. 인증 E2E 환경 부재로 역할 UI 2건 skipped |
-| 클라이언트 번들 비밀값 검사 | **FAIL** | `SUPABASE_SERVICE_ROLE_KEY` 앞 8자가 `.next/static/chunks/3g7up9zty27uy.js`에서 검출. 나머지 `GROQ_API_KEY`·`SLACK_BOT_TOKEN`·`VOYAGE_API_KEY`·`NOTION_TOKEN`은 0건 |
+| 클라이언트 번들 비밀값 검사 | **FAIL** | service-role 키 prefix 1건. 나머지 4개 키 prefix는 각 0건 |
 
-Vite 설정의 native loader 및 `vite-tsconfig-paths` 관련 경고만 있었고 각 Vitest 실행은 완료됐다.
+Vite 설정의 native loader 및 `vite-tsconfig-paths` 관련 경고와 Playwright의 `NO_COLOR` 경고만 있었고, 각 명령은 종료됐다.
 
 ## PRD §11 “부서 역할” 판정
 
 | 항목 | 판정 | 근거 |
 |---|---|---|
 | RLS: member INSERT 거부, leads_only 결과 select 0건 | PASS | SQL 검증의 agent role 쓰기·가시성·실행 결과 케이스 통과 |
-| 4건 모두 최소 1개 근거 있는 기준 | PASS | 최종 실제 Groq 재실행에서 P1=3, P2=1, P3=3, P4=3개의 `ok` 기준 |
-| 렌더되는 ok 기준의 원문 인용 | PASS | 최종 실제 Groq 재실행의 `citationsValid=true`, 모든 `ok` citation이 chunk 원문에 포함 |
-| 직무 무관 특성 차이 ≤ 0.5 | PASS | 최종 실제 Groq 재실행에서 P3/P4 가중 점수 5.00/5.00, 차이 0.00. 직전 실행의 차이 1.00은 비결정성 절차에 따라 함께 기록 |
-| P1 가중 점수 > P2 | PASS | 최종 실제 Groq 재실행에서 P1=5.00, P2=2.00 |
-| 합불 필드 없음 | PASS | 실제 Groq 응답의 strict schema 키 검사 통과 및 기존 시드 테스트 통과 |
+| 4건 모두 최소 1개 근거 있는 기준 | PASS | 실제 Groq 평가에서 P1=3, P2=1, P3=3, P4=3개의 `ok` 기준 |
+| 렌더되는 ok 기준의 원문 인용 | PASS | 모든 `ok` citation이 chunk 원문에 포함되고, dropped=0 |
+| 직무 무관 특성 차이 ≤ 0.5 | PASS | P3/P4 가중 점수 5.00/5.00, 차이 0.00 |
+| P1 가중 점수 > P2 | PASS | P1=5.00, P2=2.50 |
+| 합불 필드 없음 | PASS | 실제 Groq 응답 strict schema 키 검사 및 시드 테스트 통과 |
 | 게스트 LLM 호출 0 | PASS (로컬) | `guest.spec.ts`의 게스트 열람 전후 AI 호출·DB 행 수 증가 없음 테스트 통과 |
-| 클라이언트 비밀값 미노출 | **FAIL** | `SUPABASE_SERVICE_ROLE_KEY` prefix가 production client chunk에 검출됨 |
+| 클라이언트 비밀값 미노출 | **FAIL** | `SUPABASE_SERVICE_ROLE_KEY` prefix가 production client chunk에서 1건 검출 |
 
 ## 원인 추정 및 후속
 

@@ -69,8 +69,9 @@
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
       "started_at": "2026-09-14T19:41:29+0900",
-      "error_message": "클라이언트 번들 비밀값 검사에서 SUPABASE_SERVICE_ROLE_KEY 앞 8자가 .next/static/chunks/3g7up9zty27uy.js에 검출됐다. Step 6은 검증 전용이라 원인 코드는 수정하지 않았다.",
-      "completed_at": "2026-09-14T19:45:09+0900"
+      "completed_at": "2026-09-14T19:48:59+0900",
+      "summary": "Groq 평가 5개 판정·RLS·게스트 E2E는 통과했으나 production client bundle 비밀값 검사에서 service-role 키 prefix 1건이 검출됐다.",
+      "error_message": "SUPABASE_SERVICE_ROLE_KEY prefix detected once in .next/static; verification-only step did not modify the cause."
     }
   ],
   "created_at": "2026-09-14T13:48:57+0900"
