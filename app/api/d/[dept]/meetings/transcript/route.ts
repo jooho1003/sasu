@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 
 import { parseTranscript, TranscriptParseError } from "@/lib/adapters/transcript";
+import { insertUploadedItems } from "@/lib/adapters/upload";
 import { enqueue, kickWorker } from "@/lib/jobs";
-import { mask } from "@/lib/mask";
 import { registerClassifyHandler } from "@/lib/pipeline/classify";
 import { registerEmbedHandler } from "@/lib/pipeline/embed";
 import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
@@ -53,6 +53,11 @@ export async function POST(
   if (segments.length === 0) return Response.json({ error: "전사에서 발언을 찾지 못했습니다." }, { status: 400 });
 
   const supabase = await createServerSupabaseClient();
+  const demoResult = await supabase.rpc("is_demo_department", { p_dept: membership.deptId });
+  if (demoResult.error || typeof demoResult.data !== "boolean") {
+    return Response.json({ error: "부서 상태를 확인하지 못했습니다." }, { status: 500 });
+  }
+  if (demoResult.data) return Response.json({ error: "데모에서는 전사를 업로드할 수 없습니다." }, { status: 403 });
   const membersResult = await supabase.from("members").select("user_id, display_name, slack_user_id, consented_at").eq("dept_id", membership.deptId);
   if (membersResult.error) return Response.json({ error: "부서 멤버를 확인하지 못했습니다." }, { status: 500 });
   const membersByName = new Map((membersResult.data ?? []).map((member) => [member.display_name.trim(), member]));
@@ -69,15 +74,17 @@ export async function POST(
   if (sourceResult.error || !sourceResult.data) return Response.json({ error: "회의 소스를 저장하지 못했습니다." }, { status: 500 });
   const meetingId = randomUUID();
 
-  const itemResult = await supabase.from("items").insert(accepted.map(({ segment, member }) => ({
+  // ADR-042: 동의한 멤버의 발언을 마스킹한 뒤에만 수집 어댑터 INSERT.
+  // 조회·소스·회의 메타데이터는 계속 세션 클라이언트와 RLS를 사용한다.
+  const itemResult = await insertUploadedItems(accepted.map(({ segment, member }) => ({
     source_id: sourceId,
     dept_id: membership.deptId,
     external_ref: segment.externalRef,
     author_ext_id: member.slack_user_id ?? member.user_id,
     author: member.display_name,
     spoken_at: null,
-    content: mask(segment.content),
-  }))).select("id");
+    content: segment.content,
+  })));
   if (itemResult.error) return Response.json({ error: "전사 발언을 저장하지 못했습니다." }, { status: 500 });
   const meetingResult = await supabase.from("meetings").insert({ id: meetingId, source_id: sourceId, dept_id: membership.deptId, status: "transcribed", status_reason: null }).select("id").single<{ id: string }>();
   if (meetingResult.error || !meetingResult.data) return Response.json({ error: "회의를 저장하지 못했습니다." }, { status: 500 });

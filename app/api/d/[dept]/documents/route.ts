@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 
 import { extractDocumentText, chunkDocumentText, validateDocumentUpload } from "@/lib/adapters/document";
+import { insertUploadedItems } from "@/lib/adapters/upload";
 import { enqueue, kickWorker } from "@/lib/jobs";
-import { mask } from "@/lib/mask";
 import { registerClassifyHandler } from "@/lib/pipeline/classify";
 import { registerDocumentSummaryHandler } from "@/lib/pipeline/document-summary";
 import { registerEmbedHandler } from "@/lib/pipeline/embed";
@@ -91,6 +91,11 @@ export async function POST(
   const visibility = form.get("visibility") === "leads_only" ? "leads_only" : "dept";
   const sourceId = randomUUID();
   const supabase = await createServerSupabaseClient();
+  const demoResult = await supabase.rpc("is_demo_department", { p_dept: membership.deptId });
+  if (demoResult.error || typeof demoResult.data !== "boolean") {
+    return Response.json({ error: "부서 상태를 확인하지 못했습니다." }, { status: 500 });
+  }
+  if (demoResult.data) return Response.json({ error: "데모에서는 문서를 업로드할 수 없습니다." }, { status: 403 });
 
   const sourceResult = await supabase
     .from("sources")
@@ -121,18 +126,17 @@ export async function POST(
     .single<{ source_id: string }>();
   if (summaryResult.error || !summaryResult.data) return Response.json({ error: "문서 처리 상태를 저장하지 못했습니다." }, { status: 500 });
 
-  const itemResult = await supabase
-    .from("items")
-    .insert(chunks.map((chunk, index) => ({
-      source_id: sourceId,
-      dept_id: membership.deptId,
-      external_ref: `document-chunk-${index + 1}`,
-      author_ext_id: null,
-      author: "문서",
-      spoken_at: null,
-      content: mask(chunk),
-    })))
-    .select("id");
+  // ADR-042: 수집 어댑터 INSERT에만 service role을 사용한다.
+  // 소스·부서 권한 확인과 메타데이터 쓰기는 위의 세션/RLS를 유지한다.
+  const itemResult = await insertUploadedItems(chunks.map((chunk, index) => ({
+    source_id: sourceId,
+    dept_id: membership.deptId,
+    external_ref: `document-chunk-${index + 1}`,
+    author_ext_id: null,
+    author: "문서",
+    spoken_at: null,
+    content: chunk,
+  })));
   if (itemResult.error) return Response.json({ error: "문서 내용을 저장하지 못했습니다." }, { status: 500 });
 
   registerClassifyHandler();

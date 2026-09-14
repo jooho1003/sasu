@@ -1,0 +1,9 @@
+{
+  "project": "sasu",
+  "phase": "8-security-hotfix",
+  "steps": [
+    { "step": 0, "name": "write-boundaries", "status": "completed", "completed_at": "2026-09-15T03:27:00+09:00", "summary": "0025 departments/items 쓰기 회수, 세션·비데모 검증 후 mask 수집 어댑터. lint/build 통과, 단위773·SQL67(+행렬2016)·예고편E2E6·게스트E2E8 통과. docs/verification/security-hotfix.md. 운영 미반영." },
+    { "step": 1, "name": "upload-e2e", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 2, "name": "production-gate", "status": "pending", "codex_model": "gpt-5.6-luna", "effort": "low" }
+  ]
+}
