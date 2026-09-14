@@ -2,7 +2,7 @@
 
 - 검증일: 2026-09-14 (KST, 재실행)
 - 범위: phase `4-agent-roles` step 6 `agent-role-verification` 재실행
-- 판정: **PASS (로컬)**. 번들 비밀값 검사의 FAIL은 오탐으로 재판정했다(아래 "비밀값 검사 재판정", Claude 리뷰 2026-09-14). 역할 UI 인증 E2E 2건은 skipped라 운영 확인(O1)에서 보완한다
+- 판정: **PASS (로컬 + 운영)**. 번들 비밀값 검사의 FAIL은 오탐으로 재판정했다(아래 "비밀값 검사 재판정", Claude 리뷰 2026-09-14). 역할 UI 인증 E2E 2건은 skipped라 운영 확인(O1)에서 보완한다
 - 원문 지원서·모델 원문 응답·질문·비밀값은 이 기록과 결과 JSON에 남기지 않는다.
 
 ## 이전 실행
@@ -46,13 +46,22 @@ step 6은 각 키의 앞 8자로 검사했다. Supabase의 `SUPABASE_SERVICE_ROL
 
 결론: 검출 1건은 공개 anon 키의 JWT 헤더와 겹친 오탐이다. service-role 키는 번들에 없다. 이후 JWT 형식 키는 앞 8자가 아니라 payload·서명 세그먼트로 검사한다. 키 값은 이 기록에 남기지 않았다.
 
-## 운영에서만 판정 가능한 항목
+## 운영 반영 실행 기록 (2026-09-14 KST, 사용자 승인 O1)
 
-- 운영 DB migration `0023` 적용
-- 운영 `/demo/d/<개발팀>/roles` 읽기 전용 확인
-- 운영 lead 계정으로 실제 문서 3건 역할 실행
+| 순서 | 작업 | 결과 | 근거 |
+|---|---|---|---|
+| 1 | `feat-4-agent-roles` → main 머지·push | 성공 | 원격 README 커밋 1건 병합 후 push |
+| 2 | 앱 스냅샷 선빌드(도메인 미할당) | READY | `dpl_J4C4dgD4egmk9FUEnf1BdzqzmSUc` |
+| 3 | `supabase db push` 0023 | 성공 | dry-run 대상 0023 1건 확인 후 적용 |
+| 4 | promote | 성공 | `sasu-alpha.vercel.app` → `dpl_J4C4dgD4egmk9FUEnf1BdzqzmSUc` |
+| 5 | 게스트 시드 | 성공 | 4부서·답변 24 + 개발팀 역할 1·합성 지원자 3 |
+| 6 | 운영 `/demo/d/<개발팀>/roles` 1차 | **FAIL → 수정** | "데모 데이터를 불러오지 못했습니다". 원인: 0023이 anon에 두 테이블 권한·게스트 정책을 주지 않음(로컬 guest E2E가 역할 화면을 다니지 않아 누락) |
+| 7 | `0024_agent_roles_demo_read.sql` (anon select + `is_demo_department` 정책) | 성공 | 보안 SQL 61/61(게스트 읽기·비데모 0건·쓰기 거부 케이스 추가) 후 운영 적용. 앱 재배포 불필요 |
+| 8 | 운영 `/demo/d/<개발팀>/roles` 2차 | PASS | 고정 문구 표시, 지원자 A 5.00 > B 1.67 > C 0.67, "근거 없음 (0점 반영)" 표기, "합격" 문자열 0 |
+| 9 | 스모크 | PASS | `/demo` 200 · `/login` 200 · `/consent` 307 · `/api/jobs/run` 무시크릿 401 · `/api/slack/events` 무서명 401 |
+| 10 | 운영 E2E `tests/e2e/agent-roles.spec.ts` | PASS (53.8초) | QA 부서 시드 계정. lead: 합성 문서 업로드 → 역할 생성 201 → 실행 202 → 워커 → `completed`, ok 기준 인용 전부 원문 포함, 합불 키 없음. member: 역할 생성 403, leads_only 결과 0건, 화면에 "역할 만들기" 없음. 정리: 소스 제거(결과 삭제 트리거) + 역할 보관 |
 
-상태: **미실행 — 승인 노드 O1**. 이 step은 운영 DB·Vercel·Slack에 쓰지 않았다.
+로컬에서 skipped였던 인증 역할 UI E2E는 시드 계정 로그인 방식으로 바꿔 운영에서 실행했다.
 
 ## 컷 ⓪ 판정 재료
 
