@@ -8,6 +8,8 @@ const REAL_DEPT = "22222222-2222-4222-8222-222222222222";
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
   test(`게스트 대시보드·카드·원장·묻기 완주 ${viewport.width}px`, async ({ page }, testInfo) => {
+    // 운영 URL에서는 데모 부서 4곳을 도는 데 기본 30초를 넘는다(2026-09-15 O8 실측 31~39초).
+    test.setTimeout(120_000);
     await page.setViewportSize(viewport);
     const writes: string[] = [];
     const errors: string[] = [];
@@ -24,10 +26,13 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
       const card = page.locator('a[href*="/cards/"]').first();
       await expect(card).toBeVisible();
       await card.click();
+      await page.waitForURL(/\/cards\//u, { waitUntil: "commit" });
       await expect(page.locator("q").first()).toBeVisible();
       await page.getByRole("link", { name: "원장", exact: true }).click();
+      await page.waitForURL(/\/ledger$/u, { waitUntil: "commit" });
       await expect(page.getByRole("heading", { level: 1 })).toContainText("원장");
       await page.getByRole("link", { name: "묻기", exact: true }).click();
+      await page.waitForURL(/\/ask$/u, { waitUntil: "commit" });
       await expect(page.getByRole("heading", { level: 1 })).toContainText("묻기");
       const articles = page.locator("article");
       expect(await articles.count()).toBeGreaterThan(0);

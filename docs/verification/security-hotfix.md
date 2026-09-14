@@ -59,9 +59,49 @@ npm run e2e -- tests/e2e/guest.spec.ts tests/e2e/team-coverage.spec.ts --output=
 
 이는 **각 테이블의 모든 값 변경이 안전하다는 판정이 아니다**. 세부 RLS·트리거 검증은 기존 행위 테스트로 수행한다. 특히 document_summaries의 넓은 기존 쓰기 정책은 이번 두 건 수정 범위에 포함되지 않으며 후속 보안 검토 대상이다. 새 단계가 테이블을 추가하면 기대 표도 명시적으로 검토해야 한다.
 
-## 다음 게이트
+## 다음 게이트 (step 0 시점 기록)
 
 - `phases/8-security-hotfix/step1.md`: 사용자가 승인한 환경에서 실제 업로드·세로 슬라이스·권한·역할 E2E. 이들은 DB 쓰기와 LLM/워커 실행을 포함하므로 이번에는 실행하지 않았다.
 - 승인 및 검증 후 **0025만** 운영 DB에 반영. 운영 적용 전 코드의 업로드 경로와 마이그레이션을 함께 점검한다.
 - phase9~12는 아직 미구현이며 step 파일도 Claude에서 인계되지 않았다. phase7 기존 메타버스형 합성 체험은 그대로 유지한다.
 - commit, push, 배포, 운영 마이그레이션, 실제 조직 예고편 발행은 수행하지 않았다.
+
+→ 이후 경과: step 1(업로드 E2E 스펙)과 운영 게이트(O8)는 아래 절에 기록했다. phase 9~12 step 파일은 실행 플랜 `sasu-scope-expansion-2026-09-15`로 작성됐다.
+
+## step 1 — 업로드 쓰기 경계 E2E 스펙 (2026-09-15)
+
+- `tests/e2e/upload-boundaries.spec.ts` 6케이스 + 공용 로그인 `tests/e2e/support/auth.ts`.
+- 실행 조건: `E2E_ALLOW_EXTERNAL_WRITES=1`(운영 쓰기·분류/요약 LLM). 마지막 두 케이스(직접 INSERT·`departments.org_id` 변경 거부)는 `E2E_EXPECT_0025=1`일 때만 돈다. 0025 적용 전에 직접 INSERT 케이스가 돌면 마스킹되지 않은 행이 실제로 들어가기 때문이다(성공 시 즉시 삭제하도록 작성).
+- 로컬 확인: ESLint 0 · 프로젝트 전체 `tsc --noEmit` 오류 0 · env 없이 6 skipped.
+- 작성 주체: Claude(메인). 위임한 서브에이전트가 세션 한도로 파일을 만들지 못해 직접 작성했다.
+
+## R8 리뷰 (Claude, 2026-09-15)
+
+차단 결함 없음.
+
+- 0025: `departments` 정책을 같은 USING의 SELECT 전용으로 교체하고 anon·authenticated 쓰기를 회수했다. `items` INSERT를 회수했다(UPDATE·DELETE는 0015에서 회수됨). 게스트 읽기 정책과 service role은 그대로다.
+- 두 업로드 라우트: 부서장 → 데모 여부(null·오류는 500) → 세션 RLS로 소스(·요약·회의) 생성 → `insertUploadedItems`(마스킹 후 service role insert) 순서. 전사는 동의한 멤버 표시 이름과 일치하는 발언만 넣는다.
+- 세션 클라이언트로 `items`·`departments`에 쓰는 다른 앱 경로는 없다. 남은 `items` 쓰기는 워커 파이프라인(service role)과 service_role 전용 definer RPC(`ingest_slack_atomic`)뿐이다.
+- 비차단 지적(후속): ① items 저장이 실패하면 빈 소스·요약 행이 남는다 ② 전사 라우트가 `meetings` 행보다 items를 먼저 넣어, 회의 행 저장이 실패하면 분류 job 없는 items가 남는다 ③ 소스 제목·파일명은 마스킹 대상이 아니다(기존 동작, 불변식 9는 `items.content` 대상) ④ `document_summaries`의 넓은 기존 쓰기 정책(위 절).
+
+## 운영 반영 (O8, 2026-09-15 05:17~06:04 KST, 사용자 승인)
+
+순서 원칙: 옛 코드는 세션으로 `items`에 insert하므로 **새 코드 배포 → 0025** 순서로 했다.
+
+| 순서 | 작업 | 결과 | 근거 |
+|---|---|---|---|
+| 1 | 운영 권한 읽기 조회(PRD §10 #23, 적용 전) | 구멍 2건 실재 | anon·authenticated: `departments` INSERT·UPDATE·DELETE, `items` INSERT. `departments_member_access` cmd=ALL. 최신 적용 0024 |
+| 2 | phase 8 커밋 `6812a3e` 스냅샷(Git 메타데이터 없음) 선빌드 | READY | `dpl_5coSV3pB9eqVyvPdFGtCASaCfqsC`. 첫 시도는 CLI 토큰 갱신 직후 "Not authorized", 재시도 성공. phase 7·9 코드는 스냅샷에 없음 |
+| 3 | promote + 스모크 | PASS | `sasu-alpha.vercel.app` → `dpl_5coSV3…`(이전 `dpl_J4C4dgD4…`). `/demo` 200 · `/login` 200 · `/consent` 307 · `/api/jobs/run` 무시크릿 401 · `/api/slack/events` 무서명 401 |
+| 4 | 적용 전 E2E — 읽기(`guest`·`team-coverage`) | 8/8 PASS | 기본 30초 제한에서는 게스트 완주 2건이 운영 지연으로 시간 초과(실측 36.6~39.3초). 120초로 재실행 PASS. 게스트 화면은 이번 배포와 무관 |
+| 5 | 적용 전 E2E — `upload-boundaries` | 4 PASS · 2 skip(설계) | lead 문서 마스킹 · member 403 · 데모 부서 거부 · 전사 동의자 발언만 마스킹 |
+| 6 | 적용 전 E2E — 쓰기(`agent-roles`·`ask-permission`·`vertical-slice`) | 3 PASS · 1 FAIL | 역할·ASK 권한 차등·세로 슬라이스 이벤트 흐름 PASS. **병합 1건 FAIL**: 회의 item은 업로드 202 → 분류 decision → 임베딩까지 정상이었고, 후보 카드에 `merge_confirm`(gpt-oss-20b) 1회 호출이 "같은 안건 아님"으로 판정해 새 카드가 생겼다(ADR-037의 확률적 경계, phase 8 경로와 무관). 테스트 정리에서 빠진 open 카드 `1de0d64d…`는 스펙과 같은 `decide_request(reject)`로 정리 |
+| 7 | `supabase db push` | **0025만 적용** | dry-run 대상 0025 1건 확인 후 적용. 작업 트리의 미완성 0026이 섞이지 않게 phase 8 스냅샷 폴더에서 실행 |
+| 8 | 운영 권한 읽기 조회(적용 후) | 회수 확인 | `departments`·`items`: REFERENCES·SELECT·TRIGGER·TRUNCATE만 남음(Supabase 기본 권한, PostgREST가 노출하지 않음). `departments_member_access` cmd=SELECT. 최신 적용 0025 |
+| 9 | 적용 후 E2E — `upload-boundaries`(`E2E_EXPECT_0025=1`) | 6/6 PASS | 추가 확인: 부서장 토큰의 `items` 직접 INSERT → 42501 · 팀원의 `departments.org_id` UPDATE → 42501 |
+| 10 | 적용 후 E2E — `guest` + 세로 슬라이스 이벤트 흐름 | 4 PASS · 1 FAIL → 재실행 PASS | 게스트 390px에서 카드 클릭 후 5초 안에 화면 전환이 끝나지 않음(대시보드는 anon 읽기로 정상 렌더). 단독 재실행 PASS(31.3초) |
+
+남은 것:
+- 병합 E2E는 재실행하지 않았다. LLM 확인 결과에 따라 통과·실패가 갈리고, 재실행하면 슬랙 발송·LLM 호출이 반복된다.
+- 게스트 완주 스펙에 운영 지연을 반영했다(테스트 제한시간 120초, 클릭 뒤 URL 전환 대기).
+- 운영 E2E가 남긴 데이터: 합성 업로드 소스는 스펙 정리(`remove_source`)로 본문이 삭제됐다. 병합 E2E 카드 2장은 rejected다.

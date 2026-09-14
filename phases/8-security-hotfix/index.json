@@ -3,7 +3,7 @@
   "phase": "8-security-hotfix",
   "steps": [
     { "step": 0, "name": "write-boundaries", "status": "completed", "completed_at": "2026-09-15T03:27:00+09:00", "summary": "0025 departments/items 쓰기 회수, 세션·비데모 검증 후 mask 수집 어댑터. lint/build 통과, 단위773·SQL67(+행렬2016)·예고편E2E6·게스트E2E8 통과. docs/verification/security-hotfix.md. 운영 미반영." },
-    { "step": 1, "name": "upload-e2e", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 2, "name": "production-gate", "status": "pending", "codex_model": "gpt-5.6-luna", "effort": "low" }
+    { "step": 1, "name": "upload-e2e", "status": "completed", "codex_model": "gpt-5.6-terra", "effort": "medium", "completed_at": "2026-09-15T05:50:00+09:00", "summary": "tests/e2e/upload-boundaries.spec.ts 6케이스(lead 문서 마스킹·member 403·데모 거부·전사 동의자만 마스킹·0025 후 items 직접 INSERT 42501·departments UPDATE 42501) + tests/e2e/support/auth.ts. E2E_ALLOW_EXTERNAL_WRITES=1에서만 실행, 뒤 두 케이스는 E2E_EXPECT_0025=1. eslint·tsc 0, env 없이 6 skipped. 실행 주체: Claude(서브에이전트 세션 한도로 메인이 직접 작성). 운영 실행은 O8." },
+    { "step": 2, "name": "production-gate", "status": "completed", "codex_model": "gpt-5.6-luna", "effort": "low", "completed_at": "2026-09-15T06:04:00+09:00", "summary": "O8(Claude, 사용자 승인): 적용 전 권한 조회로 구멍 2건 실재 확인 → phase 8 스냅샷 dpl_5coSV3pB9eqVyvPdFGtCASaCfqsC promote → 운영 E2E(읽기 8/8, 업로드 4+2skip, 역할·ASK·세로 슬라이스 PASS, 병합 1건은 merge_confirm 판정 불일치로 FAIL·잔여 카드 정리) → db push 0025만 → 권한 회수 확인 → 업로드 6/6(직접 INSERT·org_id 변경 42501)·게스트·세로 슬라이스 PASS. docs/verification/security-hotfix.md 운영 반영 절." }
   ]
 }
