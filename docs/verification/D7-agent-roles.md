@@ -2,7 +2,7 @@
 
 - 검증일: 2026-09-14 (KST, 재실행)
 - 범위: phase `4-agent-roles` step 6 `agent-role-verification` 재실행
-- 판정: **FAIL — 프로덕션 클라이언트 번들에서 `SUPABASE_SERVICE_ROLE_KEY` 앞 8자가 1건 검출**
+- 판정: **PASS (로컬)**. 번들 비밀값 검사의 FAIL은 오탐으로 재판정했다(아래 "비밀값 검사 재판정", Claude 리뷰 2026-09-14). 역할 UI 인증 E2E 2건은 skipped라 운영 확인(O1)에서 보완한다
 - 원문 지원서·모델 원문 응답·질문·비밀값은 이 기록과 결과 JSON에 남기지 않는다.
 
 ## 이전 실행
@@ -20,7 +20,7 @@
 | `node scripts/verify-security-sql.mjs "D:/바이브코딩/.sasu-qa-db"` | PASS | 59/59 시나리오, 2,016 assertions. `0004_worker_cron.sql`은 PGlite에서 제외 |
 | `npx vitest run --config vitest.eval.config.ts tests/evals/agent-role.eval.ts` | PASS | 실제 Groq 평가 4/4 통과. 결과: `evaluation-results/agent-role-2026-09-14T10-55-59-155Z.json` (입력 3,483 / 출력 4,048 토큰, 4회 호출) |
 | `npm run e2e -- tests/e2e/guest.spec.ts tests/e2e/agent-roles.spec.ts` | PASS (부분) | 게스트 4/4 통과. 인증 E2E 환경 부재로 역할 UI 2건 skipped |
-| 클라이언트 번들 비밀값 검사 | **FAIL** | service-role 키 prefix 1건. 나머지 4개 키 prefix는 각 0건 |
+| 클라이언트 번들 비밀값 검사 | PASS (재판정) | step 실행 시 service-role 키 prefix 8자 1건 → 오탐. 전체 키·뒤 24자·JWT payload는 0건 |
 
 Vite 설정의 native loader 및 `vite-tsconfig-paths` 관련 경고와 Playwright의 `NO_COLOR` 경고만 있었고, 각 명령은 종료됐다.
 
@@ -35,11 +35,16 @@ Vite 설정의 native loader 및 `vite-tsconfig-paths` 관련 경고와 Playwrig
 | P1 가중 점수 > P2 | PASS | P1=5.00, P2=2.50 |
 | 합불 필드 없음 | PASS | 실제 Groq 응답 strict schema 키 검사 및 시드 테스트 통과 |
 | 게스트 LLM 호출 0 | PASS (로컬) | `guest.spec.ts`의 게스트 열람 전후 AI 호출·DB 행 수 증가 없음 테스트 통과 |
-| 클라이언트 비밀값 미노출 | **FAIL** | `SUPABASE_SERVICE_ROLE_KEY` prefix가 production client chunk에서 1건 검출 |
+| 클라이언트 비밀값 미노출 | PASS (재판정) | 아래 재판정 참조 |
 
-## 원인 추정 및 후속
+## 비밀값 검사 재판정 (Claude 리뷰, 2026-09-14)
 
-검출 위치는 production client chunk 한 곳이다. 어떤 클라이언트 import 또는 환경 변수 참조가 service-role 값을 번들로 끌어들였는지의 원인 분석과 수정은 이 검증 전용 step 범위 밖이므로 수행하지 않았다. Step 6은 `error`로 종료한다. 후속 수정 step은 해당 chunk의 공개 경로를 추적하고, `lib/supabase/service.ts`와 client component import 경계를 점검한 뒤 전체 검증을 재실행해야 한다.
+step 6은 각 키의 앞 8자로 검사했다. Supabase의 `SUPABASE_SERVICE_ROLE_KEY`와 `NEXT_PUBLIC_SUPABASE_ANON_KEY`는 둘 다 JWT라 앞 8자가 같은 헤더(`eyJhbGci…`)다. 로컬 `.env`로 다시 대조했다.
+- 두 키의 앞 8자는 일치한다.
+- `.next/static` 427개 파일 중 anon 키 전체 문자열이 든 파일이 1개이고, 앞 8자가 검출된 파일도 그 1개다. anon 키는 클라이언트 공개가 허용된 값이다(CLAUDE.md).
+- service-role 키 전체 문자열, 뒤 24자, JWT payload 세그먼트는 **0건**이다.
+
+결론: 검출 1건은 공개 anon 키의 JWT 헤더와 겹친 오탐이다. service-role 키는 번들에 없다. 이후 JWT 형식 키는 앞 8자가 아니라 payload·서명 세그먼트로 검사한다. 키 값은 이 기록에 남기지 않았다.
 
 ## 운영에서만 판정 가능한 항목
 
@@ -51,4 +56,4 @@ Vite 설정의 native loader 및 `vite-tsconfig-paths` 관련 경고와 Playwrig
 
 ## 컷 ⓪ 판정 재료
 
-역할 기준표의 실제 Groq·RLS·게스트 로컬 검증은 통과했지만, production client bundle의 service-role 키 노출 검사 실패로 PRD §11 전체 로컬 통과 조건을 충족하지 못했다. 컷 ⓪의 최종 판정은 사람이 한다.
+역할 기준표의 실제 Groq·RLS·게스트·번들 비밀값(재판정) 로컬 검증을 통과했다. 인증된 역할 UI E2E 2건은 로컬 인증 환경이 없어 skipped다. 컷 ⓪의 최종 판정은 사람이 한다.
