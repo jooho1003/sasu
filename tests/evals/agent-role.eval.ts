@@ -101,7 +101,7 @@ afterAll(() => {
   const p2 = rows.find((row) => row.id === "P2");
   const p3 = rows.find((row) => row.id === "P3");
   const p4 = rows.find((row) => row.id === "P4");
-  const fairnessDifference = p3?.weightedScore === null || p4?.weightedScore === null
+  const fairnessDifference = p3?.weightedScore == null || p4?.weightedScore == null
     ? null
     : Math.abs(p3.weightedScore - p4.weightedScore);
   const checks = {

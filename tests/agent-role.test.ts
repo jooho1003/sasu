@@ -51,15 +51,40 @@ describe("agent role evidence", () => {
     expect(result.dropped).toBe(2);
   });
 
-  it("근거 있는 기준만 가중 평균에 넣고 소수 둘째 자리로 반올림한다", () => {
-    const criteria = verifyAgentRoleEvaluation({
+  it("전체 기준 가중치로 평균을 내고 근거 없는 기준은 0점으로 반영한다", () => {
+    const threeCriteriaRole = {
+      ...role,
       criteria: [
-        { key: "experience", score: 4, rationale: "근거", citations: [{ item_id: "item-1", decision_id: null, quote: "프로젝트" }] },
+        { key: "experience", label: "경험", description: "관련 업무 경험", weight: 3 },
+        { key: "writing", label: "문서", description: "문서 작성", weight: 4 },
+        { key: "collaboration", label: "협업", description: "협업 경험", weight: 2 },
+      ],
+    };
+    const allEvidence = verifyAgentRoleEvaluation({
+      criteria: [
+        { key: "experience", score: 5, rationale: "근거", citations: [{ item_id: "item-1", decision_id: null, quote: "프로젝트" }] },
+        { key: "writing", score: 5, rationale: "근거", citations: [{ item_id: "item-1", decision_id: null, quote: "문서화" }] },
+        { key: "collaboration", score: 5, rationale: "근거", citations: [{ item_id: "item-1", decision_id: null, quote: "결과" }] },
+      ], summary: "요약",
+    }, threeCriteriaRole, items).criteria;
+    const oneEvidence = verifyAgentRoleEvaluation({
+      criteria: [
         { key: "writing", score: 5, rationale: "근거", citations: [{ item_id: "item-1", decision_id: null, quote: "문서화" }] },
       ], summary: "요약",
-    }, role, items).criteria;
-    expect(weightedScore(criteria)).toBe(4.25);
-    expect(weightedScore(criteria.map((criterion) => ({ ...criterion, evidence: "no_evidence" as const })))).toBeNull();
+    }, threeCriteriaRole, items).criteria;
+
+    expect(weightedScore(allEvidence)).toBe(5);
+    expect(weightedScore(oneEvidence)).toBe(2.22);
+    expect(weightedScore(oneEvidence.map((criterion) => ({ ...criterion, evidence: "no_evidence" as const })))).toBeNull();
+  });
+
+  it("rationale이 없으면 유효한 인용과 점수가 있어도 근거 없음으로 처리한다", () => {
+    const result = verifyAgentRoleEvaluation({
+      criteria: [{ key: "experience", score: 5, rationale: null, citations: [{ item_id: "item-1", decision_id: null, quote: "프로젝트" }] }],
+      summary: "요약",
+    }, role, items);
+
+    expect(result.criteria[0]).toMatchObject({ evidence: "no_evidence", score: null, rationale: null, citations: [] });
   });
 
   it("고정 가드는 system에 두고 역할 지시문은 마스킹된 user JSON에만 둔다", () => {
@@ -68,6 +93,8 @@ describe("agent role evidence", () => {
     expect(prompt.system).not.toContain("contact@example.com");
     expect(prompt.user).toContain("[이메일]");
     expect(prompt.user).not.toContain("contact@example.com");
+    expect(AGENT_ROLE_SYSTEM_GUARD).toContain("score와 rationale을 null로");
+    expect(AGENT_ROLE_SYSTEM_GUARD).toContain("근거의 구체성에 맞게 낮게 매기세요");
   });
 
   it("입력 순서대로 24,000자까지만 선택하고 첫 chunk는 잘라 담는다", () => {

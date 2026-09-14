@@ -90,6 +90,18 @@ describe("agent role pipeline", () => {
     }));
   });
 
+  it("rationale이 null인 기준은 근거 없음으로 처리해 citation_invalid로 실패한다", async () => {
+    mocks.client = createFakeClient({ result, role, items: [{ id: "item-1", content: "관련 프로젝트를 운영했습니다." }] });
+    mocks.structured.mockResolvedValue({ data: {
+      criteria: [{ key: "experience", score: 4, rationale: null, citations: [{ item_id: "item-1", decision_id: null, quote: "프로젝트를 운영" }] }],
+      summary: "요약",
+    } });
+    await runAgentRole("result-1");
+    expect(mocks.client.operations).toContainEqual(expect.objectContaining({
+      table: "agent_role_results", values: expect.objectContaining({ status: "failed", status_reason: "citation_invalid", result: null }),
+    }));
+  });
+
   it("결과 id를 받는 handler를 등록한다", () => {
     registerAgentRoleHandler();
     expect(mocks.register).toHaveBeenCalledWith("run_agent_role", expect.any(Function));

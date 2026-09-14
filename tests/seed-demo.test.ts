@@ -60,6 +60,10 @@ describe("게스트 데모 시드", () => {
       }
       expect(result.weighted_score).toBe(weightedScore(result.result.criteria));
     }
+    expect(DEMO_AGENT_ROLE.results.map((result) => result.weighted_score)).toEqual([5, 1.67, 0.67]);
+    expect(DEMO_AGENT_ROLE.results.map((result) => result.weighted_score)).toEqual(
+      [...DEMO_AGENT_ROLE.results].sort((left, right) => (right.weighted_score ?? 0) - (left.weighted_score ?? 0)).map((result) => result.weighted_score),
+    );
   });
 
   it("지원서 결과에는 합불 판정이 없고 합성 시드에는 마스킹 대상 문자열이 없다", () => {

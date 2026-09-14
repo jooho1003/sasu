@@ -83,7 +83,7 @@ export const AgentRoleEvaluation = z.strictObject({
   criteria: z.array(z.strictObject({
     key: NonEmptyString,
     score: z.number().int().min(0).max(5).nullable(),
-    rationale: NonEmptyString,
+    rationale: NullableString,
     citations: z.array(Citation),
   })),
   summary: NonEmptyString,

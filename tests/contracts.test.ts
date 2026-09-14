@@ -382,6 +382,8 @@ describe("AgentRole contracts", () => {
       summary: "요약",
     };
     expect(AgentRoleEvaluation.safeParse(evaluation).success).toBe(true);
+    expect(AgentRoleEvaluation.safeParse({ ...evaluation, criteria: [{ ...evaluation.criteria[0], rationale: null }] }).success).toBe(true);
+    expect(AgentRoleEvaluation.safeParse({ ...evaluation, criteria: [{ ...evaluation.criteria[0], rationale: "" }] }).success).toBe(false);
     expect(AgentRoleEvaluation.safeParse({ ...evaluation, recommendation: "합격" }).success).toBe(false);
   });
 });

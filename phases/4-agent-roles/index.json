@@ -55,9 +55,12 @@
     {
       "step": 5,
       "name": "agent-role-scoring-fix",
-      "status": "pending",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium"
+      "effort": "medium",
+      "started_at": "2026-09-14T14:45:18+0900",
+      "summary": "전체 기준 가중치 기준 점수와 nullable rationale 검증, 근거 없음 0점 반영 UI를 적용하고 AC를 통과했다.",
+      "completed_at": "2026-09-14T19:40:00+0900"
     },
     {
       "step": 6,
