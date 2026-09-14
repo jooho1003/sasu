@@ -1,0 +1,14 @@
+{
+  "project": "sasu",
+  "phase": "11-trailer-publish",
+  "steps": [
+    { "step": 0, "name": "trailer-schema", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
+    { "step": 1, "name": "trailer-publish-sql", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
+    { "step": 2, "name": "trailer-gate-jobs", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 3, "name": "trailer-routes", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
+    { "step": 4, "name": "trailer-review-ui", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 5, "name": "trailer-public-page", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 6, "name": "trailer-demo-seed", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 7, "name": "trailer-verification", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" }
+  ]
+}

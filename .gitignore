@@ -32,3 +32,6 @@ tsconfig.tsbuildinfo
 .DS_Store
 Thumbs.db
 *.log
+
+# crash dumps
+*.stackdump

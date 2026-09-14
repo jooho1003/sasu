@@ -1,0 +1,11 @@
+{
+  "project": "sasu",
+  "phase": "12-trailer-assessment",
+  "steps": [
+    { "step": 0, "name": "assessment-schema", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
+    { "step": 1, "name": "assessment-scoring", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 2, "name": "assessment-fixtures-seed", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 3, "name": "assessment-score-table", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 4, "name": "assessment-verification", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" }
+  ]
+}
