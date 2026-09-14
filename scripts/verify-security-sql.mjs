@@ -221,6 +221,19 @@ try {
       error => error.code === "42501" && error.message === "agent_role_forbidden",
     );
   }));
+  await check("guests read demo agent roles and results only, without writes", async () => {
+    const demoResult = randomUUID();
+    await q("insert into agent_role_results(id,role_id,source_id,dept_id,visibility,status,requested_by) values ($1,$2,$3,$4,'dept','completed',$5)", [demoResult, roleIds.demoRole, removalIds.demoSource, removalIds.demoDept, ids.lead]);
+    await db.exec("set role anon");
+    try {
+      assert.equal((await q("select id from agent_roles where id=$1", [roleIds.demoRole])).rows.length, 1);
+      assert.equal((await q("select id from agent_roles where id=$1", [roleIds.deptRole])).rows.length, 0);
+      assert.equal((await q("select id from agent_role_results where id=$1", [demoResult])).rows.length, 1);
+      assert.equal((await q("select id from agent_role_results where id=$1", [publicRoleResult])).rows.length, 0);
+      await denied("insert into agent_roles(dept_id,name,instruction,criteria,visibility,created_by) values($1,'anon','anon',$2::jsonb,'dept',$3)", [removalIds.demoDept, roleCriteria, ids.lead]);
+      await denied("update agent_role_results set weighted_score=5 where id=$1", [demoResult]);
+    } finally { await db.exec("reset role"); }
+  });
   await check("removing a document source deletes its agent role results", async () => {
     assert.ok((await q("select id from agent_role_results where source_id=$1", [roleIds.privateDocument])).rows.length > 0);
     await asUser(ids.lead, () => q("select remove_source($1)", [roleIds.privateDocument]));
