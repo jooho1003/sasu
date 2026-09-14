@@ -46,13 +46,13 @@ export default function HomePage() {
           </div>
           <div className="relative overflow-hidden rounded-[2rem] border border-black/10 bg-white shadow-2xl shadow-black/10">
             <Image
-              alt="게스트 모드에서 실제로 동작하는 지금 결정 큐와 결정 카드"
+              alt="게스트 모드의 결정 카드: 배경, 원문 근거 인용 2건, 과거 결정과 충돌 확인, 추천 방향 (합성 데이터)"
               className="h-auto w-full"
-              height={1080}
+              height={666}
               priority
               sizes="(max-width: 1024px) 100vw, 55vw"
-              src="/marketing/decision-queue.png"
-              width={1920}
+              src="/marketing/guest-decision-card.png"
+              width={832}
             />
           </div>
         </div>
@@ -95,15 +95,18 @@ export default function HomePage() {
           <article className="rounded-3xl border border-black/10 p-7"><p data-meta className="m-0 text-sm text-[var(--muted)]">기존 도구</p><h3 className="mt-3 text-2xl">기록 · 요약 · 검색</h3><p className="mb-0 leading-7 text-[var(--muted)]">회의와 대화를 잘 남기고, 필요한 내용을 다시 찾게 합니다.</p></article>
           <article className="rounded-3xl bg-[var(--accent)] p-7 text-white"><p data-meta className="m-0 text-sm text-[var(--signal)]">사수가 서는 층</p><h3 className="mt-3 text-2xl">요청 · 결정 · 권한별 답변</h3><p className="mb-0 leading-7 text-white/75">결정할 사람에게 먼저 밀어주고, 결정 원장과 부서별 권한으로 다음 행동까지 이어갑니다.</p></article>
         </div>
-        <figure className="m-0 overflow-hidden rounded-3xl border border-black/10 bg-white shadow-xl shadow-black/5">
-          <Image alt="같은 질문에 팀장과 팀원의 권한에 따라 다른 근거를 인용하는 실제 게스트 화면" className="h-auto w-full" height={1080} sizes="100vw" src="/marketing/permission-aware-answer.png" width={1920} />
-          <figcaption className="px-5 py-4 text-sm text-[var(--muted)]">같은 질문에도 질문자가 볼 수 있는 원문만 인용합니다.</figcaption>
+        <figure className="m-0 grid gap-4 rounded-3xl border border-black/10 bg-white p-4 shadow-xl shadow-black/5 sm:p-6">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Image alt="영업 사수의 답: 같은 질문에 영업 원칙과 슬랙 원문을 인용한 게스트 화면 (합성 데이터)" className="h-auto w-full" height={291} sizes="(max-width: 1024px) 100vw, 50vw" src="/marketing/guest-ask-sales.png" width={1088} />
+            <Image alt="개발 사수의 답: 같은 질문에 개발 부서에는 해당 기록이 없다고 답한 게스트 화면 (합성 데이터)" className="h-auto w-full" height={271} sizes="(max-width: 1024px) 100vw, 50vw" src="/marketing/guest-ask-dev.png" width={1088} />
+          </div>
+          <figcaption className="text-sm text-[var(--muted)]">같은 질문을 영업·개발 사수에게 물었습니다. 각 사수는 자기 부서 기록만 인용합니다. 게스트 모드 실제 화면이며 데이터는 합성입니다.</figcaption>
         </figure>
       </section>
 
       <section className="border-y border-black/10 bg-[var(--surface)]" id="trust">
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-20 sm:px-8">
-          <div className="grid gap-3"><p data-meta className="m-0 text-sm text-[var(--accent)]">TRUST BY DESIGN</p><h2 className="m-0 text-4xl sm:text-5xl">동의와 권한이 먼저입니다</h2><p className="m-0 max-w-3xl leading-7 text-[var(--muted)]">조직 관리자 권한만으로는 질문·답변·카드의 내용을 볼 수 없습니다.</p></div>
+          <div className="grid gap-3"><p data-meta className="m-0 text-sm text-[var(--accent)]">TRUST BY DESIGN</p><h2 className="m-0 text-4xl sm:text-5xl">동의와 권한이 먼저입니다</h2></div>
           <ul className="m-0 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
             {trustItems.map((item, index) => <li className="flex min-h-28 items-start gap-4 rounded-2xl border border-black/10 p-5" key={item}><span data-meta className="text-[var(--accent)]">0{index + 1}</span><strong className="leading-7">{item}</strong></li>)}
           </ul>
