@@ -1,0 +1,151 @@
+.shell { --accent:#235842; --ink:#293b33; --muted:#6a786d; display:block; padding:0; min-height:100dvh; color:var(--ink); background:#182b25; text-align:left; color-scheme:light; font-family:var(--font-body),system-ui,sans-serif; }
+.shell button,.shell input,.shell textarea { font:inherit; }
+.shell button { cursor:pointer; }
+.shell button:focus-visible,.shell input:focus-visible,.shell textarea:focus-visible { outline:3px solid #dcaa58; outline-offset:3px; }
+.shell h1,.shell h2,.shell h3 { margin:0; font-family:var(--font-body),system-ui,sans-serif; color:inherit; letter-spacing:-.035em; }
+.shell h1 { font-size:2.2rem; line-height:1.45; }
+.shell h2 { font-size:1.15rem; line-height:1.5; }
+.shell h3 { font-size:.9rem; line-height:1.5; }
+.shell p { line-height:1.85; word-break:keep-all; overflow-wrap:anywhere; }
+.header { height:66px; padding:0 26px; background:#192e27; border-bottom:1px solid #ffffff17; color:#edf0e8; display:flex; align-items:center; justify-content:space-between; gap:15px; }
+.brand { display:flex; align-items:center; gap:10px; }
+.brand strong { font-size:1.15rem; }
+.brandIcon { background:#e1e8cb; color:#254834; border-radius:8px; font-weight:700; padding:4px 9px; }
+.brandSub { padding-left:14px; margin-left:5px; border-left:1px solid #b2c4b52f; color:#afc0b4; font-size:.76rem; }
+.location { display:flex; align-items:center; gap:12px; font-size:.76rem; color:#c4d0c5; }
+.location > span:first-child { font-size:1.2rem; }
+.locationDot { width:5px; height:5px; background:#bfcab7; border-radius:50%; }
+.badge { border:1px solid #ffffff22; border-radius:20px; padding:7px 12px; font-size:.66rem; color:#afc1b2; }
+.stage { position:relative; height:calc(100dvh - 66px); min-height:580px; overflow:hidden; isolation:isolate; }
+.canvasLayer { position:absolute; inset:0; }
+.canvasLayer[hidden] { display:none; }
+.world { width:100%; height:100%; position:relative; overflow:hidden; background:#263a32; }
+.canvas { display:block; width:100%; height:100%; touch-action:none; outline:none; }
+.canvas:focus-visible { box-shadow:inset 0 0 0 2px #e6edbf; }
+.worldLoading { position:absolute; inset:0; display:grid; place-content:center; color:#f1e9d4; background:#293c31; font-size:.95rem; }
+.welcome { position:absolute; left:max(40px,7vw); top:50%; transform:translateY(-50%); width:370px; padding:34px; border:1px solid #ffffffab; border-radius:20px; background:#fffff2ef; box-shadow:0 24px 80px #142a2550,inset 0 1px #fff; backdrop-filter:blur(20px); }
+.welcomeChip { display:inline-block; background:#e6eddc; color:#567557; padding:7px 10px; border-radius:6px; font-size:.67rem; margin-bottom:22px; }
+.welcome h1 { font-size:2rem; color:#2f4e3c; letter-spacing:-.07em; font-weight:700; }
+.welcome > p { color:#6c7869; font-size:.8rem; margin:20px 0; }
+.characterPicker { padding:0; border:0; display:flex; gap:10px; margin:24px 0; }
+.characterPicker legend { font-size:.7rem; font-weight:700; margin-bottom:12px; }
+.characterPicker button { width:62px; height:65px; border:1px solid #d5dccb; border-radius:10px; background:#e7eadc; position:relative; }
+.characterPicker button[aria-pressed="true"] { background:#dfe9d2; border:2px solid #648368; box-shadow:0 0 0 3px #63815e1a; }
+.avatarPreview { display:block; width:22px; height:34px; position:absolute; top:13px; left:18px; image-rendering:pixelated; }
+.avatarPreview i { display:block; position:absolute; top:0; left:3px; width:17px; height:15px; background:#efc595; border-top:5px solid #473934; box-shadow:-2px -2px #473934,2px -2px #473934; }
+.avatarPreview b { display:block; position:absolute; top:16px; width:22px; height:12px; background:var(--shirt); border-top:2px solid #fff5dd; }
+.avatarPreview em { display:block; position:absolute; top:28px; left:3px; width:7px; height:8px; background:#46535a; box-shadow:11px 0 #46535a; border-bottom:2px solid #ffefd2; }
+.enter,.primary { padding:13px 20px; border:1px solid #305b41; background:#305b41; border-radius:9px; color:#fffdf2; font-weight:700 !important; font-size:.8rem !important; }
+.enter { width:100%; display:flex; justify-content:space-between; align-items:center; }
+.enter:hover,.primary:hover { background:#21452f; }
+.welcomeFacts { display:flex; gap:10px; margin:14px 0; font-size:.63rem; color:#63735e; }
+.welcomeFacts span + span::before { content:"·"; margin-right:10px; }
+.shell .notice { color:#7b8175; font-size:.65rem; line-height:1.8; margin:14px 0 0; }
+.questHud { position:absolute; top:24px; left:26px; width:306px; padding:19px 21px; border:1px solid #ffffff3b; border-radius:14px; color:#eff1e5; background:#213d32f0; box-shadow:0 8px 30px #122b2730; backdrop-filter:blur(14px); }
+.questMeta { display:flex; align-items:center; gap:9px; margin-bottom:12px; font-size:.66rem; color:#c9d6be; }
+.questMeta b { margin-left:auto; color:#e5eab6; }
+.questSymbol { color:#f2d897; font-size:1.1rem; }
+.questHud h1 { font-size:.98rem; line-height:1.6; font-weight:700; letter-spacing:-.04em; }
+.questHud p { font-size:.7rem; line-height:1.8; color:#bacbb9; margin:9px 0 16px; }
+.questSteps { display:flex; align-items:center; gap:8px; font-size:.57rem; color:#bccab6; }
+.questSteps i { height:1px; background:#788d744d; flex:1; }
+.questSteps span[data-done="true"] { color:#efdb9a; }
+.gameNav { position:absolute; top:24px; right:24px; display:flex; gap:8px; }
+.gameNav button { color:#324937; background:#fffef0f2; border:1px solid #e8eedcc2; border-radius:9px; padding:12px 14px; display:flex; align-items:center; gap:9px; font-size:.7rem !important; box-shadow:0 3px 12px #203b2320; }
+.gameNav button > span { font-size:1rem; color:#567454; }
+.gameNav b { font-size:.6rem; padding:2px 5px; border-radius:4px; background:#e4ead4; }
+.playerBadge { position:absolute; bottom:26px; left:26px; background:#20382fe8; color:#ecedde; border:1px solid #ffffff30; padding:12px 15px; border-radius:12px; display:flex; align-items:center; gap:12px; backdrop-filter:blur(10px); }
+.playerDot { height:30px; width:30px; border:4px solid #e3dfc8; border-radius:9px; }
+.playerBadge b,.playerBadge span { display:block; }
+.playerBadge b { font-size:.68rem; }
+.playerBadge div > span { font-size:.55rem; color:#b1c3b0; margin-top:5px; }
+.playerBadge button { background:none; border:none; color:#c9d3c0; font-size:1.2rem; margin-left:8px; }
+.worldControls { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:7px; white-space:nowrap; font-size:.58rem; color:#eff3df; background:#233c30bb; padding:7px 11px; border-radius:6px; pointer-events:none; }
+.worldControls kbd { padding:2px 5px; border:1px solid #b6c6a961; border-radius:3px; font:inherit; }
+.zoomControls { position:absolute; bottom:24px; right:24px; background:#233c32e8; border:1px solid #ffffff30; border-radius:9px; display:flex; align-items:center; overflow:hidden; color:#d9e3cc; }
+.zoomControls button { background:transparent; border:0; color:#ecf1dd; width:38px; height:36px; font-size:1.25rem; }
+.zoomControls span { font-size:.65rem; }
+.interactionPrompt { position:absolute; bottom:58px; left:50%; transform:translateX(-50%); }
+.interactionPrompt button { display:flex; align-items:center; gap:15px; padding:9px 12px; white-space:nowrap; background:#fff8e8; color:#304636; border:1px solid #e8dcba; border-radius:10px; box-shadow:0 6px 22px #15291c4d; font-size:.78rem; }
+.interactionPrompt kbd { font:700 .8rem ui-monospace,monospace; padding:6px 10px; border-radius:5px; color:#fff8e8; background:#406348; }
+.interactionPrompt > span { display:block; color:#fff8de; background:#2a4336d9; font-size:.7rem; white-space:nowrap; padding:10px 14px; border-radius:20px; }
+.walkStatus { position:absolute; bottom:119px; left:50%; transform:translateX(-50%); color:#fff8db; background:#213c31de; border-radius:20px; padding:7px 14px; font-size:.67rem; max-width:90%; text-align:center; }
+.walkStatus:empty { display:none; }
+.dpad { display:none; }
+.minimap { position:absolute; right:24px; bottom:80px; width:165px; padding:5px; border:1px solid #fbf8e342; border-radius:9px; background:#253e33ed; box-shadow:0 4px 20px #17312533; }
+.minimap > div { position:relative; width:100%; aspect-ratio:1.5; border-radius:5px; background:url('/trailer/office-world.png') center / cover; }
+.minimap > div > span { position:absolute; top:76%; left:48%; width:7px; height:7px; transform:translate(-50%,-50%); border:2px solid #fff6d4; border-radius:50%; background:#58c78d; box-shadow:0 0 0 3px #2f69487d; }
+.minimap > span { display:block; padding:5px 0 1px; color:#d7dec9; font-size:.56rem; text-align:center; }
+.modal { position:fixed; inset:auto 0 64px; width:min(720px,calc(100vw - 40px)); max-height:min(76dvh,780px); padding:0; margin:auto; border:1px solid #e7e9d6; border-radius:18px; background:#fcfbee; color:#334332; box-shadow:0 22px 100px #132b2766; overflow:auto; }
+.modal::backdrop { background:#102b252e; }
+.modalHeader { display:flex; align-items:center; gap:14px; padding:22px 26px; border-bottom:1px solid #dce2ce; position:sticky; top:0; background:#fcfbee; z-index:2; }
+.speakerIcon { height:46px; width:46px; display:grid; place-content:center; flex-shrink:0; border-radius:12px; color:#263b33; font-size:1.2rem; font-weight:700; border:3px solid #fff9e7; box-shadow:0 0 0 1px #d4ddc9; }
+.eyebrow { display:block; font-size:.63rem; color:#7b8871; margin-bottom:6px; font-weight:500; }
+.modalHeader h2 { outline:none; }
+.close { margin-left:auto; align-self:flex-start; border:0; background:#eaeedc; color:#62705c; width:30px; height:30px; border-radius:50%; flex-shrink:0; font-size:1.3rem !important; }
+.modalBody { padding:24px 28px; font-size:.84rem; }
+.dialogueText { font-size:.95rem; line-height:2 !important; margin:0 0 20px; }
+.dialogueActions { display:grid; gap:9px; border-top:1px solid #dde3d0; padding-top:20px; }
+.dialogueActions > span { font-size:.63rem; color:#839074; margin-bottom:2px; }
+.dialogueActions button { border:1px solid #d8e0c9; background:#f0f3e3; color:#3d5a3e; padding:13px 15px; border-radius:8px; text-align:left; font-size:.78rem; display:flex; justify-content:space-between; }
+.dialogueActions button:hover { background:#e6edda; }
+.citation { color:#688358; font-size:.69rem; display:flex; gap:12px; justify-content:space-between; }
+.citation span,.collected { color:#4b7b4e; }
+.collected { font-size:.72rem; }
+.shell blockquote { margin:5px 0 20px; border-left:3px solid #a3bb82; padding:16px 20px; background:#edf1df; line-height:1.9; }
+.shell cite { display:block; margin-top:12px; font-size:.68rem; color:#788969; font-style:normal; }
+.muted { color:#7a8671; font-size:.7rem; }
+.sectionHeading { display:flex; justify-content:space-between; align-items:center; }
+.sectionHeading span { font-size:.65rem; color:#738062; }
+.notebook { background:#f2f1e0; padding:18px; border-radius:10px; border:1px solid #e0e2cc; margin-bottom:20px; }
+.note { display:flex; gap:12px; border-top:1px solid #dddfc9; padding:13px 0; cursor:pointer; }
+.note input { margin-top:3px; accent-color:#507445; width:17px; height:17px; flex-shrink:0; }
+.note b { display:block; font-size:.75rem; margin-bottom:5px; }
+.note small { display:block; font-size:.71rem; color:#727b60; line-height:1.8; }
+.empty { font-size:.76rem; color:#8b907a; }
+.choices { border:0; margin:0 0 20px; padding:0; }
+.choices legend { font-size:.8rem; font-weight:700; margin-bottom:12px; }
+.choices label { display:flex; align-items:center; gap:10px; padding:12px; background:#edf1df; border:1px solid #d9e1ca; border-radius:7px; margin-bottom:7px; font-size:.8rem; }
+.choices input { accent-color:#507445; }
+.reasonLabel { display:grid; gap:10px; font-size:.8rem; font-weight:700; }
+.reasonLabel textarea { width:100%; color:#334332; background:#fffef7; border:1px solid #c9d6bc; border-radius:8px; padding:12px; font-weight:400; resize:vertical; }
+.error { background:#fff0dd; color:#a05e2c; padding:10px; border-radius:6px; font-size:.75rem; }
+.comparison { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:20px 0; }
+.comparison section { border:1px solid #d9e1ca; border-radius:10px; background:#f5f5e7; padding:18px; }
+.comparison h3 { margin-bottom:14px; }
+.comparison p,.comparison blockquote { font-size:.76rem; }
+.comparison blockquote { padding:12px; margin-bottom:0; }
+.reason { white-space:pre-wrap; overflow-wrap:anywhere; }
+.destinations { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.destinations button { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:7px; padding:12px; border-radius:8px; border:1px solid #dce2cf; background:#f2f4e8; color:#415c3c; text-align:left; }
+.destinations b { font-size:.77rem; }
+.destinations small { grid-row:2; grid-column:2; color:#7b886a; font-size:.65rem; }
+.destinations button > span:last-child { grid-column:3; grid-row:1 / 3; }
+.listMode { position:absolute; inset:0; padding:275px 30px 110px; overflow:auto; background:#e5e9da; z-index:-1; }
+.listMode > h2,.listMode > p,.placeList { max-width:850px; margin-left:auto; margin-right:auto; }
+.listMode > p { font-size:.8rem; color:#75816a; }
+.placeList { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.placeList button { display:flex; align-items:center; gap:12px; border:1px solid #d0dac2; background:#f8f9ef; padding:17px; border-radius:10px; color:#425b3f; text-align:left; }
+.placeList b { display:block; font-size:.8rem; }
+.placeList small { display:block; color:#7d886f; font-size:.65rem; margin-top:5px; }
+.placeList button > span:last-child { margin-left:auto; }
+.placeIcon { width:32px; height:35px; border-radius:8px; display:grid; place-content:center; flex-shrink:0; }
+.finished { min-height:calc(100dvh - 66px); background:#f2f3e5; padding:50px max(24px,calc((100vw - 960px) / 2)); }
+.finished > h1 { color:#31573b; }
+.finished > p { color:#7c856f; font-size:.85rem; }
+.finished article { margin:35px 0; }
+@media (max-width:1050px) {
+  .gameNav { flex-direction:column; } .gameNav button { padding:9px 12px; } .playerBadge { bottom:24px; } .worldControls { bottom:6px; } .placeList { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:650px) {
+  .minimap { display:none; }
+  .header { height:56px; padding:0 14px; } .brand { gap:7px; } .brand strong { font-size:1rem; } .brandSub { font-size:.64rem; margin:0; padding-left:8px; } .badge { font-size:.53rem; padding:6px 8px; } .location { display:none; }
+  .stage { height:calc(100dvh - 56px); min-height:580px; } .welcome { left:50%; transform:translate(-50%,-50%); width:min(335px,calc(100% - 36px)); padding:26px; background:#fffff0e8; } .welcome h1 { font-size:1.8rem; }
+  .questHud { left:12px; top:12px; width:min(260px,calc(100% - 106px)); padding:12px 14px; } .questMeta { font-size:.59rem; margin-bottom:7px; } .questHud h1 { font-size:.78rem; } .questHud p { display:none; } .questSteps { margin-top:12px; font-size:.5rem; gap:5px; }
+  .gameNav { top:12px; right:12px; gap:6px; } .gameNav button { width:68px; min-height:42px; padding:7px 5px; justify-content:center; font-size:.55rem !important; flex-wrap:wrap; gap:3px; } .gameNav button > span { display:none; }
+  .playerBadge { left:12px; bottom:12px; padding:9px; gap:8px; } .playerBadge b { font-size:.57rem; } .playerBadge div > span { display:none; } .playerDot { width:22px; height:22px; border-width:3px; } .zoomControls { bottom:12px; right:12px; } .worldControls { display:none; }
+  .interactionPrompt { bottom:98px; left:auto; right:12px; transform:none; max-width:220px; } .interactionPrompt button { font-size:.65rem; gap:8px; padding:8px; } .interactionPrompt > span { white-space:normal; max-width:190px; text-align:center; font-size:.6rem; } .walkStatus { bottom:197px; font-size:.6rem; }
+  .dpad { display:grid; position:absolute; left:12px; bottom:74px; grid-template-columns:repeat(3,39px); grid-template-rows:repeat(2,39px); gap:3px; } .dpad button { border:1px solid #f6f3d76b; background:#243f30d4; color:#fffde5; border-radius:8px; touch-action:none; font-size:1.1rem; } .dpad button:first-child { grid-column:2; } .dpad button:nth-child(2) { grid-row:2; } .dpad button:nth-child(3) { grid-row:2; grid-column:2; } .dpad button:nth-child(4) { grid-row:2; grid-column:3; }
+  .modal { bottom:10px; max-height:82dvh; width:calc(100vw - 20px); border-radius:14px; } .modalHeader { padding:15px; gap:10px; } .modalHeader h2 { font-size:.95rem; } .speakerIcon { width:38px; height:38px; font-size:1rem; } .modalBody { padding:18px; } .dialogueText { font-size:.85rem; }
+  .comparison { grid-template-columns:1fr; } .destinations { grid-template-columns:1fr; } .listMode { padding:200px 16px 100px; } .placeList { grid-template-columns:1fr; } .finished { padding:35px 22px; }
+}

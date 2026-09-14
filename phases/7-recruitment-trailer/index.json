@@ -1,0 +1,18 @@
+{
+  "project": "sasu",
+  "phase": "7-recruitment-trailer",
+  "steps": [
+    {
+      "step": 0,
+      "name": "public-playthrough",
+      "status": "completed",
+      "summary": "합성 콘텐츠 R1 첫 슬라이스: /trailers, 맵·목록, 3퀘스트, 사실집 인용, 메모리 전용 결정·회고. lint/build, 747 단위 테스트 및 5 E2E 통과. 실제 원장 생성·발행은 후속. docs/verification/recruitment-trailer.md 참조."
+    },
+    {
+      "step": 1,
+      "name": "immersive-office",
+      "status": "completed",
+      "summary": "ADR-041 전체 화면 Canvas 오피스·전용 배경·캐릭터 걷기·충돌·클릭 경로·근접 NPC·카메라/줌/미니맵·모바일 조작·모달 UI 구현. lint/build, 754 단위 테스트, 6 E2E 통과. 실제 원장 발행은 여전히 후속."
+    }
+  ]
+}

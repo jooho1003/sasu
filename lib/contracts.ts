@@ -152,6 +152,40 @@ export const MeetingSummary = z.strictObject({
 
 export type MeetingSummary = z.infer<typeof MeetingSummary>;
 
+const TrailerText = z.string().trim().min(1).max(2000);
+const TrailerId = z.string().regex(/^[a-z][a-z0-9_-]{0,39}$/);
+
+export const TrailerScenario = z.strictObject({
+  id: TrailerId,
+  title: TrailerText,
+  summary: TrailerText,
+  facts: z.array(z.strictObject({
+    id: TrailerId,
+    place: z.enum(["library", "meeting", "messenger", "finance", "partner"]),
+    label: TrailerText,
+    text: TrailerText,
+  })).min(1).max(30),
+  dialogues: z.array(z.strictObject({
+    id: TrailerId,
+    place: z.enum(["finance", "partner"]),
+    question: TrailerText,
+    fact_id: TrailerId,
+    quote: TrailerText,
+  })).min(1).max(20),
+  choices: z.array(z.strictObject({ id: TrailerId, label: TrailerText })).min(2).max(5),
+  ending: z.strictObject({ choice_id: TrailerId, fact_id: TrailerId, quote: TrailerText }),
+});
+
+export type TrailerScenario = z.infer<typeof TrailerScenario>;
+
+export const TrailerSubmission = z.strictObject({
+  choice_id: TrailerId,
+  reason: z.string().trim().min(1).max(1000),
+  fact_ids: z.array(TrailerId).min(1).max(30),
+});
+
+export type TrailerSubmission = z.infer<typeof TrailerSubmission>;
+
 type JsonSchemaObject = Record<string, unknown>;
 
 function isJsonSchemaObject(value: unknown): value is JsonSchemaObject {
