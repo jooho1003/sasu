@@ -1,0 +1,18 @@
+{
+  "project": "sasu",
+  "phase": "9-site",
+  "steps": [
+    {
+      "step": 0,
+      "name": "foundation",
+      "status": "completed",
+      "summary": "전역 CSS base layer·site URL TDD·메타데이터/OG/아이콘/robots/sitemap 구현. lint/build 및 전체 단위 테스트 통과."
+    },
+    {
+      "step": 1,
+      "name": "public-site-and-guest-cta",
+      "status": "completed",
+      "summary": "정적 메인·개인정보 안내·조건부 CTA·게스트 깊은 화면 CTA 구현. 사이트 E2E 3, 전체 E2E 12(+조건부 skip 3), 예고편 E2E 6 통과. docs/verification/D12-site.md."
+    }
+  ]
+}

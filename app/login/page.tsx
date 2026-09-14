@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const initialError = error ? (LOGIN_ERRORS[error] ?? null) : null;
 
   return (
-    <main>
+    <main className="center-shell">
       <section className="mx-auto grid w-full max-w-md gap-6 rounded-2xl bg-[var(--surface)] p-8 text-left shadow-sm">
         <div className="grid gap-2">
           <p className="m-0 text-sm font-bold text-[var(--accent)]">사수</p>

@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { SiteCta } from "@/components/site-cta";
+import { siteLinks } from "@/lib/site";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 type DemoDepartment = { id: string; name: string };
@@ -7,6 +9,7 @@ type DemoDepartment = { id: string; name: string };
 export const revalidate = 60;
 
 export default async function DemoLandingPage() {
+  const links = siteLinks();
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase.rpc("demo_departments");
   const departments = (data ?? []) as DemoDepartment[];
@@ -43,8 +46,9 @@ export default async function DemoLandingPage() {
         </section>
       )}
 
-      <footer className="text-sm text-[var(--muted)]">
-        게스트 모드에서는 질문을 새로 저장하거나 외부 AI를 호출하지 않습니다.
+      <footer className="grid gap-5 border-t border-black/10 pt-8 text-sm text-[var(--muted)]">
+        <p className="m-0">게스트 모드에서는 질문을 새로 저장하거나 외부 AI를 호출하지 않습니다.</p>
+        <SiteCta compact links={links} showHome />
       </footer>
     </main>
   );

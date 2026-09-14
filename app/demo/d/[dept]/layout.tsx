@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { SiteCta } from "@/components/site-cta";
+import { siteLinks } from "@/lib/site";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 export default async function DemoDepartmentLayout({
@@ -11,6 +13,7 @@ export default async function DemoDepartmentLayout({
   params: Promise<{ dept: string }>;
 }) {
   const { dept } = await params;
+  const links = siteLinks();
   const supabase = createPublicSupabaseClient();
   const { data: department } = await supabase
     .from("departments")
@@ -39,6 +42,12 @@ export default async function DemoDepartmentLayout({
         </div>
       </header>
       {children}
+      <aside className="border-t border-black/10 bg-[var(--surface)]" aria-label="게스트 데모 다음 단계">
+        <div className="mx-auto grid w-full max-w-6xl gap-4 px-5 py-7 sm:px-8 md:grid-cols-[1fr_auto] md:items-center">
+          <div><strong className="text-lg">우리 부서의 결정도 사수하세요</strong><p className="mb-0 mt-1 text-sm text-[var(--muted)]">파일럿 문의 또는 대회 투표로 이어갈 수 있습니다.</p></div>
+          <SiteCta compact links={links} showHome />
+        </div>
+      </aside>
     </div>
   );
 }
