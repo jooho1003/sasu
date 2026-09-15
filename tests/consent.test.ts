@@ -43,6 +43,13 @@ function visibleConsentFromDocument(document: string) {
 }
 
 describe("파일럿 동의문 상수", () => {
+  it("조직 관리자의 메타데이터 열람과 첫 부서장 지정 범위를 고지하고 동의 버전은 유지한다", () => {
+    const notice = CONSENT_SECTIONS.items.find((item) => item.title === "누가 보나")?.body;
+    expect(CONSENT_VERSION).toBe(1);
+    expect(notice).toContain("조직 관리자는 멤버 목록(이름·이메일·부서·역할)과 동의 상태, 부서별 질문 수와 인용 통계를 볼 수 있습니다.");
+    expect(notice).toContain("조직 관리자 권한만으로는 질문·답변·카드·원장의 내용과 질문자별 기록을 볼 수 없습니다.");
+    expect(notice).toContain("조직 관리자는 새 부서의 첫 부서장을 지정할 수 있고, 지정된 부서장은 부서 설정에서 확인할 수 있습니다.");
+  });
   it("문서의 제목·소개·일곱 항목 본문과 세부 문장을 그대로 유지한다", () => {
     const document = readFileSync(
       resolve(process.cwd(), "docs/pilot-consent.md"),

@@ -43,6 +43,8 @@
 
 ### 3. 로컬 AC 실행과 기록 `docs/verification/org-admin.md`
 
+- **R10 조기 리뷰 반영 절**을 둔다(Claude, 2026-09-15 06:25). 지적 F1: `admin_invite_first_lead`가 초대 생성 때만 "멤버 0명"을 확인해, 관리자가 빈 부서에 첫 부서장 초대를 여러 개 만들어 두면 부서에 멤버·내용이 생긴 뒤에도 남은 초대로 기존 부서의 부서장이 될 수 있었다(ADR-044 2·불변식 18 위반). 수정: ① 부서마다 살아 있는 관리자발 첫 부서장 초대는 1개만(`invite_pending`) ② `accept_invite`가 관리자발 초대는 부서 행을 잠그고 다른 멤버가 있으면 `department_not_empty`로 거부. 하니스 케이스 "a spare admin first-lead invite cannot be accepted once the department has members (R10)" 추가, 92/92 통과. E2E B 그룹 2번에 "같은 빈 부서에 두 번째 첫 부서장 초대 → 이미 대기 중인 초대 문구"를 추가한다.
+
 - 이번 step에서 실행한 것(A 그룹, 단위·라우트 테스트, SQL 하니스, 빌드, 기존 `guest`·`team-coverage`·`site` E2E 회귀)의 실제 출력 요약을 적는다.
 - B 그룹은 "O10에서 실행"으로 적고, O10이 그대로 쓸 명령을 순서대로 적는다: 부서명 중복 읽기 조회 SQL → `supabase db push`(0026) → 배포(`SASU_ORG_ADMIN_MODE=off`) → `npx tsx scripts/seed-qa-org.ts` → `SASU_ORG_ADMIN_MODE=on npm run start -- --port <p>` → `E2E_BASE_URL=… E2E_ALLOW_EXTERNAL_WRITES=1 E2E_ORG_ADMIN_DB=1 npm run e2e -- tests/e2e/org-admin.spec.ts` → 데모 시드 → 모드 `on` 배포.
 - 매직링크 실제 메일 경로(쿠키 `next` → 콜백)는 E2E가 대신하지 못한다는 한계를 적는다. O10에서 사람이 실제 메일로 1회 확인하는 항목으로 남긴다.

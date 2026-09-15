@@ -1,3 +1,4 @@
+import { verifyTrailerAssessmentSql } from "./verify-trailer-assessment-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
 // node scripts/verify-security-sql.mjs <temporary-directory>
@@ -6,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
+import { verifyTrailerSql } from "./verify-trailer-sql.mjs";
 
 const require = createRequire(resolve(process.argv[2] ?? ".", "package.json"));
 const { PGlite } = require("@electric-sql/pglite");
@@ -29,6 +31,11 @@ const roleIds = Object.fromEntries([
   "deptRole", "privateRole", "archivedRole", "publicDocument", "privateDocument",
   "nonDocumentSource", "otherOrg", "otherDept", "otherDocument", "demoRole",
 ].map(key => [key, randomUUID()]));
+const adminIds = Object.fromEntries([
+  "adminA", "adminB", "orgB", "deptB", "memberB", "deptY", "leadY",
+  "sourceY", "itemY", "answerY", "cardY", "pendingInvite", "crossBInvite",
+  "invitee", "otherInvitee", "emptyDept", "revokedDept", "expiredDept",
+].map(key => [key, randomUUID()]));
 const oversizedRoleSources = Array.from({ length: 21 }, () => randomUUID());
 const q = (sql, params = []) => db.query(sql, params);
 const uuidArray = values => `{${values.join(",")}}`;
@@ -38,6 +45,16 @@ const cosineVector = similarity => {
   values[1] = Math.sqrt(1 - similarity ** 2);
   return JSON.stringify(values);
 };
+const collectKeys = (value, keys = new Set()) => {
+  if (Array.isArray(value)) value.forEach(item => collectKeys(item, keys));
+  else if (value && typeof value === "object") {
+    for (const [key, child] of Object.entries(value)) {
+      keys.add(key);
+      collectKeys(child, keys);
+    }
+  }
+  return keys;
+};
 async function check(name, fn) {
   await fn();
   passed++;
@@ -45,10 +62,18 @@ async function check(name, fn) {
 }
 async function asUser(id, fn) {
   await db.exec("set role authenticated");
-  await q("select set_config('request.jwt.claim.sub', $1, false), set_config('request.jwt.claim.role', 'authenticated', false)", [id]);
+  await q("select set_config('request.jwt.claim.sub', $1, false), set_config('request.jwt.claim.role', 'authenticated', false), set_config('request.jwt.claims', $2, false)", [id, JSON.stringify({ sub:id, role:"authenticated" })]);
   try { await fn(); } finally {
     await db.exec("reset role");
-    await q("select set_config('request.jwt.claim.sub', '', false), set_config('request.jwt.claim.role', 'service_role', false)");
+    await q("select set_config('request.jwt.claim.sub', '', false), set_config('request.jwt.claim.role', 'service_role', false), set_config('request.jwt.claims', '{}', false)");
+  }
+}
+async function asUserWithEmail(id, email, fn) {
+  await db.exec("set role authenticated");
+  await q("select set_config('request.jwt.claim.sub', $1, false), set_config('request.jwt.claim.role', 'authenticated', false), set_config('request.jwt.claims', $2, false)", [id, JSON.stringify({ sub:id, role:"authenticated", email })]);
+  try { await fn(); } finally {
+    await db.exec("reset role");
+    await q("select set_config('request.jwt.claim.sub', '', false), set_config('request.jwt.claim.role', 'service_role', false), set_config('request.jwt.claims', '{}', false)");
   }
 }
 async function denied(sql, params = []) {
@@ -58,9 +83,10 @@ try {
   await db.exec(`
     create role anon; create role authenticated; create role service_role bypassrls;
     create schema auth;
-    create table auth.users(id uuid primary key);
+    create table auth.users(id uuid primary key, email text);
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
     create function auth.role() returns text language sql stable as $$ select current_setting('request.jwt.claim.role', true) $$;
+    create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb) $$;
     grant usage on schema public, auth to anon, authenticated, service_role;
     grant execute on all functions in schema auth to anon, authenticated, service_role;
     alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
@@ -72,6 +98,11 @@ try {
   const boundaryMigration = "0017_card_decision_boundaries.sql";
   for (const file of migrations.filter(name => name < boundaryMigration)) {
     await db.exec(readFileSync(resolve("supabase/migrations", file), "utf8"));
+    if (file === "0001_schema_v1.sql") {
+      // Supabase grants must precede the hardening migrations. Granting again
+      // after the migrations would undo their REVOKEs and invalidate the test.
+      await db.exec("grant all on all tables in schema public to anon, authenticated, service_role; grant all on all sequences in schema public to anon, authenticated, service_role");
+    }
   }
   await q("insert into orgs(id,name) values ($1,'backfill fixture')", [backfillIds.org]);
   await q("insert into departments(id,org_id,name) values ($1,$2,'backfill fixture')", [backfillIds.dept,backfillIds.org]);
@@ -81,7 +112,14 @@ try {
   await q("insert into decisions(id,dept_id,request_id,decided_by_name,outcome,rationale) values ($1,$2,$3,'backfill actor','backfill card outcome','backfill reason'),($4,$2,null,'backfill actor','backfill direct outcome','backfill reason')", [backfillIds.cardDecision,backfillIds.dept,backfillIds.card,backfillIds.directDecision]);
   await q("insert into citations(owner_kind,owner_id,item_id,quote) values ('decision',$1,$2,'backfill private evidence')", [backfillIds.directDecision,backfillIds.privateItem]);
   await db.exec(readFileSync(resolve("supabase/migrations", boundaryMigration), "utf8"));
-  for (const file of migrations.filter(name => name > boundaryMigration)) {
+  const orgAdminMigration = "0026_org_admin.sql";
+  for (const file of migrations.filter(name => name > boundaryMigration && name < orgAdminMigration)) {
+    await db.exec(readFileSync(resolve("supabase/migrations", file), "utf8"));
+  }
+  // Supabase grants newly created public functions to API roles by default.
+  // Reproduce that before 0026 so its explicit four-role REVOKEs are tested.
+  await db.exec("alter default privileges in schema public grant all on functions to anon, authenticated, service_role");
+  for (const file of migrations.filter(name => name >= orgAdminMigration)) {
     await db.exec(readFileSync(resolve("supabase/migrations", file), "utf8"));
   }
   await check("0017 backfills card and direct decision visibility from their evidence", async () => {
@@ -138,6 +176,66 @@ try {
   await q("insert into members(user_id,dept_id,role,display_name,consented_at) values ($1,$2,'lead','demo lead',now())", [ids.lead, removalIds.demoDept]);
   await q("insert into sources(id,dept_id,kind,external_id) values ($1,$2,'slack_channel','demo-removal-source')", [removalIds.demoSource, removalIds.demoDept]);
   const roleCriteria = JSON.stringify([{ key: "evidence", label: "근거", description: "문서 근거", weight: 1 }]);
+  for (const actor of [ids.member, ids.lead]) {
+    await check("0025 rejects department reassignment, creation, and deletion", () => asUser(actor, async () => {
+      await denied("update departments set org_id=$1 where id=$2", [removalIds.demoOrg, ids.dept]);
+      await denied("insert into departments(org_id,name) values($1,'forged')", [ids.org]);
+      await denied("delete from departments where id=$1", [ids.dept]);
+      assert.equal((await q("select id from departments where id=$1", [ids.dept])).rows.length, 1);
+    }));
+    await check("0025 rejects raw items insertion on public and private sources", () => asUser(actor, async () => {
+      for (const source of [ids.publicSource, ids.privateSource]) {
+        await denied("insert into items(source_id,dept_id,content) values($1,$2,'synthetic unmasked input')", [source, ids.dept]);
+      }
+    }));
+  }
+  await check("0025 preserves service ingestion and guest read-only isolation", async () => {
+    const item = randomUUID();
+    await db.exec("set role service_role");
+    try {
+      await q("insert into items(id,source_id,dept_id,content) values($1,$2,$3,'synthetic masked input')", [item, ids.publicSource, ids.dept]);
+    } finally { await db.exec("reset role"); }
+    await asUser(ids.member, async () => {
+      assert.equal((await q("select id from items where id=$1", [item])).rows.length, 1);
+      assert.equal((await q("select id from items where id=$1", [ids.privateItem])).rows.length, 0);
+    });
+    await db.exec("set role anon");
+    try {
+      assert.equal((await q("select id from departments where id=$1", [ids.dept])).rows.length, 0);
+      assert.equal((await q("select id from departments where id=$1", [removalIds.demoDept])).rows.length, 1);
+      assert.equal((await q("select id from items where id=$1", [item])).rows.length, 0);
+      await denied("update departments set org_id=$1 where id=$2", [ids.org, removalIds.demoDept]);
+      await denied("insert into items(source_id,dept_id,content) values($1,$2,'synthetic')", [removalIds.demoSource, removalIds.demoDept]);
+    } finally { await db.exec("reset role"); }
+  });
+  await check("all public tables: authenticated/anon direct-write policy and grant matrix", async () => {
+    // Snapshot existing intentional API write surfaces; this is not a claim
+    // that every allowed column/value is safe (row tests cover those separately).
+    const allowed = {
+      INSERT: ["agent_roles", "answers", "document_summaries", "meetings", "sources"],
+      UPDATE: ["agent_roles", "document_summaries", "members", "sources"],
+      DELETE: ["document_summaries", "sources"],
+    };
+    const tables = (await q("select tablename from pg_tables where schemaname='public' order by tablename")).rows;
+    assert.ok(tables.length >= 18);
+    for (const role of ["authenticated", "anon"]) {
+      for (const command of ["INSERT", "UPDATE", "DELETE"]) {
+        const actual = [];
+        for (const { tablename } of tables) {
+          const result = await q(`select
+            (has_table_privilege($1, 'public.' || $2, $3)
+              or ($3 in ('INSERT','UPDATE') and has_any_column_privilege($1, 'public.' || $2, case when $3='INSERT' then 'INSERT' else 'UPDATE' end)))
+            and exists(select 1 from pg_policies where schemaname='public' and tablename=$2
+              and permissive='PERMISSIVE' and cmd in ('ALL',$3)
+              and (roles @> array[$1]::name[] or roles @> array['public']::name[])) as writable`, [role, tablename, command]);
+          if (result.rows[0].writable) actual.push(tablename);
+        }
+        assert.deepEqual(actual, role === "authenticated" ? allowed[command] : [], `${role} ${command}`);
+      }
+    }
+    const columns = (await q("select column_name from information_schema.column_privileges where table_schema='public' and table_name='members' and grantee='authenticated' and privilege_type='UPDATE' order by column_name")).rows;
+    assert.deepEqual(columns.map(row => row.column_name), ["consent_version", "consented_at", "slack_user_id"]);
+  });
   await q("insert into orgs(id,name) values ($1,'role other org')", [roleIds.otherOrg]);
   await q("insert into departments(id,org_id,name) values ($1,$2,'role other dept')", [roleIds.otherDept, roleIds.otherOrg]);
   await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$5,'document','role-public','dept'),($2,$5,'document','role-private','leads_only'),($3,$5,'slack_channel','role-not-document','dept'),($4,$6,'document','role-other-dept','dept')", [roleIds.publicDocument, roleIds.privateDocument, roleIds.nonDocumentSource, roleIds.otherDocument, ids.dept, roleIds.otherDept]);
@@ -632,6 +730,273 @@ try {
         });
       }
     }
+  });
+  await q("update auth.users set email=case id when $1 then 'lead-a@example.test' when $2 then 'member-a@example.test' when $3 then 'member-b@example.test' end where id in ($1,$2,$3)", [ids.lead, ids.member, ids.memberB]);
+  await q("insert into auth.users(id,email) values($1,'admin-a@example.test'),($2,'admin-b@example.test'),($3,'lead-y@example.test'),($4,'member-org-b@example.test'),($5,'invitee@example.test'),($6,'other-invitee@example.test')", [adminIds.adminA, adminIds.adminB, adminIds.leadY, adminIds.memberB, adminIds.invitee, adminIds.otherInvitee]);
+  await q("insert into orgs(id,name) values($1,'Admin fixture B')", [adminIds.orgB]);
+  await q("insert into departments(id,org_id,name) values($1,$2,'Admin Y'),($3,$4,'Admin B')", [adminIds.deptY, ids.org, adminIds.deptB, adminIds.orgB]);
+  await q("insert into members(user_id,dept_id,role,display_name,consented_at) values($1,$2,'lead','lead Y',null),($3,$4,'member','member org B',now())", [adminIds.leadY, adminIds.deptY, adminIds.memberB, adminIds.deptB]);
+  await q("insert into org_admins(org_id,user_id,granted_by) values($1,$2,'script:test'),($3,$4,'script:test'),($1,$5,'script:test')", [ids.org, adminIds.adminA, adminIds.orgB, adminIds.adminB, ids.lead]);
+  await q("insert into sources(id,dept_id,kind,external_id,title,visibility,last_synced_at) values($1,$2,'document','admin-y','Admin source Y','dept',now())", [adminIds.sourceY, adminIds.deptY]);
+  await q("insert into items(id,source_id,dept_id,content) values($1,$2,$3,'admin Y secret content')", [adminIds.itemY, adminIds.sourceY, adminIds.deptY]);
+  await q("insert into answers(id,dept_id,asked_by,question,status) values($1,$2,$3,'admin Y secret question','done')", [adminIds.answerY, adminIds.deptY, adminIds.leadY]);
+  await q("insert into citations(owner_kind,owner_id,item_id,quote) values('answer',$1,$2,'admin Y secret content')", [adminIds.answerY, adminIds.itemY]);
+  await q("insert into decision_requests(id,dept_id,title,background,visibility) values($1,$2,'admin Y secret card','admin Y secret background','dept')", [adminIds.cardY, adminIds.deptY]);
+  await q("insert into member_invites(id,org_id,dept_id,invited_by_role,email_normalized,role,token_hash,expires_at,created_by) values($1,$2,$3,'org_admin','invitee@example.test','lead','pending-hash',now()+interval '7 days',$4)", [adminIds.pendingInvite, ids.org, adminIds.deptY, adminIds.adminA]);
+  await q("insert into member_invites(id,org_id,dept_id,invited_by_role,email_normalized,role,token_hash,expires_at,created_by) values($1,$2,$3,'org_admin','cross@example.test','lead','cross-hash',now()+interval '7 days',$4)", [adminIds.crossBInvite, adminIds.orgB, adminIds.deptB, adminIds.adminB]);
+  await q("insert into admin_events(org_id,actor_id,action,target) values($1,$2,'department_create',jsonb_build_object('dept_id',$3::text))", [ids.org, adminIds.adminA, adminIds.deptY]);
+  await q("insert into llm_calls(dept_id,purpose,model) values($1,'test','synthetic')", [adminIds.deptY]);
+
+  await check("organization admin private helpers are unreachable to API roles", async () => {
+    for (const role of ["anon", "authenticated"]) {
+      await db.exec(`set role ${role}`);
+      try { await denied("select private._admin_overview($1)", [ids.org]); }
+      finally { await db.exec("reset role"); }
+    }
+  });
+  await check("organization admin functions have exact execution grants", async () => {
+    const privateFunctions = [
+      "private.is_org_admin(uuid,uuid)", "private._admin_overview(uuid)",
+      "private._admin_members(uuid)", "private._admin_sources(uuid)",
+      "private._admin_answer_stats(uuid,date,date)",
+    ];
+    const authenticatedFunctions = [
+      "public.admin_org_id()", "public.admin_overview()", "public.admin_members()",
+      "public.admin_sources()", "public.admin_answer_stats(date,date)",
+      "public.admin_invites()", "public.admin_events_list(integer)",
+    ];
+    const anonFunctions = [
+      "public.demo_admin_overview()", "public.demo_admin_members()",
+      "public.demo_admin_sources()", "public.demo_admin_answer_stats(date,date)",
+    ];
+    for (const name of privateFunctions) {
+      for (const role of ["anon", "authenticated", "service_role"])
+        assert.equal((await q("select has_function_privilege($1,$2,'execute') as allowed", [role,name])).rows[0].allowed, false, `${role} ${name}`);
+    }
+    for (const name of authenticatedFunctions) {
+      assert.equal((await q("select has_function_privilege('authenticated',$1,'execute') as allowed", [name])).rows[0].allowed, true, name);
+      assert.equal((await q("select has_function_privilege('anon',$1,'execute') as allowed", [name])).rows[0].allowed, false, name);
+    }
+    for (const name of anonFunctions) {
+      assert.equal((await q("select has_function_privilege('anon',$1,'execute') as allowed", [name])).rows[0].allowed, true, name);
+      assert.equal((await q("select has_function_privilege('authenticated',$1,'execute') as allowed", [name])).rows[0].allowed, false, name);
+    }
+    const publicGrants = await q("select count(*)::int as count from information_schema.routine_privileges where routine_schema in ('public','private') and grantee='PUBLIC' and routine_name like '%admin%'");
+    assert.equal(publicGrants.rows[0].count, 0);
+  });
+  await check("non-admins are forbidden from every metadata read RPC", () => asUser(ids.member, async () => {
+    assert.equal((await q("select admin_org_id() as org")).rows[0].org, null);
+    for (const sql of [
+      "select admin_overview()", "select admin_members()", "select admin_sources()",
+      "select admin_answer_stats(current_date-1,current_date)", "select admin_invites()",
+      "select admin_events_list(10)",
+    ]) await denied(sql);
+  }));
+  await check("admin overview is organization-scoped and contains metadata keys only", () => asUserWithEmail(adminIds.adminA, "admin-a@example.test", async () => {
+    const overview = (await q("select admin_overview() as value")).rows[0].value;
+      assert.deepEqual(Object.keys(overview).sort(), ["departments", "llm_calls_this_month", "org_name", "published_trailers", "trailer_publish_enabled"]);
+    const departmentNames = overview.departments.map(row => row.name);
+    assert.ok(departmentNames.includes("Admin Y"));
+    assert.ok(departmentNames.includes("SQL fixture"));
+    assert.equal(departmentNames.includes("Admin B"), false);
+    assert.ok(overview.llm_calls_this_month >= 1);
+    const forbiddenKeys = ["question", "content", "quote", "asked_by", "answer"];
+    const keys = collectKeys(overview);
+    forbiddenKeys.forEach(key => assert.equal(keys.has(key), false, key));
+  }));
+  await check("admin member listing never crosses organization boundaries", () => asUser(adminIds.adminA, async () => {
+    const members = (await q("select admin_members() as value")).rows[0].value;
+    assert.ok(members.some(row => row.user_id === adminIds.leadY));
+    assert.equal(members.some(row => row.user_id === adminIds.memberB), false);
+  }));
+  await check("answer statistics are daily aggregates and reject ranges over 31 days", () => asUser(adminIds.adminA, async () => {
+    const stats = (await q("select admin_answer_stats(current_date-1,current_date) as value")).rows[0].value;
+    const y = stats.find(row => row.dept_id === adminIds.deptY);
+    assert.equal(y.answered, 1);
+    assert.equal(y.cited_dept, 1);
+    assert.deepEqual(Object.keys(y).sort(), ["answered","cited_decisions","cited_dept","cited_leads_only","day","dept_id","dept_name","failed","refused"]);
+    await assert.rejects(
+      () => q("select admin_answer_stats(current_date-31,current_date)"),
+      error => error.code === "22023" && error.message === "invalid_range",
+    );
+  }));
+  await check("demo admin wrappers are anon-only and remove account identifiers", async () => {
+    await db.exec("set role anon");
+    try {
+      const members = (await q("select demo_admin_members() as value")).rows[0].value;
+      assert.ok(members.length > 0);
+      assert.equal(members.some(row => "email" in row || "user_id" in row), false);
+    } finally { await db.exec("reset role"); }
+    await asUser(adminIds.adminA, async () => {
+      for (const sql of ["select demo_admin_overview()", "select demo_admin_members()", "select demo_admin_sources()", "select demo_admin_answer_stats(current_date-1,current_date)"])
+        await denied(sql);
+    });
+  });
+  await check("organization admin status never expands can_see content access", () => asUser(ids.lead, async () => {
+    assert.equal((await q("select id from items where dept_id=$1", [adminIds.deptY])).rows.length, 0);
+    assert.equal((await q("select id from answers where dept_id=$1", [adminIds.deptY])).rows.length, 0);
+    assert.equal((await q("select id from decision_requests where dept_id=$1", [adminIds.deptY])).rows.length, 0);
+  }));
+  await check("admin tables remain policy-free and admin events append-only even for service role", async () => {
+    const tables = await q("select relname, relrowsecurity from pg_class where relname in ('org_admins','member_invites','admin_events') order by relname");
+    assert.equal(tables.rows.length, 3);
+    assert.equal(tables.rows.every(row => row.relrowsecurity), true);
+    assert.equal((await q("select count(*)::int as count from pg_policies where tablename in ('org_admins','member_invites','admin_events')")).rows[0].count, 0);
+    await db.exec("set role service_role");
+    try {
+      await denied("update admin_events set target='{}'::jsonb where org_id=$1", [ids.org]);
+      await denied("delete from admin_events where org_id=$1", [ids.org]);
+    } finally { await db.exec("reset role"); }
+  });
+  await check("department names are unique case-insensitively inside an organization", async () => {
+    await assert.rejects(
+      () => q("insert into departments(org_id,name) values($1,'sql FIXTURE')", [ids.org]),
+      error => error.code === "23505",
+    );
+  });
+
+  await check("organization admins cannot target another organization", () => asUserWithEmail(adminIds.adminA, "admin-a@example.test", async () => {
+    for (const [sql,message] of [
+      ["select * from admin_invite_first_lead($1,'new@example.test')", "forbidden"],
+      ["select revoke_invite($1)", "forbidden"],
+      ["select demote_lead($1,$2)", "forbidden"],
+      ["select remove_member($1,$2)", "forbidden"],
+    ]) {
+      const params = sql.includes("$2") ? [adminIds.memberB,adminIds.deptB] : [sql.includes("invite_first") ? adminIds.deptB : adminIds.crossBInvite];
+      await assert.rejects(() => q(sql,params), error => error.code==="42501" && error.message===message);
+    }
+  }));
+  await check("admin write surface has no promotion RPC", async () => {
+    assert.equal((await q("select count(*)::int as count from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname like 'admin_%promote%'")).rows[0].count,0);
+  });
+  let createdDept;
+  await check("admin creates a trimmed department and cannot duplicate its name", () => asUser(adminIds.adminA, async () => {
+    createdDept=(await q("select admin_create_department('  Operations  ') as id")).rows[0].id;
+    assert.ok(createdDept);
+    await assert.rejects(() => q("select admin_create_department('operations')"), error => error.code==="P0001" && error.message==="department_name_taken");
+  }));
+  await check("first-lead invites reject nonempty departments and the admin's own email", () => asUserWithEmail(adminIds.adminA,"admin-a@example.test",async () => {
+    await assert.rejects(() => q("select * from admin_invite_first_lead($1,'fresh@example.test')",[adminIds.deptY]), error => error.message==="department_not_empty");
+    await assert.rejects(() => q("select * from admin_invite_first_lead($1,'ADMIN-A@example.test')",[createdDept]), error => error.code==="42501" && error.message==="self_invite_forbidden");
+  }));
+  await check("members cannot use lead invite, promotion, or invite listing commands", () => asUser(ids.member, async () => {
+    for (const [sql,params] of [
+      ["select * from lead_invite_member($1,'x@example.test')",[ids.dept]],
+      ["select lead_promote_member($1,$2)",[ids.memberB,ids.dept]],
+      ["select lead_invites($1)",[ids.dept]],
+    ]) await assert.rejects(() => q(sql,params), error => error.code==="42501" && error.message==="forbidden");
+  }));
+  await check("demo departments reject lead administration", () => asUser(ids.lead, async () => {
+    await assert.rejects(() => q("select * from lead_invite_member($1,'x@example.test')",[removalIds.demoDept]), error => error.code==="42501" && error.message==="forbidden");
+  }));
+  await check("the final department lead cannot be demoted or removed", () => asUser(adminIds.adminA, async () => {
+    for (const sql of ["select demote_lead($1,$2)","select remove_member($1,$2)"])
+      await assert.rejects(() => q(sql,[adminIds.leadY,adminIds.deptY]), error => error.message==="last_lead");
+  }));
+  let acceptedToken;
+  await check("first-lead invitation is single-use, email-bound, and idempotent for its recipient", async () => {
+    await asUserWithEmail(adminIds.adminA,"admin-a@example.test",async () => {
+      const invite=(await q("select * from admin_invite_first_lead($1,'invitee@example.test')",[createdDept])).rows[0];
+      acceptedToken=invite.token;
+      assert.equal(acceptedToken.length,64);
+    });
+    await db.exec("set role anon");
+    try {
+      const preview=(await q("select invite_preview($1) as value",[acceptedToken])).rows[0].value;
+      assert.equal(preview.status,"valid"); assert.equal(preview.email_masked,"in***@example.test");
+    } finally { await db.exec("reset role"); }
+    await asUserWithEmail(adminIds.otherInvitee,"other-invitee@example.test",async () => {
+      await assert.rejects(() => q("select accept_invite($1,'Wrong user')",[acceptedToken]), error => error.message==="invite_email_mismatch");
+    });
+    await asUserWithEmail(adminIds.invitee,"invitee@example.test",async () => {
+      assert.equal((await q("select accept_invite($1,'  초대 부서장  ') as dept",[acceptedToken])).rows[0].dept,createdDept);
+      assert.equal((await q("select accept_invite($1,'ignored') as dept",[acceptedToken])).rows[0].dept,createdDept);
+    });
+    const member=(await q("select role,display_name,consented_at from members where user_id=$1 and dept_id=$2",[adminIds.invitee,createdDept])).rows[0];
+    assert.deepEqual(member,{role:"lead",display_name:"초대 부서장",consented_at:null});
+    const stored=(await q("select token_hash,used_token_hash from member_invites where dept_id=$1 and accepted_by=$2",[createdDept,adminIds.invitee])).rows[0];
+    assert.ok(stored.token_hash.startsWith("void:")); assert.equal(stored.used_token_hash.length,64);
+    await asUserWithEmail(adminIds.otherInvitee,"other-invitee@example.test",async () => {
+      await assert.rejects(() => q("select accept_invite($1,'Other')",[acceptedToken]), error => error.message==="invite_used");
+    });
+  });
+  await check("a spare admin first-lead invite cannot be accepted once the department has members (R10)", async () => {
+    await asUser(adminIds.adminA,async () => { adminIds.spareDept=(await q("select admin_create_department('Spare invite dept') as id")).rows[0].id; });
+    let firstToken;
+    await asUserWithEmail(adminIds.adminA,"admin-a@example.test",async () => {
+      firstToken=(await q("select token from admin_invite_first_lead($1,'invitee@example.test')",[adminIds.spareDept])).rows[0].token;
+      await assert.rejects(() => q("select * from admin_invite_first_lead($1,'other-invitee@example.test')",[adminIds.spareDept]), error => error.code==="P0001" && error.message==="invite_pending");
+    });
+    // A second live admin invite created outside the RPC rule (legacy data or a race) must still fail at acceptance.
+    const spareToken="c".repeat(64);
+    await q("insert into member_invites(org_id,dept_id,invited_by_role,email_normalized,role,token_hash,expires_at) select org_id,id,'org_admin','other-invitee@example.test','lead',encode(sha256(convert_to($2,'UTF8')),'hex'),now()+interval '7 days' from departments where id=$1",[adminIds.spareDept,spareToken]);
+    await asUserWithEmail(adminIds.invitee,"invitee@example.test",async () => {
+      assert.equal((await q("select accept_invite($1,'첫 부서장') as dept",[firstToken])).rows[0].dept,adminIds.spareDept);
+    });
+    await asUserWithEmail(adminIds.otherInvitee,"other-invitee@example.test",async () => {
+      await assert.rejects(() => q("select accept_invite($1,'늦은 초대')",[spareToken]), error => error.code==="P0001" && error.message==="department_not_empty");
+    });
+    assert.equal((await q("select count(*)::int as count from members where dept_id=$1",[adminIds.spareDept])).rows[0].count,1);
+  });
+  let revokedToken;
+  await check("revoked invitations remain previewable but cannot be accepted", async () => {
+    await asUser(adminIds.adminA,async () => { adminIds.revokedDept=(await q("select admin_create_department('Revoked dept') as id")).rows[0].id; });
+    let inviteId;
+    await asUserWithEmail(adminIds.adminA,"admin-a@example.test",async () => {
+      const invite=(await q("select * from admin_invite_first_lead($1,'other-invitee@example.test')",[adminIds.revokedDept])).rows[0]; inviteId=invite.invite_id; revokedToken=invite.token;
+      await q("select revoke_invite($1)",[inviteId]);
+    });
+    await db.exec("set role anon"); try { assert.equal((await q("select invite_preview($1) as value",[revokedToken])).rows[0].value.status,"revoked"); } finally { await db.exec("reset role"); }
+    await asUserWithEmail(adminIds.otherInvitee,"other-invitee@example.test",async () => {
+      await assert.rejects(() => q("select accept_invite($1,'Other')",[revokedToken]), error => error.message==="invite_revoked");
+    });
+  });
+  await check("expired invitations cannot be accepted", async () => {
+    await asUser(adminIds.adminA,async () => { adminIds.expiredDept=(await q("select admin_create_department('Expired dept') as id")).rows[0].id; });
+    let token;
+    await asUserWithEmail(adminIds.adminA,"admin-a@example.test",async () => { token=(await q("select token from admin_invite_first_lead($1,'other-invitee@example.test')",[adminIds.expiredDept])).rows[0].token; });
+    await q("update member_invites set expires_at=now()-interval '1 minute' where dept_id=$1",[adminIds.expiredDept]);
+    await asUserWithEmail(adminIds.otherInvitee,"other-invitee@example.test",async () => {
+      await assert.rejects(() => q("select accept_invite($1,'Other')",[token]), error => error.message==="invite_expired");
+    });
+  });
+  await check("lead invitations are member-only, pending-deduplicated, and promotable only by a lead", () => asUser(ids.lead, async () => {
+    const invite=(await q("select * from lead_invite_member($1,'new-member@example.test')",[ids.dept])).rows[0];
+    assert.equal(invite.token.length,64);
+    await assert.rejects(() => q("select * from lead_invite_member($1,'NEW-MEMBER@example.test')",[ids.dept]), error => error.message==="invite_pending");
+    const listed=(await q("select lead_invites($1) as value",[ids.dept])).rows[0].value;
+    assert.ok(listed.some(row => row.invite_id===invite.invite_id && row.role==="member"));
+    await q("select lead_promote_member($1,$2)",[ids.member,ids.dept]);
+    assert.equal((await q("select role from members where user_id=$1 and dept_id=$2",[ids.member,ids.dept])).rows[0].role,"lead");
+  }));
+  await check("all write RPCs keep admin event targets identifier-only", async () => {
+    const events=(await q("select target from admin_events")).rows;
+    for (const {target} of events) {
+      assert.equal(JSON.stringify(target).includes("@"),false);
+      for (const key of Object.keys(target)) assert.ok(["dept_id","invite_id","user_id"].includes(key),key);
+    }
+  });
+  await check("organization pending-invite limit is atomic at the command boundary", async () => {
+    const count=(await q("select count(*)::int as count from member_invites where org_id=$1 and accepted_at is null and revoked_at is null",[ids.org])).rows[0].count;
+    for(let index=count;index<100;index++) await q("insert into member_invites(org_id,dept_id,invited_by_role,email_normalized,role,token_hash,expires_at,created_by) values($1,$2,'lead',$3,'member',$4,now()+interval '7 days',$5)",[ids.org,ids.dept,`limit-${index}@example.test`,`limit-hash-${index}`,ids.lead]);
+    await asUser(ids.lead,async () => {
+      await assert.rejects(() => q("select * from lead_invite_member($1,'over-limit@example.test')",[ids.dept]), error => error.message==="invite_limit");
+    });
+  });
+
+  await verifyTrailerSql({ db, q, check, asUser, ids, adminIds });
+  await verifyTrailerAssessmentSql({ db, q, check, asUser, ids });
+  await db.exec(readFileSync(resolve("supabase/rollback/0028_trailer_assessment_down.sql"), "utf8"));
+  await check("0028 rollback removes assessment only", async () => { assert.equal((await q("select to_regclass('public.trailer_attempts') value")).rows[0].value, null); });
+  await db.exec(readFileSync(resolve("supabase/rollback/0027_trailer_publish_down.sql"), "utf8"));
+  await check("0027 rollback restores the exact 0026 overview contract", () => asUser(adminIds.adminA,async () => {
+    assert.deepEqual(Object.keys((await q("select admin_overview() result")).rows[0].result).sort(),["departments","llm_calls_this_month","org_name"]);
+  }));
+  await db.exec(readFileSync(resolve("supabase/rollback/0026_org_admin_down.sql"), "utf8"));
+  await check("0026 manual rollback removes the complete organization admin surface", async () => {
+    for (const name of ["org_admins", "member_invites", "admin_events"])
+      assert.equal((await q("select to_regclass($1) as value", [`public.${name}`])).rows[0].value, null);
+    assert.equal((await q("select count(*)::int as count from information_schema.schemata where schema_name='private'")).rows[0].count, 0);
   });
   console.log(JSON.stringify({ passed, failed: 0, matrix: { organizations:4, departments:12, actors:24, items:72, assertions:matrixAssertions }, database: "isolated PGlite", excluded: ["0004_worker_cron.sql (pg_cron/pg_net not available)"] }));
 } finally {

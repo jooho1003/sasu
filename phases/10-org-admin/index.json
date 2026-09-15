@@ -1,0 +1,63 @@
+{
+  "project": "sasu",
+  "phase": "10-org-admin",
+  "steps": [
+    {
+      "step": 0,
+      "name": "admin-schema-read",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "0026에 org_admins/member_invites/admin_events, private.is_org_admin 및 메타데이터 읽기·데모 RPC 추가. 신규 보안 11건 포함 PGlite 78건·행렬 2016개 passed, failed 0. lint/tsc/test789/build 통과."
+    },
+    {
+      "step": 1,
+      "name": "admin-schema-write",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "부서 생성·초대·수락·승격·강등·제거 RPC와 초대 토큰 해시·마지막 부서장 보호 추가. PGlite 보안 검증 91건·행렬 2016개 passed, failed 0. lint/tsc/test789/build 통과."
+    },
+    {
+      "step": 2,
+      "name": "admin-contracts",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "조직 관리 플래그, 안전한 로그인 next, 이메일·통계·오류 유틸리티와 SQL RPC strict Zod 계약을 TDD로 추가. 대상 47개·전체 808개 테스트, lint/tsc/build, SQL 보안 91건 통과."
+    },
+    {
+      "step": 3,
+      "name": "admin-routes",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "관리자 5개·부서장 7개·초대 수락·POST 로그아웃 API, 관리자 페이지 가드, 로그인 next 쿠키·콜백, 운영 권한 부여 스크립트 추가. 라우트 대상 19개·전체 820개 테스트, lint/tsc/build, SQL 보안 91건 통과."
+    },
+    {
+      "step": 4,
+      "name": "admin-ui",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "관리자 4개 화면·초대 수락·S5 멤버 초대/권한 관리·조직 관리 링크 구현. 세션 RPC→Zod, readOnly/쓰기 플래그, R10 초대 교체 반영. lint/tsc/build 통과; on 서버 비로그인 redirect·초대 RPC 오류 안내 확인."
+    },
+    {
+      "step": 5,
+      "name": "admin-guest-notice",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "/demo/admin public RPC·ISR60·readOnly 및 조건부 진입 링크, 데모 4부서×3명 계정 시드와 고지 추가. TDD 3실패→11통과, 버전1 유지. 시드는 작성만 했고 운영 DB에서 실행하지 않음."
+    },
+    {
+      "step": 6,
+      "name": "admin-verification",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "QA 전용 시드·E2E A/B·실행 기록 docs/verification/org-admin.md 추가. lint/tsc/build, 822개 단위·라우트, SQL92·행렬2016, E2E18 passed. 운영 B 3 skipped/O10 미실행; 메일 실경로 사람 확인 필요."
+    }
+  ],
+  "operational_summary": "O10: 0026 적용·QA/데모 시드·실제 B 3개 통과·관리자 on 운영 배포 완료. 실제 이메일 수신 확인 1회는 수동 항목. docs/verification/O10-O12-production.md 참조."
+}

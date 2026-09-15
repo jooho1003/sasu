@@ -8,11 +8,11 @@ const LOGIN_ERRORS: Record<string, string> = {
 };
 
 type LoginPageProps = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
   const initialError = error ? (LOGIN_ERRORS[error] ?? null) : null;
 
   return (
@@ -26,7 +26,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </p>
         </div>
 
-        <LoginForm initialError={initialError} />
+        <LoginForm initialError={initialError} next={next ?? null} />
       </section>
     </main>
   );

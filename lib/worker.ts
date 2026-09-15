@@ -9,6 +9,9 @@ import { registerAgentRoleHandler } from "@/lib/pipeline/agent-role";
 import { registerNotionImportHandler } from "@/lib/pipeline/notion-import";
 import { registerSendSlackHandler } from "@/lib/pipeline/send-slack";
 import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
+import { registerTrailerGenerateHandler } from "@/lib/pipeline/trailer-generate";
+import { registerTrailerGateHandler } from "@/lib/pipeline/trailer-gate";
+import { registerTrailerScoreHandler } from "@/lib/pipeline/trailer-score";
 
 // HTTP 정기 호출과 after() 즉시 실행 모두 같은 등록 집합을 사용한다.
 export async function runWorkerOnce(limit?: number) {
@@ -22,6 +25,9 @@ export async function runWorkerOnce(limit?: number) {
   registerMakeCardHandler();
   registerSendSlackHandler();
   registerSlackBackfillHandler();
+  registerTrailerGenerateHandler();
+  registerTrailerGateHandler();
+  registerTrailerScoreHandler();
   await sweepPendingRows();
   return runOnce(limit);
 }

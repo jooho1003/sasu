@@ -1,0 +1,528 @@
+{
+  "schema_version": 1,
+  "trailer_id": "cccccccc-cccc-4ccc-8ccc-cccccccccf01",
+  "attempts": [
+    {
+      "id": "17afebd6-485f-5a05-a8df-2a2ee2189cbd",
+      "kind": "synthetic",
+      "label": "합성 지원자 A",
+      "submissions": [
+        {
+          "events": [
+            {
+              "ref": "f1",
+              "seq": 1,
+              "kind": "open_fact"
+            },
+            {
+              "ref": "f2",
+              "seq": 2,
+              "kind": "open_fact"
+            },
+            {
+              "ref": "f3",
+              "seq": 3,
+              "kind": "open_fact"
+            },
+            {
+              "ref": "f4",
+              "seq": 4,
+              "kind": "open_fact"
+            },
+            {
+              "ref": "d1",
+              "seq": 5,
+              "kind": "ask_dialogue"
+            },
+            {
+              "ref": "d2",
+              "seq": 6,
+              "kind": "ask_dialogue"
+            },
+            {
+              "ref": "c1",
+              "seq": 7,
+              "kind": "choose"
+            },
+            {
+              "ref": "scenario_1",
+              "seq": 8,
+              "kind": "submit"
+            }
+          ],
+          "reason": "원칙에서 확인한 「이번 분기 운영 예산 중 로그 인프라에 할당 가능한 금액은 최대 5백만 원이며, 추가 지출은 승인받기 어려운 상황입니다.」와 대화에서 확인한 「최대 5백만 원」를 함께 보고 선택했습니다.",
+          "fact_ids": [
+            "f1",
+            "f2",
+            "f3",
+            "f4"
+          ],
+          "choice_id": "c1",
+          "scenario_id": "scenario_1"
+        }
+      ],
+      "status": "scored",
+      "result": {
+        "criteria": [
+          {
+            "key": "principle_check",
+            "label": "원칙 확인",
+            "score": 3,
+            "weight": 3,
+            "evidence": [
+              {
+                "seq": null,
+                "kind": "reason_quote",
+                "quote": "원칙에서 확인한 「이번 분기 운영 예산 중 로그 인프라에 할당 가능한 금액은 최대 5백만 원이며, 추가 지출은 승인받기 어려운 상황입니다.」",
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": 1,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": null,
+                "kind": "fact",
+                "quote": null,
+                "fact_id": "f1",
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "rationale": "제출자는 예산 제한 원칙을 확인하고 이유에 연결했으나, 다른 원칙(예: 일정·인력·가시성)과의 연계는 부족하여 3점",
+            "evidence_status": "ok"
+          },
+          {
+            "key": "stakeholder_check",
+            "label": "관계자 확인",
+            "score": null,
+            "weight": 2,
+            "evidence": [],
+            "rationale": null,
+            "evidence_status": "no_evidence"
+          },
+          {
+            "key": "tradeoff",
+            "label": "선택의 손익",
+            "score": null,
+            "weight": 3,
+            "evidence": [],
+            "rationale": null,
+            "evidence_status": "no_evidence"
+          },
+          {
+            "key": "decision_clarity",
+            "label": "결정의 명확성",
+            "score": 4,
+            "weight": 2,
+            "evidence": [
+              {
+                "seq": 7,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": 8,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": null,
+                "kind": "fact",
+                "quote": null,
+                "fact_id": "f2",
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "rationale": "선택(c1)과 1주 이내 구현해야 한다는 일정(f2)을 구체적으로 제시해 결정과 후속 조치를 명확히 설명했음",
+            "evidence_status": "ok"
+          }
+        ],
+        "rubric_snapshot": [
+          {
+            "key": "principle_check",
+            "label": "원칙 확인",
+            "weight": 3,
+            "description": "결정 전에 관련 원칙을 확인하고 이유에 연결했는가"
+          },
+          {
+            "key": "stakeholder_check",
+            "label": "관계자 확인",
+            "weight": 2,
+            "description": "관련자의 제약과 요청을 확인했는가"
+          },
+          {
+            "key": "tradeoff",
+            "label": "선택의 손익",
+            "weight": 3,
+            "description": "선택의 이점과 포기한 점을 근거로 설명했는가"
+          },
+          {
+            "key": "decision_clarity",
+            "label": "결정의 명확성",
+            "weight": 2,
+            "description": "결정과 후속 조치를 구체적으로 설명했는가"
+          }
+        ],
+        "interview_questions": []
+      },
+      "weighted_score": 1.7
+    },
+    {
+      "id": "39bc384e-ba1d-561a-849d-1bd44caba938",
+      "kind": "synthetic",
+      "label": "합성 지원자 B",
+      "submissions": [
+        {
+          "events": [
+            {
+              "ref": "f1",
+              "seq": 1,
+              "kind": "open_fact"
+            },
+            {
+              "ref": "c2",
+              "seq": 2,
+              "kind": "choose"
+            },
+            {
+              "ref": "scenario_1",
+              "seq": 3,
+              "kind": "submit"
+            }
+          ],
+          "reason": "먼저 실행하고 다음 단계에서 조정하겠습니다.",
+          "fact_ids": [
+            "f1"
+          ],
+          "choice_id": "c2",
+          "scenario_id": "scenario_1"
+        }
+      ],
+      "status": "scored",
+      "result": {
+        "criteria": [
+          {
+            "key": "principle_check",
+            "label": "원칙 확인",
+            "score": null,
+            "weight": 3,
+            "evidence": [],
+            "rationale": null,
+            "evidence_status": "no_evidence"
+          },
+          {
+            "key": "stakeholder_check",
+            "label": "관계자 확인",
+            "score": 2,
+            "weight": 2,
+            "evidence": [
+              {
+                "seq": 1,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": 2,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": null,
+                "kind": "fact",
+                "quote": null,
+                "fact_id": "f1",
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "rationale": "예산 제한은 확인했지만 일정·인력·외부 솔루션 등 다른 이해관계자는 고려되지 않았다.",
+            "evidence_status": "ok"
+          },
+          {
+            "key": "tradeoff",
+            "label": "선택의 손익",
+            "score": null,
+            "weight": 3,
+            "evidence": [],
+            "rationale": null,
+            "evidence_status": "no_evidence"
+          },
+          {
+            "key": "decision_clarity",
+            "label": "결정의 명확성",
+            "score": null,
+            "weight": 2,
+            "evidence": [],
+            "rationale": null,
+            "evidence_status": "no_evidence"
+          }
+        ],
+        "rubric_snapshot": [
+          {
+            "key": "principle_check",
+            "label": "원칙 확인",
+            "weight": 3,
+            "description": "결정 전에 관련 원칙을 확인하고 이유에 연결했는가"
+          },
+          {
+            "key": "stakeholder_check",
+            "label": "관계자 확인",
+            "weight": 2,
+            "description": "관련자의 제약과 요청을 확인했는가"
+          },
+          {
+            "key": "tradeoff",
+            "label": "선택의 손익",
+            "weight": 3,
+            "description": "선택의 이점과 포기한 점을 근거로 설명했는가"
+          },
+          {
+            "key": "decision_clarity",
+            "label": "결정의 명확성",
+            "weight": 2,
+            "description": "결정과 후속 조치를 구체적으로 설명했는가"
+          }
+        ],
+        "interview_questions": [
+          {
+            "basis": [
+              {
+                "ref": "f2",
+                "seq": null,
+                "kind": "unchecked_fact",
+                "quote": null,
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "question": "배포 일정이 2주 이내로 제한되어 있는 상황에서, 외부 로그플러스 서비스를 도입하면 구현 및 설정에 소요되는 시간은 어느 정도라고 생각하십니까?"
+          },
+          {
+            "basis": [
+              {
+                "ref": "f3",
+                "seq": null,
+                "kind": "unchecked_fact",
+                "quote": null,
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "question": "현재 백엔드 팀의 인력이 제한된 상황에서, 외부 서비스를 선택했을 때 내부 인력 투입이 얼마나 감소할 수 있는지 구체적으로 설명해 주시겠습니까?"
+          },
+          {
+            "basis": [
+              {
+                "ref": "d2",
+                "seq": null,
+                "kind": "unchecked_dialogue",
+                "quote": null,
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "question": "파트너사가 제안한 로그플러스 서비스의 주요 기능과 한계는 무엇이라고 파악하셨나요?"
+          }
+        ]
+      },
+      "weighted_score": 0.4
+    },
+    {
+      "id": "db4efe55-cb3b-5209-9027-bea41a7a977d",
+      "kind": "synthetic",
+      "label": "합성 지원자 C",
+      "submissions": [
+        {
+          "events": [
+            {
+              "ref": "f1",
+              "seq": 1,
+              "kind": "open_fact"
+            },
+            {
+              "ref": "f2",
+              "seq": 2,
+              "kind": "open_fact"
+            },
+            {
+              "ref": "d1",
+              "seq": 3,
+              "kind": "ask_dialogue"
+            },
+            {
+              "ref": "d2",
+              "seq": 4,
+              "kind": "ask_dialogue"
+            },
+            {
+              "ref": "c1",
+              "seq": 5,
+              "kind": "choose"
+            },
+            {
+              "ref": "scenario_1",
+              "seq": 6,
+              "kind": "submit"
+            }
+          ],
+          "reason": "대화에서 확인한 「최대 5백만 원」를 중심으로 관계자의 조건을 고려했습니다.",
+          "fact_ids": [
+            "f1",
+            "f2"
+          ],
+          "choice_id": "c1",
+          "scenario_id": "scenario_1"
+        }
+      ],
+      "status": "scored",
+      "result": {
+        "criteria": [
+          {
+            "key": "principle_check",
+            "label": "원칙 확인",
+            "score": null,
+            "weight": 3,
+            "evidence": [],
+            "rationale": null,
+            "evidence_status": "no_evidence"
+          },
+          {
+            "key": "stakeholder_check",
+            "label": "관계자 확인",
+            "score": 4,
+            "weight": 2,
+            "evidence": [
+              {
+                "seq": null,
+                "kind": "reason_quote",
+                "quote": "최대 5백만 원",
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": 3,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": 4,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "rationale": "제출자는 예산 제한(f1)과 배포 일정(f2)을 대화(d1, d2)와 사실을 근거로 제시하여 이해관계자의 제약을 충분히 확인하였다.",
+            "evidence_status": "ok"
+          },
+          {
+            "key": "tradeoff",
+            "label": "선택의 손익",
+            "score": 2,
+            "weight": 3,
+            "evidence": [
+              {
+                "seq": null,
+                "kind": "reason_quote",
+                "quote": "최대 5백만 원",
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": 5,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "rationale": "예산을 고려했지만 외부 솔루션 도입의 비용 절감 효과와 내부 구축의 인력 투입량 사이의 손익을 구체적으로 서술하지 않아 설명이 부족하다.",
+            "evidence_status": "ok"
+          },
+          {
+            "key": "decision_clarity",
+            "label": "결정의 명확성",
+            "score": 4,
+            "weight": 2,
+            "evidence": [
+              {
+                "seq": 5,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": 6,
+                "kind": "event",
+                "quote": null,
+                "fact_id": null,
+                "scenario_id": "scenario_1"
+              },
+              {
+                "seq": null,
+                "kind": "fact",
+                "quote": null,
+                "fact_id": "f2",
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "rationale": "선택(c1)과 1주 이내 구현 필요(f2)를 명시적으로 제시하고, 선택 단계와 제출 과정을 이벤트(seq5, seq6)로 구체화하여 결정이 명확히 제시되었다.",
+            "evidence_status": "ok"
+          }
+        ],
+        "rubric_snapshot": [
+          {
+            "key": "principle_check",
+            "label": "원칙 확인",
+            "weight": 3,
+            "description": "결정 전에 관련 원칙을 확인하고 이유에 연결했는가"
+          },
+          {
+            "key": "stakeholder_check",
+            "label": "관계자 확인",
+            "weight": 2,
+            "description": "관련자의 제약과 요청을 확인했는가"
+          },
+          {
+            "key": "tradeoff",
+            "label": "선택의 손익",
+            "weight": 3,
+            "description": "선택의 이점과 포기한 점을 근거로 설명했는가"
+          },
+          {
+            "key": "decision_clarity",
+            "label": "결정의 명확성",
+            "weight": 2,
+            "description": "결정과 후속 조치를 구체적으로 설명했는가"
+          }
+        ],
+        "interview_questions": [
+          {
+            "basis": [
+              {
+                "ref": "f3",
+                "seq": null,
+                "kind": "unchecked_fact",
+                "quote": null,
+                "scenario_id": "scenario_1"
+              }
+            ],
+            "question": "내부 구축에 투입되는 인력 시간과 외부 서비스 비용을 비교한 구체적인 분석이 있나요?"
+          }
+        ]
+      },
+      "weighted_score": 2.2
+    }
+  ]
+}

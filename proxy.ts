@@ -1,7 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
+import { trailerPublishEnabled } from "@/lib/features";
 
 export async function proxy(request: NextRequest) {
+  // Close disabled pages before the parent department layout redirects to login.
+  if (!trailerPublishEnabled() && /^\/d\/[^/]+\/trailers(?:\/|$)/u.test(request.nextUrl.pathname)) {
+    return new NextResponse("페이지를 찾을 수 없습니다.", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+  }
   let response = NextResponse.next({ request });
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -50,5 +55,9 @@ export const config = {
     "/d/:path*",
     "/api/d/:path*",
     "/api/cards/:path*",
+    "/admin/:path*",
+    "/invite/:path*",
+    "/api/admin/:path*",
+    "/api/invites/:path*",
   ],
 };

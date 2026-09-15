@@ -19,7 +19,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     page.on("pageerror", error => errors.push(error.name));
     await page.goto("/demo");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("부서가 다르면");
-    const departments = await page.locator('a[href^="/demo/d/"]').evaluateAll(links => links.map(link => link.getAttribute("href")!));
+    const departments = await page.locator('a[href^="/demo/d/"]').evaluateAll(links => links.map(link => link.getAttribute("href")!).filter(href => /^\/demo\/d\/[0-9a-f-]{36}$/u.test(href)));
     expect(departments.length).toBeGreaterThanOrEqual(2);
     for (const dept of departments) {
       await page.goto(dept);
@@ -77,7 +77,7 @@ test("게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다", 
   }));
   const before = await counts();
   await page.goto("/demo");
-  const departments = await page.locator('a[href^="/demo/d/"]').evaluateAll(links => links.map(link => link.getAttribute("href")!));
+  const departments = await page.locator('a[href^="/demo/d/"]').evaluateAll(links => links.map(link => link.getAttribute("href")!).filter(href => /^\/demo\/d\/[0-9a-f-]{36}$/u.test(href)));
   expect(departments.length).toBeGreaterThanOrEqual(2);
   for (const dept of departments) {
     for (const suffix of ["", "/ledger", "/ask"]) {

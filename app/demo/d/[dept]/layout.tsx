@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { SiteCta } from "@/components/site-cta";
 import { siteLinks } from "@/lib/site";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { trailerPublishEnabled } from "@/lib/features";
 
 export default async function DemoDepartmentLayout({
   children,
@@ -38,6 +39,7 @@ export default async function DemoDepartmentLayout({
             <Link href={`/demo/d/${dept}/ledger`}>원장</Link>
             <Link href={`/demo/d/${dept}/ask`}>묻기</Link>
             <Link href={`/demo/d/${dept}/roles`}>역할</Link>
+            {trailerPublishEnabled() ? <Link href={`/demo/d/${dept}/trailers`}>예고편</Link> : null}
           </nav>
         </div>
       </header>

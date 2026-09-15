@@ -2,7 +2,10 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
 import { CONSENT_LATER_COOKIE } from "@/lib/consent";
+import { sanitizeInternalPath } from "@/lib/auth-redirect";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+
+export { sanitizeInternalPath } from "@/lib/auth-redirect";
 
 type Membership = {
   userId: string;
@@ -14,35 +17,6 @@ type Membership = {
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-export function sanitizeInternalPath(
-  value: string | null | undefined,
-  fallback: string,
-): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return fallback;
-  }
-
-  let decoded: string;
-  try {
-    decoded = decodeURIComponent(value);
-  } catch {
-    return fallback;
-  }
-  if (decoded.startsWith("//") || decoded.startsWith("/\\")) {
-    return fallback;
-  }
-
-  try {
-    const base = new URL("https://sasu.internal");
-    const resolved = new URL(value, base);
-    return resolved.origin === base.origin
-      ? `${resolved.pathname}${resolved.search}${resolved.hash}`
-      : fallback;
-  } catch {
-    return fallback;
-  }
-}
 
 export async function requireMembership(
   deptSlugOrId: string,

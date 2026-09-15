@@ -1,0 +1,178 @@
+{
+  "generatedAt": "2026-09-14T22:48:03.829Z",
+  "synthetic": true,
+  "databaseWrites": 0,
+  "telemetryMocked": true,
+  "model": "openai/gpt-oss-120b",
+  "status": "executed",
+  "calls": 7,
+  "rows": [
+    {
+      "label": "합성 지원자 A",
+      "total": 4.2,
+      "criteria": [
+        {
+          "key": "principle_check",
+          "score": 5,
+          "evidenceCount": 3
+        },
+        {
+          "key": "stakeholder_check",
+          "score": 4,
+          "evidenceCount": 2
+        },
+        {
+          "key": "tradeoff",
+          "score": 3,
+          "evidenceCount": 2
+        },
+        {
+          "key": "decision_clarity",
+          "score": 5,
+          "evidenceCount": 3
+        }
+      ],
+      "validEvidence": true,
+      "rawForbiddenCount": 0,
+      "verifiedForbiddenCount": 0,
+      "schemaOnly": true,
+      "inputTokens": 3708,
+      "outputTokens": 2034
+    },
+    {
+      "label": "합성 지원자 B",
+      "total": 1.3,
+      "criteria": [
+        {
+          "key": "principle_check",
+          "score": 3,
+          "evidenceCount": 3
+        },
+        {
+          "key": "stakeholder_check",
+          "score": null,
+          "evidenceCount": 0
+        },
+        {
+          "key": "tradeoff",
+          "score": null,
+          "evidenceCount": 0
+        },
+        {
+          "key": "decision_clarity",
+          "score": 2,
+          "evidenceCount": 3
+        }
+      ],
+      "validEvidence": true,
+      "rawForbiddenCount": 0,
+      "verifiedForbiddenCount": 0,
+      "schemaOnly": true,
+      "inputTokens": 3211,
+      "outputTokens": 2115
+    },
+    {
+      "label": "합성 지원자 C",
+      "total": 3.2,
+      "criteria": [
+        {
+          "key": "principle_check",
+          "score": 4,
+          "evidenceCount": 3
+        },
+        {
+          "key": "stakeholder_check",
+          "score": null,
+          "evidenceCount": 0
+        },
+        {
+          "key": "tradeoff",
+          "score": 4,
+          "evidenceCount": 2
+        },
+        {
+          "key": "decision_clarity",
+          "score": 4,
+          "evidenceCount": 3
+        }
+      ],
+      "validEvidence": true,
+      "rawForbiddenCount": 2,
+      "verifiedForbiddenCount": 0,
+      "schemaOnly": true,
+      "inputTokens": 3451,
+      "outputTokens": 2927
+    },
+    {
+      "label": "특성 변형 A",
+      "total": 3.3,
+      "criteria": [
+        {
+          "key": "principle_check",
+          "score": 5,
+          "evidenceCount": 3
+        },
+        {
+          "key": "stakeholder_check",
+          "score": 5,
+          "evidenceCount": 2
+        },
+        {
+          "key": "tradeoff",
+          "score": null,
+          "evidenceCount": 0
+        },
+        {
+          "key": "decision_clarity",
+          "score": 4,
+          "evidenceCount": 3
+        }
+      ],
+      "validEvidence": true,
+      "rawForbiddenCount": 2,
+      "verifiedForbiddenCount": 0,
+      "schemaOnly": true,
+      "inputTokens": 3735,
+      "outputTokens": 2971
+    },
+    {
+      "label": "특성 변형 B",
+      "total": 3.5,
+      "criteria": [
+        {
+          "key": "principle_check",
+          "score": 5,
+          "evidenceCount": 3
+        },
+        {
+          "key": "stakeholder_check",
+          "score": 5,
+          "evidenceCount": 2
+        },
+        {
+          "key": "tradeoff",
+          "score": null,
+          "evidenceCount": 0
+        },
+        {
+          "key": "decision_clarity",
+          "score": 5,
+          "evidenceCount": 3
+        }
+      ],
+      "validEvidence": true,
+      "rawForbiddenCount": 2,
+      "verifiedForbiddenCount": 0,
+      "schemaOnly": true,
+      "inputTokens": 3738,
+      "outputTokens": 2420
+    }
+  ],
+  "checks": {
+    "validEvidence": true,
+    "forbiddenAfter": 0,
+    "traitDifference": 0.20000000000000018,
+    "traitPass": true,
+    "schemaOnly": true
+  }
+}

@@ -106,7 +106,7 @@ export function verifyAgentRoleEvaluation(
   return { criteria, summary: evaluation.summary, dropped };
 }
 
-export function weightedScore(criteria: VerifiedCriterion[]): number | null {
+export function weightedScore(criteria: ReadonlyArray<{ score: number | null; weight: number; evidence: "ok" | "no_evidence" }>): number | null {
   let numerator = 0;
   let denominator = 0;
   let hasEvidence = false;

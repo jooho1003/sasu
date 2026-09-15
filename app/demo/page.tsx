@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { SiteCta } from "@/components/site-cta";
 import { siteLinks } from "@/lib/site";
+import { orgAdminReadEnabled, trailerPublishEnabled } from "@/lib/features";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 type DemoDepartment = { id: string; name: string };
@@ -45,6 +46,9 @@ export default async function DemoLandingPage() {
           ))}
         </section>
       )}
+
+      {orgAdminReadEnabled() ? <Link href="/demo/admin" className="rounded-2xl border border-accent/20 bg-surface p-6">조직 단위로 보기 →</Link> : null}
+      {trailerPublishEnabled() ? <Link href="/demo/d/cccccccc-cccc-4ccc-8ccc-cccccccccccc/trailers" className="rounded-2xl border border-accent/20 bg-surface p-6">채용 예고편 만드는 과정 →</Link> : null}
 
       <footer className="grid gap-5 border-t border-black/10 pt-8 text-sm text-[var(--muted)]">
         <p className="m-0">게스트 모드에서는 질문을 새로 저장하거나 외부 AI를 호출하지 않습니다.</p>

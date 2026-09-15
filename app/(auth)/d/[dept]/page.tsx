@@ -1,5 +1,6 @@
 import DashboardS1 from "@/components/dashboard-s1";
 import { requireMembership } from "@/lib/supabase/membership";
+import { trailerPublishEnabled } from "@/lib/features";
 
 type DepartmentDashboardPageProps = {
   params: Promise<{ dept: string }>;
@@ -16,6 +17,7 @@ export default async function DepartmentDashboardPage({
       deptId={membership.deptId}
       displayName={membership.displayName}
       role={membership.role}
+      trailerPublishingEnabled={trailerPublishEnabled()}
     />
   );
 }

@@ -2,10 +2,46 @@
   "project": "sasu",
   "phase": "12-trailer-assessment",
   "steps": [
-    { "step": 0, "name": "assessment-schema", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 1, "name": "assessment-scoring", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 2, "name": "assessment-fixtures-seed", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 3, "name": "assessment-score-table", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 4, "name": "assessment-verification", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" }
-  ]
+    {
+      "step": 0,
+      "name": "assessment-schema",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "로컬 구현 및 검증 완료. 최종 단위 67 파일/909 테스트, SQL 109 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 20 통과, B 7 skipped. 기존 공간 체험 6 통과. 실제 합성 Groq eval 5/5 통과, 특성 변형 총점 차이 0.20, 검증 후 금지어 0, DB 쓰기 0. 운영 적용·시드·배포와 E2E B는 O12 미실행. docs/verification/trailer-assessment.md 참조."
+    },
+    {
+      "step": 1,
+      "name": "assessment-scoring",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 구현 및 검증 완료. 최종 단위 67 파일/909 테스트, SQL 109 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 20 통과, B 7 skipped. 기존 공간 체험 6 통과. 실제 합성 Groq eval 5/5 통과, 특성 변형 총점 차이 0.20, 검증 후 금지어 0, DB 쓰기 0. 운영 적용·시드·배포와 E2E B는 O12 미실행. docs/verification/trailer-assessment.md 참조."
+    },
+    {
+      "step": 2,
+      "name": "assessment-fixtures-seed",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 구현 및 검증 완료. 최종 단위 67 파일/909 테스트, SQL 109 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 20 통과, B 7 skipped. 기존 공간 체험 6 통과. 실제 합성 Groq eval 5/5 통과, 특성 변형 총점 차이 0.20, 검증 후 금지어 0, DB 쓰기 0. 운영 적용·시드·배포와 E2E B는 O12 미실행. docs/verification/trailer-assessment.md 참조."
+    },
+    {
+      "step": 3,
+      "name": "assessment-score-table",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 구현 및 검증 완료. 최종 단위 67 파일/909 테스트, SQL 109 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 20 통과, B 7 skipped. 기존 공간 체험 6 통과. 실제 합성 Groq eval 5/5 통과, 특성 변형 총점 차이 0.20, 검증 후 금지어 0, DB 쓰기 0. 운영 적용·시드·배포와 E2E B는 O12 미실행. docs/verification/trailer-assessment.md 참조."
+    },
+    {
+      "step": 4,
+      "name": "assessment-verification",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 구현 및 검증 완료. 최종 단위 67 파일/909 테스트, SQL 109 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 20 통과, B 7 skipped. 기존 공간 체험 6 통과. 실제 합성 Groq eval 5/5 통과, 특성 변형 총점 차이 0.20, 검증 후 금지어 0, DB 쓰기 0. 운영 적용·시드·배포와 E2E B는 O12 미실행. docs/verification/trailer-assessment.md 참조."
+    }
+  ],
+  "operational_summary": "O12: 0028 적용·합성 3명 실제 채점/검증/시드·B 2개 통과(full/scores)·full 운영 배포 완료. 최종 단위 910, 실제 eval 5/5 및 특성 차이 0.30 통과. 실제 지원자 0행, 파일럿/QA 채점 false. docs/verification/O10-O12-production.md 참조."
 }

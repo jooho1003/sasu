@@ -1,0 +1,7 @@
+{
+  "scenarios": [
+    { "id": "first", "title": "공동 작업 일정", "summary": "가상 협업팀의 일정을 결정합니다.", "facts": [{ "id": "schedule", "place": "library", "label": "일정 안내", "text": "초안을 먼저 공유하고 검토 시간을 확보합니다." }], "dialogues": [{ "id": "review", "place": "partner", "question": "언제 확인하나요?", "fact_id": "schedule", "quote": "검토 시간을 확보합니다." }], "choices": [{ "id": "draft", "label": "초안 먼저 공유" }, { "id": "complete", "label": "전체 정리 후 공유" }], "ending": { "choice_id": "draft", "fact_id": "schedule", "quote": "초안을 먼저 공유" } },
+    { "id": "second", "title": "자료 공유 범위", "summary": "가상 부서의 공유 범위를 결정합니다.", "facts": [{ "id": "scope", "place": "meeting", "label": "공유 원칙", "text": "공유 대상과 목적을 정한 뒤 필요한 자료를 전달합니다." }], "dialogues": [{ "id": "purpose", "place": "finance", "question": "무엇부터 정하나요?", "fact_id": "scope", "quote": "공유 대상과 목적을 정한 뒤" }], "choices": [{ "id": "scope", "label": "대상 확인" }, { "id": "purpose", "label": "목적 확인" }], "ending": { "choice_id": "scope", "fact_id": "scope", "quote": "필요한 자료를 전달합니다." } }
+  ],
+  "expected_item_ids": ["first:title", "first:summary", "first:fact:schedule", "first:dialogue:review", "first:choice:draft", "first:choice:complete", "first:ending", "second:title", "second:summary", "second:fact:scope", "second:dialogue:purpose", "second:choice:scope", "second:choice:purpose", "second:ending"]
+}

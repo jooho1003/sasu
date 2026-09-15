@@ -3,12 +3,14 @@
 import { FormEvent, useState } from "react";
 
 import { createBrowserSupabaseClient } from "@/lib/supabase/rls-client";
+import { LOGIN_NEXT_COOKIE, loginNextCookieValue } from "@/lib/auth-redirect";
 
 type LoginFormProps = {
   initialError: string | null;
+  next: string | null;
 };
 
-export default function LoginForm({ initialError }: LoginFormProps) {
+export default function LoginForm({ initialError, next }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(initialError);
   const [isSending, setIsSending] = useState(false);
@@ -20,6 +22,12 @@ export default function LoginForm({ initialError }: LoginFormProps) {
     setIsSending(true);
 
     const supabase = createBrowserSupabaseClient();
+    const safeNext = loginNextCookieValue(next);
+    if (safeNext) {
+      document.cookie = `${LOGIN_NEXT_COOKIE}=${encodeURIComponent(safeNext)}; Path=/; Max-Age=600; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
+    } else {
+      document.cookie = `${LOGIN_NEXT_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
+    }
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {

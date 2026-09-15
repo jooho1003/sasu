@@ -44,6 +44,7 @@ type DashboardS1Props = {
   deptId: string;
   displayName: string;
   role: MemberRole;
+  trailerPublishingEnabled?: boolean;
 };
 
 type LoadedDashboard = {
@@ -105,6 +106,7 @@ export default function DashboardS1({
   deptId,
   displayName,
   role,
+  trailerPublishingEnabled = false,
 }: DashboardS1Props) {
   const [activeLabel, setActiveLabel] = useState<PanelLabel>("decision");
   const [dashboard, setDashboard] = useState<LoadedDashboard | null>(null);
@@ -243,6 +245,7 @@ export default function DashboardS1({
           <Link href={`/d/${deptId}/ask`}>묻기</Link>
           <Link href={`/d/${deptId}/documents`}>문서</Link>
           <Link href={`/d/${deptId}/roles`}>역할</Link>
+          {role === "lead" && trailerPublishingEnabled ? <Link href={`/d/${deptId}/trailers`}>예고편</Link> : null}
           <Link href={`/d/${deptId}/ledger`}>원장</Link>
           <Link href={settingsHref}>세팅</Link>
           <span className="text-[var(--muted)]" data-meta>10초마다 갱신</span>

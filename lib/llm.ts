@@ -51,6 +51,8 @@ export type LlmPurpose =
   | "summarize_meeting"
   | "summarize_document"
   | "run_agent_role"
+  | "trailer_generate"
+  | "trailer_score"
   | "transcribe_voice"
   | "generic_answer";
 
@@ -362,14 +364,18 @@ async function structured<T>(
   let schemaRetries = 0;
 
   while (true) {
-    const completion = await createCompletionWithRetry(
-      client,
-      purpose,
-      model,
-      responseSchema,
-      prompt,
-      opts,
-    );
+    let completion;
+    try {
+      completion = await createCompletionWithRetry(client, purpose, model, responseSchema, prompt, opts);
+    } catch (error) {
+      // Providers may reject invalid generated JSON at the HTTP boundary.
+      // Share the same single schema retry as local JSON/schema validation.
+      if (error instanceof SchemaInvalidError && schemaRetries < 1) {
+        schemaRetries += 1;
+        continue;
+      }
+      throw error;
+    }
     const content = completion.choices[0]?.message.content ?? "";
     let candidate: unknown;
 

@@ -3,6 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { after } from "next/server";
 
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
+import { trailerPublishEnabled, trailerScoresMode } from "@/lib/features";
 
 export type JobKind =
   | "classify"
@@ -11,6 +12,9 @@ export type JobKind =
   | "summarize_meeting"
   | "summarize_document"
   | "run_agent_role"
+  | "generate_trailer"
+  | "check_trailer_gate"
+  | "score_trailer_attempt"
   | "make_card"
   | "answer"
   | "send_slack"
@@ -34,7 +38,7 @@ type OwnerReference = {
 };
 
 type FailureOwnerMapping = {
-  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "document_summaries" | "agent_role_results";
+  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "document_summaries" | "agent_role_results" | "trailers" | "trailer_attempts";
   references: OwnerReference[];
   write: "update" | "upsert";
   values: (ownerId: string, errorCode: string) => Record<string, unknown>;
@@ -71,12 +75,19 @@ const SAFE_ERROR_CODES = new Set([
   "unknown_kind",
   "unmasked_prompt",
   "voice_transcription_empty",
+  "invalid_scenario",
+  "trailer_decisions_invalid",
+  "attempt_invalid",
+  "timeout",
 ]);
 
 // 3회 실패가 사용자에게 보이는 상태로 이어지는 규칙은 이 표 한 곳에 둔다.
 const FAILURE_OWNER_MAPPINGS: Partial<
   Record<JobKind, FailureOwnerMapping>
 > = {
+  score_trailer_attempt: { table: "trailer_attempts", references: [{ payloadKey: "attemptId", column: "id" }], write: "update", values: (_id, errorCode) => ({ status: "failed", status_reason: errorCode }) },
+  generate_trailer: { table: "trailers", references: [{ payloadKey: "trailerId", column: "id" }], write: "update", values: (_id, errorCode) => ({ status: "failed", status_reason: errorCode }) },
+  check_trailer_gate: { table: "trailers", references: [{ payloadKey: "trailerId", column: "id" }], write: "update", values: (_id, errorCode) => ({ status: "failed", status_reason: errorCode }) },
   classify: {
     table: "classifications",
     references: [
@@ -257,6 +268,16 @@ async function updateFailureOwner(
   }
 
   const values = mapping.values(reference.id, errorCode);
+  if (mapping.table === "trailer_attempts") {
+    const result = await client.from("trailer_attempts").update(values).eq(reference.column, reference.id).eq("status", "scoring");
+    if (result.error) throw new JobWorkerDatabaseError();
+    return;
+  }
+  if (mapping.table === "trailers") {
+    const result = await client.from("trailers").update(values).eq(reference.column, reference.id).in("status", ["generating", "checking"]);
+    if (result.error) throw new JobWorkerDatabaseError();
+    return;
+  }
   const result =
     mapping.write === "upsert"
       ? await client.from(mapping.table).upsert(values)
@@ -272,6 +293,14 @@ async function updateFailureOwner(
 
 export async function sweepPendingRows(): Promise<void> {
   const client = createServiceSupabaseClient();
+  if (trailerScoresMode() !== "off") {
+    const attempts = await client.from("trailer_attempts").update({ status: "failed", status_reason: "timeout" }).eq("status", "scoring").lt("updated_at", new Date(Date.now() - 10 * 60 * 1000).toISOString());
+    if (attempts.error) throw new JobWorkerDatabaseError();
+  }
+  if (trailerPublishEnabled()) {
+    const trailers = await client.from("trailers").update({ status: "failed", status_reason: "timeout" }).in("status", ["generating", "checking"]).lt("updated_at", new Date(Date.now() - 10 * 60 * 1000).toISOString());
+    if (trailers.error) throw new JobWorkerDatabaseError();
+  }
   const cutoff = new Date(Date.now() - SWEEP_TIMEOUT_MS).toISOString();
   const answerResult = await client
     .from("answers")

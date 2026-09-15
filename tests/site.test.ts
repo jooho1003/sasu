@@ -55,10 +55,17 @@ describe("채용 예고편 링크", () => {
   it("발행 데모 경로가 프리뷰보다 우선한다", () => {
     expect(
       trailerDemoHref({
-        SASU_TRAILER_DEMO_PATH: "/t/demo-company",
+        SASU_TRAILER_DEMO_PATH: "/t/abcdefghijklmnopqrstuv",
+        SASU_TRAILER_PUBLISH_ENABLED: "true",
         SASU_TRAILER_PREVIEW_ENABLED: "true",
       }),
-    ).toBe("/t/demo-company");
+    ).toBe("/t/abcdefghijklmnopqrstuv");
+  });
+
+  it("발행 플래그 off는 공개 데모 경로를 숨기고 프리뷰로 돌아간다", () => {
+    const env = { SASU_TRAILER_DEMO_PATH: "/t/abcdefghijklmnopqrstuv" };
+    expect(trailerDemoHref(env)).toBeNull();
+    expect(trailerDemoHref({ ...env, SASU_TRAILER_PREVIEW_ENABLED: "true" })).toBe("/trailers");
   });
 
   it("프리뷰가 명시적으로 켜졌을 때만 합성 체험을 노출한다", () => {

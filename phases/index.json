@@ -1,6 +1,31 @@
 {
   "phases": [
     {
+      "dir": "9-site",
+      "status": "completed",
+      "completed_at": "2026-09-15T04:10:00+09:00"
+    },
+    {
+      "dir": "8-security-hotfix",
+      "status": "pending"
+    },
+    {
+      "dir": "10-org-admin",
+      "status": "completed"
+    },
+    {
+      "dir": "11-trailer-publish",
+      "status": "completed"
+    },
+    {
+      "dir": "12-trailer-assessment",
+      "status": "completed"
+    },
+    {
+      "dir": "7-recruitment-trailer",
+      "status": "completed"
+    },
+    {
       "dir": "0-vertical-slice",
       "status": "blocked"
     },

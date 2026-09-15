@@ -1,8 +1,13 @@
 import { loadEnvConfig } from "@next/env";
 import { fileURLToPath } from "node:url";
+import { readFile } from "node:fs/promises";
 
 import { weightedScore, type VerifiedCriterion } from "../lib/agent-role";
 import { createServiceSupabaseClient } from "../lib/supabase/service";
+import { parseDemoTrailerSnapshot, parseDemoAttemptsSnapshot } from "../lib/trailer-snapshot";
+import { DEFAULT_TRAILER_RUBRIC } from "../lib/trailer-generation";
+import { trailerApprovalItems } from "../lib/trailer-gate";
+import { mask } from "../lib/mask";
 
 loadEnvConfig(process.cwd());
 
@@ -14,6 +19,9 @@ const IDS = {
 } as const;
 
 const DEMO_DEV_LEAD_ID = "cccccccc-cccc-4ccc-8ccc-cccccccccc01";
+export const DEMO_TRAILER_ID = "cccccccc-cccc-4ccc-8ccc-cccccccccf01";
+export const DEMO_TRAILER_SLUG = "onsaemiro2026demotrail";
+export const DEMO_TRAILER_DEPT_ID = IDS.devDept;
 
 type DemoDepartment = {
   id: string;
@@ -401,10 +409,30 @@ const DESIGN: DemoDepartment = {
 
 export const DEMO_DEPARTMENTS = [SALES, DEVELOPMENT, PLANNING, DESIGN];
 
+const DEMO_MEMBER_NAMES = [
+  ["김서윤", "이도현", "박하린"], ["개발팀 리드", "정지우", "최민준"],
+  ["한지민", "윤서준", "강수빈"], ["오예린", "장도윤", "임서아"],
+];
+export const DEMO_MEMBERS = DEMO_DEPARTMENTS.flatMap((department, deptIndex) =>
+  DEMO_MEMBER_NAMES[deptIndex].map((name, memberIndex) => {
+    const userId = `${department.id.slice(0, -2)}0${memberIndex + 1}`;
+    return { user_id: userId, dept_id: department.id, email: `${userId}@demo.invalid`, display_name: name, role: memberIndex === 0 ? "lead" as const : "member" as const, consented: memberIndex !== 2 };
+  }),
+);
+
 async function removeExistingDemoData(
   client: ReturnType<typeof createServiceSupabaseClient>,
 ): Promise<void> {
+  const org = await client.from("orgs").select("is_demo").eq("id", IDS.org).maybeSingle();
+  if (org.error || (org.data && !org.data.is_demo)) throw new Error("demo org identity check failed");
+  const events = await client.from("admin_events").select("id", { count: "exact", head: true }).eq("org_id", IDS.org);
+  if (events.error) throw new Error("demo admin event check failed; apply 0026 before seeding");
+  if (events.count) throw new Error("demo admin events exist; append-only records prevent reseeding");
   const departmentIds = DEMO_DEPARTMENTS.map((department) => department.id);
+  for (const table of ["trailer_attempts", "trailers", "trailer_generation_counters"] as const) {
+    const result = await client.from(table).delete().in("dept_id", departmentIds);
+    if (result.error && !["42P01", "PGRST205"].includes(result.error.code)) throw new Error(`demo cleanup failed: ${table}`);
+  }
   const citationOwnerIds = DEMO_DEPARTMENTS.flatMap((department) => [
     department.request.id,
     ...(department.extraRequests ?? []).map((request) => request.id),
@@ -434,21 +462,28 @@ async function removeExistingDemoData(
     const { error } = await client.from(table).delete().in("dept_id", departmentIds);
     if (error) throw new Error(`demo cleanup failed: ${table}`);
   }
+  for (const table of ["member_invites", "org_admins"] as const) {
+    const { error } = await client.from(table).delete().eq("org_id", IDS.org);
+    if (error) throw new Error(`demo cleanup failed: ${table}`);
+  }
   const { error: departmentError } = await client.from("departments").delete().in("id", departmentIds);
   if (departmentError) throw new Error("demo department cleanup failed");
   const { error: orgError } = await client.from("orgs").delete().eq("id", IDS.org);
   if (orgError) throw new Error("demo org cleanup failed");
-  await client.auth.admin.deleteUser(DEMO_DEV_LEAD_ID);
+  for (const member of DEMO_MEMBERS) {
+    const existing = await client.auth.admin.getUserById(member.user_id);
+    if (existing.error?.status === 404) continue;
+    if (existing.error || !existing.data.user || existing.data.user.email !== member.email) throw new Error("demo user identity check failed");
+    const result = await client.auth.admin.deleteUser(member.user_id);
+    if (result.error) throw new Error("demo user cleanup failed");
+  }
 }
 
-async function seedDemoDevLead(client: ReturnType<typeof createServiceSupabaseClient>): Promise<void> {
-  const { error } = await client.auth.admin.createUser({
-    id: DEMO_DEV_LEAD_ID,
-    email: `${DEMO_DEV_LEAD_ID}@demo.invalid`,
-    email_confirm: true,
-    user_metadata: { display_name: "개발팀 리드" },
-  });
-  if (error) throw new Error("demo development lead seed failed");
+async function seedDemoUsers(client: ReturnType<typeof createServiceSupabaseClient>): Promise<void> {
+  for (const member of DEMO_MEMBERS) {
+    const { error } = await client.auth.admin.createUser({ id: member.user_id, email: member.email, email_confirm: true, user_metadata: { display_name: member.display_name } });
+    if (error) throw new Error("demo user seed failed");
+  }
 }
 
 async function seedDepartment(
@@ -468,17 +503,13 @@ async function seedDepartment(
   );
   if (sourceError) throw new Error("demo source seed failed");
 
-  if (department.id === IDS.devDept) {
-    const { error: memberError } = await client.from("members").insert({
-      user_id: DEMO_DEV_LEAD_ID,
-      dept_id: department.id,
-      role: "lead",
-      display_name: "개발팀 리드",
-      consented_at: new Date().toISOString(),
-      consent_version: 1,
-    });
-    if (memberError) throw new Error("demo development lead membership seed failed");
-  }
+  const { error: memberError } = await client.from("members").insert(
+    DEMO_MEMBERS.filter((member) => member.dept_id === department.id).map((member) => ({
+      user_id: member.user_id, dept_id: member.dept_id, role: member.role, display_name: member.display_name,
+      consented_at: member.consented ? new Date().toISOString() : null, consent_version: member.consented ? 1 : null,
+    })),
+  );
+  if (memberError) throw new Error("demo membership seed failed");
 
   const { error: itemError } = await client.from("items").insert(
     department.items.map((item) => ({
@@ -623,6 +654,43 @@ async function seedDemoAgentRole(client: ReturnType<typeof createServiceSupabase
   if (resultError) throw new Error("demo agent role result seed failed");
 }
 
+export async function seedDemoTrailer(client: ReturnType<typeof createServiceSupabaseClient>, path = "fixtures/trailer/demo-trailer.snapshot.json"): Promise<boolean> {
+  let raw: unknown;
+  try { raw = JSON.parse(await readFile(path, "utf8")); }
+  catch (error) { if (error && typeof error === "object" && Reflect.get(error, "code") === "ENOENT") { console.log("데모 예고편 스냅샷 없음 — 건너뜀"); return false; } throw new Error("demo snapshot read failed"); }
+  const department = DEVELOPMENT;
+  const decisions = [department.priorDecision, ...(department.extraPriorDecisions ?? [])];
+  const sourceIds = department.sources.filter((source) => source.is_principles && source.visibility === "dept").map((source) => source.id);
+  const texts = [...decisions.flatMap((d) => [d.outcome, d.rationale]), ...department.items.filter((item) => sourceIds.includes(item.source_id)).map((item) => item.content), ...[department.request, ...(department.extraRequests ?? [])].map((r) => r.title)];
+  const parsed = parseDemoTrailerSnapshot(raw, { sourceTexts: texts.flatMap((text) => [text, mask(text)]), properNouns: ["온새미로 주식회사", department.name, ...DEMO_MEMBERS.filter((m) => m.dept_id === department.id).map((m) => m.display_name), ...department.sources.map((s) => s.title)], knownDecisionIds: decisions.map((d) => d.id) });
+  if (parsed.status !== "ok") throw new Error(`demo snapshot invalid: ${parsed.reason}`);
+  if (parsed.snapshot.dept_id !== DEMO_TRAILER_DEPT_ID) throw new Error("demo snapshot department mismatch");
+  const org = await client.from("orgs").update({ trailer_publish_enabled: true }).eq("id", IDS.org).eq("is_demo", true).select("id").single();
+  if (org.error) throw new Error("demo trailer org failed");
+  const { scenarios, decision_ids, gate_report } = parsed.snapshot;
+  const inserted = await client.from("trailers").insert({ id: DEMO_TRAILER_ID, dept_id: department.id, status: "review", source_decision_ids: decision_ids, scenarios, rubric: DEFAULT_TRAILER_RUBRIC, created_by: DEMO_DEV_LEAD_ID }).select("scenarios_hash").single();
+  if (inserted.error || !inserted.data.scenarios_hash) throw new Error("demo trailer insert failed");
+  const published = await client.from("trailers").update({ gate_report, gate_passed_hash: inserted.data.scenarios_hash, approved_item_ids: trailerApprovalItems(scenarios).map((item) => item.id), approval_hash: inserted.data.scenarios_hash, approved_by: DEMO_DEV_LEAD_ID, approved_at: new Date().toISOString(), status: "published", published_at: new Date().toISOString(), slug: DEMO_TRAILER_SLUG }).eq("id", DEMO_TRAILER_ID);
+  if (published.error) throw new Error("demo trailer publish failed");
+  return true;
+}
+
+export async function seedDemoAttempts(client: ReturnType<typeof createServiceSupabaseClient>, path = "fixtures/trailer/demo-attempts.snapshot.json"): Promise<void> {
+  let raw: unknown;
+  try { raw = JSON.parse(await readFile(path, "utf8")); }
+  catch (error) { if (error && typeof error === "object" && Reflect.get(error, "code") === "ENOENT") { console.log("데모 채점 스냅샷 없음 — 건너뜀"); return; } throw new Error("demo attempts snapshot read failed"); }
+  const trailer = await client.from("trailers").select("scenarios,rubric,status").eq("id", DEMO_TRAILER_ID).maybeSingle();
+  if (trailer.error || !trailer.data || trailer.data.status !== "published") throw new Error("demo trailer required");
+  const parsed = parseDemoAttemptsSnapshot(raw, { trailerId: DEMO_TRAILER_ID, scenarios: trailer.data.scenarios, rubric: trailer.data.rubric });
+  if (parsed.status !== "ok") throw new Error(`demo attempts snapshot invalid: ${parsed.reason}`);
+  const org = await client.from("orgs").update({ trailer_assessment_enabled: true }).eq("id", IDS.org).eq("is_demo", true).select("id").single();
+  if (org.error) throw new Error("demo assessment org failed");
+  for (const attempt of [...parsed.attempts].sort((a,b)=>a.label.localeCompare(b.label))) {
+    const saved = await client.from("trailer_attempts").insert({ ...attempt, trailer_id: DEMO_TRAILER_ID });
+    if (saved.error) throw new Error("demo attempt seed failed");
+  }
+}
+
 async function main(): Promise<void> {
   const client = createServiceSupabaseClient();
   await removeExistingDemoData(client);
@@ -632,11 +700,12 @@ async function main(): Promise<void> {
     is_demo: true,
   });
   if (orgError) throw new Error("demo org seed failed");
-  await seedDemoDevLead(client);
+  await seedDemoUsers(client);
   for (const department of DEMO_DEPARTMENTS) {
     await seedDepartment(client, department);
   }
   await seedDemoAgentRole(client);
+  if (await seedDemoTrailer(client)) await seedDemoAttempts(client);
   console.log("seed-demo complete: demo_org=1 departments=4 prepared_answers=24 planning_items=68 design_items=24");
 }
 

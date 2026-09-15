@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AdminAction } from "@/components/admin/actions";
+import { LeadInvites } from "@/components/admin/lead-invites";
 
 type SettingsMember = {
   user_id: string;
@@ -48,7 +50,7 @@ async function readResponse<T>(response: Response): Promise<T> {
   return body;
 }
 
-export default function SettingsS5({ deptId }: { deptId: string }) {
+export default function SettingsS5({ deptId, memberAdminEnabled = false }: { deptId: string; memberAdminEnabled?: boolean }) {
   const [data, setData] = useState<SettingsPayload | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [consentState, setConsentState] = useState<ActionState>(IDLE_ACTION);
@@ -400,6 +402,10 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
                     {data.slack_users.map((user) => <option key={user.id} value={user.id}>{user.displayName}</option>)}
                   </select>
                   <button className="rounded-lg border border-[var(--accent)] px-3 py-2 text-sm font-bold text-[var(--accent)] disabled:opacity-50" disabled={mappingState.kind === "pending"} onClick={() => void saveMemberMapping(member.user_id)} type="button">저장</button>
+                  {memberAdminEnabled ? <>
+                    {member.role === "member" ? <AdminAction label="부서장으로 지정" endpoint={`/api/d/${deptId}/members/${member.user_id}/promote`} description={`${member.display_name}님에게 부서장 권한을 부여합니다.`} onChanged={load} /> : <AdminAction label="부서장 해제" endpoint={`/api/d/${deptId}/members/${member.user_id}/demote`} description={`${member.display_name}님의 부서장 권한을 해제합니다. 마지막 부서장은 해제할 수 없습니다.`} onChanged={load} />}
+                    <AdminAction label="제외" endpoint={`/api/d/${deptId}/members/${member.user_id}/remove`} description={`${member.display_name}님을 부서에서 제외합니다. 마지막 부서장은 제외할 수 없습니다.`} onChanged={load} />
+                  </> : null}
                 </div>
               ) : (
                 <span className="text-sm text-[var(--muted)]">{member.slack_user_id ? "Slack 연결됨" : "Slack 계정 미연결"}</span>
@@ -413,6 +419,7 @@ export default function SettingsS5({ deptId }: { deptId: string }) {
             {consentRequestState.message}
           </p>
         ) : null}
+        {memberAdminEnabled && data.role === "lead" ? <LeadInvites deptId={deptId} onChanged={load} /> : null}
       </section>
 
       {data.role === "lead" ? (

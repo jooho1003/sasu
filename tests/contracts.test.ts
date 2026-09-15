@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  TrailerScoreDraft,
+  TrailerGenerationDraft,
   AnswerDraft,
   AgentRoleDefinition,
   AgentRoleEvaluation,
@@ -10,6 +12,20 @@ import {
   IngestItem,
   MeetingSummary,
   MergeConfirmation,
+  AcceptInviteBody,
+  AdminAnswerStatRow,
+  AdminEventRow,
+  AdminInviteRow,
+  AdminMemberRow,
+  AdminOverview,
+  AdminSourceRow,
+  CreateDepartmentBody,
+  DemoAdminMemberRow,
+  InviteCreated,
+  InviteEmailBody,
+  InvitePreview,
+  LeadInviteRow,
+  MemberTargetBody,
   toStrictJsonSchema,
 } from "@/lib/contracts";
 
@@ -305,6 +321,8 @@ describe("toStrictJsonSchema", () => {
     toStrictJsonSchema("document_summary", DocumentSummary),
     toStrictJsonSchema("merge_confirmation", MergeConfirmation),
     toStrictJsonSchema("agent_role_evaluation", AgentRoleEvaluation),
+    toStrictJsonSchema("trailer_generate", TrailerGenerationDraft),
+    toStrictJsonSchema("trailer_score", TrailerScoreDraft),
   ] as JsonSchemaNode[];
 
   it("산출물의 모든 object에 additionalProperties:false가 있다", () => {
@@ -385,5 +403,76 @@ describe("AgentRole contracts", () => {
     expect(AgentRoleEvaluation.safeParse({ ...evaluation, criteria: [{ ...evaluation.criteria[0], rationale: null }] }).success).toBe(true);
     expect(AgentRoleEvaluation.safeParse({ ...evaluation, criteria: [{ ...evaluation.criteria[0], rationale: "" }] }).success).toBe(false);
     expect(AgentRoleEvaluation.safeParse({ ...evaluation, recommendation: "합격" }).success).toBe(false);
+  });
+});
+
+describe("조직 관리자 계약", () => {
+  const uuid = "33333333-3333-4333-8333-333333333333";
+  const timestamp = "2026-09-15T00:00:00.000Z";
+
+  it("SQL RPC의 읽기 응답 키를 엄격하게 고정한다", () => {
+    const overview = {
+      org_name: "사수",
+      departments: [{
+        dept_id: uuid, name: "제품", lead_names: ["김사수"], member_count: 2,
+        consented_count: 1, active_source_count: 3, decisions_30d: 4, answers_30d: 5,
+      }],
+      llm_calls_this_month: 6,
+      trailer_publish_enabled: false,
+      published_trailers: [],
+    };
+    expect(AdminOverview.safeParse(overview).success).toBe(true);
+    expect(AdminOverview.safeParse({ ...overview, content: "비공개 원문" }).success).toBe(false);
+
+    const member = {
+      user_id: uuid, display_name: "김사수", email: "lead@example.com", dept_id: uuid,
+      dept_name: "제품", role: "lead", consented_at: timestamp, consent_version: 1, slack_linked: true,
+    };
+    expect(AdminMemberRow.safeParse(member).success).toBe(true);
+    expect(AdminMemberRow.safeParse({ ...member, extra: true }).success).toBe(false);
+    const demoMember = withoutKey(withoutKey(member, "user_id"), "email");
+    expect(DemoAdminMemberRow.safeParse(demoMember).success).toBe(true);
+    expect(DemoAdminMemberRow.safeParse(member).success).toBe(false);
+
+    expect(AdminSourceRow.safeParse({
+      source_id: uuid, dept_id: uuid, dept_name: "제품", kind: "slack", title: "제품 채널",
+      visibility: "dept", is_principles: false, active: true, item_count: 7,
+      last_synced_at: null, has_error: false,
+    }).success).toBe(true);
+    expect(AdminAnswerStatRow.safeParse({
+      day: "2026-09-15", dept_id: uuid, dept_name: "제품", answered: 2, refused: 1,
+      failed: 0, cited_dept: 2, cited_leads_only: 1, cited_decisions: 1,
+    }).success).toBe(true);
+  });
+
+  it("초대·이벤트·미리보기 응답을 SQL과 동일하게 파싱한다", () => {
+    expect(AdminInviteRow.safeParse({
+      invite_id: uuid, dept_id: uuid, dept_name: "제품", email: "lead@example.com",
+      role: "lead", invited_by_role: "org_admin", expires_at: timestamp, created_at: timestamp,
+    }).success).toBe(true);
+    expect(LeadInviteRow.safeParse({
+      invite_id: uuid, email: "member@example.com", role: "member", expires_at: timestamp,
+      created_at: timestamp, created_by_label: "lead@example.com",
+    }).success).toBe(true);
+    expect(AdminEventRow.safeParse({
+      event_id: 1, created_at: timestamp, actor_label: "lead@example.com",
+      action: "member_invite", dept_name: "제품", target_user_label: "(삭제된 사용자)",
+    }).success).toBe(true);
+    expect(InvitePreview.safeParse({
+      org_name: "사수", dept_name: "제품", role: "member", email_masked: "me***@example.com", status: "valid",
+    }).success).toBe(true);
+    for (const status of ["valid", "accepted", "revoked", "expired"]) {
+      expect(InvitePreview.safeParse({ org_name: "사수", dept_name: "제품", role: "lead", email_masked: "le***@example.com", status }).success).toBe(true);
+    }
+    expect(InviteCreated.safeParse({ invite_id: uuid, token: "token", expires_at: timestamp }).success).toBe(true);
+  });
+
+  it("쓰기 요청 본문을 엄격하게 검증한다", () => {
+    expect(AdminOverview.parse({org_name:"합성",departments:[],llm_calls_this_month:0})).toMatchObject({trailer_publish_enabled:false,published_trailers:[]});
+    expect(CreateDepartmentBody.safeParse({ name: "제품" }).success).toBe(true);
+    expect(InviteEmailBody.safeParse({ email: "lead@example.com" }).success).toBe(true);
+    expect(AcceptInviteBody.safeParse({ token: "token", displayName: "김사수" }).success).toBe(true);
+    expect(MemberTargetBody.safeParse({ userId: uuid, deptId: uuid }).success).toBe(true);
+    expect(MemberTargetBody.safeParse({ userId: uuid, deptId: uuid, orgId: uuid }).success).toBe(false);
   });
 });

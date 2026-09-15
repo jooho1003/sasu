@@ -1,10 +1,28 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { weightedScore } from "../lib/agent-role";
 import { MASK_PATTERNS } from "../lib/mask";
-import { DEMO_AGENT_ROLE, DEMO_DEPARTMENTS } from "../scripts/seed-demo";
+import { DEMO_AGENT_ROLE, DEMO_DEPARTMENTS, DEMO_MEMBERS, DEMO_TRAILER_SLUG, seedDemoTrailer, seedDemoAttempts } from "../scripts/seed-demo";
 
 describe("게스트 데모 시드", () => {
+  it("데모 공개 링크는 22자리이며 스냅샷이 없으면 DB에 접근하지 않는다", async () => {
+    expect(DEMO_TRAILER_SLUG).toMatch(/^[a-z0-9]{22}$/);
+    const from = vi.fn();
+    await seedDemoTrailer({ from } as unknown as Parameters<typeof seedDemoTrailer>[0], "tests/fixtures/not-present.snapshot.json");
+    await seedDemoAttempts({ from } as unknown as Parameters<typeof seedDemoAttempts>[0], "tests/fixtures/not-present.snapshot.json");
+    expect(from).not.toHaveBeenCalled();
+  });
+  it("모든 데모 부서에 부서장 1명과 멤버 2명을 합성 계정으로 준비한다", () => {
+    for (const department of DEMO_DEPARTMENTS) {
+      const members = DEMO_MEMBERS.filter((member) => member.dept_id === department.id);
+      expect(members).toHaveLength(3);
+      expect(members.filter((member) => member.role === "lead")).toHaveLength(1);
+      expect(members.filter((member) => member.consented)).toHaveLength(2);
+      for (const member of members) expect(member.email).toMatch(/@demo\.invalid$/);
+    }
+    expect(new Set(DEMO_MEMBERS.map((member) => member.user_id)).size).toBe(12);
+    expect(DEMO_MEMBERS.find((member) => member.user_id === DEMO_AGENT_ROLE.created_by)?.role).toBe("lead");
+  });
   it("디자인팀은 인용 가능한 합성 데이터와 권한 차등을 갖는다", () => {
     const design = DEMO_DEPARTMENTS.find((department) => department.name === "디자인팀 사수");
 

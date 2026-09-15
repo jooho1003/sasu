@@ -178,6 +178,18 @@ export const TrailerScenario = z.strictObject({
 
 export type TrailerScenario = z.infer<typeof TrailerScenario>;
 
+export const TrailerGenerationDraft = z.strictObject({
+  id: z.string(), title: z.string(), summary: z.string(),
+  facts: z.array(z.strictObject({ id: z.string(), place: z.enum(["library", "meeting", "messenger", "finance", "partner"]), label: z.string(), text: z.string() })),
+  dialogues: z.array(z.strictObject({ id: z.string(), place: z.enum(["finance", "partner"]), question: z.string(), fact_id: z.string(), quote: z.string() })),
+  choices: z.array(z.strictObject({ id: z.string(), label: z.string() })),
+  ending: z.strictObject({ choice_id: z.string(), fact_id: z.string(), quote: z.string() }),
+});
+export type TrailerGenerationDraft = z.infer<typeof TrailerGenerationDraft>;
+
+export const TrailerGateReport = z.strictObject({ passed: z.boolean(), violations: z.array(z.strictObject({ path: z.string(), rule: z.enum(["overlap", "proper_noun", "mask", "schema"]) })) });
+export type TrailerGateReport = z.infer<typeof TrailerGateReport>;
+
 export const TrailerSubmission = z.strictObject({
   choice_id: TrailerId,
   reason: z.string().trim().min(1).max(1000),
@@ -185,6 +197,167 @@ export const TrailerSubmission = z.strictObject({
 });
 
 export type TrailerSubmission = z.infer<typeof TrailerSubmission>;
+
+export const TrailerAttemptEvent = z.strictObject({ seq: z.number().int().min(1), kind: z.enum(["open_fact", "ask_dialogue", "choose", "submit"]), ref: TrailerId });
+export const TrailerAttemptSubmission = z.strictObject({ scenario_id: TrailerId, choice_id: TrailerId, reason: z.string().trim().min(1).max(1000), fact_ids: z.array(TrailerId).min(1).max(30), events: z.array(TrailerAttemptEvent).max(200) });
+export type TrailerAttemptSubmission = z.infer<typeof TrailerAttemptSubmission>;
+const TrailerScoreEvidence = z.strictObject({ scenario_id: z.string(), kind: z.enum(["reason_quote", "event", "fact"]), quote: z.string().nullable(), seq: z.number().int().nullable(), fact_id: z.string().nullable() });
+const TrailerQuestionBasis = z.strictObject({ scenario_id: z.string(), kind: z.enum(["reason_quote", "event", "fact", "unchecked_dialogue", "unchecked_fact"]), ref: z.string().nullable(), quote: z.string().nullable(), seq: z.number().int().nullable() });
+const TrailerInterviewQuestion = z.strictObject({ question: z.string(), basis: z.array(TrailerQuestionBasis) });
+export const TrailerScoreDraft = z.strictObject({ criteria: z.array(z.strictObject({ key: z.string(), score: z.number().int().nullable(), rationale: z.string().nullable(), evidence: z.array(TrailerScoreEvidence) })), interview_questions: z.array(TrailerInterviewQuestion) });
+export type TrailerScoreDraft = z.infer<typeof TrailerScoreDraft>;
+export const TrailerAttemptResult = z.strictObject({ rubric_snapshot: z.array(AgentRoleCriterion), criteria: z.array(z.strictObject({ key: z.string(), label: z.string(), weight: z.number().int().min(1).max(5), score: z.number().int().min(0).max(5).nullable(), rationale: z.string().nullable(), evidence_status: z.enum(["ok", "no_evidence"]), evidence: z.array(TrailerScoreEvidence) })), interview_questions: z.array(TrailerInterviewQuestion) });
+export type TrailerAttemptResult = z.infer<typeof TrailerAttemptResult>;
+
+const Uuid = z.uuid();
+const Timestamp = NonEmptyString;
+const Count = z.number().int().nonnegative();
+const MemberRole = z.enum(["lead", "member"]);
+
+const AdminDepartmentOverview = z.strictObject({
+  dept_id: Uuid,
+  name: NonEmptyString,
+  lead_names: z.array(NonEmptyString),
+  member_count: Count,
+  consented_count: Count,
+  active_source_count: Count,
+  decisions_30d: Count,
+  answers_30d: Count,
+});
+
+export const AdminOverview = z.strictObject({
+  org_name: NonEmptyString,
+  departments: z.array(AdminDepartmentOverview),
+  llm_calls_this_month: Count,
+    trailer_publish_enabled: z.boolean().default(false),
+    published_trailers: z.array(z.strictObject({ trailer_id: Uuid, dept_name: NonEmptyString, title: NonEmptyString, published_at: Timestamp, public_path: z.string().regex(/^\/t\/[a-z0-9]{22}$/) })).default([]),
+});
+export type AdminOverview = z.infer<typeof AdminOverview>;
+
+const AdminMemberFields = {
+  display_name: NonEmptyString,
+  dept_id: Uuid,
+  dept_name: NonEmptyString,
+  role: MemberRole,
+  consented_at: NullableString,
+  consent_version: z.number().int().nullable(),
+  slack_linked: z.boolean(),
+};
+
+export const AdminMemberRow = z.strictObject({
+  user_id: Uuid,
+  email: z.email(),
+  ...AdminMemberFields,
+});
+export type AdminMemberRow = z.infer<typeof AdminMemberRow>;
+
+export const DemoAdminMemberRow = z.strictObject(AdminMemberFields);
+export type DemoAdminMemberRow = z.infer<typeof DemoAdminMemberRow>;
+
+export const AdminInviteRow = z.strictObject({
+  invite_id: Uuid,
+  dept_id: Uuid,
+  dept_name: NonEmptyString,
+  email: z.email(),
+  role: MemberRole,
+  invited_by_role: z.enum(["org_admin", "lead"]),
+  expires_at: Timestamp,
+  created_at: Timestamp,
+});
+export type AdminInviteRow = z.infer<typeof AdminInviteRow>;
+
+export const LeadInviteRow = z.strictObject({
+  invite_id: Uuid,
+  email: z.email(),
+  role: MemberRole,
+  expires_at: Timestamp,
+  created_at: Timestamp,
+  created_by_label: NonEmptyString,
+});
+export type LeadInviteRow = z.infer<typeof LeadInviteRow>;
+
+export const AdminSourceRow = z.strictObject({
+  source_id: Uuid,
+  dept_id: Uuid,
+  dept_name: NonEmptyString,
+  kind: NonEmptyString,
+  title: NullableString,
+  visibility: z.enum(["dept", "leads_only"]),
+  is_principles: z.boolean(),
+  active: z.boolean().nullable(),
+  item_count: Count,
+  last_synced_at: NullableString,
+  has_error: z.boolean(),
+});
+export type AdminSourceRow = z.infer<typeof AdminSourceRow>;
+
+export const AdminAnswerStatRow = z.strictObject({
+  day: z.iso.date(),
+  dept_id: Uuid,
+  dept_name: NonEmptyString,
+  answered: Count,
+  refused: Count,
+  failed: Count,
+  cited_dept: Count,
+  cited_leads_only: Count,
+  cited_decisions: Count,
+});
+export type AdminAnswerStatRow = z.infer<typeof AdminAnswerStatRow>;
+
+export const AdminEventRow = z.strictObject({
+  event_id: Count,
+  created_at: Timestamp,
+  actor_label: NonEmptyString,
+  action: z.enum([
+    "department_create",
+    "first_lead_invite",
+    "member_invite",
+    "invite_revoke",
+    "invite_accept",
+    "lead_promote",
+    "lead_demote",
+    "member_remove",
+  ]),
+  dept_name: NonEmptyString,
+  target_user_label: NonEmptyString,
+});
+export type AdminEventRow = z.infer<typeof AdminEventRow>;
+
+export const InvitePreview = z.strictObject({
+  org_name: NonEmptyString,
+  dept_name: NonEmptyString,
+  role: MemberRole,
+  email_masked: NonEmptyString,
+  status: z.enum(["valid", "accepted", "revoked", "expired"]),
+});
+export type InvitePreview = z.infer<typeof InvitePreview>;
+
+export const InviteCreated = z.strictObject({
+  invite_id: Uuid,
+  token: NonEmptyString,
+  expires_at: Timestamp,
+});
+export type InviteCreated = z.infer<typeof InviteCreated>;
+
+export const CreateDepartmentBody = z.strictObject({
+  name: z.string().trim().min(1).max(40),
+});
+export type CreateDepartmentBody = z.infer<typeof CreateDepartmentBody>;
+
+export const InviteEmailBody = z.strictObject({ email: z.email() });
+export type InviteEmailBody = z.infer<typeof InviteEmailBody>;
+
+export const AcceptInviteBody = z.strictObject({
+  token: NonEmptyString,
+  displayName: z.string().trim().min(1).max(60),
+});
+export type AcceptInviteBody = z.infer<typeof AcceptInviteBody>;
+
+export const MemberTargetBody = z.strictObject({
+  userId: Uuid,
+  deptId: Uuid,
+});
+export type MemberTargetBody = z.infer<typeof MemberTargetBody>;
 
 type JsonSchemaObject = Record<string, unknown>;
 

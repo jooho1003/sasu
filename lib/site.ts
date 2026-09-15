@@ -22,7 +22,7 @@ function externalUrl(
 
 export function trailerDemoHref(env: SiteEnvironment = process.env): string | null {
   const publishedPath = env.SASU_TRAILER_DEMO_PATH?.trim();
-  if (publishedPath && /^\/t\/[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(publishedPath)) {
+  if (env.SASU_TRAILER_PUBLISH_ENABLED === "true" && publishedPath && /^\/t\/[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(publishedPath)) {
     return publishedPath;
   }
   return env.SASU_TRAILER_PREVIEW_ENABLED === "true" ? "/trailers" : null;

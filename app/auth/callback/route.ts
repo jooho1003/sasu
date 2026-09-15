@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { LOGIN_NEXT_COOKIE, resolvePostLoginPath } from "@/lib/auth-redirect";
+import { orgAdminReadEnabled } from "@/lib/features";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -46,11 +48,30 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (!membership) {
-    return NextResponse.redirect(new URL("/no-membership", request.url));
+  let cookieNext: string | null = null;
+  const encodedNext = request.cookies.get(LOGIN_NEXT_COOKIE)?.value;
+  if (encodedNext) {
+    try {
+      cookieNext = decodeURIComponent(encodedNext);
+    } catch {
+      cookieNext = null;
+    }
   }
 
-  return NextResponse.redirect(
-    new URL(`/d/${membership.dept_id}`, request.url),
-  );
+  let isOrgAdmin = false;
+  const adminReadEnabled = orgAdminReadEnabled();
+  if (!membership && adminReadEnabled) {
+    const adminResult = await supabase.rpc("admin_org_id");
+    isOrgAdmin = !adminResult.error && Boolean(adminResult.data);
+  }
+
+  const destination = resolvePostLoginPath({
+    next: cookieNext,
+    firstDeptId: membership?.dept_id ?? null,
+    isOrgAdmin,
+    adminReadEnabled,
+  });
+  const response = NextResponse.redirect(new URL(destination, request.url));
+  response.cookies.delete(LOGIN_NEXT_COOKIE);
+  return response;
 }

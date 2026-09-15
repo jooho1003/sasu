@@ -26,7 +26,7 @@ type ClaimedJob = {
   attempts: number;
 };
 
-type Filter = { operator: "eq" | "lt"; column: string; value: unknown };
+type Filter = { operator: "eq" | "lt" | "in"; column: string; value: unknown };
 type Operation = {
   table: string;
   method: "insert" | "update" | "upsert";
@@ -36,6 +36,7 @@ type Operation = {
 
 type DbResult = { data: unknown; error: null };
 type QueryBuilder = Promise<DbResult> & {
+  in: (column: string, value: unknown) => QueryBuilder;
   eq: (column: string, value: unknown) => QueryBuilder;
   lt: (column: string, value: unknown) => QueryBuilder;
   select: (columns?: string) => QueryBuilder;
@@ -44,6 +45,7 @@ type QueryBuilder = Promise<DbResult> & {
 
 function makeBuilder(operation: Operation, data: unknown = null): QueryBuilder {
   const builder = Promise.resolve({ data, error: null }) as QueryBuilder;
+  builder.in = (column, value) => { operation.filters.push({ operator: "in", column, value }); return builder; };
 
   builder.eq = (column, value) => {
     operation.filters.push({ operator: "eq", column, value });
@@ -114,6 +116,13 @@ function jobUpdate(operations: Operation[], status: string): Operation {
 }
 
 describe("jobs worker", () => {
+  it("채점 3회 실패와 10분 스윕은 사용자 실패 상태로 이어진다", async () => {
+    vi.stubEnv("SASU_TRAILER_SCORES_MODE", "scores");
+    const fake=createFakeClient([[{id:"score-job",kind:"score_trailer_attempt",payload:{attemptId:"a"},attempts:3}]]);moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    registerHandler("score_trailer_attempt",async()=>{throw Object.assign(new Error("attempt_invalid"),{error_code:"attempt_invalid"});});await runOnce();
+    expect(fake.operations.some(o=>o.table==="trailer_attempts"&&(o.values as Record<string,unknown>).status_reason==="attempt_invalid")).toBe(true);
+    const {sweepPendingRows}=await import("@/lib/jobs"); await sweepPendingRows();expect(fake.operations.some(o=>o.table==="trailer_attempts"&&o.filters.some(f=>f.column==="updated_at"&&f.operator==="lt"))).toBe(true);
+  });
   beforeEach(() => {
     moduleMocks.after.mockReset();
     moduleMocks.createServiceSupabaseClient.mockReset();
@@ -273,6 +282,28 @@ describe("jobs worker", () => {
     expect(jobUpdate(fake.operations, "done").values).toEqual(
       expect.objectContaining({ lease_until: null }),
     );
+  });
+
+  it("발행 플래그가 꺼져 있으면 미적용 예고편 테이블을 조회하지 않는다", async () => {
+    vi.stubEnv("SASU_TRAILER_PUBLISH_ENABLED", "false");
+    const fake = createFakeClient([[{ id: "sweep-trailer", kind: "sweep", payload: {}, attempts: 1 }]]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    await runOnce();
+    expect(fake.operations.some((operation) => operation.table === "trailers")).toBe(false);
+    vi.unstubAllEnvs();
+  });
+
+  it("예고편의 생성·검사는 updated_at 기준 10분 후 timeout으로 끝낸다", async () => {
+    vi.stubEnv("SASU_TRAILER_PUBLISH_ENABLED", "true"); vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-15T12:20:00Z"));
+    const fake = createFakeClient([[{ id: "sweep-trailer", kind: "sweep", payload: {}, attempts: 1 }]]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    await runOnce();
+    const operation = fake.operations.find((op) => op.table === "trailers");
+    expect(operation?.values).toEqual({ status: "failed", status_reason: "timeout" });
+    expect(operation?.filters).toContainEqual({ operator: "in", column: "status", value: ["generating", "checking"] });
+    expect(operation?.filters).toContainEqual({ operator: "lt", column: "updated_at", value: "2026-09-15T12:10:00.000Z" });
+    vi.unstubAllEnvs();
   });
 
   it("sweep은 2분 넘은 pending answers를 failed(llm_timeout)로 바꾼다", async () => {

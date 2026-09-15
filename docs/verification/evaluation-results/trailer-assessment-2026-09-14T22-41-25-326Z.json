@@ -1,0 +1,82 @@
+{
+  "generatedAt": "2026-09-14T22:41:25.326Z",
+  "synthetic": true,
+  "databaseWrites": 0,
+  "telemetryMocked": true,
+  "model": "openai/gpt-oss-120b",
+  "status": "executed",
+  "calls": 5,
+  "rows": [
+    {
+      "label": "합성 지원자 B",
+      "total": 0.7,
+      "criteria": [
+        {
+          "key": "principle_check",
+          "score": 1,
+          "evidenceCount": 3
+        },
+        {
+          "key": "stakeholder_check",
+          "score": null,
+          "evidenceCount": 0
+        },
+        {
+          "key": "tradeoff",
+          "score": null,
+          "evidenceCount": 0
+        },
+        {
+          "key": "decision_clarity",
+          "score": 2,
+          "evidenceCount": 3
+        }
+      ],
+      "validEvidence": true,
+      "rawForbiddenCount": 2,
+      "verifiedForbiddenCount": 0,
+      "schemaOnly": true,
+      "inputTokens": 3070,
+      "outputTokens": 2591
+    },
+    {
+      "label": "특성 변형 B",
+      "total": 3.7,
+      "criteria": [
+        {
+          "key": "principle_check",
+          "score": 4,
+          "evidenceCount": 3
+        },
+        {
+          "key": "stakeholder_check",
+          "score": 4,
+          "evidenceCount": 6
+        },
+        {
+          "key": "tradeoff",
+          "score": 3,
+          "evidenceCount": 3
+        },
+        {
+          "key": "decision_clarity",
+          "score": 4,
+          "evidenceCount": 3
+        }
+      ],
+      "validEvidence": true,
+      "rawForbiddenCount": 2,
+      "verifiedForbiddenCount": 0,
+      "schemaOnly": true,
+      "inputTokens": 3597,
+      "outputTokens": 2591
+    }
+  ],
+  "checks": {
+    "validEvidence": false,
+    "forbiddenAfter": 0,
+    "traitDifference": null,
+    "traitPass": false,
+    "schemaOnly": false
+  }
+}

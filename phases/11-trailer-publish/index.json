@@ -2,13 +2,70 @@
   "project": "sasu",
   "phase": "11-trailer-publish",
   "steps": [
-    { "step": 0, "name": "trailer-schema", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 1, "name": "trailer-publish-sql", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 2, "name": "trailer-gate-jobs", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 3, "name": "trailer-routes", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 4, "name": "trailer-review-ui", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 5, "name": "trailer-public-page", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 6, "name": "trailer-demo-seed", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 7, "name": "trailer-verification", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" }
-  ]
+    {
+      "step": 0,
+      "name": "trailer-schema",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "로컬 구현 및 검증 완료. phase 11: 880 단위 테스트, SQL 104 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 19 통과, B 5 skipped. 기존 공간 체험 6 통과. 운영 적용·시드·실제 생성은 O11 미실행. docs/verification/trailer-publish.md 참조."
+    },
+    {
+      "step": 1,
+      "name": "trailer-publish-sql",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "로컬 구현 및 검증 완료. phase 11: 880 단위 테스트, SQL 104 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 19 통과, B 5 skipped. 기존 공간 체험 6 통과. 운영 적용·시드·실제 생성은 O11 미실행. docs/verification/trailer-publish.md 참조."
+    },
+    {
+      "step": 2,
+      "name": "trailer-gate-jobs",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 구현 및 검증 완료. phase 11: 880 단위 테스트, SQL 104 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 19 통과, B 5 skipped. 기존 공간 체험 6 통과. 운영 적용·시드·실제 생성은 O11 미실행. docs/verification/trailer-publish.md 참조."
+    },
+    {
+      "step": 3,
+      "name": "trailer-routes",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "로컬 구현 및 검증 완료. phase 11: 880 단위 테스트, SQL 104 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 19 통과, B 5 skipped. 기존 공간 체험 6 통과. 운영 적용·시드·실제 생성은 O11 미실행. docs/verification/trailer-publish.md 참조."
+    },
+    {
+      "step": 4,
+      "name": "trailer-review-ui",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 구현 및 검증 완료. phase 11: 880 단위 테스트, SQL 104 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 19 통과, B 5 skipped. 기존 공간 체험 6 통과. 운영 적용·시드·실제 생성은 O11 미실행. docs/verification/trailer-publish.md 참조."
+    },
+    {
+      "step": 5,
+      "name": "trailer-public-page",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 구현 및 검증 완료. phase 11: 880 단위 테스트, SQL 104 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 19 통과, B 5 skipped. 기존 공간 체험 6 통과. 운영 적용·시드·실제 생성은 O11 미실행. docs/verification/trailer-publish.md 참조."
+    },
+    {
+      "step": 6,
+      "name": "trailer-demo-seed",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 구현 및 검증 완료. phase 11: 880 단위 테스트, SQL 104 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 19 통과, B 5 skipped. 기존 공간 체험 6 통과. 운영 적용·시드·실제 생성은 O11 미실행. docs/verification/trailer-publish.md 참조."
+    },
+    {
+      "step": 7,
+      "name": "trailer-verification",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 구현 및 검증 완료. phase 11: 880 단위 테스트, SQL 104 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 19 통과, B 5 skipped. 기존 공간 체험 6 통과. 운영 적용·시드·실제 생성은 O11 미실행. docs/verification/trailer-publish.md 참조."
+    }
+  ],
+  "operational_summary": "O11: 0027 적용·실제 생성 스냅샷 검토/시드·B 2개 통과(21 동시 요청 한도 포함)·발행 on 운영 배포 완료. 파일럿/QA 공개 허용 false. docs/verification/O10-O12-production.md 참조."
 }

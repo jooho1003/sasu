@@ -81,6 +81,7 @@ describe("Slack Block Kit 카드", () => {
     const fullNotice = sectionTexts.join("\n");
 
     expect(fullNotice).toContain(CONSENT_SECTIONS.introduction);
+    expect(fullNotice).toContain("조직 관리자 권한만으로는 질문·답변·카드·원장의 내용과 질문자별 기록을 볼 수 없습니다.");
     for (const item of CONSENT_SECTIONS.items) {
       expect(fullNotice).toContain(item.title);
       if (item.body) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import Link from "next/link";
 import type { TrailerScenario, TrailerSubmission } from "@/lib/contracts";
 import { validateSubmission } from "@/lib/trailer";
 import { INTERACTIONS, type PlaceId } from "@/lib/trailer-world";
@@ -10,7 +11,7 @@ import styles from "./recruitment-trailer.module.css";
 type Overlay = "place" | "notebook" | "destinations" | null;
 const characters = [{ name: "초록 재킷", color: "#6da183" }, { name: "노란 니트", color: "#d8af65" }, { name: "파란 셔츠", color: "#7b9dc3" }];
 
-export function RecruitmentTrailer({ scenarios }: { scenarios: TrailerScenario[] }) {
+export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null }: { scenarios: TrailerScenario[]; applyUrl?: string | null; notice?: string | null }) {
   const [screen, setScreen] = useState<"intro" | "play" | "finished">("intro");
   const [mode, setMode] = useState<"map" | "list">("map");
   const [quest, setQuest] = useState(0);
@@ -89,16 +90,17 @@ export function RecruitmentTrailer({ scenarios }: { scenarios: TrailerScenario[]
   return <main className={styles.shell}>
     <header className={styles.header}><div className={styles.brand}><span className={styles.brandIcon}>ㅅ</span><strong>사수</strong><span className={styles.brandSub}>채용 예고편</span></div><div className={styles.location}><span aria-hidden="true">⌂</span> 사수 오피스 <span className={styles.locationDot} /> 첫 출근</div><span className={styles.badge}>합성 사례 · 1인 체험</span></header>
     {screen === "finished" ? <section className={styles.finished}>
-      <p className={styles.eyebrow}>오늘의 오피스 체험 완료</p><h1>당신은 어떤 팀에서<br />일하고 싶나요?</h1><p>세 가지 결정에 담긴 나의 기준을 돌아보세요. 점수나 정답은 없습니다.</p>
+      <p className={styles.eyebrow}>오늘의 오피스 체험 완료</p><h1>당신은 어떤 팀에서<br />일하고 싶나요?</h1><p>{scenarios.length}가지 결정에 담긴 나의 기준을 돌아보세요. 점수나 정답은 없습니다.</p>
       {results.map((_, index) => <article key={scenarios[index].id}><h2>{index + 1}. {scenarios[index].title}</h2>{comparison(index)}</article>)}<button className={styles.primary} onClick={restart}>처음부터 다시 체험하기</button><p className={styles.notice}>다시 체험하거나 새로고침하면 이 기록은 사라집니다.</p>
+      {applyUrl?.startsWith("https://") ? <a href={applyUrl} target="_blank" rel="noopener noreferrer">이 회사 공고 보기 →</a> : <Link href="/">사수 알아보기 →</Link>}
     </section> : <div className={styles.stage}>
       <div className={styles.canvasLayer} hidden={mode === "list" && screen === "play"}><TrailerOffice ref={office} paused={screen !== "play" || overlay !== null || mode === "list"} resetKey={quest + (screen === "intro" ? 100 : 0)} color={characters[character].color} discoveredPlaces={scenario.facts.filter((fact) => discovered.includes(fact.id)).map((fact) => fact.place)} onInteract={visit} /></div>
       {screen === "intro" ? <section className={styles.welcome}>
-        <div className={styles.welcomeChip}>당신의 첫 출근을 환영해요</div><h1>일하는 방식을,<br />먼저 만나보세요.</h1><p>오피스를 걸으며 동료에게 묻고,<br />당신의 첫 번째 결정을 내려보세요.</p>
+        {notice ? <p className={styles.notice}>{notice}</p> : null}<div className={styles.welcomeChip}>당신의 첫 출근을 환영해요</div><h1>일하는 방식을,<br />먼저 만나보세요.</h1><p>오피스를 걸으며 동료에게 묻고,<br />당신의 첫 번째 결정을 내려보세요.</p>
         <fieldset className={styles.characterPicker}><legend>나의 캐릭터</legend>{characters.map((entry, index) => <button type="button" key={entry.name} aria-label={entry.name} aria-pressed={character === index} onClick={() => setCharacter(index)} style={{ "--shirt": entry.color } as CSSProperties}><span className={styles.avatarPreview}><i /><b /><em /></span></button>)}</fieldset>
-        <button className={styles.enter} onClick={() => setScreen("play")}>오피스 입장하기 <span>→</span></button><div className={styles.welcomeFacts}><span>3가지 결정</span><span>자유로운 탐색</span><span>채점 없음</span></div><p className={styles.notice}>회사·동료·사례는 모두 가상입니다. 답변은 전송·저장하지 않으며 새로고침하면 초기화됩니다.</p>
+        <button className={styles.enter} onClick={() => setScreen("play")}>오피스 입장하기 <span>→</span></button><div className={styles.welcomeFacts}><span>{scenarios.length}가지 결정</span><span>자유로운 탐색</span><span>채점 없음</span></div><p className={styles.notice}>회사·동료·사례는 모두 가상입니다. 답변은 전송·저장하지 않으며 새로고침하면 초기화됩니다.</p>
       </section> : <>
-        <aside className={styles.questHud} aria-label="오늘의 퀘스트"><div className={styles.questMeta}><span className={styles.questSymbol}>✦</span><span>오늘의 퀘스트</span><b>{quest + 1} / 3</b></div><h1>{scenario.title}</h1><p>{scenario.summary}</p><div className={styles.questSteps}><span data-done={discovered.length > 0}>단서 찾기</span><i /><span data-done={Boolean(submitted)}>결정 남기기</span><i /><span>돌아보기</span></div></aside>
+        <aside className={styles.questHud} aria-label="오늘의 퀘스트">{notice ? <p className={styles.notice}>{notice}</p> : null}<div className={styles.questMeta}><span className={styles.questSymbol}>✦</span><span>오늘의 퀘스트</span><b>{quest + 1} / {scenarios.length}</b></div><h1>{scenario.title}</h1><p>{scenario.summary}</p><div className={styles.questSteps}><span data-done={discovered.length > 0}>단서 찾기</span><i /><span data-done={Boolean(submitted)}>결정 남기기</span><i /><span>돌아보기</span></div></aside>
         <nav className={styles.gameNav} aria-label="체험 메뉴"><button onClick={() => setOverlay("notebook")}><span aria-hidden="true">▤</span>단서 수첩 <b>{discovered.length}</b></button><button onClick={() => setOverlay("destinations")}><span aria-hidden="true">⌖</span>장소 찾아가기</button><button onClick={() => setMode((current) => current === "map" ? "list" : "map")}><span aria-hidden="true">☷</span>{mode === "map" ? "목록형 모드로 전환" : "맵 모드로 전환"}</button></nav>
         {mode === "list" ? <div className={styles.listMode}><h2>오피스 장소</h2><p>같은 이야기와 단서를 목록으로 만날 수 있어요.</p><nav className={styles.placeList} aria-label="오피스 장소">{INTERACTIONS.map((entry) => <button key={entry.id} onClick={() => visit(entry.id)}><span className={styles.placeIcon} style={{ background: entry.color }}>{entry.person ? entry.person.slice(0, 1) : "◇"}</span><span><b>{entry.name}</b><small>{entry.detail}</small></span><span>→</span></button>)}</nav></div> : null}
         <div className={styles.playerBadge}><span className={styles.playerDot} style={{ background: characters[character].color }} /><div><b>나 · 오늘의 담당자</b><span>가상 동료와 함께하는 체험</span></div><button aria-label="체험 초기화" onClick={restart}>↻</button></div>
