@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("기획팀은 직접 URL로 카드·원장·답변을 열 수 있다", async ({ page }, testInfo) => {
   await page.goto("/demo/d/dddddddd-dddd-4ddd-8ddd-dddddddddddd");
-  await expect(page.locator("header")).toContainText("기획");
+  await expect(page.locator(".workspace-topbar")).toContainText("기획");
   await page.locator('a[href*="/cards/"]').first().click();
   await expect(page.locator("q").first()).toBeVisible();
   await page.getByRole("link", { name: "원장", exact: true }).click();

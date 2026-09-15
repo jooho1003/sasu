@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { formatConflictBadge } from "@/lib/conflicts";
@@ -265,18 +264,17 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-7 px-5 py-10 text-left sm:px-8">
+    <main className="workspace-page">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="grid gap-2">
           <p className="m-0 text-sm font-bold text-[var(--accent)]">사수</p>
-          <h1 className="text-4xl! text-[var(--ink)]!">결정 원장</h1>
+          <h1 className="m-0 text-3xl">결정 원장</h1>
           <p className="m-0 text-[var(--muted)]">부서의 결정과 근거를 최신순으로 봅니다.</p>
         </div>
-        <Link href={`/d/${deptId}`}>대시보드로</Link>
-        <Link href={`/d/${deptId}/documents`}>문서</Link>
+
       </header>
 
-      <details id="direct-record" className="rounded-2xl bg-[var(--surface)] p-5 shadow-sm">
+      <details id="direct-record" className="panel p-5">
         <summary className="cursor-pointer font-bold text-[var(--accent)]">직접 기록</summary>
         <div className="mt-5 grid gap-4">
           <label className="grid gap-2 font-bold">
@@ -323,7 +321,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
       </details>
 
       <form
-        className="grid gap-3 rounded-2xl bg-[var(--surface)] p-5 shadow-sm sm:grid-cols-2 lg:grid-cols-5"
+        className="grid gap-3 panel p-5 sm:grid-cols-2 lg:grid-cols-5"
         onSubmit={(event) => {
           event.preventDefault();
           setAppliedFilters(filters);
@@ -400,7 +398,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
       {!loading && !error && data && data.decisions.length > 0 ? (
         <section aria-label="결정 목록" className="grid gap-4">
           {data.decisions.map((decision) => (
-            <div key={decision.id} className="rounded-2xl bg-[var(--surface)] p-5 shadow-sm sm:p-6">
+            <div key={decision.id} className="panel p-5 sm:p-6">
               <DecisionDetail decision={decision} />
               {decision.history.length > 0 ? (
                 <details className="mt-5 border-t border-black/10 pt-4">

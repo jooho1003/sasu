@@ -106,7 +106,6 @@ export default function DashboardS1({
   deptId,
   displayName,
   role,
-  trailerPublishingEnabled = false,
 }: DashboardS1Props) {
   const [activeLabel, setActiveLabel] = useState<PanelLabel>("decision");
   const [dashboard, setDashboard] = useState<LoadedDashboard | null>(null);
@@ -232,24 +231,16 @@ export default function DashboardS1({
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-5 py-10 text-left sm:px-8">
+    <main className="workspace-page">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="grid gap-2">
           <p className="m-0 text-sm font-bold text-[var(--accent)]">사수</p>
-          <h1 className="text-4xl! text-[var(--ink)]!">부서 대시보드</h1>
+          <h1 className="m-0 text-3xl">부서 대시보드</h1>
           <p className="m-0 text-[var(--muted)]">
             {displayName}님 · {role === "lead" ? "팀장" : "팀원"}
           </p>
         </div>
-        <div className="flex items-center gap-4 text-sm">
-          <Link href={`/d/${deptId}/ask`}>묻기</Link>
-          <Link href={`/d/${deptId}/documents`}>문서</Link>
-          <Link href={`/d/${deptId}/roles`}>역할</Link>
-          {role === "lead" && trailerPublishingEnabled ? <Link href={`/d/${deptId}/trailers`}>예고편</Link> : null}
-          <Link href={`/d/${deptId}/ledger`}>원장</Link>
-          <Link href={settingsHref}>세팅</Link>
-          <span className="text-[var(--muted)]" data-meta>10초마다 갱신</span>
-        </div>
+        <Link className="button button-primary button-small" href={`/d/${deptId}/ask`}>사수에게 묻기 →</Link>
       </header>
 
       <section aria-labelledby="today-inputs-heading" className="grid gap-4">
@@ -259,7 +250,7 @@ export default function DashboardS1({
             부서 기록 현황
           </h2>
         </div>
-        <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <dl className="stats-row">
           {[
             ["슬랙", data?.counts.slack ?? 0],
             ["회의", data?.counts.meeting ?? 0],
@@ -267,7 +258,7 @@ export default function DashboardS1({
           ].map(([name, count]) => (
             <div
               key={name}
-              className="rounded-2xl bg-[var(--surface)] p-5 shadow-sm"
+              className="panel p-5"
             >
               <dt className="text-sm text-[var(--muted)]">{name}</dt>
               <dd className="m-0 mt-1 text-3xl font-bold" data-meta>

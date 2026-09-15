@@ -1,12 +1,36 @@
 import Link from "next/link";
-
-import { SiteCta } from "@/components/site-cta";
-import { siteLinks } from "@/lib/site";
+import { SiteHeader } from "@/components/site-shell";
+import { Icon, type IconName } from "@/components/ui/icon";
 import { orgAdminReadEnabled, trailerPublishEnabled } from "@/lib/features";
+import { siteLinks } from "@/lib/site";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 type DemoDepartment = { id: string; name: string };
-
+const departmentCopy: Record<
+  string,
+  { icon: IconName; description: string; example: string }
+> = {
+  "영업 사수": {
+    icon: "briefcase",
+    description: "견적과 계약 사이, 놓치기 쉬운 결정을 챙깁니다.",
+    example: "견적 인상, 우리 팀은 어떻게 결정할까요?",
+  },
+  "개발 사수": {
+    icon: "code",
+    description: "배포부터 기술 검토까지, 결정의 맥락을 연결합니다.",
+    example: "이번 배포 전에 확인해야 할 것은 무엇일까요?",
+  },
+  "기획팀 사수": {
+    icon: "file",
+    description: "흩어진 논의를 모아 팀의 다음 방향을 확인합니다.",
+    example: "우리 팀의 원칙과 지난 결정을 함께 살펴보세요.",
+  },
+  "디자인팀 사수": {
+    icon: "pen",
+    description: "디자인의 기준과 피드백, 그 뒤의 이유를 기억합니다.",
+    example: "팀의 디자인 원칙은 어떤 결정으로 이어질까요?",
+  },
+};
 export const revalidate = 60;
 
 export default async function DemoLandingPage() {
@@ -14,46 +38,115 @@ export default async function DemoLandingPage() {
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase.rpc("demo_departments");
   const departments = (data ?? []) as DemoDepartment[];
-
   return (
-    <main className="mx-auto grid min-h-screen w-full max-w-5xl gap-8 px-5 py-12 sm:px-8">
-      <header className="grid gap-4">
-        <Link className="w-fit text-sm" href="/">사수</Link>
-        <p className="m-0 text-sm font-bold text-[var(--accent)]">게스트 모드 · 읽기 전용</p>
-        <h1 className="m-0 text-4xl sm:text-5xl">부서가 다르면 답도 달라집니다</h1>
-        <p className="m-0 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-          온새미로 주식회사의 합성 데이터로 대시보드, 결정 카드, 원장, 권한 기반 Q&A를 둘러보세요.
-        </p>
-      </header>
-
-      {error || departments.length === 0 ? (
-        <section className="rounded-3xl bg-[var(--surface)] p-6 shadow-sm">
-          <h2 className="m-0 text-2xl">데모를 준비하는 중입니다</h2>
-          <p className="mb-0 text-[var(--muted)]">잠시 후 다시 접속해주세요.</p>
-        </section>
-      ) : (
-        <section className="grid gap-4 sm:grid-cols-2" aria-label="데모 부서 선택">
-          {departments.map((department) => (
-            <Link
-              key={department.id}
-              className="grid gap-3 rounded-3xl bg-[var(--surface)] p-6 shadow-sm transition hover:-translate-y-0.5"
-              href={`/demo/d/${department.id}`}
-            >
-              <span className="text-sm text-[var(--muted)]">합성 워크스페이스</span>
-              <strong className="text-2xl">{department.name}</strong>
-              <span className="text-[var(--accent)]">대시보드 열기 →</span>
+    <>
+      <SiteHeader />
+      <main className="demo-landing">
+        <header className="demo-intro">
+          <span className="hero-label">
+            <Icon name="spark" size={14} />
+            사수, 가볍게 만나보기
+          </span>
+          <h1>
+            부서가 다르면,
+            <br />
+            사수의 답도 달라집니다.
+          </h1>
+          <p>
+            가상 회사 온새미로에 오신 걸 환영합니다.
+            <br />
+            함께 일할 부서를 고르고, 사수가 결정을 돕는 과정을 둘러보세요.
+          </p>
+          <div className="demo-steps" aria-label="데모 체험 순서">
+            <span>
+              <b>1</b>부서 선택
+            </span>
+            <Icon name="chevron" size={13} />
+            <span>
+              <b>2</b>결정과 근거 확인
+            </span>
+            <Icon name="chevron" size={13} />
+            <span>
+              <b>3</b>사수에게 묻기
+            </span>
+          </div>
+        </header>
+        {error || departments.length === 0 ? (
+          <section className="empty-state">
+            <h2 className="text-xl">데모를 준비하는 중입니다</h2>
+            <p>잠시 후 다시 접속해주세요.</p>
+            <Link className="text-link" href="/">
+              메인으로 돌아가기
             </Link>
-          ))}
-        </section>
-      )}
-
-      {orgAdminReadEnabled() ? <Link href="/demo/admin" className="rounded-2xl border border-accent/20 bg-surface p-6">조직 단위로 보기 →</Link> : null}
-      {trailerPublishEnabled() ? <Link href="/demo/d/cccccccc-cccc-4ccc-8ccc-cccccccccccc/trailers" className="rounded-2xl border border-accent/20 bg-surface p-6">채용 예고편 만드는 과정 →</Link> : null}
-
-      <footer className="grid gap-5 border-t border-black/10 pt-8 text-sm text-[var(--muted)]">
-        <p className="m-0">게스트 모드에서는 질문을 새로 저장하거나 외부 AI를 호출하지 않습니다.</p>
-        <SiteCta compact links={links} showHome />
-      </footer>
-    </main>
+          </section>
+        ) : (
+          <section className="department-grid" aria-label="데모 부서 선택">
+            {departments.map((department) => {
+              const copy = departmentCopy[department.name] ?? {
+                icon: "people" as const,
+                description:
+                  "우리 부서의 대화와 결정, 근거를 한곳에서 확인하세요.",
+                example: "부서의 기록에서 다음 결정의 힌트를 찾아보세요.",
+              };
+              return (
+                <Link
+                  className="department-card"
+                  href={`/demo/d/${department.id}`}
+                  key={department.id}
+                >
+                  <div className="department-card-top">
+                    <span className="department-icon">
+                      <Icon name={copy.icon} size={23} />
+                    </span>
+                    <span className="badge badge-neutral">읽기 전용</span>
+                  </div>
+                  <div>
+                    <h2>{department.name}</h2>
+                    <p>{copy.description}</p>
+                  </div>
+                  <div className="department-example">{copy.example}</div>
+                  <div className="department-card-footer">
+                    <span>이 부서 둘러보기</span>
+                    <Icon name="arrow" size={17} />
+                  </div>
+                </Link>
+              );
+            })}
+          </section>
+        )}
+        <div className="demo-more">
+          {orgAdminReadEnabled() ? (
+            <Link className="text-link" href="/demo/admin">
+              조직 단위로 보기 <Icon name="arrow" size={14} />
+            </Link>
+          ) : null}
+          {trailerPublishEnabled() ? (
+            <Link
+              className="text-link"
+              href="/demo/d/cccccccc-cccc-4ccc-8ccc-cccccccccccc/trailers"
+            >
+              채용 예고편 만드는 과정 <Icon name="arrow" size={14} />
+            </Link>
+          ) : null}
+        </div>
+        <footer className="demo-footer">
+          <p>가입 없이 체험 · 회사·인물·대화는 모두 합성 데이터입니다.</p>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/login">우리 팀으로 로그인</Link>
+            {links.pilotContactUrl ? (
+              <a href={links.pilotContactUrl} target="_blank" rel="noreferrer">
+                파일럿 문의
+              </a>
+            ) : null}
+            {links.voteUrl ? (
+              <a href={links.voteUrl} target="_blank" rel="noreferrer">
+                투표하기
+              </a>
+            ) : null}
+            <Link href="/">사수 알아보기</Link>
+          </div>
+        </footer>
+      </main>
+    </>
   );
 }

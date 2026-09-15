@@ -306,7 +306,7 @@ export default function SettingsS5({ deptId, memberAdminEnabled = false }: { dep
 
   if (loadError) {
     return (
-      <main className="mx-auto grid min-h-screen w-full max-w-4xl gap-5 px-5 py-10 sm:px-8">
+      <main className="workspace-page">
         <Link href={`/d/${deptId}`}>← 대시보드</Link>
         <div className="rounded-2xl bg-[var(--surface)] p-6">
           <h1 className="m-0 text-3xl">부서 세팅</h1>
@@ -317,26 +317,21 @@ export default function SettingsS5({ deptId, memberAdminEnabled = false }: { dep
   }
 
   if (!data || !currentMember) {
-    return <main className="mx-auto min-h-screen max-w-4xl px-5 py-10">부서 세팅을 불러오는 중입니다.</main>;
+    return <main className="workspace-page"><header className="page-heading"><div><p className="eyebrow">우리 부서의 연결과 권한</p><h1>부서 세팅</h1></div></header><div className="panel p-6" role="status"><p className="m-0 text-sm text-muted">부서 세팅을 불러오는 중입니다.</p><p className="mb-0 mt-2 text-xs text-muted">멤버 동의와 연결된 채널을 확인하고 있습니다.</p></div></main>;
   }
 
   return (
-    <main className="mx-auto grid min-h-screen w-full max-w-4xl gap-6 px-5 py-10 text-left sm:px-8">
+    <main className="workspace-page">
       <header className="grid gap-3">
-        <nav className="flex flex-wrap gap-4 text-sm">
-          <Link href={`/d/${deptId}`}>대시보드</Link>
-          <Link href={`/d/${deptId}/ask`}>묻기</Link>
-          <Link href={`/d/${deptId}/documents`}>문서</Link>
-          <Link href={`/d/${deptId}/ledger`}>원장</Link>
-        </nav>
-        <p className="m-0 text-sm font-bold text-[var(--accent)]">S5 · 부서 세팅</p>
-        <h1 className="m-0 text-4xl">수집 범위와 동의를 확인하세요</h1>
+
+        <p className="m-0 text-sm font-bold text-[var(--accent)]">부서 세팅</p>
+        <h1 className="m-0 text-3xl">수집 범위와 동의를 확인하세요</h1>
         <p className="m-0 text-[var(--muted)]">
-          멤버 동의가 확인된 발언만 저장하고, 소스의 visibility에 따라 답변 근거를 제한합니다.
+          멤버 동의가 확인된 발언만 저장하고, 연결된 자료의 공개 범위에 따라 답변 근거를 제한합니다.
         </p>
       </header>
 
-      <section className="grid gap-4 rounded-3xl bg-[var(--surface)] p-6 shadow-sm">
+      <section className="grid gap-4 panel p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="m-0 text-2xl">1. 내 수집 동의</h2>
@@ -369,7 +364,7 @@ export default function SettingsS5({ deptId, memberAdminEnabled = false }: { dep
         {consentState.message ? <p className="m-0 text-sm text-[var(--muted)]">{consentState.message}</p> : null}
       </section>
 
-      <section className="grid gap-4 rounded-3xl bg-[var(--surface)] p-6 shadow-sm">
+      <section className="grid gap-4 panel p-6">
         <div>
           <h2 className="m-0 text-2xl">2. 멤버 동의 상태</h2>
           <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
@@ -423,7 +418,7 @@ export default function SettingsS5({ deptId, memberAdminEnabled = false }: { dep
       </section>
 
       {data.role === "lead" ? (
-        <section className="grid gap-4 rounded-3xl bg-[var(--surface)] p-6 shadow-sm">
+        <section className="grid gap-4 panel p-6">
           <div>
             <h2 className="m-0 text-2xl">3. Slack 채널 연결</h2>
             <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
@@ -478,7 +473,7 @@ export default function SettingsS5({ deptId, memberAdminEnabled = false }: { dep
       ) : null}
 
       {data.role === "lead" ? (
-        <section className="grid gap-4 rounded-3xl bg-[var(--surface)] p-6 shadow-sm">
+        <section className="grid gap-4 panel p-6">
           <div>
             <h2 className="m-0 text-2xl">4. 회의 전사 업로드</h2>
             <p className="mb-0 mt-2 text-sm text-[var(--muted)]">Zoom·Meet 기본 전사 VTT/TXT를 올리면 화자 동의가 확인된 발언만 저장합니다.</p>
@@ -494,7 +489,7 @@ export default function SettingsS5({ deptId, memberAdminEnabled = false }: { dep
       ) : null}
 
       {data.role === "lead" ? (
-        <section className="grid gap-4 rounded-3xl bg-[var(--surface)] p-6 shadow-sm">
+        <section className="grid gap-4 panel p-6">
           <div>
             <h2 className="m-0 text-2xl">5. Notion 원칙 문서</h2>
             <p className="mb-0 mt-2 text-sm text-[var(--muted)]">공유된 페이지와 하위 블록을 한 번 가져옵니다. 다시 가져오면 기존 블록은 멱등 처리됩니다.</p>
@@ -509,7 +504,7 @@ export default function SettingsS5({ deptId, memberAdminEnabled = false }: { dep
         </section>
       ) : null}
 
-      <section className="grid gap-4 rounded-3xl bg-[var(--surface)] p-6 shadow-sm">
+      <section className="grid gap-4 panel p-6">
         <div>
           <h2 className="m-0 text-2xl">연결된 입력과 백필</h2>
           <p className="mb-0 mt-2 text-sm text-[var(--muted)]">백필 job은 수집 후 분류·임베딩·카드 생성을 순서대로 진행합니다.</p>

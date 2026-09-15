@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-import { SiteCta } from "@/components/site-cta";
+import { WorkspaceShell } from "@/components/workspace-shell";
+import { Icon } from "@/components/ui/icon";
 import { siteLinks } from "@/lib/site";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
-import { trailerPublishEnabled } from "@/lib/features";
+import { orgAdminReadEnabled, trailerPublishEnabled } from "@/lib/features";
 
 export default async function DemoDepartmentLayout({
   children,
@@ -21,35 +21,62 @@ export default async function DemoDepartmentLayout({
     .select("id, name")
     .eq("id", dept)
     .maybeSingle<{ id: string; name: string }>();
-
-  if (!department) {
-    notFound();
-  }
+  if (!department) notFound();
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-black/10 bg-[var(--surface)]">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <div className="flex items-center gap-4">
-            <Link className="font-bold text-[var(--accent)]" href="/demo">사수 데모</Link>
-            <span className="text-sm text-[var(--muted)]">{department.name}</span>
-          </div>
-          <nav className="flex flex-wrap gap-4 text-sm">
-            <Link href={`/demo/d/${dept}`}>대시보드</Link>
-            <Link href={`/demo/d/${dept}/ledger`}>원장</Link>
-            <Link href={`/demo/d/${dept}/ask`}>묻기</Link>
-            <Link href={`/demo/d/${dept}/roles`}>역할</Link>
-            {trailerPublishEnabled() ? <Link href={`/demo/d/${dept}/trailers`}>예고편</Link> : null}
-          </nav>
-        </div>
-      </header>
+    <WorkspaceShell
+      demo
+      deptId={dept}
+      departmentName={department.name}
+      showOrgAdmin={orgAdminReadEnabled()}
+      showTrailers={trailerPublishEnabled()}
+    >
       {children}
-      <aside className="border-t border-black/10 bg-[var(--surface)]" aria-label="게스트 데모 다음 단계">
-        <div className="mx-auto grid w-full max-w-6xl gap-4 px-5 py-7 sm:px-8 md:grid-cols-[1fr_auto] md:items-center">
-          <div><strong className="text-lg">우리 부서의 결정도 사수하세요</strong><p className="mb-0 mt-1 text-sm text-[var(--muted)]">파일럿 문의 또는 대회 투표로 이어갈 수 있습니다.</p></div>
-          <SiteCta compact links={links} showHome />
+      <aside className="workspace-cta" aria-label="게스트 데모 다음 단계">
+        <div>
+          <strong>우리 부서의 결정도 사수하세요</strong>
+          <p>우리 팀의 기록을 연결하고, 함께 일할 사수를 만나보세요.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {links.pilotContactUrl ? (
+            <a
+              className="button button-primary button-small"
+              href={links.pilotContactUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              파일럿 문의
+            </a>
+          ) : (
+            <Link className="button button-primary button-small" href="/#pilot">
+              우리 팀에 적용하기 <Icon name="arrow" size={14} />
+            </Link>
+          )}
+          {links.voteUrl ? (
+            <a
+              className="text-link"
+              href={links.voteUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              투표하기
+            </a>
+          ) : null}
+          {links.demoVideoUrl ? (
+            <a
+              className="text-link"
+              href={links.demoVideoUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              3분 데모 영상
+            </a>
+          ) : null}
+          <Link className="text-link" href="/demo">
+            다른 부서 보기
+          </Link>
         </div>
       </aside>
-    </div>
+    </WorkspaceShell>
   );
 }

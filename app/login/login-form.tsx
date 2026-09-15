@@ -61,7 +61,8 @@ export default function LoginForm({ initialError, next }: LoginFormProps) {
           <label className="grid gap-2 font-bold" htmlFor="email">
             이메일
             <input
-              className="rounded-xl border border-[var(--muted)] bg-transparent px-4 py-3 font-normal text-[var(--ink)]"
+              className="rounded-xl border border-black/15 bg-[#fafbf9] px-4 py-3 font-normal text-[var(--ink)]"
+              autoComplete="email"
               id="email"
               name="email"
               onChange={(event) => setEmail(event.target.value)}
@@ -72,7 +73,7 @@ export default function LoginForm({ initialError, next }: LoginFormProps) {
             />
           </label>
           <button
-            className="rounded-xl bg-[var(--accent)] px-4 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="button button-primary w-full disabled:opacity-60"
             disabled={isSending}
             type="submit"
           >

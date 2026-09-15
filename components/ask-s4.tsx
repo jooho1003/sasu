@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 type Citation = {
@@ -147,26 +146,22 @@ export default function AskS4({ deptId }: { deptId: string }) {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-7 px-5 py-10 text-left sm:px-8">
+    <main className="workspace-page">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="grid gap-2">
           <p className="m-0 text-sm font-bold text-[var(--accent)]">사수</p>
-          <h1 className="text-4xl! text-[var(--ink)]!">묻기</h1>
+          <h1 className="m-0 text-3xl">사수에게 묻기</h1>
           <p className="m-0 text-[var(--muted)]">내 권한 범위 안의 부서 기록만 근거로 답합니다.</p>
         </div>
-        <div className="flex gap-4 text-sm">
-          <Link href={`/d/${deptId}`}>대시보드</Link>
-          <Link href={`/d/${deptId}/documents`}>문서</Link>
-          <Link href={`/d/${deptId}/ledger`}>원장</Link>
-        </div>
+
       </header>
 
-      <section className="grid gap-4 rounded-2xl bg-[var(--surface)] p-5 shadow-sm">
+      <section className="grid gap-4 panel p-5">
         <label className="grid gap-2 font-bold" htmlFor="ask-question">
           무엇이 궁금한가요?
           <textarea
             id="ask-question"
-            className="min-h-32 rounded-xl border border-black/15 bg-[var(--surface)] p-3 font-normal text-[var(--ink)]"
+            className="min-h-40 rounded-xl border border-black/10 bg-[#fafbf9] p-4 leading-7 font-normal text-[var(--ink)]"
             maxLength={1_000}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder="예: 외주사 B 견적은 어떻게 결정됐나요?"
@@ -185,7 +180,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
           <span className="text-sm text-[var(--muted)]">최대 60초 · 원본 음성은 저장하지 않습니다.</span>
         </div>
         <button
-          className="w-fit rounded-lg bg-[var(--accent)] px-5 py-3 font-bold text-white disabled:opacity-50"
+          className="button button-primary w-fit disabled:opacity-50"
           disabled={busy}
           onClick={() => void ask()}
           type="button"
@@ -202,7 +197,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
         <div className="rounded-2xl bg-[var(--surface)] p-6">답변을 만들지 못했습니다. 잠시 후 다시 질문해주세요.</div>
       ) : null}
       {answer && (answer.status === "done" || answer.status === "refused") ? (
-        <article className="grid gap-5 rounded-2xl bg-[var(--surface)] p-6 shadow-sm">
+        <article className="grid gap-5 panel p-6">
           <p className="m-0 whitespace-pre-wrap leading-8">{answer.answer}</p>
           {answer.citations.length > 0 ? (
             <section className="grid gap-3">

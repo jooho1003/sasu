@@ -197,13 +197,10 @@ export default async function CardDetailPage({
   const canAct = membership.role === "lead" || card.assignee_id === membership.userId;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-6 px-5 py-10 text-left sm:px-8">
-      <nav className="flex flex-wrap gap-4 text-sm">
-        <Link href={`/d/${membership.deptId}`}>대시보드</Link>
-        <Link href={`/d/${membership.deptId}/ledger`}>결정 원장</Link>
-      </nav>
+    <main className="workspace-page">
+      <Link className="text-link" href={`/d/${membership.deptId}`}>← 대시보드</Link>
 
-      <article className="grid gap-6 rounded-3xl border-l-4 border-l-[var(--urgent)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+      <article className="grid gap-6 panel border-l-4 border-l-[var(--urgent)] p-6 shadow-sm sm:p-8">
         <header className="grid gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-[var(--urgent)] px-3 py-1 text-xs font-bold text-white">
@@ -215,7 +212,7 @@ export default async function CardDetailPage({
               </span>
             ) : null}
           </div>
-          <h1 className="text-3xl! text-[var(--ink)]! sm:text-4xl!">{card.title}</h1>
+          <h1 className="m-0 text-2xl sm:text-3xl">{card.title}</h1>
           <p className="m-0 text-sm text-[var(--muted)]" data-meta>
             마감 · {deadline && !Number.isNaN(deadline.getTime()) ? formatDate(card.deadline) : "마감 미정"}
           </p>
@@ -223,7 +220,7 @@ export default async function CardDetailPage({
 
         {lacksVerifiedEvidence ? (
           <section className="rounded-2xl bg-[var(--urgent)]/10 p-5">
-            <h2 className="m-0 text-xl">근거를 확인하지 못했습니다 — lead 검토 필요</h2>
+            <h2 className="m-0 text-xl">근거를 확인하지 못했습니다 · 팀장 검토 필요</h2>
             <p className="mb-0 text-[var(--muted)]">
               검증된 인용이 없어 카드 본문과 추천 방향을 표시하지 않습니다.
             </p>

@@ -1,31 +1,15 @@
 import type { Metadata } from "next";
-import { Gothic_A1, Hahmlet, IBM_Plex_Mono } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 
 import { metadataBase } from "@/lib/site";
 
 import "./globals.css";
 
-const headingFont = Hahmlet({
+const bodyFont = Noto_Sans_KR({
   subsets: ["latin"],
-  display: "swap",
-  variable: "--font-heading",
-  fallback: ["system-ui", "Arial", "sans-serif"],
-});
-
-const bodyFont = Gothic_A1({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
   display: "swap",
   variable: "--font-body",
   fallback: ["system-ui", "Arial", "sans-serif"],
-});
-
-const metaFont = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-  variable: "--font-meta",
-  fallback: ["ui-monospace", "SFMono-Regular", "monospace"],
 });
 
 export const metadata: Metadata = {
@@ -41,13 +25,22 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     siteName: "사수",
     title: "사수 — 회의록이 아니라 결정을 만듭니다",
-    description: "부서별 결정 요청, 결정 원장, 권한 인지 Q&A를 하나로 연결합니다.",
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "사수 — 부서별 결정 사수 AI" }],
+    description:
+      "부서별 결정 요청, 결정 원장, 권한 인지 Q&A를 하나로 연결합니다.",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "사수 — 부서별 결정 사수 AI",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "사수 — 회의록이 아니라 결정을 만듭니다",
-    description: "부서별 결정 요청, 결정 원장, 권한 인지 Q&A를 하나로 연결합니다.",
+    description:
+      "부서별 결정 요청, 결정 원장, 권한 인지 Q&A를 하나로 연결합니다.",
     images: ["/opengraph-image.png"],
   },
 };
@@ -58,10 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="ko"
-      className={`${headingFont.variable} ${bodyFont.variable} ${metaFont.variable}`}
-    >
+    <html lang="ko" className={bodyFont.variable}>
       <body>{children}</body>
     </html>
   );

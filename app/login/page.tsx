@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { BrandMark, Icon } from "@/components/ui/icon";
 import LoginForm from "./login-form";
 
 const LOGIN_ERRORS: Record<string, string> = {
@@ -6,7 +8,6 @@ const LOGIN_ERRORS: Record<string, string> = {
   membership_lookup:
     "로그인은 확인했지만 부서 멤버십을 조회하지 못했습니다. 잠시 후 다시 시도해주세요.",
 };
-
 type LoginPageProps = {
   searchParams: Promise<{ error?: string; next?: string }>;
 };
@@ -14,20 +15,47 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const { error, next } = await searchParams;
   const initialError = error ? (LOGIN_ERRORS[error] ?? null) : null;
-
   return (
-    <main className="center-shell">
-      <section className="mx-auto grid w-full max-w-md gap-6 rounded-2xl bg-[var(--surface)] p-8 text-left shadow-sm">
-        <div className="grid gap-2">
-          <p className="m-0 text-sm font-bold text-[var(--accent)]">사수</p>
-          <h1 className="text-3xl!">이메일로 로그인</h1>
-          <p className="m-0 text-[var(--muted)]">
-            비밀번호 없이 로그인할 수 있는 매직링크를 보내드립니다.
+    <main className="login-shell">
+      <section className="login-story">
+        <Link className="brand" href="/">
+          <BrandMark />
+          사수
+        </Link>
+        <div>
+          <span className="feature-icon">
+            <Icon name="chat" size={23} />
+          </span>
+          <h2>
+            우리 팀의 이야기를
+            <br />
+            이해하는 동료.
+          </h2>
+          <p>
+            놓친 결정은 챙기고, 궁금한 맥락은 바로 묻고.
+            <br />
+            오늘도 사수와 함께 시작하세요.
           </p>
         </div>
-
-        <LoginForm initialError={initialError} next={next ?? null} />
+        <span>팀의 맥락을 기억하고, 다음 결정을 돕습니다.</span>
       </section>
+      <div className="login-form-wrap">
+        <section className="login-form-panel">
+          <header>
+            <span className="badge badge-green">다시 만나 반가워요</span>
+            <h1>이메일로 로그인</h1>
+            <p>
+              업무용 이메일을 입력해주세요.
+              <br />
+              비밀번호 없이 로그인할 수 있는 매직링크를 보내드립니다.
+            </p>
+          </header>
+          <LoginForm initialError={initialError} next={next ?? null} />
+          <footer>
+            먼저 둘러보고 싶다면?<Link href="/demo">데모 체험하기 →</Link>
+          </footer>
+        </section>
+      </div>
     </main>
   );
 }

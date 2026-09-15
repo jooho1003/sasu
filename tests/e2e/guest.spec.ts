@@ -37,8 +37,11 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
       const articles = page.locator("article");
       expect(await articles.count()).toBeGreaterThan(0);
       for (const article of await articles.all()) {
-        await expect(article.locator("q")).toBeVisible();
-        await expect(article.locator("q")).not.toHaveText("인용 없음");
+        expect(await article.locator("q").count()).toBeGreaterThan(0);
+        for (const quote of await article.locator("q").all()) {
+          await expect(quote).toBeVisible();
+          await expect(quote).not.toHaveText("인용 없음");
+        }
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       await expect(page.locator("body")).not.toContainText(REAL_DEPT);

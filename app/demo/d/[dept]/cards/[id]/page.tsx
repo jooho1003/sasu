@@ -34,9 +34,9 @@ export default async function DemoCardPage({
   const decisionMap = new Map(((decisions ?? []) as Decision[]).map((decision) => [decision.id, decision]));
 
   return (
-    <main className="mx-auto grid w-full max-w-4xl gap-6 px-5 py-10 sm:px-8">
+    <main className="workspace-page">
       <Link className="text-sm" href={`/demo/d/${dept}`}>← 대시보드</Link>
-      <article className="grid gap-6 rounded-3xl border-l-4 border-l-[var(--urgent)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+      <article className="grid gap-6 panel border-l-4 border-l-[var(--urgent)] p-6 shadow-sm sm:p-8">
         <header className="grid gap-3"><span className="w-fit rounded-full bg-[var(--urgent)] px-3 py-1 text-xs font-bold text-white">지금 결정</span><h1 className="m-0 text-3xl">{card.title}</h1><p className="m-0 text-sm text-[var(--muted)]">{card.visibility === "leads_only" ? "팀장 근거가 포함된 카드" : "부서 전체 카드"}</p></header>
         <section className="grid gap-2"><h2 className="m-0 text-xl">배경</h2><p className="m-0 whitespace-pre-wrap leading-7">{card.background}</p></section>
         <section className="grid gap-3"><h2 className="m-0 text-xl">근거 인용</h2>{rows.map((row, index) => { const item = row.item_id ? itemMap.get(row.item_id) : null; const decision = row.decision_id ? decisionMap.get(row.decision_id) : null; return <blockquote key={`${row.quote}-${index}`} className="m-0 grid gap-2 rounded-2xl border border-[var(--accent)]/25 bg-[var(--accent)]/5 p-4"><span className="text-xs text-[var(--muted)]">{item?.author ?? decision?.decided_by_name ?? "기록"}</span><q className="leading-7">{row.quote}</q></blockquote>; })}</section>
