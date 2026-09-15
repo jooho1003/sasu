@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { openDirectMessage, postMessage } from "@/lib/slack/post";
+import {
+  getMessagePermalink,
+  openDirectMessage,
+  postMessage,
+} from "@/lib/slack/post";
 
 describe("Slack API client", () => {
   afterEach(() => {
@@ -38,5 +42,82 @@ describe("Slack API client", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(fetchMock.mock.calls[0][0]).toContain("conversations.open");
     expect(fetchMock.mock.calls[1][0]).toContain("chat.postMessage");
+  });
+
+  it("답변의 자동 마크업·미리보기 차단 옵션을 Slack으로 전달한다", async () => {
+    process.env.SLACK_BOT_TOKEN = "xoxb-test";
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify({ ok: true, channel: "C123", ts: "1.2" })),
+      );
+    await postMessage({
+      channel: "C123",
+      thread_ts: "1.1",
+      text: "<!channel>",
+      blocks: [],
+      mrkdwn: false,
+      parse: "none",
+      unfurl_links: false,
+      unfurl_media: false,
+    });
+    expect(
+      JSON.parse(fetchMock.mock.calls[0][1]?.body as string),
+    ).toMatchObject({
+      mrkdwn: false,
+      parse: "none",
+      unfurl_links: false,
+      unfurl_media: false,
+      thread_ts: "1.1",
+    });
+  });
+
+  it("인증 헤더와 제한 시간으로 실제 원문 permalink를 조회한다", async () => {
+    process.env.SLACK_BOT_TOKEN = "xoxb-test";
+    const permalink =
+      "https://example.slack.com/archives/C123/p1789431300000000";
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(JSON.stringify({ ok: true, permalink })));
+    await expect(
+      getMessagePermalink({ channel: "C123", messageTs: "1789431300.000000" }),
+    ).resolves.toBe(permalink);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toContain(
+      "chat.getPermalink?channel=C123&message_ts=1789431300.000000",
+    );
+    expect(String(url)).not.toContain("xoxb-test");
+    expect(init?.headers).toMatchObject({ authorization: "Bearer xoxb-test" });
+    expect(init?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it.each([
+    { ok: false, error: "message_not_found" },
+    { ok: true },
+    { ok: true, permalink: 123 },
+  ])("원문 링크가 없으면 오류를 반환한다", async (response) => {
+    process.env.SLACK_BOT_TOKEN = "xoxb-test";
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify(response)),
+    );
+    await expect(
+      getMessagePermalink({ channel: "C123", messageTs: "1.2" }),
+    ).rejects.toMatchObject({ error_code: "slack_api_failed" });
+  });
+
+  it("선택적인 원문 링크 조회는 rate limit에서 대기 재시도하지 않는다", async () => {
+    process.env.SLACK_BOT_TOKEN = "xoxb-test";
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify({ ok: false, error: "ratelimited" }), {
+          status: 429,
+          headers: { "retry-after": "120" },
+        }),
+      );
+    await expect(
+      getMessagePermalink({ channel: "C123", messageTs: "1.2" }),
+    ).rejects.toMatchObject({ error_code: "slack_rate_limited" });
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 });

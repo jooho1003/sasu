@@ -32,14 +32,16 @@ type SlackResponse = {
     name?: string;
     is_private?: boolean;
   }>;
-  members?: string[] | Array<{
-    id?: string;
-    name?: string;
-    real_name?: string;
-    deleted?: boolean;
-    is_bot?: boolean;
-    profile?: { display_name?: string; real_name?: string };
-  }>;
+  members?:
+    | string[]
+    | Array<{
+        id?: string;
+        name?: string;
+        real_name?: string;
+        deleted?: boolean;
+        is_bot?: boolean;
+        profile?: { display_name?: string; real_name?: string };
+      }>;
   user_id?: string;
 };
 
@@ -63,7 +65,10 @@ function apiError(response: SlackResponse, status: number): SlackApiError {
   if (status === 429 || response.error === "ratelimited") {
     return new SlackApiError("slack_rate_limited");
   }
-  if (response.error === "channel_not_found" || response.error === "user_not_found") {
+  if (
+    response.error === "channel_not_found" ||
+    response.error === "user_not_found"
+  ) {
     return new SlackApiError("slack_dm_unavailable");
   }
   return new SlackApiError("slack_api_failed");
@@ -97,7 +102,10 @@ async function callSlack(
     }
 
     const error = apiError(parsed, response.status);
-    if (error.error_code !== "slack_rate_limited" || attempt === MAX_RATE_LIMIT_RETRIES - 1) {
+    if (
+      error.error_code !== "slack_rate_limited" ||
+      attempt === MAX_RATE_LIMIT_RETRIES - 1
+    ) {
       throw error;
     }
 
@@ -109,11 +117,12 @@ async function callSlack(
   throw new SlackApiError("slack_api_failed");
 }
 
-export async function openDirectMessage(userId: string): Promise<{ id: string }> {
+export async function openDirectMessage(
+  userId: string,
+): Promise<{ id: string }> {
   const response = await callSlack("conversations.open", { users: userId });
   const channel = response.channel;
-  const channelId =
-    typeof channel === "string" ? channel : channel?.id;
+  const channelId = typeof channel === "string" ? channel : channel?.id;
   if (!channelId) {
     throw new SlackApiError("slack_dm_unavailable");
   }
@@ -125,12 +134,46 @@ export async function postMessage(args: {
   text: string;
   blocks: SlackBlock[];
   thread_ts?: string;
+  mrkdwn?: boolean;
+  parse?: "none";
+  unfurl_links?: boolean;
+  unfurl_media?: boolean;
 }): Promise<{ channel: string; ts: string }> {
   const response = await callSlack("chat.postMessage", args);
-  if (!response.channel || typeof response.channel !== "string" || !response.ts) {
+  if (
+    !response.channel ||
+    typeof response.channel !== "string" ||
+    !response.ts
+  ) {
     throw new SlackApiError("slack_api_failed");
   }
   return { channel: response.channel, ts: response.ts };
+}
+
+/** Optional citation enrichment: fail quickly instead of delaying the answer. */
+export async function getMessagePermalink(args: {
+  channel: string;
+  messageTs: string;
+}): Promise<string> {
+  const params = new URLSearchParams({
+    channel: args.channel,
+    message_ts: args.messageTs,
+  });
+  const response = await fetch(`${SLACK_API_URL}/chat.getPermalink?${params}`, {
+    headers: { authorization: `Bearer ${token()}` },
+    signal: AbortSignal.timeout(5_000),
+  });
+  let parsed: SlackResponse & { permalink?: unknown };
+  try {
+    parsed = await response.json();
+  } catch {
+    throw new SlackApiError("slack_api_failed");
+  }
+  if (!response.ok || parsed.ok !== true)
+    throw apiError(parsed, response.status);
+  if (typeof parsed.permalink !== "string" || !parsed.permalink)
+    throw new SlackApiError("slack_api_failed");
+  return parsed.permalink;
 }
 
 export async function openModal(args: {
@@ -162,7 +205,13 @@ export async function listConversations(): Promise<
   });
   return (response.channels ?? []).flatMap((channel) =>
     channel.id && channel.name
-      ? [{ id: channel.id, name: channel.name, isPrivate: channel.is_private === true }]
+      ? [
+          {
+            id: channel.id,
+            name: channel.name,
+            isPrivate: channel.is_private === true,
+          },
+        ]
       : [],
   );
 }
@@ -172,7 +221,9 @@ export async function conversationMembers(channel: string): Promise<string[]> {
     channel,
     limit: 1_000,
   });
-  return (response.members ?? []).filter((member): member is string => typeof member === "string");
+  return (response.members ?? []).filter(
+    (member): member is string => typeof member === "string",
+  );
 }
 
 export type SlackDirectoryUser = {
@@ -184,8 +235,19 @@ export async function listUsers(): Promise<SlackDirectoryUser[]> {
   const response = await callSlack("users.list", { limit: "200" });
   const members = Array.isArray(response.members) ? response.members : [];
   return members.flatMap((member) => {
-    if (typeof member === "string" || !member.id || member.deleted || member.is_bot) return [];
-    const displayName = member.profile?.display_name || member.profile?.real_name || member.real_name || member.name || member.id;
+    if (
+      typeof member === "string" ||
+      !member.id ||
+      member.deleted ||
+      member.is_bot
+    )
+      return [];
+    const displayName =
+      member.profile?.display_name ||
+      member.profile?.real_name ||
+      member.real_name ||
+      member.name ||
+      member.id;
     return [{ id: member.id, displayName }];
   });
 }
@@ -230,8 +292,9 @@ export async function historyPage(args: {
     ...(args.cursor ? { cursor: args.cursor } : {}),
   });
   return {
-    messages: (response as SlackResponse & { messages?: SlackHistoryPage["messages"] }).messages ?? [],
-    nextCursor:
-      response.response_metadata?.next_cursor?.trim() || null,
+    messages:
+      (response as SlackResponse & { messages?: SlackHistoryPage["messages"] })
+        .messages ?? [],
+    nextCursor: response.response_metadata?.next_cursor?.trim() || null,
   };
 }

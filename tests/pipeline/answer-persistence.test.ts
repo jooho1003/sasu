@@ -1,14 +1,32 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  rpc: vi.fn(), from: vi.fn(), search: vi.fn(), decisions: vi.fn(),
-  structured: vi.fn(), post: vi.fn(),
+  rpc: vi.fn(),
+  from: vi.fn(),
+  search: vi.fn(),
+  decisions: vi.fn(),
+  structured: vi.fn(),
+  post: vi.fn(),
+  permalink: vi.fn(),
+  metadata: vi.fn(),
+  metadataSelect: vi.fn(),
+  metadataDept: vi.fn(),
 }));
-vi.mock("@/lib/supabase/service", () => ({ createServiceSupabaseClient: () => mocks }));
-vi.mock("@/lib/embeddings", () => ({ embedText: async () => ({ vector: [0.1] }) }));
-vi.mock("@/lib/search", () => ({ searchAs: mocks.search, recentDecisionsAs: mocks.decisions }));
+vi.mock("@/lib/supabase/service", () => ({
+  createServiceSupabaseClient: () => mocks,
+}));
+vi.mock("@/lib/embeddings", () => ({
+  embedText: async () => ({ vector: [0.1] }),
+}));
+vi.mock("@/lib/search", () => ({
+  searchAs: mocks.search,
+  recentDecisionsAs: mocks.decisions,
+}));
 vi.mock("@/lib/llm", () => ({ llm: { structured: mocks.structured } }));
-vi.mock("@/lib/slack/post", () => ({ postMessage: mocks.post }));
+vi.mock("@/lib/slack/post", () => ({
+  postMessage: mocks.post,
+  getMessagePermalink: mocks.permalink,
+}));
 vi.mock("@/lib/jobs", () => ({ registerHandler: vi.fn() }));
 
 import { answerQuestion } from "@/lib/pipeline/answer";
@@ -19,90 +37,307 @@ describe("answer publication boundary", () => {
     const query = { select: vi.fn(), eq: vi.fn(), maybeSingle: vi.fn() };
     query.select.mockReturnValue(query);
     query.eq.mockReturnValue(query);
-    query.maybeSingle.mockResolvedValue({ data: {
-      id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "합성 테스트 질문", status: "pending",
-    }, error: null });
-    mocks.from.mockReturnValue(query);
-    mocks.search.mockResolvedValue([{ id: "item-1", content: "확인된 근거", source_visibility: "dept" }]);
+    query.maybeSingle.mockResolvedValue({
+      data: {
+        id: "answer-1",
+        dept_id: "dept-1",
+        asked_by: "lead-1",
+        question: "합성 테스트 질문",
+        status: "pending",
+      },
+      error: null,
+    });
+    const metadataQuery = {
+      select: mocks.metadataSelect,
+      eq: mocks.metadataDept,
+      in: mocks.metadata,
+      abortSignal: vi.fn(),
+    };
+    mocks.metadataSelect.mockReturnValue(metadataQuery);
+    mocks.metadataDept.mockReturnValue(metadataQuery);
+    mocks.metadata.mockReturnValue(metadataQuery);
+    metadataQuery.abortSignal.mockImplementation(async () => ({
+      data: [{ id: "item-1", external_ref: "1789431300.000000" }],
+      error: null,
+    }));
+    mocks.from.mockImplementation((table: string) =>
+      table === "items" ? metadataQuery : query,
+    );
+    mocks.search.mockResolvedValue([
+      {
+        id: "item-1",
+        content: "확인된 근거",
+        source_visibility: "dept",
+        source_kind: "slack_channel",
+        source_external_id: "C123",
+        source_title: "#영업",
+        author: "민서",
+        spoken_at: "2026-09-15T00:15:00.000Z",
+      },
+    ]);
+    mocks.permalink.mockResolvedValue(
+      "https://example.slack.com/archives/C123/p1789431300000000",
+    );
     mocks.decisions.mockResolvedValue([]);
-    mocks.structured.mockResolvedValue({ data: {
-      citations: [{ item_id: "item-1", decision_id: null, quote: "확인된 근거" }],
-      answer: "근거를 확인했습니다.", refused: false,
-    } });
+    mocks.structured.mockResolvedValue({
+      data: {
+        citations: [
+          { item_id: "item-1", decision_id: null, quote: "확인된 근거" },
+        ],
+        answer: "근거를 확인했습니다.",
+        refused: false,
+      },
+    });
     mocks.rpc.mockResolvedValue({ data: true, error: null });
   });
 
   it("채널 응답은 팀장 질문도 두 검색 모두 channel 범위로 제한한다", async () => {
     await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
-    expect(mocks.search).toHaveBeenCalledWith(mocks, expect.objectContaining({ scope: "channel" }));
-    expect(mocks.decisions).toHaveBeenCalledWith(mocks, expect.objectContaining({ scope: "channel" }));
+    expect(mocks.search).toHaveBeenCalledWith(
+      mocks,
+      expect.objectContaining({ scope: "channel" }),
+    );
+    expect(mocks.decisions).toHaveBeenCalledWith(
+      mocks,
+      expect.objectContaining({ scope: "channel" }),
+    );
   });
 
   it("웹 질문은 질문자 범위를 유지한다", async () => {
     await answerQuestion("answer-1");
-    expect(mocks.search).toHaveBeenCalledWith(mocks, expect.objectContaining({ scope: "user", userId: "lead-1" }));
+    expect(mocks.search).toHaveBeenCalledWith(
+      mocks,
+      expect.objectContaining({ scope: "user", userId: "lead-1" }),
+    );
+    expect(mocks.post).not.toHaveBeenCalled();
+    expect(mocks.metadataSelect).not.toHaveBeenCalled();
+    expect(mocks.permalink).not.toHaveBeenCalled();
+  });
+
+  it("저장 성공 뒤 검증된 인용의 메타데이터와 원문 링크만 게시한다", async () => {
+    await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
+    expect(mocks.metadataSelect).toHaveBeenCalledWith("id, external_ref");
+    expect(mocks.metadataDept).toHaveBeenCalledWith("dept_id", "dept-1");
+    expect(mocks.metadata).toHaveBeenCalledWith("id", ["item-1"]);
+    expect(mocks.rpc.mock.invocationCallOrder[0]).toBeLessThan(
+      mocks.metadata.mock.invocationCallOrder[0],
+    );
+    expect(mocks.permalink).toHaveBeenCalledWith({
+      channel: "C123",
+      messageTs: "1789431300.000000",
+    });
+    const message = mocks.post.mock.calls[0][0];
+    expect(message).toMatchObject({
+      channel: "C_TEST",
+      thread_ts: "1.1",
+      mrkdwn: false,
+    });
+    for (const text of [
+      "근거를 확인했습니다.",
+      "확인된 근거",
+      "민서",
+      "2026. 9. 15.",
+      "#영업",
+      "example.slack.com",
+      "이 채널의 부서 공개 기록만",
+    ])
+      expect(JSON.stringify(message.blocks)).toContain(text);
+  });
+
+  it("링크 조회 실패에도 인용을 유지하고 부서 페이지를 제공한다", async () => {
+    mocks.permalink.mockRejectedValue(new Error("unavailable"));
+    await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
+    expect(mocks.post.mock.calls[0][0].text).toContain("확인된 근거");
+    expect(mocks.post.mock.calls[0][0].text).toContain("부서에서 보기");
+    expect(mocks.post.mock.calls[0][0].text).toContain("/d/dept-1");
+  });
+
+  it("메타데이터 조회 오류에도 저장된 답변과 인용을 게시한다", async () => {
+    mocks.metadata.mockReturnValue({
+      abortSignal: async () => ({ data: null, error: { code: "57014" } }),
+    });
+    await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
+    expect(mocks.post.mock.calls[0][0].text).toContain("확인된 근거");
+    expect(mocks.post.mock.calls[0][0].text).toContain("부서에서 보기");
+    expect(mocks.permalink).not.toHaveBeenCalled();
+  });
+
+  it("검색됐어도 인용하지 않은 항목은 조회하지 않고 중복 인용의 링크는 한 번만 조회한다", async () => {
+    const item = (await mocks.search())[0];
+    mocks.search.mockResolvedValue([
+      item,
+      { ...item, id: "uncited", content: "인용하지 않은 본문" },
+    ]);
+    mocks.structured.mockResolvedValue({
+      data: {
+        answer: "확인한 답변",
+        refused: false,
+        citations: [
+          { item_id: "item-1", decision_id: null, quote: "확인된 근거" },
+          { item_id: "item-1", decision_id: null, quote: "근거" },
+        ],
+      },
+    });
+    await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
+    expect(mocks.metadata).toHaveBeenCalledWith("id", ["item-1"]);
+    expect(mocks.permalink).toHaveBeenCalledOnce();
+    expect(JSON.stringify(mocks.post.mock.calls)).not.toContain(
+      "인용하지 않은 본문",
+    );
+  });
+
+  it("모델이 검색 밖 ID를 인용하면 해당 원문을 재조회하지 않고 거절한다", async () => {
+    mocks.structured.mockResolvedValue({
+      data: {
+        answer: "숨겨진 내용",
+        refused: false,
+        citations: [
+          { item_id: "hidden", decision_id: null, quote: "숨겨진 내용" },
+        ],
+      },
+    });
+    await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
+    expect(mocks.metadata).not.toHaveBeenCalled();
+    expect(mocks.permalink).not.toHaveBeenCalled();
+    expect(JSON.stringify(mocks.post.mock.calls)).not.toContain("숨겨진 내용");
+    expect(mocks.rpc).toHaveBeenCalledWith(
+      "complete_answer",
+      expect.objectContaining({ p_refused: true }),
+    );
+  });
+
+  it("결정 인용은 검색된 결정자·시각·원장 링크를 사용한다", async () => {
+    mocks.search.mockResolvedValue([]);
+    mocks.decisions.mockResolvedValue([
+      {
+        id: "decision-1",
+        outcome: "재입찰",
+        rationale: "비용 원칙",
+        decided_by_name: "수현",
+        decided_at: "2026-09-15T00:15:00.000Z",
+      },
+    ]);
+    mocks.structured.mockResolvedValue({
+      data: {
+        answer: "재입찰로 결정했습니다.",
+        refused: false,
+        citations: [
+          { item_id: null, decision_id: "decision-1", quote: "비용 원칙" },
+        ],
+      },
+    });
+    await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
+    const text = mocks.post.mock.calls[0][0].text;
+    for (const part of [
+      "비용 원칙",
+      "수현",
+      "2026. 9. 15.",
+      "/d/dept-1/ledger#decision-decision-1",
+    ])
+      expect(text).toContain(part);
+    expect(mocks.metadata).not.toHaveBeenCalled();
+    expect(mocks.permalink).not.toHaveBeenCalled();
   });
 
   it("답변과 검증된 인용을 한 트랜잭션으로 저장한다", async () => {
     await answerQuestion("answer-1");
-    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({
-      p_answer_id: "answer-1", p_refused: false,
-      p_citations: [{ item_id: "item-1", decision_id: null, quote: "확인된 근거" }],
-    }));
+    expect(mocks.rpc).toHaveBeenCalledWith(
+      "complete_answer",
+      expect.objectContaining({
+        p_answer_id: "answer-1",
+        p_refused: false,
+        p_citations: [
+          { item_id: "item-1", decision_id: null, quote: "확인된 근거" },
+        ],
+      }),
+    );
   });
 
   it("인용 저장 실패는 재시도 가능한 오류로 남고 Slack에 게시하지 않는다", async () => {
     mocks.rpc.mockResolvedValue({ data: null, error: { code: "XX000" } });
-    await expect(answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" })).rejects.toThrow("database operation failed");
+    await expect(
+      answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" }),
+    ).rejects.toThrow("database operation failed");
     expect(mocks.post).not.toHaveBeenCalled();
+    expect(mocks.metadata).not.toHaveBeenCalled();
+    expect(mocks.permalink).not.toHaveBeenCalled();
   });
 
   it("스윕이 먼저 종료한 답변은 Slack에 늦게 게시하지 않는다", async () => {
     mocks.rpc.mockResolvedValue({ data: false, error: null });
     await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
     expect(mocks.post).not.toHaveBeenCalled();
+    expect(mocks.metadata).not.toHaveBeenCalled();
+    expect(mocks.permalink).not.toHaveBeenCalled();
   });
 
   it("일부 인용만 유효한 초안은 재생성 후에도 실패하면 전체 거절한다", async () => {
-    mocks.structured.mockResolvedValue({ data: {
-      answer: "확인된 근거와 근거 없는 추가 주장", refused: false,
-      citations: [
-        { item_id: "item-1", decision_id: null, quote: "확인된 근거" },
-        { item_id: "item-1", decision_id: null, quote: "존재하지 않는 내용" },
-      ],
-    } });
+    mocks.structured.mockResolvedValue({
+      data: {
+        answer: "확인된 근거와 근거 없는 추가 주장",
+        refused: false,
+        citations: [
+          { item_id: "item-1", decision_id: null, quote: "확인된 근거" },
+          { item_id: "item-1", decision_id: null, quote: "존재하지 않는 내용" },
+        ],
+      },
+    });
     await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
     expect(mocks.structured).toHaveBeenCalledTimes(2);
-    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: true, p_citations: [], p_error_code: "citation_invalid" }));
+    expect(mocks.rpc).toHaveBeenCalledWith(
+      "complete_answer",
+      expect.objectContaining({
+        p_refused: true,
+        p_citations: [],
+        p_error_code: "citation_invalid",
+      }),
+    );
     expect(JSON.stringify(mocks.rpc.mock.calls)).not.toContain("추가 주장");
     expect(JSON.stringify(mocks.post.mock.calls)).not.toContain("추가 주장");
   });
 
   it("첫 초안이 잘못되어도 두 번째 인용 전체가 유효하면 두 번째 답변만 게시한다", async () => {
-    mocks.structured.mockResolvedValueOnce({ data: { answer: "잘못된 초안", refused: false, citations: [] } });
+    mocks.structured.mockResolvedValueOnce({
+      data: { answer: "잘못된 초안", refused: false, citations: [] },
+    });
     await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
     expect(mocks.structured).toHaveBeenCalledTimes(2);
-    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: false, p_answer: "근거를 확인했습니다." }));
+    expect(mocks.rpc).toHaveBeenCalledWith(
+      "complete_answer",
+      expect.objectContaining({
+        p_refused: false,
+        p_answer: "근거를 확인했습니다.",
+      }),
+    );
     expect(JSON.stringify(mocks.post.mock.calls)).not.toContain("잘못된 초안");
   });
 
   it("모델이 refused이면 자유 서술 초안을 게시하지 않는다", async () => {
-    mocks.structured.mockResolvedValue({ data: { answer: "검증되지 않은 거절 이유", refused: true, citations: [] } });
+    mocks.structured.mockResolvedValue({
+      data: { answer: "검증되지 않은 거절 이유", refused: true, citations: [] },
+    });
     await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
     expect(mocks.structured).toHaveBeenCalledOnce();
     expect(JSON.stringify(mocks.rpc.mock.calls)).not.toContain("검증되지 않은");
-    expect(JSON.stringify(mocks.post.mock.calls)).not.toContain("검증되지 않은");
+    expect(JSON.stringify(mocks.post.mock.calls)).not.toContain(
+      "검증되지 않은",
+    );
   });
 
   it("실제 게이트웨이의 llm_refusal 오류도 failed가 아니라 refused로 종료한다", async () => {
     mocks.structured.mockRejectedValue({ error_code: "llm_refusal" });
     await answerQuestion("answer-1");
-    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: true, p_citations: [] }));
+    expect(mocks.rpc).toHaveBeenCalledWith(
+      "complete_answer",
+      expect.objectContaining({ p_refused: true, p_citations: [] }),
+    );
   });
 
   it("네트워크 오류를 근거 부족으로 숨기지 않는다", async () => {
     mocks.structured.mockRejectedValue(new Error("network unavailable"));
-    await expect(answerQuestion("answer-1")).rejects.toThrow("network unavailable");
+    await expect(answerQuestion("answer-1")).rejects.toThrow(
+      "network unavailable",
+    );
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 });
