@@ -140,7 +140,8 @@ test.describe("조직 관리자 B · O10 QA 조직 검증", () => {
     const writes: string[] = [];
     page.on("request", (request) => { if (!["GET", "HEAD", "OPTIONS"].includes(request.method())) writes.push(request.method()); });
     await page.goto("/demo/admin");
-    await expect(page.getByText("게스트 모드 · 읽기 전용", { exact: true })).toBeVisible();
+    await expect(page.getByText("게스트 모드 · 합성 데이터 · 읽기 전용", { exact: true })).toBeVisible();
+    await page.getByRole("navigation", { name: "조직 관리", exact: true }).getByRole("link", { name: "멤버", exact: true }).click();
     await expect(page.getByRole("heading", { name: "멤버", exact: true })).toBeVisible();
     expect(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(await page.content())).toBe(false);
     await expect(page.getByText("대기 중 초대", { exact: true })).toHaveCount(0);
