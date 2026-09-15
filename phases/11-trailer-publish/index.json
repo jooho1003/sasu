@@ -65,6 +65,12 @@
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
       "summary": "로컬 구현 및 검증 완료. phase 11: 880 단위 테스트, SQL 104 및 권한 조합 2016, lint/tsc/build 통과. E2E A·기존 회귀 19 통과, B 5 skipped. 기존 공간 체험 6 통과. 운영 적용·시드·실제 생성은 O11 미실행. docs/verification/trailer-publish.md 참조."
+    },
+    {
+      "step": 8,
+      "name": "generic-company-product-names",
+      "status": "completed",
+      "summary": "97f13a6. 회사·제품 일반 명칭 생성 지시, TDD와 전체 단위 937개 통과. 운영 재생성·시드 없음. 다음 배포 반영 대상."
     }
   ],
   "operational_summary": "O11: 0027 적용·실제 생성 스냅샷 검토/시드·B 2개 통과(21 동시 요청 한도 포함)·발행 on 운영 배포 완료. 파일럿/QA 공개 허용 false. docs/verification/O10-O12-production.md 참조."

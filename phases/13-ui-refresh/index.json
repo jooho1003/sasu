@@ -1,0 +1,19 @@
+{
+  "project": "sasu",
+  "phase": "13-ui-refresh",
+  "steps": [
+    {
+      "step": 0,
+      "name": "workspace-ui-refresh",
+      "status": "completed",
+      "summary": "초기 UI는 f8d71ef 스냅샷 운영 배포 완료. docs/verification/ui-refresh-2026-09-15.md 참조."
+    },
+    {
+      "step": 1,
+      "name": "workspace-settings-documents-admin",
+      "status": "completed",
+      "summary": "292b3f5. 설정·문서·관리 개선, 최종 합본 단위 937개·E2E 26개 통과. 운영 미반영."
+    }
+  ],
+  "operational_summary": "step0 운영 반영 완료, step1은 검증된 커밋 스냅샷으로 준비됨. 운영 승인 확인 후 반영."
+}
