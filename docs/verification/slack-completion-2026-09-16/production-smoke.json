@@ -1,0 +1,46 @@
+{
+  "base": "https://sasu-alpha.vercel.app",
+  "at": "2026-09-15T17:09:47.250Z",
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/demo",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/demo/admin",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/t/onsaemiro2026demotrail",
+      "status": 200,
+      "expected": 200
+    },
+    {
+      "path": "/admin",
+      "status": 307,
+      "expected": 307
+    },
+    {
+      "path": "/api/jobs/run",
+      "status": 401,
+      "expected": 401
+    },
+    {
+      "path": "/api/slack/events",
+      "status": 401,
+      "expected": 401
+    }
+  ]
+}

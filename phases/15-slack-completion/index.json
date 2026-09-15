@@ -3,6 +3,6 @@
   "phase": "15-slack-completion",
   "steps": [
     { "step": 0, "name": "slack-ask-completion", "status": "completed", "summary": "DM·복수 부서·진행/동의 안내·내구성 전달·본인 재전송 구현. 0029에 원자 접수·전달 job·lease·현재 인용 RLS·Slack 신원 경계와 질문 한도 잠금 추가." },
-    { "step": 1, "name": "verification-handoff", "status": "completed", "summary": "lint/build·단위 970개·격리 SQL 121개 및 권한 2016조합·E2E 30개·로컬 동시100명 PASS. docs/verification/slack-completion-2026-09-16.md에 로그·캡처·사용자 테스트 절차 기록. 운영 반영은 별도." }
+    { "step": 1, "name": "verification-handoff", "status": "completed", "summary": "lint/build·단위 970개·격리 SQL 121개 및 권한 2016조합·E2E 30개·로컬 동시100명 PASS. 사용자 요청으로 0029 운영 적용·main 머지/푸시·Vercel 배포 완료. 운영 새 질문 패널 실제 세션 조회·공개/인증 경계 스모크 확인. 실발송 인수 테스트는 사용자 검증. 상세 기록: docs/verification/slack-completion-2026-09-16.md." }
   ]
 }

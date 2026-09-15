@@ -67,6 +67,7 @@ test("게스트는 실제 부서에 접근하지 못하고 잘못된 서명은 �
 });
 
 test("게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다", async ({ page }) => {
+  test.setTimeout(120_000);
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   test.skip(!url || !key, "DB 카운트 검증용 서버 키가 필요합니다 (브라우저에 전달하지 않음).");

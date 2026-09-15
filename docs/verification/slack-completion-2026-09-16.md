@@ -33,7 +33,7 @@ TDD 기록: 질문 준비 모듈과 전달 모듈이 없는 상태에서 각각 
 
 ## 사용자 실사용 테스트 준비
 
-새 운영 DB 마이그레이션·배포·Slack 실발송은 이 개발 단계에서 실행하지 않았다. 운영에 새 코드만 먼저 올리면 새 RPC가 없어 질문 접수가 실패한다.
+초기 개발 단계에서는 운영 DB 마이그레이션·배포·Slack 실발송을 실행하지 않았다. 이후 사용자 요청으로 아래 「운영 반영」의 마이그레이션·머지·배포를 완료했다. 아래 1·2번은 운영 환경에서 완료된 상태이며, 실제 Slack 발송 검증은 사용자 테스트로 남아 있다.
 
 1. 테스트할 Supabase 환경에 `0029_slack_ask_completion.sql`을 적용한다. 마이그레이션은 기존 자료를 삭제하지 않는다. 기존 앱은 유지할 수 있으나 저장 답변 읽기 정책은 즉시 강화된다.
 2. 새 앱을 실행한다. 로컬은 `npm run dev`, 외부 Slack 이벤트 검증은 접근 가능한 테스트 배포 URL을 사용한다.
@@ -55,7 +55,23 @@ TDD 기록: 질문 준비 모듈과 전달 모듈이 없는 상태에서 각각 
 
 전체 제품 인수 테스트에는 실제 채널 20건 분류 라벨 비교, Slack 카드 버튼→원장, 전사/문서 업로드, Notion 가져오기, 관리자 초대→로그인→동의, 합성 예고편 발행·철회도 포함한다. 이번 변경은 이미 있는 해당 기능을 새로 만들었다고 집계하지 않는다. 100명 부하는 로컬 서버 결과이며 운영 URL의 부하 검증을 대체하지 않는다.
 
-Vercel CLI가 없다면 `npm i -g vercel` 설치를 권장한다. 테스트 배포·환경 변수·로그 확인에 사용할 수 있다.
+운영 반영 시 설치된 Vercel CLI 59.17.0과 Supabase CLI 2.117.0을 사용했다.
+
+## 운영 반영 — 2026-09-16, 사용자 요청
+
+- 기능 커밋: `ac4b49a`. `feat/slack-ask-completion`을 `main`에 머지한 커밋은 `cda9971`이며 GitHub `origin/main` 푸시를 완료했다. 기존 로컬 선행 8개 커밋도 함께 반영했다.
+- 이전 운영 배포(앱 롤백 대상): `dpl_Hq6oWYaRH9BqxRZD3ScRzZQgQLMq`.
+- 새 운영 배포: `dpl_FY5yvhZdEVQHoRNB4L7bpZePDBL3`, 소스 `ac4b49a`, [운영 주소](https://sasu-alpha.vercel.app). Git 메타데이터 없는 커밋 스냅샷을 `--prod --skip-domain`으로 선빌드하고 READY를 확인했다. 앱 소스는 머지 커밋과 동일하다.
+- DB: 대상 프로젝트 `fzpnidoyhejrmhymggpp`를 확인하고 dry-run에서 `0029`만 예정된 것을 확인한 뒤 적용했다. 시드 실행 없음. [마이그레이션 실행 기록](slack-completion-2026-09-16/production-migration.txt).
+- 순서: 새 앱 선빌드 → `0029` 적용 → `main` 머지·푸시 → 새 배포 promote → 운영 주소가 새 배포를 가리키는지 재확인.
+- DB 확인: 최신 `0029`, 전달 테이블 RLS, 사용자 직접 조회 거부, 익명 RPC 실행 거부, 세션 조회 허용, 수집 RPC는 서비스 역할만 허용, 답변 restrictive 정책 1개. 활성 cron 1개, 최근 5분 실행 성공 5건. [SQL 실행 기록](slack-completion-2026-09-16/production-sql.txt). 최초 조회 명령은 Windows CLI의 여러 줄 인자 전달 오류로 실패했으며 SQL 파일 입력으로 바꿔 성공했다. 마이그레이션 오류가 아니다.
+- 공개 페이지·데모·로그인·데모 관리자·공개 예고편 200, 관리자 비로그인 307, 워커·Slack 무인증 401: [8개 스모크 결과](slack-completion-2026-09-16/production-smoke.json).
+- 운영 읽기 E2E: 최초 **14/16 통과(2.9분)**. 게스트 전체 순회의 기본 30초 한도와 묻기 화면 전환 전 5초 인용 검사에서 2건이 실패했다. 실패 캡처는 아직 원장 화면이었다. 게스트 전체 검사 한도를 120초로 맞추고 묻기 URL 전환 완료를 명시적으로 기다리도록 테스트만 보완했다. 해당 **2건 재실행 모두 통과(21.4초)**, 게스트 열람 전후 AI·업무 테이블 행 수 동일. [최초 기록](slack-completion-2026-09-16/production-e2e.txt), [재검사 기록](slack-completion-2026-09-16/production-e2e-recheck.txt). 수정한 테스트의 ESLint·diff 검사도 통과했다. 이 보완은 배포 앱 소스를 바꾸지 않는다.
+- 새 Slack 질문 패널: 실제 QA 세션 → 운영 GET → 실제 DB RPC를 1440px·390px에서 확인했다. 자신의 질문 0건 응답과 빈 상태 표시, 업무 쓰기 요청 0, 브라우저 오류 0, 응답 모킹 0. [실행 결과](slack-completion-2026-09-16/production-slack-read.json), [1440px](slack-completion-2026-09-16/production-slack-questions-1440.png), [390px](slack-completion-2026-09-16/production-slack-questions-390.png).
+- 로컬에 설정된 Slack 봇 토큰의 인증과 `im:history`·`chat:write` scope를 읽기 API로 확인했다. `message.im` 구독·App Home 입력 허용·실발송은 이번 배포 검증에 포함하지 않았다.
+- 새 배포의 최근 10분 error 로그 조회: 0건(조회 시점 기준).
+
+앱 롤백은 위 이전 배포로 수행할 수 있다. `0029`를 파괴적으로 되돌리는 SQL은 실행하지 않는다. 기존 앱과 호환되지만, 강화된 저장 답변 조회 정책은 DB에 유지된다.
 
 ## 검증의 경계
 

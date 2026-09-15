@@ -1,0 +1,76 @@
+
+Running 16 tests using 1 worker
+
+
+
+(node:32156) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/16] [chromium] › tests\e2e\guest.spec.ts:10:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px
+[2/16] [chromium] › tests\e2e\guest.spec.ts:10:7 › 게스트 대시보드·카드·원장·묻기 완주 390px
+[3/16] [chromium] › tests\e2e\guest.spec.ts:57:5 › 게스트는 실제 부서에 접근하지 못하고 잘못된 서명은 거부된다
+[4/16] [chromium] › tests\e2e\guest.spec.ts:69:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다
+  1) [chromium] › tests\e2e\guest.spec.ts:69:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다 ──────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\guest-게스트-열람-전후-AI-호출·DB-행-수가-증가하지-않는다-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\guest-게스트-열람-전후-AI-호출·DB-행-수가-증가하지-않는다-chromium\error-context.md
+
+
+
+(node:45232) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[5/16] [chromium] › tests\e2e\site.spec.ts:4:7 › 공개 메인 사이트 › 핵심 메시지와 데모 동선을 정적으로 제공한다
+[6/16] [chromium] › tests\e2e\site.spec.ts:27:7 › 공개 메인 사이트 › 모바일에서 가로로 넘치지 않는다
+[7/16] [chromium] › tests\e2e\site.spec.ts:37:7 › 공개 메인 사이트 › 개인정보 안내와 검색 노출 경계를 제공한다
+[8/16] [chromium] › tests\e2e\team-coverage.spec.ts:3:5 › 기획팀은 직접 URL로 카드·원장·답변을 열 수 있다
+[9/16] [chromium] › tests\e2e\team-coverage.spec.ts:17:7 › 기획팀 데모 진입 → 카드 → 원장 → 근거 답변
+  2) [chromium] › tests\e2e\team-coverage.spec.ts:17:7 › 기획팀 데모 진입 → 카드 → 원장 → 근거 답변 ───────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('article q').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('article q').first() with timeout 5000ms
+      - waiting for locator('article q').first()
+
+
+      25 |     await expect(page.getByRole("heading", { level: 1 })).toContainText("원장");
+      26 |     await page.getByRole("link", { name: "묻기", exact: true }).click();
+    > 27 |     await expect(page.locator("article q").first()).toBeVisible();
+         |                                                     ^
+      28 |     await page.screenshot({ path: testInfo.outputPath(`${team}-workflow.png`), fullPage: true });
+      29 |   });
+      30 | }
+        at D:\바이브코딩\sasu\tests\e2e\team-coverage.spec.ts:27:53
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\team-coverage-기획팀-데모-진입-→-카드-→-원장-→-근거-답변-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\team-coverage-기획팀-데모-진입-→-카드-→-원장-→-근거-답변-chromium\error-context.md
+
+
+
+(node:52924) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[10/16] [chromium] › tests\e2e\team-coverage.spec.ts:17:7 › 디자인팀 데모 진입 → 카드 → 원장 → 근거 답변
+[11/16] [chromium] › tests\e2e\team-coverage.spec.ts:17:7 › 개발팀 데모 진입 → 카드 → 원장 → 근거 답변
+[12/16] [chromium] › tests\e2e\ui-refresh.spec.ts:8:7 › 새 탐색·기록 분류·질문 선택 1440px
+[13/16] [chromium] › tests\e2e\ui-refresh.spec.ts:8:7 › 새 탐색·기록 분류·질문 선택 390px
+[14/16] [chromium] › tests\e2e\ui-refresh.spec.ts:111:5 › 모바일 메뉴로 로그인에 접근한다
+[15/16] [chromium] › tests\e2e\ui-refresh.spec.ts:123:7 › 로그인한 부서의 공통 탐색과 읽기 화면 1440px
+[16/16] [chromium] › tests\e2e\ui-refresh.spec.ts:123:7 › 로그인한 부서의 공통 탐색과 읽기 화면 390px
+  2 failed
+    [chromium] › tests\e2e\guest.spec.ts:69:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다 ───────────────────
+    [chromium] › tests\e2e\team-coverage.spec.ts:17:7 › 기획팀 데모 진입 → 카드 → 원장 → 근거 답변 ────────────────
+  14 passed (2.9m)

@@ -1,0 +1,10 @@
+
+Running 2 tests using 1 worker
+
+
+
+(node:34620) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/2] [chromium] › tests\e2e\guest.spec.ts:69:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다
+[2/2] [chromium] › tests\e2e\team-coverage.spec.ts:19:7 › 기획팀 데모 진입 → 카드 → 원장 → 근거 답변
+  2 passed (21.4s)

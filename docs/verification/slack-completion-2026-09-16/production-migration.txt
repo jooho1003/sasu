@@ -1,0 +1,7 @@
+Connecting to remote database...
+Skipping migration .gitkeep... (file name must match pattern "<timestamp>_name.sql")
+Do you want to push these migrations to the remote database?
+ • 0029_slack_ask_completion.sql
+ [Y/n] y
+Applying migration 0029_slack_ask_completion.sql...
+{"upToDate":false,"dryRun":false,"migrations":["0029_slack_ask_completion.sql"],"seeds":[],"roles":[],"message":"Finished supabase db push."}

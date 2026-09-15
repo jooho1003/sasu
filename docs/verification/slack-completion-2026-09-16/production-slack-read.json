@@ -1,0 +1,17 @@
+{
+  "base": "https://sasu-alpha.vercel.app",
+  "at": "2026-09-15T17:10:48.626Z",
+  "checks": [
+    {
+      "width": 1440,
+      "questionCount": 0
+    },
+    {
+      "width": 390,
+      "questionCount": 0
+    }
+  ],
+  "businessWriteRequests": 0,
+  "pageErrors": 0,
+  "mockedResponses": 0
+}
