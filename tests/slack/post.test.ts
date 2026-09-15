@@ -7,6 +7,12 @@ import {
 } from "@/lib/slack/post";
 
 describe("Slack API client", () => {
+  it("긴 Retry-After는 함수 안에서 대기하지 않고 워커에 전달한다", async () => {
+    process.env.SLACK_BOT_TOKEN = "xoxb-test";
+    const fetchMock=vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response(JSON.stringify({ok:false,error:"ratelimited"}),{status:429,headers:{"retry-after":"120"}}));
+    await expect(postMessage({channel:"D123",text:"안내",blocks:[]})).rejects.toMatchObject({error_code:"slack_rate_limited",retryAfterSeconds:120});
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
   afterEach(() => {
     vi.restoreAllMocks();
     delete process.env.SLACK_BOT_TOKEN;
@@ -92,7 +98,6 @@ describe("Slack API client", () => {
   });
 
   it.each([
-    { ok: false, error: "message_not_found" },
     { ok: true },
     { ok: true, permalink: 123 },
   ])("원문 링크가 없으면 오류를 반환한다", async (response) => {
@@ -103,6 +108,11 @@ describe("Slack API client", () => {
     await expect(
       getMessagePermalink({ channel: "C123", messageTs: "1.2" }),
     ).rejects.toMatchObject({ error_code: "slack_api_failed" });
+  });
+  it("삭제된 메시지는 재생성이 필요한 오류로 구분한다", async () => {
+    process.env.SLACK_BOT_TOKEN="xoxb-test";
+    vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response(JSON.stringify({ok:false,error:"message_not_found"})));
+    await expect(getMessagePermalink({channel:"C123",messageTs:"1.1"})).rejects.toMatchObject({error_code:"slack_message_missing"});
   });
 
   it("선택적인 원문 링크 조회는 rate limit에서 대기 재시도하지 않는다", async () => {

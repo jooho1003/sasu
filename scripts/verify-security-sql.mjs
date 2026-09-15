@@ -1,4 +1,5 @@
 import { verifyTrailerAssessmentSql } from "./verify-trailer-assessment-sql.mjs";
+import { verifySlackAskSql } from "./verify-slack-ask-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
 // node scripts/verify-security-sql.mjs <temporary-directory>
@@ -166,6 +167,9 @@ try {
   }
   await q("insert into answers(id,dept_id,asked_by,question,status) values ($1,$3,$4,'member A question','done'),($2,$3,$5,'member B question','done')", [ids.memberAnswer,ids.memberBAnswer,ids.dept,ids.member,ids.memberB]);
   await q("insert into citations(owner_kind,owner_id,item_id,quote) values ('answer',$1,$3,'public evidence'),('answer',$2,$3,'public evidence')", [ids.memberAnswer,ids.memberBAnswer,ids.publicItem]);
+  // Production complete_answer marks cited answers verified; the read boundary
+  // intentionally hides incomplete synthetic 'done' rows as of 0029.
+  await q("update answers set verified=true where id in ($1,$2)",[ids.memberAnswer,ids.memberBAnswer]);
   await q("insert into sources(id,dept_id,kind,external_id,visibility) values ($1,$2,'slack_channel','removal-source','dept')", [removalIds.source, ids.dept]);
   await q("insert into items(id,source_id,dept_id,content,embedding,embed_model) values ($1,$2,$3,'removal evidence',$4,'voyage-4-lite')", [removalIds.item, removalIds.source, ids.dept, embedding]);
   await q("insert into classifications(item_id,label,method) values ($1,'decision','llm')", [removalIds.item]);
@@ -986,6 +990,7 @@ try {
 
   await verifyTrailerSql({ db, q, check, asUser, ids, adminIds });
   await verifyTrailerAssessmentSql({ db, q, check, asUser, ids });
+  await verifySlackAskSql({ db, q, check, asUser });
   await db.exec(readFileSync(resolve("supabase/rollback/0028_trailer_assessment_down.sql"), "utf8"));
   await check("0028 rollback removes assessment only", async () => { assert.equal((await q("select to_regclass('public.trailer_attempts') value")).rows[0].value, null); });
   await db.exec(readFileSync(resolve("supabase/rollback/0027_trailer_publish_down.sql"), "utf8"));

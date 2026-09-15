@@ -1,0 +1,38 @@
+
+Running 30 tests using 1 worker
+
+
+
+(node:29184) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/30] [chromium] › tests\e2e\guest.spec.ts:10:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px
+[2/30] [chromium] › tests\e2e\guest.spec.ts:10:7 › 게스트 대시보드·카드·원장·묻기 완주 390px
+[3/30] [chromium] › tests\e2e\guest.spec.ts:57:5 › 게스트는 실제 부서에 접근하지 못하고 잘못된 서명은 거부된다
+[4/30] [chromium] › tests\e2e\guest.spec.ts:69:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다
+[5/30] [chromium] › tests\e2e\site.spec.ts:4:7 › 공개 메인 사이트 › 핵심 메시지와 데모 동선을 정적으로 제공한다
+[6/30] [chromium] › tests\e2e\site.spec.ts:27:7 › 공개 메인 사이트 › 모바일에서 가로로 넘치지 않는다
+[7/30] [chromium] › tests\e2e\site.spec.ts:37:7 › 공개 메인 사이트 › 개인정보 안내와 검색 노출 경계를 제공한다
+[8/30] [chromium] › tests\e2e\slack-questions.spec.ts:13:7 › 내 Slack 질문 조회·저장 답변 확인·재전송 1440px
+[9/30] [chromium] › tests\e2e\slack-questions.spec.ts:13:7 › 내 Slack 질문 조회·저장 답변 확인·재전송 390px
+[10/30] [chromium] › tests\e2e\slack-questions.spec.ts:46:5 › 조회 실패 재시도와 인용 없는 생성 본문 차단
+[11/30] [chromium] › tests\e2e\slack-questions.spec.ts:62:5 › 2분 넘게 pending인 답변은 대기를 종료하고 다시 질문할 수 있다
+[12/30] [chromium] › tests\e2e\team-coverage.spec.ts:3:5 › 기획팀은 직접 URL로 카드·원장·답변을 열 수 있다
+[13/30] [chromium] › tests\e2e\team-coverage.spec.ts:17:7 › 기획팀 데모 진입 → 카드 → 원장 → 근거 답변
+[14/30] [chromium] › tests\e2e\team-coverage.spec.ts:17:7 › 디자인팀 데모 진입 → 카드 → 원장 → 근거 답변
+[15/30] [chromium] › tests\e2e\team-coverage.spec.ts:17:7 › 개발팀 데모 진입 → 카드 → 원장 → 근거 답변
+[16/30] [chromium] › tests\e2e\ui-refresh.spec.ts:8:7 › 새 탐색·기록 분류·질문 선택 1440px
+[17/30] [chromium] › tests\e2e\ui-refresh.spec.ts:8:7 › 새 탐색·기록 분류·질문 선택 390px
+[18/30] [chromium] › tests\e2e\ui-refresh.spec.ts:111:5 › 모바일 메뉴로 로그인에 접근한다
+[19/30] [chromium] › tests\e2e\ui-refresh.spec.ts:123:7 › 로그인한 부서의 공통 탐색과 읽기 화면 1440px
+[20/30] [chromium] › tests\e2e\ui-refresh.spec.ts:123:7 › 로그인한 부서의 공통 탐색과 읽기 화면 390px
+[21/30] [chromium] › tests\e2e\workspace-polish.spec.ts:98:9 › 후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 없음 › 문서 선택·검색·인용·파일 선택 1440px
+[22/30] [chromium] › tests\e2e\workspace-polish.spec.ts:187:9 › 후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 없음 › 설정 메뉴 전환·채널 선택 후 입력 보존 1440px
+[23/30] [chromium] › tests\e2e\workspace-polish.spec.ts:98:9 › 후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 없음 › 문서 선택·검색·인용·파일 선택 390px
+[24/30] [chromium] › tests\e2e\workspace-polish.spec.ts:187:9 › 후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 없음 › 설정 메뉴 전환·채널 선택 후 입력 보존 390px
+[25/30] [chromium] › tests\e2e\workspace-polish.spec.ts:248:7 › 후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 없음 › 문서 로딩·오류 재시도와 처리 완료 후 폴링 종료
+[26/30] [chromium] › tests\e2e\workspace-polish.spec.ts:289:7 › 후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 없음 › 설정 오류에서 다시 불러온다
+[27/30] [chromium] › tests\e2e\workspace-polish.spec.ts:312:7 › 게스트 관리자 메뉴와 읽기 전용 탐색 1440px
+[28/30] [chromium] › tests\e2e\workspace-polish.spec.ts:312:7 › 게스트 관리자 메뉴와 읽기 전용 탐색 390px
+[29/30] [chromium] › tests\e2e\workspace-polish.spec.ts:361:7 › 로그인한 조직 관리자의 읽기 탐색과 키보드 탭 1440px
+[30/30] [chromium] › tests\e2e\workspace-polish.spec.ts:361:7 › 로그인한 조직 관리자의 읽기 탐색과 키보드 탭 390px
+  30 passed (1.1m)

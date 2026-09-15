@@ -14,6 +14,7 @@ import {
 } from "@/lib/slack/answer";
 import { getMessagePermalink, postMessage } from "@/lib/slack/post";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
+import { deliverSlackAnswer } from "@/lib/pipeline/slack-answer-delivery";
 
 type CitationReference = {
   itemId?: string;
@@ -29,7 +30,7 @@ type AnswerRow = {
   status: "pending" | "done" | "refused" | "failed";
 };
 
-type SlackReply = { channel: string; threadTs: string };
+type SlackReply = { channel: string; threadTs: string; scope?: "user" | "channel"; durable?: boolean };
 
 type DecisionSearchResult = {
   id: string;
@@ -139,7 +140,10 @@ function answerJobFromPayload(payload: unknown): {
     channel.length > 0 &&
     typeof threadTs === "string" &&
     threadTs.length > 0
-    ? { answerId, slackReply: { channel, threadTs } }
+    ? { answerId, slackReply: { channel, threadTs,
+        scope: Reflect.get(reply, "scope") === "user" && /^D[A-Z0-9]+$/.test(channel) ? "user" : "channel",
+        durable: Reflect.get(reply, "durable") === true,
+      } }
     : { answerId, slackReply: null };
 }
 
@@ -147,7 +151,7 @@ async function replyInSlack(
   reply: SlackReply | null,
   message: string | ReturnType<typeof buildSlackAnswerMessage>,
 ): Promise<void> {
-  if (!reply) return;
+  if (!reply || reply.durable) return;
   try {
     await postMessage({
       channel: reply.channel,
@@ -311,6 +315,9 @@ export async function answerQuestion(
   if (!answer || answer.status !== "pending") {
     return;
   }
+  if (slackReply?.durable) {
+    try { await deliverSlackAnswer(answer.id); } catch { /* The persisted delivery job retries independently. */ }
+  }
   if (!answer.asked_by) {
     if (
       await saveRefused(
@@ -327,8 +334,7 @@ export async function answerQuestion(
 
   const question = mask(answer.question).slice(0, 1_000);
   const embedding = await embedText(question, { inputType: "query" });
-  // 현재 Slack 회신 경로는 채널 @멘션이다. 질문자의 lead 권한을 채널에 전달하지 않는다.
-  const scope = slackReply ? "channel" : "user";
+  const scope = !slackReply || (slackReply.scope === "user" && /^D[A-Z0-9]+$/.test(slackReply.channel)) ? "user" : "channel";
   const [items, decisions] = await Promise.all([
     searchAs(client, {
       userId: answer.asked_by,
@@ -408,7 +414,7 @@ export async function answerQuestion(
       verified.valid,
     );
     if (!saved) return;
-    if (slackReply) {
+    if (slackReply && !slackReply.durable) {
       const citations = await slackCitations({
         client,
         deptId: answer.dept_id,
@@ -418,7 +424,7 @@ export async function answerQuestion(
       });
       await replyInSlack(
         slackReply,
-        buildSlackAnswerMessage({ answer: result.data.answer, citations }),
+        buildSlackAnswerMessage({ answer: result.data.answer, citations, scope }),
       );
     }
     return;

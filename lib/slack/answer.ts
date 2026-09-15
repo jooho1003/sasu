@@ -68,7 +68,9 @@ function notice(text: string) {
 export function buildSlackAnswerMessage(input: {
   answer: string;
   citations: SlackAnswerCitation[];
+  scope?: "user" | "channel";
 }) {
+  const footer = input.scope === "user" ? "내 권한 범위 안의 부서 기록만 참고했습니다." : FOOTER;
   if (
     !input.citations.length ||
     input.citations.some((citation) => !citation.quote.trim())
@@ -135,8 +137,8 @@ export function buildSlackAnswerMessage(input: {
     );
   });
 
-  blocks.push({ type: "context", elements: [plain(FOOTER)] });
-  fallback.push(FOOTER);
+  blocks.push({ type: "context", elements: [plain(footer)] });
+  fallback.push(footer);
   const text = fallback.join("\n\n");
   if (blocks.length > 50 || text.length > 39_000) return tooLong();
   return { text, blocks, ...MESSAGE_OPTIONS };

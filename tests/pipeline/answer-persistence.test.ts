@@ -28,10 +28,23 @@ vi.mock("@/lib/slack/post", () => ({
   getMessagePermalink: mocks.permalink,
 }));
 vi.mock("@/lib/jobs", () => ({ registerHandler: vi.fn() }));
+vi.mock("@/lib/pipeline/slack-answer-delivery", () => ({ deliverSlackAnswer: vi.fn() }));
 
 import { answerQuestion } from "@/lib/pipeline/answer";
 
 describe("answer publication boundary", () => {
+  it("DM은 user 검색을 사용하고 내구성 전달은 생성 워커에서 직접 게시하지 않는다", async () => {
+    await answerQuestion("answer-1", { channel: "D123", threadTs: "1.1", scope: "user", durable: true });
+    expect(mocks.search).toHaveBeenCalledWith(mocks, expect.objectContaining({ scope: "user" }));
+    expect(mocks.decisions).toHaveBeenCalledWith(mocks, expect.objectContaining({ scope: "user" }));
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.anything());
+    expect(mocks.post).not.toHaveBeenCalled();
+    expect(mocks.metadata).not.toHaveBeenCalled();
+  });
+  it("채널 목적지에 user scope를 넣어도 channel 범위로 제한한다", async () => {
+    await answerQuestion("answer-1", { channel: "C123", threadTs: "1.1", scope: "user", durable: true });
+    expect(mocks.search).toHaveBeenCalledWith(mocks, expect.objectContaining({ scope: "channel" }));
+  });
   beforeEach(() => {
     vi.resetAllMocks();
     const query = { select: vi.fn(), eq: vi.fn(), maybeSingle: vi.fn() };

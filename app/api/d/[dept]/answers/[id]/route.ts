@@ -18,6 +18,8 @@ type CitationRow = {
 
 type ItemRow = {
   id: string;
+  content: string;
+  deleted_at: string | null;
   author: string | null;
   spoken_at: string | null;
   external_ref: string | null;
@@ -26,6 +28,8 @@ type ItemRow = {
 
 type DecisionRow = {
   id: string;
+  outcome: string;
+  rationale: string;
   decided_by_name: string;
   decided_at: string | null;
 };
@@ -97,13 +101,13 @@ export async function GET(
       ? Promise.resolve({ data: [] as ItemRow[], error: null })
       : supabase
           .from("items")
-          .select("id, author, spoken_at, external_ref, sources!inner(kind, external_id, title)")
+          .select("id, content, deleted_at, author, spoken_at, external_ref, sources!inner(kind, external_id, title)")
           .in("id", itemIds),
     decisionIds.length === 0
       ? Promise.resolve({ data: [] as DecisionRow[], error: null })
       : supabase
           .from("decisions")
-          .select("id, decided_by_name, decided_at")
+          .select("id, outcome, rationale, decided_by_name, decided_at")
           .in("id", decisionIds),
   ]);
 
@@ -116,17 +120,21 @@ export async function GET(
   const visibleCitations = citations.flatMap((citation) => {
     if (citation.item_id) {
       const item = items.get(citation.item_id);
-      if (!item) return [];
+      if (!item || item.deleted_at || !citation.quote || !item.content.includes(citation.quote)) return [];
       const source = relation(item.sources);
       return [{ quote: citation.quote, author: item.author ?? "작성자 미상", source: source.title ?? source.kind, href: itemHref(item) }];
     }
     if (citation.decision_id) {
       const decision = decisions.get(citation.decision_id);
-      if (!decision) return [];
+      if (!decision || !citation.quote || !`${decision.outcome}\n${decision.rationale}`.includes(citation.quote)) return [];
       return [{ quote: citation.quote, author: decision.decided_by_name, source: `원장 #${decision.id.slice(0, 8)}`, href: `/d/${membership.deptId}/ledger#decision-${decision.id}` }];
     }
     return [];
   });
+
+  if (answer.status === "done" && (visibleCitations.length === 0 || visibleCitations.length !== citations.length)) {
+    return Response.json({ id: answer.id, status: "refused", answer: "현재 확인할 수 있는 근거로 답변을 표시할 수 없습니다. 다시 질문해 주세요.", refused: true, citations: [] });
+  }
 
   return Response.json({
     id: answer.id,

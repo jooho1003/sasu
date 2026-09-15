@@ -4,6 +4,7 @@ type SlackApiErrorCode =
   | "slack_not_configured"
   | "slack_rate_limited"
   | "slack_api_failed"
+  | "slack_message_missing"
   | "slack_dm_unavailable";
 
 export class SlackApiError extends Error {
@@ -62,6 +63,7 @@ function retryAfter(response: Response): number {
 }
 
 function apiError(response: SlackResponse, status: number): SlackApiError {
+  if (response.error === "message_not_found") return new SlackApiError("slack_message_missing");
   if (status === 429 || response.error === "ratelimited") {
     return new SlackApiError("slack_rate_limited");
   }
@@ -88,6 +90,7 @@ async function callSlack(
         "content-type": "application/json; charset=utf-8",
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(8_000),
     });
 
     let parsed: SlackResponse;
@@ -102,15 +105,16 @@ async function callSlack(
     }
 
     const error = apiError(parsed, response.status);
+    const delay = retryAfter(response);
     if (
       error.error_code !== "slack_rate_limited" ||
-      attempt === MAX_RATE_LIMIT_RETRIES - 1
+      attempt === MAX_RATE_LIMIT_RETRIES - 1 || delay > 2
     ) {
-      throw error;
+      throw error.error_code === "slack_rate_limited" ? new SlackApiError("slack_rate_limited", delay) : error;
     }
 
     await new Promise((resolve) => {
-      setTimeout(resolve, retryAfter(response) * 1_000);
+      setTimeout(resolve, delay * 1_000);
     });
   }
 
@@ -138,6 +142,7 @@ export async function postMessage(args: {
   parse?: "none";
   unfurl_links?: boolean;
   unfurl_media?: boolean;
+  client_msg_id?: string;
 }): Promise<{ channel: string; ts: string }> {
   const response = await callSlack("chat.postMessage", args);
   if (
@@ -191,8 +196,16 @@ export async function updateMessage(args: {
   ts: string;
   text: string;
   blocks: SlackBlock[];
+  mrkdwn?: boolean;
+  parse?: "none";
+  unfurl_links?: boolean;
+  unfurl_media?: boolean;
 }): Promise<void> {
   await callSlack("chat.update", args);
+}
+
+export async function postEphemeral(args: { channel: string; user: string; text: string; thread_ts?: string }): Promise<void> {
+  await callSlack("chat.postEphemeral", { ...args, mrkdwn: false, parse: "none" });
 }
 
 export async function listConversations(): Promise<

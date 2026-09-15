@@ -1,0 +1,6 @@
+
+> sasu@0.1.0 test:load:demo
+> node scripts/load-test-demo.mjs
+
+demo load test: users=100 completed=100 failed=0
+requests=601 elapsed_ms=5953 p50_ms=842 p95_ms=2456 max_ms=2704

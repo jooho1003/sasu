@@ -18,6 +18,7 @@ export type JobKind =
   | "make_card"
   | "answer"
   | "send_slack"
+  | "deliver_slack_answer"
   | "notion_import"
   | "slack_backfill"
   | "sweep";
@@ -66,6 +67,7 @@ const SAFE_ERROR_CODES = new Set([
   "rate_limited",
   "schema_invalid",
   "slack_api_failed",
+  "slack_message_missing",
   "slack_dm_unavailable",
   "slack_not_configured",
   "slack_rate_limited",
@@ -235,10 +237,12 @@ function ownerReference(
   return null;
 }
 
-function retryAt(attempts: number): string {
+function retryAt(attempts: number, error?: unknown): string {
   const exponentialDelay = RETRY_BASE_DELAY_MS * 2 ** Math.max(1, attempts);
   const jitter = Math.floor(Math.random() * RETRY_JITTER_MS);
-  return new Date(Date.now() + exponentialDelay + jitter).toISOString();
+  const requested = error && typeof error === "object" ? Reflect.get(error, "retryAfterSeconds") : null;
+  const serverDelay = typeof requested === "number" && Number.isFinite(requested) ? Math.min(3600, Math.max(0, requested)) * 1000 : 0;
+  return new Date(Date.now() + Math.max(exponentialDelay, serverDelay) + jitter).toISOString();
 }
 
 async function updateJob(
@@ -436,7 +440,7 @@ export async function runOnce(
 
       await updateJob(client, job.id, {
         status: "queued",
-        run_after: retryAt(job.attempts),
+        run_after: retryAt(job.attempts, handlerError),
         last_error: errorCode,
         lease_until: null,
         updated_at: new Date().toISOString(),

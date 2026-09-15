@@ -4,6 +4,7 @@ import { mask } from "@/lib/mask";
 export type SlackMessageEvent = {
   type?: string;
   channel?: string;
+  channel_type?: string;
   user?: string;
   text?: string;
   ts?: string;
