@@ -5,6 +5,13 @@ import { validateScenario } from "@/lib/trailer";
 import fixture from "./fixtures/trailer-approval.json";
 
 describe("예고편 생성 입력 경계", () => {
+  it("회사·제품 고유명사를 새로 짓지 않고 일반 명칭으로 가상화한다", () => {
+    const prompt = buildTrailerGeneratePrompt({ scenarioId: "scenario_1", decision: { outcome: "계약 갱신", rationale: "비용 원칙" }, cardTitle: null, principles: "운영 안정성" });
+    expect(prompt.system).toContain("회사·제품 고유명사를 만들거나 실제 이름을 사용하지 마세요");
+    expect(prompt.system).toContain("협력사");
+    expect(prompt.system).toContain("업무 도구");
+    expect(prompt.system).not.toContain("회사명과 사람 이름도 가상의 한글 이름");
+  });
   it("기준표 4개와 12000자 원칙 상한을 유지한다", () => {
     expect(AgentRoleCriterion.array().parse(DEFAULT_TRAILER_RUBRIC)).toHaveLength(4);
     expect(DEFAULT_TRAILER_RUBRIC.map((item) => item.key)).toEqual(["principle_check", "stakeholder_check", "tradeoff", "decision_clarity"]);
