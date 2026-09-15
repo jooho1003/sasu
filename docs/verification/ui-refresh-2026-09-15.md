@@ -62,6 +62,17 @@ npx playwright test tests/e2e/site.spec.ts tests/e2e/guest.spec.ts tests/e2e/tea
 - 예고편 섹션 "직무의 실제 맥락을 먼저 경험하세요"는 공개 체험이 가상화된 합성 사례라는 점과 어긋나 "가상화한 업무 사례로 직무를 먼저 경험해 보세요. AI는 지원자를 거르지 않고 담당자가 참고할 근거만 정리합니다. 지금은 합성 지원자로 시연합니다."로 고쳤다(설계 §A-2 8번 문구 기준).
 - API·DB·권한 변경 없음, 금지 카피 없음을 확인했다.
 
+## 운영 반영 (2026-09-15 15:48~15:52 KST, 사용자 승인)
+
+| 순서 | 작업 | 결과 |
+|---|---|---|
+| 1 | 커밋 `f8d71ef` 스냅샷(Git 메타데이터 없음, 580개 파일) 선빌드 | READY `dpl_Hq6oWYaRH9BqxRZD3ScRzZQgQLMq` |
+| 2 | promote | `sasu-alpha.vercel.app` → `dpl_Hq6oWYaRH9BqxRZD3ScRzZQgQLMq` (이전 `dpl_Yh5dQ4aeZfwf9tQf55b6W4vD2jqF`, 롤백 대상) |
+| 3 | 스모크 | `/`·`/demo`·`/privacy`·`/demo/admin`·`/t/onsaemiro2026demotrail`·`/login` 200 · `/admin` 307 · 히어로 이미지 200 · `/api/jobs/run`·`/api/slack/events` 무인증 401. 메인 HTML에 실제 캡처·배지 있음, HTML 미리보기 없음, 예고편 새 문구 확인 |
+| 4 | 운영 읽기 E2E(`site`·`guest`·`team-coverage`·`ui-refresh`) | **16/16 통과, 2.2분**. 게스트 열람 전후 `llm_calls`·`jobs`·`items`·`answers`·`decisions`·`citations` 행 수 불변 |
+
+DB 마이그레이션·시드·기능 플래그 변경은 없다.
+
 ## 범위와 상태
 
 API·워커·DB 마이그레이션·권한 판정은 변경하지 않았다. 운영 배포·커밋·푸시는 수행하지 않았다. 조직 관리·채용 예고편의 기능 플래그는 유지했으며, 해당 기능의 전체 운영 쓰기 흐름은 이번 E2E 범위에 포함하지 않았다. 자동 다크 테마는 ADR-048에 따라 밝은 테마로 통일했다.
