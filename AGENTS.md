@@ -42,7 +42,7 @@
 
 ## 개발 프로세스
 - CRITICAL: `lib/` 아래 새 모듈은 테스트를 먼저 작성하고, 테스트가 통과하는 구현을 작성한다 (TDD — `scripts/hooks/tdd-guard.sh`가 강제). 예외: 라우트 핸들러(`route.ts`)·`app/**/page.tsx` 등 Next.js 프레임워크 파일·`components/`·`lib/supabase/*`·`lib/llm.ts`·`lib/slack/{blocks,post}.ts`·`scripts/`·`phases/`·`.sql`. 이유는 ARCHITECTURE.md §8 (SDK 어댑터·프레젠테이션·배선은 우리 로직이 아니다).
-- 하루 마지막 커밋은 항상 배포 가능 상태. D10(9/17) 기능 프리징 이후 신기능 금지.
+- 하루 마지막 커밋은 항상 배포 가능 상태. 날짜 기반 기능 프리징·컷은 두지 않는다(ADR-049) — 신기능은 계속 만들되, 운영 반영은 검증(하니스·테스트·E2E·리뷰)과 사용자 승인 뒤에만 한다.
 - 커밋 메시지는 conventional commits (feat:, fix:, docs:, chore:, refactor:).
 - 구현은 `phases/`의 step 파일로 Codex에 넘긴다 (`.claude/commands/harness.md`). 완료 판정은 에이전트의 자기 보고가 아니라 PRD §11 검증의 **실행 기록**(스크린샷·쿼리 결과).
 - 되돌릴 수 없는 명령(`rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE`)은 `scripts/hooks/dangerous-command-guard.sh`가 차단한다.
