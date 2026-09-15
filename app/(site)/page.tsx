@@ -1,6 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SiteCta } from "@/components/site-cta";
-import { BrandMark, Icon, type IconName } from "@/components/ui/icon";
+import { Icon, type IconName } from "@/components/ui/icon";
 import { siteLinks } from "@/lib/site";
 
 const benefits: { icon: IconName; title: string; body: string }[] = [
@@ -53,60 +54,21 @@ export default function HomePage() {
         <p className="hero-footnote">
           가입 없이 바로 체험 · 가상 회사의 합성 데이터
         </p>
-        <div
-          className="product-preview"
-          aria-label="사수 결정 카드 미리보기 · 합성 예시"
-        >
-          <div className="preview-window">
-            <div className="preview-titlebar">
-              <span className="window-dots" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-              </span>
-              <span>온새미로 · 영업 사수</span>
-              <span className="badge badge-green">합성 예시</span>
-            </div>
-            <div className="preview-layout">
-              <div className="preview-sidebar" aria-hidden="true">
-                <span className="brand">
-                  <BrandMark small />
-                  사수
-                </span>
-                <span>
-                  <Icon name="grid" size={15} />
-                  대시보드
-                </span>
-                <span>
-                  <Icon name="chat" size={15} />
-                  묻기
-                </span>
-                <span>
-                  <Icon name="book" size={15} />
-                  원장
-                </span>
-              </div>
-              <div className="preview-main">
-                <h2>좋은 결정의 시작, 여기서.</h2>
-                <p>흩어진 맥락을 모았습니다. 이제 함께 확인해보세요.</p>
-                <div className="preview-card">
-                  <span className="badge badge-urgent">결정 필요</span>
-                  <h3>외주사 B 12% 인상 견적을 받아들일까요?</h3>
-                  <q>
-                    외주사 B 견적이 12% 올랐습니다. 이번 견적을 받아도 될까요?
-                    오늘 17시까지 방향이 필요합니다.
-                  </q>
-                  <footer>
-                    <span>슬랙 · 영업팀 합성 대화</span>
-                    <Link className="text-link" href="/demo">
-                      근거와 함께 살펴보기 <Icon name="arrow" size={13} />
-                    </Link>
-                  </footer>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* ADR-043: 제품 화면은 게스트 모드 실제 캡처만 쓴다(HTML로 다시 그린 화면 금지). */}
+        <figure className="product-preview">
+          <span className="badge badge-green product-preview-badge">
+            게스트 모드 실제 화면 · 합성 데이터
+          </span>
+          <Image
+            alt="영업 사수 게스트 모드의 결정 카드 화면. 원문 근거 인용이 붙은 '외주사 B 12% 인상 견적을 받아들일까요?' 카드 (가상 회사의 합성 데이터)"
+            className="product-preview-image"
+            height={720}
+            priority
+            sizes="(max-width: 980px) 100vw, 940px"
+            src="/marketing/guest-decision-card.webp"
+            width={1440}
+          />
+        </figure>
       </section>
       <div className="integration-strip">
         <span>팀이 일하던 곳에서 시작합니다</span>
@@ -242,8 +204,9 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col items-start justify-center gap-5">
               <p className="text-sm leading-7 text-muted">
-                직무의 실제 맥락을 먼저 경험하세요. AI는 담당자가 참고할 근거를
-                정리하고, 최종 판단은 사람이 합니다.
+                가상화한 업무 사례로 직무를 먼저 경험해 보세요. AI는 지원자를
+                거르지 않고 담당자가 참고할 근거만 정리합니다. 지금은 합성
+                지원자로 시연합니다.
               </p>
               <Link
                 className="button button-secondary"
