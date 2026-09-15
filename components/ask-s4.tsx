@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import SlackQuestions from "@/components/slack-questions";
 
 type Citation = {
   quote: string;
@@ -27,8 +28,10 @@ export default function AskS4({ deptId }: { deptId: string }) {
   const voiceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
   const recordingChunks = useRef<Blob[]>([]);
+  const requestVersion = useRef(0);
 
   useEffect(() => () => {
+    requestVersion.current += 1;
     if (pollTimer.current !== null) clearInterval(pollTimer.current);
     if (voiceTimer.current !== null) clearTimeout(voiceTimer.current);
     recorder.current?.stream.getTracks().forEach((track) => track.stop());
@@ -92,7 +95,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
   const loadAnswer = async (answerId: string): Promise<AnswerState> => {
     const response = await fetch(
       `/api/d/${encodeURIComponent(deptId)}/answers/${encodeURIComponent(answerId)}`,
-      { cache: "no-store" },
+      { cache: "no-store", signal: AbortSignal.timeout(10_000) },
     );
     const body = (await response.json()) as AnswerState & { error?: string; message?: string };
     if (!response.ok) throw new Error(body.message ?? body.error ?? "답변 상태를 확인하지 못했습니다.");
@@ -105,21 +108,37 @@ export default function AskS4({ deptId }: { deptId: string }) {
       return;
     }
     setBusy(true);
+    const version = ++requestVersion.current;
+    const startedAt = Date.now();
+    let polling = false;
     setError(null);
     setAnswer(null);
     if (pollTimer.current !== null) clearInterval(pollTimer.current);
     try {
       const response = await fetch(`/api/d/${encodeURIComponent(deptId)}/ask`, {
         method: "POST",
+        signal: AbortSignal.timeout(10_000),
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ question }),
       });
       const body = (await response.json()) as { answer_id?: string; error?: string; message?: string };
+      if (version !== requestVersion.current) return;
       if (!response.ok || !body.answer_id) throw new Error(body.message ?? body.error ?? "질문을 저장하지 못했습니다.");
 
       const poll = async (): Promise<AnswerState | null> => {
+        if (polling || version !== requestVersion.current) return null;
+        if (Date.now() - startedAt >= 120_000) {
+          if (pollTimer.current !== null) clearInterval(pollTimer.current);
+          pollTimer.current = null;
+          setBusy(false);
+          setAnswer(null);
+          setError("답변 확인이 지연되고 있습니다. 잠시 후 다시 질문해 주세요.");
+          return null;
+        }
+        polling = true;
         try {
           const next = await loadAnswer(body.answer_id as string);
+          if (version !== requestVersion.current) return null;
           setAnswer(next);
           if (next.status !== "pending") {
             if (pollTimer.current !== null) clearInterval(pollTimer.current);
@@ -128,11 +147,14 @@ export default function AskS4({ deptId }: { deptId: string }) {
           }
           return next;
         } catch (pollError) {
+          if (version !== requestVersion.current) return null;
           if (pollTimer.current !== null) clearInterval(pollTimer.current);
           pollTimer.current = null;
           setBusy(false);
           setError(pollError instanceof Error ? pollError.message : "답변을 불러오지 못했습니다.");
           return null;
+        } finally {
+          polling = false;
         }
       };
       const first = await poll();
@@ -140,6 +162,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
         pollTimer.current = setInterval(() => void poll(), 2_000);
       }
     } catch (askError) {
+      if (version !== requestVersion.current) return;
       setBusy(false);
       setError(askError instanceof Error ? askError.message : "질문을 보내지 못했습니다.");
     }
@@ -190,13 +213,25 @@ export default function AskS4({ deptId }: { deptId: string }) {
         {error ? <p aria-live="assertive" className="m-0 text-sm font-bold text-red-700">{error}</p> : null}
       </section>
 
+      <SlackQuestions deptId={deptId} onSelect={async id => {
+        const version = ++requestVersion.current;
+        if (pollTimer.current !== null) clearInterval(pollTimer.current);
+        pollTimer.current = null;
+        setBusy(false);
+        setError(null);
+        setAnswer(null);
+        const next = await loadAnswer(id);
+        if (version === requestVersion.current) setAnswer(next);
+      }} />
+
       {answer?.status === "pending" ? (
         <div className="rounded-2xl bg-[var(--surface)] p-6 text-[var(--muted)]">부서 기록을 확인하고 있습니다.</div>
       ) : null}
       {answer?.status === "failed" ? (
         <div className="rounded-2xl bg-[var(--surface)] p-6">답변을 만들지 못했습니다. 잠시 후 다시 질문해주세요.</div>
       ) : null}
-      {answer && (answer.status === "done" || answer.status === "refused") ? (
+      {answer?.status === "done" && answer.citations.length === 0 ? <p role="status">현재 확인할 수 있는 근거로 답변을 표시할 수 없습니다. 다시 질문해 주세요.</p> : null}
+      {answer && (answer.status === "refused" || (answer.status === "done" && answer.citations.length > 0)) ? (
         <article className="grid gap-5 panel p-6">
           <p className="m-0 whitespace-pre-wrap leading-8">{answer.answer}</p>
           {answer.citations.length > 0 ? (

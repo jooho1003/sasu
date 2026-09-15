@@ -186,6 +186,18 @@ describe("jobs worker", () => {
     ]);
   });
 
+  it("Slack이 요청한 재시도 시각보다 먼저 다시 실행하지 않는다", async () => {
+    const started = Date.now();
+    const fake = createFakeClient([[{ id: "delivery-job", kind: "deliver_slack_answer", payload: { answerId: "answer-1" }, attempts: 1 }]]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    registerHandler("deliver_slack_answer", async () => { throw { error_code: "slack_rate_limited", retryAfterSeconds: 120 }; });
+    await runOnce();
+    const update = jobUpdate(fake.operations,"queued").values as { run_after: string; last_error: string };
+    expect(update.last_error).toBe("slack_rate_limited");
+    expect(Date.parse(update.run_after)-started).toBeGreaterThanOrEqual(120_000);
+    expect(Date.parse(update.run_after)-started).toBeLessThan(122_000);
+  });
+
   it.each([
     {
       kind: "classify" as const,

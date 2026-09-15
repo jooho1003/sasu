@@ -104,6 +104,7 @@
 4. Install to Workspace (관리자 권한 필요) → `SLACK_BOT_TOKEN`(xoxb-) · Basic Information의 `Signing Secret` → Vercel env.
 5. **배포 후** (D1 저녁): Event Subscriptions 켜고 Request URL `https://<도메인>/api/slack/events` (URL 검증 challenge에 200). Subscribe to bot events: `message.channels` · `message.groups` · `app_mention` · `message.im`.
 6. Interactivity & Shortcuts 켜고 Request URL `https://<도메인>/api/slack/interactions`.
+   - DM ASK(ADR-051): App Home → Messages Tab에서 메시지 입력을 허용한다. `im:history` 또는 이벤트 구독을 추가했다면 앱을 재설치한다. 부서가 하나면 바로 질문하고, 여러 부서면 `부서 이름: 질문`으로 선택한다. 새 앱 적용 전에 `0029_slack_ask_completion.sql`을 적용해야 한다. 운영 변경과 실제 발송 검증은 사용자 테스트 단계에서 수행한다.
 7. 봇을 수집할 채널 3개에 초대. 프라이빗 채널은 봇 초대가 있어야 `conversations.list`에 보인다.
 8. 백필 레이트 리밋: `conversations.history`는 Tier 3(분당 50). 채널 3개 7일치면 수 분 — job 1개, 페이지네이션 (PRD §10 #18).
 

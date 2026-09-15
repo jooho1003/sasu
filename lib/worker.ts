@@ -3,6 +3,7 @@ import { registerMakeCardHandler } from "@/lib/pipeline/card";
 import { registerClassifyHandler } from "@/lib/pipeline/classify";
 import { registerEmbedHandler } from "@/lib/pipeline/embed";
 import { registerAnswerHandler } from "@/lib/pipeline/answer";
+import { registerSlackAnswerDeliveryHandler } from "@/lib/pipeline/slack-answer-delivery";
 import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
 import { registerDocumentSummaryHandler } from "@/lib/pipeline/document-summary";
 import { registerAgentRoleHandler } from "@/lib/pipeline/agent-role";
@@ -18,6 +19,7 @@ export async function runWorkerOnce(limit?: number) {
   registerClassifyHandler();
   registerEmbedHandler();
   registerAnswerHandler();
+  registerSlackAnswerDeliveryHandler();
   registerMeetingSummaryHandler();
   registerDocumentSummaryHandler();
   registerAgentRoleHandler();

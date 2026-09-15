@@ -302,4 +302,10 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 
 ## 10. 외부 의존성이 죽었을 때
 
+### Slack ASK 전달 (ADR-051)
+- `slack_answer_deliveries`는 worker 전용(RLS on, API 역할 직접 권한 0)이다. 질문·인용을 복사하지 않고 answer ID·목적지·scope·message timestamp·lease·전송 상태만 보관한다.
+- `ingest_slack_question`은 멤버십·동의·채널을 재검증하여 answer·delivery·progress job·answer job을 원자 생성한다. 답변의 종료 상태 트리거가 최종 delivery job을 예약한다.
+- `claim_slack_answer_delivery`는 `can_see()`와 인용 전체를 현재 상태로 검증한 결과만 반환한다. `chat.update` 실패는 전달만 재시도한다. 세션 RPC `my_slack_questions`·`retry_my_slack_answer`는 질문자 본인에게만 열려 있다.
+- `answers_current_evidence` SELECT 정책은 현재 인용 전체가 유효하지 않은 done 답변을 직접 REST에서도 숨긴다. 권한 로직을 앱에 복제하지 않는다.
+
 의존성 9개별 거동·사용자 문구·다음 행동은 PRD §6-10 표가 원천이다. 구조 관점의 원칙 하나: **어댑터는 외부 장애와 무관하게 items를 먼저 저장한다.** LLM·임베딩·슬랙 발송·회의 정리는 전부 job이라 나중에 따라잡는다. 사용자에게는 "무엇이 실패했는지 + 다음에 할 수 있는 것"을 보여주고, 내부에는 `error_code`(`llm_timeout|llm_refusal|schema_invalid|citation_invalid|rate_limited`)를 남긴다. "오류가 발생했습니다"만 있는 화면은 만들지 않는다.

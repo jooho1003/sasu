@@ -126,7 +126,7 @@
       "step": 15,
       "name": "deploy-slice-gate",
       "status": "blocked",
-      "blocked_reason": "코드·문서·자동 검증과 Production 배포 생성은 완료했다. 사람 확인이 남았다: (1) Vercel 플랜·Cron 간격·after() 상한·maxDuration을 setup-guide §2에 기록하고 Vercel Cron/pg_cron을 확정, (2) Production Deployment Protection이 배포 URL을 외부 심사자에게 막지 않는지 확인하고 필요하면 프로젝트의 허용된 접근 경로를 설정, (3) Vercel 환경 변수와 Slack Event Subscriptions/Interactivity Request URL·채널 초대를 확인, (4) 시크릿 창에서 Slack 메시지→대시보드→카드→원장 전체를 5분 안에 스톱워치 판정해 docs/verification/D3-vertical-slice.md에 기록, (5) 실패 시 PRD §8-0·§4의 회의 업로드·Notion 붙여넣기·키워드 검색 강등을 반영한다. 현재 Production deployment readyState는 BLOCKED(Deployment Protection)다."
+      "blocked_reason": "사람의 수동 5분 완주 판정 기록 대기. 이전 배포·Cron 차단은 후속 기록으로 대체됨: docs/verification/D3-vertical-slice.md에 공개 alias와 pg_cron 동작 확인, D10-completion.md에 운영 합성 세로 슬라이스 52.2초 PASS가 있다. 이 항목은 잔여 코드 구현을 뜻하지 않는다. 새 Slack 기능의 사용자 테스트 절차는 docs/verification/slack-completion-2026-09-16.md를 따른다."
     }
   ],
   "created_at": "2026-09-08T18:27:29+0900"
