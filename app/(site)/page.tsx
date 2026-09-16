@@ -161,7 +161,7 @@ export default function HomePage() {
               실제 결정과 부서 원칙을 인용합니다. 확인할 근거가 부족할 때는
               부족하다고 알려줍니다.
             </p>
-            <Link className="text-link" href="/demo">
+            <Link className="text-link" href="/demo" prefetch={false}>
               부서별 답변 비교하기 <Icon name="arrow" size={15} />
             </Link>
           </article>

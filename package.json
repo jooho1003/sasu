@@ -10,6 +10,8 @@
     "test": "vitest run --passWithNoTests",
     "test:rls": "vitest run --config vitest.rls.config.ts",
     "test:load:demo": "node scripts/load-test-demo.mjs",
+    "audit:showcase": "tsx scripts/audit-showcase-data.ts",
+    "check:demo-release": "node scripts/check-demo-release.mjs",
     "e2e": "playwright test",
     "e2e:trailer": "playwright test --config playwright.trailer.config.ts"
   },

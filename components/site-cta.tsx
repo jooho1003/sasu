@@ -22,12 +22,12 @@ export function SiteCta({
     <div
       className={`flex flex-wrap items-center gap-3 ${compact ? "text-sm" : ""}`}
     >
-      <Link
+      <a
         className={`button button-primary ${compact ? "button-small" : ""}`}
         href="/demo"
       >
         데모 보기
-      </Link>
+      </a>
       {links.pilotContactUrl ? (
         <a
           className={`button button-secondary ${compact ? "button-small" : ""}`}

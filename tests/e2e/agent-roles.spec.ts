@@ -12,6 +12,11 @@ for (const envFile of [".env", ".env.local"]) {
 const DEPARTMENT_ID = "22222222-2222-4222-8222-222222222222";
 const NOTICE = "AI 점수는 참고용입니다. 최종 판단은 담당자가 합니다.";
 
+test.skip(
+  process.env.E2E_ALLOW_SHOWCASE_WRITES !== "1",
+  "공유 파일럿 부서 쓰기는 기본 차단됩니다. 전체 쓰기 검증은 scripts/review-qa.mjs의 격리 DB에서 실행하세요.",
+);
+
 function requiredEnv(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`${name} is not set`);

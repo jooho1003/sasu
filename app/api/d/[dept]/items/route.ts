@@ -75,6 +75,10 @@ export async function GET(
   const membership = await requireMembership(dept);
   const requestedLabel = request.nextUrl.searchParams.get("label");
   const requestedSource = request.nextUrl.searchParams.get("source");
+  const parsedLimit = Number(request.nextUrl.searchParams.get("limit") ?? "10");
+  const limit = Number.isInteger(parsedLimit) && parsedLimit >= 1 && parsedLimit <= 50
+    ? parsedLimit
+    : 10;
 
   if (requestedLabel !== null && !isItemLabel(requestedLabel)) {
     return Response.json(
@@ -95,10 +99,12 @@ export async function GET(
     .from("items")
     .select(
       `id, author, spoken_at, content, sources!inner(title, kind), ${classificationJoin}`,
+      { count: "exact" },
     )
     .eq("dept_id", membership.deptId)
     .is("deleted_at", null)
-    .order("spoken_at", { ascending: false, nullsFirst: false });
+    .order("spoken_at", { ascending: false, nullsFirst: false })
+    .limit(limit);
 
   if (requestedLabel !== null) {
     itemsQuery = itemsQuery.eq("classifications.label", requestedLabel);
@@ -180,5 +186,6 @@ export async function GET(
     counts,
     channelCount: channelResult.count ?? 0,
     totalItems: totalResult.count ?? 0,
+    filteredTotal: itemsResult.count ?? items.length,
   });
 }

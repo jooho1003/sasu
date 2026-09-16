@@ -9,7 +9,7 @@ export default function NotFound() {
         <p className="m-0 leading-7 text-[var(--muted)]">주소가 바뀌었거나 현재 권한으로 볼 수 없는 기록입니다.</p>
         <div className="flex flex-wrap gap-3">
           <Link className="rounded-xl bg-[var(--accent)] px-5 py-3 text-white" href="/">처음으로</Link>
-          <Link className="rounded-xl border border-black/15 px-5 py-3" href="/demo">게스트 데모</Link>
+          <Link className="rounded-xl border border-black/15 px-5 py-3" href="/demo" prefetch={false}>게스트 데모</Link>
         </div>
       </section>
     </main>

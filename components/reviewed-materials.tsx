@@ -34,6 +34,8 @@ export function ReviewedMaterials({
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
+  const participantReady = kind === "document" || synthetic || participants.length > 0;
+  const uploadReady = Boolean(file) && participantReady && consent;
   const load = useCallback(async () => {
     try {
       const response = await fetch(`/api/d/${deptId}/reviews`, {
@@ -363,10 +365,15 @@ export function ReviewedMaterials({
               원본은 비공개로 보관됩니다. 직접 삭제할 때까지 다시 열 수 있으며,
               확인·확정 전에는 검색과 업무 평가에 사용되지 않습니다.
             </p>
+            <ul className="upload-readiness" aria-label="업로드 준비 상태">
+              <li data-ready={Boolean(file)}>{file ? "✓" : "1"} 파일 선택</li>
+              <li data-ready={participantReady}>{participantReady ? "✓" : "2"} {kind === "audio" ? "참여자 선택" : "자료 종류 확인"}</li>
+              <li data-ready={consent}>{consent ? "✓" : "3"} 권한·동의 확인</li>
+            </ul>
             <button
               className="button button-primary"
               type="submit"
-              disabled={!file || !consent || busy}
+              disabled={!uploadReady || busy}
             >
               {busy
                 ? "업로드 중…"

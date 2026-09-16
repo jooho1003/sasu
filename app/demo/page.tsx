@@ -1,9 +1,16 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-shell";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { orgAdminReadEnabled, trailerPublishEnabled } from "@/lib/features";
 import { siteLinks } from "@/lib/site";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  DEMO_FEATURES,
+  demoAutoLoginEnabled,
+  isDemoReviewer,
+} from "@/lib/demo-access";
 
 type DemoDepartment = { id: string; name: string };
 const departmentCopy: Record<
@@ -31,9 +38,40 @@ const departmentCopy: Record<
     example: "팀의 디자인 원칙은 어떤 결정으로 이어질까요?",
   },
 };
-export const revalidate = 60;
+// 서버 전용 기능 플래그와 데모 링크를 배포 런타임 기준으로 일치시킨다.
+export const dynamic = "force-dynamic";
 
-export default async function DemoLandingPage() {
+const featureIcons: Record<(typeof DEMO_FEATURES)[number]["key"], IconName> = {
+  dashboard: "grid",
+  card: "spark",
+  ledger: "book",
+  ask: "chat",
+  reviews: "file",
+  documents: "file",
+  roles: "people",
+  retention: "book",
+  settings: "settings",
+  admin: "people",
+  trailers: "video",
+};
+
+export default async function DemoLandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ demo?: string }>;
+}) {
+  const { demo: accessMessage } = await searchParams;
+  const autoLoginEnabled = demoAutoLoginEnabled();
+  let reviewerConnected = false;
+  let existingAccount = false;
+  if (autoLoginEnabled) {
+    const {
+      data: { user },
+    } = await (await createServerSupabaseClient()).auth.getUser();
+    reviewerConnected = isDemoReviewer(user?.id);
+    existingAccount = Boolean(user) && !reviewerConnected;
+    if (!user && !accessMessage) redirect("/demo/access");
+  }
   const links = siteLinks();
   const supabase = createPublicSupabaseClient();
   const { data, error } = await supabase.rpc("demo_departments");
@@ -45,7 +83,7 @@ export default async function DemoLandingPage() {
         <header className="demo-intro">
           <span className="hero-label">
             <Icon name="spark" size={14} />
-            사수, 가볍게 만나보기
+            {reviewerConnected ? "심사위원 데모 계정 · 자동 연결 완료" : "사수, 가볍게 만나보기"}
           </span>
           <h1>
             부서가 다르면,
@@ -55,7 +93,9 @@ export default async function DemoLandingPage() {
           <p>
             가상 회사 온새미로에 오신 걸 환영합니다.
             <br />
-            함께 일할 부서를 고르고, 사수가 결정을 돕는 과정을 둘러보세요.
+            {reviewerConnected
+              ? "부서장·조직 관리자 권한으로 모든 기능을 안전하게 확인하세요."
+              : "함께 일할 부서를 고르고, 사수가 결정을 돕는 과정을 둘러보세요."}
           </p>
           <div className="demo-steps" aria-label="데모 체험 순서">
             <span>
@@ -71,6 +111,69 @@ export default async function DemoLandingPage() {
             </span>
           </div>
         </header>
+        {reviewerConnected ? (
+          <section className="demo-account-banner" aria-label="심사위원 데모 권한">
+            <div className="demo-account-status">
+              <span className="demo-account-avatar">심</span>
+              <div>
+                <strong>심사위원 데모 계정으로 접속했습니다</strong>
+                <p>네 부서의 부서장 · 조직 관리자 · 합성 데이터 전용</p>
+              </div>
+            </div>
+            <div className="demo-account-guards" aria-label="데모 안전 장치">
+              <span>실제 데이터 없음</span>
+              <span>외부 발신 없음</span>
+              <span>영속 저장 없음</span>
+            </div>
+          </section>
+        ) : accessMessage === "unavailable" ? (
+          <section className="demo-access-message" role="alert">
+            <div>
+              <strong>자동 로그인 연결을 확인하지 못했습니다</strong>
+              <p>아래 공개 데모는 바로 볼 수 있습니다. 잠시 후 자동 연결을 다시 시도해 주세요.</p>
+            </div>
+            <Link className="button button-primary button-small" href="/demo/access">
+              자동 로그인 다시 시도
+            </Link>
+          </section>
+        ) : existingAccount || accessMessage === "existing-account" ? (
+          <section className="demo-access-message" role="status">
+            <div>
+              <strong>현재 로그인된 팀 계정을 유지했습니다</strong>
+              <p>계정을 바꾸지 않았습니다. 심사위원 자동 데모는 시크릿 창에서 링크를 열어 확인할 수 있습니다.</p>
+            </div>
+          </section>
+        ) : null}
+        {reviewerConnected ? (
+          <section className="demo-capabilities" aria-labelledby="demo-capabilities-heading">
+            <header>
+              <div>
+                <p className="eyebrow">5분 셀프 시연</p>
+                <h2 id="demo-capabilities-heading">전체 기능을 순서대로 확인하세요</h2>
+                <p>앞의 네 기능이 핵심 이야기입니다. 나머지는 관심 있는 운영 기능부터 자유롭게 열어보세요.</p>
+              </div>
+              <Link className="button button-primary" href={DEMO_FEATURES[0].href}>
+                추천 시연 시작 <Icon name="arrow" size={15} />
+              </Link>
+            </header>
+            <ol className="demo-feature-grid">
+              {DEMO_FEATURES.map((feature, index) => (
+                <li key={feature.key}>
+                  <Link href={feature.href}>
+                    <span className="demo-feature-number">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="demo-feature-icon"><Icon name={featureIcons[feature.key]} size={19} /></span>
+                    <span className="demo-feature-copy">
+                      <strong>{feature.title}</strong>
+                      <small>{feature.audience} · {feature.mode === "live_read" ? "시드 결과 확인" : "안전 체험"}</small>
+                      <span>{feature.description}</span>
+                    </span>
+                    <Icon name="chevron" size={16} />
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
         {error || departments.length === 0 ? (
           <section className="empty-state">
             <h2 className="text-xl">데모를 준비하는 중입니다</h2>
@@ -82,6 +185,7 @@ export default async function DemoLandingPage() {
         ) : (
           <section className="department-grid" aria-label="데모 부서 선택">
             {departments.map((department) => {
+              const recommended = department.name === "영업 사수";
               const copy = departmentCopy[department.name] ?? {
                 icon: "people" as const,
                 description:
@@ -90,7 +194,7 @@ export default async function DemoLandingPage() {
               };
               return (
                 <Link
-                  className="department-card"
+                  className={`department-card ${recommended ? "department-card-recommended" : ""}`}
                   href={`/demo/d/${department.id}`}
                   key={department.id}
                 >
@@ -98,7 +202,9 @@ export default async function DemoLandingPage() {
                     <span className="department-icon">
                       <Icon name={copy.icon} size={23} />
                     </span>
-                    <span className="badge badge-neutral">읽기 전용</span>
+                    <span className={`badge ${recommended ? "badge-green" : "badge-neutral"}`}>
+                      {recommended ? "추천 · 90초 핵심 데모" : "다른 사례"}
+                    </span>
                   </div>
                   <div>
                     <h2>{department.name}</h2>
@@ -106,7 +212,7 @@ export default async function DemoLandingPage() {
                   </div>
                   <div className="department-example">{copy.example}</div>
                   <div className="department-card-footer">
-                    <span>이 부서 둘러보기</span>
+                    <span>{recommended ? "핵심 데모 시작" : "이 부서 둘러보기"}</span>
                     <Icon name="arrow" size={17} />
                   </div>
                 </Link>
@@ -130,7 +236,7 @@ export default async function DemoLandingPage() {
           ) : null}
         </div>
         <footer className="demo-footer">
-          <p>가입 없이 체험 · 회사·인물·대화는 모두 합성 데이터입니다.</p>
+          <p>{reviewerConnected ? "자동 로그인된 심사 계정 · 영속 변경 없는 안전 체험" : "가입 없이 체험"} · 회사·인물·대화는 모두 합성 데이터입니다.</p>
           <div className="flex flex-wrap gap-4">
             <Link href="/login">우리 팀으로 로그인</Link>
             {links.pilotContactUrl ? (

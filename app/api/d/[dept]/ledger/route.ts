@@ -136,7 +136,8 @@ export async function GET(
         "id, request_id, decided_by, decided_by_name, decided_at, outcome, rationale, supersedes_id, lead_time_min",
       )
       .eq("dept_id", membership.deptId)
-      .order("decided_at", { ascending: false }),
+      .order("decided_at", { ascending: false })
+      .limit(100),
     supabase
       .from("members")
       .select("user_id, display_name")

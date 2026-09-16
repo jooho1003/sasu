@@ -186,6 +186,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
   const [evidenceItemId, setEvidenceItemId] = useState("");
   const [recording, setRecording] = useState(false);
   const [recordMessage, setRecordMessage] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(10);
 
   useEffect(() => {
     let cancelled = false;
@@ -327,6 +328,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
         onSubmit={(event) => {
           event.preventDefault();
           setAppliedFilters(filters);
+          setVisibleCount(10);
         }}
       >
         <label className="grid gap-1 text-sm font-bold">
@@ -399,7 +401,10 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
 
       {!loading && !error && data && data.decisions.length > 0 ? (
         <section aria-label="결정 목록" className="grid gap-4">
-          {data.decisions.map((decision) => (
+          <p className="m-0 text-sm text-[var(--muted)]">
+            전체 {data.decisions.length}건 중 {Math.min(visibleCount, data.decisions.length)}건 표시
+          </p>
+          {data.decisions.slice(0, visibleCount).map((decision) => (
             <div key={decision.id} className="panel p-5 sm:p-6">
               <DecisionDetail decision={decision} />
               {decision.can_correct ? <DecisionCorrection deptId={deptId} previousId={decision.id} initialOutcome={decision.outcome} onDone={() => setRefreshKey(value => value + 1)} /> : null}
@@ -417,6 +422,15 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
               ) : null}
             </div>
           ))}
+          {data.decisions.length > visibleCount ? (
+            <button
+              className="button button-secondary w-fit"
+              type="button"
+              onClick={() => setVisibleCount((count) => count + 10)}
+            >
+              결정 10건 더 보기
+            </button>
+          ) : null}
         </section>
       ) : null}
     </main>

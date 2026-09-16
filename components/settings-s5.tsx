@@ -115,6 +115,18 @@ export default function SettingsS5({
   );
   const allConsented =
     data?.members.every((member) => member.consented_at !== null) ?? false;
+  const allSlackMapped =
+    data?.members.every((member) => member.slack_user_id !== null) ?? false;
+  const hasConnectedChannel = connectedSlackSources.length > 0;
+  const hasPrinciples =
+    data?.sources.some(
+      (source) => source.active && source.kind === "notion_page",
+    ) ?? false;
+  const setupChecks = [allConsented, allSlackMapped, hasConnectedChannel, hasPrinciples];
+  const missingConsentNames =
+    data?.members.filter((member) => !member.consented_at).map((member) => member.display_name) ?? [];
+  const missingSlackNames =
+    data?.members.filter((member) => !member.slack_user_id).map((member) => member.display_name) ?? [];
 
   const load = useCallback(
     async (signal?: AbortSignal) => {
@@ -589,6 +601,32 @@ export default function SettingsS5({
           </div>
         </div>
       </div>
+      <section className="setup-checklist panel" aria-labelledby="setup-checklist-heading">
+        <div>
+          <p className="eyebrow">첫 수집까지</p>
+          <h2 id="setup-checklist-heading">설정 완료 {setupChecks.filter(Boolean).length} / 4</h2>
+          {setupChecks.every(Boolean) ? (
+            <p>필수 연결이 모두 준비됐습니다.</p>
+          ) : (
+            <p>
+              {missingConsentNames.length ? `동의 필요: ${missingConsentNames.join(", ")}. ` : ""}
+              {missingSlackNames.length ? `Slack 연결 필요: ${missingSlackNames.join(", ")}.` : ""}
+            </p>
+          )}
+        </div>
+        <ol>
+          {[
+            [allConsented, "멤버 수집 동의"],
+            [allSlackMapped, "멤버 Slack 계정 연결"],
+            [hasConnectedChannel, "수집 채널 연결"],
+            [hasPrinciples, "원칙 문서 연결"],
+          ].map(([ready, label], index) => (
+            <li key={String(label)} data-ready={ready}>
+              <b>{ready ? "✓" : index + 1}</b>{label}
+            </li>
+          ))}
+        </ol>
+      </section>
       <div className="section-picker" role="group" aria-label="세팅 항목 선택">
         {(
           [

@@ -11,6 +11,11 @@ for (const envFile of [".env", ".env.local"]) {
 const DEPARTMENT_ID = "22222222-2222-4222-8222-222222222222";
 const FIXED_NOTICE = "내 권한 범위 안의 부서 기록만 참고했습니다.";
 
+test.skip(
+  process.env.E2E_ALLOW_SHOWCASE_WRITES !== "1",
+  "공유 파일럿 부서 쓰기는 기본 차단됩니다. 전체 쓰기 검증은 scripts/review-qa.mjs의 격리 DB에서 실행하세요.",
+);
+
 type AnswerState = {
   id: string;
   status: "pending" | "done" | "refused" | "failed";

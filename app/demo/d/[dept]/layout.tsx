@@ -5,6 +5,9 @@ import { Icon } from "@/components/ui/icon";
 import { siteLinks } from "@/lib/site";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { orgAdminReadEnabled, trailerPublishEnabled } from "@/lib/features";
+import { demoAutoLoginEnabled } from "@/lib/demo-access";
+
+export const dynamic = "force-dynamic";
 
 export default async function DemoDepartmentLayout({
   children,
@@ -16,16 +19,18 @@ export default async function DemoDepartmentLayout({
   const { dept } = await params;
   const links = siteLinks();
   const supabase = createPublicSupabaseClient();
-  const { data: department } = await supabase
-    .from("departments")
-    .select("id, name")
-    .eq("id", dept)
-    .maybeSingle<{ id: string; name: string }>();
+  // Public demo departments are exposed only through the SECURITY DEFINER RPC.
+  // Direct table reads are intentionally hidden by RLS, even for the demo account.
+  const { data } = await supabase.rpc("demo_departments");
+  const department = ((data ?? []) as Array<{ id: string; name: string }>).find(
+    (candidate) => candidate.id === dept,
+  );
   if (!department) notFound();
 
   return (
     <WorkspaceShell
       demo
+      fullDemo={demoAutoLoginEnabled()}
       deptId={dept}
       departmentName={department.name}
       showOrgAdmin={orgAdminReadEnabled()}

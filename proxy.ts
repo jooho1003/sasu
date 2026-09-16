@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 import { trailerPublishEnabled } from "@/lib/features";
+import { isDemoReviewer } from "@/lib/demo-access";
 
 export async function proxy(request: NextRequest) {
   // Close disabled pages before the parent department layout redirects to login.
@@ -41,7 +42,32 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getClaims();
+  const claims = await supabase.auth.getClaims();
+  const userId = claims.data?.claims?.sub;
+  if (typeof userId === "string" && isDemoReviewer(userId)) {
+    for (const cookie of request.cookies.getAll()) {
+      if (!/-auth-token(?:\.\d+)?$/u.test(cookie.name)) continue;
+      response.cookies.set(cookie.name, cookie.value, {
+        httpOnly: true,
+        path: "/",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+    }
+  }
+  const isWriteRequest = !["GET", "HEAD", "OPTIONS"].includes(request.method);
+  if (isWriteRequest && typeof userId === "string" && isDemoReviewer(userId)) {
+    return NextResponse.json(
+      {
+        error: "심사위원 데모에서는 실제 저장과 외부 발신을 하지 않습니다.",
+        code: "demo_read_only",
+      },
+      {
+        status: 403,
+        headers: { "cache-control": "private, no-store, max-age=0" },
+      },
+    );
+  }
 
   return response;
 }
@@ -59,5 +85,6 @@ export const config = {
     "/invite/:path*",
     "/api/admin/:path*",
     "/api/invites/:path*",
+    "/demo/access",
   ],
 };

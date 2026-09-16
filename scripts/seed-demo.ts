@@ -8,11 +8,17 @@ import { parseDemoTrailerSnapshot, parseDemoAttemptsSnapshot } from "../lib/trai
 import { DEFAULT_TRAILER_RUBRIC } from "../lib/trailer-generation";
 import { trailerApprovalItems } from "../lib/trailer-gate";
 import { mask } from "../lib/mask";
+import {
+  DEMO_ORG_ID,
+  DEMO_REVIEWER_ID,
+  demoAutoLoginEnabled,
+  demoReviewerEmail,
+} from "../lib/demo-access";
 
 loadEnvConfig(process.cwd());
 
 const IDS = {
-  org: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  org: DEMO_ORG_ID,
   salesDept: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
   devDept: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
   planningDept: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
@@ -72,13 +78,15 @@ type DemoDepartment = {
     rationale: string;
     item_id: string;
   }>;
+  conflict_explanation?: string;
   answers: Array<{
     id: string;
     question_key: string;
     question: string;
     answer: string;
     generic_answer: string;
-    item_id: string;
+    refused: boolean;
+    item_ids: string[];
   }>;
 };
 
@@ -97,14 +105,15 @@ const SALES: DemoDepartment = {
     { id: "10000000-0000-4000-8000-000000000114", source_id: "10000000-0000-4000-8000-000000000102", external_ref: "sales-slack-2", author: "지후", content: "고객 인터뷰 일정은 다음 주 화요일 오전으로 잡았습니다.", label: "action" },
   ],
   request: { id: "10000000-0000-4000-8000-000000000121", origin_item_id: "10000000-0000-4000-8000-000000000112", citation_item_ids: ["10000000-0000-4000-8000-000000000112", "10000000-0000-4000-8000-000000000113"], title: "외주사 B 12% 인상 견적을 받아들일까요?", background: "슬랙에서 외주사 B의 견적 인상에 대한 결정을 요청했고, 오늘 17시까지 방향이 필요합니다.", recommendation: "부서 원칙에 따라 재입찰을 우선 검토하고, 예외 사유가 있으면 근거를 남기는 방향을 권합니다.", visibility: "leads_only" },
-  priorDecision: { id: "10000000-0000-4000-8000-000000000122", outcome: "고객 인터뷰를 다음 주로 확정", rationale: "신규 고객군의 요구를 먼저 확인한 뒤 제안 범위를 좁히기로 했습니다.", item_id: "10000000-0000-4000-8000-000000000114" },
+  priorDecision: { id: "10000000-0000-4000-8000-000000000122", outcome: "10% 이상 인상은 자동 연장하지 않고 재입찰 검토", rationale: "연간 가격 인상이 10% 이상이면 기존 거래를 그대로 연장하지 않고 대안을 비교하기로 했습니다.", item_id: "10000000-0000-4000-8000-000000000111" },
+  conflict_explanation: "이번 12% 인상안을 그대로 수용하면, 10% 이상 인상 시 재입찰을 검토한다는 과거 결정과 충돌합니다.",
   answers: [
-    { id: "10000000-0000-4000-8000-000000000131", question_key: "vendor-price", question: "외주사 B 견적을 받아도 되나요?", answer: "현재 기록에는 12% 인상안이 있고, 영업 원칙은 10% 이상 인상 시 재입찰 검토입니다. 예외가 필요하다면 팀장 결정이 먼저입니다.", generic_answer: "견적을 비교하고 예산과 일정 영향을 확인한 뒤 담당자 승인을 받으세요.", item_id: "10000000-0000-4000-8000-000000000112" },
-    { id: "10000000-0000-4000-8000-000000000132", question_key: "interview", question: "고객 인터뷰는 언제 하나요?", answer: "기록상 고객 인터뷰는 다음 주 화요일 오전으로 잡혀 있습니다.", generic_answer: "캘린더에서 참석자와 목적을 확인하고 초대장을 보내세요.", item_id: "10000000-0000-4000-8000-000000000114" },
-    { id: "10000000-0000-4000-8000-000000000133", question_key: "pricing", question: "가격을 올릴 때 기준이 있나요?", answer: "연 10% 이상 가격이 오르면 기존 거래를 자동 연장하지 않고 재입찰을 검토합니다.", generic_answer: "원가와 시장 가격을 확인하고 고객에게 변경 근거를 안내하세요.", item_id: "10000000-0000-4000-8000-000000000111" },
-    { id: "10000000-0000-4000-8000-000000000134", question_key: "owner", question: "이 안건의 결정자는 누구인가요?", answer: "공개된 기록만으로 담당자를 확정할 수 없습니다. 현재 카드는 팀장 검토가 필요한 상태입니다.", generic_answer: "프로젝트 책임자와 예산 승인권자를 확인하세요.", item_id: "10000000-0000-4000-8000-000000000112" },
-    { id: "10000000-0000-4000-8000-000000000135", question_key: "deadline", question: "언제까지 결정해야 하나요?", answer: "슬랙 기록에 오늘 17시까지 방향이 필요하다고 남아 있습니다.", generic_answer: "요청자와 마감 시각을 합의해 기록하세요.", item_id: "10000000-0000-4000-8000-000000000112" },
-    { id: "10000000-0000-4000-8000-000000000136", question_key: "principle", question: "우리 부서 원칙은 무엇인가요?", answer: "10% 이상 가격 인상은 재입찰을 검토한다는 원칙이 있습니다.", generic_answer: "팀의 최신 원칙 문서를 확인하고 예외 조건을 기록하세요.", item_id: "10000000-0000-4000-8000-000000000111" },
+    { id: "10000000-0000-4000-8000-000000000131", question_key: "vendor-price", question: "외주사 B 견적을 받아도 되나요?", answer: "현재 기록에는 12% 인상안이 있고, 영업 원칙은 10% 이상 인상 시 재입찰 검토입니다.", generic_answer: "견적을 비교하고 예산과 일정 영향을 확인한 뒤 담당자 승인을 받으세요.", refused: false, item_ids: ["10000000-0000-4000-8000-000000000112", "10000000-0000-4000-8000-000000000111"] },
+    { id: "10000000-0000-4000-8000-000000000132", question_key: "interview", question: "고객 인터뷰는 언제 하나요?", answer: "기록상 고객 인터뷰는 다음 주 화요일 오전으로 잡혀 있습니다.", generic_answer: "캘린더에서 참석자와 목적을 확인하고 초대장을 보내세요.", refused: false, item_ids: ["10000000-0000-4000-8000-000000000114"] },
+    { id: "10000000-0000-4000-8000-000000000133", question_key: "pricing", question: "가격을 올릴 때 기준이 있나요?", answer: "연 10% 이상 가격이 오르면 기존 거래를 자동 연장하지 않고 재입찰을 검토합니다.", generic_answer: "원가와 시장 가격을 확인하고 고객에게 변경 근거를 안내하세요.", refused: false, item_ids: ["10000000-0000-4000-8000-000000000111"] },
+    { id: "10000000-0000-4000-8000-000000000134", question_key: "owner", question: "이 안건의 결정자는 누구인가요?", answer: "현재 확인 가능한 기록에는 결정자가 명시되지 않았습니다. 마감이 있는 가격 안건을 먼저 확인해 주세요.", generic_answer: "프로젝트 책임자와 예산 승인권자를 확인하세요.", refused: true, item_ids: [] },
+    { id: "10000000-0000-4000-8000-000000000135", question_key: "deadline", question: "언제까지 결정해야 하나요?", answer: "슬랙 기록에 오늘 17시까지 방향이 필요하다고 남아 있습니다.", generic_answer: "요청자와 마감 시각을 합의해 기록하세요.", refused: false, item_ids: ["10000000-0000-4000-8000-000000000112"] },
+    { id: "10000000-0000-4000-8000-000000000136", question_key: "principle", question: "우리 부서 원칙은 무엇인가요?", answer: "10% 이상 가격 인상은 재입찰을 검토한다는 원칙이 있습니다.", generic_answer: "팀의 최신 원칙 문서를 확인하고 예외 조건을 기록하세요.", refused: false, item_ids: ["10000000-0000-4000-8000-000000000111"] },
   ],
 };
 
@@ -135,12 +144,12 @@ const DEVELOPMENT: DemoDepartment = {
   request: { id: "20000000-0000-4000-8000-000000000121", origin_item_id: "20000000-0000-4000-8000-000000000112", citation_item_ids: ["20000000-0000-4000-8000-000000000112", "20000000-0000-4000-8000-000000000113"], title: "롤백 플랜 확인 전 배포를 진행할까요?", background: "개발 채널에서 오늘 배포 여부를 물었고, 영향 범위와 롤백 계획 확인이 남아 있습니다.", recommendation: "영향 범위와 롤백 가능 여부를 확인한 뒤 배포하는 방향을 권합니다.", visibility: "leads_only" },
   priorDecision: { id: "20000000-0000-4000-8000-000000000122", outcome: "스테이징 로그 대시보드 추가", rationale: "운영 배포 전에 확인 가능한 관측성을 확보하기로 했습니다.", item_id: "20000000-0000-4000-8000-000000000114" },
   answers: [
-    { id: "20000000-0000-4000-8000-000000000131", question_key: "vendor-price", question: "외주사 B 견적을 받아도 되나요?", answer: "개발 사수에는 외주사 견적에 관한 기록이 없습니다. 개발 부서 원칙과 관련된 질문을 선택해 주세요.", generic_answer: "견적을 비교하고 예산과 일정 영향을 확인한 뒤 담당자 승인을 받으세요.", item_id: "20000000-0000-4000-8000-000000000111" },
-    { id: "20000000-0000-4000-8000-000000000132", question_key: "interview", question: "고객 인터뷰는 언제 하나요?", answer: "개발 사수에는 고객 인터뷰 일정 기록이 없습니다.", generic_answer: "캘린더에서 참석자와 목적을 확인하고 초대장을 보내세요.", item_id: "20000000-0000-4000-8000-000000000114" },
-    { id: "20000000-0000-4000-8000-000000000133", question_key: "pricing", question: "가격을 올릴 때 기준이 있나요?", answer: "개발 부서의 기록에는 가격 원칙이 없습니다.", generic_answer: "원가와 시장 가격을 확인하고 고객에게 변경 근거를 안내하세요.", item_id: "20000000-0000-4000-8000-000000000111" },
-    { id: "20000000-0000-4000-8000-000000000134", question_key: "owner", question: "이 안건의 결정자는 누구인가요?", answer: "배포 안건은 개발 리드가 검토하고, 영향 범위와 롤백 계획을 먼저 확인합니다.", generic_answer: "프로젝트 책임자와 예산 승인권자를 확인하세요.", item_id: "20000000-0000-4000-8000-000000000112" },
-    { id: "20000000-0000-4000-8000-000000000135", question_key: "deadline", question: "언제까지 결정해야 하나요?", answer: "현재 기록에는 오늘 배포 여부를 결정해야 한다는 요청이 있습니다.", generic_answer: "요청자와 마감 시각을 합의해 기록하세요.", item_id: "20000000-0000-4000-8000-000000000112" },
-    { id: "20000000-0000-4000-8000-000000000136", question_key: "principle", question: "장애 대응 원칙은 무엇인가요?", answer: "원인 분석보다 먼저 영향 범위와 롤백 가능 여부를 확인합니다.", generic_answer: "팀의 최신 원칙 문서를 확인하고 예외 조건을 기록하세요.", item_id: "20000000-0000-4000-8000-000000000111" },
+    { id: "20000000-0000-4000-8000-000000000131", question_key: "vendor-price", question: "외주사 B 견적을 받아도 되나요?", answer: "개발 부서 기록에서는 외주사 B 견적을 확인할 수 없습니다. 개발 원칙 질문을 선택해 주세요.", generic_answer: "견적을 비교하고 예산과 일정 영향을 확인한 뒤 담당자 승인을 받으세요.", refused: true, item_ids: [] },
+    { id: "20000000-0000-4000-8000-000000000132", question_key: "interview", question: "고객 인터뷰는 언제 하나요?", answer: "개발 부서 기록에서는 고객 인터뷰 일정을 확인할 수 없습니다. 개발 원칙 질문을 선택해 주세요.", generic_answer: "캘린더에서 참석자와 목적을 확인하고 초대장을 보내세요.", refused: true, item_ids: [] },
+    { id: "20000000-0000-4000-8000-000000000133", question_key: "pricing", question: "가격을 올릴 때 기준이 있나요?", answer: "개발 부서 기록에서는 가격 원칙을 확인할 수 없습니다. 개발 원칙 질문을 선택해 주세요.", generic_answer: "원가와 시장 가격을 확인하고 고객에게 변경 근거를 안내하세요.", refused: true, item_ids: [] },
+    { id: "20000000-0000-4000-8000-000000000134", question_key: "owner", question: "이 안건의 결정자는 누구인가요?", answer: "현재 확인 가능한 기록에는 결정자가 명시되지 않았습니다. 배포 전에 확인할 원칙을 먼저 살펴보세요.", generic_answer: "프로젝트 책임자와 예산 승인권자를 확인하세요.", refused: true, item_ids: [] },
+    { id: "20000000-0000-4000-8000-000000000135", question_key: "deadline", question: "언제까지 결정해야 하나요?", answer: "현재 기록에는 오늘 배포 여부를 결정해야 한다는 요청이 있습니다.", generic_answer: "요청자와 마감 시각을 합의해 기록하세요.", refused: false, item_ids: ["20000000-0000-4000-8000-000000000112"] },
+    { id: "20000000-0000-4000-8000-000000000136", question_key: "principle", question: "우리 부서 원칙은 무엇인가요?", answer: "원인 분석보다 먼저 영향 범위와 롤백 가능 여부를 확인합니다.", generic_answer: "팀의 최신 원칙 문서를 확인하고 예외 조건을 기록하세요.", refused: false, item_ids: ["20000000-0000-4000-8000-000000000111"] },
   ],
 };
 
@@ -323,12 +332,12 @@ const PLANNING: DemoDepartment = {
   request: { id: planningItemId(121), origin_item_id: planningItemId(5), citation_item_ids: [planningItemId(5)], title: "외주 QA 업체 B와 1,780만원으로 계약할까요?", background: "기획팀 Slack과 런칭 예산안에서 9월 18일 베타를 위해 외주 QA를 검토했습니다. 금요일 17시까지 결정이 필요합니다.", recommendation: "예산 상한 2,000만원 안에서 일정과 야간 테스트 범위를 충족하는 업체 B를 우선협상 대상으로 두고, 계약 범위 변경은 사전 승인으로 제한하는 방향을 권합니다.", visibility: "leads_only" },
   priorDecision: { id: planningItemId(122), outcome: "업체 B와 1,780만원으로 계약 진행", rationale: "베타 일정과 야간 테스트 범위를 함께 충족했고, 예산 상한 안에서 예비비 220만원을 남겼습니다.", item_id: planningItemId(44) },
   answers: [
-    { id: planningItemId(131), question_key: "planning-vendor", question: "QA 업체 B를 선택한 이유는 무엇인가요?", answer: "기록상 업체 B는 1,780만원으로 예산 상한 2,000만원 안에 있고, 9월 18일 투입과 야간 테스트를 함께 충족합니다.", generic_answer: "업체별 일정·범위·비용을 비교하고 최종 승인자를 확인하세요.", item_id: planningItemId(44) },
-    { id: planningItemId(132), question_key: "planning-deadline", question: "외주 QA 결정은 언제까지인가요?", answer: "김현우 팀장이 금요일 17시까지 결정이 필요하다고 남겼습니다.", generic_answer: "요청자와 결정 마감 시각을 합의해 기록하세요.", item_id: planningItemId(5) },
-    { id: planningItemId(133), question_key: "planning-budget", question: "예산안에서 남는 금액은 어떻게 하나요?", answer: "런칭 예산안.xlsx와 과장 발언에 따르면 220만원을 장애 대응 예비비로 남기고 추가 집행은 팀장 승인으로 제한합니다.", generic_answer: "예산 상한과 예비비 사용 조건을 함께 확인하세요.", item_id: planningItemId(102) },
-    { id: planningItemId(134), question_key: "planning-notice", question: "고객 공지는 언제 발송하나요?", answer: "기록에는 수요일 오전 10시 발송 일정이 있고, 베타 오픈 기준은 최종 공지와 QA 통과 확인입니다.", generic_answer: "공지 대상·발송 시각·최종 승인자를 확인하세요.", item_id: planningItemId(51) },
-    { id: planningItemId(135), question_key: "planning-owner", question: "실무 자료와 테스트 케이스는 누가 맡았나요?", answer: "최민지 사원이 자료와 테스트 케이스를 맡고, 이준호 대리가 업체 커뮤니케이션과 실무 조율을 맡았습니다.", generic_answer: "업무별 담당자와 검토자를 분리해 기록하세요.", item_id: planningItemId(29) },
-    { id: planningItemId(136), question_key: "planning-principle", question: "기획팀의 예산 원칙은 무엇인가요?", answer: "예산 상한을 넘는 집행은 팀장 승인을 받고, 일정 변경보다 고객 공지 가능성을 먼저 확인합니다.", generic_answer: "최신 부서 원칙 문서를 먼저 확인하세요.", item_id: planningItemId(101) },
+    { id: planningItemId(131), question_key: "planning-vendor", question: "QA 업체 B를 선택한 이유는 무엇인가요?", answer: "기록상 업체 B는 1,780만원으로 예산 상한 2,000만원 안에 있고, 9월 18일 투입과 야간 테스트를 함께 충족합니다.", generic_answer: "업체별 일정·범위·비용을 비교하고 최종 승인자를 확인하세요.", refused: false, item_ids: [planningItemId(44)] },
+    { id: planningItemId(132), question_key: "planning-deadline", question: "외주 QA 결정은 언제까지인가요?", answer: "김현우 팀장이 금요일 17시까지 결정이 필요하다고 남겼습니다.", generic_answer: "요청자와 결정 마감 시각을 합의해 기록하세요.", refused: false, item_ids: [planningItemId(5)] },
+    { id: planningItemId(133), question_key: "planning-budget", question: "예산안에서 남는 금액은 어떻게 하나요?", answer: "런칭 예산안.xlsx와 과장 발언에 따르면 220만원을 장애 대응 예비비로 남기고 추가 집행은 팀장 승인으로 제한합니다.", generic_answer: "예산 상한과 예비비 사용 조건을 함께 확인하세요.", refused: false, item_ids: [planningItemId(102)] },
+    { id: planningItemId(134), question_key: "planning-notice", question: "고객 공지는 언제 발송하나요?", answer: "기록에는 수요일 오전 10시 발송 일정이 있고, 베타 오픈 기준은 최종 공지와 QA 통과 확인입니다.", generic_answer: "공지 대상·발송 시각·최종 승인자를 확인하세요.", refused: false, item_ids: [planningItemId(51)] },
+    { id: planningItemId(135), question_key: "planning-owner", question: "실무 자료와 테스트 케이스는 누가 맡았나요?", answer: "최민지 사원이 자료와 테스트 케이스를 맡고, 이준호 대리가 업체 커뮤니케이션과 실무 조율을 맡았습니다.", generic_answer: "업무별 담당자와 검토자를 분리해 기록하세요.", refused: false, item_ids: [planningItemId(29)] },
+    { id: planningItemId(136), question_key: "planning-principle", question: "기획팀의 예산 원칙은 무엇인가요?", answer: "예산 상한을 넘는 집행은 팀장 승인을 받고, 일정 변경보다 고객 공지 가능성을 먼저 확인합니다.", generic_answer: "최신 부서 원칙 문서를 먼저 확인하세요.", refused: false, item_ids: [planningItemId(101)] },
   ],
 };
 
@@ -398,12 +407,12 @@ const DESIGN: DemoDepartment = {
     { id: designItemId(125), outcome: "외주 일러스트 계약 조건 승인", rationale: "수정 2회와 원본 파일 전달 조건을 포함해 계약하기로 했습니다.", item_id: designItemId(22) },
   ],
   answers: [
-    { id: designItemId(131), question_key: "design-accessibility-lead", question: "팀장이 보는 출시 시안의 접근성 기준은 무엇인가요?", answer: "주요 터치 영역은 최소 48px로 만들고, 44px 승인 요청은 회의에서 보류한 뒤 48px 시안으로 출시하기로 했습니다.", generic_answer: "접근성 가이드와 출시 일정 영향을 함께 확인하세요.", item_id: designItemId(18) },
-    { id: designItemId(132), question_key: "design-accessibility-member", question: "팀원이 보는 출시 시안의 접근성 기준은 무엇인가요?", answer: "주요 터치 영역은 최소 48px로 만들고, 접근성 기준은 출시 일정 때문에 낮추지 않습니다.", generic_answer: "접근성 가이드와 출시 일정 영향을 함께 확인하세요.", item_id: designItemId(101) },
-    { id: designItemId(133), question_key: "design-brand", question: "브랜드 가이드 예외는 어떻게 처리하나요?", answer: "브랜드 가이드 예외는 승인자와 근거를 기록하며, 접근성 기준 자체는 예외로 낮추지 않습니다.", generic_answer: "브랜드 가이드와 승인 절차를 확인하세요.", item_id: designItemId(101) },
-    { id: designItemId(134), question_key: "design-cut", question: "출시에서 제외한 시안은 무엇인가요?", answer: "온보딩 일러스트 4종은 출시 일정을 지키기 위해 다음 릴리스로 이관했습니다.", generic_answer: "출시 우선순위와 다음 일정을 확인하세요.", item_id: designItemId(19) },
-    { id: designItemId(135), question_key: "design-vendor", question: "외주 일러스트 계약 조건은 무엇인가요?", answer: "외주 계약은 수정 2회와 원본 파일·저작권 이전 조건을 포함해 진행합니다.", generic_answer: "납기와 저작권 조건을 계약서에 명시하세요.", item_id: designItemId(22) },
-    { id: designItemId(136), question_key: "design-figma", question: "Figma 전달 전에 무엇을 확인하나요?", answer: "Figma 파일에는 접근성 점검표와 예외 승인 영역을 함께 기록합니다.", generic_answer: "검토 기준과 승인 이력을 파일에 남기세요.", item_id: designItemId(13) },
+    { id: designItemId(131), question_key: "design-accessibility-lead", question: "팀장이 보는 출시 시안의 접근성 기준은 무엇인가요?", answer: "주요 터치 영역은 최소 48px로 만들고, 44px 승인 요청은 회의에서 보류한 뒤 48px 시안으로 출시하기로 했습니다.", generic_answer: "접근성 가이드와 출시 일정 영향을 함께 확인하세요.", refused: false, item_ids: [designItemId(18)] },
+    { id: designItemId(132), question_key: "design-accessibility-member", question: "팀원이 보는 출시 시안의 접근성 기준은 무엇인가요?", answer: "주요 터치 영역은 최소 48px로 만들고, 접근성 기준은 출시 일정 때문에 낮추지 않습니다.", generic_answer: "접근성 가이드와 출시 일정 영향을 함께 확인하세요.", refused: false, item_ids: [designItemId(101)] },
+    { id: designItemId(133), question_key: "design-brand", question: "브랜드 가이드 예외는 어떻게 처리하나요?", answer: "브랜드 가이드 예외는 승인자와 근거를 기록하며, 접근성 기준 자체는 예외로 낮추지 않습니다.", generic_answer: "브랜드 가이드와 승인 절차를 확인하세요.", refused: false, item_ids: [designItemId(101)] },
+    { id: designItemId(134), question_key: "design-cut", question: "출시에서 제외한 시안은 무엇인가요?", answer: "온보딩 일러스트 4종은 출시 일정을 지키기 위해 다음 릴리스로 이관했습니다.", generic_answer: "출시 우선순위와 다음 일정을 확인하세요.", refused: false, item_ids: [designItemId(19)] },
+    { id: designItemId(135), question_key: "design-vendor", question: "외주 일러스트 계약 조건은 무엇인가요?", answer: "외주 계약은 수정 2회와 원본 파일·저작권 이전 조건을 포함해 진행합니다.", generic_answer: "납기와 저작권 조건을 계약서에 명시하세요.", refused: false, item_ids: [designItemId(22)] },
+    { id: designItemId(136), question_key: "design-figma", question: "Figma 전달 전에 무엇을 확인하나요?", answer: "Figma 파일에는 접근성 점검표와 예외 승인 영역을 함께 기록합니다.", generic_answer: "검토 기준과 승인 이력을 파일에 남기세요.", refused: false, item_ids: [designItemId(13)] },
   ],
 };
 
@@ -413,12 +422,28 @@ const DEMO_MEMBER_NAMES = [
   ["김서윤", "이도현", "박하린"], ["개발팀 리드", "정지우", "최민준"],
   ["한지민", "윤서준", "강수빈"], ["오예린", "장도윤", "임서아"],
 ];
-export const DEMO_MEMBERS = DEMO_DEPARTMENTS.flatMap((department, deptIndex) =>
+const DEPARTMENT_MEMBERS = DEMO_DEPARTMENTS.flatMap((department, deptIndex) =>
   DEMO_MEMBER_NAMES[deptIndex].map((name, memberIndex) => {
     const userId = `${department.id.slice(0, -2)}0${memberIndex + 1}`;
     return { user_id: userId, dept_id: department.id, email: `${userId}@demo.invalid`, display_name: name, role: memberIndex === 0 ? "lead" as const : "member" as const, consented: memberIndex !== 2 };
   }),
 );
+
+export const DEMO_MEMBERS = [
+  ...DEPARTMENT_MEMBERS,
+  ...DEMO_DEPARTMENTS.map((department) => ({
+    user_id: DEMO_REVIEWER_ID,
+    dept_id: department.id,
+    email: demoReviewerEmail(),
+    display_name: "심사위원 데모",
+    role: "lead" as const,
+    consented: true,
+  })),
+];
+
+function uniqueDemoUsers() {
+  return [...new Map(DEMO_MEMBERS.map((member) => [member.user_id, member])).values()];
+}
 
 async function removeExistingDemoData(
   client: ReturnType<typeof createServiceSupabaseClient>,
@@ -470,7 +495,7 @@ async function removeExistingDemoData(
   if (departmentError) throw new Error("demo department cleanup failed");
   const { error: orgError } = await client.from("orgs").delete().eq("id", IDS.org);
   if (orgError) throw new Error("demo org cleanup failed");
-  for (const member of DEMO_MEMBERS) {
+  for (const member of uniqueDemoUsers()) {
     const existing = await client.auth.admin.getUserById(member.user_id);
     if (existing.error?.status === 404) continue;
     if (existing.error || !existing.data.user || existing.data.user.email !== member.email) throw new Error("demo user identity check failed");
@@ -480,10 +505,33 @@ async function removeExistingDemoData(
 }
 
 async function seedDemoUsers(client: ReturnType<typeof createServiceSupabaseClient>): Promise<void> {
-  for (const member of DEMO_MEMBERS) {
-    const { error } = await client.auth.admin.createUser({ id: member.user_id, email: member.email, email_confirm: true, user_metadata: { display_name: member.display_name } });
+  const reviewerPassword = process.env.SASU_DEMO_USER_PASSWORD?.trim();
+  if (demoAutoLoginEnabled() && !reviewerPassword) {
+    throw new Error("SASU_DEMO_USER_PASSWORD is required when demo auto login is enabled");
+  }
+  for (const member of uniqueDemoUsers()) {
+    const { error } = await client.auth.admin.createUser({
+      id: member.user_id,
+      email: member.email,
+      email_confirm: true,
+      user_metadata: { display_name: member.display_name },
+      ...(member.user_id === DEMO_REVIEWER_ID && reviewerPassword
+        ? { password: reviewerPassword }
+        : {}),
+    });
     if (error) throw new Error("demo user seed failed");
   }
+}
+
+async function seedDemoReviewerAdmin(
+  client: ReturnType<typeof createServiceSupabaseClient>,
+): Promise<void> {
+  const { error } = await client.from("org_admins").insert({
+    org_id: IDS.org,
+    user_id: DEMO_REVIEWER_ID,
+    granted_by: "script:seed-demo",
+  });
+  if (error) throw new Error("demo reviewer admin seed failed");
 }
 
 async function seedDepartment(
@@ -598,7 +646,7 @@ async function seedDepartment(
   const { error: conflictError } = await client.from("conflicts").insert({
     request_id: department.request.id,
     prior_decision_id: department.priorDecision.id,
-    explanation: "과거 결정의 근거와 이번 안건을 함께 확인해야 합니다.",
+    explanation: department.conflict_explanation ?? "과거 결정의 근거와 이번 안건을 함께 확인해야 합니다.",
   });
   if (conflictError) throw new Error("demo conflict seed failed");
 
@@ -610,20 +658,24 @@ async function seedDepartment(
       question: answer.question,
       answer: answer.answer,
       generic_answer: answer.generic_answer,
-      status: "done",
-      refused: false,
+      status: answer.refused ? "refused" : "done",
+      refused: answer.refused,
       verified: true,
     })),
   );
   if (answerError) throw new Error("demo answer seed failed");
 
-  const answerCitations = department.answers.map((answer) => {
-    const item = department.items.find((candidate) => candidate.id === answer.item_id);
-    if (!item) throw new Error("demo answer citation seed failed");
-    return { owner_kind: "answer", owner_id: answer.id, item_id: item.id, quote: item.content };
-  });
-  const { error: answerCitationError } = await client.from("citations").insert(answerCitations);
-  if (answerCitationError) throw new Error("demo answer citation seed failed");
+  const answerCitations = department.answers.flatMap((answer) =>
+    answer.item_ids.map((itemId) => {
+      const item = department.items.find((candidate) => candidate.id === itemId);
+      if (!item) throw new Error("demo answer citation seed failed");
+      return { owner_kind: "answer", owner_id: answer.id, item_id: item.id, quote: item.content };
+    }),
+  );
+  if (answerCitations.length > 0) {
+    const { error: answerCitationError } = await client.from("citations").insert(answerCitations);
+    if (answerCitationError) throw new Error("demo answer citation seed failed");
+  }
 }
 
 async function seedDemoAgentRole(client: ReturnType<typeof createServiceSupabaseClient>): Promise<void> {
@@ -704,9 +756,10 @@ async function main(): Promise<void> {
   for (const department of DEMO_DEPARTMENTS) {
     await seedDepartment(client, department);
   }
+  await seedDemoReviewerAdmin(client);
   await seedDemoAgentRole(client);
   if (await seedDemoTrailer(client)) await seedDemoAttempts(client);
-  console.log("seed-demo complete: demo_org=1 departments=4 prepared_answers=24 planning_items=68 design_items=24");
+  console.log("seed-demo complete: demo_org=1 departments=4 reviewer=1 prepared_answers=24 planning_items=68 design_items=24");
 }
 
 const isEntrypoint = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];

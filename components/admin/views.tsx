@@ -24,6 +24,9 @@ export function AdminTable({
 }) {
   return (
     <div className="min-w-0">
+      <p className="mb-2 mt-0 text-right text-[10px] text-muted sm:hidden">
+        표는 좌우로 밀어 더 확인할 수 있습니다 →
+      </p>
       <div
         className="admin-table-scroll"
         tabIndex={0}
@@ -57,9 +60,6 @@ export function AdminTable({
           </tbody>
         </table>
       </div>
-      <p className="mb-0 mt-2 text-right text-[10px] text-muted sm:hidden">
-        표를 좌우로 밀어 더 확인하세요 →
-      </p>
     </div>
   );
 }
@@ -288,74 +288,68 @@ export function AdminMembersTable({
   writesEnabled?: boolean;
 }) {
   const canWrite = !readOnly && writesEnabled;
+  const leadCounts = new Map<string, number>();
+  for (const member of rows) {
+    if (member.role === "lead") {
+      leadCounts.set(member.dept_id, (leadCounts.get(member.dept_id) ?? 0) + 1);
+    }
+  }
   return (
-    <AdminTable
-      headers={[
-        "이름",
-        ...(!readOnly ? ["이메일"] : []),
-        "부서",
-        "역할",
-        "동의",
-        "슬랙",
-        ...(canWrite ? ["관리"] : []),
-      ]}
-      empty={!rows.length}
-    >
-      {rows.map((row, index) => (
-        <tr key={`${row.dept_id}-${"user_id" in row ? row.user_id : index}`}>
-          <th scope="row" className={cell}>
-            {row.display_name}
-          </th>
-          {!readOnly ? (
-            <td className={`${cell} min-w-[180px] break-all`}>
-              {"email" in row ? row.email : "—"}
-            </td>
-          ) : null}
-          <td className={cell}>{row.dept_name}</td>
-          <td className={cell}>{row.role === "lead" ? "부서장" : "멤버"}</td>
-          <td className={cell}>
-            <span
-              className={`badge ${row.consented_at ? "badge-green" : "badge-urgent"}`}
-            >
-              {row.consented_at ? "동의" : "미동의"}
-            </span>
-          </td>
-          <td className={cell}>
-            <span
-              className={`badge ${row.slack_linked ? "badge-green" : "badge-neutral"}`}
-            >
-              {row.slack_linked ? "연결됨" : "미연결"}
-            </span>
-          </td>
-          {canWrite ? (
-            <td className={cell}>
-              {"user_id" in row ? (
-                <div className="flex flex-wrap gap-2">
-                  {row.role === "lead" &&
-                  rows.filter(
-                    (member) =>
-                      member.dept_id === row.dept_id && member.role === "lead",
-                  ).length > 1 ? (
-                    <AdminAction
-                      label="부서장 해제"
-                      endpoint="/api/admin/members/demote"
-                      body={{ userId: row.user_id, deptId: row.dept_id }}
-                      description={`${row.display_name}님의 부서장 권한을 해제하고 멤버로 변경합니다.`}
-                    />
+    <>
+      <div className="admin-member-cards">
+        {rows.length === 0 ? <p className="empty-state">표시할 멤버가 없습니다.</p> : null}
+        {rows.map((row, index) => (
+          <article className="admin-member-card" key={`${row.dept_id}-mobile-${"user_id" in row ? row.user_id : index}`}>
+            <header>
+              <div><strong>{row.display_name}</strong><span>{row.dept_name} · {row.role === "lead" ? "부서장" : "멤버"}</span></div>
+              <span className={`badge ${row.consented_at ? "badge-green" : "badge-urgent"}`}>{row.consented_at ? "동의" : "미동의"}</span>
+            </header>
+            {!readOnly && "email" in row ? <p className="admin-member-email">{row.email}</p> : null}
+            <dl>
+              <div><dt>Slack</dt><dd>{row.slack_linked ? "연결됨" : "미연결"}</dd></div>
+              <div><dt>수집 동의</dt><dd>{row.consented_at ? "완료" : "확인 필요"}</dd></div>
+            </dl>
+          </article>
+        ))}
+      </div>
+      <div className="admin-members-table">
+        <AdminTable
+          headers={[
+            "이름",
+            ...(!readOnly ? ["이메일"] : []),
+            "부서",
+            "역할",
+            "동의",
+            "슬랙",
+            ...(canWrite ? ["관리"] : []),
+          ]}
+          empty={!rows.length}
+        >
+          {rows.map((row, index) => (
+            <tr key={`${row.dept_id}-${"user_id" in row ? row.user_id : index}`}>
+              <th scope="row" className={cell}>{row.display_name}</th>
+              {!readOnly ? <td className={`${cell} min-w-[180px] break-words`}>{"email" in row ? row.email : "—"}</td> : null}
+              <td className={cell}>{row.dept_name}</td>
+              <td className={cell}>{row.role === "lead" ? "부서장" : "멤버"}</td>
+              <td className={cell}><span className={`badge ${row.consented_at ? "badge-green" : "badge-urgent"}`}>{row.consented_at ? "동의" : "미동의"}</span></td>
+              <td className={cell}><span className={`badge ${row.slack_linked ? "badge-green" : "badge-neutral"}`}>{row.slack_linked ? "연결됨" : "미연결"}</span></td>
+              {canWrite ? (
+                <td className={cell}>
+                  {"user_id" in row ? (
+                    <div className="flex flex-wrap gap-2">
+                      {row.role === "lead" && (leadCounts.get(row.dept_id) ?? 0) > 1 ? (
+                        <AdminAction label="부서장 해제" endpoint="/api/admin/members/demote" body={{ userId: row.user_id, deptId: row.dept_id }} description={`${row.display_name}님의 부서장 권한을 해제하고 멤버로 변경합니다.`} />
+                      ) : null}
+                      <AdminAction label="제외" endpoint="/api/admin/members/remove" body={{ userId: row.user_id, deptId: row.dept_id }} description={`${row.display_name}님을 ${row.dept_name}에서 제외합니다. 마지막 부서장은 제외할 수 없습니다.`} />
+                    </div>
                   ) : null}
-                  <AdminAction
-                    label="제외"
-                    endpoint="/api/admin/members/remove"
-                    body={{ userId: row.user_id, deptId: row.dept_id }}
-                    description={`${row.display_name}님을 ${row.dept_name}에서 제외합니다. 마지막 부서장은 제외할 수 없습니다.`}
-                  />
-                </div>
+                </td>
               ) : null}
-            </td>
-          ) : null}
-        </tr>
-      ))}
-    </AdminTable>
+            </tr>
+          ))}
+        </AdminTable>
+      </div>
+    </>
   );
 }
 
@@ -381,7 +375,7 @@ export function AdminInvitesTable({
     >
       {rows.map((row) => (
         <tr key={row.invite_id}>
-          <td className={`${cell} min-w-[180px] break-all`}>{row.email}</td>
+          <td className={`${cell} min-w-[180px] break-words`}>{row.email}</td>
           <td className={cell}>{row.dept_name}</td>
           <td className={cell}>{row.role === "lead" ? "부서장" : "멤버"}</td>
           <td className={cell}>

@@ -10,9 +10,13 @@ for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     const writes: string[] = [];
     const errors: string[] = [];
+    const appOrigin = new URL(String(testInfo.project.use.baseURL)).origin;
     page.on("request", (request) => {
-      if (!["GET", "HEAD", "OPTIONS"].includes(request.method()))
-        writes.push(request.method());
+      if (
+        new URL(request.url()).origin === appOrigin &&
+        !["GET", "HEAD", "OPTIONS"].includes(request.method())
+      )
+        writes.push(`${request.method()} ${new URL(request.url()).pathname}`);
     });
     page.on("pageerror", (error) => errors.push(error.name));
     const capture = async (name: string) => {
@@ -36,9 +40,11 @@ for (const width of [1440, 390]) {
       .getByRole("link", { name: "데모 보기", exact: true })
       .first()
       .click();
+    await page.waitForURL(/\/demo(?:\?|$)/u);
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       "부서가 다르면",
     );
+    await expect(page.getByText("추천 · 90초 핵심 데모", { exact: true })).toBeVisible();
     await capture("demo");
     await page
       .getByRole("region", { name: "데모 부서 선택" })
@@ -94,7 +100,11 @@ for (const width of [1440, 390]) {
       await question.click();
       await expect(question).toHaveAttribute("aria-pressed", "true");
       await expect(page.locator("#demo-answer h2")).toHaveText(title);
-      await expect(page.locator("#demo-answer q").first()).toBeVisible();
+      if (await page.locator("#demo-answer").getByText("근거 없음", { exact: true }).count()) {
+        await expect(page.locator("#demo-answer q")).toHaveCount(0);
+      } else {
+        await expect(page.locator("#demo-answer q").first()).toBeVisible();
+      }
     }
     await questions.first().click();
     await capture("ask");
@@ -111,7 +121,8 @@ for (const width of [1440, 390]) {
 test("모바일 메뉴로 로그인에 접근한다", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await page.getByLabel("메뉴 열기").click();
+  await page.getByText("메뉴 열기", { exact: true }).click();
+  await expect(page.getByText("메뉴 닫기", { exact: true })).toBeVisible();
   await page
     .getByRole("navigation", { name: "모바일 메뉴" })
     .getByRole("link", { name: "로그인", exact: true })
@@ -151,16 +162,17 @@ for (const width of [1440, 390]) {
       ["/ledger", "원장"],
       ["/reviews", "음성·자료 검토"],
       ["/documents", "문서"],
-      ["/roles", "역할"],
+      ["/roles", "문서 평가"],
       ["/retention", "기록 보존"],
       ["/settings", "세팅"],
     ]) {
       await page.goto(`${base}${suffix}`);
-      await expect(
-        page
-          .getByRole("navigation", { name: "부서 메뉴" })
-          .getByRole("link", { name: label, exact: true }),
-      ).toHaveAttribute("aria-current", "page");
+      const departmentMenu = page.getByRole("navigation", { name: "부서 메뉴" });
+      const activeLink = departmentMenu.getByRole("link", { name: label, exact: true });
+      if (width < 768 && await activeLink.count() === 0) {
+        await departmentMenu.locator('summary[aria-label="부서 메뉴 더보기"]').click();
+      }
+      await expect(departmentMenu.getByRole("link", { name: label, exact: true })).toHaveAttribute("aria-current", "page");
       if (suffix === "/settings") {
         // Settings also reads the connected Slack channel list.
         await expect(page.getByRole("heading", { level: 1 })).toHaveText(

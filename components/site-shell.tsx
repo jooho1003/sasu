@@ -27,11 +27,14 @@ export function SiteHeader() {
           <Link className="text-link site-login" href="/login">
             로그인
           </Link>
-          <Link className="button button-primary button-small" href="/demo">
+          <a className="button button-primary button-small" href="/demo">
             데모 보기 <Icon name="arrow" size={14} />
-          </Link>
+          </a>
           <details className="mobile-site-menu">
-            <summary aria-label="메뉴 열기">메뉴</summary>
+            <summary>
+              <span className="menu-open-label">메뉴 열기</span>
+              <span className="menu-close-label">메뉴 닫기</span>
+            </summary>
             <nav aria-label="모바일 메뉴">
               {navigation.map(([href, label]) => (
                 <Link href={href} key={href}>
@@ -64,7 +67,7 @@ export function SiteFooter({ links }: { links: SiteLinks }) {
         </div>
         <nav aria-label="하단 메뉴">
           <Link href="/privacy">개인정보 처리 안내</Link>
-          <Link href="/demo">게스트 데모</Link>
+          <a href="/demo">게스트 데모</a>
           {links.pilotContactUrl ? (
             <a href={links.pilotContactUrl}>문의</a>
           ) : null}

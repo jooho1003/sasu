@@ -4,6 +4,11 @@ import { cookies } from "next/headers";
 import { CONSENT_LATER_COOKIE } from "@/lib/consent";
 import { sanitizeInternalPath } from "@/lib/auth-redirect";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import {
+  demoAutoLoginEnabled,
+  isDemoReviewer,
+  safeDemoDestination,
+} from "@/lib/demo-access";
 
 export { sanitizeInternalPath } from "@/lib/auth-redirect";
 
@@ -81,4 +86,17 @@ export async function requirePageMembership(
   const fallback = `/d/${membership.deptId}`;
   const safeNextPath = sanitizeInternalPath(nextPath, fallback);
   redirect(`/consent?next=${encodeURIComponent(safeNextPath)}`);
+}
+
+export async function requireDemoReviewer(nextPath: string): Promise<void> {
+  if (!demoAutoLoginEnabled()) redirect("/demo?demo=disabled");
+  const destination = safeDemoDestination(nextPath);
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect(`/demo/access?next=${encodeURIComponent(destination)}`);
+  }
+  if (!isDemoReviewer(user.id)) redirect("/demo?demo=existing-account");
 }

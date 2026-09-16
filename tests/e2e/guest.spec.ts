@@ -5,6 +5,29 @@ import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd());
 
 const REAL_DEPT = "22222222-2222-4222-8222-222222222222";
+const SALES_DEPT = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+const DEV_DEPT = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+
+test("영업 충돌과 부서 비교 답변의 근거가 의미상 일치한다", async ({ page }) => {
+  await page.goto(`/demo/d/${SALES_DEPT}`);
+  await page.locator('a[href*="/cards/"]').first().click();
+  await expect(page.getByText(/이번 12% 인상안.*10% 이상 인상/u)).toBeVisible();
+  await page.getByRole("link", { name: /결정과 충돌/u }).click();
+  await page.waitForURL(/\/ledger\?from=.*#decision-/u);
+  const target = new URL(page.url()).hash;
+  await expect(page.locator(target)).toContainText("재입찰");
+  await expect(page.locator(`${target} q`)).toContainText("연 10% 이상 가격이 오르면");
+
+  await page.goto(`/demo/d/${SALES_DEPT}/ask?q=vendor-price`);
+  await expect(page.locator("#demo-answer q")).toHaveCount(2);
+  await expect(page.locator("#demo-answer")).toContainText("12% 인상안");
+  await expect(page.locator("#demo-answer")).toContainText("10% 이상 가격");
+  await page.getByRole("link", { name: "개발 사수에게 같은 질문" }).click();
+  await expect(page).toHaveURL(new RegExp(`/demo/d/${DEV_DEPT}/ask\\?q=vendor-price$`, "u"));
+  await expect(page.locator("#demo-answer").getByText("근거 없음", { exact: true })).toBeVisible();
+  await expect(page.locator("#demo-answer q")).toHaveCount(0);
+  await expect(page.locator("#demo-answer")).toContainText("외주사 B 견적을 확인할 수 없습니다");
+});
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
   test(`게스트 대시보드·카드·원장·묻기 완주 ${viewport.width}px`, async ({ page }, testInfo) => {
@@ -13,8 +36,12 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await page.setViewportSize(viewport);
     const writes: string[] = [];
     const errors: string[] = [];
+    const appOrigin = new URL(String(testInfo.project.use.baseURL)).origin;
     page.on("request", request => {
-      if (!["GET", "HEAD", "OPTIONS"].includes(request.method())) writes.push(request.method());
+      if (
+        new URL(request.url()).origin === appOrigin &&
+        !["GET", "HEAD", "OPTIONS"].includes(request.method())
+      ) writes.push(`${request.method()} ${new URL(request.url()).pathname}`);
     });
     page.on("pageerror", error => errors.push(error.name));
     await page.goto("/demo");
@@ -38,7 +65,9 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
       const articles = page.locator("article");
       expect(await articles.count()).toBeGreaterThan(0);
       for (const article of await articles.all()) {
-        expect(await article.locator("q").count()).toBeGreaterThan(0);
+        const refused = await article.getByText("근거 없음", { exact: true }).count();
+        if (refused > 0) expect(await article.locator("q").count()).toBe(0);
+        else expect(await article.locator("q").count()).toBeGreaterThan(0);
         for (const quote of await article.locator("q").all()) {
           await expect(quote).toBeVisible();
           await expect(quote).not.toHaveText("인용 없음");

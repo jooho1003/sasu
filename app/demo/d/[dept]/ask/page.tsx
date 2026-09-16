@@ -5,39 +5,65 @@ import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
 type Answer = {
   id: string;
+  dept_id: string;
   question_key: string;
   question: string;
   answer: string | null;
   generic_answer: string | null;
+  status: "done" | "refused";
+  refused: boolean;
 };
 type Citation = { owner_id: string; quote: string };
+type DemoDepartment = { id: string; name: string };
 
 export default async function DemoAskPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ dept: string }>;
+  searchParams: Promise<{ q?: string }>;
 }) {
   const { dept } = await params;
+  const { q } = await searchParams;
   const supabase = createPublicSupabaseClient();
-  const { data: answers, error: answersError } = await supabase
-    .from("answers")
-    .select("id, question_key, question, answer, generic_answer")
-    .eq("dept_id", dept)
-    .eq("status", "done")
-    .order("created_at", { ascending: true });
+  const [{ data: answers, error: answersError }, { data: departments }] =
+    await Promise.all([
+      supabase
+        .from("answers")
+        .select("id, dept_id, question_key, question, answer, generic_answer, status, refused")
+        .eq("dept_id", dept)
+        .in("status", ["done", "refused"])
+        .order("created_at", { ascending: true }),
+      supabase.rpc("demo_departments"),
+    ]);
   if (answersError) throw new Error("게스트 답변 조회 실패");
   const rows = (answers ?? []) as Answer[];
-  const { data: citations, error: citationsError } = rows.length
-    ? await supabase
-        .from("citations")
-        .select("owner_id, quote")
-        .eq("owner_kind", "answer")
-        .in(
-          "owner_id",
-          rows.map((row) => row.id),
-        )
-    : { data: [] as Citation[], error: null };
+  const departmentRows = (departments ?? []) as DemoDepartment[];
+  const otherDepartmentIds = departmentRows
+    .filter((department) => department.id !== dept)
+    .map((department) => department.id);
+  const [citationResult, comparisonResult] = await Promise.all([
+    rows.length
+      ? supabase
+          .from("citations")
+          .select("owner_id, quote")
+          .eq("owner_kind", "answer")
+          .in(
+            "owner_id",
+            rows.map((row) => row.id),
+          )
+      : Promise.resolve({ data: [] as Citation[], error: null }),
+    otherDepartmentIds.length
+      ? supabase
+          .from("answers")
+          .select("dept_id, question_key")
+          .in("dept_id", otherDepartmentIds)
+          .in("status", ["done", "refused"])
+      : Promise.resolve({ data: [] as Pick<Answer, "dept_id" | "question_key">[], error: null }),
+  ]);
+  const { data: citations, error: citationsError } = citationResult;
   if (citationsError) throw new Error("게스트 답변 근거 조회 실패");
+  if (comparisonResult.error) throw new Error("게스트 비교 질문 조회 실패");
   const citationMap = new Map<string, string[]>();
   for (const citation of (citations ?? []) as Citation[]) {
     if (citation.quote.trim())
@@ -45,6 +71,22 @@ export default async function DemoAskPage({
         ...(citationMap.get(citation.owner_id) ?? []),
         citation.quote,
       ]);
+  }
+  const departmentNameMap = new Map(
+    departmentRows.map((department) => [department.id, department.name]),
+  );
+  const comparisonByQuestionKey: Record<
+    string,
+    { href: string; departmentName: string }
+  > = {};
+  for (const answer of comparisonResult.data ?? []) {
+    if (comparisonByQuestionKey[answer.question_key]) continue;
+    const departmentName = departmentNameMap.get(answer.dept_id);
+    if (!departmentName) continue;
+    comparisonByQuestionKey[answer.question_key] = {
+      href: `/demo/d/${answer.dept_id}/ask?q=${encodeURIComponent(answer.question_key)}`,
+      departmentName,
+    };
   }
   return (
     <main className="workspace-page">
@@ -62,6 +104,9 @@ export default async function DemoAskPage({
         </span>
       </header>
       <DemoQuestions
+        key={`${dept}:${q ?? ""}`}
+        initialQuestionKey={q}
+        comparisonByQuestionKey={comparisonByQuestionKey}
         answers={rows.map((row) => ({
           ...row,
           quotes: citationMap.get(row.id) ?? [],

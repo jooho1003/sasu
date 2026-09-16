@@ -28,6 +28,10 @@ test.beforeEach(async ({ context }) => {
 });
 
 test.setTimeout(120_000);
+test.skip(
+  process.env.E2E_ALLOW_SHOWCASE_WRITES !== "1",
+  "공유 파일럿 부서 쓰기는 기본 차단됩니다. 전체 쓰기 검증은 scripts/review-qa.mjs의 격리 DB에서 실행하세요.",
+);
 
 type CardRow = {
   id: string;

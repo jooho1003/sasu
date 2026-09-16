@@ -64,6 +64,7 @@ test.describe.configure({ mode: "serial" });
 
 test.describe("업로드 쓰기 경계 (ADR-042)", () => {
   test.skip(process.env.E2E_ALLOW_EXTERNAL_WRITES !== "1", "운영 DB 쓰기와 분류·요약 LLM 호출을 포함하므로 승인된 실행에서 E2E_ALLOW_EXTERNAL_WRITES=1로만 돈다.");
+  test.skip(process.env.E2E_ALLOW_SHOWCASE_WRITES !== "1", "공유 파일럿 부서 쓰기는 기본 차단됩니다. scripts/review-qa.mjs의 격리 DB를 사용하세요.");
   test.skip(missingEnv(REQUIRED_ENV).length > 0, `필요한 env가 없다: ${missingEnv(REQUIRED_ENV).join(", ")}`);
 
   test.afterAll(async ({ browser }) => {

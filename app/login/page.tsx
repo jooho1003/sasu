@@ -51,8 +51,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </p>
           </header>
           <LoginForm initialError={initialError} next={next ?? null} />
+          <aside className="login-help" aria-label="로그인 도움말">
+            <strong>초대받은 업무용 이메일을 사용하세요</strong>
+            <ul>
+              <li>메일이 안 오면 스팸함을 확인하고 링크를 다시 요청해 주세요.</li>
+              <li>로그인 뒤 부서가 보이지 않으면 초대한 부서장에게 멤버십을 확인해 주세요.</li>
+            </ul>
+          </aside>
           <footer>
-            먼저 둘러보고 싶다면?<Link href="/demo">데모 체험하기 →</Link>
+            먼저 둘러보고 싶다면?<Link href="/demo" prefetch={false}>데모 체험하기 →</Link>
           </footer>
         </section>
       </div>

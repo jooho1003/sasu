@@ -38,6 +38,7 @@ type DashboardData = {
   };
   channelCount: number;
   totalItems: number;
+  filteredTotal: number;
 };
 
 type DashboardS1Props = {
@@ -111,6 +112,7 @@ export default function DashboardS1({
   const [dashboard, setDashboard] = useState<LoadedDashboard | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [itemLimit, setItemLimit] = useState(10);
   const [promotions, setPromotions] = useState<
     Record<string, { pending: boolean; message: string; cardId?: string }>
   >({});
@@ -128,7 +130,7 @@ export default function DashboardS1({
       inFlight = true;
       try {
         const response = await fetch(
-          `/api/d/${encodeURIComponent(deptId)}/items?${activeLabel === "meeting" ? "source=meeting" : `label=${activeLabel}`}`,
+          `/api/d/${encodeURIComponent(deptId)}/items?${activeLabel === "meeting" ? "source=meeting" : `label=${activeLabel}`}&limit=${itemLimit}`,
           { cache: "no-store" },
         );
         const body = (await response.json()) as DashboardData & {
@@ -188,7 +190,7 @@ export default function DashboardS1({
       stopPolling();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [activeLabel, deptId, refreshKey]);
+  }, [activeLabel, deptId, itemLimit, refreshKey]);
 
   const data = dashboard?.data ?? null;
   const activeData = dashboard?.label === activeLabel ? dashboard.data : null;
@@ -198,6 +200,7 @@ export default function DashboardS1({
   };
   const selectLabel = (label: PanelLabel) => {
     setError(null);
+    setItemLimit(10);
     setActiveLabel(label);
   };
   const settingsHref = `/d/${deptId}/settings`;
@@ -356,6 +359,9 @@ export default function DashboardS1({
 
           {activeData && activeData.items.length > 0 ? (
             <div className="grid gap-3">
+              <p className="m-0 text-sm text-[var(--muted)]">
+                {activeData.filteredTotal}건 중 {activeData.items.length}건 표시
+              </p>
               {activeData.items.map((item) => (
                 <details
                   key={item.id}
@@ -426,6 +432,15 @@ export default function DashboardS1({
                   </div>
                 </details>
               ))}
+              {activeData.items.length < activeData.filteredTotal ? (
+                <button
+                  className="button button-secondary w-fit"
+                  onClick={() => setItemLimit((limit) => Math.min(limit + 10, 50))}
+                  type="button"
+                >
+                  기록 10건 더 보기
+                </button>
+              ) : null}
             </div>
           ) : null}
         </div>
