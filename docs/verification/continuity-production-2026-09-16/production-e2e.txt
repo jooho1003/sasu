@@ -1,0 +1,19 @@
+
+Running 12 tests using 1 worker
+
+(node:17760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\guest.spec.ts:10:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px (27.5s)
+  ok  2 [chromium] › tests\e2e\guest.spec.ts:10:7 › 게스트 대시보드·카드·원장·묻기 완주 390px (19.9s)
+  ok  3 [chromium] › tests\e2e\guest.spec.ts:57:5 › 게스트는 실제 부서에 접근하지 못하고 잘못된 서명은 거부된다 (2.3s)
+  ok  4 [chromium] › tests\e2e\guest.spec.ts:69:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다 (13.5s)
+  ok  5 [chromium] › tests\e2e\site.spec.ts:4:7 › 공개 메인 사이트 › 핵심 메시지와 데모 동선을 정적으로 제공한다 (946ms)
+  ok  6 [chromium] › tests\e2e\site.spec.ts:27:7 › 공개 메인 사이트 › 모바일에서 가로로 넘치지 않는다 (461ms)
+  ok  7 [chromium] › tests\e2e\site.spec.ts:37:7 › 공개 메인 사이트 › 개인정보 안내와 검색 노출 경계를 제공한다 (1.6s)
+  ok  8 [chromium] › tests\e2e\ui-refresh.spec.ts:8:7 › 새 탐색·기록 분류·질문 선택 1440px (8.0s)
+  ok  9 [chromium] › tests\e2e\ui-refresh.spec.ts:8:7 › 새 탐색·기록 분류·질문 선택 390px (6.6s)
+  ok 10 [chromium] › tests\e2e\ui-refresh.spec.ts:111:5 › 모바일 메뉴로 로그인에 접근한다 (867ms)
+  ok 11 [chromium] › tests\e2e\ui-refresh.spec.ts:123:7 › 로그인한 부서의 공통 탐색과 읽기 화면 1440px (12.3s)
+  ok 12 [chromium] › tests\e2e\ui-refresh.spec.ts:123:7 › 로그인한 부서의 공통 탐색과 읽기 화면 390px (9.8s)
+
+  12 passed (1.8m)

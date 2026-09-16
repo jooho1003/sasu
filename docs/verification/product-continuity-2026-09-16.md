@@ -1,6 +1,6 @@
 # 기간 제한 없는 후속 개발 검증 — 2026-09-16
 
-사용자가 승인한 순서대로 phase 16 → 17 → 18 → 19를 구현했다. 브랜치는 `feat/product-continuity`이며 PRD §3·§8, ADR-052가 범위의 기준이다. 이 기록은 **개발 및 로컬 검증 완료**를 뜻한다. 운영 DB 마이그레이션, 배포, 실제 Slack 설치·발송은 실행하지 않았다.
+사용자가 승인한 순서대로 phase 16 → 17 → 18 → 19를 구현했다. 브랜치는 `feat/product-continuity`이며 PRD §3·§8, ADR-052가 범위의 기준이다. 이 기록은 **개발 및 로컬 검증 시점**의 결과다. 이후 사용자 승인으로 운영 DB 마이그레이션·배포·실제 연동을 진행했으며 최신 상태는 [운영 반영 검증](continuity-production-2026-09-16.md)에 기록했다.
 
 ## 구현 결과
 
@@ -80,7 +80,9 @@ npx playwright test tests/e2e/product-continuity.spec.ts tests/e2e/slack-onboard
 - 알림·Slack 전달은 job으로 실행하며 세대와 lease로 중복 작업을 막는다. 현재 담당자·동의·카드 상태를 다시 확인하고 알림에는 원문을 넣지 않는다. Slack 전송 성공과 DB 완료 사이의 장애로 인한 중복 발송 가능성은 남는다.
 - 새 lib 모듈 `slack/change`, `pipeline/reminder`, `slack/installation`, `slack/workspace`는 실패 테스트를 먼저 실행한 후 구현했다. 기록된 최종 테스트 외에 실제 모델 호출 평가는 실행하지 않았다.
 
-## 운영 반영 전 남은 작업
+## 운영 반영 전 남은 작업 (개발 검증 당시)
+
+아래는 배포 전 기록이다. 2026-09-16 운영 적용 결과와 아직 실행하지 않은 외부 검증은 [운영 반영 검증](continuity-production-2026-09-16.md)을 따른다.
 
 구체적인 적용 순서는 [setup-guide §14](../setup-guide.md#14-후속-기능과-고객사-slack-설치-adr-052)에 있다. 로컬에는 `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_TOKEN_ENCRYPTION_KEY`가 없으므로 실제 OAuth 설치는 미검증이다. 값의 존재 여부만 확인했으며 비밀값을 출력하거나 변경하지 않았다.
 
