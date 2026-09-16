@@ -365,6 +365,30 @@ export const MemberTargetBody = z.strictObject({
 });
 export type MemberTargetBody = z.infer<typeof MemberTargetBody>;
 
+export const ReviewSection = z.object({
+  id: z.string().min(1).max(100), text: z.string().max(20_000), original_text: z.string().max(20_000),
+  origin: z.enum(["extracted", "transcribed", "user"]), edited: z.boolean(),
+  location: z.string().max(200).nullable(), start_seconds: z.number().nonnegative().nullable(), end_seconds: z.number().nonnegative().nullable(),
+});
+export type ReviewSection = z.infer<typeof ReviewSection>;
+export const ReviewEdit = z.object({
+  revision: z.number().int().positive(), title: z.string().trim().min(1).max(120),
+  sections: z.array(z.object({id:z.string().min(1).max(100),text:z.string().max(20_000)})).max(1000),
+});
+export const ReviewCreate = z.object({
+  id: z.uuid(), kind: z.enum(["audio", "document"]), title:z.string().trim().min(1).max(120),
+  filename:z.string().min(1).max(200), size:z.number().int().positive().max(50*1024*1024),
+  fingerprint:z.string().regex(/^[a-f0-9]{64}$/), duration:z.number().positive().max(1800).nullable(),
+  visibility:z.enum(["dept","leads_only"]), participants:z.array(z.uuid()).max(100), synthetic:z.boolean(), consent_confirmed:z.literal(true),
+});
+export type ReviewedMaterial = {
+  id:string; dept_id:string; kind:"audio"|"document"; title:string; filename:string; visibility:"dept"|"leads_only";
+  fingerprint:string; duration:number|null; file_size:number; original_path:string|null; status:string; status_reason:string|null;
+  revision:number; sections:ReviewSection[]; published_revision:number|null; published_source_id:string|null;
+  created_at:string; updated_at:string; confirmed_at:string|null; original_deleted_at:string|null;
+};
+export type ReviewPart = { id:string; part_index:number; start_seconds:number|null; end_seconds:number|null; status:string; error_code:string|null; attempt:number };
+
 type JsonSchemaObject = Record<string, unknown>;
 
 function isJsonSchemaObject(value: unknown): value is JsonSchemaObject {

@@ -1,0 +1,14 @@
+{
+  "synthetic": true,
+  "realGroq": true,
+  "reviewId": "7d9e4697-ec0e-4df4-bef5-fb8ae503c53d",
+  "durationSeconds": 88.284375,
+  "parts": 2,
+  "expectedCharacters": 366,
+  "recognizedCharacters": 372,
+  "characterErrorRate": 0.02185792349726776,
+  "matchedPhrases": 11,
+  "totalPhrases": 12,
+  "lastPhraseMatched": true,
+  "draftSourceCount": 0
+}

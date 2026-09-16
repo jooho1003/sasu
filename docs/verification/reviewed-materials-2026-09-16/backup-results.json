@@ -1,0 +1,18 @@
+{
+  "backup": {
+    "encrypted": true,
+    "bytes": 708144,
+    "fileCount": 2,
+    "sqlSha256": "087efd5ed2479ddae97e909cce36d72887ba7ec03fb9a739337f572dd6cac9fd"
+  },
+  "restored": {
+    "database": "review_restore_94b7ac664021",
+    "quarantined": true,
+    "filesVerified": 2,
+    "deletionsReapplied": 35,
+    "activeJobs": 0,
+    "activationPerformed": false
+  },
+  "deletedFileAbsent": true,
+  "withdrawnConsentPreserved": true
+}

@@ -30,14 +30,14 @@ export function WorkspaceShell({
     { label: "묻기", suffix: "/ask", icon: "chat" },
     { label: "원장", suffix: "/ledger", icon: "book" },
     ...(!demo
-      ? [{ label: "문서", suffix: "/documents", icon: "file" as const }]
+      ? [{ label: "음성·자료 검토", suffix: "/reviews", icon: "file" as const }, { label: "문서", suffix: "/documents", icon: "file" as const }]
       : []),
     { label: "역할", suffix: "/roles", icon: "people" },
     ...(showTrailers
       ? [{ label: "예고편", suffix: "/trailers", icon: "video" as const }]
       : []),
     ...(!demo
-      ? [{ label: "세팅", suffix: "/settings", icon: "settings" as const }]
+      ? [{ label: "기록 보존", suffix: "/retention", icon: "book" as const }, { label: "세팅", suffix: "/settings", icon: "settings" as const }]
       : []),
   ];
   const activeEntry = entries.find(({ suffix }) =>

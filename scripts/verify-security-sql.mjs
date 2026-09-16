@@ -4,6 +4,7 @@ import { verifySourceLifecycleSql } from "./verify-source-lifecycle-sql.mjs";
 import { verifyDecisionFollowupSql } from "./verify-decision-followup-sql.mjs";
 import { verifyConversationsSql } from "./verify-conversations-sql.mjs";
 import { verifySlackInstallationsSql } from "./verify-slack-installations-sql.mjs";
+import { verifyReviewedMaterialsSql } from "./verify-reviewed-materials-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
 // node scripts/verify-security-sql.mjs <temporary-directory>
@@ -1001,6 +1002,7 @@ try {
   await verifyDecisionFollowupSql({ db, q, check, asUser });
   await verifyConversationsSql({ db, q, check, asUser });
   await verifySlackInstallationsSql({ db, q, check, asUser });
+  await verifyReviewedMaterialsSql({ db, q, check, asUser });
   await db.exec(readFileSync(resolve("supabase/rollback/0028_trailer_assessment_down.sql"), "utf8"));
   await check("0028 rollback removes assessment only", async () => { assert.equal((await q("select to_regclass('public.trailer_attempts') value")).rows[0].value, null); });
   await db.exec(readFileSync(resolve("supabase/rollback/0027_trailer_publish_down.sql"), "utf8"));

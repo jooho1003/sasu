@@ -12,7 +12,7 @@
 - Groq `openai/gpt-oss-120b` (카드·답변·회의 정리, strict json_schema) · Groq `openai/gpt-oss-20b` (분류) · 규칙 휴리스틱 (정량 신호). 두 모델 모두 production + strict structured output이라 인용 스키마를 강제할 수 있다 (ADR-028)
 - 임베딩: D2에 Voyage / OpenAI 중 확정. 확정 전에는 스키마에 차원을 박지 않는다
 - 비동기: Postgres `jobs` 테이블 + `/api/jobs/run` 워커 (`after()` 즉시 1회 + 매분 트리거 — Vercel Cron 또는 Supabase `pg_cron`+`pg_net`, D0 확정)
-- 음성 입력: Groq Whisper `whisper-large-v3-turbo` (원본 음성은 저장하지 않고 사용자가 확인한 전사만 ASK로 전송) · 문서: TXT/MD/CSV/JSON/PDF/DOCX 업로드 + 근거 기반 요약
+- 음성 입력: Groq Whisper `whisper-large-v3-turbo` (짧은 ASK 음성은 원본 비저장. 자료 검토함은 사용자 승인으로 원본을 비공개 Supabase Storage에 보관하여 재생·재시도, ADR-054) · 문서: TXT/MD/CSV/JSON/PDF/DOCX 업로드 + 검토·확정 후 근거 기반 요약
 - Zod (`lib/contracts.ts` 단일 스키마) · Vitest (`lib/` 단위) · Playwright (E2E)
 
 ## 아키텍처 규칙
@@ -23,7 +23,7 @@
 - CRITICAL: 인용 없는 문장은 렌더하지 않는다. 카드·답변의 `citations[]`는 `quote`가 원문에 문자열로 포함되는지 검증하고, 0개면 답변은 `refused`, 카드는 `needs_review`(DM 안 보냄).
 - CRITICAL: 미동의 멤버(`members.consented_at` null)의 발언은 저장하지 않는다 — 어댑터가 `author_ext_id`로 skip. 이름만 가리고 본문을 저장하는 방식은 금지. 동의가 채널 연결보다 먼저다.
 - CRITICAL: 비밀값을 리포에 커밋하지 마라. 클라이언트에 노출되는 것은 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY` 둘뿐. 예외: 비밀값이 아닌 공개 배포 URL `NEXT_PUBLIC_APP_URL` 1개(2026-09-13 확인, 서버 코드는 없으면 `VERCEL_PROJECT_PRODUCTION_URL`로 대체). `/api/slack/events`·`interactions`는 signing secret 검증 후에만 처리. `/api/slack/oauth/*`는 조직 관리자 세션·origin(start)·HttpOnly cookie·단회 state(callback)로 검증한다(ADR-052).
-- CRITICAL: 로그에 슬랙 이벤트 본문·전사 원문·질문 원문을 출력하지 마라 (ID·길이·에러 코드만). `items.content`는 정규식 마스킹 후만 저장하고 마스킹 전 원문은 어디에도 두지 않는다.
+- CRITICAL: 로그에 슬랙 이벤트 본문·전사 원문·질문 원문을 출력하지 마라 (ID·길이·에러 코드만). `items.content`는 정규식 마스킹 후만 저장하고 마스킹 전 텍스트는 저장하지 않는다. 예외: 사용자가 보관을 승인한 자료 검토함 원본 파일은 비공개 Storage에 보관한다(ADR-054). 검색·전사·로그에는 마스킹한 텍스트만 사용한다.
 - 결정은 append-only. 수정·삭제 없이 `supersedes_id`로만 정정한다.
 - 카드 visibility = 인용 소스 중 가장 좁은 것. 병합은 visibility를 좁히지 않는다. `leads_only` 카드는 lead에게만 DM.
 - 채널 답변(`@사수`)은 member 권한, DM·웹은 질문자 권한. "N건 제외"는 어디에도 표시하지 않는다.

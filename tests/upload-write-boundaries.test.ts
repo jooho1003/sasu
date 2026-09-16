@@ -5,9 +5,10 @@ const mocks = vi.hoisted(() => ({
   serviceClient: vi.fn(), enqueue: vi.fn(), kickWorker: vi.fn(),
   writes: [] as Array<{ client: string; table: string; value: unknown }>,
   sourceError: false, itemError: false,
+  upload: vi.fn(),
 }));
 vi.mock("@/lib/supabase/membership", () => ({ requireMembership: mocks.membership }));
-vi.mock("@/lib/supabase/server", () => ({ createServerSupabaseClient: async () => ({ from: mocks.serverFrom, rpc: mocks.rpc }) }));
+vi.mock("@/lib/supabase/server", () => ({ createServerSupabaseClient: async () => ({ from: mocks.serverFrom, rpc: mocks.rpc, storage:{from:()=>({upload:mocks.upload})} }) }));
 vi.mock("@/lib/supabase/service", () => ({ createServiceSupabaseClient: mocks.serviceClient }));
 vi.mock("@/lib/jobs", () => ({ enqueue: mocks.enqueue, kickWorker: mocks.kickWorker }));
 vi.mock("@/lib/pipeline/classify", () => ({ registerClassifyHandler: vi.fn() }));
@@ -56,9 +57,10 @@ beforeEach(() => {
   });
   mocks.serviceClient.mockReturnValue({ from: mocks.serviceFrom });
   mocks.enqueue.mockResolvedValue("job");
+  mocks.upload.mockResolvedValue({error:null});
 });
 
-describe.each([["document", documentPost], ["transcript", transcriptPost]] as const)("%s 업로드 저장 경계", (kind, post) => {
+describe.each([["transcript", transcriptPost]] as const)("%s 업로드 저장 경계", (kind, post) => {
   it("member는 DB 쓰기와 service role 생성 전에 거부한다", async () => {
     mocks.membership.mockResolvedValue({ deptId, role: "member" });
     expect((await post(request(kind), params)).status).toBe(403);
@@ -103,6 +105,26 @@ describe.each([["document", documentPost], ["transcript", transcriptPost]] as co
     const req = new Request("http://localhost/upload", { method: "POST", body: new FormData() });
     expect((await post(req, params)).status).toBe(400);
     expect(mocks.writes).toEqual([]); expect(mocks.serviceClient).not.toHaveBeenCalled();
+  });
+});
+
+describe("문서 검토함 업로드 경계 (ADR-054)",()=>{
+  it("멤버는 초안이나 파일을 쓰지 못한다",async()=>{
+    mocks.membership.mockResolvedValue({deptId,role:"member"});expect((await documentPost(request("document"),params)).status).toBe(403);expect(mocks.upload).not.toHaveBeenCalled();expect(mocks.serviceClient).not.toHaveBeenCalled();
+  });
+  it("SQL의 데모·동의·권한 거부를 우회하지 않는다",async()=>{
+    mocks.rpc.mockResolvedValue({data:null,error:{code:"42501"}});expect((await documentPost(request("document"),params)).status).toBe(403);expect(mocks.upload).not.toHaveBeenCalled();expect(mocks.serviceClient).not.toHaveBeenCalled();expect(mocks.kickWorker).not.toHaveBeenCalled();
+  });
+  it("DB 실패는 원본 업로드와 작업 실행 전에 닫힌 상태로 실패한다",async()=>{
+    mocks.rpc.mockResolvedValue({data:null,error:{code:"failure"}});expect((await documentPost(request("document"),params)).status).toBe(500);expect(mocks.upload).not.toHaveBeenCalled();expect(mocks.kickWorker).not.toHaveBeenCalled();
+  });
+  it("요청 부서 위조는 무시하고 세션 RPC·비공개 원본만 쓰며 items는 생성하지 않는다",async()=>{
+    mocks.rpc.mockResolvedValue({data:"id",error:null});const response=await documentPost(request("document"),params);expect(response.status).toBe(202);expect(await response.json()).toHaveProperty("review_id");
+    const created=mocks.rpc.mock.calls.find(c=>c[0]==="create_review")![1];expect(created.p_dept).toBe(deptId);expect(JSON.stringify(created)).not.toContain("forged-department");expect(created.p_input.visibility).toBe("leads_only");
+    expect(mocks.upload).toHaveBeenCalledOnce();expect(mocks.writes).toEqual([]);expect(mocks.serviceClient).not.toHaveBeenCalled();expect(mocks.rpc).toHaveBeenCalledWith("queue_review_part",expect.objectContaining({p_index:0}));expect(mocks.kickWorker).toHaveBeenCalledOnce();
+  });
+  it("원본 저장 실패 시 변환을 시작하지 않는다",async()=>{
+    mocks.rpc.mockResolvedValue({data:"id",error:null});mocks.upload.mockResolvedValue({error:{code:"storage_failed"}});expect((await documentPost(request("document"),params)).status).toBe(500);expect(mocks.rpc.mock.calls.some(c=>c[0]==="queue_review_part")).toBe(false);expect(mocks.kickWorker).not.toHaveBeenCalled();
   });
 });
 

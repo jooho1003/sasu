@@ -34,6 +34,7 @@ const runId = `${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toStr
 const FAKE_EMAIL = `sasu-e2e-${runId}@example.com`;
 const FAKE_PHONE = "010-0000-0000";
 const createdSourceIds: string[] = [];
+const createdReviewIds: string[] = [];
 
 function baseUrl(): string {
   return process.env.E2E_BASE_URL ?? "http://localhost:3000";
@@ -66,10 +67,13 @@ test.describe("업로드 쓰기 경계 (ADR-042)", () => {
   test.skip(missingEnv(REQUIRED_ENV).length > 0, `필요한 env가 없다: ${missingEnv(REQUIRED_ENV).join(", ")}`);
 
   test.afterAll(async ({ browser }) => {
-    if (createdSourceIds.length === 0) return;
+    if (createdSourceIds.length === 0 && createdReviewIds.length === 0) return;
     const context = await browser.newContext();
     try {
       await signInSeedUser(context, baseUrl(), SEED_LEAD);
+      for (const reviewId of createdReviewIds) {
+        await context.request.post(`${baseUrl()}/api/d/${DEPARTMENT_ID}/reviews/${reviewId}`, { data: { action: "delete", revision: 1 } });
+      }
       for (const sourceId of createdSourceIds) {
         const response = await context.request.delete(`${baseUrl()}/api/d/${DEPARTMENT_ID}/settings/source?id=${sourceId}`);
         if (!response.ok()) console.warn(`cleanup failed: source=${sourceId} status=${response.status()}`);
@@ -99,9 +103,18 @@ test.describe("업로드 쓰기 경계 (ADR-042)", () => {
     });
     const body = await jsonBody(response);
     expect(response.status(), "문서 업로드 응답 상태").toBe(202);
-    const sourceId = String(body.document_id ?? "");
+    const reviewId = String(body.review_id ?? "");
+    expect(reviewId).toMatch(/^[0-9a-f-]{36}$/u);
+    createdReviewIds.push(reviewId);
+    const reviewUrl = `${baseUrl()}/api/d/${DEPARTMENT_ID}/reviews/${reviewId}`;
+    await expect.poll(async () => {
+      const detail = await jsonBody(await context.request.get(reviewUrl));
+      return (detail.review as { status?: string } | undefined)?.status;
+    }, { timeout: 90_000 }).toBe("ready");
+    const published = await context.request.post(reviewUrl, { data: { action: "publish", revision: 1 } });
+    expect(published.ok()).toBe(true);
+    const sourceId = String((await jsonBody(published)).source_id ?? "");
     expect(sourceId).toMatch(/^[0-9a-f-]{36}$/u);
-    createdSourceIds.push(sourceId);
 
     const contents = await itemContents(sourceId);
     expect(contents.length, `source=${sourceId} items`).toBeGreaterThan(0);

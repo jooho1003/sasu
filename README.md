@@ -93,6 +93,11 @@ npx tsx scripts/seed-demo.ts
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | 구조, 데이터 흐름, 불변식 |
 | [AI 개발 절차](docs/AI-DEVELOPMENT.md) | SDD·Graft·Archify·하네스·훅·검증과 최종 기능의 연결 |
 | [ADR](docs/ADR.md) | 기술 결정과 포기한 대안 |
+| [음성 전사·문서 검토 요구사항](docs/planning/자료검토_음성전사_요구사항.md) | 파일 전체 전사, 원본 보관/재생, 편집, 문서 읽기 결과 확인 |
+| [자료 검토·보존 운영 절차](docs/setup-reviewed-materials.md) | 배포 전 확인, 백업/격리 복원 도구, 운영 설정과 제약 |
+| [자료 검토 실제 검증](docs/verification/reviewed-materials-2026-09-16/README.md) | 한국어 TTS→실제 Groq→저장/편집/확정/삭제 및 문서·보존 검증 |
+| [Slack 기록 보존·백업 운영안](docs/planning/Slack_기록보존_백업_운영안.md) | 보존 정책, 문서화·아카이브·복구 백업, 운영 전 확인 사항 |
+| [부서 에이전트 공동 설계](docs/planning/부서_에이전트_공동설계.md) | 활용 업무·지시문·결과물·승인 범위를 사용자와 함께 정하는 문서 |
 | [설정 가이드](docs/setup-guide.md) | 계정·환경 변수·외부 서비스 설정 |
 | [제출 체크리스트](docs/submission-checklist.md) | 데모·스크린샷·영상·제출 항목 |
 

@@ -1,6 +1,18 @@
 {
   "phases": [
     {
+      "dir": "20-reviewed-materials",
+      "status": "completed",
+      "verification": "docs/verification/reviewed-materials-2026-09-16/README.md",
+      "production_deployed": false
+    },
+    {
+      "dir": "21-record-retention",
+      "status": "completed",
+      "verification": "docs/verification/reviewed-materials-2026-09-16/README.md",
+      "production_deployed": false
+    },
+    {
       "dir": "15-slack-completion",
       "status": "completed"
     },

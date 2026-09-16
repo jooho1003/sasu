@@ -1,0 +1,28 @@
+{
+  "project": "sasu",
+  "phase": "20-reviewed-materials",
+  "steps": [
+    {
+      "step": 0,
+      "name": "review-schema",
+      "status": "completed"
+    },
+    {
+      "step": 1,
+      "name": "review-processing",
+      "status": "completed"
+    },
+    {
+      "step": 2,
+      "name": "review-pages",
+      "status": "completed"
+    },
+    {
+      "step": 3,
+      "name": "tts-verification",
+      "status": "completed"
+    }
+  ],
+  "verification": "docs/verification/reviewed-materials-2026-09-16/README.md",
+  "production_deployed": false
+}

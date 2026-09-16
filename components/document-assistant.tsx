@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 
@@ -81,6 +82,7 @@ export default function DocumentAssistant({
   role: "lead" | "member";
 }) {
   const [documents, setDocuments] = useState<Document[]>([]);
+  const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -175,9 +177,13 @@ export default function DocumentAssistant({
         `/api/d/${encodeURIComponent(deptId)}/documents`,
         { method: "POST", body: form, signal: AbortSignal.timeout(60_000) },
       );
-      const body = (await response.json()) as { error?: string };
+      const body = (await response.json()) as { error?: string; review_id?: string };
       if (!response.ok)
         throw new Error(body.error ?? "문서를 업로드하지 못했습니다.");
+      if (body.review_id) {
+        router.push(`/d/${deptId}/reviews/${body.review_id}`);
+        return;
+      }
       setUploadState({
         kind: "success",
         message:
@@ -243,7 +249,7 @@ export default function DocumentAssistant({
             <span>
               <strong>새 문서 정리하기</strong>
               <small>
-                파일을 올리면 정책·결정·할 일을 근거와 함께 정리합니다.
+                읽힌 전문을 먼저 확인·수정한 뒤 확정하면 업무를 정리합니다.
               </small>
             </span>
             <Icon className="details-chevron" name="chevron" size={18} />
@@ -316,7 +322,7 @@ export default function DocumentAssistant({
             <div className="upload-footer">
               <p>
                 <Icon name="lock" size={14} />
-                원본 파일은 보관하지 않고, 개인정보를 가린 텍스트만 저장합니다.
+                원본은 비공개로 보관합니다. 읽힌 텍스트는 개인정보를 가린 뒤 검토하며, 확인·확정한 내용만 업무에 사용합니다.
               </p>
               <button
                 className="button button-primary button-small"

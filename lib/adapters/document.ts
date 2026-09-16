@@ -92,7 +92,10 @@ export async function extractDocumentText(
 ): Promise<string> {
   const extension = documentExtension(filename);
   if (extension === "pdf") {
+    // The worker data URL also works in a bundled/serverless Node runtime.
+    const { getData } = await import("pdf-parse/worker");
     const { PDFParse } = await import("pdf-parse");
+    PDFParse.setWorker(getData());
     const parser = new PDFParse({ data: bytes });
     try {
       const result = await parser.getText();

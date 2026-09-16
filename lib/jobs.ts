@@ -23,6 +23,8 @@ export type JobKind =
   | "deliver_slack_answer"
   | "notion_import"
   | "slack_backfill"
+  | "process_review"
+  | "purge_review_files"
   | "sweep";
 
 type JobRow = {
