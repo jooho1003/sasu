@@ -418,6 +418,30 @@ const DESIGN: DemoDepartment = {
 
 export const DEMO_DEPARTMENTS = [SALES, DEVELOPMENT, PLANNING, DESIGN];
 
+export const DEMO_RETENTION_SETTINGS = DEMO_DEPARTMENTS.map((department) => ({
+  dept_id: department.id,
+  plan: "paid" as const,
+  expires_at: "2027-09-30",
+  retention_days: 365 as const,
+  checked_at: "2026-09-17T00:00:00.000Z",
+  checked_by: DEMO_REVIEWER_ID,
+}));
+
+export const DEMO_RETENTION_EXPORTS = DEMO_DEPARTMENTS.map((department) => {
+  const source = department.sources.find((candidate) => candidate.kind === "slack_channel");
+  if (!source) throw new Error("demo Slack source required");
+  return {
+    dept_id: department.id,
+    source_id: source.id,
+    created_by: DEMO_REVIEWER_ID,
+    range_from: "2026-09-01T00:00:00.000Z",
+    range_to: "2026-09-17T00:00:00.000Z",
+    record_count: department.items.filter((item) => item.source_id === source.id).length,
+    checksum: department.id[0].repeat(64),
+    created_at: "2026-09-17T00:00:00.000Z",
+  };
+});
+
 const DEMO_MEMBER_NAMES = [
   ["김서윤", "이도현", "박하린"], ["개발팀 리드", "정지우", "최민준"],
   ["한지민", "윤서준", "강수빈"], ["오예린", "장도윤", "임서아"],
@@ -425,7 +449,7 @@ const DEMO_MEMBER_NAMES = [
 const DEPARTMENT_MEMBERS = DEMO_DEPARTMENTS.flatMap((department, deptIndex) =>
   DEMO_MEMBER_NAMES[deptIndex].map((name, memberIndex) => {
     const userId = `${department.id.slice(0, -2)}0${memberIndex + 1}`;
-    return { user_id: userId, dept_id: department.id, email: `${userId}@demo.invalid`, display_name: name, role: memberIndex === 0 ? "lead" as const : "member" as const, consented: memberIndex !== 2 };
+    return { user_id: userId, dept_id: department.id, email: `${userId}@demo.invalid`, display_name: name, role: memberIndex === 0 ? "lead" as const : "member" as const, consented: memberIndex !== 2, slack_user_id: memberIndex === 0 ? `demo-${department.id.slice(0, 4)}` : null };
   }),
 );
 
@@ -438,6 +462,7 @@ export const DEMO_MEMBERS = [
     display_name: "심사위원 데모",
     role: "lead" as const,
     consented: true,
+    slack_user_id: null,
   })),
 ];
 
@@ -476,6 +501,10 @@ async function removeExistingDemoData(
   if (roleError) throw new Error("demo agent role cleanup failed");
   const { error: documentSummaryError } = await client.from("document_summaries").delete().in("dept_id", departmentIds);
   if (documentSummaryError) throw new Error("demo document summary cleanup failed");
+  const { error: retentionExportError } = await client.from("retention_exports").delete().in("dept_id", departmentIds);
+  if (retentionExportError) throw new Error("demo retention export cleanup failed");
+  const { error: retentionSettingsError } = await client.from("retention_settings").delete().in("dept_id", departmentIds);
+  if (retentionSettingsError) throw new Error("demo retention settings cleanup failed");
   const { error: citationError } = await client.from("citations").delete().in("owner_id", citationOwnerIds);
   if (citationError) throw new Error("demo citation cleanup failed");
   const { error: conflictError } = await client.from("conflicts").delete().in("request_id", conflictRequestIds);
@@ -555,6 +584,7 @@ async function seedDepartment(
     DEMO_MEMBERS.filter((member) => member.dept_id === department.id).map((member) => ({
       user_id: member.user_id, dept_id: member.dept_id, role: member.role, display_name: member.display_name,
       consented_at: member.consented ? new Date().toISOString() : null, consent_version: member.consented ? 1 : null,
+      slack_user_id: member.slack_user_id,
     })),
   );
   if (memberError) throw new Error("demo membership seed failed");
@@ -727,6 +757,15 @@ export async function seedDemoTrailer(client: ReturnType<typeof createServiceSup
   return true;
 }
 
+async function seedDemoRetentionSettings(
+  client: ReturnType<typeof createServiceSupabaseClient>,
+): Promise<void> {
+  const { error } = await client.from("retention_settings").insert(DEMO_RETENTION_SETTINGS);
+  if (error) throw new Error("demo retention settings seed failed");
+  const { error: exportError } = await client.from("retention_exports").insert(DEMO_RETENTION_EXPORTS);
+  if (exportError) throw new Error("demo retention export seed failed");
+}
+
 export async function seedDemoAttempts(client: ReturnType<typeof createServiceSupabaseClient>, path = "fixtures/trailer/demo-attempts.snapshot.json"): Promise<void> {
   let raw: unknown;
   try { raw = JSON.parse(await readFile(path, "utf8")); }
@@ -757,6 +796,7 @@ async function main(): Promise<void> {
     await seedDepartment(client, department);
   }
   await seedDemoReviewerAdmin(client);
+  await seedDemoRetentionSettings(client);
   await seedDemoAgentRole(client);
   if (await seedDemoTrailer(client)) await seedDemoAttempts(client);
   console.log("seed-demo complete: demo_org=1 departments=4 reviewer=1 prepared_answers=24 planning_items=68 design_items=24");

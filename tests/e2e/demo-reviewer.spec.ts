@@ -103,12 +103,21 @@ test("결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 
   await expect(page.getByText(/마이크·음성은 서버로 전송되지 않습니다/u)).toBeVisible();
 
   await page.goto(DEMO_FEATURES.find((feature) => feature.key === "reviews")!.href);
-  await page.locator('input[type="file"]').setInputFiles({
-    name: "합성-회의.txt",
-    mimeType: "text/plain",
-    buffer: Buffer.from("합성 데모 회의 기록"),
-  });
-  await page.getByRole("checkbox").check();
+  await expect(page.getByText("예시 자료 5개 포함")).toBeVisible();
+  await expect(page.locator(".demo-sample-file-grid > article")).toHaveCount(5);
+  await expect(page.getByRole("link", { name: "파일 보기" })).toHaveCount(5);
+  const sampleLinks = await page.getByRole("link", { name: "파일 보기" }).evaluateAll((links) =>
+    links.map((link) => link.getAttribute("href")),
+  );
+  for (const href of sampleLinks) {
+    expect(href).toBeTruthy();
+    const response = await page.request.get(href!);
+    expect(response.status(), href!).toBe(200);
+    expect((await response.body()).length, href!).toBeGreaterThan(50);
+  }
+  await page.getByRole("button", { name: "추천 예시 바로 불러오기" }).click();
+  await expect(page.getByText("파일 · 온새미로-영업-주간회의.vtt")).toBeVisible();
+  await expect(page.getByRole("checkbox")).toBeChecked();
   await page.getByRole("button", { name: "전사·추출 결과 보기" }).click();
   await page.getByRole("button", { name: "이 내용으로 근거 확정 체험" }).click();
   await expect(page.getByText("근거 확정 미리보기 완료")).toBeVisible();

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { weightedScore } from "../lib/agent-role";
 import { MASK_PATTERNS } from "../lib/mask";
 import { DEMO_REVIEWER_ID } from "@/lib/demo-access";
-import { DEMO_AGENT_ROLE, DEMO_DEPARTMENTS, DEMO_MEMBERS, DEMO_TRAILER_SLUG, seedDemoTrailer, seedDemoAttempts } from "../scripts/seed-demo";
+import { DEMO_AGENT_ROLE, DEMO_DEPARTMENTS, DEMO_MEMBERS, DEMO_RETENTION_EXPORTS, DEMO_RETENTION_SETTINGS, DEMO_TRAILER_SLUG, seedDemoTrailer, seedDemoAttempts } from "../scripts/seed-demo";
 
 describe("게스트 데모 시드", () => {
   it("데모 공개 링크는 22자리이며 스냅샷이 없으면 DB에 접근하지 않는다", async () => {
@@ -27,6 +27,30 @@ describe("게스트 데모 시드", () => {
     }
     expect(new Set(DEMO_MEMBERS.map((member) => member.user_id)).size).toBe(13);
     expect(DEMO_MEMBERS.find((member) => member.user_id === DEMO_AGENT_ROLE.created_by)?.role).toBe("lead");
+  });
+
+  it("모든 데모 부서의 기록 보존 설정을 미리 준비한다", () => {
+    expect(DEMO_RETENTION_SETTINGS).toHaveLength(DEMO_DEPARTMENTS.length);
+    expect(new Set(DEMO_RETENTION_SETTINGS.map((settings) => settings.dept_id))).toEqual(
+      new Set(DEMO_DEPARTMENTS.map((department) => department.id)),
+    );
+    expect(
+      DEMO_RETENTION_SETTINGS.every(
+        (settings) =>
+          settings.plan === "paid" &&
+          settings.retention_days === 365 &&
+          settings.checked_by === DEMO_REVIEWER_ID,
+      ),
+    ).toBe(true);
+    expect(DEMO_RETENTION_EXPORTS).toHaveLength(DEMO_DEPARTMENTS.length);
+    expect(DEMO_RETENTION_EXPORTS.every((entry) => entry.record_count > 0)).toBe(true);
+    for (const department of DEMO_DEPARTMENTS) {
+      expect(
+        DEMO_MEMBERS.filter(
+          (member) => member.dept_id === department.id && member.slack_user_id,
+        ),
+      ).toHaveLength(1);
+    }
   });
   it("디자인팀은 인용 가능한 합성 데이터와 권한 차등을 갖는다", () => {
     const design = DEMO_DEPARTMENTS.find((department) => department.name === "디자인팀 사수");
