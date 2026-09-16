@@ -107,7 +107,7 @@ type MemberRow = {
 };
 
 type CardInput = {
-  originItem: { item_id: string; content: string };
+  originItem: { item_id: string; content: string; created_at: string | null };
   similarItems: { item_id: string; content: string }[];
   principleItems: { item_id: string; content: string }[];
   recentDecisions: {
@@ -222,6 +222,9 @@ async function generateDraft(
     {
       system: [
         "부서 기록을 근거로 지금 결정해야 할 카드 한 장을 작성하세요.",
+        "title, background, recommendation, conflicts의 설명은 반드시 한국어로 작성하세요. 고유명사와 원문 인용 quote는 그대로 보존하세요.",
+        "deadline은 원문에 명시된 기한만 ISO 8601 시각으로 작성하고 불명확하면 null로 두세요. 시간대가 없으면 Asia/Seoul(+09:00)이며, 예를 들어 2026년 9월 18일 16시는 2026-09-18T16:00:00+09:00입니다. 상대 날짜는 originItem.created_at의 한국 날짜를 기준으로 해석하고 기준 시각이 없으면 null로 두세요.",
+        "conflicts는 같은 프로젝트·대상에 적용되는 과거 결정과 실제로 모순될 때만 작성하세요. 비슷한 금액이나 단어만으로 무관한 프로젝트의 결정을 충돌로 연결하지 마세요.",
         "제공된 item_id 또는 decision_id와 원문만 인용하세요.",
         "카드의 모든 내용은 citations로 뒷받침되는 근거 안에서만 작성하세요.",
         "먼저 citations를 채우고 background를 작성한 뒤 recommendation 결론은 마지막에 쓰세요.",
@@ -632,7 +635,7 @@ export async function makeCard(itemId: string, expectedVersion?: number): Promis
   }
 
   const input: CardInput = {
-    originItem: { item_id: origin.id, content: origin.content },
+    originItem: { item_id: origin.id, content: origin.content, created_at: origin.created_at },
     similarItems: similarItems.map((item) => ({
       item_id: item.id,
       content: item.content,
