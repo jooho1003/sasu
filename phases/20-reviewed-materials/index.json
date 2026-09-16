@@ -23,6 +23,6 @@
       "status": "completed"
     }
   ],
-  "verification": "docs/verification/reviewed-materials-2026-09-16/README.md",
-  "production_deployed": false
+  "verification": "docs/verification/reviewed-materials-production-2026-09-17.md",
+  "production_deployed": true
 }

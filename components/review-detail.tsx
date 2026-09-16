@@ -24,6 +24,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
   const [sections, setSections] = useState<ReviewSection[]>([]);
   const [dirty, setDirty] = useState(false);
   const dirtyRef = useRef(false);
+  const loadSequence = useRef(0);
   const [editorRevision, setEditorRevision] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +35,10 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
   const [destructive, setDestructive] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement>(null);
   const originalRef = useRef<string | null>(null);
+  const processing =
+    review !== null &&
+    (["processing", "uploading"].includes(review.status) ||
+      parts.some((part) => ["queued", "processing"].includes(part.status)));
   const markDirty = () => {
     dirtyRef.current = true;
     setDirty(true);
@@ -41,8 +46,11 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
   };
   const load = useCallback(
     async (force = false) => {
+      const sequence = ++loadSequence.current;
       const response = await fetch(endpoint, { cache: "no-store" });
       const body = await response.json();
+      // A poll started before a completed action must not restore its old state.
+      if (sequence !== loadSequence.current) return;
       if (!response.ok)
         throw new Error(body.error ?? "자료를 불러오지 못했습니다.");
       setReview(body.review);
@@ -67,16 +75,25 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
     return () => clearTimeout(timer);
   }, [load]);
   useEffect(() => {
-    if (!review || !["processing", "uploading"].includes(review.status)) return;
-    const t = setInterval(
-      () =>
-        void load().catch(() =>
-          setError("처리 상태를 확인하지 못했습니다. 새로고침해 주세요."),
-        ),
-      3000,
-    );
-    return () => clearInterval(t);
-  }, [review, load]);
+    if (!processing) return;
+    let disposed = false;
+    // Schedule after completion: slow reads must not pile up or invalidate each other.
+    let timer = setTimeout(poll, 3000);
+    async function poll() {
+      try {
+        await load();
+      } catch {
+        if (!disposed)
+          setError("처리 상태를 확인하지 못했습니다. 새로고침해 주세요.");
+      } finally {
+        if (!disposed) timer = setTimeout(poll, 3000);
+      }
+    }
+    return () => {
+      disposed = true;
+      clearTimeout(timer);
+    };
+  }, [processing, load]);
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       if (dirtyRef.current) {
@@ -141,7 +158,9 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
     }
     setChecked(false);
     setDestructive(null);
-    await load(true);
+    // Original deletion/cancellation changes metadata, not the unsaved draft.
+    // Keep editorRevision too, so a concurrent edit still produces a conflict.
+    await load(action === "use_extraction");
     setMessage(
       action === "publish"
         ? "확인한 버전을 업무 자료로 확정했습니다. 요약과 검색 준비를 시작합니다."
@@ -266,7 +285,6 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
         <Link href={`/d/${deptId}/reviews`}>목록으로</Link>
       </main>
     );
-  const processing = ["processing", "uploading"].includes(review.status);
   const done = parts.filter((p) => p.status === "done").length;
   return (
     <main className="workspace-page review-workspace">
@@ -302,6 +320,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
           <button
             className="button button-secondary"
             type="button"
+            disabled={busy}
             onClick={() => void perform(() => load(!dirty))}
           >
             최신 상태 확인

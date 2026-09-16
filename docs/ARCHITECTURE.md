@@ -1,10 +1,10 @@
 # 아키텍처 — 사수 (SASU)
 
-- 문서 버전: 1.1
-- 작성일: 2026-09-08 (1.1: LLM 공급자 Groq 교체 — ADR-028)
+- 문서 버전: 1.2
+- 작성일: 2026-09-08 (1.2: ADR-052·054 구현 구조와 운영 검증 상태 반영)
 - 지위: **파생 문서**. 구조 결정의 근거는 [PRD §6-11(아키텍처)·§6-12(데이터·상태)·§6-1(스키마)](PRD.md)에 있고, 결정의 이유·트레이드오프는 [ADR.md](ADR.md)에 있다.
 - 문서 충돌 시 우선순위: [PRD](PRD.md) → 이 문서 → [ADR](ADR.md). 이 문서와 PRD가 어긋나면 PRD가 옳다.
-- 현재 상태: **2026-09-12 구현·검증 진행 중.** 로컬 구현과 운영 반영은 구분한다. 최신 보완은 ADR-034·035 및 `docs/05-qa/` 실행 기록을 따른다.
+- 현재 상태: **2026-09-17.** phase 16~19는 운영 반영과 실제 연동 검증 완료, phase 20~22도 운영 DB·앱 반영과 로그인 읽기 회귀를 완료했다. 근거는 `docs/verification/continuity-production-2026-09-16.md`, `docs/verification/reviewed-materials-production-2026-09-17.md`, `docs/verification/review-state-recovery-2026-09-17/`에 있다.
 
 ### 2026-09-12 구현 보완
 
@@ -41,11 +41,11 @@
  ┌─────────────────┐            ┌───────────────────────────────────────────┐
  │ Slack Events /  │──────────▶ │ 어댑터: 서명 검증 → 동의 확인 → 마스킹    │
  │ Interactions    │            │         → items upsert → jobs enqueue     │
- │ Recall.ai 웹훅 · │──────────▶ │         → after(runOnce) → 200            │
- │ 전사 업로드      │            ├───────────────────────────────────────────┤
- │ 음성·문서 업로드 │──────────▶ │         (음성 원본 저장 없음)             │
- │ Notion 가져오기  │──────────▶ │ UI API: 대시보드·카드·원장·묻기            │
- └─────────────────┘            │         (세션 클라이언트 = RLS)            │
+ │ 전사 업로드      │──────────▶ │         → after(runOnce) → 200            │
+ │ 자료 검토 업로드 │──────────▶ ├───────────────────────────────────────────┤
+ │ Notion 가져오기/ │──────────▶ │ UI API: 대시보드·카드·원장·묻기·검토함     │
+ │ 자동 갱신        │            │         (세션 클라이언트 = RLS)            │
+ └─────────────────┘            │         비공개 원본은 Storage 경유          │
                                 └───────────────┬───────────────────────────┘
                                                 │ enqueue / select
                                                 ▼
@@ -59,7 +59,8 @@
  ┌──────────── 워커 /api/jobs/run (after() 즉시 1회 + 매분 트리거) ────────────┐
  │ classify → embed                                                             │
  │ classify → make_card → send_slack        summarize_meeting → make_card      │
- │ summarize_document · answer · notion_import · slack_backfill · sweep       │
+ │ summarize_document · answer · notion_import/sync · slack_backfill · reminder │
+ │ process_review · purge_review_files · create_retention_export · sweep       │
  └───────────────────────────────────┬─────────────────────────────────────────┘
                                      │ llm.structured(purpose, schema, prompt)
                                      ▼
@@ -278,12 +279,9 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 | Supabase Edge Function | Next.js 워커 하나 | ADR-009 — 런타임 2개를 1인이 관리하지 않는다 |
 | 별도 벡터 DB | pgvector + RLS | ADR-008 — 권한 필터를 두 곳에서 관리하게 된다 |
 | 별도 백엔드 서버·외부 큐 서비스 | Route Handler + `jobs` 테이블 | ADR-007·009 |
-| 슬랙 OAuth "Add to Slack" 멀티 워크스페이스 | 단일 워크스페이스 수동 설치, 토큰 env | ADR-017 — 파일럿 2팀째는 별도 배포 인스턴스 |
 | 슬랙·노션 원본 권한 자동 상속, ACL 테이블 | lead가 소스별 `dept`/`leads_only` 수동 지정 | ADR-014 |
 | 인용 정합성 LLM 심판(2차) | 문자열 포함 검증 | ADR-013 |
 | `excluded_count` service role 2차 검색 · 감사 로그 화면 | `answers` 기록만 | PRD §8-0 |
-| 노션 폴링·웹훅·변경 감지 | 1회 가져오기 + [다시 가져오기] | ADR-004 |
-| 보류 재알림·마감 리마인드 cron | "마감 지남" 배지 | PRD §8-0 |
 | Presidio 2차 마스킹 · 음성 화자 지문 · 폰 원탭 녹음 | 정규식 마스킹 · 봇 전사 화자 라벨 · Whisper 음성 업무 입력 | PRD §8-1 · ADR-032 |
 | 실시간 스트리밍(SSE) | 폴링(대시보드 10초·답변 2초) | PRD §8-1 |
 | 사용자별 API 키·과금 | 공동 키 1개 | ADR-020 |
@@ -311,10 +309,10 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 
 | 결정 | 지금 (부서 1, 채널 3, 하루 ~200건) | 10배에서 깨지는 곳 |
 |---|---|---|
-| 슬랙 봇 토큰 1개 env | 충분 | 워크스페이스 2개째부터 OAuth + 토큰 테이블 |
+| 조직당 Slack 설치·암호화 토큰 1개 | 파일럿 조직별 workspace 격리 | Enterprise Grid 조직 전체 설치·자동 rotation은 별도 설계 |
 | 워커 단일 레인 매분 | 하루 200 job, 여유 | 부서 10개면 분당 처리량 한계 → 병렬화 또는 큐 서비스 |
 | pgvector 순차 스캔(인덱스 없음) | 5만 건 이하 ms 단위 | 50만 건부터 HNSW 인덱스 (인덱스 추가만으로 해결) |
-| 노션 원칙 문서 수동 가져오기 | 페이지 몇 개 | 문서 수십 개·잦은 변경이면 폴링 또는 웹훅 |
+| 노션 지정 페이지 5분 자동 갱신 | 페이지 몇 개 | 문서 수십 개·짧은 갱신 주기면 webhook·증분 cursor 검토 |
 | RLS 함수 `can_see` 행별 호출 | 무시 가능 | 대량 조회에서 느려지면 visibility를 items에 비정규화 |
 | `citations.owner_kind/owner_id` 다형 참조 | FK 무결성 없음을 알고 감수 | 소유 종류가 늘면 테이블 분리 |
 

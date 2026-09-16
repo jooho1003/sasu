@@ -24,7 +24,9 @@
       "step": 3,
       "name": "installation-verification",
       "status": "completed",
-      "summary": "OAuth 단위·조직 격리 SQL·합성 설치 E2E 통과. 실제 OAuth 키/설치와 운영 반영은 미실행; docs/verification/product-continuity-2026-09-16.md 참조."
+      "summary": "OAuth 단위·조직 격리 SQL·합성 설치 E2E 통과. 이후 운영 키·암호화 설치 이전·브라우저 OAuth 재설치·재설치 후 실제 DM 송수신까지 검증."
     }
-  ]
+  ],
+  "production_deployed": true,
+  "verification": "docs/verification/continuity-production-2026-09-16.md"
 }

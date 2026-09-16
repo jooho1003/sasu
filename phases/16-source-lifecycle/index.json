@@ -18,7 +18,9 @@
       "step": 2,
       "name": "source-verification",
       "status": "completed",
-      "summary": "단위 1012개, 격리 SQL 145개/권한 2016조합, E2E 36개 통과. docs/verification/product-continuity-2026-09-16.md 참조; 운영 미적용."
+      "summary": "단위 1012개, 격리 SQL 145개/권한 2016조합, E2E 36개 통과. 이후 운영 DB·앱에 반영하고 실제 Slack 수정 및 Notion 갱신까지 검증. docs/verification/continuity-production-2026-09-16.md 참조."
     }
-  ]
+  ],
+  "production_deployed": true,
+  "verification": "docs/verification/continuity-production-2026-09-16.md"
 }

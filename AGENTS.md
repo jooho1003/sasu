@@ -8,9 +8,9 @@
 - Next.js (App Router) + Vercel — 대시보드·원장·Q&A·게스트 모드, Route Handler가 슬랙 이벤트 수신
 - Supabase — Postgres + pgvector + RLS + Auth(매직링크). RLS가 곧 "권한 인지 답변"의 물리적 구현
 - Slack Events API + Block Kit (HTTP 모드, 조직당 워크스페이스 1개 OAuth 설치, 봇 토큰은 서버 암호화 저장; ADR-052)
-- Recall.ai 류 회의 봇 — **D6(9/13) 판정**, 실패 시 .vtt/.txt 전사 업로드로 확정 · Notion API — 원칙 문서 1회 가져오기 + [다시 가져오기]
+- 회의 입력은 `.vtt`/`.txt` 전사 업로드로 확정(ADR-036; Recall.ai 류 회의 봇은 로드맵) · Notion API — 지정 페이지 전체 스냅샷 가져오기 + 5분 자동 갱신·[다시 가져오기](ADR-052)
 - Groq `openai/gpt-oss-120b` (카드·답변·회의 정리, strict json_schema) · Groq `openai/gpt-oss-20b` (분류) · 규칙 휴리스틱 (정량 신호). 두 모델 모두 production + strict structured output이라 인용 스키마를 강제할 수 있다 (ADR-028)
-- 임베딩: D2에 Voyage / OpenAI 중 확정. 확정 전에는 스키마에 차원을 박지 않는다
+- 임베딩: Voyage AI `voyage-4-lite` 1024차원 확정. OpenAI `text-embedding-3-small`은 명시적 호환 provider로만 사용한다(ADR-030)
 - 비동기: Postgres `jobs` 테이블 + `/api/jobs/run` 워커 (`after()` 즉시 1회 + 매분 트리거 — Vercel Cron 또는 Supabase `pg_cron`+`pg_net`, D0 확정)
 - 음성 입력: Groq Whisper `whisper-large-v3-turbo` (짧은 ASK 음성은 원본 비저장. 자료 검토함은 사용자 승인으로 원본을 비공개 Supabase Storage에 보관하여 재생·재시도, ADR-054) · 문서: TXT/MD/CSV/JSON/PDF/DOCX 업로드 + 검토·확정 후 근거 기반 요약
 - Zod (`lib/contracts.ts` 단일 스키마) · Vitest (`lib/` 단위) · Playwright (E2E)

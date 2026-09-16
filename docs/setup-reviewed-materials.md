@@ -2,6 +2,8 @@
 
 2026-09-16. 계약은 [PRD §3-3·§8](PRD.md), 구현 이유는 ADR-054, 실행 증거는 [검증 기록](verification/reviewed-materials-2026-09-16/README.md)이다.
 
+> **운영 상태 (2026-09-17):** `0034`·`0035`와 phase 20~22 앱 반영을 완료했다. 배포·스모크·로그인 읽기 결과는 [운영 반영 기록](verification/reviewed-materials-production-2026-09-17.md)을 따른다. 아래 절차의 "변경하지 않았다"는 9/16 개발 검증 시점 기록이다.
+
 ## 적용 대상과 배포
 
 1. 검증된 코드와 `0034_reviewed_materials.sql`, `0035_record_retention.sql`을 함께 반영한다. 이번 개발 검증은 격리 로컬 Supabase에서 진행했으며 운영 DB/배포는 변경하지 않았다.

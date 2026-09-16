@@ -18,7 +18,9 @@
       "step": 2,
       "name": "decision-verification",
       "status": "completed",
-      "summary": "정정 권한·중복·근거 복제·최신 선례·알림 상태 SQL 및 1440/390px E2E 통과. 공통 실행 기록 참조; 실발송 미실행."
+      "summary": "정정 권한·중복·근거 복제·최신 선례·알림 상태 SQL 및 1440/390px E2E 통과. 이후 운영에서 append-only 정정과 예약·취소·마감 DM 실발송 검증."
     }
-  ]
+  ],
+  "production_deployed": true,
+  "verification": "docs/verification/continuity-production-2026-09-16.md"
 }

@@ -1,0 +1,171 @@
+
+Running 5 tests using 1 worker
+
+(node:780) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\review-state-recovery.spec.ts:44:7 › 검토 복구: 원본만 삭제해도 미저장 제목·구간이 남고 저장된다 1440px (8.7s)
+(node:28492) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › tests\e2e\review-state-recovery.spec.ts:44:7 › 검토 복구: 원본만 삭제해도 미저장 제목·구간이 남고 저장된다 390px (9.3s)
+(node:9964) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  3 [chromium] › tests\e2e\review-state-recovery.spec.ts:94:5 › 검토 복구: 다른 창의 새 버전을 조회해도 편집 기준 버전을 올리지 않는다 (6.5s)
+(node:21880) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  4 [chromium] › tests\e2e\review-state-recovery.spec.ts:128:5 › 검토 복구: 일부 구간 실패 후에도 나머지 진행을 확인하고 종료한다 (5.9s)
+(node:9004) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  5 [chromium] › tests\e2e\review-state-recovery.spec.ts:152:5 › 검토 복구: 중단 전 조회의 늦은 응답이 편집 화면을 되돌리지 않는다 (7.2s)
+
+
+  1) [chromium] › tests\e2e\review-state-recovery.spec.ts:44:7 › 검토 복구: 원본만 삭제해도 미저장 제목·구간이 남고 저장된다 1440px 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByLabel('검토 제목')
+    Expected: "저장 전 제목"
+    Received: "합성 검토 자료"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('검토 제목') with timeout 5000ms
+      - waiting for getByLabel('검토 제목')
+        14 × locator resolved to <input maxlength="120" value="합성 검토 자료" aria-label="검토 제목"/>
+           - unexpected value "합성 검토 자료"
+
+
+      75 |     await page.getByRole("button", { name: "삭제 실행", exact: true }).click();
+      76 |     await expect(page.getByText("원본 삭제됨", { exact: true })).toBeVisible();
+    > 77 |     await expect(page.getByLabel("검토 제목")).toHaveValue("저장 전 제목");
+         |                                            ^
+      78 |     await expect(page.getByLabel("구간 1 텍스트")).toHaveValue("저장 전 교정");
+      79 |     await expect(page.getByLabel("구간 2 텍스트")).toHaveValue("사용자 메모");
+      80 |     await expect(page.getByRole("button", { name: "확인 후 확정", exact: true })).toBeDisabled();
+        at D:\바이브코딩\sasu\tests\e2e\review-state-recovery.spec.ts:77:44
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\review-state-recovery-검토-복-7e583-도-미저장-제목·구간이-남고-저장된다-1440px-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\review-state-recovery-검토-복-7e583-도-미저장-제목·구간이-남고-저장된다-1440px-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\review-state-recovery.spec.ts:44:7 › 검토 복구: 원본만 삭제해도 미저장 제목·구간이 남고 저장된다 390px 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByLabel('검토 제목')
+    Expected: "저장 전 제목"
+    Received: "합성 검토 자료"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('검토 제목') with timeout 5000ms
+      - waiting for getByLabel('검토 제목')
+        14 × locator resolved to <input maxlength="120" value="합성 검토 자료" aria-label="검토 제목"/>
+           - unexpected value "합성 검토 자료"
+
+
+      75 |     await page.getByRole("button", { name: "삭제 실행", exact: true }).click();
+      76 |     await expect(page.getByText("원본 삭제됨", { exact: true })).toBeVisible();
+    > 77 |     await expect(page.getByLabel("검토 제목")).toHaveValue("저장 전 제목");
+         |                                            ^
+      78 |     await expect(page.getByLabel("구간 1 텍스트")).toHaveValue("저장 전 교정");
+      79 |     await expect(page.getByLabel("구간 2 텍스트")).toHaveValue("사용자 메모");
+      80 |     await expect(page.getByRole("button", { name: "확인 후 확정", exact: true })).toBeDisabled();
+        at D:\바이브코딩\sasu\tests\e2e\review-state-recovery.spec.ts:77:44
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\review-state-recovery-검토-복-f9e90-해도-미저장-제목·구간이-남고-저장된다-390px-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\review-state-recovery-검토-복-f9e90-해도-미저장-제목·구간이-남고-저장된다-390px-chromium\error-context.md
+
+  3) [chromium] › tests\e2e\review-state-recovery.spec.ts:94:5 › 검토 복구: 다른 창의 새 버전을 조회해도 편집 기준 버전을 올리지 않는다 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByLabel('구간 1 텍스트')
+    Expected: "이 창의 교정"
+    Received: "다른 창의 변경"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('구간 1 텍스트') with timeout 5000ms
+      - waiting for getByLabel('구간 1 텍스트')
+        14 × locator resolved to <textarea rows="4" maxlength="20000" aria-label="구간 1 텍스트">다른 창의 변경</textarea>
+           - unexpected value "다른 창의 변경"
+
+
+      116 |   await page.getByRole("button", { name: "삭제 실행", exact: true }).click();
+      117 |   await expect(page.getByText("원본 삭제됨", { exact: true })).toBeVisible();
+    > 118 |   await expect(page.getByLabel("구간 1 텍스트")).toHaveValue("이 창의 교정");
+          |                                             ^
+      119 |   await page.getByRole("button", { name: "초안 저장", exact: true }).click();
+      120 |   await expect(page.getByRole("alert")).toContainText("다른 창에서 자료가 변경됐습니다");
+      121 |   expect(saves).toBe(1);
+        at D:\바이브코딩\sasu\tests\e2e\review-state-recovery.spec.ts:118:45
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\review-state-recovery-검토-복-3dd27--버전을-조회해도-편집-기준-버전을-올리지-않는다-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\review-state-recovery-검토-복-3dd27--버전을-조회해도-편집-기준-버전을-올리지-않는다-chromium\error-context.md
+
+  4) [chromium] › tests\e2e\review-state-recovery.spec.ts:128:5 › 검토 복구: 일부 구간 실패 후에도 나머지 진행을 확인하고 종료한다 
+
+    Error: expect(locator).toBeDisabled() failed
+
+    Locator:  getByLabel('구간 1 텍스트')
+    Expected: disabled
+    Received: enabled
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeDisabled" getByLabel('구간 1 텍스트') with timeout 5000ms
+      - waiting for getByLabel('구간 1 텍스트')
+        14 × locator resolved to <textarea rows="4" maxlength="20000" aria-label="구간 1 텍스트">저장된 내용</textarea>
+           - unexpected value "enabled"
+
+
+      140 |   await open(page);
+      141 |   await page.clock.install();
+    > 142 |   await expect(page.getByLabel("구간 1 텍스트")).toBeDisabled();
+          |                                             ^
+      143 |   await page.clock.fastForward(3100);
+      144 |   await expect(page.getByRole("region", { name: "변환 진행" })).toContainText("1/2 구간 완료");
+      145 |   await expect(page.getByLabel("구간 1 텍스트")).toBeEnabled();
+        at D:\바이브코딩\sasu\tests\e2e\review-state-recovery.spec.ts:142:45
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\review-state-recovery-검토-복구-일부-구간-실패-후에도-나머지-진행을-확인하고-종료한다-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\review-state-recovery-검토-복구-일부-구간-실패-후에도-나머지-진행을-확인하고-종료한다-chromium\error-context.md
+
+  5) [chromium] › tests\e2e\review-state-recovery.spec.ts:152:5 › 검토 복구: 중단 전 조회의 늦은 응답이 편집 화면을 되돌리지 않는다 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 3
+    Received: 4
+
+      185 |   await expect(page.getByRole("button", { name: "처리 중단", exact: true })).toHaveCount(0);
+      186 |   await page.clock.fastForward(4000);
+    > 187 |   expect(gets).toBe(3);
+          |                ^
+      188 | });
+      189 |
+        at D:\바이브코딩\sasu\tests\e2e\review-state-recovery.spec.ts:187:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\review-state-recovery-검토-복구-중단-전-조회의-늦은-응답이-편집-화면을-되돌리지-않는다-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\review-state-recovery-검토-복구-중단-전-조회의-늦은-응답이-편집-화면을-되돌리지-않는다-chromium\error-context.md
+
+  5 failed
+    [chromium] › tests\e2e\review-state-recovery.spec.ts:44:7 › 검토 복구: 원본만 삭제해도 미저장 제목·구간이 남고 저장된다 1440px 
+    [chromium] › tests\e2e\review-state-recovery.spec.ts:44:7 › 검토 복구: 원본만 삭제해도 미저장 제목·구간이 남고 저장된다 390px 
+    [chromium] › tests\e2e\review-state-recovery.spec.ts:94:5 › 검토 복구: 다른 창의 새 버전을 조회해도 편집 기준 버전을 올리지 않는다 
+    [chromium] › tests\e2e\review-state-recovery.spec.ts:128:5 › 검토 복구: 일부 구간 실패 후에도 나머지 진행을 확인하고 종료한다 
+    [chromium] › tests\e2e\review-state-recovery.spec.ts:152:5 › 검토 복구: 중단 전 조회의 늦은 응답이 편집 화면을 되돌리지 않는다 

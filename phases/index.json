@@ -1,20 +1,28 @@
 {
   "phases": [
     {
+      "dir": "22-review-state-recovery",
+      "status": "completed",
+      "verification": "docs/verification/reviewed-materials-production-2026-09-17.md",
+      "production_deployed": true
+    },
+    {
       "dir": "20-reviewed-materials",
       "status": "completed",
-      "verification": "docs/verification/reviewed-materials-2026-09-16/README.md",
-      "production_deployed": false
+      "verification": "docs/verification/reviewed-materials-production-2026-09-17.md",
+      "production_deployed": true
     },
     {
       "dir": "21-record-retention",
       "status": "completed",
-      "verification": "docs/verification/reviewed-materials-2026-09-16/README.md",
-      "production_deployed": false
+      "verification": "docs/verification/reviewed-materials-production-2026-09-17.md",
+      "production_deployed": true
     },
     {
       "dir": "15-slack-completion",
-      "status": "completed"
+      "status": "completed",
+      "verification": "docs/verification/continuity-production-2026-09-16.md",
+      "production_deployed": true
     },
     {
       "dir": "9-site",
@@ -23,7 +31,9 @@
     },
     {
       "dir": "8-security-hotfix",
-      "status": "completed"
+      "status": "completed",
+      "verification": "docs/verification/security-hotfix.md",
+      "production_deployed": true
     },
     {
       "dir": "10-org-admin",
@@ -69,7 +79,9 @@
     },
     {
       "dir": "13-ui-refresh",
-      "status": "completed"
+      "status": "completed",
+      "verification": "docs/verification/continuity-production-2026-09-16.md",
+      "production_deployed": true
     },
     {
       "dir": "14-slack-answer-citations",
@@ -77,19 +89,27 @@
     },
     {
       "dir": "16-source-lifecycle",
-      "status": "completed"
+      "status": "completed",
+      "verification": "docs/verification/continuity-production-2026-09-16.md",
+      "production_deployed": true
     },
     {
       "dir": "17-decision-followup",
-      "status": "completed"
+      "status": "completed",
+      "verification": "docs/verification/continuity-production-2026-09-16.md",
+      "production_deployed": true
     },
     {
       "dir": "18-question-conversations",
-      "status": "completed"
+      "status": "completed",
+      "verification": "docs/verification/continuity-production-2026-09-16.md",
+      "production_deployed": true
     },
     {
       "dir": "19-slack-onboarding",
-      "status": "completed"
+      "status": "completed",
+      "verification": "docs/verification/continuity-production-2026-09-16.md",
+      "production_deployed": true
     }
   ]
 }

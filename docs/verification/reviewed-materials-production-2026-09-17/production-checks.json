@@ -1,0 +1,42 @@
+[
+  {
+    "check": "service:reviewed_materials",
+    "status": 200
+  },
+  {
+    "check": "service:retention_settings",
+    "status": 200
+  },
+  {
+    "check": "service:bucket",
+    "status": 200
+  },
+  {
+    "check": "anon:reviewed_materials",
+    "status": 401
+  },
+  {
+    "check": "GET:https://sasu-alpha.vercel.app/",
+    "status": 200
+  },
+  {
+    "check": "GET:https://sasu-alpha.vercel.app/login",
+    "status": 200
+  },
+  {
+    "check": "GET:https://sasu-alpha.vercel.app/demo",
+    "status": 200
+  },
+  {
+    "check": "GET:https://sasu-alpha.vercel.app/privacy",
+    "status": 200
+  },
+  {
+    "check": "POST:https://sasu-alpha.vercel.app/api/jobs/run",
+    "status": 401
+  },
+  {
+    "check": "POST:https://sasu-alpha.vercel.app/api/slack/events",
+    "status": 401
+  }
+]

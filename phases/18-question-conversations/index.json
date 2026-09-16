@@ -18,7 +18,9 @@
       "step": 2,
       "name": "question-verification",
       "status": "completed",
-      "summary": "본인/부서/동의·Slack thread/scope 격리 SQL와 후속 질문/새 질문 E2E 통과. 공통 실행 기록 참조; 운영 미적용."
+      "summary": "본인/부서/동의·Slack thread/scope 격리 SQL와 후속 질문/새 질문 E2E 통과. 이후 운영에서 웹 질문과 실제 Slack DM 같은 스레드 후속 질문을 검증."
     }
-  ]
+  ],
+  "production_deployed": true,
+  "verification": "docs/verification/continuity-production-2026-09-16.md"
 }

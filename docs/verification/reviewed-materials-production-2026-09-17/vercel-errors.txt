@@ -1,0 +1,5 @@
+Vercel CLI 59.17.0 (Node.js 24.18.0)
+Resolving deployment "dpl_C2dsyEN4xKXaTM4jwUWApjChBmkN"
+Fetching project "prj_W5sgVwi1zbEXKUg8ue4ZcS7u6sxy"
+Fetching logs...
+No logs found for wadelee1005-3954s-projects/sasu

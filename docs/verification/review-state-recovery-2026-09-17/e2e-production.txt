@@ -1,0 +1,16 @@
+
+Running 9 tests using 1 worker
+
+(node:18772) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\guest.spec.ts:10:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px (2.3s)
+  ok 2 [chromium] › tests\e2e\guest.spec.ts:10:7 › 게스트 대시보드·카드·원장·묻기 완주 390px (1.7s)
+  ok 3 [chromium] › tests\e2e\guest.spec.ts:58:5 › 게스트는 실제 부서에 접근하지 못하고 잘못된 서명은 거부된다 (141ms)
+  ok 4 [chromium] › tests\e2e\guest.spec.ts:70:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다 (1.2s)
+  ok 5 [chromium] › tests\e2e\review-state-recovery.spec.ts:44:7 › 검토 복구: 원본만 삭제해도 미저장 제목·구간이 남고 저장된다 1440px (2.5s)
+  ok 6 [chromium] › tests\e2e\review-state-recovery.spec.ts:44:7 › 검토 복구: 원본만 삭제해도 미저장 제목·구간이 남고 저장된다 390px (4.3s)
+  ok 7 [chromium] › tests\e2e\review-state-recovery.spec.ts:94:5 › 검토 복구: 다른 창의 새 버전을 조회해도 편집 기준 버전을 올리지 않는다 (1.2s)
+  ok 8 [chromium] › tests\e2e\review-state-recovery.spec.ts:128:5 › 검토 복구: 일부 구간 실패 후에도 나머지 진행을 확인하고 종료한다 (3.9s)
+  ok 9 [chromium] › tests\e2e\review-state-recovery.spec.ts:152:5 › 검토 복구: 중단 전 조회의 늦은 응답이 편집 화면을 되돌리지 않는다 (4.6s)
+
+  9 passed (22.6s)

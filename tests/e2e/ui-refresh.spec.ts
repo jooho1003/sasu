@@ -149,8 +149,10 @@ for (const width of [1440, 390]) {
       ["", "대시보드"],
       ["/ask", "묻기"],
       ["/ledger", "원장"],
+      ["/reviews", "음성·자료 검토"],
       ["/documents", "문서"],
       ["/roles", "역할"],
+      ["/retention", "기록 보존"],
       ["/settings", "세팅"],
     ]) {
       await page.goto(`${base}${suffix}`);
