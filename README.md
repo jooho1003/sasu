@@ -52,6 +52,12 @@
 Next.js App Router · React · TypeScript · Supabase(Postgres, pgvector, RLS, Auth) ·
 Slack Events API · Block Kit · Groq · Zod · Vitest · Playwright · Vercel
 
+## AI를 활용한 개발
+
+Claude로 PRD·아키텍처·완료 기준을 구체화하고, Codex가 명세에 따라 구현하는 SDD 절차를 사용합니다. 규칙 문서와 스킬이 작업 기준을 제공하고, 하네스가 맥락 전달·구현·검증·오류 수정을 이어갑니다. 훅과 Vitest·Playwright로 빌드와 기능·사용 흐름을 확인합니다.
+
+Graft의 코드 의존 관계 탐색과 Archify의 구조·실행 흐름 시각화를 개발 절차에 추가했습니다. 단계별 역할과 결과 기록 방식은 [AI 개발 절차](docs/AI-DEVELOPMENT.md)에 정리했습니다.
+
 ## 로컬 실행
 
 ```bash
@@ -85,6 +91,7 @@ npx tsx scripts/seed-demo.ts
 | [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) | 보안·인용·개발 규칙 |
 | [PRD](docs/PRD.md) | 범위, 완료 조건, 스키마, 화면, 일정 |
 | [ARCHITECTURE](docs/ARCHITECTURE.md) | 구조, 데이터 흐름, 불변식 |
+| [AI 개발 절차](docs/AI-DEVELOPMENT.md) | SDD·Graft·Archify·하네스·훅·검증과 최종 기능의 연결 |
 | [ADR](docs/ADR.md) | 기술 결정과 포기한 대안 |
 | [설정 가이드](docs/setup-guide.md) | 계정·환경 변수·외부 서비스 설정 |
 | [제출 체크리스트](docs/submission-checklist.md) | 데모·스크린샷·영상·제출 항목 |

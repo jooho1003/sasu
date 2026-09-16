@@ -41,6 +41,7 @@
 하위 문서가 상위 문서를 암묵적으로 바꾸지 않는다. 구현 중 결정이 바뀌면 PRD §3·§8을 먼저 고치고 ADR을 추가한다. bkit PDCA용 문서는 `docs/01-plan/`·`docs/02-design/`에 있으며 본문은 전부 위 문서를 가리킨다 — 거기에 새 결정을 적지 않는다. `docs/archive/`는 폐기본이라 참조하지 않는다.
 
 ## 개발 프로세스
+- AI 개발 절차는 `docs/AI-DEVELOPMENT.md`를 따른다. Graft로 구현 전후 코드 의존 관계를 확인하고, 구조·실행 흐름이 바뀌는 작업은 Archify로 시각화해 검토한다. 실제 사용한 도구 결과와 검증 기록을 step 요약에 연결하며, 도구 결과가 없으면 누락 범위를 명시한다.
 - CRITICAL: `lib/` 아래 새 모듈은 테스트를 먼저 작성하고, 테스트가 통과하는 구현을 작성한다 (TDD — `scripts/hooks/tdd-guard.sh`가 강제). 예외: 라우트 핸들러(`route.ts`)·`app/**/page.tsx` 등 Next.js 프레임워크 파일·`components/`·`lib/supabase/*`·`lib/llm.ts`·`lib/slack/{blocks,post}.ts`·`scripts/`·`phases/`·`.sql`. 이유는 ARCHITECTURE.md §8 (SDK 어댑터·프레젠테이션·배선은 우리 로직이 아니다).
 - 하루 마지막 커밋은 항상 배포 가능 상태. 날짜 기반 기능 프리징·컷은 두지 않는다(ADR-049) — 신기능은 계속 만들되, 운영 반영은 검증(하니스·테스트·E2E·리뷰)과 사용자 승인 뒤에만 한다.
 - 커밋 메시지는 conventional commits (feat:, fix:, docs:, chore:, refactor:).

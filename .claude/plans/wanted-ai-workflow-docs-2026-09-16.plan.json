@@ -1,0 +1,51 @@
+{
+  "objective": "원티드 원고의 계획형 표현을 제거하고, Graft·Archify의 역할을 사수의 개발 절차에 실제 문서로 추가해 제출 원고와 일치시킨다.",
+  "nodes": [
+    {
+      "id": "doc-design",
+      "title": "개발 절차와 원고 표현 확정",
+      "domain": "architecture",
+      "D1": 1,
+      "D2": 1,
+      "D3": 0,
+      "D4": 2,
+      "score": 4,
+      "tier": "powerful",
+      "agent": "main",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [],
+      "산출물": "AI 개발 절차 문서·500자 완료형 원고",
+      "override": "아키텍처 문서·최종 표현 판단은 메인에서 직접 수행"
+    },
+    {
+      "id": "sync",
+      "title": "연관 문서와 입력란 동기화",
+      "domain": "mechanical",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 0,
+      "score": 1,
+      "tier": "fast",
+      "agent": "main",
+      "claude_model": "haiku",
+      "codex_model": "gpt-5.6-luna",
+      "depends_on": [
+        "doc-design"
+      ],
+      "산출물": "AGENTS·CLAUDE·하네스·제출문서·원티드 입력 동기화"
+    }
+  ],
+  "gates": {
+    "G1": "PASS",
+    "G2": "PASS",
+    "G3": "PASS",
+    "G4": "PASS",
+    "G5": "PASS"
+  },
+  "G4_exception": "개발 절차 설계와 최종 리뷰는 직접 수행한다. 모델 표기는 배정 기준이며 현재 세션 모델을 변경했다는 의미가 아니다.",
+  "constraints": "기존 사용자 변경 보존. 이번 완료 범위는 개발 절차 문서 반영이다. 설치·실행 이력은 만들어내지 않는다. 원티드 500자. 수정하기 미클릭.",
+  "status": "complete",
+  "verification": "문구 500자·계획형 없음 확인. 레포 제출 문서 2곳과 로컬 원고 일치. AGENTS/CLAUDE 일치. 문서 diff 검사 통과. 원티드 입력 내용 확인. 최종 수정하기 미클릭. 도구 설치·실행 변경 없이 개발 절차 문서 반영."
+}
