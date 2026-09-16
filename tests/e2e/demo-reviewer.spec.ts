@@ -82,3 +82,34 @@ test("390px에서도 기능 지도와 추천 시작점이 잘리지 않는다", 
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
   ).toBe(true);
 });
+
+test("결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 체험한다", async ({ page }) => {
+  await page.goto(DEMO_FEATURES.find((feature) => feature.key === "card")!.href);
+  await page.getByLabel("결정 사유").fill("합성 데모에서 재입찰을 우선 검토합니다.");
+  await page.getByRole("button", { name: "재입찰로 결정" }).click();
+  await expect(page.getByText("결정 완료 미리보기")).toBeVisible();
+
+  await page.goto(DEMO_FEATURES.find((feature) => feature.key === "ledger")!.href);
+  await page.getByLabel("결정 내용").fill("외주사 B는 재입찰을 진행합니다.");
+  await page.getByLabel("결정 이유").fill("10% 이상 인상 원칙을 적용했습니다.");
+  await page.getByRole("button", { name: "원장 반영 미리보기" }).click();
+  await expect(page.getByText("결정 미리보기")).toBeVisible();
+
+  await page.goto(DEMO_FEATURES.find((feature) => feature.key === "ask")!.href);
+  await page.getByPlaceholder("예: 외주사 B 견적은 어떻게 됐나요?").fill("외주사 견적은 어떻게 됐나요?");
+  await page.getByRole("button", { name: "가까운 근거 답변 보기" }).click();
+  await expect(page.getByText(/실제 전송 없이 가장 가까운 준비 질문/u)).toBeVisible();
+  await page.getByRole("button", { name: "🎙 음성 질문 동작 보기" }).click();
+  await expect(page.getByText(/마이크·음성은 서버로 전송되지 않습니다/u)).toBeVisible();
+
+  await page.goto(DEMO_FEATURES.find((feature) => feature.key === "reviews")!.href);
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "합성-회의.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("합성 데모 회의 기록"),
+  });
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "전사·추출 결과 보기" }).click();
+  await page.getByRole("button", { name: "이 내용으로 근거 확정 체험" }).click();
+  await expect(page.getByText("근거 확정 미리보기 완료")).toBeVisible();
+});
