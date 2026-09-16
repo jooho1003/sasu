@@ -1,0 +1,30 @@
+{
+  "project": "sasu",
+  "phase": "19-slack-onboarding",
+  "steps": [
+    {
+      "step": 0,
+      "name": "installation-security",
+      "status": "completed",
+      "summary": "0033_slack_installations.sql 및 installation.ts: 단회 OAuth state, AES-GCM/AAD, 브라우저 자격 증명 쓰기 차단."
+    },
+    {
+      "step": 1,
+      "name": "workspace-routing",
+      "status": "completed",
+      "summary": "workspace.ts: 요청/job별 토큰 격리, team별 이벤트/동의, 해지 차단과 전역 토큰 fallback 제거."
+    },
+    {
+      "step": 2,
+      "name": "installation-ui",
+      "status": "completed",
+      "summary": "관리자 Slack 설치 UI, OAuth 시작/콜백·오류 안내, register-legacy-slack.ts 이전 스크립트와 setup-guide §14."
+    },
+    {
+      "step": 3,
+      "name": "installation-verification",
+      "status": "completed",
+      "summary": "OAuth 단위·조직 격리 SQL·합성 설치 E2E 통과. 실제 OAuth 키/설치와 운영 반영은 미실행; docs/verification/product-continuity-2026-09-16.md 참조."
+    }
+  ]
+}

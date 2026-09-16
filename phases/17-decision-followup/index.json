@@ -1,0 +1,24 @@
+{
+  "project": "sasu",
+  "phase": "17-decision-followup",
+  "steps": [
+    {
+      "step": 0,
+      "name": "decision-correction",
+      "status": "completed",
+      "summary": "0031_decision_followup.sql 및 정정 API/UI: 최신 결정 append-only 정정·근거 복제·원장 이력·최신 선례 검색."
+    },
+    {
+      "step": 1,
+      "name": "decision-reminders",
+      "status": "completed",
+      "summary": "pipeline/reminder.ts 및 카드 알림 API/UI: 예약/취소·마감 알림, 담당자/동의 재검증, 세대·lease 재시도."
+    },
+    {
+      "step": 2,
+      "name": "decision-verification",
+      "status": "completed",
+      "summary": "정정 권한·중복·근거 복제·최신 선례·알림 상태 SQL 및 1440/390px E2E 통과. 공통 실행 기록 참조; 실발송 미실행."
+    }
+  ]
+}

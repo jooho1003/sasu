@@ -1,0 +1,24 @@
+{
+  "project": "sasu",
+  "phase": "18-question-conversations",
+  "steps": [
+    {
+      "step": 0,
+      "name": "question-history",
+      "status": "completed",
+      "summary": "0032_question_conversations.sql, questions API, QuestionHistory: 본인 웹/Slack 기록과 키셋 페이지."
+    },
+    {
+      "step": 1,
+      "name": "question-followup",
+      "status": "completed",
+      "summary": "ask_question 원자 RPC·parent 권한 경계·최대 6개 이전 질문 문맥·새 근거 검색, 웹 후속 질문과 Slack 스레드 연결."
+    },
+    {
+      "step": 2,
+      "name": "question-verification",
+      "status": "completed",
+      "summary": "본인/부서/동의·Slack thread/scope 격리 SQL와 후속 질문/새 질문 E2E 통과. 공통 실행 기록 참조; 운영 미적용."
+    }
+  ]
+}

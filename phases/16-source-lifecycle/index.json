@@ -1,0 +1,24 @@
+{
+  "project": "sasu",
+  "phase": "16-source-lifecycle",
+  "steps": [
+    {
+      "step": 0,
+      "name": "source-revisions",
+      "status": "completed",
+      "summary": "0030_source_lifecycle.sql: 버전·tombstone·원자 무효화·조건부 완료와 Notion 동기화 lease/RPC 구현."
+    },
+    {
+      "step": 1,
+      "name": "source-adapters",
+      "status": "completed",
+      "summary": "Slack 편집/삭제·백필·Notion 전체 스냅샷·자동 갱신 UI 및 워커 배선. 미동의·오래된 job을 차단."
+    },
+    {
+      "step": 2,
+      "name": "source-verification",
+      "status": "completed",
+      "summary": "단위 1012개, 격리 SQL 145개/권한 2016조합, E2E 36개 통과. docs/verification/product-continuity-2026-09-16.md 참조; 운영 미적용."
+    }
+  ]
+}

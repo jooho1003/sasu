@@ -44,7 +44,7 @@
     {
       "dir": "3-d6-d10-completion",
       "status": "completed",
-      "completed_at": "2026-09-13T17:54:53+0900"
+      "completed_at": "2026-09-13T17:54:53+09:00"
     },
     {
       "dir": "4-agent-roles",
@@ -62,6 +62,22 @@
     {
       "dir": "14-slack-answer-citations",
       "status": "pending"
+    },
+    {
+      "dir": "16-source-lifecycle",
+      "status": "completed"
+    },
+    {
+      "dir": "17-decision-followup",
+      "status": "completed"
+    },
+    {
+      "dir": "18-question-conversations",
+      "status": "completed"
+    },
+    {
+      "dir": "19-slack-onboarding",
+      "status": "completed"
     }
   ]
 }
