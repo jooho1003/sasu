@@ -1,15 +1,22 @@
 import { toIngestItem, isCollectible, type SlackMessageEvent } from "@/lib/adapters/slack";
-import { after } from "next/server";
+import { after as nextAfter } from "next/server";
 import { kickWorker } from "@/lib/jobs";
 import { verifySlackSignature } from "@/lib/slack/verify";
 import { postMessage, postEphemeral } from "@/lib/slack/post";
 import { prepareSlackQuestion, type SlackQuestionDepartment } from "@/lib/slack/question";
+import { parseSlackChange } from "@/lib/slack/change";
 import { metadataBase } from "@/lib/site";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
+import { slackWorkspaceForTeam, withSlackCredentials, currentSlackWorkspace } from "@/lib/slack/workspace";
+function after(action: () => Promise<unknown>) {
+  const credentials = currentSlackWorkspace() ?? { token: null, teamId: null, orgId: null };
+  nextAfter(async () => { await withSlackCredentials(credentials, action); });
+}
 export const dynamic = "force-dynamic";
 
 type SlackEventEnvelope = {
+  team_id?: string;
   type?: string;
   challenge?: string;
   event_id?: string;
@@ -67,8 +74,36 @@ export async function POST(request: Request) {
     return Response.json({ error: "invalid_event" }, { status: 400 });
   }
 
+  const adapter = createServiceSupabaseClient();
+  const workspace = await slackWorkspaceForTeam(adapter, envelope.team_id);
+  if (!workspace) return ok();
+  if (envelope.event.type === "app_uninstalled") {
+    const revoked = await adapter.rpc("revoke_slack_installation", { p_team: workspace.teamId });
+    return revoked.error ? Response.json({ error: "uninstall_failed" }, { status: 500 }) : ok();
+  }
+  return withSlackCredentials(workspace, () => handleEvent(envelope, request, workspace.teamId!));
+}
+async function handleEvent(envelope: SlackEventEnvelope & { event?: SlackMessageEvent }, request: Request, teamId: string) {
+  if (!envelope.event || !envelope.event_id) return ok();
   if (envelope.event.bot_id) return ok();
-  if (envelope.event.subtype && (envelope.event.type === "app_mention" || envelope.event.channel_type === "im" || ["message_changed", "message_deleted"].includes(envelope.event.subtype))) return ok();
+  if (["message_changed", "message_deleted"].includes(envelope.event.subtype ?? "")) {
+    const change = parseSlackChange(envelope.event);
+    if (!change) return ok();
+    const adapter = createServiceSupabaseClient();
+    const source = await adapter.from("sources").select("id, dept_id").eq("kind", "slack_channel").eq("external_id", change.channel).eq("slack_team_id", teamId).eq("active", true).maybeSingle();
+    if (source.error) return Response.json({ error: "source_lookup_failed" }, { status: 500 });
+    if (!source.data) return ok();
+    if (change.kind === "edit") {
+      const member = await adapter.from("members").select("consented_at").eq("dept_id", source.data.dept_id).eq("slack_user_id", change.authorId).maybeSingle();
+      if (member.error) return Response.json({ error: "member_lookup_failed" }, { status: 500 });
+      if (!member.data?.consented_at) return ok();
+    }
+    const changed = await adapter.rpc("apply_slack_change", { p_event: `${teamId}:${envelope.event_id}`, p_source: source.data.id, p_ref: change.externalRef, p_changed_at: change.changedAt, p_author: change.authorId, p_content: change.content, p_deleted: change.kind === "delete" });
+    if (changed.error) return Response.json({ error: "source_change_failed" }, { status: 500 });
+    if (changed.data === true) kickWorker();
+    return ok();
+  }
+  if (envelope.event.subtype && (envelope.event.type === "app_mention" || envelope.event.channel_type === "im")) return ok();
   const client = createServiceSupabaseClient();
   const isDm = envelope.event.type === "message" && envelope.event.channel_type === "im" && /^D[A-Z0-9]+$/.test(envelope.event.channel ?? "");
   if ((envelope.event.type === "app_mention" || isDm) && envelope.event.channel && envelope.event.user && typeof envelope.event.text === "string") {
@@ -76,7 +111,7 @@ export async function POST(request: Request) {
     const threadTs = envelope.event.thread_ts ?? envelope.event.ts ?? "";
     const user = envelope.event.user;
     const deadline = AbortSignal.timeout(2_500);
-    const context = await client.rpc("slack_question_context", { p_author: user, p_channel: channel, p_dm: isDm }).abortSignal(deadline);
+    const context = await client.rpc("slack_question_context_for_team", { p_team: teamId, p_author: user, p_channel: channel, p_dm: isDm }).abortSignal(deadline);
     if (context.error) return Response.json({ error: "member_lookup_failed" }, { status: 500 });
     const departments = (context.data ?? []) as SlackQuestionDepartment[];
     const prepared = prepareSlackQuestion(envelope.event.text, departments);
@@ -97,7 +132,8 @@ export async function POST(request: Request) {
       if (!request.headers.get("x-slack-retry-num")) notify(guidance(prepared.status));
       return ok();
     }
-    const answerResult = await client.rpc("ingest_slack_question", {
+    const answerResult = await client.rpc("ingest_slack_question_for_team", {
+      p_team: teamId,
       p_event: envelope.event_id, p_author: user, p_channel: channel, p_thread: threadTs,
       p_dept: prepared.deptId, p_content: prepared.question, p_dm: isDm,
     }).abortSignal(deadline);
@@ -121,6 +157,7 @@ export async function POST(request: Request) {
     .select("id, dept_id")
     .eq("kind", "slack_channel")
     .eq("external_id", envelope.event.channel)
+    .eq("slack_team_id", teamId)
     .eq("active", true)
     .maybeSingle();
 
@@ -155,7 +192,7 @@ export async function POST(request: Request) {
   }
 
   const itemResult = await client.rpc("ingest_slack_atomic", {
-    p_event_id: envelope.event_id, p_source_id: sourceResult.data.id,
+    p_event_id: `${teamId}:${envelope.event_id}`, p_source_id: sourceResult.data.id,
     p_author_ext_id: envelope.event.user, p_kind: "item", p_content: item.content,
     p_external_ref: item.external_ref, p_spoken_at: item.spoken_at, p_thread_ts: null,
   });

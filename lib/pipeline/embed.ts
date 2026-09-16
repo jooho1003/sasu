@@ -3,6 +3,7 @@ import { registerHandler } from "@/lib/jobs";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
 type ItemRow = {
+  content_version: number;
   id: string;
   content: string;
   deleted_at: string | null;
@@ -49,29 +50,22 @@ function decisionIdFromPayload(payload: unknown): string {
   return decisionId;
 }
 
-export async function embedItem(itemId: string): Promise<void> {
+export async function embedItem(itemId: string, expectedVersion?: number): Promise<void> {
   const client = createServiceSupabaseClient();
   const itemResult = await client
     .from("items")
-    .select("id, content, deleted_at")
+    .select("id, content, deleted_at, content_version")
     .eq("id", itemId)
     .maybeSingle<ItemRow>();
   ensureNoDatabaseError(itemResult.error);
 
   const item = itemResult.data;
-  if (!item || item.deleted_at !== null) {
+  if (!item || item.deleted_at !== null || (expectedVersion !== undefined && expectedVersion !== item.content_version)) {
     return;
   }
 
   const result = await embedText(item.content, { inputType: "document" });
-  const updateResult = await client
-    .from("items")
-    .update({
-      embedding: formatVector(result.vector),
-      embed_model: result.model,
-      embed_status: "done",
-    })
-    .eq("id", item.id);
+  const updateResult = await client.rpc("complete_item_embedding", { p_item: item.id, p_version: item.content_version, p_embedding: formatVector(result.vector), p_model: result.model });
   ensureNoDatabaseError(updateResult.error);
 }
 
@@ -104,7 +98,8 @@ export async function embedDecision(decisionId: string): Promise<void> {
 
 export function registerEmbedHandler(): void {
   registerHandler("embed", async (payload: unknown) => {
-    await embedItem(itemIdFromPayload(payload));
+    const version = typeof payload === "object" && payload !== null ? Reflect.get(payload, "contentVersion") : undefined;
+    await embedItem(itemIdFromPayload(payload), typeof version === "number" ? version : undefined);
   });
   registerHandler("embed_decision", async (payload: unknown) => {
     await embedDecision(decisionIdFromPayload(payload));

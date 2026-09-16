@@ -1,3 +1,4 @@
+import { withSlackDepartment } from "@/lib/slack/workspace";
 import { CONSENT_SECTIONS, CONSENT_VERSION } from "@/lib/consent";
 import { consentBlocks } from "@/lib/slack/blocks";
 import { openDirectMessage, postMessage } from "@/lib/slack/post";
@@ -95,7 +96,8 @@ export async function POST(
   }
 
   if (body.action === "request") {
-    return sendConsentRequests(membership);
+    if (membership.role !== "lead") return Response.json({ error: "동의 요청은 팀장만 보낼 수 있습니다." }, { status: 403 });
+    return withSlackDepartment(await createServerSupabaseClient(), membership.deptId, () => sendConsentRequests(membership));
   }
 
   if (typeof body.consented !== "boolean") {

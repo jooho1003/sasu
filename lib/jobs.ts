@@ -1,3 +1,4 @@
+import { withSlackJob } from "@/lib/slack/workspace";
 import { createHash, randomUUID } from "node:crypto";
 
 import { after } from "next/server";
@@ -18,6 +19,7 @@ export type JobKind =
   | "make_card"
   | "answer"
   | "send_slack"
+  | "send_reminder"
   | "deliver_slack_answer"
   | "notion_import"
   | "slack_backfill"
@@ -261,6 +263,11 @@ async function updateFailureOwner(
   job: JobRow,
   errorCode: string,
 ): Promise<void> {
+  if (["classify", "embed", "make_card"].includes(job.kind)) {
+    const result = await client.rpc("fail_source_job", { p_job: job.id });
+    if (result.error) throw new JobWorkerDatabaseError();
+    return;
+  }
   const mapping = FAILURE_OWNER_MAPPINGS[job.kind as JobKind];
   if (!mapping) {
     return;
@@ -422,7 +429,7 @@ export async function runOnce(
     }
 
     try {
-      await handler(job.payload);
+      await withSlackJob(client, job.id, job.kind, () => handler(job.payload));
     } catch (handlerError) {
       const errorCode = sanitizeErrorCode(handlerError);
 

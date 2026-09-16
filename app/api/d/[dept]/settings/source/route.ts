@@ -1,3 +1,4 @@
+import { withSlackDepartment } from "@/lib/slack/workspace";
 import { authenticatedBotUserId, conversationMembers, postChannelMessage } from "@/lib/slack/post";
 import { enqueue, kickWorker } from "@/lib/jobs";
 import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
@@ -40,6 +41,7 @@ export async function POST(
     return Response.json({ error: "Slack 채널과 이름을 확인해주세요." }, { status: 400 });
   }
 
+  return withSlackDepartment(await createServerSupabaseClient(), membership.deptId, async () => {
   let channelMemberIds: string[];
   try {
     const [members, botUserId] = await Promise.all([
@@ -133,6 +135,7 @@ export async function POST(
   kickWorker();
 
   return Response.json({ ok: true, source_id: sourceResult.data.id, job_id: jobId }, { status: 201 });
+  });
 }
 
 export async function DELETE(

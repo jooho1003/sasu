@@ -1,124 +1,35 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const mocks = vi.hoisted(() => ({
-  fetchNotionPage: vi.fn(),
-  createServiceSupabaseClient: vi.fn(),
-  enqueue: vi.fn(),
-  registerHandler: vi.fn(),
-}));
-
-vi.mock("@/lib/notion", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/lib/notion")>()),
-  fetchNotionPage: mocks.fetchNotionPage,
-}));
-vi.mock("@/lib/supabase/service", () => ({
-  createServiceSupabaseClient: mocks.createServiceSupabaseClient,
-}));
-vi.mock("@/lib/jobs", () => ({
-  enqueue: mocks.enqueue,
-  registerHandler: mocks.registerHandler,
-}));
-
+const mocks = vi.hoisted(() => ({ fetchNotionPage: vi.fn(), rpc: vi.fn(), from: vi.fn() }));
+vi.mock("@/lib/notion", async original => ({ ...(await original<typeof import("@/lib/notion")>()), fetchNotionPage: mocks.fetchNotionPage }));
+vi.mock("@/lib/supabase/service", () => ({ createServiceSupabaseClient: () => mocks }));
+vi.mock("@/lib/jobs", () => ({ registerHandler: vi.fn() }));
 import { importNotionSource } from "@/lib/pipeline/notion-import";
-
-const source = {
-  id: "source-1",
-  dept_id: "dept-1",
-  external_id: "12345678-1234-1234-1234-123412341234",
-  title: "원칙",
-  active: true,
-  kind: "notion_page",
-};
-
-function paragraph(id: string, content: string) {
-  return { id, type: "paragraph", paragraph: { rich_text: [{ plain_text: content }] } };
-}
-
-function useClient(existingItems: Array<{ id: string; external_ref: string; content: string; deleted_at: string | null }>) {
-  const updates: Array<{ table: string; values: Record<string, unknown>; ids: string[] }> = [];
-  const upsert = vi.fn(() => ({
-    select: vi.fn(async () => ({
-      data: [
-        { id: "item-existing", external_ref: "block-existing" },
-        { id: "item-new", external_ref: "block-new" },
-      ],
-      error: null,
-    })),
-  }));
-
-  const sourceLookup = { eq: vi.fn(), maybeSingle: vi.fn(async () => ({ data: source, error: null })) };
-  sourceLookup.eq.mockReturnValue(sourceLookup);
-  const itemLookup = { eq: vi.fn(async () => ({ data: existingItems, error: null })) };
-
-  const client = {
-    from: vi.fn((table: string) => {
-      if (table === "sources") {
-        return {
-          select: vi.fn(() => sourceLookup),
-          update: (values: Record<string, unknown>) => ({
-            eq: vi.fn(async () => {
-              updates.push({ table, values, ids: [] });
-              return { error: null };
-            }),
-          }),
-        };
-      }
-      if (table === "items") {
-        return {
-          select: vi.fn(() => itemLookup),
-          upsert,
-          update: (values: Record<string, unknown>) => ({
-            in: vi.fn(async (_column: string, ids: string[]) => {
-              updates.push({ table, values, ids });
-              return { error: null };
-            }),
-          }),
-        };
-      }
-      throw new Error(`unexpected table: ${table}`);
-    }),
-  };
-  mocks.createServiceSupabaseClient.mockReturnValue(client);
-  return { updates, upsert };
-}
-
-describe("Notion 재가져오기", () => {
+describe("Notion 원자 스냅샷 동기화", () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    mocks.enqueue.mockResolvedValue("job-1");
+    const query = { eq: () => query, maybeSingle: async () => ({ data: { id: "source-1", dept_id: "dept-1", external_id: "page-id", kind: "notion_page", active: true }, error: null }) };
+    mocks.from.mockReturnValue({ select: () => query });
+    mocks.rpc.mockImplementation(async (name: string) => ({ data: name === "begin_notion_sync" ? true : { inserted: 1, updated: 0, deleted: 1 }, error: null }));
+    mocks.fetchNotionPage.mockResolvedValue({ title: "원칙", blocks: [{ id: "block-1", type: "paragraph", paragraph: { rich_text: [{ plain_text: "연락 qa@example.com" }] } }] });
   });
-
-  it("이번 결과에 없는 활성 블록은 원문을 보존한 채 소프트 삭제한다", async () => {
-    const fake = useClient([
-      { id: "item-existing", external_ref: "block-existing", content: "유지", deleted_at: null },
-      { id: "item-removed", external_ref: "block-removed", content: "사라짐", deleted_at: null },
-    ]);
-    mocks.fetchNotionPage.mockResolvedValue({ title: "새 원칙", blocks: [paragraph("block-existing", "유지")] });
-
-    await expect(importNotionSource(source.id)).resolves.toEqual({ inserted: 0, updated: 0, deleted: 1 });
-
-    expect(fake.updates).toContainEqual({
-      table: "items",
-      values: { deleted_at: expect.any(String), embedding: null },
-      ids: ["item-removed"],
-    });
+  it("전체 조회 후 마스킹한 스냅샷을 동일 lease로 한 번만 반영한다", async () => {
+    expect(await importNotionSource("source-1")).toEqual({ inserted: 1, updated: 0, deleted: 1 });
+    const lease=mocks.rpc.mock.calls[0][1].p_lease;
+    expect(mocks.rpc).toHaveBeenCalledWith("finish_notion_sync", expect.objectContaining({ p_lease: lease, p_items: [{ external_ref: "block-1", content: "연락 [이메일]" }] }));
+    expect(JSON.stringify(mocks.rpc.mock.calls)).not.toContain("qa@example.com");
   });
-
-  it("변경된 블록은 pending 으로 되돌리고 재임베딩 job을 넣는다", async () => {
-    useClient([{ id: "item-existing", external_ref: "block-existing", content: "이전 원칙", deleted_at: null }]);
-    mocks.fetchNotionPage.mockResolvedValue({ title: "새 원칙", blocks: [paragraph("block-existing", "바뀐 원칙")] });
-
-    await expect(importNotionSource(source.id)).resolves.toEqual({ inserted: 0, updated: 1, deleted: 0 });
-
-    expect(mocks.enqueue).toHaveBeenCalledWith("embed", { itemId: "item-existing" }, { dedupeKey: "item-existing" });
+  it("다른 동기화가 진행 중이면 페이지도 읽지 않는다", async () => {
+    mocks.rpc.mockResolvedValue({ data: false, error: null });
+    expect(await importNotionSource("source-1")).toEqual({ inserted: 0, updated: 0, deleted: 0 });
+    expect(mocks.fetchNotionPage).not.toHaveBeenCalled();
   });
-
-  it("페이지네이션을 포함한 Notion 호출이 실패하면 삭제를 실행하지 않는다", async () => {
-    const fake = useClient([{ id: "item-removed", external_ref: "block-removed", content: "보존", deleted_at: null }]);
+  it("부분 조회 실패 시 삭제 없이 lease만 해제한다", async () => {
     mocks.fetchNotionPage.mockRejectedValue(Object.assign(new Error("failed"), { error_code: "notion_api_failed" }));
-
-    await expect(importNotionSource(source.id)).rejects.toMatchObject({ error_code: "notion_api_failed" });
-
-    expect(fake.updates.some((update) => update.table === "items")).toBe(false);
+    await expect(importNotionSource("source-1")).rejects.toMatchObject({ error_code: "notion_api_failed" });
+    expect(mocks.rpc.mock.calls.map(c=>c[0])).toEqual(["begin_notion_sync","release_notion_sync"]);
+  });
+  it("lease를 잃은 늦은 결과는 성공 반영으로 보고하지 않는다", async () => {
+    mocks.rpc.mockImplementation(async (name: string) => ({ data: name === "begin_notion_sync" ? true : null, error: null }));
+    expect(await importNotionSource("source-1")).toEqual({ inserted: 0, updated: 0, deleted: 0 });
   });
 });

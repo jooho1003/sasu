@@ -1,4 +1,5 @@
 import type { SlackBlock } from "@/lib/slack/blocks";
+import { currentSlackToken } from "@/lib/slack/workspace";
 
 type SlackApiErrorCode =
   | "slack_not_configured"
@@ -50,7 +51,8 @@ const SLACK_API_URL = "https://slack.com/api";
 const MAX_RATE_LIMIT_RETRIES = 3;
 
 function token(): string {
-  const value = process.env.SLACK_BOT_TOKEN?.trim();
+  // Every request/job must bind a workspace. An unbound call cannot use a global bot token.
+  const value = currentSlackToken();
   if (!value) {
     throw new SlackApiError("slack_not_configured");
   }

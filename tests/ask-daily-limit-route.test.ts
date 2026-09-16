@@ -19,7 +19,7 @@ vi.mock("@/lib/pipeline/slack-backfill", () => ({ registerSlackBackfillHandler: 
 vi.mock("@/lib/supabase/membership", () => ({ requireMembership: mocks.requireMembership }));
 vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: async () => ({
-    from: () => ({ insert: mocks.insert }),
+    rpc: mocks.insert,
   }),
 }));
 
@@ -29,7 +29,7 @@ describe("웹 ASK 일일 한도", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mocks.requireMembership.mockResolvedValue({ deptId: "dept-1", userId: "user-1" });
-    mocks.insert.mockReturnValue({ select: () => ({ single: async () => ({ data: null, error: { code: "P0001", message: "ask_daily_limit" } }) }) });
+    mocks.insert.mockResolvedValue({ data: null, error: { code: "P0001", message: "ask_daily_limit" } });
   });
 
   it("answers INSERT의 ask_daily_limit 오류를 429와 한국어 안내로 반환한다", async () => {

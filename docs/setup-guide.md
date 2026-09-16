@@ -232,4 +232,20 @@ D12(9/19)에 영상·스크린샷·제출서를 만들고 **제출** 버튼까�
 - Supabase 대시보드에서 스키마를 직접 고치지 마라. 마이그레이션으로만.
 - D8 코드 리뷰를 건너뛰지 마라. RLS는 통과하는 것처럼 보이면서 WITH CHECK가 빠져 있기 쉽다.
 - 제출서에 컷된 기능을 만든 것처럼 쓰지 마라. "로드맵"으로 구분한다.
-- 9/17 이후 신기능을 넣지 마라.
+- 날짜로 신기능을 제한하지 않는다. 운영 반영은 검증과 사용자 승인을 거친다(ADR-049).
+
+## 14. 후속 기능과 고객사 Slack 설치 (ADR-052)
+
+개발 검증은 [product-continuity 실행 기록](verification/product-continuity-2026-09-16.md)을 따른다. 아래는 운영 반영 때 실행할 절차이며 이번 개발에서 실행하지 않았다.
+
+1. Slack 앱에 bot scopes `app_mentions:read, channels:history, channels:read, chat:write, groups:history, groups:read, im:history, im:write, users:read`를 설정한다. 공개/비공개 채널 수집과 DM이 기존 범위다. OAuth redirect URL은 정확한 운영 주소의 `/api/slack/oauth/callback`이다. `app_uninstalled`를 구독한다. 기존 message.channels/message.groups/app_mention/message.im 구독과 signing secret 검증을 유지한다.
+2. 서버 환경에 `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_TOKEN_ENCRYPTION_KEY`를 준비한다. 암호화 키는 암호학적 난수 32바이트의 표준 base64이며 비밀 저장소에서 생성·보관한다. 토큰 rotation 및 조직 전체 Enterprise Grid 설치는 이번 구현 범위가 아니므로 활성화하지 않는다. 다른 고객사가 설치하려면 Slack 앱 배포 설정에서 다른 워크스페이스 설치를 허용해야 한다.
+3. 변경 전 DB 백업과 기존 배포 ID를 기록한다. 승인된 점검 창에서 워커 트리거·수집을 잠시 정지하고 `0030`~`0033`을 순서대로 적용한다. 기존 Supersedes 분기가 있다면 `decisions_one_correction` unique 인덱스 전에 데이터 검토가 필요하다. 점검 중 발생한 수신 이벤트를 성공 처리한 것으로 기록하지 않는다.
+4. 기존 파일럿 수동 설치는 서버 키가 준비된 환경에서 `npx tsx scripts/register-legacy-slack.ts <org UUID> <org admin UUID> <expected Slack team ID>`로 옮긴다. 스크립트는 auth.test의 실제 team과 scopes를 확인하고 암호문만 저장한다. 출력은 조직/team ID와 성공 여부뿐이다. 전역 `SLACK_BOT_TOKEN`만 남기고 새 앱을 가동하면 미연결로 차단된다.
+5. 검증한 커밋의 앱을 반영하고 워커·수집을 재개한다. 신규 고객사는 `SASU_ORG_ADMIN_MODE=on`에서 조직 관리 → 수집 채널 → Slack에 사수 설치로 진행한다. 조직 관리자 권한과 기존 조직이 먼저 있어야 하며 이번 범위는 조직 생성/가입 자동화가 아니다.
+6. 실제 워크스페이스에서 설치·재설치·다른 조직 연결 거절·해지, 같은 Slack ID/채널 ID를 가진 다른 워크스페이스 격리, 원문 편집/삭제, Notion 자동 갱신, 정정, 예약·마감 알림, 후속 질문을 확인한다. 실발송 확인은 별도 사용자 승인 후 수행한다.
+7. 해지되면 암호화 토큰도 지우며 수집과 답변 전달을 중단한다. 같은 workspace 재설치는 가능하나 채널을 다시 활성화해야 한다. 알림은 DB+Slack 간 exactly-once를 보장하지 않는다. 기능 장애 시 먼저 수집/워커 및 설치 기능을 정지하고 원인 수정 후 재개한다. 신규 schema/job이 있는 상태에서 구형 워커를 무조건 재가동하지 않는다.
+
+토큰 키를 바꾸기 전에는 기존 키로 복호화 후 새 키로 재암호화하거나, 고객사가 재설치해야 한다. 기존 키를 먼저 폐기하면 설치 토큰을 복구할 수 없다.
+
+공식 계약: [Slack OAuth v2 설치](https://docs.slack.dev/authentication/installing-with-oauth/), [oauth.v2.access](https://docs.slack.dev/reference/methods/oauth.v2.access/), [app_uninstalled](https://docs.slack.dev/reference/events/app_uninstalled/).

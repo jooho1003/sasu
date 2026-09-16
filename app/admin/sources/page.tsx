@@ -1,13 +1,14 @@
 import { AdminSourceRow } from "@/lib/contracts";
 import { AdminSourcesTable, AdminUnavailable } from "@/components/admin/views";
 import { adminRead } from "../_data";
+import { SlackInstallation } from "@/components/admin/slack-installation";
 
 export default async function AdminSourcesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ dept?: string }>;
+  searchParams: Promise<{ dept?: string; slack?: string }>;
 }) {
-  const [{ dept }, sources] = await Promise.all([
+  const [{ dept, slack }, sources] = await Promise.all([
     searchParams,
     adminRead("admin_sources", AdminSourceRow.array()),
   ]);
@@ -25,6 +26,7 @@ export default async function AdminSourcesPage({
           <p>채널 추가·제거는 부서장이 부서 세팅에서 합니다.</p>
         </div>
       </header>
+      <SlackInstallation result={slack} />
       <form className="flex flex-wrap items-end gap-3">
         <label className="grid gap-2 text-sm">
           부서

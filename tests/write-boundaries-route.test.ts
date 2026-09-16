@@ -1,3 +1,4 @@
+import { encryptSlackToken } from "@/lib/slack/installation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -11,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   serverRpc: vi.fn(),
   serviceFrom: vi.fn(),
   serviceRpc: vi.fn(),
+  workspace: vi.fn(),
   updateMessage: vi.fn(),
   verifySlackSignature: vi.fn(),
   writes: [] as Array<{ table: string; action: string }>,
@@ -42,7 +44,7 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/supabase/service", () => ({
   createServiceSupabaseClient: () => ({
     from: mocks.serviceFrom,
-    rpc: mocks.serviceRpc,
+    rpc: (name: string, args: unknown) => name === "slack_installation_for_team" ? mocks.workspace(args) : mocks.serviceRpc(name, args),
   }),
 }));
 vi.mock("@/lib/slack/verify", () => ({
@@ -114,6 +116,8 @@ function card() {
 describe("명령별 쓰기 RPC 경계", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.stubEnv("SLACK_TOKEN_ENCRYPTION_KEY", Buffer.alloc(32,17).toString("base64"));
+    mocks.workspace.mockResolvedValue({ data: { org_id: "org", team_id: "TTEST", encrypted_token: encryptSlackToken("xoxb-test", "org", "TTEST") }, error: null });
     mocks.writes.length = 0;
     mocks.requireMembership.mockResolvedValue(membership);
     mocks.verifySlackSignature.mockReturnValue(true);
@@ -275,6 +279,7 @@ describe("명령별 쓰기 RPC 경계", () => {
     vi.stubEnv("SLACK_SIGNING_SECRET", "synthetic-secret");
     const payload = {
       type: "view_submission",
+      team: { id: "TTEST" },
       user: { id: "U_SYNTHETIC" },
       view: {
         callback_id: "sasu_decision_modal",

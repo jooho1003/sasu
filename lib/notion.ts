@@ -78,12 +78,27 @@ export async function fetchNotionPage(pageId: string): Promise<{ title: string |
   const normalizedId = normalizeNotionPageId(pageId);
   const page = await notionRequest<NotionPageResponse>(`/pages/${normalizedId}`);
   const blocks: NotionBlock[] = [];
-  let cursor: string | null = null;
-  do {
-    const query: string = cursor ? `?page_size=100&start_cursor=${encodeURIComponent(cursor)}` : "?page_size=100";
-    const result: NotionChildrenResponse = await notionRequest<NotionChildrenResponse>(`/blocks/${normalizedId}/children${query}`);
-    blocks.push(...(result.results ?? []));
-    cursor = result.has_more ? result.next_cursor ?? null : null;
-  } while (cursor);
+  const parents = [normalizedId];
+  const visited = new Set<string>();
+  for (let index = 0; index < parents.length; index++) {
+    const parent = parents[index];
+    if (visited.has(parent)) throw new NotionError("notion_api_failed");
+    visited.add(parent);
+    let cursor: string | null = null;
+    const cursors = new Set<string>();
+    do {
+      const query: string = cursor ? `?page_size=100&start_cursor=${encodeURIComponent(cursor)}` : "?page_size=100";
+      const result: NotionChildrenResponse = await notionRequest<NotionChildrenResponse>(`/blocks/${encodeURIComponent(parent)}/children${query}`);
+      if (!Array.isArray(result.results) || typeof result.has_more !== "boolean" || (result.has_more && (!result.next_cursor || cursors.has(result.next_cursor)))) throw new NotionError("notion_api_failed");
+      for (const block of result.results) {
+        if (!block || typeof block !== "object" || typeof block.id !== "string") throw new NotionError("notion_api_failed");
+        blocks.push(block);
+        if (blocks.length > 5_000) throw new NotionError("notion_api_failed");
+        if (block.has_children === true) parents.push(block.id);
+      }
+      cursor = result.has_more ? result.next_cursor! : null;
+      if (cursor) cursors.add(cursor);
+    } while (cursor);
+  }
   return { title: pageTitle(page), blocks };
 }

@@ -1,5 +1,9 @@
 import { verifyTrailerAssessmentSql } from "./verify-trailer-assessment-sql.mjs";
 import { verifySlackAskSql } from "./verify-slack-ask-sql.mjs";
+import { verifySourceLifecycleSql } from "./verify-source-lifecycle-sql.mjs";
+import { verifyDecisionFollowupSql } from "./verify-decision-followup-sql.mjs";
+import { verifyConversationsSql } from "./verify-conversations-sql.mjs";
+import { verifySlackInstallationsSql } from "./verify-slack-installations-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
 // node scripts/verify-security-sql.mjs <temporary-directory>
@@ -486,7 +490,9 @@ try {
     const channel = await q("select * from search_channel_as($1,$2,$3,8)",[ids.lead,ids.dept,embedding]);
     assert.deepEqual(channel.rows.map(row => row.id),[ids.publicItem]);
     assert.equal((await q("select * from recent_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,3);
-    assert.equal((await q("select * from recent_channel_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows.length,3);
+    const channelDecisions = (await q("select * from recent_channel_decisions_as($1,$2,3)",[ids.lead,ids.dept])).rows;
+    assert.equal(channelDecisions.length,2);
+    assert.ok(channelDecisions.every(row => row.id !== supersededDecision));
   }));
   await check("RPC caller cannot impersonate lead", () => asUser(ids.member, async () => {
     assert.equal((await q("select * from search_channel_as($1,$2,$3,8)",[ids.lead,ids.dept,embedding])).rows.length,0);
@@ -991,6 +997,10 @@ try {
   await verifyTrailerSql({ db, q, check, asUser, ids, adminIds });
   await verifyTrailerAssessmentSql({ db, q, check, asUser, ids });
   await verifySlackAskSql({ db, q, check, asUser });
+  await verifySourceLifecycleSql({ db, q, check, asUser });
+  await verifyDecisionFollowupSql({ db, q, check, asUser });
+  await verifyConversationsSql({ db, q, check, asUser });
+  await verifySlackInstallationsSql({ db, q, check, asUser });
   await db.exec(readFileSync(resolve("supabase/rollback/0028_trailer_assessment_down.sql"), "utf8"));
   await check("0028 rollback removes assessment only", async () => { assert.equal((await q("select to_regclass('public.trailer_attempts') value")).rows[0].value, null); });
   await db.exec(readFileSync(resolve("supabase/rollback/0027_trailer_publish_down.sql"), "utf8"));

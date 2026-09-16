@@ -8,6 +8,7 @@ const CLASSIFICATION_CONTENT_LIMIT = 4_000;
 const AUTO_PROMOTION_CONFIDENCE = 0.6;
 
 type ItemRow = {
+  content_version: number;
   content: string;
   spoken_at: string | null;
   created_at: string | null;
@@ -34,17 +35,19 @@ class ClassifyPipelineDatabaseError extends Error {
 
 async function saveClassification(
   values: ClassificationValues,
-): Promise<void> {
+  version: number,
+): Promise<boolean> {
   const client = createServiceSupabaseClient();
-  const { error } = await client.from("classifications").upsert(values);
+  const { data, error } = await client.rpc("complete_item_classification", { p_item: values.item_id, p_version: version, p_values: values });
 
   if (error) {
     throw new ClassifyPipelineDatabaseError();
   }
+  return data === true;
 }
 
-async function enqueueEmbedding(itemId: string): Promise<void> {
-  await enqueue("embed", { itemId }, { dedupeKey: itemId });
+async function enqueueEmbedding(itemId: string, version: number): Promise<void> {
+  await enqueue("embed", { itemId, contentVersion: version }, { dedupeKey: `${itemId}:${version}` });
 }
 
 function unclassifiedValues(itemId: string): ClassificationValues {
@@ -73,11 +76,11 @@ function itemIdFromPayload(payload: unknown): string {
   return itemId;
 }
 
-export async function classifyItem(itemId: string): Promise<void> {
+export async function classifyItem(itemId: string, expectedVersion?: number): Promise<void> {
   const client = createServiceSupabaseClient();
   const { data, error } = await client
     .from("items")
-    .select("content, spoken_at, created_at, deleted_at, dept_id")
+    .select("content, spoken_at, created_at, deleted_at, dept_id, content_version")
     .eq("id", itemId)
     .maybeSingle<ItemRow>();
 
@@ -88,6 +91,8 @@ export async function classifyItem(itemId: string): Promise<void> {
   if (!data || data.deleted_at !== null || !data.content.trim()) {
     return;
   }
+  const version = data.content_version;
+  if (expectedVersion !== undefined && expectedVersion !== version) return;
 
   const content = data.content.slice(0, CLASSIFICATION_CONTENT_LIMIT);
   const spokenAt = new Date(data.spoken_at ?? data.created_at ?? 0);
@@ -122,8 +127,7 @@ export async function classifyItem(itemId: string): Promise<void> {
       { deptId: data.dept_id },
     );
   } catch {
-    await saveClassification(unclassifiedValues(itemId));
-    await enqueueEmbedding(itemId);
+    if (await saveClassification(unclassifiedValues(itemId), version)) await enqueueEmbedding(itemId, version);
     return;
   }
 
@@ -131,7 +135,7 @@ export async function classifyItem(itemId: string): Promise<void> {
   const deadlineHint =
     ruleSignal.deadlineHint?.toISOString() ?? classification.deadline_hint;
 
-  await saveClassification({
+  const saved = await saveClassification({
     item_id: itemId,
     label: classification.label,
     method: "llm",
@@ -139,8 +143,9 @@ export async function classifyItem(itemId: string): Promise<void> {
     deadline_hint: deadlineHint,
     assignee_hint: classification.assignee_hint,
     reasoning: classification.reasoning,
-  });
-  await enqueueEmbedding(itemId);
+  }, version);
+  if (!saved) return;
+  await enqueueEmbedding(itemId, version);
 
   const shouldAutoPromote =
     classification.label === "decision" &&
@@ -149,12 +154,13 @@ export async function classifyItem(itemId: string): Promise<void> {
       : classification.confidence >= AUTO_PROMOTION_CONFIDENCE);
 
   if (shouldAutoPromote) {
-    await enqueue("make_card", { itemId });
+    await enqueue("make_card", { itemId, contentVersion: version });
   }
 }
 
 export function registerClassifyHandler(): void {
   registerHandler("classify", async (payload: unknown) => {
-    await classifyItem(itemIdFromPayload(payload));
+    const version = typeof payload === "object" && payload !== null ? Reflect.get(payload, "contentVersion") : undefined;
+    await classifyItem(itemIdFromPayload(payload), typeof version === "number" ? version : undefined);
   });
 }

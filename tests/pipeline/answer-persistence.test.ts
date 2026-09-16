@@ -33,6 +33,17 @@ vi.mock("@/lib/pipeline/slack-answer-delivery", () => ({ deliverSlackAnswer: vi.
 import { answerQuestion } from "@/lib/pipeline/answer";
 
 describe("answer publication boundary", () => {
+  it("후속 질문은 SQL이 허용한 질문 맥락으로 원문을 다시 검색하며 이전 본문을 인용하지 않는다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-2", dept_id: "dept-1", asked_by: "lead-1", question: "그럼 담당자는 누구인가요?", parent_id: "answer-1", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.rpc.mockImplementation(async name => ({ data: name === "answer_conversation_context" ? [{ question: "계약 승인 기준은 무엇인가요?" }] : true, error: null }));
+    await answerQuestion("answer-2");
+    expect(mocks.rpc).toHaveBeenCalledWith("answer_conversation_context", { p_answer: "answer-2", p_scope: "user" });
+    const input = JSON.parse(mocks.structured.mock.calls[0][2].user);
+    expect(input.previous_questions).toEqual([{ question: "계약 승인 기준은 무엇인가요?" }]);
+    expect(input.evidence).toContain("확인된 근거");
+    expect(mocks.search).toHaveBeenCalledWith(mocks, expect.objectContaining({ userId: "lead-1", deptId: "dept-1", scope: "user" }));
+  });
   it("DM은 user 검색을 사용하고 내구성 전달은 생성 워커에서 직접 게시하지 않는다", async () => {
     await answerQuestion("answer-1", { channel: "D123", threadTs: "1.1", scope: "user", durable: true });
     expect(mocks.search).toHaveBeenCalledWith(mocks, expect.objectContaining({ scope: "user" }));

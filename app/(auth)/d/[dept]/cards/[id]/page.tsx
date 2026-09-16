@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import CardActions from "@/components/card-actions";
+import { CardReminder } from "@/components/card-reminder";
 import { formatConflictBadge } from "@/lib/conflicts";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -295,6 +296,7 @@ export default async function CardDetailPage({
             outcome={card.recommendation ?? card.title}
             status={card.status}
           />
+          {canAct && (card.status === "open" || card.status === "deferred") ? <CardReminder deptId={membership.deptId} cardId={card.id} /> : null}
         </section>
       </article>
     </main>

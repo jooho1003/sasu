@@ -24,6 +24,7 @@ beforeAll(async () => {
   const actual = await vi.importActual<typeof import("@/lib/supabase/service")>("@/lib/supabase/service");
   const telemetryClient = actual.createServiceSupabaseClient();
   state.client = {
+    rpc: async (_name: string, args: { p_values: Record<string, unknown> }) => { classification = args.p_values; return { data: true, error: null }; },
     from(table: string) {
       if (table === "llm_calls") return { insert: async (row: { model: string; input_tokens: number; output_tokens: number }) => {
         telemetry.push(row);
@@ -35,7 +36,7 @@ beforeAll(async () => {
       } };
       if (table === "items") {
         const query = { select: () => query, eq: () => query, maybeSingle: async () => ({
-          data: { content: current.text, spoken_at: "2026-09-12T01:00:00.000Z", created_at: "2026-09-12T01:00:00.000Z", deleted_at: null }, error: null,
+          data: { content_version: 1, content: current.text, spoken_at: "2026-09-12T01:00:00.000Z", created_at: "2026-09-12T01:00:00.000Z", deleted_at: null }, error: null,
         }) };
         return query;
       }

@@ -42,6 +42,7 @@ function createClient(itemOverrides: Partial<{
               id: "item-1",
               content: "외주사 견적을 확인합니다.",
               deleted_at: null,
+              content_version: 1,
               ...itemOverrides,
             }),
           }),
@@ -71,7 +72,11 @@ function createClient(itemOverrides: Partial<{
     }
     throw new Error(`unexpected table: ${table}`);
   });
-  return { client: { from }, updates };
+  const rpc = vi.fn(async (_name: string, args: { p_embedding: string; p_model: string }) => {
+    updates.push({ embedding: args.p_embedding, embed_model: args.p_model, embed_status: "done" });
+    return { data: true, error: null };
+  });
+  return { client: { from, rpc }, updates };
 }
 
 describe("embed pipeline", () => {

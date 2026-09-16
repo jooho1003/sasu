@@ -405,7 +405,23 @@ function createFakeClient(options: FakeOptions = {}) {
     }
   }
 
-  const rpc = vi.fn((name: string) => {
+  const rpc = vi.fn((name: string, args?: Record<string, unknown>) => {
+    if (name === "recent_decisions_for_card") {
+      return Promise.resolve({ data: state.decisions, error: null });
+    }
+    if (name === "append_current_card_evidence") {
+      if (!state.citations.some(c => c.owner_id === args?.p_request && c.item_id === args?.p_item)) {
+        state.citations.push({ owner_kind: "decision_request", owner_id: args?.p_request, item_id: args?.p_item, decision_id: null, quote: args?.p_quote });
+        state.citationInsertAttempts++;
+      }
+      return Promise.resolve({ data: true, error: null });
+    }
+    if (name === "complete_item_embedding") {
+      const values = { embedding: args?.p_embedding, embed_model: args?.p_model, embed_status: "done" };
+      if (state.origin) Object.assign(state.origin, values);
+      state.itemUpdates.push(values);
+      return Promise.resolve({ data: true, error: null });
+    }
     if (name === "find_merge_candidates") {
       return Promise.resolve({
         data: state.mergeCandidates,

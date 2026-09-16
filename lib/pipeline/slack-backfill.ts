@@ -1,5 +1,5 @@
 import { collectBackfillItems, type SlackMemberConsent, type SlackMessageEvent } from "@/lib/adapters/slack";
-import { enqueue, registerHandler } from "@/lib/jobs";
+import { registerHandler } from "@/lib/jobs";
 import { historyPage } from "@/lib/slack/post";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
@@ -16,18 +16,6 @@ type MemberRow = {
   slack_user_id: string | null;
   display_name: string;
   consented_at: string | null;
-};
-
-type ItemIdRow = { id: string };
-
-type BackfillItem = {
-  source_id: string;
-  dept_id: string;
-  external_ref: string | null;
-  author_ext_id: string | null;
-  author: string | null;
-  spoken_at: string | null;
-  content: string;
 };
 
 class SlackBackfillDatabaseError extends Error {
@@ -56,16 +44,6 @@ function payloadSourceId(payload: unknown): string {
     throw new Error("slack_backfill job payload is invalid");
   }
   return sourceId;
-}
-
-export function prepareBackfillUpsertItems(items: BackfillItem[]) {
-  return items.map((item) => ({
-    ...item,
-    deleted_at: null,
-    embedding: null,
-    embed_model: null,
-    embed_status: "pending",
-  }));
 }
 
 export async function backfillSlackChannel(sourceId: string): Promise<number> {
@@ -112,21 +90,25 @@ export async function backfillSlackChannel(sourceId: string): Promise<number> {
       members,
     });
 
-    if (items.length > 0) {
-      const itemResult = await client
-        .from("items")
-        .upsert(
-          prepareBackfillUpsertItems(items.map((item) => ({ ...item, dept_id: source.dept_id }))),
-          { onConflict: "source_id,external_ref" },
-        )
-        .select("id");
-      ensureNoDatabaseError(itemResult.error);
-
-      const itemIds = (itemResult.data ?? []) as ItemIdRow[];
-      inserted += itemIds.length;
-      for (const item of itemIds) {
-        await enqueue("classify", { itemId: item.id }, { dedupeKey: item.id });
+    for (const item of items) {
+      const editedAt = (page.messages as SlackMessageEvent[]).find(message => message.ts === item.external_ref)?.edited?.ts;
+      if (editedAt && /^\d{1,12}\.\d{1,6}$/.test(editedAt)) {
+        const changed = await client.rpc("apply_slack_change", {
+          p_event: `backfill:${source.id}:${item.external_ref}:${editedAt}`, p_source: source.id,
+          p_ref: item.external_ref, p_changed_at: editedAt, p_author: item.author_ext_id,
+          p_content: item.content, p_deleted: false,
+        });
+        ensureNoDatabaseError(changed.error);
+        if (changed.data === true) inserted++;
+        continue;
       }
+      const result = await client.rpc("ingest_slack_atomic", {
+        p_event_id: `backfill:${source.id}:${item.external_ref}`, p_source_id: source.id,
+        p_author_ext_id: item.author_ext_id, p_kind: "item", p_content: item.content,
+        p_external_ref: item.external_ref, p_spoken_at: item.spoken_at, p_thread_ts: null,
+      });
+      ensureNoDatabaseError(result.error);
+      if (result.data === true) inserted++;
     }
 
     cursor = page.nextCursor ?? undefined;

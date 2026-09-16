@@ -63,8 +63,8 @@ function makeBuilder(operation: Operation, data: unknown = null): QueryBuilder {
 
 function createFakeClient(claims: ClaimedJob[][] = []) {
   const operations: Operation[] = [];
-  const rpc = vi.fn(async () => ({
-    data: claims.shift() ?? [],
+  const rpc = vi.fn(async (name: string) => ({
+    data: name === "claim_jobs" ? claims.shift() ?? [] : null,
     error: null,
   }));
   const from = vi.fn((table: string) => ({
@@ -170,7 +170,8 @@ describe("jobs worker", () => {
         (operation.values as { status?: string }).status === "queued",
     );
 
-    expect(fake.rpc).toHaveBeenCalledTimes(2);
+    expect(fake.rpc.mock.calls.filter(([name]) => name === "claim_jobs")).toHaveLength(2);
+    expect(fake.rpc.mock.calls.filter(([name]) => name === "slack_installation_for_job")).toHaveLength(2);
     expect(retries).toHaveLength(2);
     expect(retries.map((operation) => operation.values)).toEqual([
       expect.objectContaining({
@@ -255,6 +256,11 @@ describe("jobs worker", () => {
       expect(jobUpdate(fake.operations, "failed").values).toEqual(
         expect.objectContaining({ last_error: "llm_timeout", lease_until: null }),
       );
+      if (["classify", "embed", "make_card"].includes(kind)) {
+        expect(fake.rpc).toHaveBeenCalledWith("fail_source_job", { p_job: `${kind}-job` });
+        expect(fake.operations.some(operation => operation.table === ownerTable)).toBe(false);
+        return;
+      }
       expect(
         fake.operations.some(
           (operation) =>

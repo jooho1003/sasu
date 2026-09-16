@@ -1,3 +1,4 @@
+import { encryptSlackToken } from "@/lib/slack/installation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -6,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   openModal: vi.fn(),
   postMessage: vi.fn(),
   rpc: vi.fn(),
+  workspace: vi.fn(),
   updateMessage: vi.fn(),
   verifySlackSignature: vi.fn(),
 }));
@@ -25,7 +27,7 @@ vi.mock("@/lib/slack/post", () => ({
 vi.mock("@/lib/supabase/service", () => ({
   createServiceSupabaseClient: () => ({
     from: vi.fn(),
-    rpc: mocks.rpc,
+    rpc: (name: string, args: unknown) => name === "slack_installation_for_team" ? mocks.workspace(args) : mocks.rpc(name, args),
   }),
 }));
 
@@ -36,6 +38,7 @@ const DEPT_ID = "22222222-2222-4222-8222-222222222222";
 function consentRequest(slackUserId = "U_CLICKER") {
   const payload = {
     type: "block_actions",
+    team: { id: "TTEST" },
     user: { id: slackUserId },
     actions: [
       {
@@ -59,6 +62,8 @@ function consentRequest(slackUserId = "U_CLICKER") {
 describe("Slack 본인 동의 인터랙션", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.stubEnv("SLACK_TOKEN_ENCRYPTION_KEY", Buffer.alloc(32,17).toString("base64"));
+    mocks.workspace.mockResolvedValue({ data: { org_id: "org", team_id: "TTEST", encrypted_token: encryptSlackToken("xoxb-test", "org", "TTEST") }, error: null });
     vi.stubEnv("SLACK_SIGNING_SECRET", "synthetic-secret");
     mocks.verifySlackSignature.mockReturnValue(true);
     mocks.rpc.mockResolvedValue({ data: true, error: null });
@@ -70,7 +75,8 @@ describe("Slack 본인 동의 인터랙션", () => {
     const response = await POST(consentRequest());
 
     expect(response.status).toBe(200);
-    expect(mocks.rpc).toHaveBeenCalledWith("consent_via_slack", {
+    expect(mocks.rpc).toHaveBeenCalledWith("consent_via_slack_for_team", {
+      p_team: "TTEST",
       p_slack_user: "U_CLICKER",
       p_dept: DEPT_ID,
     });

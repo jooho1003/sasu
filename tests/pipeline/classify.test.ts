@@ -24,6 +24,7 @@ import {
 } from "@/lib/pipeline/classify";
 
 type ItemRow = {
+  content_version: number;
   id: string;
   content: string;
   spoken_at: string | null;
@@ -33,6 +34,7 @@ type ItemRow = {
 };
 
 const baseItem: ItemRow = {
+  content_version: 1,
   id: "item-1",
   content: "이 안으로 진행해도 돼요?",
   spoken_at: "2026-09-08T03:00:00.000Z",
@@ -53,7 +55,7 @@ function classification(overrides: Record<string, unknown> = {}) {
 }
 
 function createFakeClient(item: ItemRow | null) {
-  const classificationUpsert = vi.fn(async () => ({ data: null, error: null }));
+  const classificationUpsert = vi.fn(async (values: unknown) => { void values; return { data: true, error: null }; });
   const itemLookup = {
     eq: vi.fn(),
     maybeSingle: vi.fn(async () => ({ data: item, error: null })),
@@ -61,6 +63,7 @@ function createFakeClient(item: ItemRow | null) {
   itemLookup.eq.mockReturnValue(itemLookup);
 
   const client = {
+    rpc: vi.fn((_name: string, args: { p_values: unknown }) => classificationUpsert(args.p_values)),
     from: vi.fn((table: string) => {
       if (table === "items") {
         return { select: vi.fn(() => itemLookup) };
@@ -96,6 +99,18 @@ function resolveLlm(overrides: Record<string, unknown> = {}) {
 }
 
 describe("classify pipeline", () => {
+  it("느린 모델 실행 중 원문 버전이 바뀌면 후속 작업을 만들지 않는다", async () => {
+    const fake = useItem();
+    fake.client.rpc.mockResolvedValue({ data: false, error: null });
+    resolveLlm();
+    await classifyItem(baseItem.id);
+    expect(moduleMocks.enqueue).not.toHaveBeenCalled();
+  });
+  it("이전 버전 job은 모델을 다시 호출하지 않는다", async () => {
+    useItem({ ...baseItem, content_version: 2 });
+    await classifyItem(baseItem.id, 1);
+    expect(moduleMocks.llmStructured).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     moduleMocks.createServiceSupabaseClient.mockReset();
     moduleMocks.enqueue.mockReset();
@@ -117,8 +132,8 @@ describe("classify pipeline", () => {
     }));
     expect(moduleMocks.enqueue).toHaveBeenCalledWith(
       "embed",
-      { itemId: baseItem.id },
-      { dedupeKey: baseItem.id },
+      { itemId: baseItem.id, contentVersion: 1 },
+      { dedupeKey: `${baseItem.id}:1` },
     );
   });
 
@@ -182,7 +197,7 @@ describe("classify pipeline", () => {
 
     expect(moduleMocks.enqueue).toHaveBeenCalledTimes(2);
     expect(moduleMocks.enqueue).toHaveBeenCalledWith("make_card", {
-      itemId: baseItem.id,
+      itemId: baseItem.id, contentVersion: 1,
     });
   });
 
@@ -193,7 +208,7 @@ describe("classify pipeline", () => {
     await classifyItem(baseItem.id);
 
     expect(moduleMocks.enqueue).toHaveBeenCalledWith("make_card", {
-      itemId: baseItem.id,
+      itemId: baseItem.id, contentVersion: 1,
     });
   });
 
@@ -222,8 +237,8 @@ describe("classify pipeline", () => {
 
     expect(moduleMocks.enqueue).toHaveBeenCalledWith(
       "embed",
-      { itemId: baseItem.id },
-      { dedupeKey: baseItem.id },
+      { itemId: baseItem.id, contentVersion: 1 },
+      { dedupeKey: `${baseItem.id}:1` },
     );
   });
 

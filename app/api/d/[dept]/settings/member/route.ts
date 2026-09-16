@@ -1,3 +1,4 @@
+import { withSlackDepartment } from "@/lib/slack/workspace";
 import { listUsers } from "@/lib/slack/post";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -20,7 +21,7 @@ export async function POST(
   }
   let users;
   try {
-    users = await listUsers();
+    users = await withSlackDepartment(await createServerSupabaseClient(), membership.deptId, () => listUsers());
   } catch {
     return Response.json({ error: "Slack 멤버 목록을 확인하지 못했습니다." }, { status: 502 });
   }

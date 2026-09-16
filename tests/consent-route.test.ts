@@ -1,8 +1,10 @@
+import { encryptSlackToken } from "@/lib/slack/installation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   consentBlocks: vi.fn(() => [{ type: "section" }]),
   createClient: vi.fn(),
+  workspace: vi.fn(),
   openDirectMessage: vi.fn(),
   postMessage: vi.fn(),
   requireMembership: vi.fn(),
@@ -12,7 +14,7 @@ vi.mock("@/lib/supabase/membership", () => ({
   requireMembership: mocks.requireMembership,
 }));
 vi.mock("@/lib/supabase/server", () => ({
-  createServerSupabaseClient: mocks.createClient,
+  createServerSupabaseClient: async () => ({ ...(await mocks.createClient()), rpc: mocks.workspace }),
 }));
 vi.mock("@/lib/slack/blocks", () => ({ consentBlocks: mocks.consentBlocks }));
 vi.mock("@/lib/slack/post", () => ({
@@ -51,6 +53,8 @@ function request(body: Record<string, unknown>) {
 describe("웹 동의와 lead 동의 요청", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.stubEnv("SLACK_TOKEN_ENCRYPTION_KEY", Buffer.alloc(32,17).toString("base64"));
+    mocks.workspace.mockResolvedValue({ data: { org_id: "org", team_id: "TTEST", encrypted_token: encryptSlackToken("xoxb-test", "org", "TTEST") }, error: null });
     vi.stubEnv("VERCEL_URL", "sasu.example");
     mocks.requireMembership.mockResolvedValue({
       userId: "11111111-1111-4111-8111-111111111111",

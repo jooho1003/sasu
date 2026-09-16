@@ -7,7 +7,7 @@
 ## 기술 스택
 - Next.js (App Router) + Vercel — 대시보드·원장·Q&A·게스트 모드, Route Handler가 슬랙 이벤트 수신
 - Supabase — Postgres + pgvector + RLS + Auth(매직링크). RLS가 곧 "권한 인지 답변"의 물리적 구현
-- Slack Events API + Block Kit (HTTP 모드, 단일 워크스페이스 수동 설치, 봇 토큰은 env)
+- Slack Events API + Block Kit (HTTP 모드, 조직당 워크스페이스 1개 OAuth 설치, 봇 토큰은 서버 암호화 저장; ADR-052)
 - Recall.ai 류 회의 봇 — **D6(9/13) 판정**, 실패 시 .vtt/.txt 전사 업로드로 확정 · Notion API — 원칙 문서 1회 가져오기 + [다시 가져오기]
 - Groq `openai/gpt-oss-120b` (카드·답변·회의 정리, strict json_schema) · Groq `openai/gpt-oss-20b` (분류) · 규칙 휴리스틱 (정량 신호). 두 모델 모두 production + strict structured output이라 인용 스키마를 강제할 수 있다 (ADR-028)
 - 임베딩: D2에 Voyage / OpenAI 중 확정. 확정 전에는 스키마에 차원을 박지 않는다
@@ -17,12 +17,12 @@
 
 ## 아키텍처 규칙
 - CRITICAL: 가시성 판정은 SQL 함수 `can_see()` 하나다. RLS 정책도 `search_as()`도 이것을 호출한다. 판정 로직을 애플리케이션 코드에 복제하지 마라 — 두 곳에 있으면 반드시 어긋난다.
-- CRITICAL: 사용자 요청 경로(대시보드·카드·원장·묻기·슬랙 Q&A)에서 service role 클라이언트를 쓰지 마라. 웹은 세션 클라이언트, 슬랙 경유는 `search_as(user_id, …)`. service role은 수집 어댑터 insert·게스트 시드·워커 내부에서만.
+- CRITICAL: 사용자 요청 경로(대시보드·카드·원장·묻기·슬랙 Q&A)에서 service role 클라이언트를 쓰지 마라. 웹은 세션 클라이언트, 슬랙 경유는 `search_as(user_id, …)`. service role은 수집 어댑터 insert·게스트 시드·워커 내부에서만. OAuth callback의 검증된 설치 credential 저장은 수집 어댑터에 포함된다(ADR-052); 대시보드/설정 읽기는 세션을 유지한다.
 - CRITICAL: `dept_id`·`decided_by`·`asked_by`는 요청 본문이 아니라 세션·멤버십에서 결정한다. URL의 `[dept]`는 멤버십 검증 후에만 유효. 버튼을 숨기는 것은 권한이 아니다 — 서버·RLS(USING + WITH CHECK)에서 집행한다.
 - CRITICAL: 텍스트 LLM 호출은 `lib/llm.ts`의 `llm.structured(purpose, schema, prompt)` 하나로만 한다. 음성 전사는 같은 파일의 `llm.transcribeAudio()`만 사용하며, 다른 곳에서 Groq SDK를 직접 부르지 마라. 재시도·거절 처리·`llm_calls` 기록·마스킹 확인이 거기에 있다. strict json_schema는 모든 필드가 required + `additionalProperties: false`여야 하므로, null이 정상인 필드는 optional이 아니라 nullable union으로 정의한다 (ADR-028, ADR-032).
 - CRITICAL: 인용 없는 문장은 렌더하지 않는다. 카드·답변의 `citations[]`는 `quote`가 원문에 문자열로 포함되는지 검증하고, 0개면 답변은 `refused`, 카드는 `needs_review`(DM 안 보냄).
 - CRITICAL: 미동의 멤버(`members.consented_at` null)의 발언은 저장하지 않는다 — 어댑터가 `author_ext_id`로 skip. 이름만 가리고 본문을 저장하는 방식은 금지. 동의가 채널 연결보다 먼저다.
-- CRITICAL: 비밀값을 리포에 커밋하지 마라. 클라이언트에 노출되는 것은 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY` 둘뿐. 예외: 비밀값이 아닌 공개 배포 URL `NEXT_PUBLIC_APP_URL` 1개(2026-09-13 확인, 서버 코드는 없으면 `VERCEL_PROJECT_PRODUCTION_URL`로 대체). `/api/slack/*`는 signing secret 검증 후에만 처리.
+- CRITICAL: 비밀값을 리포에 커밋하지 마라. 클라이언트에 노출되는 것은 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY` 둘뿐. 예외: 비밀값이 아닌 공개 배포 URL `NEXT_PUBLIC_APP_URL` 1개(2026-09-13 확인, 서버 코드는 없으면 `VERCEL_PROJECT_PRODUCTION_URL`로 대체). `/api/slack/events`·`interactions`는 signing secret 검증 후에만 처리. `/api/slack/oauth/*`는 조직 관리자 세션·origin(start)·HttpOnly cookie·단회 state(callback)로 검증한다(ADR-052).
 - CRITICAL: 로그에 슬랙 이벤트 본문·전사 원문·질문 원문을 출력하지 마라 (ID·길이·에러 코드만). `items.content`는 정규식 마스킹 후만 저장하고 마스킹 전 원문은 어디에도 두지 않는다.
 - 결정은 append-only. 수정·삭제 없이 `supersedes_id`로만 정정한다.
 - 카드 visibility = 인용 소스 중 가장 좁은 것. 병합은 visibility를 좁히지 않는다. `leads_only` 카드는 lead에게만 DM.

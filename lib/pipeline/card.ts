@@ -29,6 +29,7 @@ type Member = {
 };
 
 type OriginItemRow = {
+  content_version: number;
   id: string;
   source_id: string;
   dept_id: string;
@@ -255,6 +256,7 @@ async function findExistingCard(
     .select("id")
     .eq("origin_item_id", itemId)
     .eq("status", "needs_review")
+    .eq("source_invalidated", false)
     .maybeSingle<{ id: string }>();
 
   ensureNoDatabaseError(reviewResult.error);
@@ -346,15 +348,8 @@ async function prepareOriginEmbedding(
   try {
     const result = await embedText(origin.content, { inputType: "document" });
     const embedding = formatVector(result.vector);
-    const updateResult = await client
-      .from("items")
-      .update({
-        embedding,
-        embed_model: result.model,
-        embed_status: "done",
-      })
-      .eq("id", origin.id);
-    if (updateResult.error) {
+    const updateResult = await client.rpc("complete_item_embedding", { p_item: origin.id, p_version: origin.content_version, p_embedding: embedding, p_model: result.model });
+    if (updateResult.error || updateResult.data !== true) {
       return null;
     }
     return embedding;
@@ -515,49 +510,25 @@ async function findConfirmedMergeTarget(
   return null;
 }
 
-async function appendMergeCitation(
-  client: ReturnType<typeof createServiceSupabaseClient>,
-  requestId: string,
-  origin: OriginItemRow,
-): Promise<void> {
-  const existingResult = await client
-    .from("citations")
-    .select("id")
-    .eq("owner_kind", "decision_request")
-    .eq("owner_id", requestId)
-    .eq("item_id", origin.id)
-    .maybeSingle<{ id: string }>();
-  ensureNoDatabaseError(existingResult.error);
-  if (existingResult.data !== null) {
-    return;
-  }
-
-  const insertResult = await client.from("citations").insert({
-    owner_kind: "decision_request",
-    owner_id: requestId,
-    item_id: origin.id,
-    decision_id: null,
-    quote: origin.content,
-  });
-  if (insertResult.error?.code === "23505") {
-    return;
-  }
-  ensureNoDatabaseError(insertResult.error);
+async function appendMergeCitation(client: ReturnType<typeof createServiceSupabaseClient>, requestId: string, origin: OriginItemRow): Promise<boolean> {
+  const result = await client.rpc("append_current_card_evidence", { p_request: requestId, p_item: origin.id, p_version: origin.content_version, p_quote: origin.content });
+  ensureNoDatabaseError(result.error);
+  return result.data === true;
 }
 
-export async function makeCard(itemId: string): Promise<string | undefined> {
+export async function makeCard(itemId: string, expectedVersion?: number): Promise<string | undefined> {
   const client = createServiceSupabaseClient();
   const originResult = await client
     .from("items")
     .select(
-      "id, source_id, dept_id, content, deleted_at, created_at, embedding, source:sources!inner(visibility)",
+      "id, source_id, dept_id, content, deleted_at, created_at, content_version, embedding, source:sources!inner(visibility)",
     )
     .eq("id", itemId)
     .maybeSingle<OriginItemRow>();
 
   ensureNoDatabaseError(originResult.error);
   const origin = originResult.data;
-  if (!origin || origin.deleted_at !== null) {
+  if (!origin || origin.deleted_at !== null || (expectedVersion !== undefined && expectedVersion !== origin.content_version)) {
     return;
   }
 
@@ -575,8 +546,7 @@ export async function makeCard(itemId: string): Promise<string | undefined> {
       originEmbedding,
     );
     if (mergeTargetId !== null) {
-      await appendMergeCitation(client, mergeTargetId, origin);
-      return `merged_into=${mergeTargetId}`;
+      return await appendMergeCitation(client, mergeTargetId, origin) ? `merged_into=${mergeTargetId}` : undefined;
     }
   }
 
@@ -596,12 +566,7 @@ export async function makeCard(itemId: string): Promise<string | undefined> {
         .eq("dept_id", origin.dept_id)
         .eq("is_principles", true)
         .eq("active", true),
-      client
-        .from("decisions")
-        .select("id, request_id, visibility, outcome, rationale, decided_at")
-        .eq("dept_id", origin.dept_id)
-        .order("decided_at", { ascending: false })
-        .limit(3),
+      client.rpc("recent_decisions_for_card", { p_dept: origin.dept_id, p_limit: 3 }),
       client
         .from("members")
         .select("user_id, display_name, role")
@@ -766,6 +731,7 @@ export async function makeCard(itemId: string): Promise<string | undefined> {
       visibility,
       status: "needs_review",
       origin_item_id: origin.id,
+      origin_content_version: origin.content_version,
     },
     origin.id,
   );
@@ -819,6 +785,7 @@ export async function makeCard(itemId: string): Promise<string | undefined> {
 
 export function registerMakeCardHandler(): void {
   registerHandler("make_card", async (payload: unknown) => {
-    await makeCard(itemIdFromPayload(payload));
+    const version = typeof payload === "object" && payload !== null ? Reflect.get(payload, "contentVersion") : undefined;
+    await makeCard(itemIdFromPayload(payload), typeof version === "number" ? version : undefined);
   });
 }

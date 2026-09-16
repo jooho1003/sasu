@@ -4,13 +4,16 @@ import {
   type SlackCardCitation,
   type SlackCardView,
 } from "@/lib/slack/blocks";
-import { openDirectMessage, postMessage } from "@/lib/slack/post";
+import { openDirectMessage, postMessage, updateMessage } from "@/lib/slack/post";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
 type CardStatus = "open" | "decided" | "deferred" | "rejected" | "needs_review";
 type DeliveryStatus = "pending" | "sent" | "failed" | "skipped";
 
 type CardRow = {
+  source_invalidated: boolean;
+  slack_channel_id: string | null;
+  slack_message_ts: string | null;
   id: string;
   dept_id: string;
   title: string;
@@ -130,13 +133,19 @@ export async function sendSlackCard(requestId: string): Promise<void> {
   const cardResult = await client
     .from("decision_requests")
     .select(
-      "id, dept_id, title, background, recommendation, deadline, assignee_id, visibility, status, slack_delivery_status",
+      "id, dept_id, title, background, recommendation, deadline, assignee_id, visibility, status, slack_delivery_status, source_invalidated, slack_channel_id, slack_message_ts",
     )
     .eq("id", requestId)
     .maybeSingle<CardRow>();
   ensureNoDatabaseError(cardResult.error);
 
   const card = cardResult.data;
+  if (card?.source_invalidated) {
+    if (card.slack_channel_id && card.slack_message_ts) {
+      await updateMessage({ channel: card.slack_channel_id, ts: card.slack_message_ts, text: "근거 원문이 변경되거나 삭제되어 이 결정 카드는 재검토가 필요합니다.", blocks: [], mrkdwn: false, parse: "none", unfurl_links: false, unfurl_media: false });
+    }
+    return;
+  }
   if (!card || card.slack_delivery_status === "sent") {
     return;
   }

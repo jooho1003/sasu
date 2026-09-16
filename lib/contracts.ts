@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export const DecisionCorrectionInput = z.object({
+  previous_id: z.uuid(), correction_id: z.uuid(), outcome: z.string().trim().min(1).max(300), rationale: z.string().trim().min(1).max(1_000),
+}).strict();
+export const CardReminderInput = z.object({ scheduled_for: z.iso.datetime().nullable() }).strict();
+export const AskQuestionInput = z.object({ question: z.string().trim().min(5), parent_id: z.uuid().nullable().optional() });
+
 const NonEmptyString = z.string().min(1);
 const NullableString = z
   .string()

@@ -1,13 +1,19 @@
-import { after } from "next/server";
+import { after as nextAfter } from "next/server";
 
 import { verifySlackSignature } from "@/lib/slack/verify";
 import { buildDecisionModal } from "@/lib/slack/blocks";
 import { openModal, postMessage, updateMessage } from "@/lib/slack/post";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
+import { slackWorkspaceForTeam, withSlackCredentials, currentSlackWorkspace } from "@/lib/slack/workspace";
+function after(action: () => Promise<unknown>) {
+  const credentials = currentSlackWorkspace() ?? { token: null, teamId: null, orgId: null };
+  nextAfter(async () => { await withSlackCredentials(credentials, action); });
+}
 export const dynamic = "force-dynamic";
 
 type InteractionPayload = {
+  team?: { id?: string };
   type?: string;
   trigger_id?: string;
   user?: { id?: string };
@@ -153,6 +159,7 @@ async function authorizedCard(
     .select("user_id, display_name, role, consented_at")
     .eq("dept_id", cardResult.data.dept_id)
     .eq("slack_user_id", slackUserId)
+    .eq("slack_team_id", currentSlackWorkspace()?.teamId ?? "")
     .maybeSingle<MemberRow>();
   if (memberResult.error || !memberResult.data) {
     throw new SlackInteractionError("Slack 계정이 이 부서에 연결되어 있지 않습니다.");
@@ -320,7 +327,8 @@ async function handleConsentAction(
   }
 
   const client = createServiceSupabaseClient();
-  const result = await client.rpc("consent_via_slack", {
+  const result = await client.rpc("consent_via_slack_for_team", {
+    p_team: currentSlackWorkspace()?.teamId,
     p_slack_user: slackUserId,
     p_dept: deptId,
   });
@@ -452,6 +460,11 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "invalid_json" }, { status: 400 });
   }
 
+  const workspace = await slackWorkspaceForTeam(createServiceSupabaseClient(), payload.team?.id);
+  if (!workspace) return responseOk();
+  return withSlackCredentials(workspace, () => handleInteraction(payload));
+}
+async function handleInteraction(payload: InteractionPayload): Promise<Response> {
   try {
     if (payload.type === "block_actions") {
       if (payload.actions?.[0]?.action_id === "sasu_consent") {

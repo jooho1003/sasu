@@ -34,6 +34,7 @@ beforeAll(() => {
       return query;
     },
     rpc(name: string, args: Record<string, unknown>) {
+      if (name === "complete_item_classification") { classification = args.p_values as Record<string, unknown>; return Promise.resolve({ data: true, error: null }); }
       if (name !== "complete_answer") throw new Error("Unexpected evaluation RPC");
       saved = args;
       return Promise.resolve({ data: true, error: null });
@@ -41,7 +42,7 @@ beforeAll(() => {
   };
 });
 it.each(teamClassificationCases)("분류 $id $team", async row => {
-  item = { content: row.text, dept_id: row.team, deleted_at: null, spoken_at: "2026-09-12T01:00:00Z", created_at: "2026-09-12T01:00:00Z" };
+  item = { content_version: 1, content: row.text, dept_id: row.team, deleted_at: null, spoken_at: "2026-09-12T01:00:00Z", created_at: "2026-09-12T01:00:00Z" };
   classification = {};
   state.enqueue.mockClear();
   const started = performance.now();

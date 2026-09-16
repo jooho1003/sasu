@@ -65,6 +65,7 @@ type SerializedCitation = {
 };
 
 type SerializedDecision = {
+  can_correct: boolean;
   id: string;
   status: string;
   assignee_id: string | null;
@@ -352,6 +353,7 @@ export async function GET(
 
     return {
       id: decision.id,
+      can_correct: includeHistory && !!membership.consentedAt && (membership.role === "lead" || decision.decided_by === membership.userId),
       status: linkedRequest?.status ?? "direct",
       assignee_id: linkedRequest?.assignee_id ?? decision.decided_by,
       assignee_name:

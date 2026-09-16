@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { formatConflictBadge } from "@/lib/conflicts";
+import { DecisionCorrection } from "@/components/decision-correction";
 
 type LedgerCitation = {
   quote: string;
@@ -20,6 +21,7 @@ type LedgerConflict = {
 };
 
 type LedgerDecision = {
+  can_correct: boolean;
   id: string;
   status: string;
   assignee_id: string | null;
@@ -400,6 +402,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
           {data.decisions.map((decision) => (
             <div key={decision.id} className="panel p-5 sm:p-6">
               <DecisionDetail decision={decision} />
+              {decision.can_correct ? <DecisionCorrection deptId={deptId} previousId={decision.id} initialOutcome={decision.outcome} onDone={() => setRefreshKey(value => value + 1)} /> : null}
               {decision.history.length > 0 ? (
                 <details className="mt-5 border-t border-black/10 pt-4">
                   <summary className="cursor-pointer text-sm font-bold text-[var(--muted)]">

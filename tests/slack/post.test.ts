@@ -1,12 +1,23 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
-  getMessagePermalink,
-  openDirectMessage,
-  postMessage,
+  getMessagePermalink as rawPermalink,
+  openDirectMessage as rawOpen,
+  postMessage as rawPost,
 } from "@/lib/slack/post";
+import { withSlackCredentials } from "@/lib/slack/workspace";
+const scoped = <T>(fn: () => Promise<T>) => withSlackCredentials({ token: process.env.SLACK_BOT_TOKEN ?? null, teamId: "TQA", orgId: "org" }, fn);
+const getMessagePermalink = (...args: Parameters<typeof rawPermalink>) => scoped(() => rawPermalink(...args));
+const openDirectMessage = (...args: Parameters<typeof rawOpen>) => scoped(() => rawOpen(...args));
+const postMessage = (...args: Parameters<typeof rawPost>) => scoped(() => rawPost(...args));
 
 describe("Slack API client", () => {
+  it("전역 토큰이 있어도 워크스페이스가 지정되지 않은 호출은 차단한다", async () => {
+    process.env.SLACK_BOT_TOKEN = "xoxb-other-organization";
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    await expect(rawOpen("U123")).rejects.toMatchObject({ error_code: "slack_not_configured" });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
   it("긴 Retry-After는 함수 안에서 대기하지 않고 워커에 전달한다", async () => {
     process.env.SLACK_BOT_TOKEN = "xoxb-test";
     const fetchMock=vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response(JSON.stringify({ok:false,error:"ratelimited"}),{status:429,headers:{"retry-after":"120"}}));

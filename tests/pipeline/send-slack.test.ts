@@ -4,6 +4,7 @@ const moduleMocks = vi.hoisted(() => ({
   createServiceSupabaseClient: vi.fn(),
   openDirectMessage: vi.fn(),
   postMessage: vi.fn(),
+  updateMessage: vi.fn(),
   registerHandler: vi.fn(),
 }));
 
@@ -13,6 +14,7 @@ vi.mock("@/lib/supabase/service", () => ({
 vi.mock("@/lib/slack/post", () => ({
   openDirectMessage: moduleMocks.openDirectMessage,
   postMessage: moduleMocks.postMessage,
+  updateMessage: moduleMocks.updateMessage,
 }));
 vi.mock("@/lib/jobs", () => ({
   registerHandler: moduleMocks.registerHandler,
@@ -120,7 +122,16 @@ describe("Slack 결정 카드 발송", () => {
     moduleMocks.createServiceSupabaseClient.mockReset();
     moduleMocks.openDirectMessage.mockReset();
     moduleMocks.postMessage.mockReset();
+    moduleMocks.updateMessage.mockReset();
     moduleMocks.registerHandler.mockReset();
+  });
+  it("근거가 바뀐 카드는 기존 DM을 고정 재검토 안내로 교체하고 새 DM을 보내지 않는다", async () => {
+    moduleMocks.createServiceSupabaseClient.mockReturnValue({ from: () => makeBuilder({ id: "card-1", source_invalidated: true, slack_channel_id: "DQA", slack_message_ts: "123.001", background: "이전 비밀 본문" }) });
+    moduleMocks.updateMessage.mockResolvedValue({});
+    await sendSlackCard("card-1");
+    expect(moduleMocks.updateMessage).toHaveBeenCalledWith(expect.objectContaining({ channel: "DQA", ts: "123.001", text: expect.stringContaining("재검토") }));
+    expect(JSON.stringify(moduleMocks.updateMessage.mock.calls)).not.toContain("비밀");
+    expect(moduleMocks.postMessage).not.toHaveBeenCalled();
   });
 
   it("카드 데이터로 인용 링크와 DM용 블록 입력을 만든다", () => {

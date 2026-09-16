@@ -61,6 +61,7 @@ const settings = {
       active: true,
       last_synced_at: null,
       last_error: null,
+      auto_sync: false,
     },
   ],
   channels: [

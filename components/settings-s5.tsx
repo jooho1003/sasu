@@ -22,6 +22,7 @@ type SettingsSource = {
   visibility: "dept" | "leads_only";
   active: boolean;
   last_synced_at: string | null;
+  auto_sync: boolean;
   last_error: string | null;
 };
 
@@ -355,7 +356,7 @@ export default function SettingsS5({
     }
   };
 
-  const reimportNotion = async (sourceId: string) => {
+  const reimportNotion = async (sourceId: string, autoSync?: boolean) => {
     setNotionState({
       kind: "pending",
       message: "Notion 다시 가져오기를 시작하는 중입니다.",
@@ -365,13 +366,13 @@ export default function SettingsS5({
         await fetch(`/api/d/${encodeURIComponent(deptId)}/settings/notion`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ source_id: sourceId }),
+          body: JSON.stringify({ source_id: sourceId, ...(autoSync === undefined ? {} : { auto_sync: autoSync }) }),
         }),
       );
       setNotionState({
         kind: "success",
         message:
-          "다시 가져오기를 시작했습니다. 완료되면 마지막 가져오기 시간이 갱신됩니다.",
+          autoSync === undefined ? "다시 가져오기를 시작했습니다. 완료되면 마지막 가져오기 시간이 갱신됩니다." : autoSync ? "5분마다 자동으로 갱신합니다." : "자동 갱신을 중지했습니다.",
       });
       await load();
     } catch (error) {
@@ -823,6 +824,7 @@ export default function SettingsS5({
                   {source.kind === "notion_page" ? (
                     <span className="text-sm text-[var(--muted)]">
                       마지막 가져오기: {formatKst(source.last_synced_at)}
+                      {source.auto_sync ? " · 5분마다 자동 갱신" : " · 수동 갱신"}
                     </span>
                   ) : null}
                   {source.last_error ? (
@@ -841,6 +843,11 @@ export default function SettingsS5({
                         type="button"
                       >
                         최근 7일 가져오기
+                      </button>
+                    ) : null}
+                    {source.kind === "notion_page" && source.active ? (
+                      <button className="rounded-lg border border-accent/30 px-3 py-2 text-sm font-bold text-accent" disabled={notionState.kind === "pending"} onClick={() => void reimportNotion(source.id, !source.auto_sync)} type="button">
+                        {source.auto_sync ? "자동 갱신 중지" : "자동 갱신 켜기"}
                       </button>
                     ) : null}
                     {source.kind === "notion_page" && source.active ? (

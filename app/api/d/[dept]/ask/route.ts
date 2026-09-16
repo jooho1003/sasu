@@ -1,4 +1,4 @@
-import { enqueue, kickWorker } from "@/lib/jobs";
+import { kickWorker } from "@/lib/jobs";
 import { registerAnswerHandler } from "@/lib/pipeline/answer";
 import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
 import { registerNotionImportHandler } from "@/lib/pipeline/notion-import";
@@ -10,6 +10,7 @@ import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { mask } from "@/lib/mask";
+import { AskQuestionInput } from "@/lib/contracts";
 
 const ASK_DAILY_LIMIT_MESSAGE = "오늘 질문 한도(50회)를 모두 사용했습니다. 내일 다시 물어봐 주세요.";
 
@@ -24,32 +25,25 @@ export async function POST(
   const { dept } = await params;
   const membership = await requireMembership(dept);
 
-  let body: { question?: unknown };
+  let raw: unknown;
   try {
-    body = (await request.json()) as { question?: unknown };
+    raw = await request.json();
   } catch {
     return Response.json({ error: "요청 형식이 올바르지 않습니다." }, { status: 400 });
   }
 
-  if (typeof body.question !== "string" || body.question.trim().length < 5) {
+  const parsed = AskQuestionInput.safeParse(raw);
+  if (!parsed.success) {
     return Response.json({ error: "질문을 5자 이상 입력해주세요." }, { status: 400 });
   }
 
+  const body = parsed.data;
   const originalQuestion = body.question.trim();
   const question = mask(originalQuestion).slice(0, 1_000);
   const supabase = await createServerSupabaseClient();
-  const insertResult = await supabase
-    .from("answers")
-    .insert({
-      dept_id: membership.deptId,
-      asked_by: membership.userId,
-      question,
-      status: "pending",
-      refused: false,
-      verified: null,
-    })
-    .select("id")
-    .single<{ id: string }>();
+  const insertResult = await supabase.rpc("ask_question", {
+    p_dept: membership.deptId, p_question: question, p_parent: body.parent_id ?? null,
+  });
 
   if (isAskDailyLimit(insertResult.error)) {
     return Response.json(
@@ -58,6 +52,7 @@ export async function POST(
     );
   }
 
+  if (insertResult.error?.code === "42501") return Response.json({ error: "이 질문을 이어갈 수 없습니다. 새 질문으로 시작해주세요." }, { status: 403 });
   if (insertResult.error || !insertResult.data) {
     return Response.json({ error: "질문을 저장하지 못했습니다." }, { status: 500 });
   }
@@ -70,14 +65,14 @@ export async function POST(
   registerMakeCardHandler();
   registerSendSlackHandler();
   registerSlackBackfillHandler();
-  const jobId = await enqueue("answer", { answerId: insertResult.data.id });
+  const saved = insertResult.data as { answer_id: string; job_id: string };
   kickWorker();
 
   return Response.json(
     {
       ok: true,
-      answer_id: insertResult.data.id,
-      job_id: jobId,
+      answer_id: saved.answer_id,
+      job_id: saved.job_id,
       truncated: originalQuestion.length > 1_000,
     },
     { status: 202 },

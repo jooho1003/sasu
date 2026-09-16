@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import SlackQuestions from "@/components/slack-questions";
+import { QuestionHistory } from "@/components/question-history";
 
 type Citation = {
   quote: string;
@@ -19,6 +20,9 @@ type AnswerState = {
 };
 
 export default function AskS4({ deptId }: { deptId: string }) {
+  const [parent, setParent] = useState<{ id: string; question: string } | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState("");
+  const [historyRevision, setHistoryRevision] = useState(0);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<AnswerState | null>(null);
   const [busy, setBusy] = useState(false);
@@ -108,6 +112,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
       return;
     }
     setBusy(true);
+    setSelectedQuestion(question);
     const version = ++requestVersion.current;
     const startedAt = Date.now();
     let polling = false;
@@ -119,11 +124,12 @@ export default function AskS4({ deptId }: { deptId: string }) {
         method: "POST",
         signal: AbortSignal.timeout(10_000),
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, parent_id: parent?.id ?? null }),
       });
       const body = (await response.json()) as { answer_id?: string; error?: string; message?: string };
       if (version !== requestVersion.current) return;
       if (!response.ok || !body.answer_id) throw new Error(body.message ?? body.error ?? "질문을 저장하지 못했습니다.");
+      setHistoryRevision(v => v + 1);
 
       const poll = async (): Promise<AnswerState | null> => {
         if (polling || version !== requestVersion.current) return null;
@@ -141,6 +147,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
           if (version !== requestVersion.current) return null;
           setAnswer(next);
           if (next.status !== "pending") {
+            setHistoryRevision(v => v + 1);
             if (pollTimer.current !== null) clearInterval(pollTimer.current);
             pollTimer.current = null;
             setBusy(false);
@@ -168,6 +175,37 @@ export default function AskS4({ deptId }: { deptId: string }) {
     }
   };
 
+  const selectAnswer = async (id: string, text: string) => {
+    const version = ++requestVersion.current;
+    if (pollTimer.current !== null) clearInterval(pollTimer.current);
+    pollTimer.current = null;
+    setBusy(false); setError(null); setAnswer(null); setParent(null); setSelectedQuestion(text);
+    const started = Date.now();
+    let loading = false;
+    const read = async () => {
+      if (loading || version !== requestVersion.current) return;
+      if (Date.now() - started > 120_000) {
+        if (pollTimer.current !== null) clearInterval(pollTimer.current);
+        pollTimer.current = null; setBusy(false); setAnswer(null);
+        setError("답변 확인이 지연되고 있습니다. 질문 기록에서 다시 확인해주세요."); return;
+      }
+      loading = true;
+      try {
+        const next = await loadAnswer(id);
+        if (version !== requestVersion.current) return;
+        setAnswer(next); setBusy(next.status === "pending");
+        if (next.status === "pending" && pollTimer.current === null) pollTimer.current = setInterval(() => void read(), 2000);
+        if (next.status !== "pending" && pollTimer.current !== null) { clearInterval(pollTimer.current); pollTimer.current = null; }
+      } catch {
+        if (version !== requestVersion.current) return;
+        if (pollTimer.current !== null) clearInterval(pollTimer.current);
+        pollTimer.current = null; setBusy(false);
+        setError("현재 이 답변을 확인할 수 없습니다. 새 질문으로 시작해주세요.");
+      } finally { loading = false; }
+    };
+    await read();
+  };
+
   return (
     <main className="workspace-page">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -180,6 +218,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
       </header>
 
       <section className="grid gap-4 panel p-5">
+        {parent ? <div className="rounded-lg bg-[var(--accent)]/10 p-3 text-sm"><p className="m-0 font-bold">이어서 묻는 질문: {parent.question || "선택한 질문"}</p><button className="mt-2 underline" type="button" disabled={busy} onClick={() => setParent(null)}>새 질문으로 시작</button></div> : null}
         <label className="grid gap-2 font-bold" htmlFor="ask-question">
           무엇이 궁금한가요?
           <textarea
@@ -213,16 +252,8 @@ export default function AskS4({ deptId }: { deptId: string }) {
         {error ? <p aria-live="assertive" className="m-0 text-sm font-bold text-red-700">{error}</p> : null}
       </section>
 
-      <SlackQuestions deptId={deptId} onSelect={async id => {
-        const version = ++requestVersion.current;
-        if (pollTimer.current !== null) clearInterval(pollTimer.current);
-        pollTimer.current = null;
-        setBusy(false);
-        setError(null);
-        setAnswer(null);
-        const next = await loadAnswer(id);
-        if (version === requestVersion.current) setAnswer(next);
-      }} />
+      <QuestionHistory deptId={deptId} revision={historyRevision} onSelect={selectAnswer} />
+      <SlackQuestions deptId={deptId} onSelect={id => selectAnswer(id, "슬랙에서 남긴 질문")} />
 
       {answer?.status === "pending" ? (
         <div className="rounded-2xl bg-[var(--surface)] p-6 text-[var(--muted)]">부서 기록을 확인하고 있습니다.</div>
@@ -246,6 +277,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
             </section>
           ) : null}
           <p className="m-0 text-sm text-[var(--muted)]">내 권한 범위 안의 부서 기록만 참고했습니다.</p>
+          <button className="button button-primary w-fit" type="button" onClick={() => { setParent({ id: answer.id, question: selectedQuestion }); setQuestion(""); document.getElementById("ask-question")?.focus(); }}>이어서 질문하기</button>
           {answer.refused ? <p className="m-0 text-sm font-bold text-[var(--urgent)]">근거가 부족하면 결정 카드로 승격해 담당자에게 물어볼 수 있습니다.</p> : null}
         </article>
       ) : null}

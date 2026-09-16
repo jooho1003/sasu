@@ -13,6 +13,7 @@ export type SlackMessageEvent = {
   subtype?: string;
   username?: string;
   files?: unknown[];
+  edited?: { ts?: string };
 };
 
 type SlackIngestContext = {

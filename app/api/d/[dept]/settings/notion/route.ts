@@ -12,7 +12,7 @@ export async function POST(
   const membership = await requireMembership(dept);
   if (membership.role !== "lead") return Response.json({ error: "Notion 원칙 문서는 팀장만 연결할 수 있습니다." }, { status: 403 });
 
-  let body: { source_id?: unknown; page_id?: unknown; title?: unknown; visibility?: unknown };
+  let body: { source_id?: unknown; page_id?: unknown; title?: unknown; visibility?: unknown; auto_sync?: unknown };
   try {
     body = (await request.json()) as { source_id?: unknown; page_id?: unknown; title?: unknown; visibility?: unknown };
   } catch {
@@ -29,6 +29,14 @@ export async function POST(
     if (sourceResult.error) return Response.json({ error: "Notion 연결을 확인하지 못했습니다." }, { status: 500 });
     if (!sourceResult.data || sourceResult.data.kind !== "notion_page" || !sourceResult.data.active) {
       return Response.json({ error: "활성 Notion 원칙 문서를 찾지 못했습니다." }, { status: 404 });
+    }
+
+    if (body.auto_sync !== undefined) {
+      if (typeof body.auto_sync !== "boolean") return Response.json({ error: "자동 갱신 설정을 확인해주세요." }, { status: 400 });
+      const setting = await supabase.rpc("set_notion_auto_sync", { p_source: sourceResult.data.id, p_enabled: body.auto_sync });
+      if (setting.error) return Response.json({ error: "자동 갱신 설정을 저장하지 못했습니다." }, { status: 500 });
+      if (body.auto_sync) kickWorker();
+      return Response.json({ ok: true });
     }
 
     registerNotionImportHandler();

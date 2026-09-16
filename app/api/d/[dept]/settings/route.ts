@@ -1,3 +1,4 @@
+import { withSlackDepartment } from "@/lib/slack/workspace";
 import { listConversations, listUsers } from "@/lib/slack/post";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -16,7 +17,7 @@ export async function GET(
       .eq("dept_id", membership.deptId),
     supabase
       .from("sources")
-      .select("id, kind, external_id, title, visibility, active, last_synced_at, last_error")
+      .select("id, kind, external_id, title, visibility, active, last_synced_at, last_error, auto_sync")
       .eq("dept_id", membership.deptId)
       .order("created_at", { ascending: true }),
   ]);
@@ -29,7 +30,7 @@ export async function GET(
   let slackUsers: Array<{ id: string; displayName: string }> = [];
   let channelsAvailable = true;
   try {
-    [channels, slackUsers] = await Promise.all([listConversations(), listUsers()]);
+    [channels, slackUsers] = await withSlackDepartment(supabase, membership.deptId, () => Promise.all([listConversations(), listUsers()]));
   } catch {
     channelsAvailable = false;
   }
