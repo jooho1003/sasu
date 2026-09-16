@@ -26,3 +26,6 @@
 {"at":"2026-09-16T10:06:00.558Z","name":"oauth_admin_start","httpStatus":303,"destinationHost":"slack.com","httpOnly":true,"secure":true}
 {"at":"2026-09-16T10:06:02.473Z","name":"oauth_member_blocked","httpStatus":403}
 {"at":"2026-09-16T10:08:10.822Z","name":"final_jobs","counts":{"done":40},"errors":[]}
+{"at":"2026-09-16T10:17:11.595Z","name":"browser_admin_granted","userId":"efff97b3-9d82-4486-873d-066029c2fbad","grantedBy":"user-approved:browser-admin-oauth-20260916"}
+{"at":"2026-09-16T10:17:11.597Z","name":"oauth_browser_reinstalled","teamId":"T0870U4PE90","installedBy":"efff97b3-9d82-4486-873d-066029c2fbad","installedAt":"2026-09-16T10:16:33.248196+00:00","active":true,"encrypted":true,"scopeCount":10,"permissionsExpanded":false,"stateConsumedAt":"2026-09-16T10:16:32.733137+00:00","stateCompletedAt":"2026-09-16T10:16:33.248196+00:00"}
+{"at":"2026-09-16T10:18:37.143Z","name":"post_oauth_live_dm","answerId":"c8bae1af-0fc7-42fa-afc5-0790a727ec04","status":"done","delivery":"sent","citations":1,"errorCode":null,"deliveryError":null}

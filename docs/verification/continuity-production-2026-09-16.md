@@ -8,7 +8,7 @@
 - 최종 배포: `dpl_DAbuoi64MTipScXcqWvLsiodxmMH`, Ready 확인 후 운영 도메인으로 promote 완료.
 - DB: `0030_source_lifecycle`~`0033_slack_installations` 적용. 사전 정정 분기·활성 Slack 채널 중복은 모두 0건.
 - 기존 Slack 설치를 AES-256-GCM 암호화 저장으로 이전. 활성 설치 1개, scope 10개, source/member 각각 3개 연결. 브라우저 역할의 credential 직접 읽기·저장 함수 호출은 차단됨.
-- 사용자 승인 대상인 Slack 연결 부서장 `사수 파일럿 팀장`(`06d389ec-4f73-443e-b3de-9c6b423d99c3`)을 운영 조직 관리자로 지정했다. 현재 Chrome에서 로그인한 `이주호`는 별도 부서장 계정이므로 권한을 추가하지 않았다.
+- 사용자 승인 대상인 Slack 연결 부서장 `사수 파일럿 팀장`(`06d389ec-4f73-443e-b3de-9c6b423d99c3`)을 운영 조직 관리자로 지정했다. 이후 별도 명시적 승인을 받아 Chrome에서 로그인한 부서장 `이주호`(`efff97b3-9d82-4486-873d-066029c2fbad`)도 같은 조직의 관리자로 지정했다.
 - Production에 Slack client ID·secret·암호화 키를 민감 환경변수로 설정하고 로컬의 git 제외 환경파일에도 동기화했다. 비밀값은 기록하지 않는다.
 - Slack callback URL, `app_uninstalled` 이벤트, App Home DM 메시지 입력 설정을 반영했다. 전환 중 Events·cron을 잠시 중지했고 마이그레이션·기존 설치 이전·앱 반영 후 모두 재개했다.
 
@@ -32,6 +32,8 @@
 | Notion 본문 편집 → 자동 갱신 | 37→41만원 수정 반영, version 1→2, 다음 5분 갱신 예약 확인 |
 | Notion 본문 제거 → 다시 가져오기 | version 3, tombstone과 빈 content 확인 |
 | OAuth 시작 API | 관리자 303 → slack.com, HttpOnly·Secure cookie. 일반 멤버 403 |
+| 이주호 관리자 화면 → Slack OAuth 재설치 → 앱 복귀 | `/admin/sources?slack=installed`, 화면 설치 완료·연결됨 표시. 설치 담당자 이주호로 갱신, state consumed/completed 확인 |
+| OAuth 재설치 후 실제 DM 송수신 | 답변 `c8bae1af-0fc7-42fa-afc5-0790a727ec04` `done/sent`, 원문 인용 1개, 오류 없음 |
 
 실행 시각·ID·상태는 [live-results.ndjson](continuity-production-2026-09-16/live-results.ndjson)에 보존했다. Slack 질문 원문·인증값을 실행 로그에 출력하지 않았다. 합성 문서/카드의 화면 증거는 [운영 웹 카드](continuity-production-2026-09-16/web-card-live.png), [Slack 결정 완료](continuity-production-2026-09-16/slack-decision-live.png)에서 확인할 수 있다.
 
@@ -67,8 +69,16 @@
 
 Notion 테스트 연결은 `active=false/auto_sync=false`로 중지했고 테스트 페이지 본문에 완료 안내를 남겼다. 예약 테스트는 취소했으며 새 카드도 합성 결정으로 종료했다. 기존 결정과 정정은 append-only로 보존한다.
 
+## 추가 관리자 승인 및 OAuth 재설치 — 19:15~19:18 KST
+
+사용자가 이주호 계정의 관리자 지정을 명시적으로 승인했다. 사용자 ID·부서 ID·조직 ID·부서장 역할·이름이 일치하는 1개 멤버만 `org_admins`에 추가했으며, `granted_by=user-approved:browser-admin-oauth-20260916`을 기록했다.
+
+실제 이주호 브라우저 세션으로 조직 관리자 화면을 열고 `Slack 다시 연결`을 클릭했다. 기존 `사수(SASU)` 워크스페이스의 OAuth 허용 후 앱으로 복귀해 설치 완료 표시를 확인했다. DB에는 19:16:33 KST에 `installed_by`가 이주호로 갱신됐고, 기존 scope 10개 범위를 확대하지 않았으며, 활성 설치와 암호화 저장을 유지했다. OAuth state의 사용·저장 완료 시각도 일치한다.
+
+재설치 후 실제 Slack DM에 합성 프로젝트의 예산과 기한을 질문했다. 답변은 **53만원 / 2026년 9월 18일 16시**였고 원문 인용·원문 링크가 포함됐다. DB에서 답변 `done`, 전달 `sent`, 인용 1개, 오류 없음이 확인됐다. [OAuth 완료 화면](continuity-production-2026-09-16/oauth-installed-live.png), [재설치 후 DM 답변](continuity-production-2026-09-16/oauth-dm-live.png)을 보존했다. 앱 코드는 변경하지 않아 재배포나 전체 테스트 재실행은 하지 않았다.
+
 ## 남은 외부 검증
 
-- **새 OAuth 설치·해지·재설치의 브라우저 전체 흐름**: 기존 설치 암호화 이전·실제 송수신·관리자 시작 API까지 검증했다. Chrome의 별도 `이주호` 계정은 조직 관리자가 아니어서, 그 계정의 추가 관리자 지정에 대한 사용자 응답을 기다린다. 기존 Slack 연결 부서장 계정에 대한 승인만 다른 계정까지 확대 적용하지 않았다.
+- **실제 Slack 앱 해지 이벤트**: 기존 설치 암호화 이전·OAuth 브라우저 재설치·재설치 후 실제 송수신까지 검증했다. 운영 앱을 제거하는 해지 흐름은 실행하지 않았다.
 - 실제 Slack 메시지 영구 삭제 이벤트, 다른 Slack 워크스페이스를 이용한 고객사 간 전체 흐름은 이번 운영 세션에서 실행하지 않았다. 이 분기는 앞선 단위·격리 SQL 검증 범위다.
 - Notion 자동 갱신은 활성화 직후 스케줄러 실행과 다음 5분 예약까지 확인했다. 장시간 반복 운용 관측은 이 기록의 범위가 아니다.
