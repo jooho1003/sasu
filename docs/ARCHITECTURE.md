@@ -1,6 +1,6 @@
 # 아키텍처 — 사수 (SASU)
 
-- 문서 버전: 1.2
+- 문서 버전: 1.3 (ADR-056 웹 녹음 설계 추가, 운영 상태는 별도)
 - 작성일: 2026-09-08 (1.2: ADR-052·054 구현 구조와 운영 검증 상태 반영)
 - 지위: **파생 문서**. 구조 결정의 근거는 [PRD §6-11(아키텍처)·§6-12(데이터·상태)·§6-1(스키마)](PRD.md)에 있고, 결정의 이유·트레이드오프는 [ADR.md](ADR.md)에 있다.
 - 문서 충돌 시 우선순위: [PRD](PRD.md) → 이 문서 → [ADR](ADR.md). 이 문서와 PRD가 어긋나면 PRD가 옳다.
@@ -28,7 +28,15 @@
 
 `retention_settings`·`retention_exports`는 확인 설정과 내보내기 생성 메타데이터만 보관한다. 내보내기는 현재 권한·동의·삭제 상태를 SQL에서 거른 수집본이다. 별도 원문 영구 아카이브는 없다. 운영자 도구는 암호화 덤프와 파일을 격리 DB에 복원해 검증하며 최신 삭제·부서 멤버십/동의를 재적용하고 모든 작업을 정지한다. 실제 운영 서비스 복구/스토리지 재연결·정기 보관은 [운영 절차](setup-reviewed-materials.md)의 별도 단계다. 범용 부서 에이전트 실행은 [공동 설계](planning/부서_에이전트_공동설계.md)를 유지한다.
 
-### 후속 개발 — ADR-052
+### 웹 회의 녹음 — ADR-056 설계 (미구현)
+
+상위 범위는 PRD §3-4·§8, 상세 계약은 [웹 회의 녹음 설계](planning/웹회의_녹음_설계.md)다. `getUserMedia` 마이크와 `getDisplayMedia`의 사용자가 허용한 음성을 Web Audio에서 혼합한다. display video 트랙은 권한/종료 감시에만 쓰고 인코딩·저장·전송 경로에 넣지 않는다. AudioWorklet에서 얻은 PCM을 1초 단위로 로컬 복구 저장하고, 서버에는 녹음 종료 후 최대 60초 독립 WAV 원본을 세션·RLS로 업로드한다. `MediaRecorder` 압축 조각을 각각 재생 가능한 구간으로 가정하지 않는다.
+
+`reviewed_materials`에 원본 형식(`single_file` / `audio_segments`)과 입력 경로를 추가하고 `review_original_segments`로 서버가 발급한 경로·순번·길이·해시·검증 상태를 관리한다. 기존 50MiB 단일 파일과 새 64MiB 원본 묶음을 구분한다. finalize는 파일 검증 작업을 예약하며, 워커 검증 완료 전에 전사/확정을 허용하지 않는다. 검증된 원본에서 기존 60초+1초 `review_parts`를 생성하여 `process_review`와 `publish_review`를 재사용한다. 기존 단일 원본 재생·재추출·삭제 경로도 분기 처리해야 한다.
+
+Meet·Zoom 계정/OAuth·공식 artifact 수집은 2단계이며 별도 어댑터로 같은 검토 저장소에 연결한다. 현재 운영 코드에 이 구조가 이미 존재하는 것으로 해석하지 않는다. Graft·Archify 결과는 아직 없으며 설계 문서의 Mermaid와 코드 관계 표가 수동 검토 자료다.
+
+### 후속 개발 구현 — ADR-052
 
 - 수집된 원문은 버전을 가진다. 변경·삭제와 파생 분류 무효화·재처리 예약은 SQL 트랜잭션이다. 분류/임베딩 완료는 읽은 버전과 현재 버전이 같을 때만 저장한다. Slack 삭제는 내용 없는 tombstone으로 역순 이벤트·백필의 복원을 막는다.
 - Notion 전체 페이지 읽기 성공 후에만 블록 스냅샷을 원자 반영한다. 자동 갱신은 기존 워커의 주기 호출에서 예약하며 실패 시 기존 내용을 보존한다.
@@ -198,12 +206,13 @@ answer job: 검색 권한 결정 — 채널이면 member, DM·웹이면 질문�
 ### 4.4 회의 한 건의 여정
 
 ```text
-S5 회의 URL 입력 → Recall.ai 봇 참석(참석 고지) → 웹훅 또는 lead 전사 업로드
-  또는 lead가 .vtt/.txt 업로드(10MB 상한, 파싱 실패 시 줄 번호)
+현재: lead가 .vtt/.txt 업로드(10MB 상한, 파싱 실패 시 줄 번호)
   → 발언 1건 = item 1건(동의한 멤버로 매칭된 화자만 저장) → enqueue(summarize_meeting)
 summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[], actions[]} (item_id 인용)
   → deferred 항목 → enqueue(make_card)  (슬랙 질문과 72h 병합 → 데모 장면 3)
 ```
+
+ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음성 파일은 별도 자료 검토·확정 경로이며, ADR-056은 그 앞에 웹 직접 녹음을 추가하는 설계다. 확정 음성은 우선 기존 문서 요약/분류 파이프라인을 재사용하며 회의 전사 업로드의 `summarize_meeting`과 자동으로 같은 경로라고 간주하지 않는다.
 
 ### 4.5 게스트 모드
 
@@ -282,7 +291,7 @@ summarize_meeting job: gpt-oss-120b → meetings.summary {decisions[], deferred[
 | 슬랙·노션 원본 권한 자동 상속, ACL 테이블 | lead가 소스별 `dept`/`leads_only` 수동 지정 | ADR-014 |
 | 인용 정합성 LLM 심판(2차) | 문자열 포함 검증 | ADR-013 |
 | `excluded_count` service role 2차 검색 · 감사 로그 화면 | `answers` 기록만 | PRD §8-0 |
-| Presidio 2차 마스킹 · 음성 화자 지문 · 폰 원탭 녹음 | 정규식 마스킹 · 봇 전사 화자 라벨 · Whisper 음성 업무 입력 | PRD §8-1 · ADR-032 |
+| Presidio 2차 마스킹 · 음성 화자 지문 · 모바일 백그라운드 녹음 | 정규식 마스킹 · 전사 파일 화자 라벨 · Whisper 입력. 웹 직접 회의 녹음은 ADR-056 설계 | PRD §3-4·§8-1 · ADR-032·056 |
 | 실시간 스트리밍(SSE) | 폴링(대시보드 10초·답변 2초) | PRD §8-1 |
 | 사용자별 API 키·과금 | 공동 키 1개 | ADR-020 |
 | 부서 간 교차 결정 · 부서 템플릿 2종 이상 · 부서 전환 UI | 부서 1개 슬라이스, `general` 1종 | PRD §8-0·8-1 |

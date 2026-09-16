@@ -8,7 +8,7 @@
 - Next.js (App Router) + Vercel — 대시보드·원장·Q&A·게스트 모드, Route Handler가 슬랙 이벤트 수신
 - Supabase — Postgres + pgvector + RLS + Auth(매직링크). RLS가 곧 "권한 인지 답변"의 물리적 구현
 - Slack Events API + Block Kit (HTTP 모드, 조직당 워크스페이스 1개 OAuth 설치, 봇 토큰은 서버 암호화 저장; ADR-052)
-- 회의 입력은 `.vtt`/`.txt` 전사 업로드로 확정(ADR-036; Recall.ai 류 회의 봇은 로드맵) · Notion API — 지정 페이지 전체 스냅샷 가져오기 + 5분 자동 갱신·[다시 가져오기](ADR-052)
+- 회의 입력은 `.vtt`/`.txt` 전사 업로드와 자료 검토함 음성 업로드(ADR-036·054). 웹 직접 녹음은 ADR-056 설계 단계, Meet·Zoom 공식 자료 수집은 2단계, PC 앱·회의 봇은 후속 · Notion API — 지정 페이지 전체 스냅샷 가져오기 + 5분 자동 갱신·[다시 가져오기](ADR-052)
 - Groq `openai/gpt-oss-120b` (카드·답변·회의 정리, strict json_schema) · Groq `openai/gpt-oss-20b` (분류) · 규칙 휴리스틱 (정량 신호). 두 모델 모두 production + strict structured output이라 인용 스키마를 강제할 수 있다 (ADR-028)
 - 임베딩: Voyage AI `voyage-4-lite` 1024차원 확정. OpenAI `text-embedding-3-small`은 명시적 호환 provider로만 사용한다(ADR-030)
 - 비동기: Postgres `jobs` 테이블 + `/api/jobs/run` 워커 (`after()` 즉시 1회 + 매분 트리거 — Vercel Cron 또는 Supabase `pg_cron`+`pg_net`, D0 확정)

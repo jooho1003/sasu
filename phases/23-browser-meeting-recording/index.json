@@ -1,0 +1,12 @@
+{
+  "project": "sasu",
+  "phase": "23-browser-meeting-recording",
+  "steps": [
+    { "step": 0, "name": "capture-and-recovery-validation", "status": "pending" },
+    { "step": 1, "name": "segmented-originals-and-rls", "status": "pending" },
+    { "step": 2, "name": "recording-review-flow", "status": "pending" },
+    { "step": 3, "name": "demo-and-regression", "status": "pending" }
+  ],
+  "production_deployed": false,
+  "design": "docs/planning/웹회의_녹음_설계.md"
+}
