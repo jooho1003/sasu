@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={bodyFont.variable}>
+    <html lang="ko" className={bodyFont.variable} data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );

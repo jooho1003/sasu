@@ -116,8 +116,7 @@ export default async function DemoAskPage({
         <div>
           <h2>우리 팀의 이야기도 물어보세요</h2>
           <p>
-            데모에서는 준비된 질문을 살펴볼 수 있어요. 자유 질문은 로그인 후
-            이용하세요.
+            질문을 입력하면 관련된 합성 근거 답변을 찾아드립니다. 음성 체험에서는 샘플 전사를 확인할 수 있어요.
           </p>
         </div>
         <Link className="button button-secondary button-small" href="/login">

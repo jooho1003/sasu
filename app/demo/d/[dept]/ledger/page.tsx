@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/icon";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import { DemoLedgerSimulator } from "@/components/demo-safe-actions";
+import { DemoDocumentWorkspace } from "@/components/demo-document-workspace";
+import { readDemoWorkspace } from "@/lib/supabase/demo-workspace";
 
 type Decision = {
   id: string;
@@ -24,10 +26,11 @@ export default async function DemoLedgerPage({
   searchParams,
 }: {
   params: Promise<{ dept: string }>;
-  searchParams: Promise<{ from?: string }>;
+  searchParams: Promise<{ from?: string; source?: string }>;
 }) {
   const { dept } = await params;
-  const { from } = await searchParams;
+  const { from, source } = await searchParams;
+  const workspaceData = await readDemoWorkspace(dept);
   const supabase = createPublicSupabaseClient();
   const { data: decisions, error } = await supabase
     .from("decisions")
@@ -80,7 +83,8 @@ export default async function DemoLedgerPage({
           ← 보던 결정 카드로 돌아가기
         </Link>
       ) : null}
-      <div className="section-heading">
+      <DemoDocumentWorkspace key={source ?? "all"} dept={dept} data={workspaceData} ledger initialSource={source} />
+      <details open={Boolean(from)}><summary>기존 결정 타임라인 · {rows.length}건</summary><div className="section-heading">
         <h2>
           기록된 결정 <span>{rows.length}건</span>
         </h2>
@@ -120,7 +124,7 @@ export default async function DemoLedgerPage({
           ))}
         </div>
       )}
-      <DemoLedgerSimulator />
+      </details><DemoLedgerSimulator items={workspaceData.items} />
       <section className="card-next-step">
         <div><strong>다음 4/4 · 같은 질문 비교</strong><span>부서가 바뀌면 같은 질문에 어떤 답이 달라지는지 확인하세요.</span></div>
         <Link className="button button-primary button-small" href={`/demo/d/${dept}/ask?q=principle`}>

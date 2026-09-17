@@ -1,12 +1,10 @@
 import { AdminShell } from "@/components/admin/shell";
-import { notFound } from "next/navigation";
 import {
   AdminOverview,
   DemoAdminMemberRow,
   AdminSourceRow,
   AdminAnswerStatRow,
 } from "@/lib/contracts";
-import { orgAdminReadEnabled } from "@/lib/features";
 import { answerStatsRange } from "@/lib/org-admin";
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 import {
@@ -23,7 +21,6 @@ export default async function DemoAdminPage({
 }: {
   searchParams: Promise<{ view?: string }>;
 }) {
-  if (!orgAdminReadEnabled()) notFound();
   const { view } = await searchParams;
   const section = ["members", "sources", "audit"].includes(view ?? "")
     ? view!

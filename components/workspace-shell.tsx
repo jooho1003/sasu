@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { BrandMark, Icon, type IconName } from "@/components/ui/icon";
 
 type WorkspaceShellProps = {
@@ -13,6 +14,7 @@ type WorkspaceShellProps = {
   showOrgAdmin?: boolean;
   showTrailers?: boolean;
   displayName?: string;
+  firstCardId?: string;
 };
 
 export function WorkspaceShell({
@@ -24,7 +26,9 @@ export function WorkspaceShell({
   showOrgAdmin = false,
   showTrailers = false,
   displayName,
+  firstCardId,
 }: WorkspaceShellProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
   const base = `${demo ? "/demo" : ""}/d/${deptId}`;
   const entries: { label: string; suffix: string; icon: IconName }[] = [
@@ -70,7 +74,7 @@ export function WorkspaceShell({
     {
       step: 2,
       label: "근거 확인",
-      href: pathname.includes("/cards/") ? pathname : `${base}#demo-cards-heading`,
+      href: pathname.includes("/cards/") ? pathname : firstCardId ? `${base}/cards/${firstCardId}` : `${base}/documents`,
     },
     { step: 3, label: "과거 결정", href: `${base}/ledger` },
     { step: 4, label: "같은 질문", href: `${base}/ask?q=principle` },
@@ -83,11 +87,11 @@ export function WorkspaceShell({
       pathname.startsWith(`${base}/ask`));
 
   return (
-    <div className="workspace-shell">
+    <div className={`workspace-shell${sidebarOpen ? "" : " sidebar-collapsed"}`}>
       <a className="skip-link" href="#workspace-main">
         본문으로 건너뛰기
       </a>
-      <aside className="workspace-sidebar">
+      <aside id="workspace-sidebar" className="workspace-sidebar" hidden={!sidebarOpen}>
         <Link className="brand" href={demo ? "/demo" : "/"}>
           <BrandMark />
           사수<span className="brand-caption">팀을 위한 AI</span>
@@ -97,7 +101,7 @@ export function WorkspaceShell({
           <div>
             <strong>{departmentName}</strong>
             <span>
-              {demo ? (fullDemo ? "온새미로 · 심사 공간" : "온새미로 · 데모 공간") : "우리 부서 워크스페이스"}
+              {demo ? "온새미로 · 데모 공간" : "우리 부서 워크스페이스"}
             </span>
           </div>
           {demo ? (
@@ -164,19 +168,19 @@ export function WorkspaceShell({
               <p>
                 {fullDemo ? <>확인할 기능과<br />추천 순서를 한눈에.</> : <>흩어진 대화를<br />다음 결정으로 연결하세요.</>}
               </p>
-              <Link href={fullDemo ? "/demo" : "/#pilot"}>
+              <Link href={fullDemo ? `/demo/features?dept=${deptId}` : "/#pilot"}>
                 {fullDemo ? "기능 지도로" : "사수 알아보기"} <Icon name="arrow" size={15} />
               </Link>
             </div>
           ) : null}
           <div className="workspace-profile">
             <span className="profile-avatar">
-              {demo ? (fullDemo ? "심" : "G") : (displayName?.slice(0, 1) ?? "사")}
+              {demo ? "G" : (displayName?.slice(0, 1) ?? "사")}
             </span>
             <div>
-              <strong>{demo ? (fullDemo ? "심사위원 데모" : "게스트") : (displayName ?? "팀 멤버")}</strong>
+              <strong>{demo ? "게스트 데모" : (displayName ?? "팀 멤버")}</strong>
               <span>
-                {demo ? (fullDemo ? "부서장 · 조직 관리자 권한" : "가입 없이 둘러보는 중") : "부서 권한으로 연결됨"}
+                {demo ? "로그인 없이 전체 기능 체험" : "부서 권한으로 연결됨"}
               </span>
             </div>
           </div>
@@ -184,6 +188,7 @@ export function WorkspaceShell({
       </aside>
       <div className="workspace-body">
         <header className="workspace-topbar">
+          <button className="sidebar-toggle" type="button" aria-expanded={sidebarOpen} aria-controls="workspace-sidebar" onClick={() => setSidebarOpen(open => !open)}>{sidebarOpen ? "☰ 메뉴 접기" : "☰ 메뉴 열기"}</button>
           <span>
             {departmentName}
             <span className="breadcrumb-divider">/</span>
@@ -195,7 +200,7 @@ export function WorkspaceShell({
           </span>
           <span className="badge badge-neutral">
             <Icon name="lock" size={13} />
-            {demo ? (fullDemo ? "심사 안전 데모" : "읽기 전용 데모") : "내 부서 공간"}
+            {demo ? "합성 데이터 체험" : "내 부서 공간"}
           </span>
         </header>
         {demo ? (
@@ -203,7 +208,7 @@ export function WorkspaceShell({
             <div className="demo-notice">
               <span>
                 <span className="status-dot" />
-                {fullDemo ? "합성 계정으로 모든 기능을 안전하게 확인하세요." : "합성 데이터로 자유롭게 둘러보세요."}
+                합성 자료로 모든 기능을 체험하세요. 변경은 새로고침하면 초기화됩니다.
               </span>
               <Link href="/demo">
                 다른 부서 보기 <Icon name="arrow" size={14} />

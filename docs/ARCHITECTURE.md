@@ -216,6 +216,8 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 
 ### 4.5 게스트 모드
 
+**ADR-061 공개 기능 체험:** `/demo/d/[dept]` layout은 공개 `demo_departments` RPC로 `is_demo` 부서를 확인하며 심사 계정 세션을 요구하지 않는다. 모든 메뉴가 공개 페이지로 연결된다. 문서/원장은 `lib/supabase/demo-workspace.ts`의 anon RLS 조회와 명시적 영업 합성 fixture를 합친다. `DemoWorkspaceState`는 부서별 React 메모리에 결정 체험을 보관한다. `DemoDocumentWorkspace`는 source_id별로 원문·결정을 묶고 보류 후속 결정을 supersedes_id로 추가한다. 새로고침·부서 변경으로 초기화하며 DB 쓰기·LLM 호출·브라우저 영속 저장은 없다. 묻기는 준비 답변 근사 매칭과 샘플 음성 전사를 제공하고, 기능 지도는 `/demo/features?dept=...`에서 현재 부서를 유지한다.
+
 `scripts/seed-demo.ts`가 온새미로 주식회사 영업팀·개발팀의 합성 슬랙·회의·원칙 문서를 **실제 파이프라인**에 넣어 카드·원장·충돌·Q&A 6건(+ `generic_answer`)을 만든 뒤 스냅샷으로 시드한다. `/demo`는 `orgs.is_demo=true` 부서를 anon read-only RLS로 읽고 `revalidate` 캐시로 낸다. LLM 호출·쓰기·우리 팀 실데이터가 0인 것을 §8 E2E가 검증한다.
 
 ---

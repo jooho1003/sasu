@@ -144,12 +144,13 @@ export default async function DemoLandingPage({
             </div>
           </section>
         ) : null}
-        {reviewerConnected ? (
+        {(
           <section className="demo-capabilities" aria-labelledby="demo-capabilities-heading">
             <header>
               <div>
                 <p className="eyebrow">5분 셀프 시연</p>
                 <h2 id="demo-capabilities-heading">전체 기능을 순서대로 확인하세요</h2>
+                <Link className="text-link" href="/demo/features">전체 기능 지도 열기 →</Link>
                 <p>앞의 네 기능이 핵심 이야기입니다. 나머지는 관심 있는 운영 기능부터 자유롭게 열어보세요.</p>
               </div>
               <Link className="button button-primary" href={DEMO_FEATURES[0].href}>
@@ -173,7 +174,7 @@ export default async function DemoLandingPage({
               ))}
             </ol>
           </section>
-        ) : null}
+        )}
         {error || departments.length === 0 ? (
           <section className="empty-state">
             <h2 className="text-xl">데모를 준비하는 중입니다</h2>
@@ -203,7 +204,7 @@ export default async function DemoLandingPage({
                       <Icon name={copy.icon} size={23} />
                     </span>
                     <span className={`badge ${recommended ? "badge-green" : "badge-neutral"}`}>
-                      {recommended ? "추천 · 90초 핵심 데모" : "다른 사례"}
+                      {recommended ? "추천 · 풍부한 영업 기록" : "다른 사례"}
                     </span>
                   </div>
                   <div>

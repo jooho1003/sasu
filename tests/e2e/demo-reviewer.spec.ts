@@ -45,6 +45,26 @@ test("공개 링크가 심사위원 계정으로 연결되고 전체 기능을 �
   }
 });
 
+test("각 기능 화면이 데이터를 불러온 뒤에도 오류 화면으로 바뀌지 않는다", async ({ page }) => {
+  test.setTimeout(180_000);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/demo");
+  await expect(page.getByText("심사위원 데모 계정으로 접속했습니다")).toBeVisible();
+
+  for (const feature of DEMO_FEATURES) {
+    // 200 응답만으로는 클라이언트 조회 이후의 렌더 오류를 잡지 못한다.
+    await page.goto(feature.href, { waitUntil: "networkidle" });
+    await expect(page.getByText("합성 데이터를 불러오지 못했습니다"), feature.title).toHaveCount(0);
+    if (feature.key === "documents") {
+      await page.locator(".demo-source > summary").first().click();
+      await expect(page.getByText("한눈에 보기").first()).toBeVisible();
+      expect(await page.locator(".document-citations q").count()).toBeGreaterThan(0);
+    }
+  }
+  expect(errors).toEqual([]);
+});
+
 test("심사 계정의 앱 요청과 직접 DB 변경을 모두 거부한다", async ({ page, context }) => {
   await page.goto("/demo");
   await expect(page.getByText("심사위원 데모 계정으로 접속했습니다")).toBeVisible();
