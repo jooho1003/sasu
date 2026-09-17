@@ -44,7 +44,7 @@ for (const width of [1440, 390]) {
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       "부서가 다르면",
     );
-    await expect(page.getByText("추천 · 90초 핵심 데모", { exact: true })).toBeVisible();
+    await expect(page.getByText("추천 · 풍부한 영업 기록", { exact: true })).toBeVisible();
     await capture("demo");
     await page
       .getByRole("region", { name: "데모 부서 선택" })
@@ -94,6 +94,7 @@ for (const width of [1440, 390]) {
     const questions = page
       .getByRole("group", { name: "준비된 질문 선택" })
       .getByRole("button");
+    await expect(questions.first()).toBeVisible();
     expect(await questions.count()).toBeGreaterThan(1);
     for (const question of await questions.all()) {
       const title = await question.innerText();

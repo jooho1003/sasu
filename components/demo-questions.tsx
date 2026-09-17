@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { closestDemoAnswer } from "@/lib/demo-workspace";
 import { BrandMark, Icon } from "@/components/ui/icon";
 
 type DemoAnswer = {
@@ -33,6 +34,9 @@ export function DemoQuestions({
   const [freeQuestion, setFreeQuestion] = useState("");
   const [previewMessage, setPreviewMessage] = useState("");
   const [voicePreview, setVoicePreview] = useState(false);
+  const [noMatch, setNoMatch] = useState(false);
+  const answerPanel = useRef<HTMLElement>(null);
+  const revealAnswer = () => requestAnimationFrame(() => { answerPanel.current?.scrollIntoView({ behavior: "smooth", block: "start" }); answerPanel.current?.focus({ preventScroll: true }); });
   const selected = answers.find((answer) => answer.id === selectedId);
   const selectedIndex = answers.findIndex((answer) => answer.id === selectedId);
   const suggested = answers.find(
@@ -43,17 +47,16 @@ export function DemoQuestions({
 
   const selectAt = (index: number) => {
     const next = answers[index];
-    if (next) setSelectedId(next.id);
+    if (next) { setSelectedId(next.id); setNoMatch(false); }
   };
 
   const previewAsk = () => {
-    const terms = freeQuestion.trim().split(/\s+/u).filter((term) => term.length >= 2);
-    const closest = answers.find((answer) =>
-      terms.some((term) => answer.question.includes(term) || answer.answer?.includes(term)),
-    ) ?? suggested ?? answers[0];
-    if (!closest) return;
+    const closest = closestDemoAnswer(freeQuestion, answers);
+    if (!closest) { setNoMatch(true); setPreviewMessage("이 질문에 맞는 준비된 근거 답변이 없습니다. 추천 질문을 선택해 주세요."); revealAnswer(); return; }
+    setNoMatch(false);
     setSelectedId(closest.id);
     setPreviewMessage(`실제 전송 없이 가장 가까운 준비 질문 “${closest.question}”의 답을 열었습니다.`);
+    revealAnswer();
   };
 
   return (
@@ -89,7 +92,7 @@ export function DemoQuestions({
               key={answer.id}
               aria-pressed={selectedId === answer.id}
               aria-controls="demo-answer"
-              onClick={() => setSelectedId(answer.id)}
+              onClick={() => { setSelectedId(answer.id); setNoMatch(false); setPreviewMessage(""); revealAnswer(); }}
             >
               <span>{answer.question}</span>
               <Icon name="chevron" size={14} />
@@ -102,6 +105,7 @@ export function DemoQuestions({
             <span className="badge badge-neutral"><Icon name="lock" size={11} /> 전송 없음</span>
           </div>
           <textarea
+            aria-label="데모 질문"
             value={freeQuestion}
             onChange={(event) => setFreeQuestion(event.target.value)}
             placeholder="예: 외주사 B 견적은 어떻게 됐나요?"
@@ -113,21 +117,25 @@ export function DemoQuestions({
               aria-pressed={voicePreview}
               onClick={() => {
                 setVoicePreview((current) => !current);
-                if (!voicePreview) setPreviewMessage("음성 ASK의 녹음 상태를 미리 보는 중입니다. 마이크·음성은 서버로 전송되지 않습니다.");
-                else setPreviewMessage("녹음 완료 미리보기입니다. 실제 전사 대신 준비 질문을 선택해 주세요.");
+                if (!voicePreview) setPreviewMessage("샘플 음성 입력 체험 중입니다. 마이크·음성은 서버로 전송되지 않습니다.");
+                else { setFreeQuestion(suggested?.question ?? selected.question); setPreviewMessage("샘플 전사 완료: 질문 입력창에 반영했습니다. 가까운 근거 답변 보기를 눌러 확인하세요."); }
               }}
             >{voicePreview ? "■ 녹음 끝내기 체험" : "🎙 음성 질문 동작 보기"}</button>
           </div>
+          {voicePreview ? <div className="demo-voice-state" role="status"><span className="status-dot" /> 샘플 음성 입력 중 · 실제 녹음 아님<p>“{suggested?.question ?? selected.question}”</p><p>녹음 끝내기 체험을 누르면 샘플 전사가 입력됩니다.</p></div> : null}
           {previewMessage ? <p role="status">{previewMessage}</p> : null}
         </section>
       </div>
       <article
         className="answer-panel"
         id="demo-answer"
+        ref={answerPanel}
+        tabIndex={-1}
         aria-live="polite"
         aria-atomic="true"
       >
-        <h2>{selected.question}</h2>
+        <h2>{noMatch ? freeQuestion : selected.question}</h2>
+        {noMatch ? <p role="status">이 부서의 준비된 자료에서 답을 찾지 못했습니다. 추천 질문으로 근거 있는 답변을 확인하세요.</p> : <>
         <section>
           <div className="answer-identity">
             <BrandMark small />
@@ -181,6 +189,7 @@ export function DemoQuestions({
           <Icon name="lock" size={13} />이 부서의 기록만 참고한, 미리 준비된
           답변입니다.
         </div>
+        </>}
       </article>
     </div>
   );

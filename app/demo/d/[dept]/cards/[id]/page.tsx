@@ -8,7 +8,7 @@ import { DemoDecisionSimulator } from "@/components/demo-safe-actions";
 
 type Card = { id: string; title: string; background: string; recommendation: string | null; status: string; visibility: string };
 type Citation = { item_id: string | null; decision_id: string | null; quote: string };
-type Item = { id: string; author: string | null; content: string };
+type Item = { id: string; author: string | null; content: string; source_id: string };
 type Decision = { id: string; outcome: string; rationale: string; decided_by_name: string; decided_at: string | null };
 type Conflict = { id: string; prior_decision_id: string; explanation: string };
 
@@ -29,7 +29,7 @@ export default async function DemoCardPage({
   const conflictRows = (conflicts ?? []) as Conflict[];
   const referencedDecisionIds = [...new Set([...decisionIds, ...conflictRows.map((conflict) => conflict.prior_decision_id)])];
   const [{ data: items }, { data: decisions }] = await Promise.all([
-    itemIds.length ? supabase.from("items").select("id, author, content").in("id", itemIds) : Promise.resolve({ data: [] as Item[] }),
+    itemIds.length ? supabase.from("items").select("id, author, content, source_id").in("id", itemIds) : Promise.resolve({ data: [] as Item[] }),
     referencedDecisionIds.length ? supabase.from("decisions").select("id, outcome, rationale, decided_by_name, decided_at").in("id", referencedDecisionIds) : Promise.resolve({ data: [] as Decision[] }),
   ]);
   const itemMap = new Map(((items ?? []) as Item[]).map((item) => [item.id, item]));
@@ -55,7 +55,7 @@ export default async function DemoCardPage({
         <section className="grid gap-3"><h2 className="m-0 text-xl">근거 인용</h2>{rows.map((row, index) => { const item = row.item_id ? itemMap.get(row.item_id) : null; const decision = row.decision_id ? decisionMap.get(row.decision_id) : null; return <blockquote key={`${row.quote}-${index}`} className="m-0 grid gap-2 rounded-2xl border border-[var(--accent)]/25 bg-[var(--accent)]/5 p-4"><span className="text-xs text-[var(--muted)]">{item?.author ?? decision?.decided_by_name ?? "기록"}</span><q className="leading-7">{row.quote}</q></blockquote>; })}</section>
         {conflictRows.length > 0 ? <section className="grid gap-2 rounded-2xl border border-[var(--urgent)]/30 bg-[var(--urgent)]/5 p-5"><h2 className="m-0 text-xl text-[var(--urgent)]">과거 결정과 충돌 확인</h2>{conflictRows.map((conflict) => <div key={conflict.id} className="grid gap-1"><Link className="w-fit text-sm font-bold text-[var(--urgent)]" href={`/demo/d/${dept}/ledger?from=${encodeURIComponent(card.id)}#decision-${conflict.prior_decision_id}`}>{formatConflictBadge(decisionMap.get(conflict.prior_decision_id)?.decided_at ?? null)}</Link><p className="m-0 leading-7">{conflict.explanation}</p></div>)}</section> : null}
         {card.recommendation ? <section className="grid gap-2"><h2 className="m-0 text-xl">추천 방향</h2><p className="m-0 whitespace-pre-wrap leading-7">{card.recommendation}</p></section> : null}
-        <DemoDecisionSimulator />
+        <DemoDecisionSimulator requestId={id} title={card.title} quote={rows.find(row => row.item_id && itemMap.get(row.item_id)?.content.includes(row.quote))?.quote} sourceId={items?.[0]?.source_id} />
         <footer className="card-next-step">
           <div><strong>다음 3/4 · 과거 결정 확인</strong><span>충돌한 결정의 이유와 원문 근거를 원장에서 확인하세요.</span></div>
           <Link className="button button-primary button-small" href={`/demo/d/${dept}/ledger?from=${encodeURIComponent(card.id)}`}>

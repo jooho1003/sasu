@@ -2,6 +2,8 @@ import Link from "next/link";
 import { DemoRecords } from "@/components/demo-records";
 import { Icon } from "@/components/ui/icon";
 import { notFound } from "next/navigation";
+import { salesDemoRecords } from "@/lib/demo-workspace";
+import { DEMO_DEFAULT_DEPT_ID } from "@/lib/demo-access";
 
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
@@ -67,10 +69,11 @@ export default async function DemoDashboardPage({
     throw new Error("데모 대시보드 조회 실패");
   }
 
-  const sources = (sourcesResult.data ?? []) as Source[];
-  const items = (itemsResult.data ?? []) as Item[];
+  const extra = dept === DEMO_DEFAULT_DEPT_ID ? salesDemoRecords : { sources: [], items: [] };
+  const sources = [...(sourcesResult.data ?? []), ...extra.sources] as Source[];
+  const items = [...(itemsResult.data ?? []), ...extra.items.map(item => ({ ...item, spoken_at: null }))] as Item[];
   const cards = (cardsResult.data ?? []) as Card[];
-  const itemIds = items.map((item) => item.id);
+  const itemIds = (itemsResult.data ?? []).map((item) => item.id);
   const { data: classifications } =
     itemIds.length === 0
       ? { data: [] as Classification[] }
@@ -85,6 +88,7 @@ export default async function DemoDashboardPage({
     ]),
   );
   const sourceMap = new Map(sources.map((source) => [source.id, source]));
+  for (const item of extra.items) classificationMap.set(item.id, item.label as Classification["label"]);
   const grouped = new Map<string, Item[]>();
   for (const item of items) {
     const label = classificationMap.get(item.id) ?? "unclassified";

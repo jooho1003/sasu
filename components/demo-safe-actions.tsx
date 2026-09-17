@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Icon } from "@/components/ui/icon";
+import { useDemoWorkspace } from "./demo-workspace-state";
+import type { DemoItem } from "@/lib/demo-workspace";
 
 const DEMO_REVIEW_FILES = [
   {
@@ -57,7 +59,7 @@ export function DemoReadOnlyFrame({ children }: { children: React.ReactNode }) {
       <section className="demo-safe-banner" role="status">
         <Icon name="lock" size={17} />
         <div>
-          <strong>심사위원 안전 체험</strong>
+          <strong>합성 자료 미리보기</strong>
           <p>실제 저장·업로드·외부 연결은 실행하지 않습니다. 합성 시드의 화면과 완료 조건을 그대로 확인할 수 있습니다.</p>
         </div>
       </section>
@@ -68,7 +70,8 @@ export function DemoReadOnlyFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function DemoDecisionSimulator() {
+export function DemoDecisionSimulator({ requestId, title, quote, sourceId }: { requestId?: string; title?: string; quote?: string; sourceId?: string }) {
+  const { append } = useDemoWorkspace();
   const [rationale, setRationale] = useState("");
   const [status, setStatus] = useState<"open" | "decided" | "deferred" | "rejected">("open");
   const [error, setError] = useState("");
@@ -80,6 +83,7 @@ export function DemoDecisionSimulator() {
     }
     setError("");
     setStatus(next);
+    if (quote && next !== "open" && next !== "rejected") append({ id: crypto.randomUUID(), source_id: sourceId ?? "card-preview", request_id: requestId, outcome: next === "deferred" ? `${title ?? "안건"} · 보류` : `${title ?? "안건"} · ${rationale}`, rationale: rationale || "추가 근거 확인 후 다시 결정합니다.", quote, status: next === "deferred" ? "deferred" : "decided" });
   };
 
   return (
@@ -98,7 +102,7 @@ export function DemoDecisionSimulator() {
             <textarea value={rationale} onChange={(event) => setRationale(event.target.value)} placeholder="예: 10% 이상 인상 원칙에 따라 재입찰을 먼저 검토합니다." />
           </label>
           <div className="flex flex-wrap gap-2">
-            <button className="button button-primary button-small" type="button" onClick={() => choose("decided")}>재입찰로 결정</button>
+            <button className="button button-primary button-small" type="button" onClick={() => choose("decided")}>{title?.includes("외주사") ? "재입찰로 결정" : "입력한 내용으로 결정"}</button>
             <button className="button button-secondary button-small" type="button" onClick={() => choose("deferred")}>보류</button>
             <button className="button button-secondary button-small" type="button" onClick={() => choose("rejected")}>반려</button>
           </div>
@@ -118,7 +122,9 @@ export function DemoDecisionSimulator() {
   );
 }
 
-export function DemoLedgerSimulator() {
+export function DemoLedgerSimulator({ items = [] }: { items?: DemoItem[] }) {
+  const { append } = useDemoWorkspace();
+  const [itemId, setItemId] = useState(items[0]?.id ?? "");
   const [outcome, setOutcome] = useState("");
   const [rationale, setRationale] = useState("");
   const [preview, setPreview] = useState<{ outcome: string; rationale: string } | null>(null);
@@ -140,7 +146,8 @@ export function DemoLedgerSimulator() {
         <div className="demo-simulator-form">
           <label>결정 내용<input value={outcome} onChange={(event) => setOutcome(event.target.value)} placeholder="예: 외주사 B는 재입찰을 진행합니다." /></label>
           <label>결정 이유<textarea value={rationale} onChange={(event) => setRationale(event.target.value)} placeholder="근거와 감수한 조건을 적어보세요." /></label>
-          <button className="button button-primary button-small" disabled={!outcome.trim() || !rationale.trim()} type="button" onClick={() => setPreview({ outcome: outcome.trim(), rationale: rationale.trim() })}>원장 반영 미리보기</button>
+          <label>판단 근거 선택<select value={itemId} onChange={event => setItemId(event.target.value)}>{items.map(item => <option key={item.id} value={item.id}>{item.content.slice(0, 100)}</option>)}</select></label>
+          <button className="button button-primary button-small" disabled={!outcome.trim() || !rationale.trim() || !itemId} type="button" onClick={() => { const item = items.find(row => row.id === itemId); if (!item) return; append({ id: crypto.randomUUID(), source_id: item.source_id, outcome: outcome.trim(), rationale: rationale.trim(), quote: item.content, status: "decided" }); setPreview({ outcome: outcome.trim(), rationale: rationale.trim() }); }}>원장 반영 미리보기</button>
         </div>
       )}
     </section>
