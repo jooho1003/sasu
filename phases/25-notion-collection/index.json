@@ -1,0 +1,37 @@
+{
+  "project": "sasu",
+  "phase": "25-notion-collection",
+  "steps": [
+    {
+      "step": 0,
+      "name": "notion-api-v2025",
+      "status": "completed",
+      "summary": "Notion API 2025-09-03 어댑터 전환: 요청별 토큰 컨텍스트, 429/529 Retry-After, 페이지·data source·검색·현재 봇 읽기 함수와 오류 코드를 추가했다. 실제 워크스페이스 호출은 토큰 미제공으로 미실행."
+    },
+    {
+      "step": 1,
+      "name": "notion-chunk",
+      "status": "completed",
+      "summary": "NOTION_CHUNK_LIMIT=2,400 기반 헤딩 단위 청크와 속성 줄 변환을 추가했다. chunkNotionBlocks·notionPropertyLines는 마스킹·40자 최소 본문·안정적인 externalRef를 보장하며 테스트·lint·build·전체 Vitest를 통과했다."
+    },
+    {
+      "step": 2,
+      "name": "notion-installation",
+      "status": "completed",
+      "summary": "조직별 Notion 설치 저장소와 AES-256-GCM 토큰 격리, 관리자 내부 통합 연결·해지, 데모 외부 호출 사전 차단, 부서/job 범위 토큰 해석, 전역 NOTION_TOKEN fallback 제거, 레거시 dry-run 이전 스크립트와 최소 연결 카드를 구현했다. 지정 AC·전체 lint/build/1,136 tests·PGlite 179 checks·로컬 Supabase SQL/RLS 검증을 통과했고 실제 Notion 호출·운영 반영은 미실행했다."
+    },
+    {
+      "step": 3,
+      "name": "import-v2",
+      "status": "completed",
+      "summary": "기존 Notion source는 v1/classify로 유지하고 v2 헤딩 청크·reference 직접 임베딩·편집 시각·404 retire·명시적 전환을 추가했다. 팀장 여러 줄 등록과 전환 UI, 제목 마스킹 임베딩을 구현했으며 지정 AC 21 tests, 전체 lint/build/1,144 tests, PGlite 186 checks를 통과했다. 실제 Notion 호출·운영 DB 적용·배포는 미실행했다."
+    },
+    { "step": 4, "name": "roots-discover", "status": "completed", "summary": "0041 root/exclusion RPC, notion_discover cursor/lease job, import child linkage, include_children route, PGlite 196 checks and full 1,169-test acceptance completed; real Notion/production operations not run." },
+    { "step": 5, "name": "bulk-lane", "status": "completed", "summary": "0042 migration으로 realtime/bulk claim을 분리하고 240초 bulk worker, 조직별 Notion job lease, Retry-After 무소모 재시도·24시간 기한, 부서별 64건 embed_batch를 구현했다. 공식 Voyage 상한(1,000 inputs·voyage-4-lite 1M tokens, 2026-09-18)을 확인했으며 명시적 AC 51 tests, 전체 lint/build/1,181 tests, PGlite 201 checks·2,016 assertions를 통과했다. 실제 외부 호출·운영 DB/pg_cron/배포는 미실행했다." },
+    { "step": 6, "name": "poll-reconcile", "status": "completed", "summary": "5분 bulk poll과 24시간 reconcile을 완성했다. poll은 cursor·페이지 offset·최초 시작시각을 보존하고 block_id 최대 5단계/data_source의 database 부모를 해석한다. reconcile은 본문 없이 트리를 재순회해 변경분만 bulk import하고, 트리 부재·다른 부서의 더 가까운 subtree source를 retire하면서 결정 인용을 유지한다. 명시적 Vitest 22 tests, 전체 lint/build/1,195 tests, PGlite 207 checks를 통과했고 실제 외부 호출·운영 반영은 미실행했다." },
+    { "step": 7, "name": "collection-ui", "status": "completed", "summary": "S5 자동 수집 문서 200행 목록과 오류 안내·제외/하위 포함·부서장 전용·재가져오기·root 카드 후보 토글을 세션/RLS 경로로 완성했다. 합성 root 2개·source 9개·카운트를 seed와 /demo/notion 브라우저 전용 체험에 연결했고, 라우트 mock E2E·PC/390px 캡처를 포함해 전체 lint/build/1,203 tests, Notion E2E 7/7, PGlite 208 checks를 통과했다. 운영 DB/시드/배포와 실제 Notion·LLM 호출은 미실행했다." },
+    { "step": 8, "name": "notion-oauth-webhook", "status": "blocked", "blocked_reason": "선행 사람 작업 미완: 노션 공개 통합 생성·심사 제출·승인 URL·redirect URI, 서버 환경 변수 NOTION_CLIENT_ID·NOTION_CLIENT_SECRET(.env.local에 없음, 2026-09-18 확인), webhook 구독 검증 토큰. 준비되면 pending으로 바꾸고 재실행." }
+  ],
+  "production_deployed": false,
+  "verification": "docs/verification/notion-collection/README.md"
+}

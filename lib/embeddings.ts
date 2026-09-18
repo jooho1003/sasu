@@ -4,6 +4,12 @@ export type EmbeddingResult = {
   inputTokens: number | null;
 };
 
+export type EmbeddingBatchResult = {
+  vectors: number[][];
+  model: string;
+  inputTokens: number | null;
+};
+
 export type EmbeddingProvider = "voyage" | "openai";
 export type EmbeddingInputType = "query" | "document";
 
@@ -18,16 +24,19 @@ export class EmbeddingError extends Error {
     | "embedding_not_configured"
     | "embedding_rate_limited"
     | "embedding_api_failed";
+  readonly retryAfterSeconds?: number;
 
   constructor(
     errorCode:
       | "embedding_not_configured"
       | "embedding_rate_limited"
       | "embedding_api_failed",
+    retryAfterSeconds?: number,
   ) {
     super(errorCode);
     this.name = "EmbeddingError";
     this.error_code = errorCode;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
@@ -71,23 +80,26 @@ function apiKey(provider: EmbeddingProvider): string {
   return value;
 }
 
-export async function embedText(
-  input: string,
-  options: { inputType?: EmbeddingInputType } = {},
-): Promise<EmbeddingResult> {
+export async function embedTexts(
+  inputs: string[],
+  inputType?: EmbeddingInputType,
+): Promise<EmbeddingBatchResult> {
+  if (inputs.length === 0) {
+    throw new EmbeddingError("embedding_api_failed");
+  }
   const provider = embeddingProvider();
   const key = apiKey(provider);
   const model = embeddingModel();
   const body =
     provider === "voyage"
       ? {
-          input,
+          input: inputs,
           model,
-          ...(options.inputType ? { input_type: options.inputType } : {}),
+          ...(inputType ? { input_type: inputType } : {}),
           output_dimension: embeddingDimension(),
           output_dtype: "float",
         }
-      : { input, model };
+      : { input: inputs, model };
   let response: Response;
   try {
     response = await fetch(
@@ -108,6 +120,14 @@ export async function embedText(
     throw new EmbeddingError("embedding_api_failed");
   }
 
+  if (response.status === 429) {
+    const value = Number(response.headers.get("retry-after"));
+    const retryAfterSeconds = Number.isFinite(value) && value >= 0
+      ? Math.min(3600, value)
+      : undefined;
+    throw new EmbeddingError("embedding_rate_limited", retryAfterSeconds);
+  }
+
   let payload: EmbeddingResponse;
   try {
     payload = (await response.json()) as EmbeddingResponse;
@@ -115,19 +135,15 @@ export async function embedText(
     throw new EmbeddingError("embedding_api_failed");
   }
 
-  if (response.status === 429) {
-    throw new EmbeddingError("embedding_rate_limited");
-  }
   if (!response.ok) {
     throw new EmbeddingError("embedding_api_failed");
   }
 
-  const vector = payload.data?.[0]?.embedding;
-  if (
+  const vectors = payload.data?.map((entry) => entry.embedding);
+  if (!vectors || vectors.length !== inputs.length || vectors.some((vector) =>
     !Array.isArray(vector) ||
     vector.length === 0 ||
-    vector.some((value) => typeof value !== "number" || !Number.isFinite(value))
-  ) {
+    vector.some((value) => typeof value !== "number" || !Number.isFinite(value)))) {
     throw new EmbeddingError("embedding_api_failed");
   }
 
@@ -136,5 +152,17 @@ export async function embedText(
       ? payload.usage?.total_tokens
       : payload.usage?.prompt_tokens;
   const inputTokens = typeof tokenCount === "number" ? tokenCount : null;
-  return { vector: vector as number[], model, inputTokens };
+  return { vectors: vectors as number[][], model, inputTokens };
+}
+
+export async function embedText(
+  input: string,
+  options: { inputType?: EmbeddingInputType } = {},
+): Promise<EmbeddingResult> {
+  const result = await embedTexts([input], options.inputType);
+  return {
+    vector: result.vectors[0],
+    model: result.model,
+    inputTokens: result.inputTokens,
+  };
 }

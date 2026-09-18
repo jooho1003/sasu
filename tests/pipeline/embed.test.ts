@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const moduleMocks = vi.hoisted(() => ({
   createServiceSupabaseClient: vi.fn(),
   embedText: vi.fn(),
+  embedTexts: vi.fn(),
   registerHandler: vi.fn(),
 }));
 
@@ -11,13 +12,14 @@ vi.mock("@/lib/supabase/service", () => ({
 }));
 vi.mock("@/lib/embeddings", () => ({
   embedText: moduleMocks.embedText,
+  embedTexts: moduleMocks.embedTexts,
   formatVector: (vector: number[]) => `[${vector.join(",")}]`,
 }));
 vi.mock("@/lib/jobs", () => ({
   registerHandler: moduleMocks.registerHandler,
 }));
 
-import { embedDecision, embedItem, registerEmbedHandler } from "@/lib/pipeline/embed";
+import { embedBatch, embedDecision, embedItem, registerEmbedHandler } from "@/lib/pipeline/embed";
 
 function makeBuilder(data: unknown, error: unknown = null) {
   const builder = Promise.resolve({ data, error }) as Promise<unknown> & Record<string, (...args: unknown[]) => unknown>;
@@ -31,6 +33,10 @@ function createClient(itemOverrides: Partial<{
   id: string;
   content: string;
   deleted_at: string | null;
+  sources: {
+    import_version: number;
+    title: string | null;
+  };
 }> = {}) {
   const updates: Record<string, unknown>[] = [];
   const from = vi.fn((table: string) => {
@@ -43,6 +49,7 @@ function createClient(itemOverrides: Partial<{
               content: "외주사 견적을 확인합니다.",
               deleted_at: null,
               content_version: 1,
+              sources: { import_version: 1, title: "외주 검토" },
               ...itemOverrides,
             }),
           }),
@@ -83,6 +90,7 @@ describe("embed pipeline", () => {
   beforeEach(() => {
     moduleMocks.createServiceSupabaseClient.mockReset();
     moduleMocks.embedText.mockReset();
+    moduleMocks.embedTexts.mockReset();
     moduleMocks.registerHandler.mockReset();
   });
 
@@ -123,6 +131,28 @@ describe("embed pipeline", () => {
     expect(fake.updates).toEqual([]);
   });
 
+  it("v2 item은 마스킹한 소스 제목을 임베딩 입력에만 붙인다", async () => {
+    const fake = createClient({
+      sources: {
+        import_version: 2,
+        title: "담당자 person@example.com 운영 원칙",
+      },
+    });
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    moduleMocks.embedText.mockResolvedValue({
+      vector: [0.1, 0.2],
+      model: "voyage-4-lite",
+      inputTokens: 10,
+    });
+
+    await embedItem("item-1");
+
+    expect(moduleMocks.embedText).toHaveBeenCalledWith(
+      "담당자 [이메일] 운영 원칙\n외주사 견적을 확인합니다.",
+      { inputType: "document" },
+    );
+  });
+
   it("embed handler를 등록한다", () => {
     registerEmbedHandler();
     expect(moduleMocks.registerHandler).toHaveBeenCalledWith(
@@ -133,6 +163,71 @@ describe("embed pipeline", () => {
       "embed_decision",
       expect.any(Function),
     );
+    expect(moduleMocks.registerHandler).toHaveBeenCalledWith(
+      "embed_batch",
+      expect.any(Function),
+    );
+  });
+
+  it("부서의 v2 pending item을 한 번에 임베딩하고 stale item만 pending으로 남긴다", async () => {
+    const rows = [
+      {
+        id: "item-stale",
+        dept_id: "dept-1",
+        content: "변경 전 본문",
+        content_version: 1,
+        deleted_at: null,
+        sources: { import_version: 2, title: "담당자 stale@example.com" },
+      },
+      {
+        id: "item-current",
+        dept_id: "dept-1",
+        content: "현재 본문",
+        content_version: 2,
+        deleted_at: null,
+        sources: { import_version: 2, title: "운영 원칙" },
+      },
+    ];
+    let selectCount = 0;
+    const query = (data: unknown) => {
+      const builder = Promise.resolve({ data, error: null }) as Promise<unknown> & Record<string, (...args: unknown[]) => unknown>;
+      for (const method of ["eq", "is", "order", "limit"]) builder[method] = () => builder;
+      return builder;
+    };
+    const rpc = vi.fn(async (_name: string, args: { p_item: string }) => ({
+      data: args.p_item !== "item-stale",
+      error: null,
+    }));
+    const client = {
+      from: vi.fn(() => ({
+        select: () => query(selectCount++ === 0 ? rows : [{ id: "item-stale" }]),
+      })),
+      rpc,
+    };
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(client);
+    moduleMocks.embedTexts.mockResolvedValue({
+      vectors: [[0.1, 0.2], [0.3, 0.4]],
+      model: "voyage-4-lite",
+      inputTokens: 20,
+    });
+
+    await expect(embedBatch("dept-1")).resolves.toEqual({ requeue: true });
+    expect(moduleMocks.embedTexts).toHaveBeenCalledOnce();
+    expect(moduleMocks.embedTexts).toHaveBeenCalledWith([
+      "담당자 [이메일]\n변경 전 본문",
+      "운영 원칙\n현재 본문",
+    ], "document");
+    expect(rpc).toHaveBeenCalledTimes(2);
+    expect(rpc).toHaveBeenCalledWith("complete_item_embedding", expect.objectContaining({
+      p_item: "item-stale",
+      p_version: 1,
+      p_embedding: "[0.1,0.2]",
+    }));
+    expect(rpc).toHaveBeenCalledWith("complete_item_embedding", expect.objectContaining({
+      p_item: "item-current",
+      p_version: 2,
+      p_embedding: "[0.3,0.4]",
+    }));
   });
 
   it("결정 결과와 사유를 하나의 문서 임베딩으로 저장한다", async () => {

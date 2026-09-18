@@ -70,7 +70,7 @@
 
 **설정**
 - GitHub 연동, `main` 푸시 = 프로덕션 배포. 하루 마지막 커밋은 항상 배포 가능 상태.
-- 환경 변수 (Production + Preview): `GROQ_API_KEY` · `EMBEDDING_PROVIDER=voyage` · `VOYAGE_API_KEY` · `EMBEDDING_MODEL=voyage-4-lite` · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · `JOBS_TRIGGER_SECRET`
+- 환경 변수 (Production + Preview): `GROQ_API_KEY` · `EMBEDDING_PROVIDER=voyage` · `VOYAGE_API_KEY` · `EMBEDDING_MODEL=voyage-4-lite` · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN_ENCRYPTION_KEY` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · `JOBS_TRIGGER_SECRET`
 - `NEXT_PUBLIC_` 접두사는 Supabase URL·anon key **둘뿐**. 그 외 키가 클라이언트 번들에 들어가면 안 된다 — 빌드 후 `.next/static`을 grep으로 확인.
 - 도메인: Vercel 기본 도메인으로 제출 가능. 커스텀 도메인은 D11까지 여유 있을 때만.
 - ~~Vercel Cron을 택했으면 `vercel.json`에 `/api/jobs/run` 매분.~~ → Hobby 플랜이라 `pg_cron`으로 확정(위 판정). `vercel.json`에는 `framework: nextjs`만 두고 `crons`를 넣지 않는다 — Hobby에서 매분 표현은 배포를 실패시킨다. 트리거 호출은 `JOBS_TRIGGER_SECRET`을 `x-jobs-secret` 헤더로 넣어 인증한다.
@@ -129,8 +129,9 @@ OAuth "Add to Slack"은 만들지 않는다(ADR-017). 파일럿 2팀째는 별�
 
 ## 6. Notion — D7
 
-- notion.so/my-integrations → Internal integration 생성 → `NOTION_TOKEN`.
-- 부서 원칙 문서 페이지(우리 팀 1개, 게스트용은 합성 텍스트로 시드)를 통합에 **공유**(페이지 ··· → Connections). 공유 안 하면 API가 404를 낸다.
+- 서버 환경에 `NOTION_TOKEN_ENCRYPTION_KEY`를 준비한다. 실제 내부 통합 토큰은 조직 관리자가 관리자 화면에서 입력하며 암호문으로만 저장된다.
+- 기존 단일 조직의 `NOTION_TOKEN`은 승인된 운영 이전 때 `scripts/register-legacy-notion.ts`가 읽는 값이며 앱 런타임 fallback으로 사용하지 않는다.
+- 부서 원칙 문서 페이지(우리 팀 1개, 게스트용은 합성 텍스트로 시드)를 통합에 **연결 추가**(페이지 ··· → Connections). 공유하지 않으면 API가 404를 낸다.
 - 100블록 넘는 페이지는 헤딩 단위로 청크된다 — 원칙 문서는 헤딩 구조를 갖추면 인용이 정확해진다.
 - 폴링·웹훅은 만들지 않는다(ADR-004). 바뀌면 S5의 [다시 가져오기].
 

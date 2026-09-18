@@ -12,6 +12,63 @@ export const DEMO_DEPARTMENT_IDS = [
 
 export const DEMO_REVIEWER_EMAIL = "judge-demo@demo.sasu.team";
 
+export const DEMO_NOTION_ROOTS = [
+  {
+    id: "a1000000-0000-4000-8000-000000000001",
+    org_id: DEMO_ORG_ID,
+    dept_id: DEMO_DEFAULT_DEPT_ID,
+    scope: "subtree" as const,
+    notion_id: "demo-sales-principles",
+    notion_kind: "page" as const,
+    top_title: "영업 운영 위키 (합성)",
+    visibility: "dept" as const,
+    include_new: true,
+    card_candidates: false,
+    created_role: "lead" as const,
+    state: "idle" as const,
+    discovered_count: 5,
+    completed_count: 2,
+    pending_count: 1,
+    failed_count: 1,
+    excluded_count: 1,
+  },
+  {
+    id: "a2000000-0000-4000-8000-000000000001",
+    org_id: DEMO_ORG_ID,
+    dept_id: DEMO_DEPARTMENT_IDS[1],
+    scope: "subtree" as const,
+    notion_id: "demo-dev-principles",
+    notion_kind: "page" as const,
+    top_title: "개발 운영 위키 (합성)",
+    visibility: "dept" as const,
+    include_new: true,
+    card_candidates: false,
+    created_role: "lead" as const,
+    state: "idle" as const,
+    discovered_count: 4,
+    completed_count: 2,
+    pending_count: 1,
+    failed_count: 1,
+    excluded_count: 0,
+  },
+] as const;
+
+export const DEMO_NOTION_SOURCES = [
+  { id: "10000000-0000-4000-8000-000000000101", dept_id: DEMO_DEFAULT_DEPT_ID, root_id: DEMO_NOTION_ROOTS[0].id, external_id: "demo-sales-principles", title: "영업 원칙 문서", visibility: "dept" as const, is_principles: true, active: true, last_synced_at: "2026-09-18T00:30:00.000Z", last_error: null, parent_external_id: null },
+  { id: "10000000-0000-4000-8000-000000000104", dept_id: DEMO_DEFAULT_DEPT_ID, root_id: DEMO_NOTION_ROOTS[0].id, external_id: "demo-sales-price-policy", title: "가격·할인 승인 기준", visibility: "dept" as const, is_principles: false, active: true, last_synced_at: "2026-09-18T00:25:00.000Z", last_error: null, parent_external_id: "demo-sales-principles" },
+  { id: "10000000-0000-4000-8000-000000000105", dept_id: DEMO_DEFAULT_DEPT_ID, root_id: DEMO_NOTION_ROOTS[0].id, external_id: "demo-sales-contract-notes", title: "고객 계약 검토 기록", visibility: "leads_only" as const, is_principles: false, active: true, last_synced_at: null, last_error: null, parent_external_id: "demo-sales-principles" },
+  { id: "10000000-0000-4000-8000-000000000106", dept_id: DEMO_DEFAULT_DEPT_ID, root_id: DEMO_NOTION_ROOTS[0].id, external_id: "demo-sales-partner-db", title: "파트너 현황 데이터베이스", visibility: "dept" as const, is_principles: false, active: true, last_synced_at: null, last_error: "notion_database_unsupported", parent_external_id: "demo-sales-principles" },
+  { id: "10000000-0000-4000-8000-000000000107", dept_id: DEMO_DEFAULT_DEPT_ID, root_id: DEMO_NOTION_ROOTS[0].id, external_id: "demo-sales-old-meetings", title: "이전 영업 회의록", visibility: "dept" as const, is_principles: false, active: false, last_synced_at: "2026-09-17T23:00:00.000Z", last_error: "notion_excluded", parent_external_id: "demo-sales-principles" },
+  { id: "20000000-0000-4000-8000-000000000101", dept_id: DEMO_DEPARTMENT_IDS[1], root_id: DEMO_NOTION_ROOTS[1].id, external_id: "demo-dev-principles", title: "개발 원칙 문서", visibility: "dept" as const, is_principles: true, active: true, last_synced_at: "2026-09-18T00:35:00.000Z", last_error: null, parent_external_id: null },
+  { id: "20000000-0000-4000-8000-000000000107", dept_id: DEMO_DEPARTMENT_IDS[1], root_id: DEMO_NOTION_ROOTS[1].id, external_id: "demo-dev-release", title: "배포·롤백 체크리스트", visibility: "dept" as const, is_principles: false, active: true, last_synced_at: "2026-09-18T00:32:00.000Z", last_error: null, parent_external_id: "demo-dev-principles" },
+  { id: "20000000-0000-4000-8000-000000000108", dept_id: DEMO_DEPARTMENT_IDS[1], root_id: DEMO_NOTION_ROOTS[1].id, external_id: "demo-dev-architecture", title: "서비스 구조 기록", visibility: "leads_only" as const, is_principles: false, active: true, last_synced_at: null, last_error: null, parent_external_id: "demo-dev-principles" },
+  { id: "20000000-0000-4000-8000-000000000109", dept_id: DEMO_DEPARTMENT_IDS[1], root_id: DEMO_NOTION_ROOTS[1].id, external_id: "demo-dev-large-spec", title: "대규모 기술 명세", visibility: "dept" as const, is_principles: false, active: true, last_synced_at: null, last_error: "notion_page_too_large", parent_external_id: "demo-dev-principles" },
+] as const;
+
+export const DEMO_NOTION_EXCLUSIONS = [
+  { dept_id: DEMO_DEFAULT_DEPT_ID, notion_id: "demo-sales-old-meetings", subtree: true },
+] as const;
+
 export type DemoFeature = {
   key:
     | "dashboard"
@@ -24,7 +81,8 @@ export type DemoFeature = {
     | "retention"
     | "settings"
     | "admin"
-    | "trailers";
+    | "trailers"
+    | "notion";
   title: string;
   description: string;
   href: string;
@@ -37,6 +95,7 @@ const DEV_DEPT_ID = DEMO_DEPARTMENT_IDS[1];
 const SALES_CARD_ID = "10000000-0000-4000-8000-000000000121";
 
 export const DEMO_FEATURES: readonly DemoFeature[] = [
+  { key: "notion", title: "Notion 자동 수집", description: "최상위 범위 매핑, 수집 현황, 문서 제외와 카드 후보 설정을 안전하게 체험", href: "/demo/notion", mode: "safe_preview", audience: "조직 관리자" },
   { key: "dashboard", title: "분류 대시보드", description: "슬랙·회의·문서 기록이 결정·액션·정보로 분류되는 흐름", href: `/demo/d/${SALES_DEPT_ID}`, mode: "live_read", audience: "팀원" },
   { key: "card", title: "지금 결정 카드", description: "마감·추천·원문 근거·과거 결정 충돌과 안전한 결정 체험", href: `/demo/d/${SALES_DEPT_ID}/cards/${SALES_CARD_ID}`, mode: "safe_preview", audience: "부서장" },
   { key: "ledger", title: "결정 원장", description: "결정 이유와 인용, 정정 이력을 남기는 append-only 기록", href: `/demo/d/${SALES_DEPT_ID}/ledger`, mode: "live_read", audience: "팀원" },
@@ -77,6 +136,7 @@ export function safeDemoDestination(value: string | null | undefined): string {
   if (parsed.pathname === "/demo") return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   if (parsed.pathname === "/demo/access") return "/demo";
   if (parsed.pathname === "/demo/admin") return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  if (parsed.pathname === "/demo/notion") return `${parsed.pathname}${parsed.search}${parsed.hash}`;
 
   const match = parsed.pathname.match(/^\/demo\/d\/([^/]+)(?:\/.*)?$/u);
   if (!match || !DEMO_DEPARTMENT_IDS.includes(match[1] as (typeof DEMO_DEPARTMENT_IDS)[number])) {

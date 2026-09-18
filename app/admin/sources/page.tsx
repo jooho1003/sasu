@@ -2,6 +2,8 @@ import { AdminSourceRow } from "@/lib/contracts";
 import { AdminSourcesTable, AdminUnavailable } from "@/components/admin/views";
 import { adminRead } from "../_data";
 import { SlackInstallation } from "@/components/admin/slack-installation";
+import { NotionInstallation } from "@/components/admin/notion-installation";
+import { NotionCollection } from "@/components/admin/notion-collection";
 
 export default async function AdminSourcesPage({
   searchParams,
@@ -27,6 +29,8 @@ export default async function AdminSourcesPage({
         </div>
       </header>
       <SlackInstallation result={slack} />
+      <NotionInstallation />
+      <NotionCollection departments={departments.map(([id, name]) => ({ id, name }))} />
       <form className="flex flex-wrap items-end gap-3">
         <label className="grid gap-2 text-sm">
           부서

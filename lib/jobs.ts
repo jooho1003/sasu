@@ -1,4 +1,5 @@
 import { withSlackJob } from "@/lib/slack/workspace";
+import { withNotionForJob } from "@/lib/notion-workspace";
 import { createHash, randomUUID } from "node:crypto";
 
 import { after } from "next/server";
@@ -9,6 +10,7 @@ import { trailerPublishEnabled, trailerScoresMode } from "@/lib/features";
 export type JobKind =
   | "classify"
   | "embed"
+  | "embed_batch"
   | "embed_decision"
   | "summarize_meeting"
   | "summarize_document"
@@ -22,6 +24,8 @@ export type JobKind =
   | "send_reminder"
   | "deliver_slack_answer"
   | "notion_import"
+  | "notion_discover"
+  | "notion_poll"
   | "slack_backfill"
   | "process_review"
   | "purge_review_files"
@@ -32,10 +36,14 @@ type JobRow = {
   kind: string;
   payload: unknown;
   attempts: number;
+  lane: JobLane;
+  created_at: string;
 };
 
+export type JobLane = "realtime" | "bulk";
+type JobHandlerResult = void | { requeue?: boolean };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type JobHandler = (payload: any) => Promise<void>;
+type JobHandler = (payload: any) => Promise<JobHandlerResult>;
 
 type OwnerReference = {
   payloadKey: string;
@@ -43,7 +51,7 @@ type OwnerReference = {
 };
 
 type FailureOwnerMapping = {
-  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "document_summaries" | "agent_role_results" | "trailers" | "trailer_attempts";
+  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "notion_roots" | "document_summaries" | "agent_role_results" | "trailers" | "trailer_attempts";
   references: OwnerReference[];
   write: "update" | "upsert";
   values: (ownerId: string, errorCode: string) => Record<string, unknown>;
@@ -57,6 +65,8 @@ const RETRY_BASE_DELAY_MS = 1_000;
 const RETRY_JITTER_MS = 1_000;
 const SWEEP_TIMEOUT_MS = 2 * 60 * 1_000;
 const AGENT_ROLE_SWEEP_TIMEOUT_MS = 20 * 60 * 1_000;
+const BULK_RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1_000;
+const NOTION_LEASE_RETRY_MS = 5_000;
 
 const SAFE_ERROR_CODES = new Set([
   "auth",
@@ -76,7 +86,10 @@ const SAFE_ERROR_CODES = new Set([
   "slack_not_configured",
   "slack_rate_limited",
   "notion_api_failed",
+  "notion_database_unsupported",
   "notion_not_configured",
+  "notion_not_found",
+  "notion_page_too_large",
   "notion_rate_limited",
   "unknown_kind",
   "unmasked_prompt",
@@ -160,6 +173,12 @@ const FAILURE_OWNER_MAPPINGS: Partial<
     references: [{ payloadKey: "sourceId", column: "id" }],
     write: "update",
     values: (_sourceId, errorCode) => ({ last_error: errorCode }),
+  },
+  notion_discover: {
+    table: "notion_roots",
+    references: [{ payloadKey: "rootId", column: "id" }],
+    write: "update",
+    values: (_rootId, errorCode) => ({ state: "failed", last_error: errorCode }),
   },
   summarize_meeting: {
     table: "meetings",
@@ -247,6 +266,27 @@ function retryAt(attempts: number, error?: unknown): string {
   const requested = error && typeof error === "object" ? Reflect.get(error, "retryAfterSeconds") : null;
   const serverDelay = typeof requested === "number" && Number.isFinite(requested) ? Math.min(3600, Math.max(0, requested)) * 1000 : 0;
   return new Date(Date.now() + Math.max(exponentialDelay, serverDelay) + jitter).toISOString();
+}
+
+function requestedRetryAfter(error: unknown): number | null {
+  const requested = error && typeof error === "object"
+    ? Reflect.get(error, "retryAfterSeconds")
+    : null;
+  return typeof requested === "number" && Number.isFinite(requested)
+    ? Math.min(3600, Math.max(0, requested))
+    : null;
+}
+
+function isExpiredBulkRateLimit(job: JobRow, error: unknown): boolean {
+  if (job.lane !== "bulk" || requestedRetryAfter(error) === null) return false;
+  const createdAt = Date.parse(job.created_at);
+  return Number.isFinite(createdAt) && Date.now() - createdAt >= BULK_RATE_LIMIT_WINDOW_MS;
+}
+
+function defaultLane(kind: JobKind): JobLane {
+  return ["notion_discover", "notion_poll", "embed_batch"].includes(kind)
+    ? "bulk"
+    : "realtime";
 }
 
 async function updateJob(
@@ -361,7 +401,7 @@ export async function sweepPendingRows(): Promise<void> {
 export async function enqueue(
   kind: JobKind,
   payload: unknown,
-  opts?: { dedupeKey?: string; runAfter?: Date },
+  opts?: { dedupeKey?: string; runAfter?: Date; lane?: JobLane },
 ): Promise<string> {
   const client = createServiceSupabaseClient();
   const id = opts?.dedupeKey
@@ -373,6 +413,7 @@ export async function enqueue(
       id,
       kind,
       payload,
+      lane: opts?.lane ?? defaultLane(kind),
       run_after: opts?.runAfter?.toISOString() ?? new Date().toISOString(),
     })
     .select("id")
@@ -398,6 +439,7 @@ export function registerHandler(kind: JobKind, fn: JobHandler): void {
 
 export async function runOnce(
   limit = DEFAULT_CLAIM_LIMIT,
+  lane: JobLane = "realtime",
 ): Promise<{ claimed: number; done: number; failed: number }> {
   const claimLimit = Math.min(
     MAX_CLAIM_LIMIT,
@@ -406,6 +448,7 @@ export async function runOnce(
   const client = createServiceSupabaseClient();
   const { data, error } = await client.rpc("claim_jobs", {
     p_limit: claimLimit,
+    p_lane: lane,
   });
 
   if (error) {
@@ -430,10 +473,66 @@ export async function runOnce(
       continue;
     }
 
+    const notionJob = ["notion_import", "notion_discover", "notion_poll"].includes(job.kind);
+    if (notionJob) {
+      const lease = await client.rpc("acquire_notion_job_lease", { p_job: job.id });
+      if (lease.error) throw new JobWorkerDatabaseError();
+      if (lease.data !== true) {
+        await updateJob(client, job.id, {
+          status: "queued",
+          attempts: Math.max(0, job.attempts - 1),
+          run_after: new Date(Date.now() + NOTION_LEASE_RETRY_MS).toISOString(),
+          lease_until: null,
+          updated_at: new Date().toISOString(),
+        });
+        continue;
+      }
+    }
+
+    let handlerResult: JobHandlerResult = undefined;
+    let handlerError: unknown;
+    let handlerFailed = false;
     try {
-      await withSlackJob(client, job.id, job.kind, () => handler(job.payload));
-    } catch (handlerError) {
+      handlerResult = await withSlackJob(client, job.id, job.kind, () =>
+        notionJob
+          ? withNotionForJob(client, job.id, () => handler(job.payload))
+          : handler(job.payload),
+      );
+    } catch (error) {
+      handlerFailed = true;
+      handlerError = error;
+    } finally {
+      if (notionJob) {
+        const released = await client.rpc("release_notion_job_lease", { p_job: job.id });
+        if (released.error) throw new JobWorkerDatabaseError();
+      }
+    }
+
+    if (handlerFailed) {
       const errorCode = sanitizeErrorCode(handlerError);
+
+      if (job.lane === "bulk" && requestedRetryAfter(handlerError) !== null) {
+        if (isExpiredBulkRateLimit(job, handlerError)) {
+          await updateFailureOwner(client, job, errorCode);
+          await updateJob(client, job.id, {
+            status: "failed",
+            last_error: errorCode,
+            lease_until: null,
+            updated_at: new Date().toISOString(),
+          });
+          failed += 1;
+          continue;
+        }
+        await updateJob(client, job.id, {
+          status: "queued",
+          attempts: Math.max(0, job.attempts - 1),
+          run_after: retryAt(0, handlerError),
+          last_error: errorCode,
+          lease_until: null,
+          updated_at: new Date().toISOString(),
+        });
+        continue;
+      }
 
       if (job.attempts >= MAX_ATTEMPTS) {
         await updateFailureOwner(client, job, errorCode);
@@ -459,12 +558,22 @@ export async function runOnce(
     // 처리 성공 뒤 완료 기록 실패는 외부 작업의 실패가 아니다.
     // 자동 재큐잉하지 않고 오류를 상위로 전달해 중복 실행을 피한다.
     // 이 경우 lease 만료 뒤 동일 job이 회수될 수 있으므로 handler는 멱등이어야 한다.
-    await updateJob(client, job.id, {
-      status: "done",
-      last_error: null,
-      lease_until: null,
-      updated_at: new Date().toISOString(),
-    });
+    if (job.kind === "embed_batch") {
+      const completed = await client.rpc("complete_embed_batch_job", {
+        p_job: job.id,
+        p_requeue: handlerResult?.requeue === true,
+      });
+      if (completed.error || !["done", "queued"].includes(String(completed.data))) {
+        throw new JobWorkerDatabaseError();
+      }
+    } else {
+      await updateJob(client, job.id, {
+        status: "done",
+        last_error: null,
+        lease_until: null,
+        updated_at: new Date().toISOString(),
+      });
+    }
     done += 1;
   }
 

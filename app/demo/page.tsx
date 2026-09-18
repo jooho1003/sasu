@@ -53,6 +53,7 @@ const featureIcons: Record<(typeof DEMO_FEATURES)[number]["key"], IconName> = {
   settings: "settings",
   admin: "people",
   trailers: "video",
+  notion: "file",
 };
 
 export default async function DemoLandingPage({

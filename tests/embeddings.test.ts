@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   embedText,
+  embedTexts,
   embeddingDimension,
   embeddingModel,
   embeddingProvider,
@@ -50,7 +51,7 @@ describe("embedding gateway", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
-          input: "테스트 문장",
+          input: ["테스트 문장"],
           model: "text-embedding-3-small",
         }),
       }),
@@ -86,7 +87,7 @@ describe("embedding gateway", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
-          input: "테스트 질문",
+          input: ["테스트 질문"],
           model: "voyage-4-lite",
           input_type: "query",
           output_dimension: 1024,
@@ -94,6 +95,56 @@ describe("embedding gateway", () => {
         }),
       }),
     );
+  });
+
+  it("여러 문서를 한 번의 Voyage 요청으로 보내고 입력 순서대로 벡터를 반환한다", async () => {
+    process.env.EMBEDDING_PROVIDER = "voyage";
+    process.env.VOYAGE_API_KEY = "voyage-test";
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: [
+            { embedding: [0.1, 0.2] },
+            { embedding: [0.3, 0.4] },
+          ],
+          usage: { total_tokens: 12 },
+        }),
+        { status: 200 },
+      ),
+    );
+
+    await expect(embedTexts(["문서 A", "문서 B"], "document")).resolves.toEqual({
+      vectors: [[0.1, 0.2], [0.3, 0.4]],
+      model: "voyage-4-lite",
+      inputTokens: 12,
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api.voyageai.com/v1/embeddings",
+      expect.objectContaining({
+        body: JSON.stringify({
+          input: ["문서 A", "문서 B"],
+          model: "voyage-4-lite",
+          input_type: "document",
+          output_dimension: 1024,
+          output_dtype: "float",
+        }),
+      }),
+    );
+  });
+
+  it("Voyage 429의 Retry-After를 안전한 재시도 힌트로 보존한다", async () => {
+    process.env.VOYAGE_API_KEY = "voyage-test";
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ error: "rate limited" }), {
+        status: 429,
+        headers: { "retry-after": "30" },
+      }),
+    );
+
+    await expect(embedTexts(["문서"], "document")).rejects.toMatchObject({
+      error_code: "embedding_rate_limited",
+      retryAfterSeconds: 30,
+    });
   });
 
   it("네트워크 오류도 안전한 embedding_api_failed 코드로 변환한다", async () => {

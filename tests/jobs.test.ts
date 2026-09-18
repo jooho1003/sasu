@@ -4,12 +4,16 @@ const moduleMocks = vi.hoisted(() => ({
   after: vi.fn(),
   createServiceSupabaseClient: vi.fn(),
   runWorkerOnce: vi.fn(),
+  withNotionForJob: vi.fn(),
 }));
 
 vi.mock("next/server", () => ({ after: moduleMocks.after }));
 vi.mock("@/lib/worker", () => ({ runWorkerOnce: moduleMocks.runWorkerOnce }));
 vi.mock("@/lib/supabase/service", () => ({
   createServiceSupabaseClient: moduleMocks.createServiceSupabaseClient,
+}));
+vi.mock("@/lib/notion-workspace", () => ({
+  withNotionForJob: moduleMocks.withNotionForJob,
 }));
 
 import {
@@ -24,6 +28,8 @@ type ClaimedJob = {
   kind: string;
   payload: unknown;
   attempts: number;
+  lane?: "realtime" | "bulk";
+  created_at?: string;
 };
 
 type Filter = { operator: "eq" | "lt" | "in"; column: string; value: unknown };
@@ -61,12 +67,18 @@ function makeBuilder(operation: Operation, data: unknown = null): QueryBuilder {
   return builder;
 }
 
-function createFakeClient(claims: ClaimedJob[][] = []) {
+function createFakeClient(
+  claims: ClaimedJob[][] = [],
+  options: { notionLease?: boolean } = {},
+) {
   const operations: Operation[] = [];
-  const rpc = vi.fn(async (name: string) => ({
-    data: name === "claim_jobs" ? claims.shift() ?? [] : null,
-    error: null,
-  }));
+  const rpc = vi.fn(async (name: string) => {
+    if (name === "claim_jobs") return { data: claims.shift() ?? [], error: null };
+    if (name === "acquire_notion_job_lease") return { data: options.notionLease ?? true, error: null };
+    if (name === "release_notion_job_lease") return { data: true, error: null };
+    if (name === "complete_embed_batch_job") return { data: "done", error: null };
+    return { data: null, error: null };
+  });
   const from = vi.fn((table: string) => ({
     insert: (values: unknown) => {
       const operation: Operation = {
@@ -126,6 +138,10 @@ describe("jobs worker", () => {
   beforeEach(() => {
     moduleMocks.after.mockReset();
     moduleMocks.createServiceSupabaseClient.mockReset();
+    moduleMocks.withNotionForJob.mockReset();
+    moduleMocks.withNotionForJob.mockImplementation(
+      async (_client, _jobId, action: () => Promise<unknown>) => action(),
+    );
     vi.spyOn(Math, "random").mockReturnValue(0);
   });
 
@@ -412,6 +428,161 @@ describe("jobs worker", () => {
     expect(values.last_error).toBe("job_failed");
     expect(values.last_error).not.toContain("고객 질문");
     expect(values.last_error).not.toContain("슬랙 이벤트");
+    expect(moduleMocks.withNotionForJob).toHaveBeenCalledWith(
+      fake.client,
+      "job-sensitive-error",
+      expect.any(Function),
+    );
+  });
+
+  it("claim은 lane을 SQL RPC에 명시하고 기본값은 realtime이다", async () => {
+    const fake = createFakeClient([[], []]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+
+    await runOnce();
+    await runOnce(25, "bulk");
+
+    expect(fake.rpc).toHaveBeenNthCalledWith(1, "claim_jobs", {
+      p_limit: 10,
+      p_lane: "realtime",
+    });
+    expect(fake.rpc).toHaveBeenNthCalledWith(2, "claim_jobs", {
+      p_limit: 25,
+      p_lane: "bulk",
+    });
+  });
+
+  it("24시간 안의 bulk 429는 attempts를 소모하지 않고 Retry-After만 따른다", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-18T12:00:00.000Z"));
+    const createdAt = "2026-09-18T11:00:00.000Z";
+    const fake = createFakeClient(Array.from({ length: 4 }, () => [{
+      id: "embed-batch",
+      kind: "embed_batch",
+      payload: { deptId: "dept-1" },
+      attempts: 1,
+      lane: "bulk" as const,
+      created_at: createdAt,
+    }]));
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    let calls = 0;
+    registerHandler("embed_batch", async () => {
+      calls += 1;
+      if (calls <= 3) {
+        throw Object.assign(new Error("rate limited"), {
+          error_code: "embedding_rate_limited",
+          retryAfterSeconds: 30,
+        });
+      }
+      return { requeue: false };
+    });
+
+    await runOnce(25, "bulk");
+    await runOnce(25, "bulk");
+    await runOnce(25, "bulk");
+    await expect(runOnce(25, "bulk")).resolves.toEqual({ claimed: 1, done: 1, failed: 0 });
+
+    const retries = fake.operations.filter(operation =>
+      operation.table === "jobs" &&
+      operation.method === "update" &&
+      (operation.values as { status?: string }).status === "queued");
+    expect(retries).toHaveLength(3);
+    for (const retry of retries) {
+      expect(retry.values).toEqual(expect.objectContaining({
+        attempts: 0,
+        last_error: "embedding_rate_limited",
+        run_after: "2026-09-18T12:00:30.000Z",
+      }));
+    }
+    expect(fake.rpc).toHaveBeenCalledWith("complete_embed_batch_job", {
+      p_job: "embed-batch",
+      p_requeue: false,
+    });
+  });
+
+  it("생성 후 24시간이 지난 bulk 429는 즉시 failed로 닫힌다", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-18T12:00:00.000Z"));
+    const fake = createFakeClient([[
+      {
+        id: "old-bulk-job",
+        kind: "embed_batch",
+        payload: { deptId: "dept-1" },
+        attempts: 1,
+        lane: "bulk",
+        created_at: "2026-09-17T11:00:00.000Z",
+      },
+    ]]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    registerHandler("embed_batch", async () => {
+      throw Object.assign(new Error("rate limited"), {
+        error_code: "embedding_rate_limited",
+        retryAfterSeconds: 30,
+      });
+    });
+
+    await expect(runOnce(25, "bulk")).resolves.toEqual({ claimed: 1, done: 0, failed: 1 });
+    expect(jobUpdate(fake.operations, "failed").values).toEqual(expect.objectContaining({
+      last_error: "embedding_rate_limited",
+      lease_until: null,
+    }));
+  });
+
+  it("같은 Notion 설치 lease를 못 잡으면 5초 뒤로 미루고 attempts를 되돌린다", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-18T12:00:00.000Z"));
+    const fake = createFakeClient([[
+      {
+        id: "discover-busy",
+        kind: "notion_discover",
+        payload: { rootId: "root-1" },
+        attempts: 2,
+        lane: "bulk",
+        created_at: "2026-09-18T11:00:00.000Z",
+      },
+    ]], { notionLease: false });
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    const handler = vi.fn(async () => undefined);
+    registerHandler("notion_discover", handler);
+
+    await expect(runOnce(25, "bulk")).resolves.toEqual({ claimed: 1, done: 0, failed: 0 });
+    expect(handler).not.toHaveBeenCalled();
+    expect(moduleMocks.withNotionForJob).not.toHaveBeenCalled();
+    expect(jobUpdate(fake.operations, "queued").values).toEqual(expect.objectContaining({
+      attempts: 1,
+      run_after: "2026-09-18T12:00:05.000Z",
+      lease_until: null,
+    }));
+  });
+
+  it("notion_discover 최종 실패는 root에 안전한 코드만 남긴다", async () => {
+    const fake = createFakeClient([[
+      {
+        id: "discover-job",
+        kind: "notion_discover",
+        payload: { rootId: "root-1" },
+        attempts: 3,
+      },
+    ]]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+    registerHandler("notion_discover", async () => {
+      throw Object.assign(new Error("하위 페이지 원문"), {
+        error_code: "notion_api_failed",
+      });
+    });
+
+    await runOnce();
+
+    const owner = fake.operations.find(
+      (operation) => operation.table === "notion_roots" && operation.method === "update",
+    );
+    expect(owner?.values).toEqual({ state: "failed", last_error: "notion_api_failed" });
+    expect(owner?.filters).toContainEqual({ operator: "eq", column: "id", value: "root-1" });
+    expect(moduleMocks.withNotionForJob).toHaveBeenCalledWith(
+      fake.client,
+      "discover-job",
+      expect.any(Function),
+    );
   });
 
   it("enqueue는 runAfter를 저장하고 생성된 job id를 반환한다", async () => {
@@ -428,11 +599,25 @@ describe("jobs worker", () => {
         method: "insert",
         values: expect.objectContaining({
           kind: "classify",
+          lane: "realtime",
           payload: { itemId: "item-1" },
           run_after: runAfter.toISOString(),
         }),
       }),
     );
+  });
+
+  it("enqueue는 notion_discover와 embed_batch를 bulk lane으로 저장한다", async () => {
+    const fake = createFakeClient();
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+
+    await enqueue("notion_discover", { rootId: "root-1" });
+    await enqueue("embed_batch", { deptId: "dept-1" });
+
+    expect(fake.operations.map(operation => operation.values)).toEqual([
+      expect.objectContaining({ kind: "notion_discover", lane: "bulk" }),
+      expect.objectContaining({ kind: "embed_batch", lane: "bulk" }),
+    ]);
   });
 
   it("kickWorker는 Next.js after에서 공통 워커 진입점을 실행한다", async () => {

@@ -4,6 +4,11 @@ import { verifySourceLifecycleSql } from "./verify-source-lifecycle-sql.mjs";
 import { verifyDecisionFollowupSql } from "./verify-decision-followup-sql.mjs";
 import { verifyConversationsSql } from "./verify-conversations-sql.mjs";
 import { verifySlackInstallationsSql } from "./verify-slack-installations-sql.mjs";
+import { verifyNotionInstallationsSql } from "./verify-notion-installations-sql.mjs";
+import { verifyNotionImportV2Sql } from "./verify-notion-import-v2-sql.mjs";
+import { verifyNotionRootsSql } from "./verify-notion-roots-sql.mjs";
+import { verifyNotionBulkLaneSql } from "./verify-notion-bulk-lane-sql.mjs";
+import { verifyNotionPollSql } from "./verify-notion-poll-sql.mjs";
 import { verifyReviewedMaterialsSql } from "./verify-reviewed-materials-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
@@ -1019,3 +1024,8 @@ try {
 } finally {
   await db.close();
 }
+  await verifyNotionInstallationsSql({ q, check, asUser });
+  await verifyNotionImportV2Sql({ q, check, asUser });
+  await verifyNotionRootsSql({ db, q, check, asUser });
+  await verifyNotionBulkLaneSql({ db, q, check, asUser });
+  await verifyNotionPollSql({ db, q, check, asUser });

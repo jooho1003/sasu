@@ -112,6 +112,10 @@
       "production_deployed": true
     },
     {
+      "dir": "25-notion-collection",
+      "status": "pending"
+    },
+    {
       "dir": "26-trailer-candidate-links",
       "status": "pending"
     }
