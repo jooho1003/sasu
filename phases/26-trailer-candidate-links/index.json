@@ -4,7 +4,7 @@
   "design": "docs/planning/예고편_지원자링크_설계.md",
   "adr": "ADR-062",
   "steps": [
-    { "step": 0, "name": "invite-schema", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
+    { "step": 0, "name": "invite-schema", "status": "completed", "codex_model": "gpt-5.6-sol", "effort": "xhigh", "summary": "지원자 초대·동의·1회 제출·채점 큐·철회/파기 SQL 경계와 12개 격리 하니스 검증을 추가했다." },
     { "step": 1, "name": "invite-lib", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
     { "step": 2, "name": "lead-invites", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
     { "step": 3, "name": "candidate-page", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
