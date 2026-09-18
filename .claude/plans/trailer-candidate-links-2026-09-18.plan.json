@@ -1,0 +1,18 @@
+{
+  "slug": "trailer-candidate-links",
+  "date": "2026-09-18",
+  "context": "채용 예고편 지원자별 개별 링크·동의·제출·채점·파기(ADR-062). 사용자 결정 B안·이메일·7일. 설계 docs/planning/예고편_지원자링크_설계.md. 실행 계약은 phases/26-trailer-candidate-links (Codex). 조직 개시는 사람 판정.",
+  "nodes": [
+    { "id": "D0", "title": "설계·PRD §3-2/§8-1·불변식 20·21·ADR-062·step 파일", "domain": "general", "D1": 2, "D2": 2, "D3": 1, "D4": 2, "score": 7, "tier": "powerful", "agent": "main(never_delegate: 아키텍처)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": [], "output": "docs·phases/26 step0~7", "status": "done" },
+    { "id": "S0", "title": "invite-schema (SQL·RPC·RLS·하니스·롤백)", "domain": "security", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "powerful", "agent": "codex", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["D0"], "output": "supabase/migrations/00NN_trailer_invites.sql 외" },
+    { "id": "S1", "title": "invite-lib (TDD)", "domain": "general", "D1": 0, "D2": 0, "D3": 0, "D4": 1, "score": 1, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S0"], "output": "lib/trailer-invite.ts·contracts" , "note": "score 1이지만 다중 파일 쓰기(D2 실제 1)로 terra" },
+    { "id": "S2", "title": "lead-invites (라우트+S18 구역)", "domain": "frontend", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S1"], "output": "app/api/d/[dept]/trailers/[id]/invites·components/trailers/invites.tsx" },
+    { "id": "S3", "title": "candidate-page (비로그인 공개 표면)", "domain": "security", "D1": 0, "D2": 2, "D3": 1, "D4": 1, "score": 4, "tier": "powerful", "agent": "codex", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["S1"], "output": "app/t/i/[token]·app/api/t/i/{open,consent}·trailer-invite-flow" },
+    { "id": "S4", "title": "candidate-submit-score (anon→DB 쓰기·job)", "domain": "security", "D1": 0, "D2": 2, "D3": 1, "D4": 1, "score": 4, "tier": "powerful", "agent": "codex", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["S3"], "output": "app/api/t/i/{submit,withdraw}·점수표 탭" },
+    { "id": "S5", "title": "purge-withdraw (파기 job·처리방침)", "domain": "general", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S4"], "output": "lib/pipeline/trailer-purge.ts·privacy" },
+    { "id": "S6", "title": "demo-invite-mock", "domain": "frontend", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S3"], "output": "components/demo-trailer-invites.tsx" },
+    { "id": "S7", "title": "invite-verification → blocked", "domain": "qa", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S2", "S4", "S5", "S6"], "output": "docs/verification/trailer-invites.md" },
+    { "id": "O1", "title": "운영 DB 적용·플래그·조직 개시", "domain": "security", "D1": 1, "D2": 2, "D3": 2, "D4": 2, "score": 7, "tier": "powerful", "agent": "main + 사용자", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["S7"], "output": "운영 반영 기록", "requires_approval": true, "note": "법률 자문 전 실제 조직 개시 금지" }
+  ],
+  "gate": { "G1": "PASS", "G2": "PASS", "G3": "PASS", "G4": "PASS(근거 첨부)", "G5": "PASS(O1 requires_approval)", "result": "PASS" }
+}

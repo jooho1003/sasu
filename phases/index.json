@@ -110,6 +110,10 @@
       "status": "completed",
       "verification": "docs/verification/continuity-production-2026-09-16.md",
       "production_deployed": true
+    },
+    {
+      "dir": "26-trailer-candidate-links",
+      "status": "pending"
     }
   ]
 }
