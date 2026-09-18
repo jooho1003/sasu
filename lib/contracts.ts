@@ -215,6 +215,59 @@ export type TrailerScoreDraft = z.infer<typeof TrailerScoreDraft>;
 export const TrailerAttemptResult = z.strictObject({ rubric_snapshot: z.array(AgentRoleCriterion), criteria: z.array(z.strictObject({ key: z.string(), label: z.string(), weight: z.number().int().min(1).max(5), score: z.number().int().min(0).max(5).nullable(), rationale: z.string().nullable(), evidence_status: z.enum(["ok", "no_evidence"]), evidence: z.array(TrailerScoreEvidence) })), interview_questions: z.array(TrailerInterviewQuestion) });
 export type TrailerAttemptResult = z.infer<typeof TrailerAttemptResult>;
 
+export const TrailerInviteToken = z.string().regex(/^[0-9a-f]{64}$/);
+export type TrailerInviteToken = z.infer<typeof TrailerInviteToken>;
+
+export const TrailerInviteEmail = z.string().trim().toLowerCase().email().max(254);
+export type TrailerInviteEmail = z.infer<typeof TrailerInviteEmail>;
+
+export const TrailerInviteOpen = z.strictObject({
+  scenarios: z.array(TrailerScenario).min(1).max(3),
+  apply_url: z.url().refine((url) => new URL(url).protocol === "https:").nullable(),
+  org_display_name: z.string().trim().min(1),
+  state: z.enum(["consent_required", "ready", "submitted", "withdrawn"]),
+  consent_version: z.string().trim().min(1),
+  expires_at: z.iso.datetime(),
+});
+export type TrailerInviteOpen = z.infer<typeof TrailerInviteOpen>;
+
+const TrailerInviteStatus = z.enum(["pending", "opened", "consented", "submitted", "scored", "expired", "revoked", "withdrawn", "purged"]);
+export const TrailerInviteRow = z.strictObject({
+  invite_id: z.uuid(),
+  email: z.string().nullable(),
+  status: TrailerInviteStatus,
+  expires_at: z.iso.datetime(),
+  first_opened_at: z.iso.datetime().nullable(),
+  consented_at: z.iso.datetime().nullable(),
+  submitted_at: z.iso.datetime().nullable(),
+  attempt_status: z.string().nullable(),
+  weighted_score: z.number().nullable(),
+});
+export type TrailerInviteRow = z.infer<typeof TrailerInviteRow>;
+
+export const TrailerInviteIssued = z.strictObject({
+  invite_id: z.uuid().nullable(),
+  email: z.string().nullable(),
+  token: TrailerInviteToken.nullable(),
+  expires_at: z.iso.datetime().nullable(),
+  skipped_reason: z.enum(["invalid_email", "duplicate", "active_exists"]).nullable(),
+});
+export type TrailerInviteIssued = z.infer<typeof TrailerInviteIssued>;
+
+export const CreateTrailerInvitesBody = z.strictObject({ emails: z.array(z.string()).min(1).max(20) });
+export type CreateTrailerInvitesBody = z.infer<typeof CreateTrailerInvitesBody>;
+
+export const SubmitTrailerInviteBody = z.strictObject({
+  token: TrailerInviteToken,
+  email: TrailerInviteEmail,
+  consent_version: z.string().trim().min(1),
+  submissions: z.array(TrailerAttemptSubmission).min(1).max(3),
+});
+export type SubmitTrailerInviteBody = z.infer<typeof SubmitTrailerInviteBody>;
+
+export const TrailerInviteOpenBody = z.strictObject({ token: TrailerInviteToken, email: TrailerInviteEmail });
+export type TrailerInviteOpenBody = z.infer<typeof TrailerInviteOpenBody>;
+
 const Uuid = z.uuid();
 const Timestamp = NonEmptyString;
 const Count = z.number().int().nonnegative();

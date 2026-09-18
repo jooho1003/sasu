@@ -18,6 +18,11 @@ export function orgAdminWritesEnabled(env?: FeatureEnv): boolean {
 export function trailerPublishEnabled(env: FeatureEnv = process.env): boolean {
   return env.SASU_TRAILER_PUBLISH_ENABLED === "true";
 }
+
+export function trailerInvitesEnabled(env: FeatureEnv = process.env): boolean {
+  return trailerPublishEnabled(env) && env.SASU_TRAILER_INVITES_ENABLED === "true";
+}
+
 export function trailerScoresMode(env: Readonly<Record<string, string | undefined>> = process.env): "off" | "scores" | "full" {
   const value = env.SASU_TRAILER_SCORES_MODE;
   return value === "scores" || value === "full" ? value : "off";
