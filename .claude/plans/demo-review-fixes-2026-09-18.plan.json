@@ -1,0 +1,14 @@
+{
+  "slug": "demo-review-fixes",
+  "date": "2026-09-18",
+  "context": "Codex phase 25(공개 데모 수정) 결과를 브라우저 실측으로 재검토하고, 실측에서 확인된 잔여 결함만 고친다. 운영 배포·DB 시드·커밋 없음.",
+  "nodes": [
+    { "id": "R1", "title": "공개 데모 전 경로 브라우저 실측 재검토(4부서×9탭, 클릭 이동, 쓰기 요청 0건)", "domain": "review", "D1": 2, "D2": 2, "D3": 0, "D4": 2, "score": 6, "tier": "powerful", "agent": "main(never_delegate: 최종 리뷰)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": [], "output": "결함 목록 + .playwright-mcp/review-*.png" },
+    { "id": "F1", "title": "스크롤바: 표준 scrollbar-color가 ::-webkit-scrollbar 디자인을 덮어 네이티브 화살표가 보이는 문제 — 표준 속성을 @supports not selector(::-webkit-scrollbar)로 감싼다", "domain": "mechanical", "D1": 0, "D2": 0, "D3": 0, "D4": 0, "score": 0, "tier": "fast", "agent": "worker", "claude_model": "haiku", "codex_model": "gpt-5.6-luna", "depends_on": ["R1"], "output": "app/globals.css 5~6행" },
+    { "id": "F3", "title": "원장·문서 그룹 집계 문구: 'N개 결정'이 보류를 포함해 세는 문제 — 결정 완료 수와 미해결 보류 수를 분리", "domain": "mechanical", "D1": 0, "D2": 0, "D3": 0, "D4": 0, "score": 0, "tier": "fast", "agent": "worker", "claude_model": "haiku", "codex_model": "gpt-5.6-luna", "depends_on": ["R1"], "output": "components/demo-document-workspace.tsx 29·37행" },
+    { "id": "F2", "title": "대시보드 분류된 기록: 펼쳐도 같은 문장만 반복·선택 표시 없음·원본 종류 아이콘 전부 # — 선택 상태 UI, 종류별 아이콘, 원문·결정 원장 이동 링크", "domain": "frontend", "D1": 2, "D2": 1, "D3": 0, "D4": 2, "score": 5, "tier": "powerful", "agent": "main(never_delegate: 모호한 판단)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R1"], "output": "components/demo-records.tsx, app/demo/d/[dept]/page.tsx, app/globals.css" },
+    { "id": "F4", "title": "문서 평가 탭이 영업·기획·디자인에서 빈 화면 — 추천 부서(영업)에 인용 검증되는 합성 기준표·점수표를 번들하고, 나머지는 평가가 있는 부서로 안내", "domain": "frontend", "D1": 2, "D2": 1, "D3": 1, "D4": 2, "score": 6, "tier": "powerful", "agent": "main(never_delegate: 모호한 판단)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R1"], "output": "lib/demo-workspace.ts(+테스트 선행), app/demo/d/[dept]/roles/page.tsx" },
+    { "id": "V1", "title": "lint·vitest·검증 빌드·브라우저 재실측", "domain": "qa", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "main(리뷰의 일부로 직접 실행)", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["F1", "F2", "F3", "F4"], "output": "실행 기록" }
+  ],
+  "gate": { "G1": "PASS", "G2": "PASS", "G3": "PASS", "G4": "PASS(근거 첨부)", "G5": "PASS", "result": "PASS" }
+}

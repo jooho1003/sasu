@@ -75,9 +75,15 @@ for (const width of [1440, 390]) {
     await expect(page.locator("#demo-record-list")).not.toHaveText(
       previousContent,
     );
-    const record = page.locator("#demo-record-list details").first();
-    await record.locator("summary").click();
-    await expect(record).toHaveAttribute("open", "");
+    const record = page.locator("#demo-record-list .record-item").first();
+    await record.locator(".record-toggle").click();
+    await expect(record).toHaveAttribute("data-selected", "true");
+    await expect(record.getByRole("link", { name: /앞뒤 원문 보기/ })).toHaveAttribute("href", /\/documents\?source=/);
+    await expect(record.getByRole("link", { name: /이 자료의 결정 보기/ })).toHaveAttribute("href", /\/ledger\?source=/);
+    const sources = page.getByRole("group", { name: "기록 출처 선택" }).getByRole("button");
+    await sources.nth(2).click();
+    await expect(sources.nth(2)).toHaveAttribute("aria-pressed", "true");
+    await sources.first().click();
     await categories.first().click();
     await capture("dashboard");
 

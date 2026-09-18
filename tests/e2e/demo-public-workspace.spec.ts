@@ -53,7 +53,7 @@ test("자유 질문과 샘플 음성 전사가 근거 답변으로 이어진다"
 
 test("문서별 다수 결정과 보류 후속 결정이 원장에 이어진다", async ({ page }) => {
   await page.goto(`${base}/documents?source=sales-meeting-1`);
-  await expect(page.locator(".demo-source > summary")).toContainText("4개 결정");
+  await expect(page.locator(".demo-source > summary")).toContainText("결정 완료 2개 · 보류 2개");
   await page.getByRole("button", { name: "보류 안건 다시 결정" }).first().click();
   await page.getByLabel("결정 내용", { exact: true }).fill("분할 납품 합의 후 계약을 확정합니다.");
   await page.getByLabel("결정 이유", { exact: true }).fill("고객이 1차 납기와 잔여 수량에 동의했습니다.");

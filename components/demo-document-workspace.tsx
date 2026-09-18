@@ -15,6 +15,8 @@ export function DemoDocumentWorkspace({ dept, data, ledger = false, initialSourc
   const [notice, setNotice] = useState("");
   const decisions = [...data.decisions, ...added];
   const belongsTo = (row: DemoDecision, id: string) => row.source_id === id || row.source_ids?.includes(id);
+  const isPending = (row: DemoDecision) => row.status === "deferred" && !decisions.some(next => next.supersedes_id === row.id);
+  const decidedCount = (id: string) => decisions.filter(row => belongsTo(row, id) && row.status === "decided").length;
   const sources = data.sources.filter(source => source.title.toLowerCase().includes(query.toLowerCase()));
   const visible = sources.filter(source => sourceId === "all" || source.id === sourceId);
   function record(previous: DemoDecision) {
@@ -26,7 +28,7 @@ export function DemoDocumentWorkspace({ dept, data, ledger = false, initialSourc
     <p className="demo-safe-banner">합성 자료 · 변경은 현재 부서의 데모 화면에서만 유지되며 새로고침하면 초기화됩니다.</p>
     <div className="demo-source-controls">
       <label>문서·회의 검색<input value={query} onChange={event => { setQuery(event.target.value); setSourceId("all"); }} placeholder="자료 제목으로 검색" /></label>
-      <label>문서·회의 선택<select value={sourceId} onChange={event => setSourceId(event.target.value)}><option value="all">모든 문서·회의</option>{sources.map(source => <option key={source.id} value={source.id}>{source.title} ({decisions.filter(row => belongsTo(row, source.id)).length}개 결정)</option>)}</select></label>
+      <label>문서·회의 선택<select value={sourceId} onChange={event => setSourceId(event.target.value)}><option value="all">모든 문서·회의</option>{sources.map(source => <option key={source.id} value={source.id}>{source.title} (결정 {decidedCount(source.id)} · 보류 {decisions.filter(row => belongsTo(row, source.id) && isPending(row)).length})</option>)}</select></label>
     </div>
     {notice ? <p role="status" className="demo-safe-banner">{notice}</p> : null}
     {visible.length === 0 ? <p className="empty-state">조건에 맞는 자료가 없습니다.</p> : null}
@@ -34,7 +36,7 @@ export function DemoDocumentWorkspace({ dept, data, ledger = false, initialSourc
       const records = data.items.filter(item => item.source_id === source.id);
       const rows = decisions.filter(row => belongsTo(row, source.id));
       return <details className="panel demo-source" key={source.id} open={sourceId !== "all" || undefined}>
-        <summary><strong>{source.title}</strong><span>{records.length}개 기록 · {rows.length}개 결정 · {rows.filter(row => row.status === "deferred" && !decisions.some(next => next.supersedes_id === row.id)).length}개 보류</span></summary>
+        <summary><strong>{source.title}</strong><span>{records.length}개 기록 · 결정 완료 {rows.filter(row => row.status === "decided").length}개 · 보류 {rows.filter(isPending).length}개</span></summary>
         {!ledger ? <><h3>한눈에 보기</h3><p>원문 {records.length}개에서 결정과 후속 작업의 근거를 확인하세요.</p></> : null}
         <div className="demo-source-actions"><Link className="text-link" href={`/demo/d/${dept}/${ledger ? "documents" : "ledger"}?source=${encodeURIComponent(source.id)}`}>{ledger ? "문서 원문 보기" : "이 문서의 결정 원장 보기"} →</Link></div>
         {rows.length ? rows.map(row => <article className="ledger-entry" id={`source-${source.id}-decision-${row.id}`} key={row.id}>

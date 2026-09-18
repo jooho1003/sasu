@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DemoRecords } from "@/components/demo-records";
+import { DemoRecords, type RecordKind } from "@/components/demo-records";
 import { Icon } from "@/components/ui/icon";
 import { notFound } from "next/navigation";
 import { salesDemoRecords } from "@/lib/demo-workspace";
@@ -25,6 +25,9 @@ type Classification = {
 };
 type Card = { id: string; title: string; status: string; visibility: string };
 
+const recordKind = (kind?: Source["kind"]): RecordKind =>
+  kind === "slack_channel" ? "slack" : kind === "meeting" ? "meeting" : "document";
+
 const LABELS: Record<Classification["label"], string> = {
   decision: "결정 필요",
   action: "액션",
@@ -35,10 +38,14 @@ const LABELS: Record<Classification["label"], string> = {
 
 export default async function DemoDashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ dept: string }>;
+  searchParams: Promise<{ kind?: string }>;
 }) {
   const { dept } = await params;
+  const { kind } = await searchParams;
+  const initialKind = (["slack", "meeting", "document"] as const).find((value) => value === kind);
   const supabase = createPublicSupabaseClient();
   const { data: department } = await supabase
     .from("departments")
@@ -125,30 +132,36 @@ export default async function DemoDashboardPage({
           사수에게 묻기
         </Link>
       </header>
-      <dl className="stats-row" aria-label="입력 카운트">
+      <nav className="stats-row" aria-label="출처별 기록 보기">
         {(
           [
-            { label: "슬랙", count: sourceCounts.slack_channel, icon: "hash" },
-            { label: "회의", count: sourceCounts.meeting, icon: "video" },
-            { label: "문서", count: sourceCounts.notion_page, icon: "file" },
+            { label: "슬랙", kind: "slack", count: sourceCounts.slack_channel, icon: "hash" },
+            { label: "회의", kind: "meeting", count: sourceCounts.meeting, icon: "video" },
+            { label: "문서", kind: "document", count: sourceCounts.notion_page, icon: "file" },
           ] as const
-        ).map(({ label, count, icon }) => (
-          <div key={label} className="stat-card">
-            <div>
-              <dt>{label} 기록</dt>
-              <dd>
+        ).map(({ label, kind: tileKind, count, icon }) => (
+          <Link
+            key={label}
+            className="stat-card"
+            href={`/demo/d/${dept}?kind=${tileKind}#demo-items-heading`}
+            aria-current={initialKind === tileKind ? "true" : undefined}
+            aria-label={`${label} 기록 ${count}건만 보기`}
+          >
+            <span>
+              <span className="stat-label">{label} 기록</span>
+              <strong className="stat-value">
                 {count}
                 <span className="ml-1.5 text-xs font-normal text-muted">
                   건
                 </span>
-              </dd>
-            </div>
+              </strong>
+            </span>
             <span className="stat-icon">
               <Icon name={icon} size={21} />
             </span>
-          </div>
+          </Link>
         ))}
-      </dl>
+      </nav>
       <section className="grid gap-4" aria-labelledby="demo-cards-heading">
         <div className="section-heading">
           <div>
@@ -206,6 +219,9 @@ export default async function DemoDashboardPage({
         )}
       </section>
       <DemoRecords
+        key={initialKind ?? "all"}
+        dept={dept}
+        initialKind={initialKind}
         groups={Object.entries(LABELS).flatMap(([label, name]) => {
           const group = grouped.get(label);
           return group?.length
@@ -217,7 +233,9 @@ export default async function DemoDashboardPage({
                     id: item.id,
                     author: item.author,
                     content: item.content,
+                    sourceId: item.source_id,
                     sourceTitle: sourceMap.get(item.source_id)?.title ?? "입력",
+                    sourceKind: recordKind(sourceMap.get(item.source_id)?.kind),
                   })),
                 },
               ]

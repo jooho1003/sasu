@@ -1,4 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+
+import { DEMO_DEFAULT_DEPT_ID, DEMO_FEATURES } from "@/lib/demo-access";
+import { salesDemoRecords, salesDemoRoleEvaluation } from "@/lib/demo-workspace";
 
 import { createPublicSupabaseClient } from "@/lib/supabase/public";
 
@@ -31,13 +35,16 @@ export default async function DemoRolesPage({ params }: { params: Promise<{ dept
     .order("created_at", { ascending: true });
   if (roleError) throw new Error("게스트 역할 조회 실패");
 
-  const roles = (roleRows ?? []) as AgentRole[];
+  // 영업은 공용 DB 시드 대신 번들된 합성 평가를 쓴다 (lib/demo-workspace.ts, 인용은 같은 파일의 문서 원문).
+  const bundled = (roleRows ?? []).length === 0 && dept === DEMO_DEFAULT_DEPT_ID ? salesDemoRoleEvaluation : null;
+  const roles = (bundled ? [bundled.role] : (roleRows ?? [])) as AgentRole[];
   if (roles.length === 0) {
-    return <main className="workspace-page"><p className="m-0 text-sm text-[var(--muted)]">부서 에이전트 역할</p><h1 className="m-0 text-3xl">문서 기준표 평가</h1><p className="rounded-2xl bg-[var(--surface)] p-6 text-[var(--muted)] shadow-sm">이 부서에는 공개된 역할과 점수표가 아직 없습니다.</p></main>;
+    const example = DEMO_FEATURES.find((feature) => feature.key === "roles")?.href;
+    return <main className="workspace-page"><p className="m-0 text-sm text-[var(--muted)]">부서 에이전트 역할</p><h1 className="m-0 text-3xl">문서 기준표 평가</h1><section className="grid gap-4 rounded-2xl bg-[var(--surface)] p-6 shadow-sm"><p className="m-0 leading-7 text-[var(--muted)]">{department.name}에는 아직 평가 기준표가 없습니다. 기준표와 근거 기반 점수표는 아래 부서에서 바로 체험할 수 있습니다.</p><div className="flex flex-wrap gap-3"><Link className="button button-primary button-small" href={`/demo/d/${DEMO_DEFAULT_DEPT_ID}/roles`}>영업 사수의 계약 문서 평가 보기</Link>{example ? <Link className="button button-secondary button-small" href={example}>개발 사수의 문서 평가 보기</Link> : null}</div></section></main>;
   }
 
   const roleIds = roles.map((role) => role.id);
-  const { data: resultRows, error: resultError } = await supabase
+  const { data: resultRows, error: resultError } = bundled ? { data: bundled.results, error: null } : await supabase
     .from("agent_role_results")
     .select("id, role_id, source_id, status, result, weighted_score")
     .in("role_id", roleIds)
@@ -47,7 +54,9 @@ export default async function DemoRolesPage({ params }: { params: Promise<{ dept
 
   const results = (resultRows ?? []) as Array<AgentRoleResult & { role_id: string }>;
   const sourceIds = [...new Set(results.map((result) => result.source_id))];
-  const { data: sourceRows } = sourceIds.length === 0
+  const { data: sourceRows } = bundled
+    ? { data: salesDemoRecords.sources as Source[] }
+    : sourceIds.length === 0
     ? { data: [] as Source[] }
     : await supabase.from("sources").select("id, title").in("id", sourceIds);
   const sourceNames = new Map(((sourceRows ?? []) as Source[]).map((source) => [source.id, source.title ?? "이름 없는 문서"]));

@@ -32,6 +32,58 @@ export const salesDemoRecords: DemoWorkspaceData = {
   decisions: topics.map(([, , rule, decision], i) => ({ id: `sales-decision-${i}`, source_id: `sales-meeting-${i < 4 ? 1 : 2}`, source_ids: [`sales-doc-${i}`], outcome: decision, rationale: rule, quote: decision, status: i % 2 === 1 ? "deferred" : "decided" })),
 };
 
+export type DemoRoleCriterion = { key: string; label: string; description: string; weight: number };
+export type DemoRoleResultCriterion = { key: string; label: string; score: number | null; rationale: string | null; citations: { item_id: string | null; decision_id: string | null; quote: string }[]; evidence: "ok" | "no_evidence" };
+export type DemoRoleEvaluation = {
+  role: { id: string; name: string; instruction: string; criteria: DemoRoleCriterion[] };
+  results: { id: string; role_id: string; source_id: string; status: "completed"; weighted_score: number; result: { summary: string; criteria: DemoRoleResultCriterion[] } }[];
+};
+
+const roleCriteria: DemoRoleCriterion[] = [
+  { key: "principle", label: "원칙 부합", description: "부서 원칙을 문서 안에서 인용해 판단했는가", weight: 4 },
+  { key: "clarity", label: "결정 명확성", description: "결정 또는 보류 사유가 한 문장으로 확정되어 있는가", weight: 3 },
+  { key: "followup", label: "후속 조치", description: "담당자와 기한이 적혀 있는가", weight: 2 },
+  { key: "alternatives", label: "대안 비교", description: "다른 선택지와 비교한 근거가 있는가", weight: 1 },
+];
+
+// [문서 index, 요약, 기준별 (점수, 판단 이유, topics 열 index) — null이면 근거 없음]. 인용은 topics 원문에서만 꺼낸다.
+const roleReviews: [number, string, ([number, string, 2 | 3 | 4] | null)[]][] = [
+  [0, "인상률 원칙을 인용해 재입찰을 결정했고 담당자·기한이 있습니다. 업체 선정 기준은 아직 없습니다.", [
+    [5, "10% 기준을 그대로 인용해 12% 인상안을 재입찰 대상으로 판단했습니다.", 2],
+    [4, "재입찰 결정은 분명하지만 어떤 기준으로 업체를 고를지는 적혀 있지 않습니다.", 3],
+    [5, "담당자와 9월 21일 기한이 함께 적혀 있습니다.", 4],
+    [4, "대체 업체 두 곳을 같은 범위로 비교하겠다고 밝혔습니다.", 3],
+  ]],
+  [4, "금액 외 비교 기준과 담당자·기한은 있으나, 샘플 검증의 합격 기준이 없습니다.", [
+    [4, "금액만 보지 않는다는 비교 원칙을 인용했습니다.", 2],
+    [3, "검증을 진행한다는 결정만 있고 합격·탈락 기준이 없습니다.", 3],
+    [5, "담당자와 9월 25일 기한이 함께 적혀 있습니다.", 4],
+    [4, "품질 샘플과 납기 증빙을 함께 비교하도록 정했습니다.", 2],
+  ]],
+  [5, "선금 한도 원칙에 따라 보류한 이유는 분명하지만, 다른 업체와 비교한 내용은 문서에 없습니다.", [
+    [5, "선금 50% 요구를 30% 한도 원칙에 비춰 재무팀 검토 대상으로 판단했습니다.", 2],
+    [4, "무엇을 기다리며 보류하는지가 한 문장으로 적혀 있습니다.", 3],
+    [4, "담당자와 기한은 있으나 협상이 결렬될 때의 다음 단계는 없습니다.", 4],
+    null,
+  ]],
+];
+const totalRoleWeight = roleCriteria.reduce((sum, criterion) => sum + criterion.weight, 0);
+
+// 영업 부서 문서 평가 체험용. salesDemoRecords 원문만 인용하며 공용 DB에는 넣지 않는다.
+export const salesDemoRoleEvaluation: DemoRoleEvaluation = {
+  role: { id: "sales-role-contract-review", name: "계약 검토 문서 평가", instruction: "영업 검토 문서가 부서 원칙을 인용해 결정을 내렸는지, 결정과 후속 조치가 분명한지 평가합니다. 문서에 근거가 없는 기준은 점수를 주지 않습니다.", criteria: roleCriteria },
+  results: roleReviews.map(([doc, summary, reviews]) => {
+    const criteria = roleCriteria.map(({ key, label }, i): DemoRoleResultCriterion => {
+      const review = reviews[i];
+      if (!review) return { key, label, score: null, rationale: null, citations: [], evidence: "no_evidence" };
+      const [score, rationale, column] = review;
+      return { key, label, score, rationale, citations: [{ item_id: `sales-item-${doc}-${column === 2 ? 6 : 7}`, decision_id: null, quote: topics[doc][column] }], evidence: "ok" };
+    });
+    const weighted = criteria.reduce((sum, criterion, i) => sum + (criterion.score ?? 0) * roleCriteria[i].weight, 0);
+    return { id: `sales-role-result-${doc}`, role_id: "sales-role-contract-review", source_id: `sales-doc-${doc}`, status: "completed" as const, weighted_score: weighted / totalRoleWeight, result: { summary, criteria } };
+  }).sort((a, b) => b.weighted_score - a.weighted_score),
+};
+
 const normalized = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 export function closestDemoAnswer<T extends { question: string; answer: string | null; quotes: string[] }>(question: string, answers: T[]): T | null {
   const input = normalized(question);
