@@ -23,5 +23,6 @@ export default defineConfig({
   projects: [
     { name: "trailer-enabled", testMatch: "trailer.spec.ts", use: { baseURL: "http://localhost:3107" } },
     { name: "trailer-disabled", testMatch: "trailer-disabled.spec.ts", use: { baseURL: "http://localhost:3108" } },
+    { name: "trailer-invites-disabled", testMatch: "trailer-invites.spec.ts", use: { baseURL: "http://localhost:3107" } },
   ],
 });

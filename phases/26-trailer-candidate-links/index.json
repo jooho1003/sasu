@@ -6,7 +6,7 @@
   "steps": [
     { "step": 0, "name": "invite-schema", "status": "completed", "codex_model": "gpt-5.6-sol", "effort": "xhigh", "summary": "지원자 초대·동의·1회 제출·채점 큐·철회/파기 SQL 경계와 12개 격리 하니스 검증을 추가했다." },
     { "step": 1, "name": "invite-lib", "status": "completed", "codex_model": "gpt-5.6-terra", "effort": "medium", "summary": "지원자 초대 토큰·이메일·공개/목록 RPC 계약과 상태·오류 순수 파서를 TDD로 추가했다." },
-    { "step": 2, "name": "lead-invites", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
+    { "step": 2, "name": "lead-invites", "status": "completed", "codex_model": "gpt-5.6-terra", "effort": "medium", "summary": "부서장 전용 지원자 링크 발급·목록·철회·파기·재채점 라우트와 S18 링크 구역을 추가하고 플래그 차단 E2E를 통과했다." },
     { "step": 3, "name": "candidate-page", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
     { "step": 4, "name": "candidate-submit-score", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
     { "step": 5, "name": "purge-withdraw", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },

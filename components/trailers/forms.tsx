@@ -7,6 +7,7 @@ import { trailerApprovalItems, trailerTextFields } from "@/lib/trailer-gate";
 import { DEFAULT_TRAILER_RUBRIC } from "@/lib/trailer-generation";
 import { adminButton, adminInput } from "@/components/admin/actions";
 import { ruleLabels, trailerNotice, trailerPanel, trailerReason, trailerStatus } from "./views";
+import { TrailerInvites } from "./invites";
 
 async function send(endpoint: string, body?: unknown, method = "POST") {
   const response = await fetch(endpoint, { method, headers: { "Content-Type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(20_000) });
@@ -42,7 +43,7 @@ const fieldLabel = (path: string) => {
   if (group) return `${({ facts: "사실", dialogues: "대화", choices: "선택지" } as Record<string,string>)[group[1]]} ${Number(group[2])+1} · ${label}`;
   return path.includes(".ending.") ? `엔딩 · ${label}` : label;
 };
-export function TrailerReview({ deptId, data }: { deptId: string; data: TrailerReviewData }) {
+export function TrailerReview({ deptId, data, invitesEnabled = false }: { deptId: string; data: TrailerReviewData; invitesEnabled?: boolean }) {
   const router = useRouter(); const [scenarios, setScenarios] = useState(data.scenarios), [approved, setApproved] = useState(data.approved_item_ids), [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [fields, setFields] = useState<string[]>([]), [publicPath, setPublicPath] = useState(data.slug ? `/t/${data.slug}` : ""), [dirty, setDirty] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null); const [confirm, setConfirm] = useState<"publish" | "delete" | "unpublish">("publish");
   const base = `/api/d/${deptId}/trailers/${data.id}`; const pending = ["generating", "checking"].includes(data.status), editable = ["review", "unpublished"].includes(data.status);
@@ -72,6 +73,7 @@ export function TrailerReview({ deptId, data }: { deptId: string; data: TrailerR
     {data.status === "failed" ? <button className={adminButton} disabled={busy} onClick={() => void action("regenerate")}>다시 생성</button> : null}
     {approvalItems.length ? <fieldset disabled={busy || dirty || data.status !== "review" || !data.gate_report?.passed} className="grid min-w-0 gap-3"><legend className="font-bold">항목별 공개 승인 · 승인 {approved.length} / 전체 {approvalItems.length}</legend>{approvalItems.map((item) => <label className="flex gap-3 rounded-xl bg-ink/5 p-3 text-sm" key={item.id}><input className="mt-1 size-4 shrink-0" type="checkbox" checked={approved.includes(item.id)} onChange={(e) => setApproved((old) => e.target.checked ? [...old, item.id] : old.filter((id) => id !== item.id))} /><span className="whitespace-pre-wrap break-words">{item.text}</span></label>)}<button className={adminButton} onClick={() => void action("approve")}>공개 승인 저장</button></fieldset> : null}
     {message ? <p role="status" className="whitespace-pre-wrap">{message}</p> : data.status === "published" ? <p role="status">{data.unpublished_at ? "새 링크로 발행되었습니다." : "발행되었습니다."}</p> : null}{publicPath ? <div className="grid gap-2"><Link href={publicPath} className="break-all text-accent">{publicPath}</Link><button className={adminButton} onClick={async () => { try { await navigator.clipboard.writeText(`${location.origin}${publicPath}`); setMessage("링크를 복사했습니다."); } catch { setMessage("복사하지 못했습니다. 링크 주소를 직접 복사해 주세요."); } }}>복사</button></div> : null}
+    <TrailerInvites deptId={deptId} trailerId={data.id} published={data.status === "published"} enabled={invitesEnabled} />
     <div className="flex flex-wrap gap-2">{([...(data.status === "review" ? ["publish"] : []), ...(data.status === "published" ? ["unpublish"] : []), ...(["review", "failed", "unpublished"].includes(data.status) ? ["delete"] : [])] as ("publish" | "unpublish" | "delete")[]).map((kind) => <button key={kind} disabled={busy || dirty} className={adminButton} onClick={() => { setConfirm(kind); dialog.current?.showModal(); }}>{kind === "publish" ? "발행" : kind === "unpublish" ? "철회" : "삭제"}</button>)}</div>
     <dialog ref={dialog} onCancel={(e) => { if (busy) e.preventDefault(); }} className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl bg-surface p-6 text-ink backdrop:bg-black/40"><h3>{confirm === "publish" ? "공개 링크로 발행할까요?" : confirm === "unpublish" ? "공개 링크를 철회할까요?" : "이 예고편을 삭제할까요?"}</h3><p className="text-sm">{confirm === "publish" ? "링크를 가진 누구나 가상 사례를 체험할 수 있습니다." : confirm === "unpublish" ? "현재 공개 링크가 닫힙니다. 다시 발행하면 새 링크가 생깁니다." : "삭제한 초안은 되돌릴 수 없습니다."}</p><div className="flex gap-2"><button className={adminButton} disabled={busy} onClick={() => dialog.current?.close()}>취소</button><button className={adminButton} disabled={busy} onClick={() => void action(confirm)}>확인</button></div></dialog>
   </section>;

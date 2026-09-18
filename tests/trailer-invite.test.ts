@@ -39,6 +39,7 @@ const row: TrailerInviteRow = {
   first_opened_at: null,
   consented_at: null,
   submitted_at: null,
+  attempt_id: null,
   attempt_status: null,
   weighted_score: null,
 };
@@ -73,6 +74,10 @@ describe("지원자 링크 순수 계약", () => {
   it("목록 응답은 한 행이라도 깨지면 전체를 거부한다", () => {
     expect(parseTrailerInviteRows([row])).toEqual([row]);
     expect(() => parseTrailerInviteRows([row, { ...row, status: "unknown" }])).toThrow();
+  });
+
+  it("재채점 대상은 초대 ID가 아닌 채점 attempt ID로 구분한다", () => {
+    expect(parseTrailerInviteRows([{ ...row, attempt_id: "b1d14940-5d91-4a73-8c44-fcae8e1fecec", attempt_status: "failed" }])[0].attempt_id).toBe("b1d14940-5d91-4a73-8c44-fcae8e1fecec");
   });
 
   it("모든 상태 라벨은 선발·순위 표현을 포함하지 않는다", () => {

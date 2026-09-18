@@ -454,6 +454,7 @@ returns table(
   first_opened_at timestamptz,
   consented_at timestamptz,
   submitted_at timestamptz,
+  attempt_id uuid,
   attempt_status text,
   weighted_score numeric
 )
@@ -488,6 +489,7 @@ begin
          ti.first_opened_at,
          ti.consented_at,
          ta.created_at,
+         ta.id,
          ta.status,
          ta.weighted_score
   from public.trailer_invites ti
