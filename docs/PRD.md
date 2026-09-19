@@ -335,7 +335,7 @@ Slack 서명 검증·동의 확인·선마스킹 후에는 `ingest_slack_atomic(
 | RET-10 | 3단계 (phase 29) | 공개 링크 `/r/[slug]`(조직 관리자 승인·`dept` 회고·브라우저 활동 미포함일 때만, 예고편 slug 패턴) · 주간 롤업 |
 | RET-11 | 부서별 커넥터 — 사수 내부 파생(형태 B) | 새 연결 없이 본인 행에서만: 내가 오늘 쓴 슬랙 메시지(`items.author_ext_id = members.slack_user_id`), 참여해 확정된 회의, 오늘 바뀐 부서 노션 문서(작성자 미수집이므로 **부서 문맥** 활동 — "내가 했다"의 인용 불가). 원본 visibility 상속 |
 | RET-12 | 부서별 커넥터 — 개인 OAuth·개인 키(형태 A) | `retro_connections`는 본인 행에만, 읽기 전용 최소 스코프, 대상 범위(파일·저장소·폴더·프로젝트)는 사용자가 고른다. 하루 1~2회 pull, 커넥터당 200건/일. 조직 토큰으로 구성원 활동을 읽거나 관리자 감사 API(Figma Activity Logs·Google Admin Reports·Zendesk 관리자 export)를 쓰지 않는다. 해제 시 토큰과 그 제공자 활동을 함께 삭제 |
-| RET-13 | 부서별 커넥터 — 제공자 1차 목록 | 디자인 Figma(버전·댓글)·Notion 댓글 / 기획 Notion(개인)·Confluence·Google Drive Activity(스코프 등급 확인 후) / 개발 GitHub·Jira / 영업 HubSpot 또는 Pipedrive·Google Calendar / CS 채널톡·Intercom / 인사 Greenhouse·Lever·Workable·Calendar / 마케팅 Meta·YouTube·GA4(지표 스냅샷). 웹훅 없음 |
+| RET-13 | 부서별 커넥터 — 제공자 1차 목록 | 디자인 Figma(버전·댓글)·Notion 댓글 / 기획 Notion(개인)·Confluence / 개발 GitHub·Jira·Linear / 영업 HubSpot·Pipedrive·세일즈맵·Google Calendar / CS 채널톡·Intercom·Zendesk / 인사 Greenhouse·Lever·Workable·Calendar·원티드(회사 키, 부서 문맥) / 마케팅 Meta·YouTube·GA4(지표 스냅샷)·Mailchimp·스티비(워크스페이스 키, 부서 문맥). **Google Drive Activity는 `drive.activity.readonly`가 restricted scope라 제외.** 웹훅 없음 |
 | RET-14 | 수동·음성 한 줄(형태 D) | API가 없는 흔적(휴대폰 통화·오프라인 미팅·카카오 상담)은 텍스트 또는 마이크 한 줄(≤500자, 하루 20건)로 남긴다. 원본 음성 비저장. 슬랙 `/회고`는 2단계 |
 | RET-15 | 부서 프리셋 | 부서장이 `general·dev·design·planning·sales·cs·marketing·hr` 중 선택. 4개 섹션 키는 불변, 라벨·프롬프트 힌트·추천 커넥터만 바뀐다 |
 | RET-16 | 상대방·법령 경계 | 고객·지원자·참석자의 이름·번호·이메일은 파싱하지 않는다(회사명·건수·`상대 N`). 수집 동의(연결 시)와 공개 동의(첫 `dept` 전환 시)를 분리 기록. 개인 휴대폰 통화 기록·Gmail·Drive 전체 읽기(restricted scope)는 만들지 않는다. VoIP 통화 메타데이터(통신사실확인자료)는 법률 자문 통과 후에만 |
@@ -950,7 +950,7 @@ ADR-052로 후속 반영된 Slack 원문 수정·삭제, Notion 5분 자동 갱�
 | 음성 30초 등록 → 화자 지문 식별 | 생체정보 동의·식별 모델·오인식 대응이 별도 제품 범위 | 화자 라벨 전사 + 음성 업무 입력 |
 | 모바일 백그라운드 녹음·캘린더 알림 | 웹 직접 녹음은 §3-4로 설계 범위에 편입. 잠금/절전 중 녹음·캘린더는 별도 | PC 웹 녹음·파일 가져오기 |
 | PC 설치 앱·자동 회의 봇 | 사용자 선택으로 후속 단계에 둠(ADR-056) | 웹 직접 녹음 우선, Meet·Zoom 공식 자료 수집은 2단계 |
-| 부서별 회고 커넥터 — 개인 휴대폰 통화 기록 앱·통화 녹음·Gmail/Outlook 직접 연결·Drive 전체 읽기·관리자 감사 API·웹훅·Miro·Zoom Phone(관리자 앱)·Zendesk 관리자 export | Google Play Call Log 정책·iOS API 부재·restricted scope CASA 심사·감시 성격·웹훅 요금제 불명확·실험 기능 제거(ADR-064, 조사 2026-09-19) | 개인 OAuth 커넥터(§3-6 RET-12·13) + 수동·음성 한 줄(RET-14). VoIP 통화 메타데이터는 법률 자문 후 별도 step. 재조사 목록은 설계 §11 |
+| 부서별 회고 커넥터 — 개인 휴대폰 통화 기록 앱·통화 녹음·Gmail/Outlook 직접 연결·Drive 전체 읽기·Drive Activity(`drive.activity.readonly` restricted)·관리자 감사 API·웹훅·Miro·Zoom Phone(관리자 앱)·Zendesk 관리자 export·리멤버/플렉스(공개 API 없음) | Google Play Call Log 정책·iOS API 부재·restricted scope CASA 심사·감시 성격·웹훅 요금제 불명확·실험 기능 제거(ADR-064, 조사 2026-09-19) | 개인 OAuth 커넥터(§3-6 RET-12·13) + 수동·음성 한 줄(RET-14). VoIP 통화 메타데이터는 법률 자문 후 별도 step. 재조사 목록은 설계 §11 |
 | 개발 회고 — 개인 토큰 무인 푸시·노션 페이지 생성·공개 링크·주간 롤업·블로그 CMS 연동·타인 활동 수집 | 토큰은 새 인증 경로라 보안 검토(보류 중) 재개가 먼저, 노션은 현재 연동이 읽기 전용, 공개 게시는 관리자 승인 절차 필요(ADR-063) | 1단계는 웹 드롭 업로드 + Markdown 내보내기(§3-6 RET-01~08). 토큰·노션은 phase 28, 공개 링크·롤업은 phase 29. 블로그 CMS 연동과 타인 활동 수집은 만들지 않는다 |
 | 부서 간 교차 결정 (CROSS) | 부서 1개 슬라이스 | 로드맵 |
 | 부서 템플릿 7종 | 2종만 | 로드맵 |
