@@ -75,6 +75,13 @@
       "scope": "RingCentral·Aircall call_in/out/missed(방향·시각·길이만)",
       "summary": "설계 §0·§11의 VoIP 법률 자문 선행 조건 유지. 통화 메타데이터 구현·수집 미실행.",
       "verification": "docs/verification/retro-connectors-2026-09-19/README.md"
+    },
+    {
+      "step": 9,
+      "name": "provider-contract-hardening",
+      "status": "completed",
+      "summary": "직접 RPC가 현재 구현된 17개 제공자만 연결 상태로 만들도록 허용 목록을 보정하고, 미구현 제공자 5개 거절을 격리 SQL에서 검증했다.",
+      "verification": "docs/verification/retro-provider-contract-2026-09-20.md"
     }
   ],
   "production_deployed": false

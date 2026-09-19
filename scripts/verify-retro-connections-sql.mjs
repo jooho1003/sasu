@@ -15,9 +15,15 @@ export async function verifyRetroConnectionsSql({db,q,check,asUser}) {
   const date=await scalar("select (now() at time zone 'Asia/Seoul')::date::text v"), at=`${date}T01:00:00Z`;
   async function service(fn){await db.exec('set role service_role');await q("select set_config('request.jwt.claim.role','service_role',false)");try{return await fn();}finally{await db.exec('reset role');await q("select set_config('request.jwt.claim.role','',false)");}}
   const rejects=(fn,message)=>assert.rejects(fn,e=>message?e.message===message:e.code==='42501');
-  async function begin(who=ids.a,dept=ids.dept){const hash=createHash('sha256').update(randomUUID()).digest('hex');await asUser(who,()=>q("select begin_retro_connection($1,'github',$2,'{}','token')",[dept,hash]));return hash;}
+  async function begin(who=ids.a,dept=ids.dept,provider='github'){const hash=createHash('sha256').update(randomUUID()).digest('hex');await asUser(who,()=>q("select begin_retro_connection($1,$2,$3,'{}','token')",[dept,provider,hash]));return hash;}
   const complete=h=>service(()=>scalar("select complete_retro_connection($1,$2,'v2.synthetic','연결된 개인 계정',array['read']) v",[h,ids.a]));
   let connection,claim,cited;
+  await check('retro connections: direct RPC accepts only implemented providers',async()=>{
+    for(const provider of ['channel_talk','greenhouse','lever','workable','meta']) {
+      const hash=createHash('sha256').update(randomUUID()).digest('hex');
+      await asUser(ids.a,()=>rejects(()=>q("select begin_retro_connection($1,$2,$3,'{}','token')",[ids.dept,provider,hash]),'invalid_connection'));
+    }
+  });
   await check('retro connections: company snapshots require live lead role and cannot become personal evidence',async()=>{
     const hash=createHash('sha256').update(randomUUID()).digest('hex');
     await asUser(ids.b,()=>rejects(()=>q("select begin_retro_connection($1,'stibee',$2,'{}','token')",[ids.dept,hash]),'forbidden'));
