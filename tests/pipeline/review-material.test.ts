@@ -13,7 +13,7 @@ vi.mock("@/lib/supabase/service", () => ({
 }));
 vi.mock("@/lib/llm", () => ({ llm: { transcribeAudio: mock.transcribe } }));
 vi.mock("@/lib/jobs", () => ({ registerHandler: mock.register }));
-import { processReviewPart } from "@/lib/pipeline/review-material";
+import { processReviewPart, sweepReviewParts } from "@/lib/pipeline/review-material";
 import { encodeMonoWav } from "@/lib/adapters/review-audio";
 describe("자료 변환 워커", () => {
   beforeEach(() => {
@@ -51,6 +51,14 @@ describe("자료 변환 워커", () => {
     )![1];
     expect(completion.p_sections[0].text).toContain("[이메일]");
     expect(JSON.stringify(completion)).not.toContain("qa@example.com");
+  });
+  it("원본 만료 처리를 구간 정리보다 먼저 하고 실패 시 중단한다", async () => {
+    await sweepReviewParts();
+    expect(mock.rpc.mock.calls.map(([name]) => name)).toEqual(["sweep_review_originals", "sweep_review_parts"]);
+    mock.rpc.mockClear();
+    mock.rpc.mockResolvedValueOnce({ error: { message: "private raw" }, data: null });
+    await expect(sweepReviewParts()).rejects.toThrow("review_original_sweep_failed");
+    expect(mock.rpc).toHaveBeenCalledTimes(1);
   });
   it("취소·권한 회수·지난 attempt는 저장소와 LLM을 호출하지 않는다", async () => {
     mock.rpc.mockResolvedValue({ data: null, error: null });

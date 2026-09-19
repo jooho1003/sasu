@@ -3,6 +3,7 @@ import { kickWorker } from "@/lib/jobs";
 import { reviewError, reviewExport } from "@/lib/reviews";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { originalAccessError } from "@/lib/review-access";
 
 type Context = { params: Promise<{ dept: string; id: string }> };
 async function accessible(context: Context) {
@@ -30,7 +31,12 @@ export async function GET(request: Request, context: Context) {
       { status: 404 },
     );
   const format = new URL(request.url).searchParams.get("format");
-  if (format === "txt" || format === "md")
+  if (format === "txt" || format === "md") {
+    const access = await client.rpc("authorize_review_access", { p_dept: review.dept_id, p_review: review.id, p_action: "export" });
+    if (access.error) {
+      const failure = originalAccessError(access.error);
+      return Response.json({ error: failure.error }, { status: failure.status, headers: { "cache-control": "no-store" } });
+    }
     return new Response(reviewExport(review, format), {
       headers: {
         "content-type": "text/plain; charset=utf-8",
@@ -38,7 +44,8 @@ export async function GET(request: Request, context: Context) {
         "content-disposition": `attachment; filename="review.${format}"`,
       },
     });
-  const [parts, history] = await Promise.all([
+  }
+  const [parts, history, settings, retention] = await Promise.all([
     client
       .from("review_parts")
       .select(
@@ -52,8 +59,10 @@ export async function GET(request: Request, context: Context) {
       .eq("review_id", review.id)
       .order("revision", { ascending: false })
       .limit(50),
+    client.rpc("review_org_settings", { p_dept: review.dept_id }),
+    client.from("retention_settings").select("review_original_days").eq("dept_id", review.dept_id).maybeSingle(),
   ]);
-  if (parts.error || history.error)
+  if (parts.error || history.error || settings.error || retention.error)
     return Response.json(
       { error: "자료 처리 상태를 확인하지 못했습니다." },
       { status: 500 },
@@ -77,6 +86,9 @@ export async function GET(request: Request, context: Context) {
       },
       parts: visibleParts,
       history: history.data,
+      original_download_allowed: settings.data?.allow_original_download === true,
+      original_expires_at: review.confirmed_at && retention.data?.review_original_days
+        ? new Date(new Date(review.confirmed_at).getTime() + retention.data.review_original_days * 86400000).toISOString() : null,
     },
     { headers: { "cache-control": "no-store" } },
   );
@@ -135,7 +147,7 @@ export async function POST(request: Request, context: Context) {
           p_action: body.action,
         });
   if (result.error) {
-    const error = reviewError(result.error);
+    const error = body.action === "reextract" ? originalAccessError(result.error) : reviewError(result.error);
     return Response.json(error, { status: error.status });
   }
   if (["publish", "delete", "delete_original"].includes(body.action))

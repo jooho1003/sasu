@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { TrailerInviteRow } from "@/lib/contracts";
+import { TrailerInviteIssued, type TrailerInviteRow } from "@/lib/contracts";
 import { trailerPublishEnabled, trailerInvitesEnabled } from "@/lib/features";
 import {
   TRAILER_INVITE_CONSENT_VERSION,
@@ -91,9 +91,16 @@ describe("지원자 링크 순수 계약", () => {
   });
 
   it("오류 코드는 원문 오류 메시지를 외부로 내보내지 않는다", () => {
-    expect(TRAILER_INVITE_CONSENT_VERSION).toMatch(/^2026-09-18\.1$/);
+    expect(TRAILER_INVITE_CONSENT_VERSION).toBe("1");
     expect(inviteErrorCode({ code: "P0001", message: "consent_required" })).toBe("consent_required");
     expect(inviteErrorCode({ code: "22023", message: "invalid_attempt" })).toBe("invalid_attempt");
     expect(inviteErrorCode(new Error("very secret email@example.com"))).toBe("unknown");
   });
+});
+
+it("PostgREST 시각 오프셋으로 발급·목록·열람 계약을 읽는다", () => {
+ const expires_at="2026-09-25T00:00:00.000000+00:00";
+ expect(TrailerInviteIssued.safeParse({invite_id:row.invite_id,email:row.email,token:"a".repeat(64),expires_at,skipped_reason:null}).success).toBe(true);
+ expect(parseTrailerInviteOpen({...openResponse,expires_at})).not.toBeNull();
+ expect(parseTrailerInviteRows([{...row,expires_at}])).toHaveLength(1);
 });

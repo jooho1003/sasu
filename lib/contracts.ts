@@ -1,5 +1,30 @@
 import { z } from "zod";
 
+export const RetroActivityKind = z.enum([
+  "git_commit", "claude_session", "claude_prompt", "codex_session", "memory_change", "doc_change", "web_visit", "web_search",
+  "sasu_decision", "sasu_answer", "sasu_card", "sasu_review", "slack_message", "meeting_attended", "notion_page_changed",
+  "manual_note", "voice_note", "figma_version", "figma_comment", "notion_edit", "notion_comment", "gdrive_edit", "gdrive_comment", "gdrive_rename",
+  "confluence_edit", "confluence_comment", "github_pr", "github_review", "github_push", "jira_transition", "jira_worklog", "crm_call", "crm_meeting",
+  "crm_email", "crm_note", "crm_deal", "calendar_event", "ticket_handled", "ticket_closed", "ats_stage", "ats_interview", "social_post", "video_publish", "metric_snapshot",
+]);
+export const RetroActivity = z.strictObject({ kind: RetroActivityKind, ref: z.string().min(1).max(200), title: z.string().min(1).max(200), at: z.iso.datetime({ offset: true }), text: z.string().max(500), meta: z.record(z.string(), z.union([z.string().max(500), z.number().finite(), z.boolean()])).default({}) });
+export type RetroActivity = z.infer<typeof RetroActivity>;
+export const RetroBundle = z.strictObject({ version: z.literal(1), date: z.iso.date(), tz: z.string().min(1).max(64), collected_at: z.iso.datetime({ offset: true }), collector: z.strictObject({ name: z.literal("sasu-retro-collect"), version: z.string().min(1).max(20) }), activities: z.array(RetroActivity).max(500) });
+export type RetroBundle = z.infer<typeof RetroBundle>;
+export const RetroCitation = z.strictObject({ activity_id: z.string().min(1), quote: z.string().min(1).max(500) });
+export const RetroItem = z.strictObject({ citations: z.array(RetroCitation).min(1).max(20), text: z.string().min(1).max(2000) });
+export const RetroBody = z.strictObject({ did: z.array(RetroItem).max(200), learned: z.array(RetroItem).max(200), decided: z.array(RetroItem).max(200), next: z.array(RetroItem).max(200) });
+export type RetroBody = z.infer<typeof RetroBody>;
+export const RetroDraft = z.strictObject({ citations: z.array(RetroCitation).min(1).max(200), title: z.string().min(1).max(60), highlight: z.string().min(1).max(500).nullable(), topics: z.array(z.string().min(1).max(50)).min(1).max(5), body: RetroBody });
+export type RetroDraft = z.infer<typeof RetroDraft>;
+export const RetroEdit = z.strictObject({ revision: z.number().int().nonnegative(), title: z.string().min(1).max(60), body: RetroBody, topics: z.array(z.string().min(1).max(50)).max(5) });
+export const RetroDayRow = z.object({ id: z.uuid(), dept_id: z.uuid(), user_id: z.uuid(), retro_date: z.iso.date(), tz: z.string(), visibility: z.enum(["self", "dept", "leads_only"]), status: z.enum(["collecting", "drafting", "draft", "needs_review", "confirmed", "failed"]), status_reason: z.string().nullable(), activity_count: z.number().int(), revision: z.number().int(), confirmed_revision: z.number().int().nullable(), confirmed_at: z.string().nullable(), topics: z.array(z.string()), generation: z.number().int(), updated_at: z.string(), display_name: z.string().optional(), title: z.string().nullable().optional() });
+export type RetroDayRow = z.infer<typeof RetroDayRow>;
+export const RetroActivityRow = RetroActivity.extend({ id: z.uuid(), day_id: z.uuid(), source_visibility: z.enum(["dept", "leads_only"]).nullable(), excluded: z.boolean() });
+export type RetroActivityRow = z.infer<typeof RetroActivityRow>;
+export const RetroRevisionRow = z.object({ day_id: z.uuid(), revision: z.number().int(), origin: z.enum(["draft", "edit", "confirm"]), title: z.string(), body: RetroBody, topics: z.array(z.string()), highlight: z.string().nullable(), citations: z.array(RetroCitation), created_at: z.string() });
+export type RetroRevisionRow = z.infer<typeof RetroRevisionRow>;
+
 export const DecisionCorrectionInput = z.object({
   previous_id: z.uuid(), correction_id: z.uuid(), outcome: z.string().trim().min(1).max(300), rationale: z.string().trim().min(1).max(1_000),
 }).strict();
@@ -227,7 +252,7 @@ export const TrailerInviteOpen = z.strictObject({
   org_display_name: z.string().trim().min(1),
   state: z.enum(["consent_required", "ready", "submitted", "withdrawn"]),
   consent_version: z.string().trim().min(1),
-  expires_at: z.iso.datetime(),
+  expires_at: z.iso.datetime({ offset: true }),
 });
 export type TrailerInviteOpen = z.infer<typeof TrailerInviteOpen>;
 
@@ -236,10 +261,11 @@ export const TrailerInviteRow = z.strictObject({
   invite_id: z.uuid(),
   email: z.string().nullable(),
   status: TrailerInviteStatus,
-  expires_at: z.iso.datetime(),
-  first_opened_at: z.iso.datetime().nullable(),
-  consented_at: z.iso.datetime().nullable(),
-  submitted_at: z.iso.datetime().nullable(),
+  expires_at: z.iso.datetime({ offset: true }),
+  first_opened_at: z.iso.datetime({ offset: true }).nullable(),
+  consented_at: z.iso.datetime({ offset: true }).nullable(),
+  submitted_at: z.iso.datetime({ offset: true }).nullable(),
+  attempt_id: z.uuid().nullable(),
   attempt_status: z.string().nullable(),
   weighted_score: z.number().nullable(),
 });
@@ -249,7 +275,7 @@ export const TrailerInviteIssued = z.strictObject({
   invite_id: z.uuid().nullable(),
   email: z.string().nullable(),
   token: TrailerInviteToken.nullable(),
-  expires_at: z.iso.datetime().nullable(),
+  expires_at: z.iso.datetime({ offset: true }).nullable(),
   skipped_reason: z.enum(["invalid_email", "duplicate", "active_exists"]).nullable(),
 });
 export type TrailerInviteIssued = z.infer<typeof TrailerInviteIssued>;
@@ -376,6 +402,7 @@ export const AdminEventRow = z.strictObject({
     "lead_promote",
     "lead_demote",
     "member_remove",
+    "review_settings_update",
   ]),
   dept_name: NonEmptyString,
   target_user_label: NonEmptyString,
@@ -479,3 +506,32 @@ export function toStrictJsonSchema(
 
   return strictSchema;
 }
+// ADR-058: identifiers/authority come from the session RPC, never from the browser.
+export const OriginalAccessGrant = z.object({
+  token: z.string().min(1), path: z.string().min(1),
+  kind: z.enum(["audio", "document"]), filename: z.string().min(1),
+});
+export const ReviewOrgSettings = z.object({
+  browser_recording_enabled: z.boolean(), allow_original_download: z.boolean(),
+});
+export const ReviewAccessEvent = z.object({
+  id: z.number(), review_id: z.string(), dept_id: z.string(), actor_id: z.string(),
+  action: z.enum(["play_original", "download_original", "export", "reextract"]),
+  created_at: z.string(),
+});
+// ADR-059: synthetic hiring practice; no candidate/server persistence.
+export const HiringFile = z.object({ name: z.string().min(1).max(120), size: z.number().int().positive().max(2 * 1024 * 1024) });
+export const HiringMission = z.object({
+  id: z.string(), deptId: z.uuid(), team: z.string(), role: z.string(), title: z.string(), brief: z.string(),
+  timebox: z.string(), facts: z.array(z.object({ id: z.string(), label: z.string(), text: z.string() })).min(3),
+  stages: z.array(z.object({ id: z.string(), label: z.string(), prompt: z.string() })).length(3),
+  deliverables: z.array(z.string()).min(3), criteria: z.array(z.string()).min(3),
+  sample: z.object({ approach: z.string(), artifact: z.string(), filename: z.string() }),
+});
+export type HiringMission = z.infer<typeof HiringMission>;
+export const HiringSubmission = z.object({
+  approach: z.string().trim().min(30).max(6000), artifact: z.string().trim().max(40000),
+  factIds: z.array(z.string()).min(1), checkpoints: z.array(z.object({ stageId: z.string(), note: z.string().trim().min(10).max(2000) })).length(3),
+  file: HiringFile.nullable(),
+});
+export type HiringSubmission = z.infer<typeof HiringSubmission>;

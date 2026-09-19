@@ -17,6 +17,7 @@ type Settings = {
   expires_at: string | null;
   retention_days: number | null;
   checked_at?: string;
+  review_original_days?: number | null;
 };
 const day = (value: string | null) =>
   value
@@ -39,6 +40,7 @@ export function RetentionConsole({ deptId }: { deptId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [originalDays, setOriginalDays] = useState<number | null>(null);
   const load = useCallback(async () => {
     const response = await fetch(`/api/d/${deptId}/retention`, {
       cache: "no-store",
@@ -47,6 +49,7 @@ export function RetentionConsole({ deptId }: { deptId: string }) {
     if (!response.ok) throw new Error(body.error);
     setSources(body.sources);
     setSettings(body.settings);
+    setOriginalDays(body.settings.review_original_days ?? null);
     setRisk(body.risk.message);
   }, [deptId]);
   useEffect(() => {
@@ -206,6 +209,27 @@ export function RetentionConsole({ deptId }: { deptId: string }) {
         >
           Slack 보존 정책 안내
         </a>
+      </section>
+      <section className="panel" aria-label="자료 원본 보존">
+        <h2>자료 검토함 원본 보존</h2>
+        <p>확정한 시각부터 선택한 기간이 지난 음성·문서 원본을 자동 파기합니다. 전사·교정 이력·업무 근거는 남지만 원본 재생과 재추출은 할 수 없습니다. 이미 기한이 지난 자료에도 적용됩니다.</p>
+        <form onSubmit={(event) => {
+          event.preventDefault();
+          void perform(async () => {
+            const response = await fetch(`/api/d/${deptId}/retention/originals`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ days: originalDays }) });
+            if (!response.ok) throw new Error((await response.json()).error);
+            await load();
+            setMessage("원본 보존 기간을 저장했습니다. 기한이 지난 원본은 정기 작업에서 파기합니다.");
+          });
+        }}>
+          <label>확정 후 원본 보존 기간
+            <select aria-label="확정 후 원본 보존 기간" disabled={busy} value={originalDays ?? ""} onChange={(event) => setOriginalDays(event.target.value ? Number(event.target.value) : null)}>
+              <option value="">수동 삭제 (자동 파기 안 함)</option>
+              <option value="30">30일</option><option value="90">90일</option><option value="365">365일</option>
+            </select>
+          </label>
+          <button className="button button-primary" disabled={busy} type="submit">원본 보존 기간 저장</button>
+        </form>
       </section>
       <section className="panel">
         <h2>채널별 수집 현황</h2>

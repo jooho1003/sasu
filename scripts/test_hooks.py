@@ -98,6 +98,15 @@ def posix(p: Path) -> str:
     return p.as_posix()
 
 
+def test_recording_browser_boundary(repo):
+    for path in ("lib/recording/browser/storage.ts", "lib/recording/browser/capture.worklet.js"):
+        assert not denied(run_hook(TDD_GUARD, patch_payload(f"Add File: {path}"), repo))
+    assert denied(run_hook(TDD_GUARD, patch_payload("Add File: lib/recording/pcm.ts"), repo))
+    (repo / "tests" / "recording").mkdir()
+    (repo / "tests" / "recording" / "pcm.test.ts").write_text("// test first")
+    assert not denied(run_hook(TDD_GUARD, patch_payload("Add File: lib/recording/pcm.ts"), repo))
+
+
 @pytest.mark.parametrize("script", [TDD_GUARD, DANGER_GUARD])
 def test_malformed_payload_fails_closed(repo, script):
     assert run_hook(script, "{malformed", repo).returncode == 2

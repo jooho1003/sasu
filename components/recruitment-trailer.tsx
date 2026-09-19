@@ -2,16 +2,22 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import type { TrailerScenario, TrailerSubmission } from "@/lib/contracts";
+import type { TrailerAttemptSubmission, TrailerScenario, TrailerSubmission } from "@/lib/contracts";
+import { validateAttemptSubmissions } from "@/lib/trailer-assessment";
 import { validateSubmission } from "@/lib/trailer";
 import { INTERACTIONS, type PlaceId } from "@/lib/trailer-world";
 import { TrailerOffice, type OfficeHandle } from "./trailer-office";
 import styles from "./recruitment-trailer.module.css";
 
 type Overlay = "place" | "notebook" | "destinations" | null;
+type TrailerAttemptEvent = TrailerAttemptSubmission["events"][number];
+type SubmissionMode = {
+  onSubmit(submissions: TrailerAttemptSubmission[]): Promise<"ok" | "error">;
+  notice: string;
+};
 const characters = [{ name: "초록 재킷", color: "#6da183" }, { name: "노란 니트", color: "#d8af65" }, { name: "파란 셔츠", color: "#7b9dc3" }];
 
-export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null }: { scenarios: TrailerScenario[]; applyUrl?: string | null; notice?: string | null }) {
+export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null, submission }: { scenarios: TrailerScenario[]; applyUrl?: string | null; notice?: string | null; submission?: SubmissionMode }) {
   const [screen, setScreen] = useState<"intro" | "play" | "finished">("intro");
   const [mode, setMode] = useState<"map" | "list">("map");
   const [quest, setQuest] = useState(0);
@@ -25,7 +31,9 @@ export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null }
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const [results, setResults] = useState<TrailerSubmission[]>([]);
+  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting">("idle");
   const [travel, setTravel] = useState<{ id: PlaceId; serial: number } | null>(null);
+  const attemptEvents = useRef<TrailerAttemptEvent[][]>(scenarios.map(() => []));
   const office = useRef<OfficeHandle>(null);
   const modal = useRef<HTMLDialogElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -40,18 +48,58 @@ export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null }
   }, [overlay, place, screen, mode]);
   useEffect(() => { if (travel) office.current?.walkTo(travel.id); }, [travel]);
 
-  function discover(ids: string[]) { setDiscovered((current) => [...new Set([...current, ...ids])]); }
+  function recordEvent(kind: TrailerAttemptEvent["kind"], ref: string) {
+    if (!submission) return;
+    const events = attemptEvents.current[quest] ?? [];
+    events.push({ seq: events.length + 1, kind, ref });
+    attemptEvents.current[quest] = events;
+  }
+  function discover(ids: string[]) {
+    const newIds = ids.filter((id) => !discovered.includes(id));
+    newIds.forEach((id) => recordEvent("open_fact", id));
+    setDiscovered((current) => [...new Set([...current, ...ids])]);
+  }
   function visit(id: PlaceId) {
     setPlace(id); setDialogueId(null); setOverlay("place");
     if (["library", "meeting", "messenger"].includes(id)) discover(scenario.facts.filter((fact) => fact.place === id).map((fact) => fact.id));
   }
   function walkTo(id: PlaceId) { setOverlay(null); setTravel((current) => ({ id, serial: (current?.serial ?? 0) + 1 })); }
   function clearQuest() { setDiscovered([]); setSelected([]); setDialogueId(null); setChoice(""); setReason(""); setError(""); setPlace("lobby"); setOverlay(null); setTravel(null); }
-  function restart() { clearQuest(); setQuest(0); setResults([]); setScreen("intro"); }
+  function restart() {
+    clearQuest();
+    attemptEvents.current = scenarios.map(() => []);
+    setSubmissionStatus("idle");
+    setQuest(0);
+    setResults([]);
+    setScreen("intro");
+  }
   function submit() {
     const result = validateSubmission(scenario, discovered, { choice_id: choice, reason, fact_ids: selected });
     if (!result) { setError("선택지와 결정 이유를 작성하고, 단서 수첩에서 근거를 하나 이상 골라주세요."); return; }
+    if (!results[quest]) recordEvent("submit", scenario.id);
     setError(""); setResults((current) => current[quest] ? current : [...current, result]); visit("archive");
+  }
+  async function submitAttempt() {
+    if (!submission || submissionStatus === "submitting") return;
+    const submissions = results.map((result, index) => ({
+      scenario_id: scenarios[index].id,
+      choice_id: result.choice_id,
+      reason: result.reason,
+      fact_ids: result.fact_ids,
+      events: attemptEvents.current[index] ?? [],
+    }));
+    try {
+      validateAttemptSubmissions(scenarios, submissions);
+    } catch {
+      setError("제출 내용을 확인하지 못했습니다. 각 퀘스트의 결정과 근거를 다시 확인해 주세요.");
+      return;
+    }
+    setSubmissionStatus("submitting");
+    const status = await submission.onSubmit(submissions);
+    if (status === "error") {
+      setSubmissionStatus("idle");
+      setError("제출하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    }
   }
   function notebook() {
     return <section className={styles.notebook} aria-label="단서 수첩">
@@ -73,17 +121,20 @@ export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null }
       <div className={styles.dialogueActions}><span>무엇부터 해볼까요?</span><button onClick={() => mode === "map" ? walkTo("library") : visit("library")}>서고부터 둘러보기 →</button><button onClick={() => setOverlay(null)}>직접 둘러볼게요</button></div>
     </>;
     if (place === "inbox") return submitted ? <><p>이 퀘스트의 결정을 작성했어요.</p><button className={styles.primary} onClick={() => visit("archive")}>기록실에서 비교하기</button></> : <form onSubmit={(event) => { event.preventDefault(); submit(); }}>
-      <fieldset className={styles.choices}><legend>어떤 결정을 내릴까요?</legend>{scenario.choices.map((entry) => <label key={entry.id}><input type="radio" name="trailer-choice" checked={choice === entry.id} onChange={() => setChoice(entry.id)} />{entry.label}</label>)}</fieldset>
+      <fieldset className={styles.choices}><legend>어떤 결정을 내릴까요?</legend>{scenario.choices.map((entry) => <label key={entry.id}><input type="radio" name="trailer-choice" checked={choice === entry.id} onChange={() => { setChoice(entry.id); recordEvent("choose", entry.id); }} />{entry.label}</label>)}</fieldset>
       <label className={styles.reasonLabel} htmlFor="trailer-reason">결정 이유<textarea id="trailer-reason" value={reason} onChange={(event) => setReason(event.target.value)} maxLength={1000} rows={3} placeholder="중요하게 본 기준과 감수할 점을 적어주세요." /></label><p className={styles.muted}>{reason.length}/1000자 · 개인정보는 적지 마세요.</p>
-      {notebook()}{error ? <p className={styles.error} role="alert">{error}</p> : null}<button className={styles.primary} type="submit">결정하고 기록실 열기 →</button><p className={styles.notice}>작성 내용은 이 브라우저에서만 사용하고 서버로 전송하지 않아요.</p>
+      {notebook()}{error ? <p className={styles.error} role="alert">{error}</p> : null}<button className={styles.primary} type="submit">결정하고 기록실 열기 →</button><p className={styles.notice}>{submission ? submission.notice : "작성 내용은 이 브라우저에서만 사용하고 서버로 전송하지 않아요."}</p>
     </form>;
     if (place === "archive") return submitted ? <><p>선택이 달라도 틀린 것이 아니에요. 어떤 기준을 중요하게 봤는지 비교해보세요.</p>{comparison(quest)}<button className={styles.primary} onClick={() => {
-      if (quest + 1 === scenarios.length) { setOverlay(null); setScreen("finished"); } else { clearQuest(); setQuest((current) => current + 1); }
-    }}>{quest + 1 === scenarios.length ? "전체 체험 돌아보기 →" : "다음 퀘스트 →"}</button></> : <><p>내 결정을 작성하면 가상 팀의 선택과 이유가 열립니다.</p><button className={styles.primary} onClick={() => mode === "map" ? walkTo("inbox") : visit("inbox")}>결정 작성하러 가기</button></>;
+      if (quest + 1 === scenarios.length) {
+        if (submission) void submitAttempt();
+        else { setOverlay(null); setScreen("finished"); }
+      } else { clearQuest(); setQuest((current) => current + 1); }
+    }} disabled={submissionStatus === "submitting"}>{quest + 1 === scenarios.length ? submission ? submissionStatus === "submitting" ? "제출 중…" : "최종 제출" : "전체 체험 돌아보기 →" : "다음 퀘스트 →"}</button>{error ? <p className={styles.error} role="alert">{error}</p> : null}</> : <><p>내 결정을 작성하면 가상 팀의 선택과 이유가 열립니다.</p><button className={styles.primary} onClick={() => mode === "map" ? walkTo("inbox") : visit("inbox")}>결정 작성하러 가기</button></>;
     if (place === "finance" || place === "partner") return <>
       <p className={styles.dialogueText}>{dialogue ? dialogue.quote : `반가워요! ${place === "finance" ? "예산과 일정을 함께 살펴볼까요?" : "고객과 협력사 이야기가 궁금한가요?"}`}</p>
       {dialogue ? <p className={styles.citation}>사실집 근거 · {scenario.facts.find((fact) => fact.id === dialogue.fact_id)?.label}<span>수첩에 담았어요 ✓</span></p> : null}
-      <div className={styles.dialogueActions}><span>물어보기</span>{scenario.dialogues.filter((entry) => entry.place === place).map((entry) => <button key={entry.id} onClick={() => { setDialogueId(entry.id); discover([entry.fact_id]); }}>{entry.question} <span>↗</span></button>)}<button onClick={() => setOverlay(null)}>고마워요, 또 올게요</button></div><p className={styles.notice}>가상 동료는 준비된 사실집 안에서만 대답해요.</p>
+      <div className={styles.dialogueActions}><span>물어보기</span>{scenario.dialogues.filter((entry) => entry.place === place).map((entry) => <button key={entry.id} onClick={() => { setDialogueId(entry.id); recordEvent("ask_dialogue", entry.id); discover([entry.fact_id]); }}>{entry.question} <span>↗</span></button>)}<button onClick={() => setOverlay(null)}>고마워요, 또 올게요</button></div><p className={styles.notice}>가상 동료는 준비된 사실집 안에서만 대답해요.</p>
     </>;
     return <>{scenario.facts.filter((fact) => fact.place === place).map((fact) => <blockquote key={fact.id}>{fact.text}<cite>사실집 · {fact.label}</cite></blockquote>)}<p className={styles.collected}>단서 수첩에 담았어요 ✓</p><button className={styles.primary} onClick={() => setOverlay(null)}>계속 둘러보기 →</button></>;
   }
@@ -98,7 +149,7 @@ export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null }
       {screen === "intro" ? <section className={styles.welcome}>
         {notice ? <p className={styles.notice}>{notice}</p> : null}<div className={styles.welcomeChip}>당신의 첫 출근을 환영해요</div><h1>일하는 방식을,<br />먼저 만나보세요.</h1><p>오피스를 걸으며 동료에게 묻고,<br />당신의 첫 번째 결정을 내려보세요.</p>
         <fieldset className={styles.characterPicker}><legend>나의 캐릭터</legend>{characters.map((entry, index) => <button type="button" key={entry.name} aria-label={entry.name} aria-pressed={character === index} onClick={() => setCharacter(index)} style={{ "--shirt": entry.color } as CSSProperties}><span className={styles.avatarPreview}><i /><b /><em /></span></button>)}</fieldset>
-        <button className={styles.enter} onClick={() => setScreen("play")}>오피스 입장하기 <span>→</span></button><div className={styles.welcomeFacts}><span>{scenarios.length}가지 결정</span><span>자유로운 탐색</span><span>채점 없음</span></div><p className={styles.notice}>회사·동료·사례는 모두 가상입니다. 답변은 전송·저장하지 않으며 새로고침하면 초기화됩니다.</p>
+        <button className={styles.enter} onClick={() => setScreen("play")}>오피스 입장하기 <span>→</span></button><div className={styles.welcomeFacts}><span>{scenarios.length}가지 결정</span><span>자유로운 탐색</span><span>{submission ? "최종 제출 1회" : "채점 없음"}</span></div><p className={styles.notice}>{submission ? submission.notice : "회사·동료·사례는 모두 가상입니다. 답변은 전송·저장하지 않으며 새로고침하면 초기화됩니다."}</p>
       </section> : <>
         <aside className={styles.questHud} aria-label="오늘의 퀘스트">{notice ? <p className={styles.notice}>{notice}</p> : null}<div className={styles.questMeta}><span className={styles.questSymbol}>✦</span><span>오늘의 퀘스트</span><b>{quest + 1} / {scenarios.length}</b></div><h1>{scenario.title}</h1><p>{scenario.summary}</p><div className={styles.questSteps}><span data-done={discovered.length > 0}>단서 찾기</span><i /><span data-done={Boolean(submitted)}>결정 남기기</span><i /><span>돌아보기</span></div></aside>
         <nav className={styles.gameNav} aria-label="체험 메뉴"><button onClick={() => setOverlay("notebook")}><span aria-hidden="true">▤</span>단서 수첩 <b>{discovered.length}</b></button><button onClick={() => setOverlay("destinations")}><span aria-hidden="true">⌖</span>장소 찾아가기</button><button onClick={() => setMode((current) => current === "map" ? "list" : "map")}><span aria-hidden="true">☷</span>{mode === "map" ? "목록형 모드로 전환" : "맵 모드로 전환"}</button></nav>

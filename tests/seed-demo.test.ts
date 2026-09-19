@@ -1,11 +1,40 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { weightedScore } from "../lib/agent-role";
+import { DocumentSummary } from "../lib/contracts";
 import { MASK_PATTERNS } from "../lib/mask";
-import { DEMO_REVIEWER_ID } from "@/lib/demo-access";
+import { verifyDocumentSummary } from "../lib/pipeline/document-summary";
+import { DEMO_NOTION_EXCLUSIONS, DEMO_NOTION_ROOTS, DEMO_NOTION_SOURCES, DEMO_REVIEWER_ID } from "@/lib/demo-access";
 import { DEMO_AGENT_ROLE, DEMO_DEPARTMENTS, DEMO_MEMBERS, DEMO_RETENTION_EXPORTS, DEMO_RETENTION_SETTINGS, DEMO_TRAILER_SLUG, seedDemoTrailer, seedDemoAttempts } from "../scripts/seed-demo";
 
 describe("게스트 데모 시드", () => {
+  it("부서 간 소스·항목·카드·답변 ID가 충돌하지 않는다", () => {
+    for (const values of [DEMO_DEPARTMENTS.flatMap(d => d.sources), DEMO_DEPARTMENTS.flatMap(d => d.items), DEMO_DEPARTMENTS.flatMap(d => [d.request, ...(d.extraRequests ?? [])]), DEMO_DEPARTMENTS.flatMap(d => d.answers)]) {
+      expect(new Set(values.map(value => value.id)).size).toBe(values.length);
+    }
+  });
+  it("우선 대상 5개 부서와 기존 영업·개발 데모를 함께 보존한다", () => {
+    for (const name of ["기획팀 사수", "인사팀 사수", "프론트개발팀 사수", "백엔드개발팀 사수", "디자인팀 사수", "영업 사수", "개발 사수"]) {
+      const department = DEMO_DEPARTMENTS.find(entry => entry.name === name);
+      expect(department, name).toBeDefined();
+      expect(department!.answers.length).toBeGreaterThanOrEqual(5);
+      expect(department!.sources.some(source => source.is_principles)).toBe(true);
+    }
+  });
+  it("합성 Notion root 2개와 카운트·소스 목록을 함께 준비한다", () => {
+    expect(DEMO_NOTION_ROOTS).toHaveLength(2);
+    expect(DEMO_NOTION_SOURCES).toHaveLength(9);
+    expect(DEMO_NOTION_EXCLUSIONS).toHaveLength(1);
+    for (const root of DEMO_NOTION_ROOTS) {
+      const sources = DEMO_NOTION_SOURCES.filter((source) => source.root_id === root.id);
+      expect(sources).toHaveLength(root.discovered_count);
+      expect(sources.filter((source) => source.active && source.last_synced_at && !source.last_error)).toHaveLength(root.completed_count);
+      expect(sources.filter((source) => source.active && !source.last_synced_at && !source.last_error)).toHaveLength(root.pending_count);
+      expect(sources.filter((source) => source.active && source.last_error)).toHaveLength(root.failed_count);
+      expect(DEMO_NOTION_EXCLUSIONS.filter((entry) => entry.dept_id === root.dept_id)).toHaveLength(root.excluded_count);
+      expect(root.card_candidates).toBe(false);
+    }
+  });
   it("데모 공개 링크는 22자리이며 스냅샷이 없으면 DB에 접근하지 않는다", async () => {
     expect(DEMO_TRAILER_SLUG).toMatch(/^[a-z0-9]{22}$/);
     const from = vi.fn();
@@ -25,7 +54,7 @@ describe("게스트 데모 시드", () => {
         display_name: "심사위원 데모",
       });
     }
-    expect(new Set(DEMO_MEMBERS.map((member) => member.user_id)).size).toBe(13);
+    expect(new Set(DEMO_MEMBERS.map((member) => member.user_id)).size).toBe(22);
     expect(DEMO_MEMBERS.find((member) => member.user_id === DEMO_AGENT_ROLE.created_by)?.role).toBe("lead");
   });
 
@@ -140,6 +169,23 @@ describe("게스트 데모 시드", () => {
     expect(DEMO_AGENT_ROLE.results.map((result) => result.weighted_score)).toEqual(
       [...DEMO_AGENT_ROLE.results].sort((left, right) => (right.weighted_score ?? 0) - (left.weighted_score ?? 0)).map((result) => result.weighted_score),
     );
+  });
+
+  it("문서 어시스턴트 시드 요약은 계약 전체 형태이며 인용·항목이 모두 원문에 있다", () => {
+    const development = DEMO_DEPARTMENTS.find((department) => department.id === DEMO_AGENT_ROLE.dept_id);
+
+    expect(DEMO_AGENT_ROLE.documents).toHaveLength(3);
+    for (const document of DEMO_AGENT_ROLE.documents) {
+      const items = new Map(
+        (development?.items ?? []).filter((item) => item.source_id === document.source_id).map((item) => [item.id, item.content]),
+      );
+      const summary = DocumentSummary.parse(document.summary);
+      const verified = verifyDocumentSummary(summary, items);
+
+      expect(verified.dropped).toBe(0);
+      expect(verified.valid.citations.length).toBeGreaterThan(0);
+      expect(verified.valid.key_points.length).toBeGreaterThan(0);
+    }
   });
 
   it("지원서 결과에는 합불 판정이 없고 합성 시드에는 마스킹 대상 문자열이 없다", () => {

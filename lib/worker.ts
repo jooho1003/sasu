@@ -1,3 +1,5 @@
+import { registerRetroDraftHandler } from "@/lib/pipeline/retro-draft";
+import { registerRetroPullHandler } from "@/lib/pipeline/retro-pull";
 import { runOnce, sweepPendingRows } from "@/lib/jobs";
 import { registerReviewHandlers, sweepReviewParts } from "@/lib/pipeline/review-material";
 import { registerMakeCardHandler } from "@/lib/pipeline/card";
@@ -16,10 +18,13 @@ import { registerSlackBackfillHandler } from "@/lib/pipeline/slack-backfill";
 import { registerTrailerGenerateHandler } from "@/lib/pipeline/trailer-generate";
 import { registerTrailerGateHandler } from "@/lib/pipeline/trailer-gate";
 import { registerTrailerScoreHandler } from "@/lib/pipeline/trailer-score";
+import { registerTrailerPurgeHandler } from "@/lib/pipeline/trailer-purge";
 import { registerReminderHandler, scheduleCardReminders } from "@/lib/pipeline/reminder";
 
 function registerWorkerHandlers(): void {
   registerReviewHandlers();
+  registerRetroDraftHandler();
+  registerRetroPullHandler();
   registerClassifyHandler();
   registerEmbedHandler();
   registerAnswerHandler();
@@ -36,6 +41,7 @@ function registerWorkerHandlers(): void {
   registerTrailerGenerateHandler();
   registerTrailerGateHandler();
   registerTrailerScoreHandler();
+  registerTrailerPurgeHandler();
   registerReminderHandler();
 }
 

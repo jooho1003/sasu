@@ -81,7 +81,7 @@ export default function CardActions({
         <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-sm font-bold text-[var(--accent)]">
           결정 완료
         </span>
-        <Link href={`/d/${deptId}/ledger`}>원장에서 보기</Link>
+        <Link href={`/d/${deptId}/ledger`}>결정 기록에서 보기</Link>
       </div>
     );
   }
@@ -171,7 +171,7 @@ export default function CardActions({
 
       {message ? (
         <p aria-live="polite" className="m-0 text-sm font-bold text-[var(--accent)]">
-          {message} <Link href={`/d/${deptId}/ledger`}>원장으로</Link>
+          {message} <Link href={`/d/${deptId}/ledger`}>결정 기록으로</Link>
         </p>
       ) : null}
       {error ? (

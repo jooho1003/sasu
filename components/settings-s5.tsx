@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/icon";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminAction } from "@/components/admin/actions";
 import { LeadInvites } from "@/components/admin/lead-invites";
+import { NotionSourceList } from "@/components/notion-source-list";
 
 type SettingsMember = {
   user_id: string;
@@ -24,6 +25,14 @@ type SettingsSource = {
   last_synced_at: string | null;
   auto_sync: boolean;
   last_error: string | null;
+  import_version: number;
+};
+
+type NotionLineResult = {
+  input: string;
+  status: "created" | "existing" | "error";
+  source_id?: string;
+  error?: string;
 };
 
 type SlackChannel = { id: string; name: string; isPrivate: boolean };
@@ -78,6 +87,7 @@ export default function SettingsS5({
   const [backfillState, setBackfillState] = useState<ActionState>(IDLE_ACTION);
   const [removalState, setRemovalState] = useState<ActionState>(IDLE_ACTION);
   const [notionState, setNotionState] = useState<ActionState>(IDLE_ACTION);
+  const [notionResults, setNotionResults] = useState<NotionLineResult[]>([]);
   const [meetingState, setMeetingState] = useState<ActionState>(IDLE_ACTION);
   const [selectedChannel, setSelectedChannel] = useState("");
   const [channelTitle, setChannelTitle] = useState("");
@@ -88,6 +98,7 @@ export default function SettingsS5({
   const [notionVisibility, setNotionVisibility] = useState<
     "dept" | "leads_only"
   >("dept");
+  const [notionIncludeChildren, setNotionIncludeChildren] = useState(false);
   const [meetingTitle, setMeetingTitle] = useState("");
   const [meetingVisibility, setMeetingVisibility] = useState<
     "dept" | "leads_only"
@@ -339,8 +350,9 @@ export default function SettingsS5({
       kind: "pending",
       message: "Notion 문서를 연결하는 중입니다.",
     });
+    setNotionResults([]);
     try {
-      await readResponse(
+      const result = await readResponse<{ results: NotionLineResult[] }>(
         await fetch(`/api/d/${encodeURIComponent(deptId)}/settings/notion`, {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -348,13 +360,16 @@ export default function SettingsS5({
             page_id: notionPageId.trim(),
             title: notionTitle.trim(),
             visibility: notionVisibility,
+            include_children: notionIncludeChildren,
           }),
         }),
       );
+      setNotionResults(result.results);
+      const succeeded = result.results.filter(item => item.status !== "error").length;
+      const failed = result.results.length - succeeded;
       setNotionState({
         kind: "success",
-        message:
-          "Notion 가져오기를 시작했습니다. 항목은 분류 후 대시보드에 나타납니다.",
+        message: `${succeeded}개 페이지의 가져오기를 시작했습니다.${failed ? ` ${failed}개 줄은 확인이 필요합니다.` : ""}`,
       });
       await load();
     } catch (error) {
@@ -364,6 +379,34 @@ export default function SettingsS5({
           error instanceof Error
             ? error.message
             : "Notion 가져오기를 시작하지 못했습니다.",
+      });
+    }
+  };
+
+  const convertNotion = async (sourceId: string) => {
+    if (!window.confirm("새 방식으로 전환하면 열려 있는 카드의 근거가 재검토 상태가 됩니다. 되돌릴 수 없습니다.")) return;
+    setNotionState({
+      kind: "pending",
+      message: "새 가져오기 방식으로 전환하는 중입니다.",
+    });
+    setNotionResults([]);
+    try {
+      await readResponse(
+        await fetch(`/api/d/${encodeURIComponent(deptId)}/settings/notion`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ source_id: sourceId, convert_v2: true }),
+        }),
+      );
+      setNotionState({
+        kind: "success",
+        message: "새 가져오기 방식으로 전환하고 다시 가져오기를 시작했습니다.",
+      });
+      await load();
+    } catch (error) {
+      setNotionState({
+        kind: "error",
+        message: error instanceof Error ? error.message : "새 가져오기 방식으로 전환하지 못했습니다.",
       });
     }
   };
@@ -521,7 +564,7 @@ export default function SettingsS5({
   const heading = (
     <header className="page-heading">
       <div>
-        <p className="eyebrow">부서 세팅</p>
+        <p className="eyebrow">부서 설정</p>
         <h1>수집 범위와 동의를 확인하세요</h1>
         <p>함께할 멤버와 자료를 연결하고, 우리 부서의 사수를 준비하세요.</p>
       </div>
@@ -538,7 +581,7 @@ export default function SettingsS5({
           </span>
           <h2>
             {loadError
-              ? "세팅을 불러오지 못했습니다"
+              ? "설정을 불러오지 못했습니다"
               : "우리 부서의 연결을 확인하고 있어요"}
           </h2>
           <p role={loadError ? "alert" : "status"}>
@@ -627,7 +670,7 @@ export default function SettingsS5({
           ))}
         </ol>
       </section>
-      <div className="section-picker" role="group" aria-label="세팅 항목 선택">
+      <div className="section-picker" role="group" aria-label="설정 항목 선택">
         {(
           [
             ["members", "멤버·동의"],
@@ -884,6 +927,18 @@ export default function SettingsS5({
                       </button>
                     ) : null}
                     {source.kind === "notion_page" && source.active ? (
+                      source.import_version === 1 ? (
+                        <button
+                          className="rounded-lg border border-[var(--urgent)] px-3 py-2 text-sm font-bold text-[var(--urgent)] disabled:opacity-50"
+                          disabled={notionState.kind === "pending"}
+                          onClick={() => void convertNotion(source.id)}
+                          type="button"
+                        >
+                          새 방식으로 전환
+                        </button>
+                      ) : null
+                    ) : null}
+                    {source.kind === "notion_page" && source.active ? (
                       <button className="rounded-lg border border-accent/30 px-3 py-2 text-sm font-bold text-accent" disabled={notionState.kind === "pending"} onClick={() => void reimportNotion(source.id, !source.auto_sync)} type="button">
                         {source.auto_sync ? "자동 갱신 중지" : "자동 갱신 켜기"}
                       </button>
@@ -935,6 +990,7 @@ export default function SettingsS5({
             </p>
           ) : null}
         </section>
+        <NotionSourceList deptId={deptId} role={data.role} />
         {data.role === "lead" ? (
           <section className="settings-panel panel">
             <div>
@@ -1124,12 +1180,13 @@ export default function SettingsS5({
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="grid gap-2 text-sm font-bold sm:col-span-2">
-                페이지 URL 또는 ID
-                <input
+                페이지 URL 또는 ID (한 줄에 하나, 최대 50개)
+                <textarea
                   className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
+                  rows={5}
                   value={notionPageId}
                   onChange={(event) => setNotionPageId(event.target.value)}
-                  placeholder="https://www.notion.so/..."
+                  placeholder={"https://www.notion.so/...\nhttps://www.notion.so/..."}
                 />
               </label>
               <label className="grid gap-2 text-sm font-bold">
@@ -1155,6 +1212,10 @@ export default function SettingsS5({
                   <option value="leads_only">팀장만</option>
                 </select>
               </label>
+              <label className="flex items-center gap-2 self-end text-sm font-bold">
+                <input checked={notionIncludeChildren} onChange={(event) => setNotionIncludeChildren(event.target.checked)} type="checkbox" />
+                하위 페이지 포함
+              </label>
             </div>
             <button
               className="button button-primary button-small w-fit"
@@ -1170,6 +1231,15 @@ export default function SettingsS5({
               <p role="status" className="m-0 text-sm text-[var(--muted)]">
                 {notionState.message}
               </p>
+            ) : null}
+            {notionResults.length > 0 ? (
+              <ul className="m-0 grid gap-1 pl-5 text-sm text-[var(--muted)]">
+                {notionResults.map((result, index) => (
+                  <li key={`${result.input}-${index}`}>
+                    {result.input} · {result.status === "created" ? "등록됨" : result.status === "existing" ? "기존 연결 사용" : result.error}
+                  </li>
+                ))}
+              </ul>
             ) : null}
           </section>
         ) : null}

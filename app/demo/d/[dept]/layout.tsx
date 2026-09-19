@@ -35,6 +35,7 @@ export default async function DemoDepartmentLayout({
       deptId={dept}
       departmentName={department.name}
       showOrgAdmin
+      showRetros={process.env.SASU_RETRO_ENABLED === "true"}
       showTrailers
     >
       {children}

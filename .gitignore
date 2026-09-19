@@ -6,6 +6,7 @@
 # node / next
 node_modules/
 .next/
+.next-verify/
 out/
 .vercel/
 

@@ -37,6 +37,9 @@ const departmentCopy: Record<
     description: "디자인의 기준과 피드백, 그 뒤의 이유를 기억합니다.",
     example: "팀의 디자인 원칙은 어떤 결정으로 이어질까요?",
   },
+  "인사팀 사수": { icon: "people", description: "채용·온보딩의 기준과 담당자를 확인합니다.", example: "신입의 첫 주에 무엇을 준비해야 할까요?" },
+  "프론트개발팀 사수": { icon: "code", description: "화면 상태·접근성·실패 복구의 근거를 연결합니다.", example: "제출 실패 때 사용자의 입력을 어떻게 지킬까요?" },
+  "백엔드개발팀 사수": { icon: "code", description: "권한·멱등성·동시성의 결정 근거를 확인합니다.", example: "중복 제출과 타 부서 접근을 어떻게 막을까요?" },
 };
 // 서버 전용 기능 플래그와 데모 링크를 배포 런타임 기준으로 일치시킨다.
 export const dynamic = "force-dynamic";
@@ -51,9 +54,10 @@ const featureIcons: Record<(typeof DEMO_FEATURES)[number]["key"], IconName> = {
   roles: "people",
   retention: "book",
   settings: "settings",
+  notion: "file",
   admin: "people",
   trailers: "video",
-  notion: "file",
+  retros: "book",
 };
 
 export default async function DemoLandingPage({
@@ -79,7 +83,7 @@ export default async function DemoLandingPage({
   const departments = (data ?? []) as DemoDepartment[];
   return (
     <>
-      <SiteHeader />
+      <SiteHeader links={links} />
       <main className="demo-landing">
         <header className="demo-intro">
           <span className="hero-label">
@@ -118,7 +122,7 @@ export default async function DemoLandingPage({
               <span className="demo-account-avatar">심</span>
               <div>
                 <strong>심사위원 데모 계정으로 접속했습니다</strong>
-                <p>네 부서의 부서장 · 조직 관리자 · 합성 데이터 전용</p>
+                <p>데모 부서의 부서장 · 조직 관리자 · 합성 데이터 전용</p>
               </div>
             </div>
             <div className="demo-account-guards" aria-label="데모 안전 장치">
@@ -176,6 +180,11 @@ export default async function DemoLandingPage({
             </ol>
           </section>
         )}
+        <section className="demo-capabilities" aria-label="부서별 신입 채용 미션">
+          <h2>다섯 팀의 신입 미션을 체험하세요</h2>
+          <p>기획·인사·프론트개발·백엔드개발·디자인 과제의 진행 기록과 결과 제출을 브라우저 안에서 확인합니다. 합성 자료 전용이며 서버에 제출하지 않습니다.</p>
+          <Link className="button button-primary" href="/demo/hiring">부서별 채용 미션 시작 →</Link>
+        </section>
         {error || departments.length === 0 ? (
           <section className="empty-state">
             <h2 className="text-xl">데모를 준비하는 중입니다</h2>

@@ -88,6 +88,8 @@ try {
     readFileSync(resolve("supabase/migrations/0040_trailer_invites.sql"), "utf8"),
   );
 
+  await db.exec(readFileSync(resolve("supabase/migrations/0048_trailer_invite_retention.sql"),"utf8"));
+
   const ids = Object.fromEntries(
     [
       "org",
@@ -224,6 +226,14 @@ try {
   });
 
   let submittedInvite;
+  await check("all anonymous mutations preserve failed-email counters and lock after ten failures",async()=>{
+    for(const action of ["consent","submit","withdraw"]){
+      const issued=(await asUser(ids.lead,()=>createInvites(ids.published,[`${action}-locked@example.test`]))).rows[0];
+      for(let n=0;n<10;n++) await asAnon(()=>action==="consent"?q("select trailer_invite_consent($1,'wrong@example.test','1')",[issued.token]):action==="submit"?q("select * from submit_trailer_invite_attempt($1,'wrong@example.test',$2::jsonb)",[issued.token,submissions]):q("select withdraw_trailer_invite_attempt($1,'wrong@example.test')",[issued.token]));
+      assert.equal((await q("select open_failures from trailer_invites where id=$1",[issued.invite_id])).rows[0].open_failures,10);
+      assert.deepEqual((await openInvite(issued.token,issued.email)).rows[0].value,{error:"invite_unavailable"});
+    }
+  });
   let submittedAttempt;
   await check("consent precedes one submission and atomically creates one candidate attempt and score job", async () => {
     await asUser(ids.lead, async () => {
@@ -255,6 +265,10 @@ try {
   });
 
   await check("candidate withdrawal uses the common purge path and remains visible as metadata only", async () => {
+    // Admission expiry and publication switches must not prevent removal of held data.
+    await q("update trailer_invites set created_at=now()-interval '8 days',expires_at=now()-interval '1 day' where id=$1",[submittedInvite.invite_id]);
+    await q("update orgs set trailer_assessment_enabled=false,trailer_publish_enabled=false where id=$1",[ids.org]);
+    await q("update trailer_attempts set status='failed',status_reason='timeout' where id=$1",[submittedAttempt]);
     await asAnon(() => q("select withdraw_trailer_invite_attempt($1,$2)", [submittedInvite.token, submittedInvite.email]));
     assert.equal((await q("select count(*)::int n from trailer_attempts where id=$1", [submittedAttempt])).rows[0].n, 0);
     const stored = (await q("select email_normalized,email_hash,token_hash,used_token_hash,withdrawn_at from trailer_invites where id=$1", [submittedInvite.invite_id])).rows[0];
@@ -269,6 +283,7 @@ try {
       assert.equal(row.status, "withdrawn");
       assert.equal(row.email, null);
     });
+    await q("update orgs set trailer_assessment_enabled=true,trailer_publish_enabled=true where id=$1",[ids.org]);
   });
 
   await check("only service_role can purge due invitations", async () => {
@@ -386,6 +401,7 @@ try {
   await check("0040 rollback composes before 0028, 0027, and 0026 rollback", async () => {
     await db.exec("begin");
     try {
+      await db.exec(readFileSync(resolve("supabase/rollback/0048_trailer_invite_retention_down.sql"), "utf8"));
       await db.exec(readFileSync(resolve("supabase/rollback/0040_trailer_invites_down.sql"), "utf8"));
       assert.equal((await q("select to_regclass('public.trailer_invites') value")).rows[0].value, null);
       assert.equal((await q("select count(*)::int n from information_schema.columns where table_schema='public' and table_name='trailer_attempts' and column_name='invite_id'")).rows[0].n, 0);
@@ -399,7 +415,7 @@ try {
     }
   });
 
-  console.log(JSON.stringify({ passed, failed: 0, database: "isolated PGlite", migrations: "0001-0028 + 0040", excluded: ["0004_worker_cron.sql (pg_cron/pg_net unavailable)"] }));
+  console.log(JSON.stringify({ passed, failed: 0, database: "isolated PGlite", migrations: "0001-0028 + 0040 + 0048", excluded: ["0004_worker_cron.sql (pg_cron/pg_net unavailable)"] }));
 } finally {
   await db.close();
 }

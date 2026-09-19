@@ -1,30 +1,32 @@
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { originalAccessError, requestOriginalAccess } from "@/lib/review-access";
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ dept: string; id: string }> },
 ) {
   const { dept, id } = await params;
   const member = await requireMembership(dept);
-  const client = await createServerSupabaseClient();
-  const result = await client
-    .from("reviewed_materials")
-    .select("original_path,original_deleted_at")
-    .eq("id", id)
-    .eq("dept_id", member.deptId)
-    .maybeSingle();
-  if (!result.data?.original_path || result.data.original_deleted_at)
-    return Response.json({ error: "보관된 원본이 없습니다." }, { status: 404 });
-  const signed = await client.storage
-    .from("review-materials")
-    .createSignedUrl(result.data.original_path, 60);
-  if (signed.error)
-    return Response.json(
-      { error: "원본을 열지 못했습니다. 업로드가 완료됐는지 확인해 주세요." },
-      { status: 422 },
-    );
-  return Response.json(
-    { url: signed.data.signedUrl },
-    { headers: { "cache-control": "no-store" } },
-  );
+  const action = new URL(request.url).searchParams.get("action");
+  const headers = { "cache-control": "private, no-store", "x-content-type-options": "nosniff" };
+  if (action !== "play_original" && action !== "download_original")
+    return Response.json({ error: "재생 또는 내려받기를 선택해 주세요." }, { status: 400, headers });
+  try {
+    const client = await createServerSupabaseClient();
+    const grant = await requestOriginalAccess(client.rpc.bind(client), member.deptId, id, action);
+    const storageClient = await createServerSupabaseClient({ reviewAccessToken: grant.token });
+    const file = await storageClient.storage.from("review-materials").download(grant.path);
+    if (file.error || !file.data)
+      return Response.json({ error: "원본 접근이 만료되었거나 파일을 가져오지 못했습니다. 다시 시도해 주세요." }, { status: 422, headers });
+    // No signed URL or service credential leaves this request. Treat documents as downloads.
+    return new Response(file.data.stream(), { headers: {
+      ...headers,
+      "content-type": action === "play_original" && file.data.type.startsWith("audio/") ? file.data.type : "application/octet-stream",
+      "content-length": String(file.data.size),
+      "content-disposition": `${action === "play_original" ? "inline" : "attachment"}; filename="original"; filename*=UTF-8''${encodeURIComponent(grant.filename)}`,
+    } });
+  } catch (cause) {
+    const error = originalAccessError(cause);
+    return Response.json({ error: error.error }, { status: error.status, headers: { ...headers, ...(error.status === 429 ? { "retry-after": "60" } : {}) } });
+  }
 }

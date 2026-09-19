@@ -35,6 +35,8 @@ const RETRY_BASE_DELAY_MS = 250;
 const GROQ_REQUEST_TIMEOUT_MS = 60_000;
 const FIELD_ORDER_INSTRUCTION =
   "응답 스키마에 citations가 있으면 citations를 먼저 채우고, 그다음 근거(background 또는 reasoning), 결론(answer 또는 recommendation)은 마지막에 작성하세요.";
+export const PLAIN_LANGUAGE_INSTRUCTION =
+  "한국어로 씁니다. 중학교 2학년도 이해할 수 있는 쉬운 낱말과 짧은 문장을 씁니다. 한 문장에는 한 가지 뜻만 담고, 안내·오류·답변은 합니다/하세요 문체를 씁니다. 내부 코드·영문 상태값·근거 없는 계획은 쓰지 않습니다. 원문 인용은 그대로 두고 새로 쓰는 문장만 쉽게 씁니다.";
 
 const REFUSAL_TEXT_PATTERNS = [
   /(?:도와|답변|제공|처리).{0,12}(?:드릴|할) 수 없(?:습니다|어요)/,
@@ -44,6 +46,7 @@ const REFUSAL_TEXT_PATTERNS = [
 ];
 
 export type LlmPurpose =
+  | "retro_draft"
   | "classify"
   | "merge_confirm"
   | "make_card"
@@ -277,7 +280,7 @@ async function createCompletion(
       messages: [
         {
           role: "system",
-          content: `${prompt.system}\n\n${FIELD_ORDER_INSTRUCTION}`,
+          content: `${PLAIN_LANGUAGE_INSTRUCTION}\n${prompt.system}\n\n${FIELD_ORDER_INSTRUCTION}`,
         },
         { role: "user", content: prompt.user },
       ],

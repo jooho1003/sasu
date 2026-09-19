@@ -1,0 +1,14 @@
+drop function if exists public.upsert_retro_activities_as(uuid,uuid,date,jsonb);
+drop function if exists public.add_retro_note(uuid,text,text);
+drop function if exists public.revoke_retro_connection(uuid);
+drop function if exists public.create_retro_connection(uuid,text,text,jsonb,text);
+drop function if exists public.set_retro_preset(uuid,text);
+drop function if exists public.consent_retro_share(uuid,text);
+drop policy if exists retro_connections_self on public.retro_connections;
+drop policy if exists retro_user_settings_self on public.retro_user_settings;
+drop table if exists public.retro_connections;
+drop table if exists public.retro_user_settings;
+alter table public.departments drop constraint if exists departments_retro_preset_check;
+alter table public.departments drop column if exists retro_preset;
+alter table public.retro_activities drop constraint if exists retro_activities_kind_check;
+alter table public.retro_activities add constraint retro_activities_kind_check check (kind in ('git_commit','claude_session','claude_prompt','codex_session','memory_change','doc_change','web_visit','web_search','sasu_decision','sasu_answer','sasu_card','sasu_review'));

@@ -22,6 +22,7 @@ vi.mock("@/lib/pipeline/trailer-gate", () => ({ registerTrailerGateHandler: () =
 vi.mock("@/lib/pipeline/trailer-score", () => ({ registerTrailerScoreHandler: () => mocks.register("score_trailer_attempt") }));
 
 import { runWorkerBulk, runWorkerOnce } from "@/lib/worker";
+vi.mock("@/lib/pipeline/trailer-purge", () => ({ registerTrailerPurgeHandler: () => mocks.register("purge_trailer_invites") }));
 
 describe("공통 워커 진입점", () => {
   beforeEach(() => {
@@ -33,7 +34,7 @@ describe("공통 워커 진입점", () => {
   it("큐를 claim하기 전에 모든 파이프라인을 등록하고 독립 sweep을 실행한다", async () => {
     await runWorkerOnce();
     expect(mocks.register.mock.calls.map(([kind]) => kind).sort()).toEqual([
-      "answer", "classify", "embed", "embed_batch", "make_card", "notion_discover", "notion_import", "notion_poll", "run_agent_role", "send_slack", "slack_backfill", "summarize_document", "summarize_meeting", "generate_trailer", "check_trailer_gate", "score_trailer_attempt", "deliver_slack_answer", "send_reminder", "process_review", "purge_review_files",
+      "answer", "classify", "embed", "embed_batch", "make_card", "notion_discover", "notion_import", "notion_poll", "run_agent_role", "send_slack", "slack_backfill", "summarize_document", "summarize_meeting", "generate_trailer", "check_trailer_gate", "score_trailer_attempt", "deliver_slack_answer", "send_reminder", "process_review", "purge_review_files", "purge_trailer_invites", "retro_draft",
     ].sort());
     expect(mocks.sweep).toHaveBeenCalledOnce();
     expect(mocks.reviewSweep).toHaveBeenCalledOnce();
@@ -70,3 +71,5 @@ describe("공통 워커 진입점", () => {
     expect(mocks.run).not.toHaveBeenCalled();
   });
 });
+
+vi.mock("@/lib/pipeline/retro-draft", () => ({ registerRetroDraftHandler: () => mocks.register("retro_draft") }));

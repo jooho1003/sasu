@@ -7,6 +7,24 @@ import {
 } from "@/lib/site";
 
 describe("사이트 링크 환경 변수", () => {
+  it("노션 공개 가이드 주소를 공백 제거 후 연결한다", () => {
+    expect(siteLinks({ SASU_GUIDE_URL: " https://sasu.notion.site/guide " }))
+      .toHaveProperty("guideUrl", "https://sasu.notion.site/guide");
+  });
+
+  it("별도 설정이 없으면 공개 열람을 확인한 사용자 가이드를 연결한다", () => {
+    expect(siteLinks({}).guideUrl).toBe(
+      "https://app.notion.com/p/SASU-3ddd12f23255809985bfd98b97ce51c9",
+    );
+  });
+
+  it.each(["", "  ", "javascript:alert(1)", "http://example.com", "/guide", "mailto:guide@example.com"])(
+    "명시적으로 비웠거나 안전하지 않은 가이드 주소를 숨긴다: %s",
+    (url) => {
+      expect(siteLinks({ SASU_GUIDE_URL: url })).toHaveProperty("guideUrl", null);
+    },
+  );
+
   it("허용된 https와 mailto 링크만 노출한다", () => {
     expect(
       siteLinks({

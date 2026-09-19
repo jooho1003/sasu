@@ -45,6 +45,7 @@ export default async function DepartmentLayout({
         departmentName={department?.name ?? "우리 부서"}
         displayName={membership.displayName}
         showOrgAdmin={showOrgAdmin}
+        showRetros={process.env.SASU_RETRO_ENABLED === "true"}
         showTrailers={membership.role === "lead" && trailerPublishEnabled()}
       >
         {!membership.consentedAt ? (

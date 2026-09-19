@@ -29,8 +29,11 @@ export function parsedTrailer(row: Record<string, unknown>) {
   const report = TrailerGateReport.safeParse(row.gate_report);
   return { scenarios: scenarios.success ? scenarios.data : [], gate_report: report.success ? report.data : null };
 }
-export async function readTrailerAttempts(supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>, trailerId: string): Promise<AttemptScoreRow[] | null> {
-  const result = await supabase.from("trailer_attempts").select("id,label,created_at,submissions,result,weighted_score,status,status_reason").eq("trailer_id",trailerId).eq("kind","synthetic").order("created_at",{ascending:true});
+export async function readTrailerAttempts(supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>, trailerId: string, kind: "synthetic" | "candidate" = "synthetic"): Promise<AttemptScoreRow[] | null> {
+  const result = await supabase.from("trailer_attempts").select("id,label,created_at,submissions,result,weighted_score,status,status_reason").eq("trailer_id",trailerId).eq("kind",kind).order("created_at",{ascending:true});
   if(result.error)return null;
-  return (result.data??[]).map(row=>({id:row.id,label:row.label,createdAt:row.created_at,submissions:row.submissions,result:row.result,weightedScore:row.weighted_score===null?null:Number(row.weighted_score),status:row.status,statusReason:row.status_reason}));
+  const invites = kind === "candidate" ? await supabase.rpc("list_trailer_invites", { p_trailer: trailerId }) : { data: [], error: null };
+  if (invites.error) return null;
+  const emails = new Map<string, string>((invites.data ?? []).map((invite: { attempt_id: string; email: string | null }) => [invite.attempt_id, invite.email ?? "파기됨"]));
+  return (result.data??[]).map(row=>({id:row.id,label:row.label,email:kind === "candidate" ? emails.get(row.id) ?? null : null,createdAt:row.created_at,submissions:row.submissions,result:row.result,weightedScore:row.weighted_score===null?null:Number(row.weighted_score),status:row.status,statusReason:row.status_reason}));
 }

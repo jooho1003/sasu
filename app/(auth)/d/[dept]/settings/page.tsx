@@ -1,6 +1,8 @@
+import { RetroCollectorSettings } from "@/components/retro-collector-settings";
 import SettingsS5 from "@/components/settings-s5";
 import { requireMembership } from "@/lib/supabase/membership";
 import { orgAdminWritesEnabled } from "@/lib/features";
+import { RetroConnectorsSettings } from "@/components/retro-connectors-settings";
 
 export default async function SettingsPage({
   params,
@@ -10,5 +12,5 @@ export default async function SettingsPage({
   const { dept } = await params;
   const membership = await requireMembership(dept);
 
-  return <SettingsS5 deptId={membership.deptId} memberAdminEnabled={orgAdminWritesEnabled()} />;
+  return <><SettingsS5 deptId={membership.deptId} memberAdminEnabled={orgAdminWritesEnabled()} />{process.env.SASU_RETRO_ENABLED === "true" ? <div className="workspace-page grid gap-5"><RetroCollectorSettings /><RetroConnectorsSettings dept={membership.deptId} role={membership.role} /></div> : null}</>;
 }

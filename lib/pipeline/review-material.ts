@@ -136,6 +136,9 @@ export function registerReviewHandlers(): void {
   registerHandler("purge_review_files", purgeReviewFiles);
 }
 export async function sweepReviewParts(): Promise<void> {
-  const result = await createServiceSupabaseClient().rpc("sweep_review_parts");
+  const client = createServiceSupabaseClient();
+  const originals = await client.rpc("sweep_review_originals");
+  if (originals.error) throw new Error("review_original_sweep_failed");
+  const result = await client.rpc("sweep_review_parts");
   if (result.error) throw new Error("review_sweep_failed");
 }

@@ -17,8 +17,9 @@ export async function GET(
       .eq("dept_id", membership.deptId),
     supabase
       .from("sources")
-      .select("id, kind, external_id, title, visibility, active, last_synced_at, last_error, auto_sync")
+      .select("id, kind, external_id, title, visibility, active, last_synced_at, last_error, auto_sync, import_version")
       .eq("dept_id", membership.deptId)
+      .is("root_id", null)
       .order("created_at", { ascending: true }),
   ]);
 

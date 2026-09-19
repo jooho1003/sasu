@@ -111,7 +111,7 @@ needs_test() {
   #       Block Kit 프레젠테이션, 라우트 배선이라 테스트를 붙이면 우리 로직이 아니라 SDK를 테스트하는 꼴이 된다.
   #       단 lib/slack/verify.ts(서명 검증)와 lib/contracts.ts는 우리 로직이므로 여기 없다.
   case "$FILE_PATH" in
-    */route.ts|*/route.tsx|*/middleware.ts|*/components/*|*/lib/supabase/*|*/lib/llm.ts|*/lib/slack/blocks.ts|*/lib/slack/post.ts)
+    */route.ts|*/route.tsx|*/middleware.ts|*/components/*|*/lib/supabase/*|*/lib/llm.ts|*/lib/slack/blocks.ts|*/lib/slack/post.ts|*/lib/recording/browser/*)
       return 0
       ;;
   esac

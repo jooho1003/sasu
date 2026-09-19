@@ -3,13 +3,19 @@ import { fileURLToPath } from "node:url";
 import { readFile } from "node:fs/promises";
 
 import { weightedScore, type VerifiedCriterion } from "../lib/agent-role";
+import type { DocumentSummary } from "../lib/contracts";
 import { createServiceSupabaseClient } from "../lib/supabase/service";
 import { parseDemoTrailerSnapshot, parseDemoAttemptsSnapshot } from "../lib/trailer-snapshot";
 import { DEFAULT_TRAILER_RUBRIC } from "../lib/trailer-generation";
 import { trailerApprovalItems } from "../lib/trailer-gate";
 import { mask } from "../lib/mask";
+import { buildDemoRetros } from "../fixtures/retro/days";
+import { hiringMissions } from "../fixtures/hiring/missions";
 import {
   DEMO_ORG_ID,
+  DEMO_NOTION_EXCLUSIONS,
+  DEMO_NOTION_ROOTS,
+  DEMO_NOTION_SOURCES,
   DEMO_REVIEWER_ID,
   demoAutoLoginEnabled,
   demoReviewerEmail,
@@ -39,6 +45,14 @@ type DemoDepartment = {
     title: string;
     visibility: "dept" | "leads_only";
     is_principles: boolean;
+    active?: boolean;
+    root_id?: string;
+    parent_external_id?: string | null;
+    last_synced_at?: string | null;
+    last_error?: string | null;
+    auto_sync?: boolean;
+    import_version?: number;
+    ingest_mode?: "classify" | "reference";
   }>;
   items: Array<{
     id: string;
@@ -90,11 +104,26 @@ type DemoDepartment = {
   }>;
 };
 
+function demoNotionSources(deptId: string): DemoDepartment["sources"] {
+  return DEMO_NOTION_SOURCES.filter((source) => source.dept_id === deptId).map(
+    ({ dept_id, ...source }) => {
+      if (dept_id !== deptId) throw new Error("demo Notion source department mismatch");
+      return {
+        ...source,
+        kind: "notion_page" as const,
+        auto_sync: false,
+        import_version: 2,
+        ingest_mode: "reference" as const,
+      };
+    },
+  );
+}
+
 const SALES: DemoDepartment = {
   id: IDS.salesDept,
   name: "영업 사수",
   sources: [
-    { id: "10000000-0000-4000-8000-000000000101", kind: "notion_page", external_id: "demo-sales-principles", title: "영업 원칙 문서", visibility: "dept", is_principles: true },
+    ...demoNotionSources(IDS.salesDept),
     { id: "10000000-0000-4000-8000-000000000102", kind: "slack_channel", external_id: "demo-sales-channel", title: "#영업-결정", visibility: "dept", is_principles: false },
     { id: "10000000-0000-4000-8000-000000000103", kind: "meeting", external_id: "demo-sales-meeting", title: "주간 영업회의", visibility: "leads_only", is_principles: false },
   ],
@@ -121,7 +150,7 @@ const DEVELOPMENT: DemoDepartment = {
   id: IDS.devDept,
   name: "개발 사수",
   sources: [
-    { id: "20000000-0000-4000-8000-000000000101", kind: "notion_page", external_id: "demo-dev-principles", title: "개발 원칙 문서", visibility: "dept", is_principles: true },
+    ...demoNotionSources(IDS.devDept),
     { id: "20000000-0000-4000-8000-000000000102", kind: "slack_channel", external_id: "demo-dev-channel", title: "#개발-결정", visibility: "dept", is_principles: false },
     { id: "20000000-0000-4000-8000-000000000103", kind: "meeting", external_id: "demo-dev-meeting", title: "주간 개발회의", visibility: "leads_only", is_principles: false },
     { id: "20000000-0000-4000-8000-000000000104", kind: "document", external_id: "demo-dev-applicant-a", title: "지원서 — 지원자 A (합성)", visibility: "dept", is_principles: false },
@@ -162,6 +191,16 @@ const AGENT_ROLE_CRITERIA = [
 const roleCriteria = (values: Array<Omit<VerifiedCriterion, "key" | "label" | "weight">>): VerifiedCriterion[] =>
   values.map((value, index) => ({ ...AGENT_ROLE_CRITERIA[index], ...value }));
 
+// 문서 어시스턴트가 읽는 계약(DocumentSummary) 전체 형태. 인용과 핵심 내용은 items 원문 그대로다.
+const applicantSummary = (overview: string, points: Array<[itemId: string, text: string]>): DocumentSummary => ({
+  citations: points.map(([item_id, quote]) => ({ item_id, decision_id: null, quote })),
+  overview,
+  key_points: points.map(([item_id, text]) => ({ item_id, text })),
+  decisions: [],
+  actions: [],
+  open_questions: [],
+});
+
 const DEMO_AGENT_ROLE_SEED = {
   id: "20000000-0000-4000-8000-000000000151",
   dept_id: IDS.devDept,
@@ -171,9 +210,19 @@ const DEMO_AGENT_ROLE_SEED = {
   created_by: DEMO_DEV_LEAD_ID,
   criteria: AGENT_ROLE_CRITERIA,
   documents: [
-    { source_id: "20000000-0000-4000-8000-000000000104", summary: { overview: "지원자 A는 사내 도구 구현과 운영 문서화 경험을 제시했습니다." } },
-    { source_id: "20000000-0000-4000-8000-000000000105", summary: { overview: "지원자 B는 백엔드 운영 경험을 제시했지만 프로젝트 스택 근거는 없습니다." } },
-    { source_id: "20000000-0000-4000-8000-000000000106", summary: { overview: "지원자 C는 프론트엔드 작업 경험을 제시했고 협업 문서화 근거는 없습니다." } },
+    { source_id: "20000000-0000-4000-8000-000000000104", summary: applicantSummary("지원자 A는 사내 도구 구현과 운영 문서화 경험을 제시했습니다.", [
+      ["20000000-0000-4000-8000-000000000141", "Next.js App Router와 Supabase RLS로 사내 승인 도구를 만들었습니다."],
+      ["20000000-0000-4000-8000-000000000142", "결정 기록을 문서화하고 변경 이유를 팀과 함께 검토하는 습관이 있습니다."],
+      ["20000000-0000-4000-8000-000000000143", "운영 중에는 영향 범위와 롤백 절차를 체크리스트로 남겼습니다."],
+    ]) },
+    { source_id: "20000000-0000-4000-8000-000000000105", summary: applicantSummary("지원자 B는 백엔드 운영 경험을 제시했지만 프로젝트 스택 근거는 없습니다.", [
+      ["20000000-0000-4000-8000-000000000144", "여러 서비스의 API와 데이터 처리 작업을 맡아 백엔드 운영 경험을 쌓았습니다."],
+      ["20000000-0000-4000-8000-000000000145", "운영 이슈의 원인과 대응 과정을 짧은 문서로 정리해 공유했습니다."],
+    ]) },
+    { source_id: "20000000-0000-4000-8000-000000000106", summary: applicantSummary("지원자 C는 프론트엔드 작업 경험을 제시했고 협업 문서화 근거는 없습니다.", [
+      ["20000000-0000-4000-8000-000000000146", "사용자 화면의 컴포넌트 구조와 인터랙션을 개선하는 프론트엔드 작업을 주로 했습니다."],
+      ["20000000-0000-4000-8000-000000000147", "시각적 완성도와 사용 흐름을 다듬는 데 집중했습니다."],
+    ]) },
   ],
   results: [
     {
@@ -416,7 +465,39 @@ const DESIGN: DemoDepartment = {
   ],
 };
 
-export const DEMO_DEPARTMENTS = [SALES, DEVELOPMENT, PLANNING, DESIGN];
+function hiringDepartment(mission: (typeof hiringMissions)[number], prefix: string): DemoDepartment {
+  const id = (number: number) => `${prefix}-0000-4000-8000-${String(number).padStart(12, "0")}`;
+  const sources: DemoDepartment["sources"] = [
+    { id: id(101), kind: "notion_page", external_id: `demo-${mission.id}-principles`, title: `${mission.team} 원칙 문서`, visibility: "dept", is_principles: true },
+    { id: id(102), kind: "slack_channel", external_id: `demo-${mission.id}-channel`, title: `#${mission.team}-결정`, visibility: "dept", is_principles: false },
+    { id: id(103), kind: "meeting", external_id: `demo-${mission.id}-meeting`, title: `${mission.team} 합성 과제 리뷰`, visibility: "leads_only", is_principles: false },
+    { id: id(104), kind: "document", external_id: `demo-${mission.id}-assignment`, title: `${mission.role} 합성 미션`, visibility: "dept", is_principles: false },
+  ];
+  const items: DemoDepartment["items"] = [
+    ...mission.facts.map((fact, index) => ({ id: id(111 + index), source_id: id(101), external_ref: fact.id, author: `${mission.team} 원칙`, content: fact.text, label: "info" as const })),
+    ...mission.stages.flatMap((stage, index) => [
+      { id: id(120 + index * 4), source_id: id(102), external_ref: `${stage.id}-request`, author: "합성 신입", content: `${stage.label}에서 결정이 필요합니다. ${stage.prompt}`, label: "decision" as const },
+      { id: id(121 + index * 4), source_id: id(102), external_ref: `${stage.id}-criteria`, author: "합성 동료", content: `${mission.deliverables[index]}를 준비하고 ${mission.criteria[index]}를 확인하겠습니다.`, label: "action" as const },
+      { id: id(122 + index * 4), source_id: id(103), external_ref: `${stage.id}-review`, author: "합성 리드", content: `${stage.label} 검토에서는 ${mission.criteria[index]}를 확인하고, 근거 없는 결론은 보류합니다.`, label: "decision" as const },
+      { id: id(123 + index * 4), source_id: id(102), external_ref: `${stage.id}-followup`, author: "합성 동료", content: `${mission.deliverables[index]}의 누락 항목은 다음 검토에 남기고 담당자에게 확인하겠습니다.`, label: "action" as const },
+    ]),
+    { id: id(140), source_id: id(104), external_ref: `${mission.id}-assignment`, author: `${mission.team} 과제 안내`, content: `${mission.title}\n${mission.brief}\n${mission.sample.approach}`, label: "info" },
+  ];
+  return {
+    id: mission.deptId, name: `${mission.team} 사수`, sources, items,
+    request: { id: id(201), origin_item_id: id(120), citation_item_ids: [id(120), id(122)], title: `${mission.title}: 첫 검토 기준을 확정할까요?`, background: items.find(item => item.id === id(120))!.content, recommendation: items.find(item => item.id === id(122))!.content, visibility: "leads_only" },
+    extraRequests: [{ id: id(202), origin_item_id: id(124), citation_item_ids: [id(124), id(125)], title: `${mission.stages[1].label}의 산출물을 준비할까요?`, background: items.find(item => item.id === id(124))!.content, recommendation: items.find(item => item.id === id(125))!.content, visibility: "dept" }],
+    priorDecision: { id: id(211), outcome: `${mission.criteria[0]}를 확인한 뒤 진행`, rationale: items.find(item => item.id === id(122))!.content, item_id: id(122) },
+    answers: [
+      ...mission.facts.map((fact, index) => ({ id: id(301 + index), question_key: fact.id, question: `${fact.label}에서 확인할 내용은 무엇인가요?`, answer: fact.text, generic_answer: "팀의 최신 원칙과 관련 근거를 확인하세요.", refused: false, item_ids: [id(111 + index)] })),
+      { id: id(304), question_key: `${mission.id}-mission`, question: "신입 미션은 무엇인가요?", answer: `${mission.title}\n${mission.brief}`, generic_answer: "담당자에게 직무 과제와 제출 기준을 확인하세요.", refused: false, item_ids: [id(140)] },
+      { id: id(305), question_key: `${mission.id}-review`, question: "리드가 확인한 첫 검토 기준은 무엇인가요?", answer: items.find(item => item.id === id(122))!.content, generic_answer: "검토 기준과 승인 근거를 확인하세요.", refused: false, item_ids: [id(122)] },
+      { id: id(306), question_key: `${mission.id}-missing`, question: "이 지원자의 최종 합격 여부는 무엇인가요?", answer: "합성 체험에는 실제 지원자 합불 결정 근거가 없습니다.", generic_answer: "최종 채용 판단은 담당자가 근거를 확인해야 합니다.", refused: true, item_ids: [] },
+    ],
+  };
+}
+const HIRING_DEPARTMENTS = hiringMissions.filter(mission => ["hr", "frontend", "backend"].includes(mission.id)).map((mission, index) => hiringDepartment(mission, `${index + 5}0000000`));
+export const DEMO_DEPARTMENTS = [SALES, DEVELOPMENT, PLANNING, DESIGN, ...HIRING_DEPARTMENTS];
 
 export const DEMO_RETENTION_SETTINGS = DEMO_DEPARTMENTS.map((department) => ({
   dept_id: department.id,
@@ -445,6 +526,9 @@ export const DEMO_RETENTION_EXPORTS = DEMO_DEPARTMENTS.map((department) => {
 const DEMO_MEMBER_NAMES = [
   ["김서윤", "이도현", "박하린"], ["개발팀 리드", "정지우", "최민준"],
   ["한지민", "윤서준", "강수빈"], ["오예린", "장도윤", "임서아"],
+  ["인사팀 합성 리드", "인사팀 합성 동료", "인사팀 미동의 멤버"],
+  ["프론트 합성 리드", "프론트 합성 동료", "프론트 미동의 멤버"],
+  ["백엔드 합성 리드", "백엔드 합성 동료", "백엔드 미동의 멤버"],
 ];
 const DEPARTMENT_MEMBERS = DEMO_DEPARTMENTS.flatMap((department, deptIndex) =>
   DEMO_MEMBER_NAMES[deptIndex].map((name, memberIndex) => {
@@ -479,7 +563,7 @@ async function removeExistingDemoData(
   if (events.error) throw new Error("demo admin event check failed; apply 0026 before seeding");
   if (events.count) throw new Error("demo admin events exist; append-only records prevent reseeding");
   const departmentIds = DEMO_DEPARTMENTS.map((department) => department.id);
-  for (const table of ["trailer_attempts", "trailers", "trailer_generation_counters"] as const) {
+  for (const table of ["retro_days", "trailer_attempts", "trailers", "trailer_generation_counters"] as const) {
     const result = await client.from(table).delete().in("dept_id", departmentIds);
     if (result.error && !["42P01", "PGRST205"].includes(result.error.code)) throw new Error(`demo cleanup failed: ${table}`);
   }
@@ -516,6 +600,10 @@ async function removeExistingDemoData(
     const { error } = await client.from(table).delete().in("dept_id", departmentIds);
     if (error) throw new Error(`demo cleanup failed: ${table}`);
   }
+  const { error: exclusionError } = await client.from("notion_exclusions").delete().in("dept_id", departmentIds);
+  if (exclusionError) throw new Error("demo Notion exclusion cleanup failed");
+  const { error: rootError } = await client.from("notion_roots").delete().eq("org_id", IDS.org);
+  if (rootError) throw new Error("demo Notion root cleanup failed");
   for (const table of ["member_invites", "org_admins"] as const) {
     const { error } = await client.from(table).delete().eq("org_id", IDS.org);
     if (error) throw new Error(`demo cleanup failed: ${table}`);
@@ -575,10 +663,39 @@ async function seedDepartment(
   });
   if (departmentError) throw new Error("demo department seed failed");
 
+  const root = DEMO_NOTION_ROOTS.find((candidate) => candidate.dept_id === department.id);
+  if (root) {
+    const { error: rootError } = await client.from("notion_roots").insert({
+      id: root.id,
+      org_id: root.org_id,
+      dept_id: root.dept_id,
+      scope: root.scope,
+      notion_id: root.notion_id,
+      notion_kind: root.notion_kind,
+      top_title: root.top_title,
+      visibility: root.visibility,
+      include_new: root.include_new,
+      card_candidates: root.card_candidates,
+      created_role: root.created_role,
+      state: root.state,
+      created_by: DEMO_REVIEWER_ID,
+    });
+    if (rootError) throw new Error("demo Notion root seed failed");
+  }
+
   const { error: sourceError } = await client.from("sources").insert(
-    department.sources.map((source) => ({ dept_id: department.id, ...source, active: true })),
+    department.sources.map((source) => ({ dept_id: department.id, ...source, active: source.active ?? true })),
+    { defaultToNull: false },
   );
-  if (sourceError) throw new Error("demo source seed failed");
+  if (sourceError) throw new Error(`demo source seed failed: ${sourceError.code}`);
+
+  const exclusions = DEMO_NOTION_EXCLUSIONS.filter((entry) => entry.dept_id === department.id);
+  if (exclusions.length > 0) {
+    const { error: exclusionError } = await client.from("notion_exclusions").insert(
+      exclusions.map((entry) => ({ ...entry, created_by: DEMO_REVIEWER_ID })),
+    );
+    if (exclusionError) throw new Error("demo Notion exclusion seed failed");
+  }
 
   const { error: memberError } = await client.from("members").insert(
     DEMO_MEMBERS.filter((member) => member.dept_id === department.id).map((member) => ({
@@ -782,6 +899,24 @@ export async function seedDemoAttempts(client: ReturnType<typeof createServiceSu
   }
 }
 
+export async function seedDemoRetros(client: ReturnType<typeof createServiceSupabaseClient>): Promise<void> {
+  const org = await client.from("orgs").select("is_demo").eq("id",IDS.org).single();
+  if (org.error || org.data?.is_demo !== true) throw new Error("demo org identity check failed");
+  const departments = DEMO_DEPARTMENTS.slice(0,2).map(dept => ({id:dept.id,users:DEMO_MEMBERS.filter(m=>m.dept_id===dept.id && m.user_id!==DEMO_REVIEWER_ID).slice(0,2).map(m=>m.user_id)}));
+  for (const entry of buildDemoRetros(departments)) {
+    const day = { ...entry.day }; delete day.display_name; delete day.title;
+    const prior = await client.from("retro_days").delete().eq("id",day.id).eq("dept_id",day.dept_id);
+    if (prior.error) throw new Error("demo retro cleanup failed");
+    const saved = await client.from("retro_days").insert({...day,topics:[]});
+    if (saved.error) throw new Error("demo retro day seed failed");
+    const activities=await client.from("retro_activities").insert(entry.activities);
+    if(activities.error) throw new Error("demo retro activity seed failed");
+    if (!entry.revision) throw new Error("demo retro revision missing");
+    const revisions=await client.from("retro_revisions").insert([{...entry.revision,revision:1,origin:"draft"},entry.revision]);
+    if(revisions.error) throw new Error("demo retro revision seed failed");
+  }
+}
+
 async function main(): Promise<void> {
   const client = createServiceSupabaseClient();
   await removeExistingDemoData(client);
@@ -795,11 +930,12 @@ async function main(): Promise<void> {
   for (const department of DEMO_DEPARTMENTS) {
     await seedDepartment(client, department);
   }
+  if (process.env.SASU_RETRO_ENABLED === "true") await seedDemoRetros(client);
   await seedDemoReviewerAdmin(client);
   await seedDemoRetentionSettings(client);
   await seedDemoAgentRole(client);
   if (await seedDemoTrailer(client)) await seedDemoAttempts(client);
-  console.log("seed-demo complete: demo_org=1 departments=4 reviewer=1 prepared_answers=24 planning_items=68 design_items=24");
+  console.log(`seed-demo complete: demo_org=1 departments=${DEMO_DEPARTMENTS.length} reviewer=1 prepared_answers=${DEMO_DEPARTMENTS.reduce((total, department) => total + department.answers.length, 0)} items=${DEMO_DEPARTMENTS.reduce((total, department) => total + department.items.length, 0)}`);
 }
 
 const isEntrypoint = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];

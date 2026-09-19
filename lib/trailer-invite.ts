@@ -7,7 +7,7 @@ import {
 } from "@/lib/contracts";
 import { validateScenario } from "@/lib/trailer";
 
-export const TRAILER_INVITE_CONSENT_VERSION = "2026-09-18.1";
+export const TRAILER_INVITE_CONSENT_VERSION = "1";
 
 const EMAIL_SPLITTER = /[\s,]+/;
 const STATUS_LABELS: Record<TrailerInviteRowType["status"], string> = {

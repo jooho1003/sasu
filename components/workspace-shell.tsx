@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { BrandMark, Icon, type IconName } from "@/components/ui/icon";
+import { UI_LABELS } from "@/lib/labels";
 
 type WorkspaceShellProps = {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ type WorkspaceShellProps = {
   fullDemo?: boolean;
   showOrgAdmin?: boolean;
   showTrailers?: boolean;
+  showRetros?: boolean;
   displayName?: string;
   firstCardId?: string;
 };
@@ -25,6 +27,7 @@ export function WorkspaceShell({
   fullDemo = false,
   showOrgAdmin = false,
   showTrailers = false,
+  showRetros = false,
   displayName,
   firstCardId,
 }: WorkspaceShellProps) {
@@ -34,16 +37,17 @@ export function WorkspaceShell({
   const entries: { label: string; suffix: string; icon: IconName }[] = [
     { label: "대시보드", suffix: "", icon: "grid" },
     { label: "묻기", suffix: "/ask", icon: "chat" },
-    { label: "원장", suffix: "/ledger", icon: "book" },
+    { label: UI_LABELS.ledger, suffix: "/ledger", icon: "book" },
+    ...(showRetros ? [{ label: "회고", suffix: "/retros", icon: "book" as const }] : []),
     ...(!demo || fullDemo
-      ? [{ label: "음성·자료 검토", suffix: "/reviews", icon: "file" as const }, { label: "문서", suffix: "/documents", icon: "file" as const }]
+      ? [{ label: UI_LABELS.reviews, suffix: "/reviews", icon: "file" as const }, { label: "문서", suffix: "/documents", icon: "file" as const }]
       : []),
-    { label: "문서 평가", suffix: "/roles", icon: "people" },
+    { label: UI_LABELS.roles, suffix: "/roles", icon: "people" },
     ...(showTrailers
       ? [{ label: "예고편", suffix: "/trailers", icon: "video" as const }]
       : []),
     ...(!demo || fullDemo
-      ? [{ label: "기록 보존", suffix: "/retention", icon: "book" as const }, { label: "세팅", suffix: "/settings", icon: "settings" as const }]
+      ? [{ label: UI_LABELS.retention, suffix: "/retention", icon: "book" as const }, { label: UI_LABELS.settings, suffix: "/settings", icon: "settings" as const }]
       : []),
   ];
   const activeEntry = entries.find(({ suffix }) =>

@@ -1,6 +1,10 @@
 type SiteEnvironment = Readonly<Record<string, string | undefined>>;
 
+// 사용자가 지정했고 비로그인 열람을 확인한 공개 가이드. 빈 환경 변수는 노출을 끈다.
+const DEFAULT_GUIDE_URL = "https://app.notion.com/p/SASU-3ddd12f23255809985bfd98b97ce51c9";
+
 export type SiteLinks = {
+  guideUrl: string | null;
   pilotContactUrl: string | null;
   demoVideoUrl: string | null;
   voteUrl: string | null;
@@ -30,6 +34,7 @@ export function trailerDemoHref(env: SiteEnvironment = process.env): string | nu
 
 export function siteLinks(env: SiteEnvironment = process.env): SiteLinks {
   return {
+    guideUrl: externalUrl(env.SASU_GUIDE_URL ?? DEFAULT_GUIDE_URL, ["https:"]),
     pilotContactUrl: externalUrl(env.SASU_PILOT_CONTACT_URL, ["https:", "mailto:"]),
     demoVideoUrl: externalUrl(env.SASU_DEMO_VIDEO_URL, ["https:"]),
     voteUrl: externalUrl(env.SASU_VOTE_URL, ["https:"]),

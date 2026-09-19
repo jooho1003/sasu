@@ -218,6 +218,27 @@ export default function HomePage() {
           </div>
         </section>
       ) : null}
+      {links.guideUrl ? (
+        <section className="marketing-section" id="guide" aria-labelledby="guide-title">
+          <div className="difference-grid">
+            <div>
+              <p className="eyebrow">사수가 처음이라면</p>
+              <h2 id="guide-title">사용 가이드와 함께<br />시작해 보세요.</h2>
+            </div>
+            <div className="flex flex-col items-start justify-center gap-5">
+              <p className="text-sm leading-7 text-muted">
+                사수 사용 방법은 노션 가이드에서 확인하세요.
+                가이드를 옆에 열어두고 데모를 함께 둘러볼 수 있습니다.
+              </p>
+              <a className="button button-secondary" href={links.guideUrl} target="_blank" rel="noopener noreferrer">
+                노션 가이드 보기 <Icon name="arrow" size={16} />
+                <span className="sr-only"> (새 탭)</span>
+              </a>
+              <p className="text-xs text-muted">새 탭에서 열립니다.</p>
+            </div>
+          </div>
+        </section>
+      ) : null}
       <section className="marketing-cta" id="pilot">
         <div className="marketing-section">
           <p className="eyebrow">우리 팀의 다음 결정부터</p>

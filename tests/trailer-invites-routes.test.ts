@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   membership: vi.fn(),
   rpc: vi.fn(),
+  eq: vi.fn(),
+  missingChild: false,
   target: { data: { id: "33333333-3333-4333-8333-333333333333" } as unknown, error: null as unknown },
   runWorkerOnce: vi.fn(),
   after: vi.fn(),
@@ -14,8 +16,8 @@ vi.mock("@/lib/supabase/membership", () => ({ requireMembership: mocks.membershi
 vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: async () => ({
     rpc: mocks.rpc,
-    from: () => {
-      const query = { select: () => query, eq: () => query, maybeSingle: async () => mocks.target };
+    from: (table: string) => {
+      const query = { select: () => query, eq: (...args: unknown[]) => { mocks.eq(table, ...args); return query; }, maybeSingle: async () => mocks.missingChild && table !== "trailers" ? { data: null, error: null } : mocks.target };
       return query;
     },
   }),
@@ -38,7 +40,7 @@ describe("예고편 지원자 링크 라우트", () => {
     vi.resetAllMocks(); vi.unstubAllEnvs();
     vi.stubEnv("SASU_TRAILER_PUBLISH_ENABLED", "true"); vi.stubEnv("SASU_TRAILER_INVITES_ENABLED", "true");
     mocks.membership.mockResolvedValue({ deptId: dept, role: "lead" });
-    mocks.target.data = { id: trailer }; mocks.target.error = null;
+    mocks.missingChild = false; mocks.target.data = { id: trailer }; mocks.target.error = null;
     mocks.rpc.mockResolvedValue({ data: [], error: null });
   });
 
@@ -81,6 +83,16 @@ describe("예고편 지원자 링크 라우트", () => {
     expect((await DELETE(request("DELETE"), context)).status).toBe(204);
     expect(mocks.rpc).toHaveBeenCalledWith("revoke_trailer_invite", { p_invite: invite });
     expect(mocks.rpc).toHaveBeenCalledWith("delete_trailer_invite", { p_invite: invite });
+  });
+
+  it("다른 예고편 소속 초대와 제출은 변경하지 않는다", async () => {
+    mocks.missingChild = true;
+    expect((await revoke(request("POST"), context)).status).toBe(404);
+    expect((await DELETE(request("DELETE"), context)).status).toBe(404);
+    expect((await rescore(request("POST"), context)).status).toBe(404);
+    expect(mocks.eq).toHaveBeenCalledWith("trailer_invites", "trailer_id", trailer);
+    expect(mocks.eq).toHaveBeenCalledWith("trailer_attempts", "trailer_id", trailer);
+    expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
   it("재채점 RPC 뒤 after에서 워커를 한 번 실행한다", async () => {

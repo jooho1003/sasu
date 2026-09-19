@@ -31,6 +31,9 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
   const [message, setMessage] = useState("");
   const [query, setQuery] = useState("");
   const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+  const [downloadAllowed, setDownloadAllowed] = useState(false);
+  const [originalExpiresAt, setOriginalExpiresAt] = useState<string | null>(null);
+  const [originalExpired, setOriginalExpired] = useState(false);
   const [checked, setChecked] = useState(false);
   const [destructive, setDestructive] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement>(null);
@@ -56,6 +59,14 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       setReview(body.review);
       setParts(body.parts);
       setHistory(body.history);
+      setDownloadAllowed(body.original_download_allowed === true);
+      setOriginalExpiresAt(body.original_expires_at ?? null);
+      setOriginalExpired(!!body.original_expires_at && new Date(body.original_expires_at).getTime() <= Date.now());
+      if (body.review.original_deleted_at || (body.original_expires_at && new Date(body.original_expires_at).getTime() <= Date.now())) {
+        if (originalRef.current) URL.revokeObjectURL(originalRef.current);
+        originalRef.current = null;
+        setOriginalUrl(null);
+      }
       if (force || !dirtyRef.current) {
         setTitle(body.review.title);
         setSections(body.review.sections);
@@ -94,6 +105,21 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       clearTimeout(timer);
     };
   }, [processing, load]);
+  useEffect(() => {
+    if (!originalExpiresAt) return;
+    // Clamp long deadlines to avoid the browser's signed 32-bit timeout overflow.
+    let timer: ReturnType<typeof setTimeout>;
+    function checkExpiry() {
+      const remaining = new Date(originalExpiresAt!).getTime() - Date.now();
+      if (remaining > 0) { timer = setTimeout(checkExpiry, Math.min(remaining, 2_147_000_000)); return; }
+      setOriginalExpired(true);
+      if (originalRef.current) URL.revokeObjectURL(originalRef.current);
+      originalRef.current = null;
+      setOriginalUrl(null);
+    }
+    timer = setTimeout(checkExpiry, 0);
+    return () => clearTimeout(timer);
+  }, [originalExpiresAt]);
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       if (dirtyRef.current) {
@@ -187,15 +213,16 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
     await load(true);
     setMessage("초안을 저장했습니다. 내용을 확인한 뒤 확정해 주세요.");
   }
+  async function fetchOriginal(action: "play_original" | "download_original") {
+    const response = await fetch(`${endpoint}/original?action=${action}`, { cache: "no-store" });
+    if (!response.ok) throw new Error((await response.json()).error ?? "원본을 불러오지 못했습니다.");
+    return response.blob();
+  }
   async function openOriginal() {
-    const response = await fetch(`${endpoint}/original`, { cache: "no-store" });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error);
-    const file = await fetch(data.url);
-    if (!file.ok)
-      throw new Error("원본을 불러오지 못했습니다. 다시 시도해 주세요.");
+    if (!review) return;
+    const file = await fetchOriginal(review.kind === "audio" ? "play_original" : "download_original");
     if (originalRef.current) URL.revokeObjectURL(originalRef.current);
-    const url = URL.createObjectURL(await file.blob());
+    const url = URL.createObjectURL(file);
     originalRef.current = url;
     setOriginalUrl(url);
     return url;
@@ -207,15 +234,11 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
     if (review.kind === "audio") {
       const missing = parts.filter((p) => p.status === "waiting");
       if (missing.length) {
-        const original = await storage.download(`${deptId}/${id}/original`);
-        if (original.error || !original.data)
-          throw new Error(
-            "원본 업로드가 끝나지 않았습니다. 이 자료를 삭제하고 파일을 다시 올려 주세요.",
-          );
+        const original = await fetchOriginal("play_original");
         const ctx = new AudioContext({ sampleRate: 16000 });
         try {
           const decoded = await ctx.decodeAudioData(
-            await original.data.arrayBuffer(),
+            await original.arrayBuffer(),
           );
           const mono = new Float32Array(decoded.length);
           for (let c = 0; c < decoded.numberOfChannels; c++) {
@@ -223,14 +246,9 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             for (let i = 0; i < mono.length; i++)
               mono[i] += samples[i] / decoded.numberOfChannels;
           }
-          const existing = await storage.list(`${deptId}/${id}/parts`);
-          if (existing.error)
-            throw new Error("보관 구간을 확인하지 못했습니다.");
           for (const part of audioPlan(decoded.duration).filter((p) =>
             missing.some((m) => m.part_index === p.index),
           )) {
-            if (existing.data.some((f) => f.name === `${part.index}.wav`))
-              continue;
             const bytes = encodeMonoWav(
               mono.slice(
                 Math.floor(part.start * decoded.sampleRate),
@@ -243,7 +261,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
               new Blob([bytes], { type: "audio/wav" }),
               { contentType: "audio/wav" },
             );
-            if (result.error)
+            // INSERT-only immutable path: a prior upload may have completed before a disconnect.
+            if (result.error && !["409", "Duplicate"].includes(String(result.error.statusCode)))
               throw new Error("구간 보관을 재개하지 못했습니다.");
           }
         } finally {
@@ -286,6 +305,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       </main>
     );
   const done = parts.filter((p) => p.status === "done").length;
+  const originalUnavailable = !!review.original_deleted_at || originalExpired;
   return (
     <main className="workspace-page review-workspace">
       <header className="page-heading">
@@ -381,7 +401,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
           ))}
         </ul>
         <div className="review-actions">
-          {!review.original_deleted_at &&
+          {!originalUnavailable &&
           parts.some((p) =>
             ["failed", "cancelled", "waiting"].includes(p.status),
           ) ? (
@@ -421,7 +441,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       <section className="panel" aria-label="보관 원본">
         <div className="review-list-heading">
           <h2>보관된 원본</h2>
-          {!review.original_deleted_at ? (
+          {!originalUnavailable && (review.kind === "audio" || downloadAllowed) ? (
             <button
               type="button"
               disabled={busy}
@@ -435,12 +455,12 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
               원본 {review.kind === "audio" ? "듣기" : "열기"}
             </button>
           ) : (
-            <span>원본 삭제됨</span>
+            <span>{originalUnavailable ? "원본 삭제됨 또는 보존 기한 만료" : "조직에서 원본 내려받기를 허용하지 않았습니다"}</span>
           )}
         </div>
         {originalUrl ? (
           review.kind === "audio" ? (
-            <audio ref={audio} controls src={originalUrl} preload="metadata" />
+            <audio ref={audio} controls controlsList={downloadAllowed ? undefined : "nodownload"} src={originalUrl} preload="metadata" />
           ) : (
             <a
               className="button button-secondary"
@@ -451,8 +471,9 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             </a>
           )
         ) : (
-          <p>원본은 부서장 권한으로만 열 수 있습니다.</p>
+          <p>원본은 동의한 부서장만 열 수 있으며 접근 허가가 기록됩니다.</p>
         )}
+        {originalExpiresAt ? <p className="field-help">원본 보존 기한: {new Date(originalExpiresAt).toLocaleDateString("ko-KR")} · 기한 후 전사는 남고 원본 재생·재추출은 중단됩니다.</p> : null}
       </section>
       {review.candidate_sections ? (
         <section className="panel review-notice" aria-label="재추출 검토">
@@ -527,7 +548,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                   <button
                     className="button button-ghost"
                     type="button"
-                    disabled={busy || !!review.original_deleted_at}
+                    disabled={busy || originalUnavailable}
                     onClick={() =>
                       void perform(async () => {
                         if (!originalRef.current) await openOriginal();
@@ -702,7 +723,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
           <button
             className="button button-ghost"
             disabled={
-              busy || dirty || processing || !!review.original_deleted_at
+              busy || dirty || processing || originalUnavailable
             }
             type="button"
             onClick={() => void perform(reextract)}

@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 
 import { validateDocumentUpload } from "@/lib/adapters/document";
+import { DocumentSummary } from "@/lib/contracts";
 import { reviewError } from "@/lib/reviews";
 import { kickWorker } from "@/lib/jobs";
 import { requireMembership } from "@/lib/supabase/membership";
@@ -41,7 +42,8 @@ export async function GET(
         visibility: source.visibility,
         status: row.status,
         status_reason: row.status_reason,
-        summary: row.summary,
+        // 계약과 다른 저장값은 화면에 넘기지 않는다. 화면은 null을 "근거 없음"으로 표시한다.
+        summary: DocumentSummary.safeParse(row.summary).data ?? null,
         extracted_chars: row.extracted_chars,
         chunk_count: row.chunk_count,
         created_at: row.created_at,

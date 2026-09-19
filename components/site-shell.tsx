@@ -8,7 +8,7 @@ const navigation = [
   ["/#trust", "신뢰와 보안"],
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ links }: { links: SiteLinks }) {
   return (
     <header className="site-header">
       <div className="site-header-inner">
@@ -22,6 +22,11 @@ export function SiteHeader() {
               {label}
             </Link>
           ))}
+          {links.guideUrl ? (
+            <a href={links.guideUrl} target="_blank" rel="noopener noreferrer">
+              사용 가이드<span className="sr-only"> (노션, 새 탭)</span>
+            </a>
+          ) : null}
         </nav>
         <div className="site-actions">
           <Link className="text-link site-login" href="/login">
@@ -42,6 +47,11 @@ export function SiteHeader() {
                 </Link>
               ))}
               <Link href="/login">로그인</Link>
+              {links.guideUrl ? (
+                <a href={links.guideUrl} target="_blank" rel="noopener noreferrer">
+                  사용 가이드<span className="sr-only"> (노션, 새 탭)</span>
+                </a>
+              ) : null}
             </nav>
           </details>
         </div>
@@ -68,6 +78,11 @@ export function SiteFooter({ links }: { links: SiteLinks }) {
         <nav aria-label="하단 메뉴">
           <Link href="/privacy">개인정보 처리 안내</Link>
           <a href="/demo">게스트 데모</a>
+          {links.guideUrl ? (
+            <a href={links.guideUrl} target="_blank" rel="noopener noreferrer">
+              사용 가이드<span className="sr-only"> (노션, 새 탭)</span>
+            </a>
+          ) : null}
           {links.pilotContactUrl ? (
             <a href={links.pilotContactUrl}>문의</a>
           ) : null}

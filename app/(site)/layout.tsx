@@ -5,7 +5,7 @@ export default function PublicSiteLayout({ children }: { children: React.ReactNo
   const links = siteLinks();
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <SiteHeader />
+      <SiteHeader links={links} />
       {children}
       <SiteFooter links={links} />
     </div>

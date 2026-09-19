@@ -9,6 +9,7 @@ const entries: { key: string; label: string; icon: IconName }[] = [
   { key: "members", label: "멤버", icon: "people" },
   { key: "sources", label: "수집 채널", icon: "hash" },
   { key: "audit", label: "기록", icon: "book" },
+  { key: "security", label: "자료 보호", icon: "lock" },
 ];
 
 export function AdminShell({
@@ -44,7 +45,7 @@ export function AdminShell({
         </div>
         <p className="nav-caption">조직 관리</p>
         <nav className="workspace-nav" aria-label="조직 관리">
-          {entries.map(({ key, label, icon }) => (
+          {entries.filter((entry) => !demo || entry.key !== "security").map(({ key, label, icon }) => (
             <Link
               key={key}
               aria-current={key === active ? "page" : undefined}

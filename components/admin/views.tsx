@@ -512,6 +512,7 @@ const eventLabels: Record<AdminEventRow["action"], string> = {
   lead_promote: "부서장 지정",
   lead_demote: "부서장 해제",
   member_remove: "멤버 제외",
+  review_settings_update: "자료 보호 설정 변경",
 };
 export function AdminEventsTable({
   rows,
@@ -531,8 +532,8 @@ export function AdminEventsTable({
           <td className={cell}>{formatAdminDate(row.created_at)}</td>
           <td className={cell}>{row.actor_label}</td>
           <td className={cell}>{eventLabels[row.action]}</td>
-          <td className={cell}>{row.dept_name}</td>
-          <td className={cell}>{row.target_user_label}</td>
+          <td className={cell}>{row.action === "review_settings_update" ? "조직 전체" : row.dept_name}</td>
+          <td className={cell}>{row.action === "review_settings_update" ? "자료 보호 설정" : row.target_user_label}</td>
         </tr>
       ))}
     </AdminTable>

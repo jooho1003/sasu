@@ -1,3 +1,4 @@
+import { verifyRetroSql } from "./verify-retro-sql.mjs";
 import { verifyTrailerAssessmentSql } from "./verify-trailer-assessment-sql.mjs";
 import { verifySlackAskSql } from "./verify-slack-ask-sql.mjs";
 import { verifySourceLifecycleSql } from "./verify-source-lifecycle-sql.mjs";
@@ -10,6 +11,7 @@ import { verifyNotionRootsSql } from "./verify-notion-roots-sql.mjs";
 import { verifyNotionBulkLaneSql } from "./verify-notion-bulk-lane-sql.mjs";
 import { verifyNotionPollSql } from "./verify-notion-poll-sql.mjs";
 import { verifyReviewedMaterialsSql } from "./verify-reviewed-materials-sql.mjs";
+import { verifyReviewAccessSql } from "./verify-review-access-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
 // node scripts/verify-security-sql.mjs <temporary-directory>
@@ -102,6 +104,13 @@ try {
     grant execute on all functions in schema auth to anon, authenticated, service_role;
     alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
     alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+    create schema storage;
+    create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint);
+    create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text);
+    alter table storage.objects enable row level security;
+    grant usage on schema storage to authenticated,service_role;
+    grant select,insert on storage.objects to authenticated;
+    grant all on storage.objects to service_role;
   `);
   const migrations = readdirSync("supabase/migrations")
     .filter(name => name.endsWith(".sql") && !name.startsWith("0004_"))
@@ -132,6 +141,28 @@ try {
   await db.exec("alter default privileges in schema public grant all on functions to anon, authenticated, service_role");
   for (const file of migrations.filter(name => name >= orgAdminMigration)) {
     await db.exec(readFileSync(resolve("supabase/migrations", file), "utf8"));
+    if (file === "0028_trailer_assessment.sql") {
+      // Legacy rollback contracts belong to their own migration boundary.
+      // Later migrations (0036) intentionally add private-schema dependencies.
+      // Roll back this test transaction so the full latest-schema checks still run.
+      await db.exec("begin");
+      try {
+        await q("insert into auth.users(id) values ($1)", [adminIds.adminA]);
+        await q("insert into org_admins(org_id,user_id,granted_by) values ($1,$2,'rollback-fixture')", [backfillIds.org, adminIds.adminA]);
+        await db.exec(readFileSync(resolve("supabase/rollback/0028_trailer_assessment_down.sql"), "utf8"));
+        await check("0028 rollback removes assessment only at its migration boundary", async () => { assert.equal((await q("select to_regclass('public.trailer_attempts') value")).rows[0].value, null); });
+        await db.exec(readFileSync(resolve("supabase/rollback/0027_trailer_publish_down.sql"), "utf8"));
+        await check("0027 rollback restores the exact 0026 overview contract", () => asUser(adminIds.adminA, async () => {
+          assert.deepEqual(Object.keys((await q("select admin_overview() result")).rows[0].result).sort(), ["departments", "llm_calls_this_month", "org_name"]);
+        }));
+        await db.exec(readFileSync(resolve("supabase/rollback/0026_org_admin_down.sql"), "utf8"));
+        await check("0026 manual rollback removes the complete organization admin surface at its migration boundary", async () => {
+          for (const name of ["org_admins", "member_invites", "admin_events"])
+            assert.equal((await q("select to_regclass($1) as value", [`public.${name}`])).rows[0].value, null);
+          assert.equal((await q("select count(*)::int as count from information_schema.schemata where schema_name='private'")).rows[0].count, 0);
+        });
+      } finally { await db.exec("rollback"); }
+    }
   }
   await check("0017 backfills card and direct decision visibility from their evidence", async () => {
     const rows = await q("select id,visibility from decisions where id in ($1,$2) order by id", [backfillIds.cardDecision,backfillIds.directDecision]);
@@ -785,6 +816,21 @@ try {
       "public.demo_admin_overview()", "public.demo_admin_members()",
       "public.demo_admin_sources()", "public.demo_admin_answer_stats(date,date)",
     ];
+    const invitePrivateFunctions = [
+      "private.guard_trailer_invite()", "private.trailer_invite_gate(uuid)",
+      "private.trailer_invite_lookup(text,text)", "private.purge_trailer_invite(uuid,text)",
+      "private.count_trailer_submission(uuid)",
+    ];
+    const inviteLeadFunctions = [
+      "public.create_trailer_invites(uuid,text[])", "public.revoke_trailer_invite(uuid)",
+      "public.delete_trailer_invite(uuid)", "public.list_trailer_invites(uuid)",
+      "public.requeue_trailer_attempt_score(uuid)",
+    ];
+    const inviteCandidateFunctions = [
+      "public.trailer_invite_open(text,text)", "public.trailer_invite_consent(text,text,text)",
+      "public.submit_trailer_invite_attempt(text,text,jsonb)",
+      "public.withdraw_trailer_invite_attempt(text,text)",
+    ];
     for (const name of privateFunctions) {
       for (const role of ["anon", "authenticated", "service_role"])
         assert.equal((await q("select has_function_privilege($1,$2,'execute') as allowed", [role,name])).rows[0].allowed, false, `${role} ${name}`);
@@ -797,6 +843,20 @@ try {
       assert.equal((await q("select has_function_privilege('anon',$1,'execute') as allowed", [name])).rows[0].allowed, true, name);
       assert.equal((await q("select has_function_privilege('authenticated',$1,'execute') as allowed", [name])).rows[0].allowed, false, name);
     }
+    for (const name of invitePrivateFunctions) {
+      for (const role of ["anon", "authenticated", "service_role"])
+        assert.equal((await q("select has_function_privilege($1,$2,'execute') as allowed", [role,name])).rows[0].allowed, false, `${role} ${name}`);
+    }
+    for (const name of inviteLeadFunctions) {
+      for (const role of ["anon", "authenticated", "service_role"])
+        assert.equal((await q("select has_function_privilege($1,$2,'execute') as allowed", [role,name])).rows[0].allowed, role === "authenticated", `${role} ${name}`);
+    }
+    for (const name of inviteCandidateFunctions) {
+      for (const role of ["anon", "authenticated", "service_role"])
+        assert.equal((await q("select has_function_privilege($1,$2,'execute') as allowed", [role,name])).rows[0].allowed, role !== "service_role", `${role} ${name}`);
+    }
+    for (const role of ["anon", "authenticated", "service_role"])
+      assert.equal((await q("select has_function_privilege($1,'public.purge_expired_trailer_invites()','execute') as allowed", [role])).rows[0].allowed, role === "service_role", `${role} purge_expired_trailer_invites`);
     const publicGrants = await q("select count(*)::int as count from information_schema.routine_privileges where routine_schema in ('public','private') and grantee='PUBLIC' and routine_name like '%admin%'");
     assert.equal(publicGrants.rows[0].count, 0);
   });
@@ -1007,25 +1067,15 @@ try {
   await verifyDecisionFollowupSql({ db, q, check, asUser });
   await verifyConversationsSql({ db, q, check, asUser });
   await verifySlackInstallationsSql({ db, q, check, asUser });
-  await verifyReviewedMaterialsSql({ db, q, check, asUser });
-  await db.exec(readFileSync(resolve("supabase/rollback/0028_trailer_assessment_down.sql"), "utf8"));
-  await check("0028 rollback removes assessment only", async () => { assert.equal((await q("select to_regclass('public.trailer_attempts') value")).rows[0].value, null); });
-  await db.exec(readFileSync(resolve("supabase/rollback/0027_trailer_publish_down.sql"), "utf8"));
-  await check("0027 rollback restores the exact 0026 overview contract", () => asUser(adminIds.adminA,async () => {
-    assert.deepEqual(Object.keys((await q("select admin_overview() result")).rows[0].result).sort(),["departments","llm_calls_this_month","org_name"]);
-  }));
-  await db.exec(readFileSync(resolve("supabase/rollback/0026_org_admin_down.sql"), "utf8"));
-  await check("0026 manual rollback removes the complete organization admin surface", async () => {
-    for (const name of ["org_admins", "member_invites", "admin_events"])
-      assert.equal((await q("select to_regclass($1) as value", [`public.${name}`])).rows[0].value, null);
-    assert.equal((await q("select count(*)::int as count from information_schema.schemata where schema_name='private'")).rows[0].count, 0);
-  });
-  console.log(JSON.stringify({ passed, failed: 0, matrix: { organizations:4, departments:12, actors:24, items:72, assertions:matrixAssertions }, database: "isolated PGlite", excluded: ["0004_worker_cron.sql (pg_cron/pg_net not available)"] }));
-} finally {
-  await db.close();
-}
   await verifyNotionInstallationsSql({ q, check, asUser });
   await verifyNotionImportV2Sql({ q, check, asUser });
   await verifyNotionRootsSql({ db, q, check, asUser });
   await verifyNotionBulkLaneSql({ db, q, check, asUser });
   await verifyNotionPollSql({ db, q, check, asUser });
+  await verifyReviewedMaterialsSql({ db, q, check, asUser });
+  await verifyReviewAccessSql({ db, q, check, asUser });
+  await verifyRetroSql({ db, q, check, asUser });
+  console.log(JSON.stringify({ passed, failed: 0, matrix: { organizations:4, departments:12, actors:24, items:72, assertions:matrixAssertions }, database: "isolated PGlite", excluded: ["0004_worker_cron.sql (pg_cron/pg_net not available)"] }));
+} finally {
+  await db.close();
+}

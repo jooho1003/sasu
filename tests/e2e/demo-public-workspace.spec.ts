@@ -5,6 +5,29 @@ const base = `/demo/d/${dept}`;
 test.setTimeout(90_000);
 test.use({ actionTimeout: 20_000 });
 
+test("합성 지원자 링크 발급·동의 체험은 쓰기 요청 없이 초기화된다", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  const writes: string[] = [], inviteCalls: string[] = [];
+  page.on("request", request => {
+    if (request.method() !== "GET") writes.push(request.url());
+    if (request.url().includes("/api/") && /invites|\/t\/i\//.test(request.url())) inviteCalls.push(request.url());
+  });
+  await page.goto(`${base}/trailers`);
+  const candidate = page.getByRole("region", { name: "지원자 링크 발급 체험" }).locator('[aria-label="합성 지원자 A"]');
+  await candidate.getByRole("button", { name: "링크 만들기" }).click();
+  await candidate.getByRole("button", { name: "복사", exact: true }).click();
+  await expect(page.getByText("링크를 복사했습니다.", { exact: true })).toBeVisible();
+  await candidate.getByRole("link").click();
+  await expect(page.getByRole("heading", { name: "개인정보 수집·이용 동의 화면 체험" })).toBeVisible();
+  await page.getByLabel("합성 동의 화면을 확인했습니다.").check();
+  await page.getByRole("button", { name: "계속", exact: true }).click();
+  await expect(page.getByRole("region", { name: "예고편 바로 체험" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "개인정보 수집·이용 동의 화면 체험" })).toBeVisible();
+  expect(writes).toEqual([]);
+  expect(inviteCalls).toEqual([]);
+});
+
 test("로그인 없는 부서 메뉴와 기능 지도가 화면을 벗어나지 않는다", async ({ page, context }) => {
   test.setTimeout(180_000);
   const errors: string[] = [];

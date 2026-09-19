@@ -29,6 +29,9 @@ export type JobKind =
   | "slack_backfill"
   | "process_review"
   | "purge_review_files"
+  | "purge_trailer_invites"
+  | "retro_draft"
+  | "retro_pull"
   | "sweep";
 
 type JobRow = {
@@ -345,7 +348,12 @@ async function updateFailureOwner(
 }
 
 export async function sweepPendingRows(): Promise<void> {
+  // Retention continues even when the public invite feature is switched off.
+  const kstDay = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  await enqueue("purge_trailer_invites", {}, { dedupeKey: kstDay });
   const client = createServiceSupabaseClient();
+  const inviteSweep = await client.rpc("sweep_trailer_invite_attempts");
+  if (inviteSweep.error) throw new JobWorkerDatabaseError();
   if (trailerScoresMode() !== "off") {
     const attempts = await client.from("trailer_attempts").update({ status: "failed", status_reason: "timeout" }).eq("status", "scoring").lt("updated_at", new Date(Date.now() - 10 * 60 * 1000).toISOString());
     if (attempts.error) throw new JobWorkerDatabaseError();
@@ -396,6 +404,11 @@ export async function sweepPendingRows(): Promise<void> {
   if (cardResult.error) {
     throw new JobWorkerDatabaseError();
   }
+  if (process.env.SASU_RETRO_ENABLED === "true") {
+    const retro = await client.rpc("sweep_retro_drafts");
+    if (retro.error) throw new JobWorkerDatabaseError();
+  }
+
 }
 
 export async function enqueue(

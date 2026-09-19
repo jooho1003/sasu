@@ -39,10 +39,10 @@ Object.assign(process.env, {
   SEED_MEMBER_EMAIL: "review-member@example.test",
   SEED_MEMBER_PASSWORD: credentials.password,
   E2E_REVIEW_LIVE: "1",
-  ORG_ADMIN_READ_ENABLED: "true",
-  ORG_ADMIN_WRITE_ENABLED: "true",
-  TRAILER_PUBLISH_ENABLED: "false",
-  TRAILER_SCORES_MODE: "off",
+  SASU_ORG_ADMIN_MODE: "on",
+  SASU_TRAILER_PUBLISH_ENABLED: process.env.E2E_TRAILER_INVITES === "1" ? "true" : "false",
+  SASU_TRAILER_INVITES_ENABLED: process.env.E2E_TRAILER_INVITES === "1" ? "true" : "false",
+  SASU_TRAILER_SCORES_MODE: "off",
 });
 for (const key of [
   "SLACK_BOT_TOKEN",
@@ -139,6 +139,8 @@ if (command === "setup") {
     Boolean(process.env.GROQ_API_KEY),
   );
 } else if (command === "refresh-review-schema") {
+  const guard = q("select to_regprocedure('public.authorize_review_access(uuid,uuid,text)') is not null as guarded;");
+  if (/\bt\b/.test(guard)) throw new Error("access_controls_installed_do_not_reapply_legacy_functions");
   // Reapply only functions/policies under development to the isolated QA DB.
   for (const name of [
     "0034_reviewed_materials.sql",
@@ -269,18 +271,28 @@ if (command === "setup") {
 } else {
   const args =
     command === "dev"
-      ? ["node_modules/next/dist/bin/next", "dev", "-p", "3011"]
+      ? ["node_modules/next/dist/bin/next", "dev", "-p", "3011", ...process.argv.slice(3)]
       : command === "build"
         ? ["node_modules/next/dist/bin/next", "build"]
         : command === "start"
           ? ["node_modules/next/dist/bin/next", "start", "-p", "3011"]
           : command === "seed-demo"
             ? ["node_modules/tsx/dist/cli.mjs", "scripts/seed-demo.ts"]
+            : command === "access-test"
+              ? ["scripts/verify-review-storage.mjs"]
             : [
                 "node_modules/@playwright/test/cli.js",
                 "test",
                 command === "guest-test"
                   ? "tests/e2e/guest.spec.ts"
+                  : command === "access-browser-test"
+                    ? "tests/e2e/review-access-live.spec.ts"
+                  : command === "retro-test"
+                    ? "tests/e2e/retros.spec.ts"
+                  : command === "candidate-test"
+                    ? "tests/e2e/trailer-invites.spec.ts"
+                  : command === "hiring-test"
+                    ? "tests/e2e/hiring-demo.spec.ts"
                   : "tests/e2e/reviewed-materials.spec.ts",
                 ...process.argv.slice(3),
               ];

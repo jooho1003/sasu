@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "tests/e2e",
   // The isolated trailer suite owns two servers with opposite feature flags.
-  testIgnore: ["**/trailer.spec.ts", "**/trailer-disabled.spec.ts"],
+  testIgnore: ["**/trailer.spec.ts", "**/trailer-disabled.spec.ts", "**/trailer-invite-page.spec.ts"],
   // Live workflow writes must not overlap the guest no-write count assertions.
   workers: 1,
   use: {
