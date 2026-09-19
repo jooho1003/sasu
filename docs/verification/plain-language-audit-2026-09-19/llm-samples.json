@@ -1,0 +1,76 @@
+{
+  "at": "2026-09-19T16:08:07.916Z",
+  "environment": "isolated local database; real Groq calls; synthetic evidence",
+  "generated": 0,
+  "expectedRefusals": 0,
+  "violations": 0,
+  "violationRate": null,
+  "records": [
+    {
+      "id": "answer-1",
+      "purpose": "answer",
+      "status": "failed",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "answer-2",
+      "purpose": "answer",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "answer-3",
+      "purpose": "answer",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "answer-4",
+      "purpose": "answer",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "answer-5",
+      "purpose": "answer",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "answer-6",
+      "purpose": "answer",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "card-1",
+      "purpose": "make_card",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "card-2",
+      "purpose": "make_card",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "card-3",
+      "purpose": "make_card",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "summary-1",
+      "purpose": "summarize_document",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    },
+    {
+      "id": "summary-2",
+      "purpose": "summarize_document",
+      "status": "blocked",
+      "code": "llm_budget_exceeded"
+    }
+  ]
+}

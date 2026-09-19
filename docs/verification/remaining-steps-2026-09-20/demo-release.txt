@@ -1,0 +1,62 @@
+{
+  "base": "http://localhost:3011",
+  "demo": 200,
+  "account": "connected",
+  "features": [
+    {
+      "label": "분류 대시보드",
+      "path": "/demo/d/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "status": 200
+    },
+    {
+      "label": "지금 결정 카드",
+      "path": "/demo/d/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/cards/10000000-0000-4000-8000-000000000121",
+      "status": 200
+    },
+    {
+      "label": "결정 원장",
+      "path": "/demo/d/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/ledger",
+      "status": 200
+    },
+    {
+      "label": "권한 인지 묻기",
+      "path": "/demo/d/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/ask?q=vendor-price",
+      "status": 200
+    },
+    {
+      "label": "음성·자료 검토",
+      "path": "/demo/d/cccccccc-cccc-4ccc-8ccc-cccccccccccc/reviews",
+      "status": 200
+    },
+    {
+      "label": "문서 어시스턴트",
+      "path": "/demo/d/cccccccc-cccc-4ccc-8ccc-cccccccccccc/documents",
+      "status": 200
+    },
+    {
+      "label": "문서 평가",
+      "path": "/demo/d/cccccccc-cccc-4ccc-8ccc-cccccccccccc/roles",
+      "status": 200
+    },
+    {
+      "label": "기록 보존",
+      "path": "/demo/d/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/retention",
+      "status": 200
+    },
+    {
+      "label": "부서 세팅",
+      "path": "/demo/d/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/settings",
+      "status": 200
+    },
+    {
+      "label": "조직 관리",
+      "path": "/demo/admin",
+      "status": 200
+    },
+    {
+      "label": "채용 예고편",
+      "path": "/demo/d/cccccccc-cccc-4ccc-8ccc-cccccccccccc/trailers",
+      "status": 200
+    }
+  ]
+}

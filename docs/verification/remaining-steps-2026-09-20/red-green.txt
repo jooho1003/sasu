@@ -1,0 +1,133 @@
+sasu-zendesk-red.log
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/retro/zendesk.test.ts [ tests/retro/zendesk.test.ts ]
+Error: Cannot find package '@/lib/retro/connectors/zendesk' imported from D:/바이브코딩/sasu/tests/retro/zendesk.test.ts
+ ❯ tests/retro/zendesk.test.ts:2:1
+      1| import { afterEach, expect, it, vi } from "vitest";
+      2| import { zendeskAuthorization, exchangeZendesk, refreshZendesk, pullZe…
+       | ^
+      3| afterEach(()=>vi.unstubAllEnvs());
+      4| const config={subdomain:"example-team"},date="2026-09-19",at=date+"T01…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  02:13:52
+   Duration  176ms (worker 96%, environment 4%)
+
+
+
+sasu-mailchimp-red.log
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/retro/mailchimp.test.ts [ tests/retro/mailchimp.test.ts ]
+Error: Cannot find package '@/lib/retro/connectors/mailchimp' imported from D:/바이브코딩/sasu/tests/retro/mailchimp.test.ts
+ ❯ tests/retro/mailchimp.test.ts:2:1
+      1| import { afterEach, expect, it, vi } from "vitest";
+      2| import { exchangeMailchimp, mailchimpAuthorization, pullMailchimp } fr…
+       | ^
+      3| afterEach(()=>vi.unstubAllEnvs());
+      4| it("메일침프 OAuth의 서버 위치와 로그인 고유번호만 저장한다",async()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  02:24:29
+   Duration  156ms (worker 95%, environment 5%)
+
+
+
+sasu-department-connectors-red.log
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/retro/department-connectors.test.ts [ tests/retro/department-connectors.test.ts ]
+Error: Cannot find package '@/lib/retro/connectors/department' imported from D:/바이브코딩/sasu/tests/retro/department-connectors.test.ts
+ ❯ tests/retro/department-connectors.test.ts:2:1
+      1| import { expect, it, vi } from "vitest";
+      2| import { departmentHeaders, validateDepartmentToken, pullDepartment } …
+       | ^
+      3| const date="2026-09-19";
+      4| it("스티비는 프로 요금제 읽기 권한을 검증하고 당일 발송 존재만 부서 문맥으로 남긴다",async()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  02:18:49
+   Duration  153ms (worker 96%, environment 4%)
+
+
+
+sasu-activity-row-red.log
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/retro/bundle.test.ts:6:202
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  02:12:52
+   Duration  296ms (import 46%, transform 35%, tests 17%, worker 2%)
+
+
+
+sasu-budget-sql-red.log
+  }
+
+    at file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/scripts/verify-retro-sql.mjs:113:12
+    at async check (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/scripts/verify-security-sql.mjs:73:3)
+    at async verifyRetroSql (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/scripts/verify-retro-sql.mjs:108:3)
+    at async file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/scripts/verify-security-sql.mjs:1078:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: { status: 'failed', status_reason: 'job_failed', lease: null },
+  expected: {
+    status: 'failed',
+    status_reason: 'llm_budget_exceeded',
+    lease: null
+  },
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.18.0
+
+
+sasu-preset-topic-red.log
+    "검증",
+  ]
+
+ ❯ tests/pipeline/retro-draft.test.ts:21:29
+     19|     expect(finish).toMatchObject({ p_lease: "lease", p_generation: 1, …
+     20|     expect(finish.p_body.did[0].citations[0].activity_id).toBe("a");
+     21|     expect(finish.p_topics).toEqual(["기획", "검증"]);
+       |                             ^
+     22|     expect(mocks.structured.mock.calls[0][2].system).toContain("고친 문서"…
+     23|     expect(mocks.structured.mock.calls[0][2].system).toContain("dept_c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  02:44:29
+   Duration  319ms (import 49%, transform 44%, tests 6%, worker 2%)
+
+
+
+Final green: unit.txt (1319 passed), sql.txt (236 passed, matrix 2016).

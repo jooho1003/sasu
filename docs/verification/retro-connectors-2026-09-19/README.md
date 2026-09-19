@@ -1,13 +1,33 @@
 # 부서별 회고 커넥터 검증
 
-2026-09-19 사용자 확정값에 따라 개발·기획 파일럿, 개인 연결, pull만, 개인정보 미수집, 연결 해제 즉시 삭제, 부서 프리셋을 구현했다.
+2026-09-20, phase 30의 제안값 10개를 채택한 사용자 지시에 따라 개발했다. 운영 DB·외부 계정·배포에는 적용하지 않았다. 아래 결과는 로컬 구현 검증이며 외부 서비스 연결 성공을 뜻하지 않는다.
 
-실행 기록:
+## 구현 범위
 
-- `npx vitest run tests/retro/connectors-map.test.ts tests/retro/connection-crypto.test.ts tests/labels.test.ts`: 통과
-- `node scripts/verify-retro-connections-sql.mjs`: 8/8 통과(로컬 QA PostgreSQL)
-- `npm run lint`, `npx tsc --noEmit`, `npm run build`: 통과
-- 실제 외부 Figma·GitHub·Google·CRM 샌드박스 호출과 OAuth 교환은 자격 증명 미제공으로 미실행. pull API는 유효한 `https` endpoint와 암호화된 개인 키가 없으면 저장·호출하지 않는다.
-- VoIP 통화 메타데이터는 법률 자문 게이트로 제외했다.
+- 개인 연결: GitHub, Figma, Google Calendar, Notion, Jira, Confluence, Linear, HubSpot, Pipedrive, 세일즈맵, Intercom, Zendesk, Mailchimp, YouTube, GA4.
+- 승인된 부서 요약 예외: 원티드·스티비. 팀장만 연결하며 개인 활동의 인용으로 사용할 수 없다. 현재 팀장 권한을 잃으면 읽기·수집도 차단한다.
+- 8개 부서 형식·추천 연결, 사수 내부 활동, 텍스트·음성 한 줄 기록, 수동·예약 수집, 별도 공개 동의, 공개 철회·연결 해제·자료 삭제를 연결했다.
+- 개인 작성자 확인, 응답 필드 제한, 날짜·시간대 필터, 암호화, 단회 OAuth 상태, 토큰 갱신, 수집 임대와 재시도, 본인 열 권한을 서버·SQL에서 집행한다.
+- 달력은 등록된 일정으로만, Mailchimp·GA4는 수치 관찰로만 사용한다. 부서 소식은 별도 회색 그룹에 표시하고 인용에서 제외한다.
 
-서버 로그에는 제공자 응답·활동 제목·토큰을 출력하지 않는다. 운영 DB와 배포에는 적용하지 않았다.
+## 실행 증거
+
+| 검사 | 결과 | 범위 |
+|---|---|---|
+| 전체 Vitest | 133개 파일·1,319개 통과 | 제공자 합성 응답, 인용·개인정보·OAuth·워크플로 |
+| `verify-security-sql.mjs` | 236개 통과 + 권한 조합 2,016건 | 격리 PGlite, 연결 비밀 열·역할·해제 경합·롤백 포함 |
+| 개발·기획 브라우저 흐름 | 각 3일, 통과 | 아래 실제 실행 JSON·화면 |
+| lint·프로덕션 빌드 | 통과 | 차단 문구 0개 |
+
+[local-pilot-results.json](local-pilot-results.json)은 파일 C·내부 활동 B·한 줄 D → **사람이 검토한 내용 저장** → 확정 → 공개 → 공개 철회 → 연결 해제를 실행한 결과다. 실제 모델 호출은 0회이며 AI 초안 생성 파일럿 완료로 간주하지 않는다. Groq 사용 한도 때문에 실제 초안 생성은 [외부 조건 기록](../plain-language-audit-2026-09-19/external-gates.md)에 남겼다.
+
+- [개발 390px](development-390.png) · [1440px](development-1440.png)
+- [기획 390px](planning-390.png) · [1440px](planning-1440.png)
+- [개발 연결 설정](settings-0.png) · [기획 연결 설정](settings-1.png)
+- [실행 기록 모음](../remaining-steps-2026-09-20.md) · [구조·의존 관계](dependency-review.md)
+
+## 남은 완료 조건
+
+각 제공자의 실제 OAuth/키·요금제·권한·sandbox 응답 확인은 미실행이다. 채널톡·Greenhouse·Lever는 승인된 개인 수집 원칙과 인증 범위를 맞추지 못했고, Workable은 파트너 OAuth의 사용자 식별 계약 확인이, Meta는 설계 §11의 권한·앱 검토 확인이 남았다. VoIP는 법률 자문 전 착수 금지다. 이 항목들을 완료로 표시하지 않았다. [공식 API 근거와 설정](setup-and-api-evidence.md)을 참고한다.
+
+수집은 제공자별 제한된 페이지 범위·하루 최대 200건이므로 완전한 감사 로그가 아니다. 사용자 입력 URL로 요청하지 않으며 서버에서 허용한 API 호스트·경로만 구성한다. worker 로그에는 응답 본문·활동 제목·토큰을 기록하지 않는다.

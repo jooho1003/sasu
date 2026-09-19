@@ -1,0 +1,8 @@
+
+Running 1 test using 1 worker
+
+(node:38048) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\retro-connectors.spec.ts:18:5 › 개발·기획 3일: 파일·내부 활동·한 줄 기록, 검토·확정·공개 철회·연결 해제 (16.0s)
+
+  1 passed (16.9s)

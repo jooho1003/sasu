@@ -1,0 +1,141 @@
+{
+  "at": "2026-09-19T17:42:07.555Z",
+  "width": 1440,
+  "measurements": [
+    {
+      "name": "dashboard",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": 514.875,
+      "mainTop": 147.59375
+    },
+    {
+      "name": "card",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": 147.59375
+    },
+    {
+      "name": "ledger",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": 147.59375
+    },
+    {
+      "name": "ask",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": 147.59375
+    },
+    {
+      "name": "reviews",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": 102.59375
+    },
+    {
+      "name": "documents",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": 102.59375
+    },
+    {
+      "name": "roles",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": 102.59375
+    },
+    {
+      "name": "retention",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": 102.59375
+    },
+    {
+      "name": "settings",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": 102.59375
+    },
+    {
+      "name": "notion",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": null
+    },
+    {
+      "name": "admin",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": null
+    },
+    {
+      "name": "trailers",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": 102.59375
+    },
+    {
+      "name": "demo",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": null
+    },
+    {
+      "name": "features",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": null
+    },
+    {
+      "name": "hiring",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": null
+    },
+    {
+      "name": "login",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": null
+    },
+    {
+      "name": "not-found",
+      "status": 404,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": null
+    },
+    {
+      "name": "privacy",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": null
+    },
+    {
+      "name": "home",
+      "status": 200,
+      "overflow": false,
+      "firstCardTop": null,
+      "mainTop": null
+    }
+  ],
+  "writes": [],
+  "errors": []
+}

@@ -1,0 +1,63 @@
+{
+  "implementationCommit": "aa31f8563a42d2bfaf48bcb9ca25664b9bf8f062",
+  "environment": "local Supabase and isolated PGlite; Next production build on localhost:3011",
+  "lint": {
+    "errors": 0,
+    "wordingBlocking": 0,
+    "wordingWarnings": 77
+  },
+  "build": "passed",
+  "types": "passed",
+  "unit": {
+    "files": 133,
+    "passed": 1319,
+    "failed": 0
+  },
+  "sql": {
+    "passed": 236,
+    "failed": 0,
+    "permissionMatrixAssertions": 2016
+  },
+  "browser": {
+    "uiRegression": {
+      "passed": 63
+    },
+    "trailerRegression": {
+      "passed": 14,
+      "skipped": 3
+    },
+    "plainLanguage": {
+      "passed": 4,
+      "screens": 19,
+      "widths": [
+        1440,
+        390
+      ]
+    },
+    "connectors": {
+      "passed": 1,
+      "departments": 2,
+      "daysPerDepartment": 3,
+      "realProviderCalls": 0,
+      "llmCalls": 0,
+      "review": "manual"
+    }
+  },
+  "localRls": {
+    "passed": 6
+  },
+  "localStorage": {
+    "passed": 8,
+    "concurrentRequests": 61
+  },
+  "mockAccessUi": {
+    "passed": 8
+  },
+  "externalLlmSamples": {
+    "planned": 11,
+    "generated": 0,
+    "blocker": "spend_limit_reached"
+  },
+  "productionChanges": false,
+  "remotePush": false
+}

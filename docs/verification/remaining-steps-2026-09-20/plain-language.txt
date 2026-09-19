@@ -1,0 +1,11 @@
+
+Running 4 tests using 1 worker
+
+(node:33628) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\plain-language.spec.ts:18:35 › 쉬운말 19화면 1440 (6.7s)
+  ok 2 [chromium] › tests\e2e\plain-language.spec.ts:18:35 › 쉬운말 19화면 390 (4.8s)
+  ok 3 [chromium] › tests\e2e\plain-language.spec.ts:37:5 › 단건 원문은 목록 필터 밖에서도 열리고 다른 부서 원문은 숨긴다 (736ms)
+  ok 4 [chromium] › tests\e2e\plain-language.spec.ts:53:5 › 판단 근거는 최신 출처만 펴고 검색·단일 선택을 지원한다 (553ms)
+
+  4 passed (13.4s)

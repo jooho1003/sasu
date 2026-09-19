@@ -1,0 +1,6 @@
+{
+  "checked": 37,
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": ""
+}

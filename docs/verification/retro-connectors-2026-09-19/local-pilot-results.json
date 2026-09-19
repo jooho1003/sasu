@@ -1,0 +1,9 @@
+{
+  "database": "local Supabase",
+  "departments": 2,
+  "daysPerDepartment": 3,
+  "flow": "C file RPC + B internal + D manual -> manually reviewed revision -> confirm -> share -> withdraw -> revoke",
+  "realExternalProviderCalls": 0,
+  "llmCalls": 0,
+  "errors": []
+}

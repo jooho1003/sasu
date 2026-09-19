@@ -4,13 +4,74 @@
   "design": "docs/planning/예고편_지원자링크_설계.md",
   "adr": "ADR-062",
   "steps": [
-    { "step": 0, "name": "invite-schema", "status": "completed", "codex_model": "gpt-5.6-sol", "effort": "xhigh", "summary": "지원자 초대·동의·1회 제출·채점 큐·철회/파기 SQL 경계와 12개 격리 하니스 검증을 추가했다." },
-    { "step": 1, "name": "invite-lib", "status": "completed", "codex_model": "gpt-5.6-terra", "effort": "medium", "summary": "지원자 초대 토큰·이메일·공개/목록 RPC 계약과 상태·오류 순수 파서를 TDD로 추가했다." },
-    { "step": 2, "name": "lead-invites", "status": "completed", "codex_model": "gpt-5.6-terra", "effort": "medium", "summary": "부서장 전용 지원자 링크 발급·목록·철회·파기·재채점 라우트와 S18 링크 구역을 추가하고 플래그 차단 E2E를 통과했다." },
-    { "step": 3, "name": "candidate-page", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 4, "name": "candidate-submit-score", "status": "pending", "codex_model": "gpt-5.6-sol", "effort": "xhigh" },
-    { "step": 5, "name": "purge-withdraw", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 6, "name": "demo-invite-mock", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium" },
-    { "step": 7, "name": "invite-verification", "status": "pending", "codex_model": "gpt-5.6-terra", "effort": "medium", "note": "완료 시 blocked로 멈춘다 — 조직 개시는 사람 판정" }
+    {
+      "step": 0,
+      "name": "invite-schema",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "지원자 초대·동의·1회 제출·채점 큐·철회/파기 SQL 경계와 12개 격리 하니스 검증을 추가했다."
+    },
+    {
+      "step": 1,
+      "name": "invite-lib",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "지원자 초대 토큰·이메일·공개/목록 RPC 계약과 상태·오류 순수 파서를 TDD로 추가했다."
+    },
+    {
+      "step": 2,
+      "name": "lead-invites",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "부서장 전용 지원자 링크 발급·목록·철회·파기·재채점 라우트와 S18 링크 구역을 추가하고 플래그 차단 E2E를 통과했다."
+    },
+    {
+      "step": 3,
+      "name": "candidate-page",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "지원자 페이지·동의·1회 제출/채점·철회 파기·게스트 체험 구현. 기존 실제 로컬 3문항 제출/채점/파기 기록과 이번 예고편 14개 회귀 통과(실모델/운영 3건 skipped).",
+      "verification": "docs/verification/trailer-candidate-links-2026-09-19/live-results.json"
+    },
+    {
+      "step": 4,
+      "name": "candidate-submit-score",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh",
+      "summary": "지원자 페이지·동의·1회 제출/채점·철회 파기·게스트 체험 구현. 기존 실제 로컬 3문항 제출/채점/파기 기록과 이번 예고편 14개 회귀 통과(실모델/운영 3건 skipped).",
+      "verification": "docs/verification/trailer-candidate-links-2026-09-19/live-results.json"
+    },
+    {
+      "step": 5,
+      "name": "purge-withdraw",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "지원자 페이지·동의·1회 제출/채점·철회 파기·게스트 체험 구현. 기존 실제 로컬 3문항 제출/채점/파기 기록과 이번 예고편 14개 회귀 통과(실모델/운영 3건 skipped).",
+      "verification": "docs/verification/trailer-candidate-links-2026-09-19/live-results.json"
+    },
+    {
+      "step": 6,
+      "name": "demo-invite-mock",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "지원자 페이지·동의·1회 제출/채점·철회 파기·게스트 체험 구현. 기존 실제 로컬 3문항 제출/채점/파기 기록과 이번 예고편 14개 회귀 통과(실모델/운영 3건 skipped).",
+      "verification": "docs/verification/trailer-candidate-links-2026-09-19/live-results.json"
+    },
+    {
+      "step": 7,
+      "name": "invite-verification",
+      "status": "blocked",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "note": "완료 시 blocked로 멈춘다 — 조직 개시는 사람 판정",
+      "summary": "로컬 SQL·브라우저 검증 완료. 법률 검토·조직 개시와 운영 반영은 사람 판정 대기."
+    }
   ]
 }
