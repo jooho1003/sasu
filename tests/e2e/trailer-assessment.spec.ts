@@ -11,7 +11,7 @@ test.describe("합성 채점 B · O12 운영 승인 후",()=>{
   test.skip(!live,"외부 쓰기·QA DB·발행 on·full 서버 필요");
   test("제출순·명시적 점수 정렬·고정 문구·근거·쓰기 없음",async({page,browser})=>{
     const db=serviceClient();const counts=()=>Promise.all(["llm_calls","trailer_attempts","jobs"].map(async(table)=>{const r=await db.from(table).select("*",{count:"exact",head:true});expect(Boolean(r.error)).toBe(false);return r.count;}));const before=await counts();
-    await page.goto(path);await page.getByRole("tab",{name:"합성 지원자 점수표"}).click();for(const copy of ASSESSMENT_FIXED_COPY)await expect(page.getByText(copy,{exact:true})).toBeVisible();
+    await page.goto(path);await page.getByRole("tab",{name:"가상 지원자 점수표"}).click();for(const copy of ASSESSMENT_FIXED_COPY)await expect(page.getByText(copy,{exact:true})).toBeVisible();
     const rows=page.locator("[data-attempt-label]");expect(await rows.evaluateAll(nodes=>nodes.map(n=>n.getAttribute("data-attempt-label")))).toEqual(["합성 지원자 A","합성 지원자 B","합성 지원자 C"]);await expect(rows.locator("details[open]")).toHaveCount(0);
     expect(new Set(await rows.evaluateAll(nodes=>nodes.map(n=>n.className))).size).toBe(1);
     await page.getByRole("button",{name:"점수순으로 보기"}).click();await expect(page.getByRole("button",{name:"제출순으로 보기"})).toHaveAttribute("aria-pressed","true");
@@ -19,7 +19,7 @@ test.describe("합성 채점 B · O12 운영 승인 후",()=>{
     const expected=[...(scored.data??[])].sort((a,b)=>(b.weighted_score??-1)-(a.weighted_score??-1)||a.created_at.localeCompare(b.created_at)).map(a=>a.label);expect(await rows.evaluateAll(nodes=>nodes.map(n=>n.getAttribute("data-attempt-label")))).toEqual(expected);
     for(const summary of await rows.locator("summary").all())await summary.click();await expect(page.getByRole("region",{name:"면접 확인 질문"}).first()).toBeVisible();
     let text=await page.locator("main").innerText();for(const copy of ASSESSMENT_FIXED_COPY)text=text.replaceAll(copy,"");expect(/합격|불합격|탈락|추천/u.test(text)).toBe(false);expect(await counts()).toEqual(before);
-    if(process.env.E2E_BASE_URL_SCORES){const context=await browser.newContext();try{const scores=await context.newPage();await scores.goto(`${process.env.E2E_BASE_URL_SCORES}${path}`);await scores.getByRole("tab",{name:"합성 지원자 점수표"}).click();for(const summary of await scores.locator("summary").all())await summary.click();await expect(scores.getByRole("region",{name:"면접 확인 질문"})).toHaveCount(0);}finally{await context.close();}}
+    if(process.env.E2E_BASE_URL_SCORES){const context=await browser.newContext();try{const scores=await context.newPage();await scores.goto(`${process.env.E2E_BASE_URL_SCORES}${path}`);await scores.getByRole("tab",{name:"가상 지원자 점수표"}).click();for(const summary of await scores.locator("summary").all())await summary.click();await expect(scores.getByRole("region",{name:"면접 확인 질문"})).toHaveCount(0);}finally{await context.close();}}
   });
   test("실제 지원자 생성은 service RPC와 직접 insert 양쪽에서 차단",async()=>{
     const db=serviceClient(),trailerId=randomUUID(),id=randomUUID();

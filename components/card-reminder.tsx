@@ -1,9 +1,10 @@
 "use client";
 
+import { LABELS } from "@/lib/labels";
 import { useEffect, useState } from "react";
 
 type Reminder = { id: string; kind: string; state: string; scheduled_for: string };
-const labels: Record<string, string> = { pending: "예약됨", queued: "발송 대기", sending: "발송 중", sent: "발송 완료", failed: "발송 실패 · 다시 예약해주세요", cancelled: "취소됨" };
+const labels: Record<string,string> = LABELS.reminderState;
 
 export function CardReminder({ deptId, cardId }: { deptId: string; cardId: string }) {
   const [rows, setRows] = useState<Reminder[] | null>(null);
@@ -38,7 +39,7 @@ export function CardReminder({ deptId, cardId }: { deptId: string; cardId: strin
   }
   return <section className="mt-6 grid gap-3 border-t border-black/10 pt-5" aria-label="담당 결정 알림">
     <h2 className="m-0 text-lg">다시 확인할 시간</h2>
-    <p className="m-0 text-sm text-[var(--muted)]">담당자에게 슬랙 DM으로 알려드립니다. 미완료 결정은 마감 후에도 한 번 알립니다.</p>
+    <p className="m-0 text-sm text-[var(--muted)]">담당자에게 슬랙 개인 메시지으로 알려드립니다. 미완료 결정은 마감 후에도 한 번 알립니다.</p>
     <form className="flex flex-wrap items-end gap-3" onSubmit={e => { e.preventDefault(); void save(false); }}>
       <label className="grid gap-1 text-sm font-bold">알림 시각 (한국 시간)
         <input className="rounded-lg border border-black/15 p-2 font-normal" required type="datetime-local" value={at} onChange={e => setAt(e.target.value)} disabled={busy} />

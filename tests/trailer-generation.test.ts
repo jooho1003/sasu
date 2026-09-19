@@ -8,6 +8,7 @@ describe("예고편 생성 입력 경계", () => {
   it("회사·제품 고유명사를 새로 짓지 않고 일반 명칭으로 가상화한다", () => {
     const prompt = buildTrailerGeneratePrompt({ scenarioId: "scenario_1", decision: { outcome: "계약 갱신", rationale: "비용 원칙" }, cardTitle: null, principles: "운영 안정성" });
     expect(prompt.system).toContain("회사·제품 고유명사를 만들거나 실제 이름을 사용하지 마세요");
+    expect(prompt.system).toContain("dialogues[].question과 가상 동료의 대사에만 -해요체");
     expect(prompt.system).toContain("협력사");
     expect(prompt.system).toContain("업무 도구");
     expect(prompt.system).not.toContain("회사명과 사람 이름도 가상의 한글 이름");

@@ -32,13 +32,14 @@ export async function accessible(context: Context) {
 export async function detail(context: Context) {
   const access = await accessible(context); if (access instanceof Response) return access;
   const { client, day, owner } = access;
-  const [activityResult, revisionResult] = await Promise.all([
+  const [activityResult, revisionResult, departmentResult] = await Promise.all([
     client.from("retro_activities").select("*").eq("day_id", day.id).order("at"),
     client.from("retro_revisions").select("*").eq("day_id", day.id).in("revision", [...new Set([owner ? day.revision : day.confirmed_revision, day.confirmed_revision].filter((n): n is number => n !== null))]),
+    client.from("departments").select("retro_preset").eq("id", day.dept_id).single(),
   ]);
-  if (activityResult.error || revisionResult.error) return fail("unknown");
+  if (activityResult.error || revisionResult.error || departmentResult.error) return fail("unknown");
   const activities = RetroActivityRow.array().safeParse(activityResult.data);
   const revisions = RetroRevisionRow.array().safeParse(revisionResult.data);
   if (!activities.success || !revisions.success) return fail("unknown");
-  return { ...access, activities: activities.data, revision: revisions.data.find(r => r.revision === (owner ? day.revision : day.confirmed_revision)) ?? null, confirmed: revisions.data.find(r => r.revision === day.confirmed_revision) ?? null };
+  return { ...access, preset: departmentResult.data.retro_preset, activities: activities.data, revision: revisions.data.find(r => r.revision === (owner ? day.revision : day.confirmed_revision)) ?? null, confirmed: revisions.data.find(r => r.revision === day.confirmed_revision) ?? null };
 }

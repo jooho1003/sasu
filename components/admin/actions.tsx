@@ -113,7 +113,7 @@ function ActionForm({
         if (!revoked.ok) {
           setMessage(
             revoked.message ??
-              "초대를 철회하지 못했습니다. 다시 시도해 주세요.",
+              "초대를 거두지 못했습니다. 다시 시도해 주세요.",
           );
           return;
         }
@@ -129,7 +129,7 @@ function ActionForm({
       if (!result.ok) {
         setMessage(
           result.error === "invite_pending" && pendingScope === "department"
-            ? "이 부서에 첫 부서장 초대가 이미 대기 중입니다."
+            ? "이 부서에 첫 팀장 초대가 이미 대기 중입니다."
             : (result.message ??
                 "요청을 처리하지 못했습니다. 다시 시도해 주세요."),
         );
@@ -230,7 +230,7 @@ function ActionForm({
           disabled={busy}
           onClick={() => void submit(true)}
         >
-          기존 초대 철회 후 새 링크
+          기존 초대 거둔 뒤 새 링크
         </button>
       ) : null}
       <div className="flex flex-wrap justify-end gap-2">
@@ -265,7 +265,7 @@ export function AdminTabs({
   const id = useId();
   return (
     <div className="grid min-w-0 gap-5">
-      <div className="section-picker" role="tablist" aria-label="조회 항목">
+      <div className="section-picker" role="tablist" aria-label="보기 항목">
         {tabs.map((tab, index) => (
           <button
             key={tab.label}

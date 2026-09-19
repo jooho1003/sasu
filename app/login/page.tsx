@@ -4,9 +4,9 @@ import LoginForm from "./login-form";
 
 const LOGIN_ERRORS: Record<string, string> = {
   auth_callback:
-    "로그인 링크를 확인하지 못했습니다. 링크가 만료되었을 수 있으니 새 링크를 요청해주세요.",
+    "로그인 링크를 더는 쓸 수 없습니다. 새 링크를 받아 주세요.",
   membership_lookup:
-    "로그인은 확인했지만 부서 멤버십을 조회하지 못했습니다. 잠시 후 다시 시도해주세요.",
+    "로그인은 됐지만 부서를 찾지 못했습니다. 잠시 뒤 다시 시도해 주세요.",
 };
 type LoginPageProps = {
   searchParams: Promise<{ error?: string; next?: string }>;
@@ -42,20 +42,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="login-form-wrap">
         <section className="login-form-panel">
           <header>
-            <span className="badge badge-green">다시 만나 반가워요</span>
+            <span className="badge badge-green">다시 오셨군요</span>
             <h1>이메일로 로그인</h1>
             <p>
               업무용 이메일을 입력해주세요.
               <br />
-              비밀번호 없이 로그인할 수 있는 매직링크를 보내드립니다.
+              비밀번호 없이 로그인할 수 있는 링크를 메일로 보냅니다.
             </p>
           </header>
           <LoginForm initialError={initialError} next={next ?? null} />
           <aside className="login-help" aria-label="로그인 도움말">
-            <strong>초대받은 업무용 이메일을 사용하세요</strong>
             <ul>
-              <li>메일이 안 오면 스팸함을 확인하고 링크를 다시 요청해 주세요.</li>
-              <li>로그인 뒤 부서가 보이지 않으면 초대한 부서장에게 멤버십을 확인해 주세요.</li>
+              <li>회사에서 초대받은 이메일을 쓰세요.</li>
+              <li>메일이 안 오면 스팸함을 보고, 다시 받기를 누르세요.</li>
+              <li>로그인했는데 부서가 안 보이면 팀장에게 초대를 부탁하세요.</li>
             </ul>
           </aside>
           <footer>

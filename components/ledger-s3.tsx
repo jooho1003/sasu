@@ -1,9 +1,12 @@
 "use client";
 
+import { labelFrom } from "@/lib/labels";
 import { useEffect, useState } from "react";
 
 import { formatConflictBadge } from "@/lib/conflicts";
 import { DecisionCorrection } from "@/components/decision-correction";
+import { EvidencePicker } from "@/components/evidence-picker";
+import type { EvidenceOption } from "@/lib/evidence-options";
 
 type LedgerCitation = {
   quote: string;
@@ -40,7 +43,7 @@ type LedgerDecision = {
 type LedgerData = {
   decisions: LedgerDecision[];
   members: { id: string; name: string }[];
-  evidenceOptions: { id: string; label: string }[];
+  evidenceOptions: (EvidenceOption & {label:string})[];
 };
 
 type Filters = {
@@ -56,10 +59,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
 });
 
-const STATUS_LABELS: Record<string, string> = {
-  decided: "결정 완료",
-  direct: "직접 기록",
-};
+
 
 function formatDate(value: string | null): string {
   if (!value) {
@@ -98,7 +98,7 @@ function DecisionDetail({ decision, historical = false }: { decision: LedgerDeci
         <div className="grid gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-[var(--accent)]/10 px-3 py-1 text-xs font-bold text-[var(--accent)]">
-              {STATUS_LABELS[decision.status] ?? decision.status}
+              {labelFrom("ledgerStatus", decision.status)}
             </span>
             {!decision.has_evidence ? (
               <span className="rounded-full bg-black/5 px-3 py-1 text-xs font-bold text-[var(--muted)]">
@@ -107,14 +107,14 @@ function DecisionDetail({ decision, historical = false }: { decision: LedgerDeci
             ) : null}
             {decision.conflicts.length > 0 ? (
               <span className="rounded-full bg-[var(--urgent)]/10 px-3 py-1 text-xs font-bold text-[var(--urgent)]">
-                과거 결정과 충돌
+                예전 결정과 다름
               </span>
             ) : null}
           </div>
           <h2 className={`${historical ? "text-lg" : "text-2xl"} m-0`}>{decision.outcome}</h2>
         </div>
         <span className="text-xs text-[var(--muted)]" data-meta>
-          원장 #{decision.id.slice(0, 8)}
+          결정 기록 #{decision.id.slice(0, 8)}
         </span>
       </div>
 
@@ -128,7 +128,7 @@ function DecisionDetail({ decision, historical = false }: { decision: LedgerDeci
           <dd className="m-0 font-bold">{formatDate(decision.decided_at)}</dd>
         </div>
         <div>
-          <dt className="text-[var(--muted)]">리드타임</dt>
+          <dt className="text-[var(--muted)]">걸린 시간</dt>
           <dd className="m-0 font-bold">{formatLeadTime(decision.lead_time_min)}</dd>
         </div>
       </dl>
@@ -207,7 +207,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
         );
         const body = (await response.json()) as LedgerData & { error?: string };
         if (!response.ok) {
-          throw new Error(body.error ?? "결정 원장을 불러오지 못했습니다.");
+          throw new Error(body.error ?? "결정 기록을 불러오지 못했습니다.");
         }
         if (!cancelled) {
           setData(body);
@@ -215,7 +215,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
         }
       } catch (loadError) {
         if (!cancelled) {
-          setError(loadError instanceof Error ? loadError.message : "결정 원장을 불러오지 못했습니다.");
+          setError(loadError instanceof Error ? loadError.message : "결정 기록을 불러오지 못했습니다.");
         }
       } finally {
         if (!cancelled) {
@@ -255,7 +255,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
       setOutcome("");
       setRationale("");
       setEvidenceItemId("");
-      setRecordMessage(body.message ?? "결정을 원장에 기록했습니다.");
+      setRecordMessage(body.message ?? "결정을 기록에 남겼습니다.");
       setRefreshKey((value) => value + 1);
     } catch (recordError) {
       setRecordMessage(
@@ -271,7 +271,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="grid gap-2">
           <p className="m-0 text-sm font-bold text-[var(--accent)]">사수</p>
-          <h1 className="m-0 text-3xl">결정 원장</h1>
+          <h1 className="m-0 text-3xl">결정 기록</h1>
           <p className="m-0 text-[var(--muted)]">부서의 결정과 근거를 최신순으로 봅니다.</p>
         </div>
 
@@ -298,26 +298,14 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
               value={rationale}
             />
           </label>
-          <label className="grid gap-2 font-bold">
-            근거 (선택)
-            <select
-              className="rounded-xl border border-black/15 bg-[var(--surface)] p-3 font-normal"
-              onChange={(event) => setEvidenceItemId(event.target.value)}
-              value={evidenceItemId}
-            >
-              <option value="">근거 없이 기록</option>
-              {(data?.evidenceOptions ?? []).map((option) => (
-                <option key={option.id} value={option.id}>{option.label}</option>
-              ))}
-            </select>
-          </label>
+          <EvidencePicker options={data?.evidenceOptions??[]} value={evidenceItemId} onChange={setEvidenceItemId} optional />
           <button
             className="w-fit rounded-lg bg-[var(--accent)] px-5 py-3 font-bold text-white disabled:opacity-50"
             disabled={recording}
             onClick={() => void recordDecision()}
             type="button"
           >
-            {recording ? "기록 중…" : "원장에 기록"}
+            {recording ? "기록 중…" : "결정 남기기"}
           </button>
           {recordMessage ? <p aria-live="polite" className="m-0 text-sm">{recordMessage}</p> : null}
         </div>
@@ -380,7 +368,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
       </form>
 
       {loading ? (
-        <div className="rounded-2xl bg-[var(--surface)] p-8 text-[var(--muted)]">원장을 불러오는 중입니다.</div>
+        <div className="rounded-2xl bg-[var(--surface)] p-8 text-[var(--muted)]">결정 기록을 불러오는 중입니다.</div>
       ) : null}
       {error ? (
         <div className="grid gap-3 rounded-2xl bg-[var(--surface)] p-8">
@@ -411,7 +399,7 @@ export default function LedgerS3({ deptId }: { deptId: string }) {
               {decision.history.length > 0 ? (
                 <details className="mt-5 border-t border-black/10 pt-4">
                   <summary className="cursor-pointer text-sm font-bold text-[var(--muted)]">
-                    정정 이력 {decision.history.length}건
+                    고친 기록 {decision.history.length}건
                   </summary>
                   <div className="mt-4 grid gap-4">
                     {decision.history.map((historicalDecision) => (

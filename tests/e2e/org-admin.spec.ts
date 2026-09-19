@@ -38,31 +38,31 @@ test.describe("조직 관리자 B · O10 QA 조직 검증", () => {
     test.setTimeout(180_000);
     const admin = await signInSeedUser(context, baseURL!, adminCredentials);
     await page.goto("/admin");
-    await expect(page.getByRole("heading", { name: "조직 개요" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "조직 한눈에" })).toBeVisible();
     const departmentName = `E2E-${Date.now()}`;
     await page.getByRole("button", { name: /^(첫 )?부서 만들기$/ }).click();
     let dialog = page.getByRole("dialog");
     await dialog.getByLabel("부서 이름").fill(departmentName);
     await dialog.getByRole("button", { name: /^(첫 )?부서 만들기$/ }).click();
     const row = page.getByRole("row").filter({ hasText: departmentName });
-    await expect(row.getByText("부서장 없음")).toBeVisible();
-    await row.getByRole("button", { name: "첫 부서장 초대" }).click();
+    await expect(row.getByText("팀장 없음")).toBeVisible();
+    await row.getByRole("button", { name: "첫 팀장 초대" }).click();
     dialog = page.getByRole("dialog");
     await dialog.getByLabel("초대할 이메일").fill(requiredEnv("SEED_ORG_ADMIN_EMAIL"));
-    await dialog.getByRole("button", { name: "첫 부서장 초대" }).click();
+    await dialog.getByRole("button", { name: "첫 팀장 초대" }).click();
     await expect(dialog.getByRole("status")).toContainText("본인");
     await dialog.getByLabel("초대할 이메일").fill(requiredEnv("SEED_INVITEE_EMAIL"));
-    await dialog.getByRole("button", { name: "첫 부서장 초대" }).click();
+    await dialog.getByRole("button", { name: "첫 팀장 초대" }).click();
     await expect(dialog.getByLabel("초대 링크")).toBeVisible();
     const invitePath = new URL(await dialog.getByLabel("초대 링크").inputValue()).pathname;
     await dialog.getByRole("button", { name: "닫기" }).click();
 
     // R10: a second email cannot retain another first-lead invitation.
-    await row.getByRole("button", { name: "첫 부서장 초대" }).click();
+    await row.getByRole("button", { name: "첫 팀장 초대" }).click();
     await dialog.getByLabel("초대할 이메일").fill(requiredEnv("SEED_MEMBER_EMAIL"));
-    await dialog.getByRole("button", { name: "첫 부서장 초대" }).click();
+    await dialog.getByRole("button", { name: "첫 팀장 초대" }).click();
     await expect(dialog.getByRole("status")).toContainText("이미 대기 중");
-    await expect(dialog.getByRole("button", { name: "기존 초대 철회 후 새 링크" })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "기존 초대 거둔 뒤 새 링크" })).toBeVisible();
     await dialog.getByRole("button", { name: "취소" }).click();
 
     const overview = await admin.supabase.rpc("admin_overview");
@@ -109,11 +109,11 @@ test.describe("조직 관리자 B · O10 QA 조직 검증", () => {
     await signInSeedUser(context, baseURL!, adminCredentials);
     await page.goto("/admin/members");
     const memberRow = page.getByRole("row").filter({ hasText: departmentName });
-    await expect(memberRow.getByRole("button", { name: "부서장 해제" })).toHaveCount(0);
+    await expect(memberRow.getByRole("button", { name: "팀장 해제" })).toHaveCount(0);
     await memberRow.getByRole("button", { name: "제외", exact: true }).click();
     dialog = page.getByRole("dialog");
     await dialog.getByRole("button", { name: "제외", exact: true }).click();
-    await expect(dialog.getByRole("status")).toContainText("부서장");
+    await expect(dialog.getByRole("status")).toContainText("팀장");
     const demote = await context.request.post(`${baseURL}/api/admin/members/demote`, { data: { deptId, userId: verified.data.session!.user.id } });
     expect((await demote.json()).error).toBe("last_lead");
   });
@@ -140,7 +140,7 @@ test.describe("조직 관리자 B · O10 QA 조직 검증", () => {
     const writes: string[] = [];
     page.on("request", (request) => { if (!["GET", "HEAD", "OPTIONS"].includes(request.method())) writes.push(request.method()); });
     await page.goto("/demo/admin");
-    await expect(page.getByText("게스트 모드 · 합성 데이터 · 읽기 전용", { exact: true })).toBeVisible();
+    await expect(page.getByText("로그인 없이 보기 · 가상 회사 자료 · 읽기 전용", { exact: true })).toBeVisible();
     await page.getByRole("navigation", { name: "조직 관리", exact: true }).getByRole("link", { name: "멤버", exact: true }).click();
     await expect(page.getByRole("heading", { name: "멤버", exact: true })).toBeVisible();
     expect(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(await page.content())).toBe(false);

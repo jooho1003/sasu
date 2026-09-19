@@ -62,7 +62,7 @@ export async function POST(request: Request) {
   const token = typeof body.token === "string" ? body.token.trim() : "";
   if (!token || token.length > 2_048) {
     return noStore(
-      { error: "Notion 내부 통합 토큰을 확인해주세요." },
+      { error: "노션 내부 통합 토큰을 확인해주세요." },
       { status: 400 },
     );
   }
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
   }
   if (!notionTokenEncryptionConfigured()) {
     return noStore(
-      { error: "Notion 연결 설정을 준비 중입니다." },
+      { error: "노션 연결 설정을 준비 중입니다." },
       { status: 503 },
     );
   }
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
   const eligible = await client.rpc("admin_notion_installation");
   if (eligible.error) {
     return noStore(
-      { error: "이 조직에서는 Notion을 연결할 수 없습니다." },
+      { error: "이 조직에서는 노션을 연결할 수 없습니다." },
       { status: 403 },
     );
   }
@@ -124,20 +124,20 @@ export async function POST(request: Request) {
     });
     if (saved === "workspace_conflict") {
       return noStore(
-        { error: "이미 다른 조직에 연결된 Notion 워크스페이스입니다." },
+        { error: "이미 다른 조직에 연결된 노션 부서 메뉴입니다." },
         { status: 409 },
       );
     }
     if (saved !== "saved") {
       return noStore(
-        { error: "Notion 연결을 저장하지 못했습니다." },
+        { error: "노션 연결을 저장하지 못했습니다." },
         { status: 500 },
       );
     }
     return noStore({ ok: true });
   } catch {
     return noStore(
-      { error: "Notion 토큰 또는 워크스페이스를 확인해주세요." },
+      { error: "노션 토큰 또는 부서 메뉴를 확인해주세요." },
       { status: 400 },
     );
   }
@@ -160,7 +160,7 @@ export async function DELETE(request: Request) {
   }
   if (result.error) {
     return noStore(
-      { error: "Notion 연결을 해제하지 못했습니다." },
+      { error: "노션 연결을 해제하지 못했습니다." },
       { status: 500 },
     );
   }

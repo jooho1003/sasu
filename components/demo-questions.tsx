@@ -118,11 +118,11 @@ export function DemoQuestions({
               onClick={() => {
                 setVoicePreview((current) => !current);
                 if (!voicePreview) setPreviewMessage("샘플 음성 입력 체험 중입니다. 마이크·음성은 서버로 전송되지 않습니다.");
-                else { setFreeQuestion(suggested?.question ?? selected.question); setPreviewMessage("샘플 전사 완료: 질문 입력창에 반영했습니다. 가까운 근거 답변 보기를 눌러 확인하세요."); }
+                else { setFreeQuestion(suggested?.question ?? selected.question); setPreviewMessage("예시 음성을 글로 바꿈: 질문 입력창에 반영했습니다. 가까운 근거 답변 보기를 눌러 확인하세요."); }
               }}
             >{voicePreview ? "■ 녹음 끝내기 체험" : "🎙 음성 질문 동작 보기"}</button>
           </div>
-          {voicePreview ? <div className="demo-voice-state" role="status"><span className="status-dot" /> 샘플 음성 입력 중 · 실제 녹음 아님<p>“{suggested?.question ?? selected.question}”</p><p>녹음 끝내기 체험을 누르면 샘플 전사가 입력됩니다.</p></div> : null}
+          {voicePreview ? <div className="demo-voice-state" role="status"><span className="status-dot" /> 샘플 음성 입력 중 · 실제 녹음 아님<p>“{suggested?.question ?? selected.question}”</p><p>녹음 끝내기 체험을 누르면 샘플 받아쓴 글이 입력됩니다.</p></div> : null}
           {previewMessage ? <p role="status">{previewMessage}</p> : null}
         </section>
       </div>
@@ -167,7 +167,7 @@ export function DemoQuestions({
           <div className="citation-block" key={`${selected.id}-${index}`}>
             <span>
               <Icon name="file" size={13} />
-              답변의 근거 · 원문 인용 {index + 1}
+              답변의 근거 · 원문 그대로 {index + 1}
             </span>
             <q>{quote}</q>
           </div>
@@ -182,7 +182,7 @@ export function DemoQuestions({
           </Link>
         ) : null}
         <section className="answer-comparison">
-          <h3>범용 AI 답변 예시 · 사전 작성</h3>
+          <h3>범용 인공지능 답변 예시 · 사전 작성</h3>
           <p>{selected.generic_answer ?? "준비된 범용 답변이 없습니다."}</p>
         </section>
         <div className="answer-footer">

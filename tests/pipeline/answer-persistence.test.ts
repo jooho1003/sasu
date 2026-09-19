@@ -163,7 +163,7 @@ describe("answer publication boundary", () => {
       "2026. 9. 15.",
       "#영업",
       "example.slack.com",
-      "이 채널의 부서 공개 기록만",
+      "이 채널에서 볼 수 있는 부서 기록만",
     ])
       expect(JSON.stringify(message.blocks)).toContain(text);
   });

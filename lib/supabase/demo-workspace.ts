@@ -6,7 +6,7 @@ export async function readDemoWorkspace(dept: string): Promise<DemoWorkspaceData
   const client = createPublicSupabaseClient();
   const [sources, items, decisions] = await Promise.all([
     client.from("sources").select("id,title,kind").eq("dept_id", dept).eq("active", true),
-    client.from("items").select("id,source_id,content,author").eq("dept_id", dept).is("deleted_at", null),
+    client.from("items").select("id,source_id,content,author,spoken_at").eq("dept_id", dept).is("deleted_at", null).order("spoken_at", { ascending: false, nullsFirst: false }),
     client.from("decisions").select("id,outcome,rationale").eq("dept_id", dept).order("decided_at", { ascending: false }),
   ]);
   if (sources.error || items.error || decisions.error) throw new Error("데모 문서 조회 실패");

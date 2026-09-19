@@ -49,7 +49,7 @@ export async function POST(
       body.data.size > 20 * 1024 * 1024)
   )
     return Response.json(
-      { error: "20MB 이하 TXT, MD, CSV, JSON, PDF, DOCX를 선택해 주세요." },
+      { error: "20메가바이트 이하 .txt 파일, .md 파일, .csv 파일, .json 파일, .pdf 파일, .docx 파일를 선택해 주세요." },
       { status: 400 },
     );
   const client = await createServerSupabaseClient();

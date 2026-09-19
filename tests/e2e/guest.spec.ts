@@ -10,7 +10,7 @@ const DEV_DEPT = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 
 test("영업 충돌과 부서 비교 답변의 근거가 의미상 일치한다", async ({ page }) => {
   await page.goto(`/demo/d/${SALES_DEPT}`);
-  await page.locator('a[href*="/cards/"]').first().click();
+  await page.locator('a[href*="/cards/"]:visible').first().click();
   await expect(page.getByText(/이번 12% 인상안.*10% 이상 인상/u)).toBeVisible();
   await page.getByRole("link", { name: /결정과 충돌/u }).click();
   await page.waitForURL(/\/ledger\?from=.*#decision-/u);
@@ -51,14 +51,14 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     expect(departments.length).toBeGreaterThanOrEqual(2);
     for (const dept of departments) {
       await page.goto(dept);
-      const card = page.locator('a[href*="/cards/"]').first();
+      const card = page.locator('a[href*="/cards/"]:visible').first();
       await expect(card).toBeVisible();
       await card.click();
       await page.waitForURL(/\/cards\//u, { waitUntil: "commit" });
       await expect(page.locator("q").first()).toBeVisible();
-      await page.getByRole("link", { name: "원장", exact: true }).click();
+      await page.getByRole("link", { name: "결정 기록", exact: true }).click();
       await page.waitForURL(/\/ledger$/u, { waitUntil: "commit" });
-      await expect(page.getByRole("heading", { level: 1 })).toContainText("원장");
+      await expect(page.getByRole("heading", { level: 1 })).toContainText("결정 기록");
       await page.getByRole("link", { name: "묻기", exact: true }).click();
       await page.waitForURL(/\/ask$/u, { waitUntil: "commit" });
       await expect(page.getByRole("heading", { level: 1 })).toContainText("묻기");

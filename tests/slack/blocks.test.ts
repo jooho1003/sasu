@@ -53,7 +53,7 @@ describe("Slack Block Kit 카드", () => {
     expect(modal.private_metadata).toBe(
       JSON.stringify({ requestId: card.id, status: "decided" }),
     );
-    expect(JSON.stringify(modal)).toContain("결정 사유");
+    expect(JSON.stringify(modal)).toContain("왜 그렇게 정했나요");
     expect(JSON.stringify(modal)).toContain("sasu_rationale");
   });
 

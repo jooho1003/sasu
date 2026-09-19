@@ -1,5 +1,5 @@
 import { registerRetroDraftHandler } from "@/lib/pipeline/retro-draft";
-import { registerRetroPullHandler } from "@/lib/pipeline/retro-pull";
+import { registerRetroPullHandler, scheduleRetroPulls } from "@/lib/pipeline/retro-pull";
 import { runOnce, sweepPendingRows } from "@/lib/jobs";
 import { registerReviewHandlers, sweepReviewParts } from "@/lib/pipeline/review-material";
 import { registerMakeCardHandler } from "@/lib/pipeline/card";
@@ -52,6 +52,7 @@ async function prepareWorker(): Promise<void> {
   await scheduleNotionSync();
   await scheduleNotionPolls();
   await scheduleCardReminders();
+  await scheduleRetroPulls();
 }
 
 // HTTP 정기 호출과 after() 즉시 실행 모두 같은 등록 집합을 사용한다.

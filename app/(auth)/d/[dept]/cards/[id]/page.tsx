@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import CardActions from "@/components/card-actions";
 import { CardReminder } from "@/components/card-reminder";
 import { formatConflictBadge } from "@/lib/conflicts";
+import { label } from "@/lib/labels";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -17,6 +18,7 @@ type CardRow = {
   deadline: string | null;
   assignee_id: string | null;
   status: CardStatus;
+  visibility:"dept"|"leads_only";
 };
 
 type CitationRow = {
@@ -98,7 +100,7 @@ export default async function CardDetailPage({
   const supabase = await createServerSupabaseClient();
   const cardResult = await supabase
     .from("decision_requests")
-    .select("id, title, background, recommendation, deadline, assignee_id, status")
+    .select("id, title, background, recommendation, deadline, assignee_id, status, visibility")
     .eq("id", id)
     .eq("dept_id", membership.deptId)
     .maybeSingle<CardRow>();
@@ -153,7 +155,7 @@ export default async function CardDetailPage({
   ]);
 
   if (itemsResult.error || decisionsResult.error) {
-    throw new Error("인용 원문을 불러오지 못했습니다.");
+    throw new Error("근거가 된 원문을 불러오지 못했습니다.");
   }
 
   const itemMap = new Map(((itemsResult.data ?? []) as ItemRow[]).map((item) => [item.id, item]));
@@ -184,7 +186,7 @@ export default async function CardDetailPage({
         quote: citation.quote,
         author: decision.decided_by_name,
         occurredAt: decision.decided_at,
-        source: `원장 #${decision.id.slice(0, 8)}`,
+        source: `결정 기록 #${decision.id.slice(0, 8)}`,
         href: `/d/${membership.deptId}/ledger#decision-${decision.id}`,
       }];
     }
@@ -214,27 +216,31 @@ export default async function CardDetailPage({
             ) : null}
           </div>
           <h1 className="m-0 text-2xl sm:text-3xl">{card.title}</h1>
-          <p className="m-0 text-sm text-[var(--muted)]" data-meta>
-            마감 · {deadline && !Number.isNaN(deadline.getTime()) ? formatDate(card.deadline) : "마감 미정"}
-          </p>
+          <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-5">
+            <div><dt className="text-muted">마감</dt><dd className="m-0">{deadline&&!Number.isNaN(deadline.getTime())?formatDate(card.deadline):"마감 미정"}</dd></div>
+            <div><dt className="text-muted">결정하는 사람</dt><dd className="m-0">{card.assignee_id===membership.userId?"나 또는 팀장":card.assignee_id?"담당자 또는 팀장":"팀장"}</dd></div>
+            <div><dt className="text-muted">볼 수 있는 사람</dt><dd className="m-0">{label("visibility",card.visibility)}</dd></div>
+            <div><dt className="text-muted">근거</dt><dd className="m-0">{visibleCitations.length}개</dd></div>
+            <div><dt className="text-muted">상태</dt><dd className="m-0">{label("cardStatus",card.status)}</dd></div>
+          </dl>
         </header>
 
         {lacksVerifiedEvidence ? (
           <section className="rounded-2xl bg-[var(--urgent)]/10 p-5">
             <h2 className="m-0 text-xl">근거를 확인하지 못했습니다 · 팀장 검토 필요</h2>
             <p className="mb-0 text-[var(--muted)]">
-              검증된 인용이 없어 카드 본문과 추천 방향을 표시하지 않습니다.
+              원문과 맞는 근거를 찾지 못해 내용을 보여 주지 않습니다. 팀장이 확인한 뒤 다시 만들 수 있습니다.
             </p>
           </section>
         ) : (
           <>
             <section className="grid gap-2">
-              <h2 className="m-0 text-xl">배경</h2>
+              <h2 className="m-0 text-xl">무슨 일인가요</h2>
               <p className="m-0 whitespace-pre-wrap leading-7">{card.background}</p>
             </section>
 
             <section className="grid gap-3">
-              <h2 className="m-0 text-xl">근거 인용</h2>
+              <h2 className="m-0 text-xl">원문 근거</h2>
               <div className="grid gap-3">
                 {visibleCitations.map((citation, index) => (
                   <a
@@ -253,7 +259,7 @@ export default async function CardDetailPage({
 
             {conflicts.length > 0 ? (
               <section className="grid gap-3 rounded-2xl border border-[var(--urgent)]/30 bg-[var(--urgent)]/5 p-5">
-                <h2 className="m-0 text-xl text-[var(--urgent)]">과거 결정과 충돌</h2>
+                <h2 className="m-0 text-xl text-[var(--urgent)]">예전 결정과 다름</h2>
                 {conflicts.map((conflict) => {
                   const prior = decisionMap.get(conflict.prior_decision_id);
                   return (
@@ -268,7 +274,7 @@ export default async function CardDetailPage({
                             {prior.outcome} — {prior.rationale}
                           </q>
                           <Link href={`/d/${membership.deptId}/ledger#decision-${prior.id}`}>
-                            원장 #{prior.id.slice(0, 8)}에서 근거 보기
+                            결정 기록 #{prior.id.slice(0, 8)}에서 근거 보기
                           </Link>
                         </div>
                       ) : null}
@@ -280,7 +286,7 @@ export default async function CardDetailPage({
 
             {card.recommendation ? (
               <section className="grid gap-2">
-                <h2 className="m-0 text-xl">추천 방향</h2>
+                <h2 className="m-0 text-xl">사수의 제안</h2>
                 <p className="m-0 whitespace-pre-wrap leading-7">{card.recommendation}</p>
               </section>
             ) : null}

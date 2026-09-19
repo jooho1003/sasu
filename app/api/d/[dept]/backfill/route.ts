@@ -28,7 +28,7 @@ export async function POST(
   }
 
   if (typeof body.source_id !== "string" || body.source_id.length === 0) {
-    return Response.json({ error: "백필할 Slack 채널을 선택해주세요." }, { status: 400 });
+    return Response.json({ error: "백필할 슬랙 채널을 선택해주세요." }, { status: 400 });
   }
 
   const supabase = await createServerSupabaseClient();
@@ -42,10 +42,10 @@ export async function POST(
     .maybeSingle<{ id: string }>();
 
   if (sourceResult.error) {
-    return Response.json({ error: "Slack 채널을 확인하지 못했습니다." }, { status: 500 });
+    return Response.json({ error: "슬랙 채널을 확인하지 못했습니다." }, { status: 500 });
   }
   if (!sourceResult.data) {
-    return Response.json({ error: "연결된 Slack 채널을 찾을 수 없습니다." }, { status: 404 });
+    return Response.json({ error: "연결된 슬랙 채널을 찾을 수 없습니다." }, { status: 404 });
   }
 
   registerSlackBackfillHandler();

@@ -53,7 +53,7 @@ test.describe("B: QA 조직의 발급·목록·철회", () => {
       await expect(page.getByText(email,{exact:false})).toBeVisible();await expect(page.getByRole("button",{name:/점수순/})).toHaveCount(0);
       await page.screenshot({path:`${evidence}/lead-scores.png`,fullPage:true});
       guest.once("dialog",dialog=>dialog.accept());
-      await guest.getByRole("button",{name:"내 제출 철회"}).click();await expect(guest.getByRole("heading",{name:"제출 철회",exact:true})).toBeVisible();
+      await guest.getByRole("button",{name:"내 제출 취소"}).click();await expect(guest.getByRole("heading",{name:"제출 취소",exact:true})).toBeVisible();
       expect((await service.from("trailer_attempts").select("id").eq("invite_id",invite.invite_id)).data).toEqual([]);
       const purged=await service.from("trailer_invites").select("email_normalized,email_hash,withdrawn_at").eq("id",invite.invite_id).single();expect(purged.data).toMatchObject({email_normalized:null,email_hash:null});expect(purged.data?.withdrawn_at).toBeTruthy();
       expect(await guest.evaluate(()=>({local:localStorage.length,session:sessionStorage.length}))).toEqual({local:0,session:0});

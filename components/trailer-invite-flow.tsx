@@ -94,18 +94,18 @@ export function TrailerInviteFlow({ token }: { token: string }) {
   }
 
   async function withdraw() {
-    if (!window.confirm("제출을 철회하면 복구할 수 없습니다. 철회할까요?") || busy) return;
+    if (!window.confirm("제출을 거두면 복구할 수 없습니다. 거둘까요?") || busy) return;
     setBusy(true);
     setMessage("");
     try {
       const result = await post("/api/t/i/withdraw", { token, email });
       if (!result.response.ok) {
-        setMessage("철회하지 못했습니다. 채용 담당자에게 문의하세요.");
+        setMessage("거두지 못했습니다. 채용 담당자에게 문의하세요.");
         return;
       }
       setState("withdrawn");
     } catch {
-      setMessage("철회하지 못했습니다. 채용 담당자에게 문의하세요.");
+      setMessage("거두지 못했습니다. 채용 담당자에게 문의하세요.");
     } finally {
       setBusy(false);
     }
@@ -129,7 +129,7 @@ export function TrailerInviteFlow({ token }: { token: string }) {
         <input id="candidate-email" className="rounded-xl border border-ink/15 bg-white px-4 py-3" type="email" autoComplete="email" maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} required disabled={busy} />
         <button className="rounded-xl bg-accent px-5 py-3 font-bold text-white disabled:opacity-50" type="submit" disabled={busy}>{busy ? "확인 중…" : "확인"}</button>
       </form>
-      <button type="button" className="text-sm text-urgent underline" disabled={busy || !email.includes("@")} onClick={withdraw}>기존 제출 철회</button>
+      <button type="button" className="text-sm text-urgent underline" disabled={busy || !email.includes("@")} onClick={withdraw}>기존 제출 취소</button>
       {message ? <p className="m-0 text-sm text-urgent" role="alert">{message}</p> : null}
       <p className="m-0 text-xs text-muted">작성 중인 내용은 브라우저에 저장되지 않으며, 새로고침하면 이메일 확인부터 다시 시작합니다.</p>
     </section> : null}
@@ -140,9 +140,9 @@ export function TrailerInviteFlow({ token }: { token: string }) {
         <div><dt className="font-bold">수집 주체</dt><dd className="m-0 text-muted">{invite.org_display_name}</dd></div>
         <div><dt className="font-bold">수집 항목</dt><dd className="m-0 text-muted">이메일, 선택한 결정과 이유 서술, 단서 선택 기록</dd></div>
         <div><dt className="font-bold">이용 목적</dt><dd className="m-0 text-muted">채용 과제의 참고 자료와 면접 질문 준비</dd></div>
-        <div><dt className="font-bold">보관 기간</dt><dd className="m-0 text-muted">제출 후 90일, 이후 자동 파기 · 보관 중 이 링크에서 직접 철회. 링크 이용이 중단되면 채용 담당자에게 삭제 요청</dd></div>
+        <div><dt className="font-bold">보관 기간</dt><dd className="m-0 text-muted">제출 후 90일, 이후 자동 삭제 · 보관 중 이 링크에서 직접 거두기. 링크 이용이 중단되면 채용 담당자에게 삭제 요청</dd></div>
       </dl>
-      <p className="m-0 rounded-2xl bg-bg p-4 text-sm">AI가 계산한 점수는 채용 담당자의 참고 자료이며, 합격 여부를 자동으로 결정하지 않습니다. 결과에 대한 설명이나 이의는 채용 담당자에게 요청할 수 있습니다.</p>
+      <p className="m-0 rounded-2xl bg-bg p-4 text-sm">인공지능이 계산한 점수는 채용 담당자의 참고 자료이며, 합격 여부를 자동으로 결정하지 않습니다. 결과에 대한 설명이나 이의는 채용 담당자에게 요청할 수 있습니다.</p>
       <p className="m-0 text-sm text-muted">동의하지 않아도 불이익이 없습니다. 별도로 받은 공개 체험 링크가 있다면 동의 없이 이용할 수 있습니다.</p>
       <form className="grid gap-4" onSubmit={consent}>
         <label className="flex items-start gap-3 rounded-2xl border border-ink/10 p-4 text-sm"><input className="mt-1" type="checkbox" checked={agreed} onChange={(event) => setAgreed(event.target.checked)} disabled={busy} /><span>위 내용을 확인했고 개인정보 수집·이용에 동의합니다.</span></label>
@@ -154,11 +154,11 @@ export function TrailerInviteFlow({ token }: { token: string }) {
 
     {state === "submitted" && invite ? <section className="grid gap-5 rounded-3xl border border-ink/10 bg-surface p-6 shadow-sm">
       <h1 className="m-0 text-3xl">제출이 끝났습니다</h1><p className="m-0">제출이 끝났습니다. 결과는 채용 담당자가 확인합니다.</p>
-      <button className="rounded-xl border border-urgent px-5 py-3 font-bold text-urgent disabled:opacity-50" type="button" onClick={withdraw} disabled={busy}>{busy ? "철회 중…" : "내 제출 철회"}</button>
+      <button className="rounded-xl border border-urgent px-5 py-3 font-bold text-urgent disabled:opacity-50" type="button" onClick={withdraw} disabled={busy}>{busy ? "거두기 중…" : "내 제출 취소"}</button>
       {invite.apply_url?.startsWith("https://") ? <a className="text-accent underline" href={invite.apply_url} target="_blank" rel="noopener noreferrer">이 회사 공고 보기 →</a> : null}
       {message ? <p className="m-0 text-sm text-urgent" role="alert">{message}</p> : null}
     </section> : null}
 
-    {state === "withdrawn" ? <section className="grid gap-4 rounded-3xl border border-ink/10 bg-surface p-6 shadow-sm"><h1 className="m-0 text-3xl">제출 철회</h1><p className="m-0">철회 요청을 처리했습니다. 이메일이나 링크를 확인할 수 없는 경우 채용 담당자에게 삭제를 요청해 주세요.</p></section> : null}
+    {state === "withdrawn" ? <section className="grid gap-4 rounded-3xl border border-ink/10 bg-surface p-6 shadow-sm"><h1 className="m-0 text-3xl">제출 취소</h1><p className="m-0">거두기 요청을 처리했습니다. 이메일이나 링크를 확인할 수 없는 경우 채용 담당자에게 삭제를 요청해 주세요.</p></section> : null}
   </main>;
 }

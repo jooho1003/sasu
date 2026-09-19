@@ -5,9 +5,9 @@ import { kickWorker } from "@/lib/jobs";
 import { accessible, detail, fail, noStore, readBody, type Context } from "../_shared";
 export async function GET(_request: Request, context: Context) {
   const data = await detail(context); if (data instanceof Response) return data;
-  const { day, activities, revision, confirmed, owner } = data;
+  const { day, activities, revision, confirmed, owner, preset } = data;
   const timedOut = day.status === "drafting" && Date.now() - Date.parse(day.updated_at) > 120000;
-  return Response.json({ day: owner && timedOut ? { ...day, status: "failed", status_reason: "llm_timeout" } : day, activities, revision, confirmed, owner }, { headers: noStore });
+  return Response.json({ day: owner && timedOut ? { ...day, status: "failed", status_reason: "llm_timeout" } : day, activities, revision, confirmed, owner, preset }, { headers: noStore });
 }
 export async function PATCH(request: Request, context: Context) {
   const data = await detail(context); if (data instanceof Response) return data;

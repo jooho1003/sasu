@@ -1,3 +1,4 @@
+import { label } from "@/lib/labels";
 import { CONSENT_SECTIONS } from "@/lib/consent";
 import { formatConflictBadge } from "@/lib/conflicts";
 
@@ -91,7 +92,7 @@ export function buildCardBlocks(card: SlackCardView): SlackBlock[] {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*배경*\n${escapeSlackText(card.background)}`,
+        text: `*무슨 일인가요*\n${escapeSlackText(card.background)}`,
       },
     },
   ];
@@ -101,7 +102,7 @@ export function buildCardBlocks(card: SlackCardView): SlackBlock[] {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*추천 방향*\n${escapeSlackText(card.recommendation)}`,
+        text: `*사수의 제안*\n${escapeSlackText(card.recommendation)}`,
       },
     });
   }
@@ -127,7 +128,7 @@ export function buildCardBlocks(card: SlackCardView): SlackBlock[] {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `:warning: *과거 결정과 충돌*\n${card.conflicts
+        text: `⚠ *예전 결정과 다릅니다*\n${card.conflicts
           .map(
             (conflict) =>
               `• <${conflict.href}|${escapeSlackText(formatConflictBadge(conflict.decided_at))}> — ${escapeSlackText(conflict.explanation)}`,
@@ -144,20 +145,20 @@ export function buildCardBlocks(card: SlackCardView): SlackBlock[] {
         {
           type: "button",
           action_id: "sasu_decide_card",
-          text: { type: "plain_text", text: "결정", emoji: true },
+          text: { type: "plain_text", text: label("decisionAction", "decided"), emoji: true },
           style: "primary",
           value: card.id,
         },
         {
           type: "button",
           action_id: "sasu_defer_card",
-          text: { type: "plain_text", text: "보류", emoji: true },
+          text: { type: "plain_text", text: label("decisionAction", "deferred"), emoji: true },
           value: card.id,
         },
         {
           type: "button",
           action_id: "sasu_reject_card",
-          text: { type: "plain_text", text: "반려", emoji: true },
+          text: { type: "plain_text", text: label("decisionAction", "rejected"), emoji: true },
           style: "danger",
           value: card.id,
         },
@@ -185,12 +186,7 @@ export function buildDecisionModal(args: {
   channelId?: string;
   messageTs?: string;
 }): Record<string, unknown> {
-  const statusLabel =
-    args.status === "decided"
-      ? "결정"
-      : args.status === "deferred"
-        ? "보류"
-        : "반려";
+  const statusLabel = label("decisionAction", args.status);
 
   return {
     type: "modal",
@@ -202,8 +198,8 @@ export function buildDecisionModal(args: {
       ...(args.channelId ? { channelId: args.channelId } : {}),
       ...(args.messageTs ? { messageTs: args.messageTs } : {}),
     }),
-    title: { type: "plain_text", text: "카드 처리" },
-    submit: { type: "plain_text", text: `${statusLabel} 기록` },
+    title: { type: "plain_text", text: "결정 남기기" },
+    submit: { type: "plain_text", text: statusLabel },
     close: { type: "plain_text", text: "취소" },
     blocks: [
       {
@@ -228,7 +224,7 @@ export function buildDecisionModal(args: {
           min_length: 1,
           max_length: 1000,
         },
-        label: { type: "plain_text", text: "결정 사유" },
+        label: { type: "plain_text", text: "왜 그렇게 정했나요" },
       },
     ],
   };

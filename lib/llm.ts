@@ -36,7 +36,7 @@ const GROQ_REQUEST_TIMEOUT_MS = 60_000;
 const FIELD_ORDER_INSTRUCTION =
   "응답 스키마에 citations가 있으면 citations를 먼저 채우고, 그다음 근거(background 또는 reasoning), 결론(answer 또는 recommendation)은 마지막에 작성하세요.";
 export const PLAIN_LANGUAGE_INSTRUCTION =
-  "한국어로 씁니다. 중학교 2학년도 이해할 수 있는 쉬운 낱말과 짧은 문장을 씁니다. 한 문장에는 한 가지 뜻만 담고, 안내·오류·답변은 합니다/하세요 문체를 씁니다. 내부 코드·영문 상태값·근거 없는 계획은 쓰지 않습니다. 원문 인용은 그대로 두고 새로 쓰는 문장만 쉽게 씁니다.";
+  "한국어로 씁니다. 중학교 2학년도 이해할 수 있는 쉬운 낱말을 씁니다. 한 문장은 한 가지 뜻만 담고 40자를 넘기지 않습니다. 안내·오류·답변은 합니다/하세요로 끝냅니다. 어려운 사무 용어와 영어 단어·약어를 풀어 씁니다(원장→결정 기록, 인용→원문 근거, 산정→계산). 내부 코드·영문 상태값·근거 없는 계획은 쓰지 않습니다. 원문 그대로 옮기는 quote 필드는 한 글자도 바꾸지 않고, 새로 쓰는 문장에만 이 규칙을 적용합니다.";
 
 const REFUSAL_TEXT_PATTERNS = [
   /(?:도와|답변|제공|처리).{0,12}(?:드릴|할) 수 없(?:습니다|어요)/,
@@ -71,6 +71,7 @@ export type LlmResult<T> = {
 
 export type LlmErrorCode =
   | "llm_timeout"
+  | "llm_budget_exceeded"
   | "llm_refusal"
   | "schema_invalid"
   | "rate_limited"
@@ -207,6 +208,10 @@ function sanitizedError(error: unknown): LlmGatewayError {
   }
 
   if (error instanceof APIError) {
+    const payload = isObject(error.error) && isObject(error.error.error) ? error.error.error : error.error;
+    if (isObject(payload) && payload.code === "spend_limit_reached") {
+      return new LlmGatewayError("인공지능 사용 한도에 도달했습니다. 관리자에게 한도 확인을 요청하세요.", "llm_budget_exceeded");
+    }
     if (error.status === 429) {
       return new RateLimitedError();
     }

@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
+import { RETRO_PRESETS, RETRO_PRESET_COPY } from "@/lib/retro/presets";
+import { LABELS } from "@/lib/labels";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { RetroDayRow } from "@/lib/contracts";
 import { localDate, parseRetroBundle } from "@/lib/retro/bundle";
 
-const statusLabels = { collecting: "수집 중", drafting: "초안 생성 중", draft: "초안", needs_review: "검토 필요", confirmed: "확정", failed: "실패" };
-const visibilityLabels = { self: "본인만", dept: "부서 공개", leads_only: "부서장 전용" };
+const statusLabels = LABELS.retroStatus;
+const visibilityLabels = { self: "본인만", dept: "부서 공개", leads_only: "팀장 전용" };
 export function RetroTimeline({ dept, userId, initialDays, readOnly = false, onSelect }: { dept: string; userId: string; initialDays?: RetroDayRow[]; readOnly?: boolean; onSelect?: (id: string) => void }) {
   const router = useRouter();
   const [days, setDays] = useState(initialDays ?? []), [loading, setLoading] = useState(!initialDays), [message, setMessage] = useState(""), [busy, setBusy] = useState(false);
@@ -24,7 +26,7 @@ export function RetroTimeline({ dept, userId, initialDays, readOnly = false, onS
   async function create(file?: File) {
     if (busy || readOnly) return; setBusy(true); setMessage("");
     try {
-      if (file && (file.size > 1048576 || !file.name.endsWith(".json"))) throw new Error("1MB 이하 JSON 파일을 선택해 주세요.");
+      if (file && (file.size > 1048576 || !file.name.endsWith(".json"))) throw new Error("1메가바이트 이하 .json 파일을 선택해 주세요.");
       const bundle = file ? parseRetroBundle(JSON.parse(await file.text())) : null;
       if (bundle && !bundle.ok) throw new Error("회고 파일의 날짜·형식·한도를 확인해 주세요.");
       const value = bundle?.ok ? bundle.bundle : null;
@@ -34,9 +36,17 @@ export function RetroTimeline({ dept, userId, initialDays, readOnly = false, onS
     } catch (error) { setMessage(error instanceof Error && !error.message.includes("JSON") ? error.message : "회고 파일을 확인해 주세요."); }
     finally { setBusy(false); }
   }
+  async function pullToday() {
+    if(busy||readOnly)return;setBusy(true);setMessage("");
+    try {
+      const response=await fetch(`/api/d/${dept}/retros/connections/pull`,{method:"POST",signal:AbortSignal.timeout(20000)});
+      const data=await response.json();if(!response.ok)throw new Error(data.error||"가져오기를 요청하지 못했습니다.");
+      setMessage(data.queued?`${data.queued}개 연결에 가져오기를 요청했습니다. 잠시 뒤 목록을 새로고침해 주세요.`:"설정에서 개인 계정을 먼저 연결해 주세요.");
+    }catch(error){setMessage(error instanceof Error?error.message:"가져오기를 요청하지 못했습니다.");}finally{setBusy(false);}
+  }
   const visible = days.filter(d => (!mine || d.user_id === userId) && (!person || person === d.user_id) && (!topic || d.topics.includes(topic)) && (!from || d.retro_date >= from) && (!to || d.retro_date <= to) && `${d.title ?? ""} ${d.topics.join(" ")}`.includes(search));
   const names = [...new Map(days.map(d => [d.user_id, d.display_name ?? "작성자"])).entries()];
-  const topics = [...new Set(days.flatMap(d => d.topics))];
+  const topics = [...new Set([...RETRO_PRESETS.map(key => RETRO_PRESET_COPY[key].label), ...days.flatMap(d => d.topics)])];
   const [week] = useState(() => localDate(new Date(Date.now() - 7 * 86400000), "Asia/Seoul"));
   const weekly = days.filter(d => d.retro_date >= week);
   const counts = new Map<string, number>(); weekly.flatMap(d => d.topics).forEach(t => counts.set(t, (counts.get(t) ?? 0) + 1));
@@ -44,8 +54,9 @@ export function RetroTimeline({ dept, userId, initialDays, readOnly = false, onS
   return <div className="grid gap-6">
     <section className="grid gap-4 rounded-2xl border border-ink/10 bg-surface p-5" aria-label="오늘 회고 만들기" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); if (e.dataTransfer.files[0]) void create(e.dataTransfer.files[0]); }}>
       <h2 className="m-0 text-xl">오늘 회고 만들기</h2><p className="m-0 text-sm text-muted">로컬 수집기가 만든 파일을 여기에 놓거나 사수 안의 내 활동만 모아 시작하세요.</p>
-      <div className="flex flex-wrap gap-3"><label className="grid gap-2 text-sm">회고 파일 업로드<input aria-label="회고 파일 업로드" type="file" accept=".json,application/json" disabled={busy || readOnly} onChange={e => { if (e.target.files?.[0]) void create(e.target.files[0]); e.target.value = ""; }} /></label><button className={inputClass} type="button" disabled={busy || readOnly} title={readOnly ? "체험판에서는 만들 수 없어요" : undefined} onClick={() => void create()}>사수 활동만으로 만들기</button></div>
+      <div className="flex flex-wrap gap-3"><label className="grid gap-2 text-sm">회고 파일 업로드<input aria-label="회고 파일 업로드" type="file" accept=".json,application/json" disabled={busy || readOnly} onChange={e => { if (e.target.files?.[0]) void create(e.target.files[0]); e.target.value = ""; }} /></label><button className={inputClass} type="button" disabled={busy || readOnly} title={readOnly ? "체험판에서는 만들 수 없습니다" : undefined} onClick={() => void create()}>사수 활동만으로 만들기</button></div>
       <Link href={readOnly ? "/demo/features" : `/d/${dept}/settings#retro-collector`} className="text-sm text-accent underline">수집기 설정 안내</Link>
+      <div className="flex flex-wrap gap-3"><button className={inputClass} disabled={busy||readOnly} onClick={()=>void pullToday()}>연결한 곳에서 오늘 기록 가져오기</button><button className={inputClass} disabled={busy||readOnly} onClick={()=>void load()}>목록 새로고침하기</button><Link className="self-center text-sm text-accent underline" href={readOnly?"/demo/features":`/d/${dept}/settings#retro-connectors`}>회고 기록 연결하기</Link></div>
     </section>
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem]">
       <section className="grid content-start gap-5" aria-label="회고 타임라인">
@@ -56,7 +67,7 @@ export function RetroTimeline({ dept, userId, initialDays, readOnly = false, onS
           <label className="grid gap-1 text-sm">시작일<input className={inputClass} type="date" value={from} onChange={e => setFrom(e.target.value)} /></label><label className="grid gap-1 text-sm">종료일<input className={inputClass} type="date" value={to} onChange={e => setTo(e.target.value)} /></label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={mine} onChange={e => setMine(e.target.checked)} />내 회고만</label>
         </div>
         {message ? <p role="alert">{message}</p> : null}
-        {loading ? <p role="status">회고를 불러오는 중입니다.</p> : !visible.length ? <p>아직 회고가 없어요. 수집기로 오늘 활동을 모아 보세요.</p> : visible.map(d => <article key={d.id} className="grid gap-3 rounded-2xl border border-ink/10 bg-surface p-5"><p className="m-0 text-sm text-muted">{d.retro_date} · {d.display_name ?? "작성자"} · {visibilityLabels[d.visibility]}</p><h2 className="m-0 text-xl">{onSelect ? <button className="text-left text-accent" onClick={() => onSelect(d.id)}>{d.title || "회고 초안"}</button> : <Link href={`/d/${dept}/retros/${d.id}`} className="text-accent">{d.title || "회고 초안"}</Link>}</h2><p className="m-0 text-sm">{statusLabels[d.status]} · 활동 {d.activity_count}건</p><div className="flex flex-wrap gap-2">{d.topics.map(t => <span key={t} className="rounded-full bg-accent/10 px-3 py-1 text-xs">{t}</span>)}</div></article>)}
+        {loading ? <p role="status">회고를 불러오는 중입니다.</p> : !visible.length ? <p>아직 회고가 없습니다. 오늘 활동을 모아 보세요.</p> : visible.map(d => <article key={d.id} className="grid gap-3 rounded-2xl border border-ink/10 bg-surface p-5"><p className="m-0 text-sm text-muted">{d.retro_date} · {d.display_name ?? "작성자"} · {visibilityLabels[d.visibility]}</p><h2 className="m-0 text-xl">{onSelect ? <button className="text-left text-accent" onClick={() => onSelect(d.id)}>{d.title || "회고 초안"}</button> : <Link href={`/d/${dept}/retros/${d.id}`} className="text-accent">{d.title || "회고 초안"}</Link>}</h2><p className="m-0 text-sm">{statusLabels[d.status]} · 활동 {d.activity_count}건</p><div className="flex flex-wrap gap-2">{d.topics.map(t => <span key={t} className="rounded-full bg-accent/10 px-3 py-1 text-xs">{t}</span>)}</div></article>)}
       </section>
       <aside className="h-fit rounded-2xl bg-ink/5 p-5"><h2 className="mt-0 text-lg">이번 주 주제</h2>{[...counts].sort((a,b) => b[1]-a[1]).slice(0,10).map(([t,n]) => <p key={t}>{t} · {n}</p>)}<h2 className="text-lg">작성자별 확정 일수</h2>{names.map(([id,name]) => <p key={id}>{name} · {new Set(weekly.filter(d => d.user_id===id && d.confirmed_revision!==null).map(d=>d.retro_date)).size}일</p>)}</aside>
     </div>

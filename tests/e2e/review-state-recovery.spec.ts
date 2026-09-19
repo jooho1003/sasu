@@ -73,7 +73,7 @@ for (const width of [1440, 390]) {
     await page.getByLabel("구간 2 텍스트").fill("사용자 메모");
     await page.getByRole("button", { name: "원본 파일만 삭제", exact: true }).click();
     await page.getByRole("button", { name: "삭제 실행", exact: true }).click();
-    await expect(page.getByText("원본 삭제됨", { exact: true })).toBeVisible();
+    await expect(page.getByText("원본이 지워졌거나 보관 기한이 지났습니다", { exact: true })).toBeVisible();
     await expect(page.getByLabel("검토 제목")).toHaveValue("저장 전 제목");
     await expect(page.getByLabel("구간 1 텍스트")).toHaveValue("저장 전 교정");
     await expect(page.getByLabel("구간 2 텍스트")).toHaveValue("사용자 메모");
@@ -114,7 +114,7 @@ test("검토 복구: 다른 창의 새 버전을 조회해도 편집 기준 버�
   await page.getByLabel("구간 1 텍스트").fill("이 창의 교정");
   await page.getByRole("button", { name: "원본 파일만 삭제", exact: true }).click();
   await page.getByRole("button", { name: "삭제 실행", exact: true }).click();
-  await expect(page.getByText("원본 삭제됨", { exact: true })).toBeVisible();
+  await expect(page.getByText("원본이 지워졌거나 보관 기한이 지났습니다", { exact: true })).toBeVisible();
   await expect(page.getByLabel("구간 1 텍스트")).toHaveValue("이 창의 교정");
   await page.getByRole("button", { name: "초안 저장", exact: true }).click();
   await expect(page.getByRole("alert").filter({ hasText: "다른 창에서 자료가 변경됐습니다" })).toBeVisible();

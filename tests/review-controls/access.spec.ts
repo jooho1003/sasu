@@ -86,8 +86,8 @@ test("원본 보존 기간 선택은 Slack 보존값과 별도 요청", async ({
     await route.fulfill({ json: { ok: true } });
   });
   await page.goto("/?view=retention");
-  await page.getByLabel("확정 후 원본 보존 기간").selectOption("30");
-  await page.getByRole("button", { name: "원본 보존 기간 저장" }).click();
-  await expect(page.getByRole("status")).toContainText("원본 보존 기간을 저장");
-  await expect(page.getByLabel("확정 후 원본 보존 기간")).toHaveValue("30");
+  await page.getByLabel("확정 후 원본 보관 기간").selectOption("30");
+  await page.getByRole("button", { name: "원본 보관 기간 저장" }).click();
+  await expect(page.getByRole("status")).toContainText("원본 보관 기간을 저장");
+  await expect(page.getByLabel("확정 후 원본 보관 기간")).toHaveValue("30");
 });

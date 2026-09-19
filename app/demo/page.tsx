@@ -37,9 +37,9 @@ const departmentCopy: Record<
     description: "디자인의 기준과 피드백, 그 뒤의 이유를 기억합니다.",
     example: "팀의 디자인 원칙은 어떤 결정으로 이어질까요?",
   },
-  "인사팀 사수": { icon: "people", description: "채용·온보딩의 기준과 담당자를 확인합니다.", example: "신입의 첫 주에 무엇을 준비해야 할까요?" },
+  "인사팀 사수": { icon: "people", description: "채용·첫 안내의 기준과 담당자를 확인합니다.", example: "신입의 첫 주에 무엇을 준비해야 할까요?" },
   "프론트개발팀 사수": { icon: "code", description: "화면 상태·접근성·실패 복구의 근거를 연결합니다.", example: "제출 실패 때 사용자의 입력을 어떻게 지킬까요?" },
-  "백엔드개발팀 사수": { icon: "code", description: "권한·멱등성·동시성의 결정 근거를 확인합니다.", example: "중복 제출과 타 부서 접근을 어떻게 막을까요?" },
+  "백엔드개발팀 사수": { icon: "code", description: "권한·같은 요청은 한 번만 처리·여러 요청을 함께 처리의 결정 근거를 확인합니다.", example: "중복 제출과 타 부서 접근을 어떻게 막을까요?" },
 };
 // 서버 전용 기능 플래그와 데모 링크를 배포 런타임 기준으로 일치시킨다.
 export const dynamic = "force-dynamic";
@@ -99,7 +99,7 @@ export default async function DemoLandingPage({
             가상 회사 온새미로에 오신 걸 환영합니다.
             <br />
             {reviewerConnected
-              ? "부서장·조직 관리자 권한으로 모든 기능을 안전하게 확인하세요."
+              ? "팀장·조직 관리자 권한으로 모든 기능을 안전하게 확인하세요."
               : "함께 일할 부서를 고르고, 사수가 결정을 돕는 과정을 둘러보세요."}
           </p>
           <div className="demo-steps" aria-label="데모 체험 순서">
@@ -122,7 +122,7 @@ export default async function DemoLandingPage({
               <span className="demo-account-avatar">심</span>
               <div>
                 <strong>심사위원 데모 계정으로 접속했습니다</strong>
-                <p>데모 부서의 부서장 · 조직 관리자 · 합성 데이터 전용</p>
+                <p>데모 부서의 팀장 · 조직 관리자 · 가상 회사 자료 전용</p>
               </div>
             </div>
             <div className="demo-account-guards" aria-label="데모 안전 장치">
@@ -155,7 +155,7 @@ export default async function DemoLandingPage({
               <div>
                 <p className="eyebrow">5분 셀프 시연</p>
                 <h2 id="demo-capabilities-heading">전체 기능을 순서대로 확인하세요</h2>
-                <Link className="text-link" href="/demo/features">전체 기능 지도 열기 →</Link>
+                <Link className="text-link" href="/demo/features">기능 한눈에 보기 열기 →</Link>
                 <p>앞의 네 기능이 핵심 이야기입니다. 나머지는 관심 있는 운영 기능부터 자유롭게 열어보세요.</p>
               </div>
               <Link className="button button-primary" href={DEMO_FEATURES[0].href}>
@@ -170,7 +170,7 @@ export default async function DemoLandingPage({
                     <span className="demo-feature-icon"><Icon name={featureIcons[feature.key]} size={19} /></span>
                     <span className="demo-feature-copy">
                       <strong>{feature.title}</strong>
-                      <small>{feature.audience} · {feature.mode === "live_read" ? "시드 결과 확인" : "안전 체험"}</small>
+                      <small>{feature.audience} · {feature.mode === "live_read" ? "보기만 가능" : "눌러 볼 수 있음"}</small>
                       <span>{feature.description}</span>
                     </span>
                     <Icon name="chevron" size={16} />
@@ -182,7 +182,7 @@ export default async function DemoLandingPage({
         )}
         <section className="demo-capabilities" aria-label="부서별 신입 채용 미션">
           <h2>다섯 팀의 신입 미션을 체험하세요</h2>
-          <p>기획·인사·프론트개발·백엔드개발·디자인 과제의 진행 기록과 결과 제출을 브라우저 안에서 확인합니다. 합성 자료 전용이며 서버에 제출하지 않습니다.</p>
+          <p>기획·인사·프론트개발·백엔드개발·디자인 과제의 진행 기록과 결과 제출을 브라우저 안에서 확인합니다. 가상 회사 자료 전용이며 서버에 제출하지 않습니다.</p>
           <Link className="button button-primary" href="/demo/hiring">부서별 채용 미션 시작 →</Link>
         </section>
         {error || departments.length === 0 ? (
@@ -247,7 +247,7 @@ export default async function DemoLandingPage({
           ) : null}
         </div>
         <footer className="demo-footer">
-          <p>{reviewerConnected ? "자동 로그인된 심사 계정 · 영속 변경 없는 안전 체험" : "가입 없이 체험"} · 회사·인물·대화는 모두 합성 데이터입니다.</p>
+          <p>{reviewerConnected ? "자동 로그인된 심사 계정 · 눌러 본 결과는 저장되지 않습니다" : "가입 없이 체험"} · 회사·인물·대화는 모두 가상 회사 자료입니다.</p>
           <div className="flex flex-wrap gap-4">
             <Link href="/login">우리 팀으로 로그인</Link>
             {links.pilotContactUrl ? (

@@ -154,7 +154,7 @@ export async function GET(
 
   if (decisionsResult.error || membersResult.error || evidenceResult.error) {
     return Response.json(
-      { error: "결정 원장을 불러오지 못했습니다. 잠시 후 다시 시도해주세요." },
+      { error: "결정 기록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요." },
       { status: 500 },
     );
   }
@@ -211,7 +211,7 @@ export async function GET(
     priorConflictsResult.error
   ) {
     return Response.json(
-      { error: "원장의 근거를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." },
+      { error: "결정 기록의 근거를 불러오지 못했습니다. 잠시 후 다시 시도해주세요." },
       { status: 500 },
     );
   }
@@ -247,7 +247,7 @@ export async function GET(
 
   if (citationItemsResult.error || citedDecisionsResult.error) {
     return Response.json(
-      { error: "인용 원문을 불러오지 못했습니다. 잠시 후 다시 시도해주세요." },
+      { error: "근거가 된 원문을 불러오지 못했습니다. 잠시 후 다시 시도해주세요." },
       { status: 500 },
     );
   }
@@ -303,7 +303,7 @@ export async function GET(
         quote: citation.quote,
         author: cited.decided_by_name,
         occurred_at: cited.decided_at,
-        source: `원장 #${cited.id.slice(0, 8)}`,
+        source: `결정 기록 #${cited.id.slice(0, 8)}`,
         href: `/d/${membership.deptId}/ledger#decision-${cited.id}`,
       };
     }
@@ -397,6 +397,10 @@ export async function GET(
     evidenceOptions: evidenceItems.map((item) => ({
       id: item.id,
       label: `${item.author ?? "작성자 미상"} · ${item.content.slice(0, 80)}`,
+      sourceId: JSON.stringify(Array.isArray(item.sources)?[item.sources[0]?.kind,item.sources[0]?.external_id]:[item.sources?.kind,item.sources?.external_id]),
+      source: (Array.isArray(item.sources)?item.sources[0]?.title:item.sources?.title)??"부서 기록",
+      content:item.content,
+      at:item.spoken_at,
     })),
   });
 }

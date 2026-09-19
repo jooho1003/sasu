@@ -162,7 +162,7 @@ async function authorizedCard(
     .eq("slack_team_id", currentSlackWorkspace()?.teamId ?? "")
     .maybeSingle<MemberRow>();
   if (memberResult.error || !memberResult.data) {
-    throw new SlackInteractionError("Slack 계정이 이 부서에 연결되어 있지 않습니다.");
+    throw new SlackInteractionError("슬랙 계정이 이 부서에 연결되어 있지 않습니다.");
   }
 
   const member = memberResult.data;
@@ -218,7 +218,7 @@ async function recordDecision(args: {
     throw new SlackInteractionError("결정 결과를 입력해주세요.", "sasu_outcome");
   }
   if (args.status === "decided" && !rationale) {
-    throw new SlackInteractionError("결정 사유를 입력해주세요.");
+    throw new SlackInteractionError("왜 그렇게 정했나요를 입력해주세요.");
   }
   if (outcome.length > 1_000 || rationale.length > 1_000) {
     throw new SlackInteractionError("입력은 1,000자 이내로 작성해주세요.");
@@ -255,7 +255,7 @@ async function recordDecision(args: {
   if (result.duplicate && result.decision_id && result.decided_by_name) {
     return {
       decisionId: result.decision_id,
-      message: `이미 ${result.decided_by_name}이(가) ${formatDecisionTime(result.decided_at)}에 결정했습니다 → 원장 #${result.decision_id.slice(0, 8)}`,
+      message: `이미 ${result.decided_by_name}이(가) ${formatDecisionTime(result.decided_at)}에 결정했습니다 → 결정 기록 #${result.decision_id.slice(0, 8)}`,
       created: false,
       origin: null,
     };
@@ -264,19 +264,19 @@ async function recordDecision(args: {
   if (args.status !== "decided") {
     return {
       decisionId: null,
-      message: args.status === "deferred" ? "카드를 보류했습니다." : "카드를 반려했습니다.",
+      message: args.status === "deferred" ? "카드를 미뤘습니다." : "카드를 돌려보냈습니다.",
       created: true,
       origin: await originThreadForCard(client, card),
     };
   }
 
   if (!result.decision_id) {
-    throw new SlackInteractionError("결정을 원장에 기록하지 못했습니다.");
+    throw new SlackInteractionError("결정을 기록에 남기지 못했습니다.");
   }
 
   return {
     decisionId: result.decision_id,
-    message: "결정을 원장에 기록했습니다.",
+    message: "결정을 기록에 남겼습니다.",
     created: true,
     origin: await originThreadForCard(client, card),
   };
@@ -336,7 +336,7 @@ async function handleConsentAction(
     ? "동의 상태를 확인하지 못했습니다. 잠시 후 다시 시도해주세요."
     : result.data === true
       ? "동의가 기록되었습니다. 이제부터 연결된 채널의 내 발언이 사수에 저장됩니다."
-      : "Slack 계정이 사수 멤버십에 연결되어 있지 않습니다. 부서 세팅에서 계정 연결이 필요합니다.";
+      : "슬랙 계정이 사수 부서 소속에 연결되어 있지 않습니다. 부서 설정에서 계정 연결이 필요합니다.";
   const channel = payload.container?.channel_id;
   const messageTs = payload.container?.message_ts;
 
@@ -406,7 +406,7 @@ async function handleViewSubmission(payload: InteractionPayload): Promise<Respon
             blocks: [
               {
                 type: "section",
-                text: { type: "mrkdwn", text: `✅ ${result.message}\n<${ledgerHref}|원장에서 보기>` },
+                text: { type: "mrkdwn", text: `✅ ${result.message}\n<${ledgerHref}|결정 기록에서 보기>` },
               },
             ],
           }),
@@ -415,7 +415,7 @@ async function handleViewSubmission(payload: InteractionPayload): Promise<Respon
                 postMessage({
                   channel: result.origin.channelId,
                   thread_ts: result.origin.messageTs,
-                  text: `✅ ${result.message} · <${ledgerHref}|원장에서 보기>`,
+                  text: `✅ ${result.message} · <${ledgerHref}|결정 기록에서 보기>`,
                   blocks: [],
                 }),
               ]

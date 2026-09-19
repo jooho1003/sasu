@@ -184,10 +184,10 @@ export function NotionSourceList({
         자동 수집된 문서 {payload ? `${payload.total}개` : ""}
       </summary>
       <p className="m-0 text-sm text-[var(--muted)]">
-        자동 발견된 Notion 문서를 200개씩 표시합니다. 제외한 문서는 다시 발견되어도 복구되지 않습니다.
+        자동 발견된 노션 문서를 200개씩 표시합니다. 제외한 문서는 다시 발견되어도 복구되지 않습니다.
       </p>
       {role === "lead" && payload?.roots.length ? (
-        <div className="grid gap-3" aria-label="Notion 수집 범위별 카드 후보 설정">
+        <div className="grid gap-3" aria-label="노션 수집 범위별 카드 후보 설정">
           {payload.roots.map((root) => (
             <div className="rounded-xl border border-black/10 p-4" key={root.id}>
               <label className="flex items-start gap-3 text-sm font-bold">
@@ -209,7 +209,7 @@ export function NotionSourceList({
                   }}
                   type="checkbox"
                 />
-                <span>{root.top_title ?? "Notion 수집 범위"} · 카드 후보로도 사용</span>
+                <span>{root.top_title ?? "노션 수집 범위"} · 카드 후보로도 사용</span>
               </label>
               {root.card_candidates ? (
                 <p className="mb-0 mt-2 text-sm text-[var(--urgent)]" role="alert">
@@ -227,7 +227,7 @@ export function NotionSourceList({
       <div className="grid gap-3">
         {sources.map((source) => {
           const state = sourceState(source);
-          const title = source.title ?? "제목 없는 Notion 문서";
+          const title = source.title ?? "제목 없는 노션 문서";
           const errorCode = source.last_error === "notion_excluded" ? null : source.last_error;
           const error = errorCode ? ERROR_GUIDANCE[errorCode] : null;
           return (
@@ -241,7 +241,7 @@ export function NotionSourceList({
                   <strong className="break-words">{title}</strong>
                   <span className={`rounded-full px-2 py-1 text-xs font-bold ${state.className}`}>{state.label}</span>
                   <span className="text-xs text-[var(--muted)]">
-                    {source.visibility === "leads_only" ? "부서장만" : "부서 전체"}
+                    {source.visibility === "leads_only" ? "팀장만" : "부서 전체"}
                   </span>
                 </div>
                 <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
@@ -289,7 +289,7 @@ export function NotionSourceList({
                       onClick={() => void mutate(
                         source.id,
                         { action: "restrict", source_id: source.id },
-                        "공개 범위를 부서장만으로 좁혔습니다.",
+                        "팀장만 볼 수 있도록 바꿨습니다.",
                         (current) => ({
                           ...current,
                           sources: current.sources.map((item) => item.id === source.id ? { ...item, visibility: "leads_only" } : item),
@@ -297,7 +297,7 @@ export function NotionSourceList({
                       )}
                       type="button"
                     >
-                      부서장만으로
+                      팀장만으로
                     </button>
                     <button
                       className="button button-small"

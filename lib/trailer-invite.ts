@@ -1,3 +1,4 @@
+import { LABELS } from "@/lib/labels";
 import {
   TrailerInviteEmail,
   TrailerInviteOpen,
@@ -10,17 +11,7 @@ import { validateScenario } from "@/lib/trailer";
 export const TRAILER_INVITE_CONSENT_VERSION = "1";
 
 const EMAIL_SPLITTER = /[\s,]+/;
-const STATUS_LABELS: Record<TrailerInviteRowType["status"], string> = {
-  pending: "미열람",
-  opened: "열람",
-  consented: "동의",
-  submitted: "제출",
-  scored: "검토 완료",
-  expired: "만료",
-  revoked: "철회",
-  withdrawn: "본인 철회",
-  purged: "파기 완료",
-};
+const STATUS_LABELS = LABELS.inviteStatus;
 
 export function normalizeInviteEmails(raw: string): { emails: string[]; invalid: string[] } {
   const values = raw.split(EMAIL_SPLITTER).filter(Boolean);

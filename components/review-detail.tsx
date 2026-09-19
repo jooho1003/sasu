@@ -312,7 +312,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
         <div>
           <Link href={`/d/${deptId}/reviews`}>← 자료 목록</Link>
           <p className="eyebrow">
-            {review.kind === "audio" ? "음성 전사" : "문서 읽기 결과"} · 버전{" "}
+            {review.kind === "audio" ? "음성 받아쓴 글" : "문서 읽기 결과"} · 버전{" "}
             {review.revision}
           </p>
           <h1>{review.title}</h1>
@@ -391,7 +391,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                   {p.error_code === "timeout"
                     ? "처리 시간이 초과됐습니다."
                     : p.error_code === "empty_extraction"
-                      ? "읽을 수 있는 텍스트가 없습니다. 스캔 PDF는 OCR이 필요할 수 있습니다."
+                      ? "읽을 수 있는 텍스트가 없습니다. 스캔 .pdf 파일은 글자 읽기가 필요할 수 있습니다."
                       : p.error_code === "file_unavailable"
                         ? "보관 파일을 찾지 못했습니다."
                         : "변환을 완료하지 못했습니다."}
@@ -433,7 +433,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
           </p>
         ) : (
           <p className="field-help">
-            표·다단 문서의 순서와 누락을 원본으로 확인해 주세요. OCR과 추출기가
+            표·다단 문서의 순서와 빠짐을 원본으로 확인해 주세요. 글자 읽기와 추출기가
             제공하지 않은 위치 정보는 생성하지 않습니다.
           </p>
         )}
@@ -455,7 +455,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
               원본 {review.kind === "audio" ? "듣기" : "열기"}
             </button>
           ) : (
-            <span>{originalUnavailable ? "원본 삭제됨 또는 보존 기한 만료" : "조직에서 원본 내려받기를 허용하지 않았습니다"}</span>
+            <span>{originalUnavailable ? "원본이 지워졌거나 보관 기한이 지났습니다" : "조직에서 원본 내려받기를 허용하지 않았습니다"}</span>
           )}
         </div>
         {originalUrl ? (
@@ -471,9 +471,9 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             </a>
           )
         ) : (
-          <p>원본은 동의한 부서장만 열 수 있으며 접근 허가가 기록됩니다.</p>
+          <p>원본은 동의한 팀장만 열 수 있으며 접근 허가가 기록됩니다.</p>
         )}
-        {originalExpiresAt ? <p className="field-help">원본 보존 기한: {new Date(originalExpiresAt).toLocaleDateString("ko-KR")} · 기한 후 전사는 남고 원본 재생·재추출은 중단됩니다.</p> : null}
+        {originalExpiresAt ? <p className="field-help">원본 보존 기한: {new Date(originalExpiresAt).toLocaleDateString("ko-KR")} · 기한 후 받아쓴 글은 남고 원본 재생·재추출은 중단됩니다.</p> : null}
       </section>
       {review.candidate_sections ? (
         <section className="panel review-notice" aria-label="재추출 검토">
@@ -483,7 +483,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             여부를 결정하세요.
           </p>
           <details>
-            <summary>새 추출문 전체 보기</summary>
+            <summary>새 꺼낸 글 전체 보기</summary>
             <pre className="review-original-text">
               {review.candidate_sections.map((s) => s.text).join("\n\n")}
             </pre>
@@ -494,7 +494,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
               disabled={busy || dirty}
               onClick={() => void perform(() => command("use_extraction"))}
             >
-              새 추출문으로 교체
+              새로 읽은 글로 바꾸기
             </button>
             <button
               className="button button-ghost"
@@ -506,7 +506,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
           </div>
         </section>
       ) : null}
-      <section className="panel review-editor" aria-label="추출문 편집">
+      <section className="panel review-editor" aria-label="꺼낸 글 편집">
         <div className="review-list-heading">
           <h2>전문 검토·편집</h2>
           <input
@@ -540,8 +540,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                     : s.edited || s.text !== s.original_text
                       ? "수정됨"
                       : s.origin === "transcribed"
-                        ? "음성 전사"
-                        : "추출문"}
+                        ? "음성 받아쓴 글"
+                        : "꺼낸 글"}
                 </span>
                 <span>{s.location ?? "위치 정보 없음"}</span>
                 {s.start_seconds !== null ? (
@@ -664,8 +664,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             disabled={dirty || processing}
             onChange={(e) => setChecked(e.target.checked)}
           />
-          전문과 누락·오류를 확인했습니다. 이 버전을{" "}
-          {review.visibility === "dept" ? "부서" : "부서장 전용"} 업무 근거로
+          전문과 빠짐·오류를 확인했습니다. 이 버전을{" "}
+          {review.visibility === "dept" ? "부서" : "팀장 전용"} 업무 근거로
           확정합니다.
         </label>
         <div className="review-actions">
@@ -698,8 +698,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
           ) : null}
         </div>
         <p className="field-help">
-          직접 추가한 문장은 원래 발언과 구분합니다. 이전 원장에 기록된 결정과
-          인용은 정정·삭제 후에도 보존됩니다.
+          직접 추가한 문장은 원래 발언과 구분합니다. 이전 기록된 결정과
+          원문 근거는 결정 고치기·삭제 후에도 보존됩니다.
         </p>
       </section>
       <section className="panel" aria-label="수정 이력 및 관리">
@@ -715,10 +715,10 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             className="button button-secondary"
             href={`${endpoint}?format=txt`}
           >
-            TXT 다운로드
+            .txt 파일 다운로드
           </a>
           <a className="button button-secondary" href={`${endpoint}?format=md`}>
-            MD 다운로드
+            .md 파일 다운로드
           </a>
           <button
             className="button button-ghost"
@@ -771,8 +771,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
           <div className="review-confirm" role="alert">
             <p>
               {destructive === "delete"
-                ? "원본·전사·수정 이력과 검색 근거를 삭제합니다. 원장의 기존 인용은 남습니다."
-                : "보관 원본과 변환용 파일을 삭제합니다. 저장한 전사는 남고 다시 듣기·재추출은 할 수 없습니다."}
+                ? "원본·받아쓴 글·수정 이력과 검색 근거를 삭제합니다. 결정 기록의 기존 원문 근거는 남습니다."
+                : "보관 원본과 변환용 파일을 삭제합니다. 저장한 받아쓴 글은 남고 다시 듣기·재추출은 할 수 없습니다."}
             </p>
             <button
               className="button button-primary"

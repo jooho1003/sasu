@@ -41,9 +41,9 @@ export async function deliverSlackAnswer(answerId: string): Promise<void> {
       const citations = await Promise.all(row.citations.map(async citation => {
         const deptUrl = new URL(`/d/${encodeURIComponent(row.dept_id)}`, metadataBase()).href;
         const enriched: SlackAnswerCitation = { ...citation, href: citation.decisionId ? `${deptUrl}/ledger#decision-${encodeURIComponent(citation.decisionId)}` : deptUrl,
-          linkLabel: citation.decisionId ? "결정 원장 확인" : "부서에서 보기" };
+          linkLabel: citation.decisionId ? "결정 기록 보기" : "부서에서 보기" };
         if (citation.slackChannel && citation.slackTs) {
-          try { enriched.href = await getMessagePermalink({ channel: citation.slackChannel, messageTs: citation.slackTs }); enriched.linkLabel = "원문 확인"; } catch { /* Quote remains valid without optional link. */ }
+          try { enriched.href = await getMessagePermalink({ channel: citation.slackChannel, messageTs: citation.slackTs }); enriched.linkLabel = "원문 보기"; } catch { /* Quote remains valid without optional link. */ }
         }
         return enriched;
       }));

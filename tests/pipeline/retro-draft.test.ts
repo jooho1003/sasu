@@ -7,7 +7,7 @@ vi.mock("@/lib/slack/workspace", () => ({ withSlackDepartment: async (_client: u
 vi.mock("@/lib/slack/post", () => ({ openDirectMessage: mocks.dm, postMessage: mocks.post }));
 import { draftRetro } from "@/lib/pipeline/retro-draft";
 const activity = { id: "a", kind: "git_commit", title: "검증 완료", text: "", excluded: false, at: "2026-09-19T01:00:00Z" };
-const claim = { day: { id: "d", dept_id: "dept", user_id: "u", retro_date: "2026-09-19" }, lease: "lease", activities: [activity] };
+const claim = { day: { id: "d", dept_id: "dept", user_id: "u", retro_date: "2026-09-19" }, preset: "planning", lease: "lease", activities: [activity] };
 const cite = { activity_id: "A-1", quote: "검증 완료" };
 const draft = { citations: [cite], title: "검증 회고", highlight: null, topics: ["검증"], body: { did: [{ text: "검증했다.", citations: [cite] }], learned: [], decided: [], next: [] } };
 describe("회고 생성 워커", () => {
@@ -18,6 +18,9 @@ describe("회고 생성 워커", () => {
     const finish = mocks.rpc.mock.calls.find(([name]) => name === "finish_retro_draft")![1];
     expect(finish).toMatchObject({ p_lease: "lease", p_generation: 1, p_error: null });
     expect(finish.p_body.did[0].citations[0].activity_id).toBe("a");
+    expect(finish.p_topics).toEqual(["기획", "검증"]);
+    expect(mocks.structured.mock.calls[0][2].system).toContain("고친 문서");
+    expect(mocks.structured.mock.calls[0][2].system).toContain("dept_context");
   });
   it("인용 0개는 needs_review 코드로 남긴다", async () => {
     mocks.structured.mockResolvedValue({ data: { ...draft, body: { ...draft.body, did: [{ text: "지어낸 문장", citations: [{ ...cite, quote: "없는 근거" }] }] } } });

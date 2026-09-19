@@ -295,7 +295,7 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
   await expect(async () => {
     if (await completedText.isVisible()) return;
 
-    await page.getByLabel("결정 사유").fill(rationale);
+    await page.getByLabel("왜 그렇게 정했나요").fill(rationale);
     await page.getByRole("button", { name: "결정", exact: true }).click();
     await expect(completedText).toBeVisible({ timeout: 5_000 });
   }).toPass({ timeout: 60_000 });
@@ -337,7 +337,7 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
     waitUntil: "domcontentloaded",
   });
   await expect(page.getByText(rationale, { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("리드타임", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("걸린 시간", { exact: true }).first()).toBeVisible();
 
   await postSlackEvent(request, baseURL, envelope);
   const items = await supabase

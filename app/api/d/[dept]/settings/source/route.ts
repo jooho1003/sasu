@@ -23,7 +23,7 @@ export async function POST(
   const { dept } = await params;
   const membership = await requireMembership(dept);
   if (membership.role !== "lead") {
-    return Response.json({ error: "Slack 채널 연결은 팀장만 할 수 있습니다." }, { status: 403 });
+    return Response.json({ error: "슬랙 채널 연결은 팀장만 할 수 있습니다." }, { status: 403 });
   }
 
   let body: SourceBody;
@@ -38,7 +38,7 @@ export async function POST(
   const visibility = isVisibility(body.visibility) ? body.visibility : "dept";
   const isPrinciples = body.is_principles === true;
   if (!/^[CG][A-Z0-9]+$/u.test(externalId) || title.length === 0) {
-    return Response.json({ error: "Slack 채널과 이름을 확인해주세요." }, { status: 400 });
+    return Response.json({ error: "슬랙 채널과 이름을 확인해주세요." }, { status: 400 });
   }
 
   return withSlackDepartment(await createServerSupabaseClient(), membership.deptId, async () => {
@@ -50,7 +50,7 @@ export async function POST(
     ]);
     channelMemberIds = members.filter((memberId) => memberId !== botUserId);
   } catch {
-    return Response.json({ error: "Slack 채널 멤버를 확인하지 못했습니다." }, { status: 502 });
+    return Response.json({ error: "슬랙 채널 멤버를 확인하지 못했습니다." }, { status: 502 });
   }
 
   const supabase = await createServerSupabaseClient();
@@ -72,7 +72,7 @@ export async function POST(
   );
   if (missingConsent.length > 0) {
     return Response.json(
-      { error: "채널 멤버 전원의 동의와 Slack 계정 연결이 먼저 필요합니다." },
+      { error: "채널 멤버 전원의 동의와 슬랙 계정 연결이 먼저 필요합니다." },
       { status: 409 },
     );
   }
@@ -110,7 +110,7 @@ export async function POST(
         .single<{ id: string }>();
 
   if (sourceResult.error || !sourceResult.data) {
-    return Response.json({ error: "Slack 채널을 저장하지 못했습니다." }, { status: 500 });
+    return Response.json({ error: "슬랙 채널을 저장하지 못했습니다." }, { status: 500 });
   }
 
   try {

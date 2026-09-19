@@ -71,34 +71,34 @@ export function DemoNotionCollection() {
     );
     if (blocked) {
       const department = departments.find((item) => item.id === mapping[blocked.id])!;
-      setMessage(`${department.name}에 동의하지 않은 멤버 ${department.missingConsent}명이 있어 시작할 수 없습니다. root는 생성되지 않았습니다.`);
+      setMessage(`${department.name}에 동의하지 않은 멤버 ${department.missingConsent}명이 있어 시작할 수 없습니다. 가져오기를 시작하지 않았습니다.`);
       setStarted(false);
       return;
     }
     setStarted(true);
-    setMessage(`${assigned.length}개 최상위 항목의 합성 수집을 시작했습니다. 실제 Notion이나 DB에는 요청하지 않았습니다.`);
+    setMessage(`${assigned.length}개 최상위 항목의 합성 수집을 시작했습니다. 실제 노션이나 데이터베이스에는 요청하지 않았습니다.`);
   }
 
   return (
     <main className="demo-landing">
       <header className="demo-intro">
-        <p className="eyebrow">합성 데이터 · 브라우저 안전 체험</p>
-        <h1>Notion 자동 수집</h1>
-        <p>조직 관리자의 범위 매핑과 부서장의 문서 통제를 한 흐름으로 확인합니다.</p>
+        <p className="eyebrow">가상 회사 자료 · 직접 눌러 보는 체험</p>
+        <h1>노션 자동 수집</h1>
+        <p>조직 관리자의 범위 매핑과 팀장의 문서 통제를 한 흐름으로 확인합니다.</p>
       </header>
       <p className="demo-safe-banner" role="status">{message}</p>
 
       <section className="panel grid gap-5 p-5 sm:p-6" id="demo-notion-admin" aria-labelledby="demo-notion-admin-heading">
         <div>
           <p className="eyebrow">조직 관리 · 자료 연결</p>
-          <h2 className="m-0 text-xl" id="demo-notion-admin-heading">Notion 연결과 범위 매핑</h2>
-          <p className="mb-0 mt-2 text-sm text-[var(--muted)]">노션에서 일부만 보던 문서도 선택한 부서의 전원(또는 부서장)에게 검색됩니다. 회의록처럼 발언이 담긴 문서도 수집되며 부서 구성원 전원의 동의가 필요합니다.</p>
+          <h2 className="m-0 text-xl" id="demo-notion-admin-heading">노션 연결과 범위 매핑</h2>
+          <p className="mb-0 mt-2 text-sm text-[var(--muted)]">노션에서 일부만 보던 문서도 선택한 부서의 전원(또는 팀장)에게 검색됩니다. 회의록처럼 발언이 담긴 문서도 수집되며 부서 구성원 전원의 동의가 필요합니다.</p>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-black/10 p-4">
-          <span><strong>온새미로 Notion (합성)</strong> · {connected ? "연결됨" : "연결 해제됨"}</span>
+          <span><strong>온새미로 노션 (합성)</strong> · {connected ? "연결됨" : "연결 해제됨"}</span>
           <button className="button button-small" onClick={() => {
             setConnected((current) => !current);
-            setMessage(connected ? "연결 해제 체험 완료 · 실제 토큰은 변경하지 않았습니다." : "연결 체험 완료 · 실제 Notion 호출은 없습니다.");
+            setMessage(connected ? "연결 해제 체험 완료 · 실제 토큰은 변경하지 않았습니다." : "연결 체험 완료 · 실제 노션 호출은 없습니다.");
           }} type="button">{connected ? "연결 해제 체험" : "연결 체험"}</button>
         </div>
         <div className="grid gap-3">
@@ -111,10 +111,10 @@ export function DemoNotionCollection() {
                   {departments.map((department) => <option key={department.id} value={department.id}>{department.name}</option>)}
                 </select>
               </label>
-              <label className="grid gap-1 text-sm">공개 범위
-                <select aria-label={`${entry.title} 공개 범위`} className="rounded-lg border border-black/15 bg-white px-3 py-2" value={visibility[entry.id] ?? "dept"} onChange={(event) => setVisibility((current) => ({ ...current, [entry.id]: event.target.value as "dept" | "leads_only" }))}>
+              <label className="grid gap-1 text-sm">볼 수 있는 사람
+                <select aria-label={`${entry.title} 볼 수 있는 사람`} className="rounded-lg border border-black/15 bg-white px-3 py-2" value={visibility[entry.id] ?? "dept"} onChange={(event) => setVisibility((current) => ({ ...current, [entry.id]: event.target.value as "dept" | "leads_only" }))}>
                   <option value="dept">부서 전체</option>
-                  <option value="leads_only">부서장만</option>
+                  <option value="leads_only">팀장만</option>
                 </select>
               </label>
               <label className="flex items-center gap-2 self-end text-sm"><input checked={includeNew[entry.id]} onChange={(event) => setIncludeNew((current) => ({ ...current, [entry.id]: event.target.checked }))} type="checkbox" />새 문서 포함</label>
@@ -147,7 +147,7 @@ export function DemoNotionCollection() {
               </select>
             </label>
             <div aria-label="권한 보기" className="flex items-end gap-2" role="group">
-              <button aria-pressed={role === "lead"} className="button button-small" onClick={() => setRole("lead")} type="button">부서장 보기</button>
+              <button aria-pressed={role === "lead"} className="button button-small" onClick={() => setRole("lead")} type="button">팀장 보기</button>
               <button aria-pressed={role === "member"} className="button button-small" onClick={() => setRole("member")} type="button">일반 멤버 보기</button>
             </div>
             <button className="button button-small self-end" onClick={() => setMessage("재발견 체험 완료 · 제외한 문서는 계속 제외 상태입니다.")} type="button">재발견 체험</button>

@@ -43,7 +43,7 @@ export function NotionInstallation() {
       })
       .catch(() => {
         if (!controller.signal.aborted) {
-          setMessage("Notion 연결 정보를 불러오지 못했습니다.");
+          setMessage("노션 연결 정보를 불러오지 못했습니다.");
         }
       });
     return () => controller.abort();
@@ -64,12 +64,12 @@ export function NotionInstallation() {
       setToken("");
       setAttested(false);
       await load();
-      setMessage("Notion 워크스페이스를 연결했습니다.");
+      setMessage("노션 부서 메뉴를 연결했습니다.");
     } catch (error) {
       setMessage(
         error instanceof Error && error.message
           ? error.message
-          : "Notion 연결을 완료하지 못했습니다.",
+          : "노션 연결을 완료하지 못했습니다.",
       );
     } finally {
       setBusy(false);
@@ -84,12 +84,12 @@ export function NotionInstallation() {
       const body = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(body.error);
       await load();
-      setMessage("Notion 연결을 해제하고 노션 소스 수집을 중단했습니다.");
+      setMessage("노션 연결을 해제하고 노션 소스 수집을 중단했습니다.");
     } catch (error) {
       setMessage(
         error instanceof Error && error.message
           ? error.message
-          : "Notion 연결을 해제하지 못했습니다.",
+          : "노션 연결을 해제하지 못했습니다.",
       );
     } finally {
       setBusy(false);
@@ -98,12 +98,12 @@ export function NotionInstallation() {
 
   const connected = status?.installation?.active === true;
   return (
-    <section className="panel grid gap-4 p-5" aria-label="Notion 워크스페이스 연결">
+    <section className="panel grid gap-4 p-5" aria-label="노션 부서 메뉴 연결">
       <div>
-        <h2 className="m-0 text-xl">Notion 워크스페이스</h2>
+        <h2 className="m-0 text-xl">노션 부서 메뉴</h2>
         <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
           노션에서 최상위 페이지에 연결을 추가하면 하위 전체가 공유됩니다.
-          연결한 부서 범위가 곧 열람 범위입니다.
+          연결한 부서 범위가 곧 보기 범위입니다.
         </p>
       </div>
       {message ? <p className="m-0" role="status">{message}</p> : null}
@@ -111,10 +111,10 @@ export function NotionInstallation() {
         <>
           <p className="m-0">
             {connected
-              ? `${status.installation?.workspace_name ?? "Notion 워크스페이스"} · 연결됨`
+              ? `${status.installation?.workspace_name ?? "노션 부서 메뉴"} · 연결됨`
               : status.installation
                 ? "연결 해제됨"
-                : "아직 연결된 워크스페이스가 없습니다."}
+                : "아직 연결된 부서 메뉴가 없습니다."}
           </p>
           {status.configured ? (
             <form className="grid max-w-xl gap-3" onSubmit={connect}>
@@ -151,7 +151,7 @@ export function NotionInstallation() {
             </form>
           ) : (
             <p className="m-0 text-sm text-[var(--muted)]">
-              Notion 토큰 암호화 설정을 준비 중입니다.
+              노션 토큰 암호화 설정을 준비 중입니다.
             </p>
           )}
         </>

@@ -1,14 +1,15 @@
 "use client";
 
+import { label } from "@/lib/labels";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const TABS = [
-  { label: "decision", name: "결정 필요" },
-  { label: "action", name: "액션" },
-  { label: "info", name: "정보" },
-  { label: "chatter", name: "잡담" },
-  { label: "unclassified", name: "분류 대기" },
+  { label: "decision", name: label("itemLabel", "decision") },
+  { label: "action", name: label("itemLabel", "action") },
+  { label: "info", name: label("itemLabel", "info") },
+  { label: "chatter", name: label("itemLabel", "chatter") },
+  { label: "unclassified", name: label("itemLabel", "unclassified") },
   { label: "meeting", name: "회의" },
 ] as const;
 
@@ -23,6 +24,7 @@ type DashboardItem = {
   content: string;
   label: ItemLabel;
   confidence: number | null;
+  decisionId: string | null;
   source: {
     title: string | null;
     kind: "slack_channel" | "meeting" | "notion_page" | "document";
@@ -334,17 +336,17 @@ export default function DashboardS1({
             <div className="grid gap-3 rounded-2xl bg-[var(--surface)] p-8 shadow-sm">
               <h3 className="m-0 text-xl">
                 {activeData.channelCount === 0
-                  ? "슬랙 채널을 연결하면 시작됩니다"
-                  : `수집 채널 ${activeData.channelCount}개에서 첫 메시지를 기다리는 중`}
+                  ? "슬랙 채널을 연결하면 기록이 쌓입니다"
+                  : `연결한 채널 ${activeData.channelCount}개에서 첫 메시지를 기다리는 중`}
               </h3>
               <p className="m-0 text-[var(--muted)]">
-                채널 연결 상태는 부서 세팅에서 확인할 수 있습니다.
+                채널 연결 상태는 부서 설정에서 확인할 수 있습니다.
               </p>
               <Link
                 className="w-fit"
                 href={settingsHref}
               >
-                세팅으로
+                설정으로 가기
               </Link>
             </div>
           ) : null}
@@ -363,7 +365,7 @@ export default function DashboardS1({
                 {activeData.filteredTotal}건 중 {activeData.items.length}건 표시
               </p>
               {activeData.items.map((item) => (
-                <details
+                <article
                   key={item.id}
                   id={`item-${item.id}`}
                   className={`group rounded-2xl border-l-4 bg-[var(--surface)] p-5 shadow-sm ${
@@ -372,7 +374,7 @@ export default function DashboardS1({
                       : "border-l-black/15"
                   }`}
                 >
-                  <summary className="cursor-pointer list-none">
+                  <Link className="block text-inherit no-underline" href={`/d/${deptId}?item=${item.id}#item-${item.id}`}>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="grid min-w-0 gap-2">
                         <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
@@ -394,18 +396,12 @@ export default function DashboardS1({
                         </span>
                       ) : null}
                     </div>
-                  </summary>
+                  <span className="mt-2 block text-sm text-[var(--accent)]">원문 보기</span>
+                  </Link>
 
                   <div className="mt-5 grid gap-4 border-t border-black/10 pt-5">
-                    <div className="grid gap-1">
-                      <p className="m-0 text-xs text-[var(--muted)]" data-meta>
-                        원문 · {item.author ?? "작성자 미상"}
-                      </p>
-                      <p className="m-0 whitespace-pre-wrap leading-7">
-                        {item.content}
-                      </p>
-                    </div>
                     <div className="flex flex-wrap items-center gap-3">
+                      {item.decisionId ? <Link href={`/d/${deptId}/ledger#decision-${item.decisionId}`}>→ 결정 기록</Link> : null}
                       <button
                         className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 text-sm font-bold text-[var(--accent)] disabled:opacity-50"
                         disabled={promotions[item.id]?.pending === true}
@@ -413,8 +409,8 @@ export default function DashboardS1({
                         type="button"
                       >
                         {promotions[item.id]?.pending
-                          ? "승격 중…"
-                          : "카드로 승격"}
+                          ? "카드로 올리는 중…"
+                          : "카드로 올리기"}
                       </button>
                       {promotions[item.id] ? (
                         <span className="text-sm text-[var(--muted)]">
@@ -430,7 +426,7 @@ export default function DashboardS1({
                       ) : null}
                     </div>
                   </div>
-                </details>
+                </article>
               ))}
               {activeData.items.length < activeData.filteredTotal ? (
                 <button

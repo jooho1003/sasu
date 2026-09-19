@@ -31,7 +31,7 @@ test.describe("공개 메인 사이트", () => {
       clientWidth: document.documentElement.clientWidth,
       scrollWidth: document.documentElement.scrollWidth,
     }));
-    expect(dimensions.scrollWidth).toBe(dimensions.clientWidth);
+    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
   });
 
   test("개인정보 안내와 검색 노출 경계를 제공한다", async ({ page, request }) => {

@@ -3217,3 +3217,30 @@ div.review-consent { display: block; }
     line-height: 1.7;
   }
 }
+
+/* Plain-language step 2: retain 4+more navigation, shorten the mobile header. */
+.demo-mobile-progress { display: none; }
+@media (max-width: 767px) {
+  .workspace-sidebar { padding-top: 8px; }
+  .workspace-sidebar > .brand { margin-bottom: 6px; font-size: 18px; }
+  .workspace-nav { padding-bottom: 6px; }
+
+
+  .workspace-topbar .sidebar-toggle, .workspace-parent, .workspace-topbar .badge,
+  .workspace-body > .demo-notice, .workspace-body > .demo-journey { display: none; }
+  .workspace-topbar { height: 24px; min-height: 24px; padding-top: 2px; padding-bottom: 2px; }
+  .demo-mobile-progress { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 18px; font-size: 12px; }
+  .workspace-content { padding-top: 0; }
+  .workspace-content > main { padding-top: 4px; }
+  .demo-dashboard > * { order: 1; }
+  .demo-dashboard > .demo-card-section { order: 0; gap: 8px; }
+  .demo-card-section > .section-heading { align-items: center; gap: 8px; }
+  .demo-card-section > .section-heading h2 { margin: 0; font-size: 16px; line-height: 24px; }
+  .demo-card-section > .section-heading p { display: none; }
+}
+
+.settings-page, .review-workspace { gap: 16px; }
+.settings-page .review-consent, .review-workspace .review-consent { font-size: 15px; }
+.record-toggle[href] { display: grid; text-decoration: none; color: inherit; }
+
+@media (max-width: 900px) { .admin-shell .admin-demo-notice { display: flex; padding: 4px 12px; font-size: 11px; } }

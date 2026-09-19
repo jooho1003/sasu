@@ -1,3 +1,4 @@
+import { label } from "@/lib/labels";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -65,7 +66,7 @@ function duplicateResponse(decision: DecisionRow) {
     ok: true,
     duplicate: true,
     decision_id: decision.id,
-    message: `이미 ${decision.decided_by_name}이(가) ${formatDecisionTime(decision.decided_at)}에 결정했습니다 → 원장 #${ledgerNumber}`,
+    message: `이미 ${decision.decided_by_name}이(가) ${formatDecisionTime(decision.decided_at)}에 결정했습니다 → 결정 기록 #${ledgerNumber}`,
   });
 }
 
@@ -166,7 +167,7 @@ export async function POST(
     }
     if (result.error.code === "23514") {
       return Response.json(
-        { error: `${card.status} 상태에서 ${body.status} 상태로 바꿀 수 없습니다.` },
+        { error: `${label("cardStatus", card.status)} 상태에서는 ${label("cardStatus", body.status)} 상태로 바꿀 수 없습니다. 화면을 새로 고쳐 주세요.` },
         { status: 409 },
       );
     }
@@ -180,7 +181,7 @@ export async function POST(
       );
     }
     return Response.json(
-      { error: body.status === "decided" ? "결정을 원장에 기록하지 못했습니다. 잠시 후 다시 시도해주세요." : "카드 상태가 이미 바뀌었습니다. 화면을 새로고침해주세요." },
+      { error: body.status === "decided" ? "결정을 기록에 남기지 못했습니다. 잠시 후 다시 시도해주세요." : "카드 상태가 이미 바뀌었습니다. 화면을 새로고침해주세요." },
       { status: 500 },
     );
   }
@@ -211,7 +212,7 @@ export async function POST(
 
   if (!rpcResult.decision_id) {
     return Response.json(
-      { error: "결정을 원장에 기록하지 못했습니다. 잠시 후 다시 시도해주세요." },
+      { error: "결정을 기록에 남기지 못했습니다. 잠시 후 다시 시도해주세요." },
       { status: 500 },
     );
   }
@@ -220,6 +221,6 @@ export async function POST(
     ok: true,
     duplicate: false,
     decision_id: rpcResult.decision_id,
-    message: `결정이 원장 #${rpcResult.decision_id.slice(0, 8)}에 기록됐습니다.`,
+    message: `결정이 결정 기록 #${rpcResult.decision_id.slice(0, 8)}에 기록됐습니다.`,
   });
 }

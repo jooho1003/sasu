@@ -1,15 +1,16 @@
+import { LABELS } from "@/lib/labels";
 import Link from "next/link";
 import type { TrailerGateReport, TrailerScenario } from "@/lib/contracts";
 import { trailerApprovalItems } from "@/lib/trailer-gate";
 
 export const trailerPanel = "min-w-0 rounded-2xl border border-ink/10 bg-surface p-5 sm:p-6";
 export const trailerNotice = "자동 검사는 수치·전략이 가상화됐는지 판단하지 못합니다. 항목마다 직접 확인한 뒤 승인하세요.";
-export const trailerStatus: Record<string, string> = { generating: "생성 중", checking: "검사 중", review: "검토", published: "발행", unpublished: "철회", failed: "실패" };
+export const trailerStatus: Record<string,string> = LABELS.trailerStatus;
 export const trailerReason: Record<string, string> = { invalid_scenario: "가상화 초안을 만들지 못했습니다", timeout: "시간이 초과됐습니다", trailer_decisions_invalid: "선택한 결정을 쓸 수 없습니다" };
 export const ruleLabels = { overlap: "원문 20자 겹침", proper_noun: "고유명사", mask: "개인정보 형식", schema: "형식 오류" };
 export type TrailerOriginal = { id: string; title: string | null; outcome: string; rationale: string };
 export function TrailerOriginals({ originals, principles }: { originals: TrailerOriginal[]; principles: string[] }) {
-  return <section className={trailerPanel}><h2 className="mt-0 text-xl">원문</h2><div className="grid gap-5">{originals.map((original) => <article key={original.id} className="border-b border-ink/10 pb-4"><h3>{original.title ?? "원장의 결정"}</h3><p className="whitespace-pre-wrap break-words">{original.outcome}</p><p className="whitespace-pre-wrap break-words text-sm text-muted">{original.rationale}</p></article>)}<div><h3>원칙 문서</h3><p className="text-sm">원칙 문서 {principles.length}개가 입력에 쓰였습니다.</p><ul className="pl-5 text-sm">{principles.map((title, i) => <li key={i}>{title}</li>)}</ul></div></div></section>;
+  return <section className={trailerPanel}><h2 className="mt-0 text-xl">원문</h2><div className="grid gap-5">{originals.map((original) => <article key={original.id} className="border-b border-ink/10 pb-4"><h3>{original.title ?? "결정 기록의 결정"}</h3><p className="whitespace-pre-wrap break-words">{original.outcome}</p><p className="whitespace-pre-wrap break-words text-sm text-muted">{original.rationale}</p></article>)}<div><h3>원칙 문서</h3><p className="text-sm">원칙 문서 {principles.length}개가 입력에 쓰였습니다.</p><ul className="pl-5 text-sm">{principles.map((title, i) => <li key={i}>{title}</li>)}</ul></div></div></section>;
 }
 export function TrailerReadOnly({ scenarios, report, approvedCount, slug }: { scenarios: TrailerScenario[]; report: TrailerGateReport | null; approvedCount: number; slug: string | null }) {
   const items = trailerApprovalItems(scenarios);

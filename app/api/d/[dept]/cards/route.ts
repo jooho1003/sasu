@@ -21,7 +21,7 @@ export async function POST(
   }
 
   if (typeof body.origin_item_id !== "string" || body.origin_item_id.length === 0) {
-    return Response.json({ error: "승격할 항목을 선택해주세요." }, { status: 400 });
+    return Response.json({ error: "카드로 올릴 항목을 선택해주세요." }, { status: 400 });
   }
 
   const supabase = await createServerSupabaseClient();
@@ -41,7 +41,7 @@ export async function POST(
   }
 
   if (!itemResult.data) {
-    return Response.json({ error: "승격할 수 있는 항목이 아닙니다." }, { status: 404 });
+    return Response.json({ error: "카드로 올릴 수 있는 항목이 아닙니다." }, { status: 404 });
   }
 
   const existingResult = await supabase

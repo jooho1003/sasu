@@ -123,10 +123,10 @@ async function handleEvent(envelope: SlackEventEnvelope & { event?: SlackMessage
     });
     const guidance = (status: string) => {
       if (status === "consent_required") return `질문을 저장하지 않았습니다. 먼저 수집·처리에 동의해 주세요: ${new URL("/consent", metadataBase()).href}`;
-      if (status === "choose_department") return `어느 부서에 물어볼까요? "부서 이름: 질문"으로 보내주세요.\n${departments.map(d => `${d.name} (${d.id})`).join("\n")}\n이름이 같으면 부서 ID를 사용할 수 있습니다.`;
+      if (status === "choose_department") return `어느 부서에 물어볼까요? "부서 이름: 질문"으로 보내주세요.\n${departments.map(d => `${d.name} (${d.id})`).join("\n")}\n이름이 같으면 부서 고유번호를 사용할 수 있습니다.`;
       if (status === "too_short") return "질문을 5자 이상 입력해 주세요.";
       if (status === "rate_limited") return ASK_DAILY_LIMIT_MESSAGE;
-      return `부서 설정에서 Slack 계정과 채널 연결을 확인해 주세요: ${new URL("/login", metadataBase()).href}`;
+      return `부서 설정에서 슬랙 계정과 채널 연결을 확인해 주세요: ${new URL("/login", metadataBase()).href}`;
     };
     if (prepared.status !== "ready") {
       if (!request.headers.get("x-slack-retry-num")) notify(guidance(prepared.status));

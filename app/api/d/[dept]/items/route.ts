@@ -163,7 +163,12 @@ export async function GET(
     }
   }
 
-  const items = ((itemsResult.data ?? []) as ItemRow[]).map((row) => {
+  const rows = (itemsResult.data ?? []) as ItemRow[];
+  const decisionCitations = rows.length ? await supabase.from("citations")
+    .select("item_id,owner_id").eq("owner_kind", "decision").in("item_id", rows.map(row => row.id)) : {data:[],error:null};
+  if (decisionCitations.error) return Response.json({error:"결정 기록을 불러오지 못했습니다. 잠시 후 다시 시도하세요."},{status:500});
+  const decisionByItem = new Map((decisionCitations.data ?? []).map(citation => [citation.item_id,citation.owner_id]));
+  const items = rows.map((row) => {
     const source = firstRelation(row.sources);
     const classification = firstOptionalRelation(row.classifications);
 
@@ -174,6 +179,7 @@ export async function GET(
       content: row.content,
       label: classification?.label ?? "unclassified",
       confidence: classification?.confidence ?? null,
+      decisionId: decisionByItem.get(row.id) ?? null,
       source: {
         title: source.title,
         kind: source.kind,

@@ -246,7 +246,7 @@ describe("명령별 쓰기 RPC 경계", () => {
 
     expect(body.duplicate).toBe(true);
     expect(body.message).toContain(`이미 ${membership.displayName}이(가)`);
-    expect(body.message).toContain(`원장 #${decisionId.slice(0, 8)}`);
+    expect(body.message).toContain(`결정 기록 #${decisionId.slice(0, 8)}`);
     expect(mocks.serverRpc).not.toHaveBeenCalled();
   });
 

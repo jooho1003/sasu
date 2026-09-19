@@ -276,9 +276,9 @@ export default function AskS4({ deptId }: { deptId: string }) {
               ))}
             </section>
           ) : null}
-          <p className="m-0 text-sm text-[var(--muted)]">내 권한 범위 안의 부서 기록만 참고했습니다.</p>
+          <p className="m-0 text-sm text-[var(--muted)]">내가 볼 수 있는 부서 기록만 보고 답했습니다.</p>
           <button className="button button-primary w-fit" type="button" onClick={() => { setParent({ id: answer.id, question: selectedQuestion }); setQuestion(""); document.getElementById("ask-question")?.focus(); }}>이어서 질문하기</button>
-          {answer.refused ? <p className="m-0 text-sm font-bold text-[var(--urgent)]">근거가 부족하면 결정 카드로 승격해 담당자에게 물어볼 수 있습니다.</p> : null}
+          {answer.refused ? <p className="m-0 text-sm font-bold text-[var(--urgent)]">근거가 부족하면 결정 카드로 올리기해 담당자에게 물어볼 수 있습니다.</p> : null}
         </article>
       ) : null}
     </main>

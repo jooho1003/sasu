@@ -52,7 +52,7 @@ describe("Slack 답변과 인용 표시", () => {
       expect(blocks).toContain(part);
       expect(message.text).toContain(part);
     }
-    expect(message.text).toContain("이 채널의 부서 공개 기록만 참고했습니다.");
+    expect(message.text).toContain("이 채널에서 볼 수 있는 부서 기록만 보고 답했습니다.");
   });
 
   it("원문 속 멘션·마크업·링크를 명령이나 링크로 처리하지 않는다", () => {
@@ -147,7 +147,7 @@ describe("Slack 답변과 인용 표시", () => {
     );
     expect(markdown).toHaveLength(1);
     expect(markdown[0].text).toBe(
-      "<https://example.slack.com/a%7Cb?thread_ts=1.2&amp;cid=C123|원문 확인>",
+      "<https://example.slack.com/a%7Cb?thread_ts=1.2&amp;cid=C123|원문 보기>",
     );
   });
 

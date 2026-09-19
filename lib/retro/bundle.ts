@@ -18,7 +18,7 @@ export function parseRetroBundle(json: unknown, now = new Date()): { ok: true; b
     if (Math.abs(Date.parse(bundle.date) - Date.parse(today)) > 7 * 86400000) return { ok: false, code: "date_out_of_range" };
     const refs = new Set<string>();
     for (const activity of bundle.activities) {
-      if (activity.kind.startsWith("sasu_")) return { ok: false, code: "server_only_kind" };
+      if (!["git_commit", "claude_session", "claude_prompt", "codex_session", "memory_change", "doc_change", "web_visit", "web_search"].includes(activity.kind)) return { ok: false, code: "server_only_kind" };
       if (localDate(activity.at, bundle.tz) !== bundle.date) return { ok: false, code: "invalid_bundle" };
       const key = JSON.stringify([activity.kind, activity.ref]);
       if (refs.has(key)) return { ok: false, code: "duplicate_ref" };

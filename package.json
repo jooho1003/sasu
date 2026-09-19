@@ -6,7 +6,7 @@
     "dev": "next dev",
     "start": "next start",
     "build": "next build",
-    "lint": "eslint .",
+    "lint": "eslint . && node scripts/check-wording.mjs",
     "test": "vitest run --passWithNoTests",
     "test:rls": "vitest run --config vitest.rls.config.ts",
     "test:load:demo": "node scripts/load-test-demo.mjs",
@@ -18,7 +18,8 @@
     "dev:recording": "vite scripts/recording-lab --config scripts/recording-lab/vite.config.ts --host 127.0.0.1 --port 3191 --strictPort",
     "e2e:trailer": "playwright test --config playwright.trailer.config.ts",
     "retro:collect": "tsx scripts/retro-collect.ts",
-    "wording:check": "node scripts/check-wording.mjs"
+    "wording:check": "node scripts/check-wording.mjs",
+    "check:wording": "node scripts/check-wording.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

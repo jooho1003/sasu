@@ -67,8 +67,8 @@ export function ReviewedMaterials({
       )
         throw new Error(
           kind === "audio"
-            ? "음성은 50MB 이하이어야 합니다."
-            : "문서는 20MB 이하이어야 합니다.",
+            ? "음성은 50메가바이트 이하이어야 합니다."
+            : "문서는 20메가바이트 이하이어야 합니다.",
         );
       if (
         kind === "document" &&
@@ -85,7 +85,7 @@ export function ReviewedMaterials({
           decoded = await context.decodeAudioData(bytes.slice(0));
         } catch {
           throw new Error(
-            "음성을 읽을 수 없습니다. 손상 여부를 확인하거나 WAV, MP3, M4A 파일로 변환해 주세요.",
+            "음성을 읽을 수 없습니다. 손상 여부를 확인하거나 .wav, .mp3, M4A 파일로 변환해 주세요.",
           );
         }
         if (!validateAudioMetadata(file.size, decoded.duration))
@@ -201,7 +201,7 @@ export function ReviewedMaterials({
       <main className="workspace-page">
         <h1>자료 검토</h1>
         <p>
-          자료의 원본·초안 검토는 부서장이 진행합니다. 확정된 자료는 문서와
+          자료의 원본·초안 검토는 팀장이 진행합니다. 확정된 자료는 문서와
           묻기에서 확인할 수 있습니다.
         </p>
         <Link href={`/d/${deptId}/documents`}>확정된 문서 보기</Link>
@@ -263,13 +263,13 @@ export function ReviewedMaterials({
               <strong>
                 {file?.name ??
                   (kind === "audio"
-                    ? "전사할 음성을 선택하세요"
+                    ? "글로 바꿀 음성을 선택하세요"
                     : "내용을 확인할 문서를 선택하세요")}
               </strong>
               <span>
                 {kind === "audio"
-                  ? "MP3 · WAV · M4A · WebM 등 / 50MB · 30분 이하"
-                  : "TXT · MD · CSV · JSON · PDF · DOCX / 20MB 이하"}
+                  ? ".mp3 · .wav · M4A · .webm 등 / 50메가바이트 · 30분 이하"
+                  : ".txt 파일 · .md 파일 · .csv 파일 · .json 파일 · .pdf 파일 · .docx 파일 / 20메가바이트 이하"}
               </span>
               <input
                 ref={fileInput}
@@ -300,7 +300,7 @@ export function ReviewedMaterials({
                 />
               </label>
               <label>
-                확정 후 공개 범위
+                확정 후 볼 수 있는 사람
                 <select
                   value={visibility}
                   onChange={(e) =>
@@ -308,7 +308,7 @@ export function ReviewedMaterials({
                   }
                 >
                   <option value="dept">우리 부서</option>
-                  <option value="leads_only">부서장만</option>
+                  <option value="leads_only">팀장만</option>
                 </select>
               </label>
             </div>
@@ -320,7 +320,7 @@ export function ReviewedMaterials({
                     checked={synthetic}
                     onChange={(e) => setSynthetic(e.target.checked)}
                   />
-                  TTS 등 실제 사람의 발언이 아닌 합성 음성입니다
+                  합성 음성(TTS)입니다. 기계가 읽은 소리이며 진짜 사람의 발언이 아닙니다. {/* // wording-ok: 사용자 확정 §0-6의 합성 음성(TTS) 표기를 유지합니다. */}
                 </label>
                 {!synthetic ? (
                   <fieldset>
@@ -358,7 +358,7 @@ export function ReviewedMaterials({
                 required
               />
               {kind === "audio" && !synthetic
-                ? "녹음의 모든 참여자가 선택 목록에 있고, 원본 보관과 전사 활용에 동의했음을 확인했습니다."
+                ? "녹음의 모든 참여자가 선택 목록에 있고, 원본 보관과 받아쓴 글 활용에 동의했음을 확인했습니다."
                 : "이 자료를 보관하고 업무에 활용할 권한이 있음을 확인했습니다."}
             </label>
             <p className="field-help">
@@ -378,7 +378,7 @@ export function ReviewedMaterials({
               {busy
                 ? "업로드 중…"
                 : kind === "audio"
-                  ? "전체 음성 전사 시작"
+                  ? "전체 음성 받아쓰기 시작"
                   : "문서 읽기 시작"}
             </button>
           </fieldset>

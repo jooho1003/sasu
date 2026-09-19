@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { label } from "@/lib/labels";
 import { useState } from "react";
 
 type CardStatus = "open" | "decided" | "deferred" | "rejected" | "needs_review";
@@ -32,7 +33,7 @@ export default function CardActions({
 
   const submit = async (targetStatus: TargetStatus) => {
     if (targetStatus === "decided" && !rationale.trim()) {
-      setError("결정 사유를 입력해주세요.");
+      setError("왜 그렇게 정했나요를 입력해주세요.");
       return;
     }
 
@@ -90,9 +91,9 @@ export default function CardActions({
     return (
       <p className="m-0 rounded-xl bg-black/5 p-4 text-sm text-[var(--muted)]">
         {status === "deferred"
-          ? "보류된 카드입니다. 팀장이 다시 열 수 있습니다."
+          ? "미룬 카드입니다. 팀장이 다시 열 수 있습니다."
           : status === "rejected"
-            ? "반려된 카드입니다. 팀장이 다시 열 수 있습니다."
+            ? "돌려보낸 카드입니다. 팀장이 다시 열 수 있습니다."
             : "근거 확인이 필요해 팀장 검토를 기다리고 있습니다."}
       </p>
     );
@@ -105,7 +106,7 @@ export default function CardActions({
     <div className="grid gap-4">
       {status === "open" ? (
         <label className="grid gap-2 font-bold">
-          결정 사유
+          왜 그렇게 정했나요
           <textarea
             className="min-h-28 rounded-xl border border-black/15 bg-[var(--surface)] p-3 font-normal text-[var(--ink)]"
             maxLength={1000}
@@ -125,7 +126,7 @@ export default function CardActions({
               onClick={() => void submit("decided")}
               type="button"
             >
-              {pending === "decided" ? "기록 중…" : "결정"}
+              {pending === "decided" ? "기록 중…" : label("decisionAction", "decided")}
             </button>
             <button
               className="rounded-lg border border-black/15 px-5 py-3 font-bold disabled:opacity-50"
@@ -133,7 +134,7 @@ export default function CardActions({
               onClick={() => void submit("deferred")}
               type="button"
             >
-              보류
+              미루기
             </button>
             <button
               className="rounded-lg border border-black/15 px-5 py-3 font-bold text-[var(--muted)] disabled:opacity-50"
@@ -141,7 +142,7 @@ export default function CardActions({
               onClick={() => void submit("rejected")}
               type="button"
             >
-              반려
+              돌려보내기
             </button>
           </>
         ) : null}
@@ -164,7 +165,7 @@ export default function CardActions({
             onClick={() => void submit("rejected")}
             type="button"
           >
-            반려
+            돌려보내기
           </button>
         ) : null}
       </div>

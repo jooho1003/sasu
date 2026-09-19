@@ -51,13 +51,13 @@ export default async function DemoAdminPage({
     stats.success;
   const titles: Record<string, [string, string]> = {
     overview: [
-      "조직 개요",
+      "조직 한눈에",
       "부서별 멤버, 연결된 자료와 의사결정 현황을 한눈에 확인하세요.",
     ],
-    members: ["멤버", "부서별 역할, 수집 동의와 Slack 연결 상태를 확인하세요."],
+    members: ["멤버", "부서별 역할, 수집 동의와 슬랙 연결 상태를 확인하세요."],
     sources: [
-      "수집 채널",
-      "조직에 연결된 자료의 공개 범위와 동기화 상태를 확인하세요.",
+      "연결한 채널",
+      "조직에 연결된 자료의 볼 수 있는 사람와 새로 가져오기 상태를 확인하세요.",
     ],
     audit: [
       "기록",

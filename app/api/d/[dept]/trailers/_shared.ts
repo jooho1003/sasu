@@ -10,11 +10,11 @@ import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const trailerMessages: Record<string, string> = {
-  forbidden: "부서장만 사용할 수 있습니다.", trailer_state_invalid: "지금 상태에서는 처리할 수 없습니다. 새로고침해 주세요.",
-  trailer_stale: "다른 곳에서 바뀌었습니다. 새로고침하세요.", trailer_decisions_invalid: "선택한 결정을 쓸 수 없습니다. 원장에서 확인해 주세요.",
-  trailer_daily_limit: "오늘 생성 한도를 넘었습니다. 내일 다시 시도해 주세요.", trailer_publishing_disabled: "조직 관리자가 공개 예고편을 허용해야 발행할 수 있습니다.",
-  trailer_gate_not_passed: "검사를 통과해야 발행할 수 있습니다.", trailer_not_approved: "모든 항목을 공개 승인한 뒤 발행해 주세요.",
-  invalid_scenarios: "가상화본의 형식과 인용을 확인해 주세요.", invalid_apply_url: "공고 주소는 https로 시작해야 합니다.",
+  forbidden: "팀장만 사용할 수 있습니다.", trailer_state_invalid: "지금 상태에서는 처리할 수 없습니다. 새로고침해 주세요.",
+  trailer_stale: "다른 곳에서 바뀌었습니다. 새로고침하세요.", trailer_decisions_invalid: "선택한 결정을 쓸 수 없습니다. 결정 기록에서 확인해 주세요.",
+  trailer_daily_limit: "오늘 생성 한도를 넘었습니다. 내일 다시 시도해 주세요.", trailer_publishing_disabled: "조직 관리자가 공개 예고편을 허용해야 공개할 수 있습니다.",
+  trailer_gate_not_passed: "검사를 통과해야 공개할 수 있습니다.", trailer_not_approved: "모든 항목을 공개 승인한 뒤 공개하기해 주세요.",
+  invalid_scenarios: "가상화본의 형식과 원문 근거를 확인해 주세요.", invalid_apply_url: "공고 주소는 https로 시작해야 합니다.",
   invalid_banned_terms: "가릴 이름은 각각 60자 이하, 최대 50개까지 입력해 주세요.", invalid_rubric: "기준표를 확인해 주세요.",
 };
 

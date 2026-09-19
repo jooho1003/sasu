@@ -16,6 +16,7 @@ type RecordGroup = {
     sourceId: string;
     sourceTitle: string;
     sourceKind: RecordKind;
+    hasDecision?: boolean;
   }[];
 };
 
@@ -40,7 +41,6 @@ export function DemoRecords({
       : (groups[0]?.label ?? ""),
   );
   const [kind, setKind] = useState<RecordKind | "all">(initialKind ?? "all");
-  const [openId, setOpenId] = useState<string | null>(null);
   const active = groups.find((group) => group.label === selected);
   const visible = (active?.items ?? []).filter(
     (item) => kind === "all" || item.sourceKind === kind,
@@ -75,7 +75,6 @@ export function DemoRecords({
                   aria-controls="demo-record-list"
                   onClick={() => {
                     setSelected(group.label);
-                    setOpenId(null);
                   }}
                 >
                   {group.name}
@@ -97,8 +96,7 @@ export function DemoRecords({
                     aria-controls="demo-record-list"
                     onClick={() => {
                       setKind(value);
-                      setOpenId(null);
-                    }}
+                      }}
                   >
                     {value === "all" ? "전체 출처" : KINDS[value].name}
                   </button>
@@ -110,69 +108,15 @@ export function DemoRecords({
             {visible.length === 0 ? (
               <p className="empty-state">이 조건에 맞는 기록이 없습니다.</p>
             ) : null}
-            {visible.map((item) => {
-              const open = openId === item.id;
-              const source = `?source=${encodeURIComponent(item.sourceId)}`;
-              return (
-                <article
-                  className="record-item"
-                  data-selected={open || undefined}
-                  key={item.id}
-                >
-                  <button
-                    type="button"
-                    className="record-toggle"
-                    aria-expanded={open}
-                    aria-controls={`record-detail-${item.id}`}
-                    onClick={() => setOpenId(open ? null : item.id)}
-                  >
-                    <span className="record-meta">
-                      <Icon name={KINDS[item.sourceKind].icon} size={13} />
-                      <span>{item.sourceTitle}</span>
-                      <span>·</span>
-                      <span>{item.author ?? "작성자 미상"}</span>
-                    </span>
-                    <span className={open ? "record-content" : "record-content line-clamp-2"}>
-                      {item.content}
-                    </span>
-                    <span className="record-expand">
-                      {open ? "접기" : "출처와 결정 보기"}{" "}
-                      <Icon name="chevron" size={11} />
-                    </span>
-                  </button>
-                  {open ? (
-                    <div className="record-detail" id={`record-detail-${item.id}`}>
-                      <dl>
-                        <div>
-                          <dt>출처</dt>
-                          <dd>
-                            {KINDS[item.sourceKind].name} · {item.sourceTitle}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt>사수의 분류</dt>
-                          <dd>{active?.name}</dd>
-                        </div>
-                      </dl>
-                      <div className="record-actions">
-                        <Link
-                          className="button button-secondary button-small"
-                          href={`/demo/d/${dept}/documents${source}`}
-                        >
-                          앞뒤 원문 보기 <Icon name="arrow" size={13} />
-                        </Link>
-                        <Link
-                          className="button button-secondary button-small"
-                          href={`/demo/d/${dept}/ledger${source}`}
-                        >
-                          이 자료의 결정 보기 <Icon name="arrow" size={13} />
-                        </Link>
-                      </div>
-                    </div>
-                  ) : null}
-                </article>
-              );
-            })}
+            {visible.map(item=><article className="record-item" key={item.id}>
+              <Link className="record-toggle" href={`/demo/d/${dept}/documents?source=${encodeURIComponent(item.sourceId)}`} aria-label={`${item.sourceTitle} ${item.author??"작성자 모름"} 원문 보기`}>
+                <span className="record-meta"><Icon name={KINDS[item.sourceKind].icon} size={13}/><span>{item.sourceTitle}</span><span>·</span><span>{item.author??"작성자 모름"}</span></span>
+                <span className="record-content line-clamp-2">{item.content}</span>
+                <span className="record-expand">원문 <Icon name="arrow" size={13}/></span>
+              </Link>
+              {item.hasDecision?<Link className="text-link px-4 pb-3" href={`/demo/d/${dept}/ledger?source=${encodeURIComponent(item.sourceId)}`}>→ 결정 기록</Link>:null}
+            </article>)}
+
           </div>
         </>
       )}

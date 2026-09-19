@@ -9,7 +9,7 @@ for (const envFile of [".env", ".env.local"]) {
 }
 
 const DEPARTMENT_ID = "22222222-2222-4222-8222-222222222222";
-const FIXED_NOTICE = "내 권한 범위 안의 부서 기록만 참고했습니다.";
+const FIXED_NOTICE = "내가 볼 수 있는 부서 기록만 보고 답했습니다.";
 
 test.skip(
   process.env.E2E_ALLOW_SHOWCASE_WRITES !== "1",

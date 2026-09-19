@@ -23,6 +23,7 @@ vi.mock("@/lib/pipeline/trailer-score", () => ({ registerTrailerScoreHandler: ()
 
 import { runWorkerBulk, runWorkerOnce } from "@/lib/worker";
 vi.mock("@/lib/pipeline/trailer-purge", () => ({ registerTrailerPurgeHandler: () => mocks.register("purge_trailer_invites") }));
+vi.mock("@/lib/pipeline/retro-pull", () => ({ registerRetroPullHandler: () => mocks.register("retro_pull"), scheduleRetroPulls: vi.fn() }));
 
 describe("공통 워커 진입점", () => {
   beforeEach(() => {
@@ -35,6 +36,7 @@ describe("공통 워커 진입점", () => {
     await runWorkerOnce();
     expect(mocks.register.mock.calls.map(([kind]) => kind).sort()).toEqual([
       "answer", "classify", "embed", "embed_batch", "make_card", "notion_discover", "notion_import", "notion_poll", "run_agent_role", "send_slack", "slack_backfill", "summarize_document", "summarize_meeting", "generate_trailer", "check_trailer_gate", "score_trailer_attempt", "deliver_slack_answer", "send_reminder", "process_review", "purge_review_files", "purge_trailer_invites", "retro_draft",
+      "retro_pull",
     ].sort());
     expect(mocks.sweep).toHaveBeenCalledOnce();
     expect(mocks.reviewSweep).toHaveBeenCalledOnce();

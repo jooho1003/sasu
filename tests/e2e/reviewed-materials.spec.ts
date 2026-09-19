@@ -78,12 +78,12 @@ test("한국어 TTS 전체 전사 → 원본 재생 → 편집·재접속·확�
     .getByLabel("자료 제목", { exact: true })
     .fill("TTS 실제 연동 검증");
   await page
-    .getByLabel("TTS 등 실제 사람의 발언이 아닌 합성 음성입니다")
+    .getByLabel("합성 음성(TTS)입니다. 기계가 읽은 소리이며 진짜 사람의 발언이 아닙니다.")
     .check();
   await page
     .getByLabel("이 자료를 보관하고 업무에 활용할 권한이 있음을 확인했습니다.")
     .check();
-  await page.getByRole("button", { name: "전체 음성 전사 시작" }).click();
+  await page.getByRole("button", { name: "전체 음성 받아쓰기 시작" }).click();
   await expect(page).toHaveURL(/\/reviews\/[0-9a-f-]+$/, { timeout: 60_000 });
   const id = page.url().split("/").at(-1)!;
   const draft = await ready(context, id, baseURL!);
@@ -340,7 +340,7 @@ test("문서 전문 검토·교정·재추출 충돌·다중 창 버전 충돌",
     .click();
   await ready(context, id, baseURL!);
   await page
-    .getByRole("button", { name: "새 추출문으로 교체", exact: true })
+    .getByRole("button", { name: "새로 읽은 글로 바꾸기", exact: true })
     .click();
   await expect(page.getByLabel("구간 1 텍스트")).not.toHaveValue(
     "사람이 교정한 문서 내용입니다.",
@@ -506,7 +506,7 @@ test("Slack 보존 현황·설정·체크섬 내보내기·멤버 차단", async
     });
   await page.goto(`/d/${dept}/retention`);
   await page.getByLabel("확인한 요금제", { exact: true }).selectOption("free");
-  await page.getByLabel("확인한 메시지 보존 기간").selectOption("90");
+  await page.getByLabel("확인한 메시지 보관 기간").selectOption("90");
   await page.getByRole("button", { name: "확인값 저장" }).click();
   await expect(page.getByRole("status")).toContainText("기록했습니다");
   await page.getByLabel("대상 채널").selectOption(source.data!.id);

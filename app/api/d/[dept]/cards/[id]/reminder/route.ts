@@ -24,7 +24,7 @@ export async function POST(request: Request, input: Context) {
   const body = CardReminderInput.safeParse(await request.json().catch(() => null));
   if (!body.success) return Response.json({ error: "알림 날짜를 확인해주세요." }, { status: 400 });
   const result = await client.rpc("set_card_reminder", { p_request: id, p_at: body.data.scheduled_for });
-  if (result.error) return Response.json({ error: "담당자나 부서장만 90일 이내의 미래 날짜로 예약할 수 있습니다." }, { status: result.error.code === "42501" ? 403 : 400 });
+  if (result.error) return Response.json({ error: "담당자나 팀장만 90일 이내의 미래 날짜로 예약할 수 있습니다." }, { status: result.error.code === "42501" ? 403 : 400 });
   kickWorker();
   return Response.json({ ok: true });
 }

@@ -27,7 +27,7 @@ describe("Slack 답변 전달", () => {
   it("SQL에서 전체 검증된 답변만 DM 권한 문구와 함께 갱신한다", async () => {
     mocks.rpc.mockResolvedValueOnce({ data: { ...row, message_ts: "2.2", status: "done", answer: "오늘 배포합니다.", citations: [{ quote: "오늘 배포합니다.", author: "팀장", occurredAt: null, source: "문서", href: null }] }, error: null });
     await deliverSlackAnswer("answer-1");
-    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ text: expect.stringContaining("내 권한 범위") }));
+    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ text: expect.stringContaining("내가 볼 수 있는 부서 기록만") }));
     expect(mocks.rpc).toHaveBeenCalledWith("finish_slack_answer_delivery", expect.objectContaining({ p_sent: true }));
   });
   it("권한 회수·이미 전달된 답변은 외부 호출하지 않는다", async () => {

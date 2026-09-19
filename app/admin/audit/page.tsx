@@ -40,8 +40,8 @@ export default async function AdminAuditPage({
       </header>
       <div className="grid gap-3 md:grid-cols-3">
         {[
-          ["보이는 것", "일별·부서별 답변·거절·실패 수, 인용 가시성별 합계"],
-          ["보이지 않는 것", "질문 원문, 질문자, 답변 한 건의 시각과 인용"],
+          ["보이는 것", "일별·부서별 답변·거절·실패 수, 원문 근거 볼 수 있는 사람별 합계"],
+          ["보이지 않는 것", "질문 원문, 질문자, 답변 한 건의 시각과 원문 근거"],
           ["준비 중", "권한 경계 판정"],
         ].map(([title, description]) => (
           <section key={title} className={adminPanel}>
@@ -77,7 +77,7 @@ export default async function AdminAuditPage({
                     </label>
                   ))}
                   <button className="rounded-xl border border-accent/30 px-4 py-2 text-sm font-bold text-accent">
-                    조회
+                    보기
                   </button>
                   <span className="text-sm text-muted">최대 31일</span>
                 </form>

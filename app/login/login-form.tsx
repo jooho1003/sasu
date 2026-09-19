@@ -77,7 +77,7 @@ export default function LoginForm({ initialError, next }: LoginFormProps) {
             disabled={isSending}
             type="submit"
           >
-            {isSending ? "보내는 중…" : "매직링크 받기"}
+            {isSending ? "보내는 중…" : "로그인 링크 받기"}
           </button>
         </form>
       )}

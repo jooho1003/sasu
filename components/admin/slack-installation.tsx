@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 type Status = { configured: boolean; installation: { team_id: string; team_name: string; active: boolean; installed_at: string } | null };
 const messages: Record<string,string> = {
-  installed: "Slack 설치가 완료되었습니다. 부서 세팅에서 계정을 연결하고 동의를 받은 뒤 채널을 추가해주세요.",
+  installed: "Slack 설치가 완료되었습니다. 부서 설정에서 계정을 연결하고 동의를 받은 뒤 채널을 추가해주세요.",
   cancelled: "Slack 설치를 취소했습니다.", invalid_state: "설치 요청이 만료되었거나 로그인 상태가 달라졌습니다. 다시 시작해주세요.",
   workspace_conflict: "이 조직 또는 워크스페이스에 다른 연결이 있습니다. 기존 연결을 확인해주세요.",
   failed: "Slack 설치를 완료하지 못했습니다. 잠시 후 다시 시도해주세요.",

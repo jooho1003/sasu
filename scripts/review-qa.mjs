@@ -36,10 +36,16 @@ Object.assign(process.env, {
   E2E_BASE_URL: "http://localhost:3011",
   SEED_LEAD_EMAIL: "review-lead@example.test",
   SEED_LEAD_PASSWORD: credentials.password,
+  SEED_ORG_ADMIN_EMAIL: "review-lead@example.test",
+  SEED_ORG_ADMIN_PASSWORD: credentials.password,
   SEED_MEMBER_EMAIL: "review-member@example.test",
   SEED_MEMBER_PASSWORD: credentials.password,
   E2E_REVIEW_LIVE: "1",
   SASU_ORG_ADMIN_MODE: "on",
+  SASU_RETRO_ENABLED: "true",
+  SASU_DEMO_AUTO_LOGIN_ENABLED: "true",
+  SASU_DEMO_USER_EMAIL: "judge-demo@demo.sasu.team",
+  SASU_DEMO_USER_PASSWORD: credentials.password,
   SASU_TRAILER_PUBLISH_ENABLED: process.env.E2E_TRAILER_INVITES === "1" ? "true" : "false",
   SASU_TRAILER_INVITES_ENABLED: process.env.E2E_TRAILER_INVITES === "1" ? "true" : "false",
   SASU_TRAILER_SCORES_MODE: "off",
@@ -72,7 +78,28 @@ const q = (sql) =>
     ],
     { input: sql, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] },
   );
-if (command === "setup") {
+if (command === "refresh-retro-connectors") {
+  const sql=readFileSync("supabase/migrations/0050_retro_connection_boundaries.sql","utf8");
+  const functions=sql.match(/create (?:or replace )?function [\s\S]*?\$\$;/g) ?? [];
+  const permissions=sql.match(/(?:revoke all on function|grant execute on function) [\s\S]*?;/g) ?? [];
+  const constraint=sql.match(/alter table public\.retro_activities add constraint retro_activities_kind_check[\s\S]*?;/)?.[0];
+  if(functions.length<15||!constraint)throw Error("local_connector_schema_incomplete");
+  q("begin;\nalter table public.retro_activities drop constraint retro_activities_kind_check;\n"+constraint+"\n"+functions.map(s=>s.replace(/^create function/,"create or replace function")).join("\n")+"\n"+permissions.join("\n")+"\ncommit;notify pgrst,'reload schema';");
+  console.log("local retrospective connector functions refreshed");
+} else if (command === "admin-auth") {
+  const ids = JSON.parse(readFileSync(resolve(root, "ids.json"), "utf8"));
+  if (![ids.org, ids.lead].every(id => /^[a-f0-9-]{36}$/.test(id))) throw Error("invalid_local_ids");
+  q(`insert into org_admins(org_id,user_id,granted_by) values('${ids.org}','${ids.lead}','local-review-qa') on conflict do nothing;`);
+  console.log("local organization administrator configured");
+} else if (command === "demo-auth") {
+  const client=createClient(info.API_URL,info.SERVICE_ROLE_KEY,{auth:{persistSession:false}});
+  const id="99999999-9999-4999-8999-999999999991";
+  const existing=await client.auth.admin.getUserById(id);
+  if(existing.error||existing.data.user?.email!=="judge-demo@demo.sasu.team")throw Error("local_demo_seed_required");
+  const result=await client.auth.admin.updateUserById(id,{password:credentials.password});
+  if(result.error)throw Error("local_demo_auth_setup_failed");
+  console.log("local demo reviewer authentication configured");
+} else if (command === "setup") {
   q(
     "create table if not exists public.review_qa_migrations(name text primary key); revoke all on public.review_qa_migrations from public,anon,authenticated;",
   );
@@ -278,6 +305,20 @@ if (command === "setup") {
           ? ["node_modules/next/dist/bin/next", "start", "-p", "3011"]
           : command === "seed-demo"
             ? ["node_modules/tsx/dist/cli.mjs", "scripts/seed-demo.ts"]
+            : command === "llm-style"
+              ? ["node_modules/tsx/dist/cli.mjs", "scripts/sample-llm-style.ts"]
+            : command === "plain-language-test"
+              ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/plain-language.spec.ts", ...process.argv.slice(3)]
+            : command === "connector-test"
+              ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/retro-connectors.spec.ts", ...process.argv.slice(3)]
+            : command === "ui-regression"
+              ? ["node_modules/@playwright/test/cli.js", "test", "guest.spec.ts", "demo-public-workspace.spec.ts", "demo-reviewer.spec.ts", "ui-refresh.spec.ts", "workspace-polish.spec.ts", "hiring-demo.spec.ts", "plain-language.spec.ts", "site.spec.ts", "security-headers.spec.ts", "review-state-recovery.spec.ts", ...process.argv.slice(3)]
+            : command === "trailer-regression"
+              ? ["node_modules/@playwright/test/cli.js", "test", "--config", "playwright.trailer.config.ts", ...process.argv.slice(3)]
+            : command === "rls-test"
+              ? ["node_modules/vitest/vitest.mjs", "run", "--config", "vitest.rls.config.ts"]
+            : command === "audit-showcase"
+              ? ["node_modules/tsx/dist/cli.mjs", "scripts/audit-showcase-data.ts"]
             : command === "access-test"
               ? ["scripts/verify-review-storage.mjs"]
             : [

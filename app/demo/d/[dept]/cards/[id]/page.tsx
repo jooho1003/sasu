@@ -1,3 +1,4 @@
+import { labelFrom } from "@/lib/labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -45,24 +46,24 @@ export default async function DemoCardPage({
           <h1 className="m-0 text-3xl">{card.title}</h1>
           <dl className="card-facts" aria-label="결정 카드 핵심 정보">
             <div><dt>마감</dt><dd>{deadline}</dd></div>
-            <div><dt>결정 권한</dt><dd>{card.visibility === "leads_only" ? "부서장" : "부서 멤버"}</dd></div>
-            <div><dt>공개 범위</dt><dd>{card.visibility === "leads_only" ? "부서장만" : "부서 전체"}</dd></div>
+            <div><dt>결정하는 사람</dt><dd>{card.visibility === "leads_only" ? "팀장" : "부서 멤버"}</dd></div>
+            <div><dt>볼 수 있는 사람</dt><dd>{card.visibility === "leads_only" ? "팀장만" : "부서 전체"}</dd></div>
             <div><dt>근거</dt><dd>{rows.length}개</dd></div>
-            <div><dt>상태</dt><dd>{card.status === "open" ? "결정 대기" : card.status}</dd></div>
+            <div><dt>상태</dt><dd>{labelFrom("cardStatus", card.status)}</dd></div>
           </dl>
         </header>
-        <section className="grid gap-2"><h2 className="m-0 text-xl">배경</h2><p className="m-0 whitespace-pre-wrap leading-7">{card.background}</p></section>
-        <section className="grid gap-3"><h2 className="m-0 text-xl">근거 인용</h2>{rows.map((row, index) => { const item = row.item_id ? itemMap.get(row.item_id) : null; const decision = row.decision_id ? decisionMap.get(row.decision_id) : null; return <blockquote key={`${row.quote}-${index}`} className="m-0 grid gap-2 rounded-2xl border border-[var(--accent)]/25 bg-[var(--accent)]/5 p-4"><span className="text-xs text-[var(--muted)]">{item?.author ?? decision?.decided_by_name ?? "기록"}</span><q className="leading-7">{row.quote}</q></blockquote>; })}</section>
-        {conflictRows.length > 0 ? <section className="grid gap-2 rounded-2xl border border-[var(--urgent)]/30 bg-[var(--urgent)]/5 p-5"><h2 className="m-0 text-xl text-[var(--urgent)]">과거 결정과 충돌 확인</h2>{conflictRows.map((conflict) => <div key={conflict.id} className="grid gap-1"><Link className="w-fit text-sm font-bold text-[var(--urgent)]" href={`/demo/d/${dept}/ledger?from=${encodeURIComponent(card.id)}#decision-${conflict.prior_decision_id}`}>{formatConflictBadge(decisionMap.get(conflict.prior_decision_id)?.decided_at ?? null)}</Link><p className="m-0 leading-7">{conflict.explanation}</p></div>)}</section> : null}
-        {card.recommendation ? <section className="grid gap-2"><h2 className="m-0 text-xl">추천 방향</h2><p className="m-0 whitespace-pre-wrap leading-7">{card.recommendation}</p></section> : null}
+        <section className="grid gap-2"><h2 className="m-0 text-xl">무슨 일인가요</h2><p className="m-0 whitespace-pre-wrap leading-7">{card.background}</p></section>
+        <section className="grid gap-3"><h2 className="m-0 text-xl">원문 근거</h2>{rows.map((row, index) => { const item = row.item_id ? itemMap.get(row.item_id) : null; const decision = row.decision_id ? decisionMap.get(row.decision_id) : null; return <blockquote key={`${row.quote}-${index}`} className="m-0 grid gap-2 rounded-2xl border border-[var(--accent)]/25 bg-[var(--accent)]/5 p-4"><span className="text-xs text-[var(--muted)]">{item?.author ?? decision?.decided_by_name ?? "기록"}</span><q className="leading-7">{row.quote}</q></blockquote>; })}</section>
+        {conflictRows.length > 0 ? <section className="grid gap-2 rounded-2xl border border-[var(--urgent)]/30 bg-[var(--urgent)]/5 p-5"><h2 className="m-0 text-xl text-[var(--urgent)]">예전 결정과 다릅니다</h2>{conflictRows.map((conflict) => <div key={conflict.id} className="grid gap-1"><Link className="w-fit text-sm font-bold text-[var(--urgent)]" href={`/demo/d/${dept}/ledger?from=${encodeURIComponent(card.id)}#decision-${conflict.prior_decision_id}`}>{formatConflictBadge(decisionMap.get(conflict.prior_decision_id)?.decided_at ?? null)}</Link><p className="m-0 leading-7">{conflict.explanation}</p></div>)}</section> : null}
+        {card.recommendation ? <section className="grid gap-2"><h2 className="m-0 text-xl">사수의 제안</h2><p className="m-0 whitespace-pre-wrap leading-7">{card.recommendation}</p></section> : null}
         <DemoDecisionSimulator requestId={id} title={card.title} quote={rows.find(row => row.item_id && itemMap.get(row.item_id)?.content.includes(row.quote))?.quote} sourceId={items?.[0]?.source_id} />
         <footer className="card-next-step">
-          <div><strong>다음 3/4 · 과거 결정 확인</strong><span>충돌한 결정의 이유와 원문 근거를 원장에서 확인하세요.</span></div>
+          <div><strong>다음 3/4 · 과거 결정 확인</strong><span>충돌한 결정의 이유와 원문 근거를 결정 기록에서 확인하세요.</span></div>
           <Link className="button button-primary button-small" href={`/demo/d/${dept}/ledger?from=${encodeURIComponent(card.id)}`}>
-            결정 원장 보기 <Icon name="arrow" size={14} />
+            결정 기록 보기 <Icon name="arrow" size={14} />
           </Link>
         </footer>
-        <div className="text-sm text-[var(--muted)]">안전 체험 결과는 브라우저에서만 보이며 실제 결정 원장이나 외부 채널을 변경하지 않습니다.</div>
+        <div className="text-sm text-[var(--muted)]">눌러 본 결과는 브라우저에서만 보이며 실제 결정 기록이나 외부 채널을 변경하지 않습니다.</div>
       </article>
     </main>
   );

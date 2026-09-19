@@ -218,7 +218,7 @@ export default function SettingsS5({
         kind: "success",
         message: consented
           ? "수집 동의가 기록되었습니다."
-          : "수집 동의를 철회했습니다.",
+          : "수집 동의를 거뒀습니다.",
       });
       await load();
     } catch (error) {
@@ -236,7 +236,7 @@ export default function SettingsS5({
     if (!selectedChannel || !channelTitle.trim()) {
       setSourceState({
         kind: "error",
-        message: "Slack 채널과 표시 이름을 선택해주세요.",
+        message: "슬랙 채널과 표시 이름을 선택해주세요.",
       });
       return;
     }
@@ -268,7 +268,7 @@ export default function SettingsS5({
         message:
           error instanceof Error
             ? error.message
-            : "Slack 채널을 연결하지 못했습니다.",
+            : "슬랙 채널을 연결하지 못했습니다.",
       });
     }
   };
@@ -305,7 +305,7 @@ export default function SettingsS5({
   const removeSource = async (sourceId: string) => {
     if (
       !window.confirm(
-        "제거하면 이 채널의 저장된 본문과 검색 데이터가 삭제됩니다. 원장에 인용된 문장은 남습니다. 다시 연결하면 최근 7일만 복구됩니다.",
+        "제거하면 이 채널의 저장된 본문과 검색 데이터가 삭제됩니다. 결정 기록에 근거로 쓰인 문장은 남습니다. 다시 연결하면 최근 7일만 복구됩니다.",
       )
     )
       return;
@@ -342,13 +342,13 @@ export default function SettingsS5({
     if (!notionPageId.trim()) {
       setNotionState({
         kind: "error",
-        message: "Notion 페이지 URL 또는 ID를 입력해주세요.",
+        message: "노션 페이지 주소 또는 고유번호를 입력해주세요.",
       });
       return;
     }
     setNotionState({
       kind: "pending",
-      message: "Notion 문서를 연결하는 중입니다.",
+      message: "노션 문서를 연결하는 중입니다.",
     });
     setNotionResults([]);
     try {
@@ -378,7 +378,7 @@ export default function SettingsS5({
         message:
           error instanceof Error
             ? error.message
-            : "Notion 가져오기를 시작하지 못했습니다.",
+            : "노션 가져오기를 시작하지 못했습니다.",
       });
     }
   };
@@ -414,7 +414,7 @@ export default function SettingsS5({
   const reimportNotion = async (sourceId: string, autoSync?: boolean) => {
     setNotionState({
       kind: "pending",
-      message: "Notion 다시 가져오기를 시작하는 중입니다.",
+      message: "노션 다시 가져오기를 시작하는 중입니다.",
     });
     try {
       await readResponse(
@@ -427,7 +427,7 @@ export default function SettingsS5({
       setNotionState({
         kind: "success",
         message:
-          autoSync === undefined ? "다시 가져오기를 시작했습니다. 완료되면 마지막 가져오기 시간이 갱신됩니다." : autoSync ? "5분마다 자동으로 갱신합니다." : "자동 갱신을 중지했습니다.",
+          autoSync === undefined ? "다시 가져오기를 시작했습니다. 완료되면 마지막 가져오기 시간이 새로 고침됩니다." : autoSync ? "5분마다 자동으로 새로 가져옵니다." : "자동 새로 고침을 중지했습니다.",
       });
       await load();
     } catch (error) {
@@ -436,7 +436,7 @@ export default function SettingsS5({
         message:
           error instanceof Error
             ? error.message
-            : "Notion 다시 가져오기를 시작하지 못했습니다.",
+            : "노션 다시 가져오기를 시작하지 못했습니다.",
       });
     }
   };
@@ -454,13 +454,13 @@ export default function SettingsS5({
     if (!meetingFile) {
       setMeetingState({
         kind: "error",
-        message: "VTT 또는 TXT 전사 파일을 선택해주세요.",
+        message: ".vtt 파일 또는 .txt 파일 받아쓴 글 파일을 선택해주세요.",
       });
       return;
     }
     setMeetingState({
       kind: "pending",
-      message: "전사를 저장하고 회의 정리를 시작하는 중입니다.",
+      message: "받아쓴 글을 저장하고 회의 정리를 시작하는 중입니다.",
     });
     const form = new FormData();
     form.set("file", meetingFile);
@@ -481,7 +481,7 @@ export default function SettingsS5({
         : "";
       setMeetingState({
         kind: "success",
-        message: `회의 전사를 저장하고 요약을 시작했습니다.${skipped}`,
+        message: `회의 받아쓴 글을 저장하고 요약을 시작했습니다.${skipped}`,
       });
       setMeetingFile(null);
       await load();
@@ -491,7 +491,7 @@ export default function SettingsS5({
         message:
           error instanceof Error
             ? error.message
-            : "회의 전사를 업로드하지 못했습니다.",
+            : "회의 받아쓴 글을 업로드하지 못했습니다.",
       });
     }
   };
@@ -499,12 +499,12 @@ export default function SettingsS5({
   const saveMemberMapping = async (userId: string) => {
     const slackUserId = memberMappings[userId] ?? "";
     if (!slackUserId) {
-      setMappingState({ kind: "error", message: "Slack 계정을 선택해주세요." });
+      setMappingState({ kind: "error", message: "슬랙 계정을 선택해주세요." });
       return;
     }
     setMappingState({
       kind: "pending",
-      message: "Slack 계정 연결을 저장하는 중입니다.",
+      message: "슬랙 계정 연결을 저장하는 중입니다.",
     });
     try {
       await readResponse(
@@ -522,7 +522,7 @@ export default function SettingsS5({
       );
       setMappingState({
         kind: "success",
-        message: "Slack 계정 연결을 저장했습니다.",
+        message: "슬랙 계정 연결을 저장했습니다.",
       });
       await load();
     } catch (error) {
@@ -531,7 +531,7 @@ export default function SettingsS5({
         message:
           error instanceof Error
             ? error.message
-            : "Slack 계정 연결을 저장하지 못했습니다.",
+            : "슬랙 계정 연결을 저장하지 못했습니다.",
       });
     }
   };
@@ -582,7 +582,7 @@ export default function SettingsS5({
           <h2>
             {loadError
               ? "설정을 불러오지 못했습니다"
-              : "우리 부서의 연결을 확인하고 있어요"}
+              : "우리 부서의 연결을 확인하고 있습니다"}
           </h2>
           <p role={loadError ? "alert" : "status"}>
             {loadError ?? "멤버 동의와 연결된 채널을 확인하고 있습니다."}
@@ -623,7 +623,7 @@ export default function SettingsS5({
             <Icon name="hash" />
           </span>
           <div>
-            <span>연결된 Slack</span>
+            <span>연결된 슬랙</span>
             <strong>{connectedSlackSources.length}개 채널</strong>
           </div>
         </div>
@@ -653,15 +653,15 @@ export default function SettingsS5({
           ) : (
             <p>
               {missingConsentNames.length ? `동의 필요: ${missingConsentNames.join(", ")}. ` : ""}
-              {missingSlackNames.length ? `Slack 연결 필요: ${missingSlackNames.join(", ")}.` : ""}
+              {missingSlackNames.length ? `슬랙 연결 필요: ${missingSlackNames.join(", ")}.` : ""}
             </p>
           )}
         </div>
         <ol>
           {[
             [allConsented, "멤버 수집 동의"],
-            [allSlackMapped, "멤버 Slack 계정 연결"],
-            [hasConnectedChannel, "수집 채널 연결"],
+            [allSlackMapped, "멤버 슬랙 계정 연결"],
+            [hasConnectedChannel, "슬랙 채널 연결"],
             [hasPrinciples, "원칙 문서 연결"],
           ].map(([ready, label], index) => (
             <li key={String(label)} data-ready={ready}>
@@ -712,8 +712,8 @@ export default function SettingsS5({
             <div>
               <h2 className="m-0 text-xl">내 수집 동의</h2>
               <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
-                원장에 인용된 발언은 결정 기록의 일부로 남습니다. 동의를
-                철회하면 이후 발언부터 저장하지 않습니다.
+                결정 기록에 근거로 쓰인 발언은 결정 기록의 일부로 남습니다. 동의를
+                거두면 이후 발언부터 저장하지 않습니다.
               </p>
             </div>
             <span className="rounded-full bg-black/5 px-3 py-1 text-sm font-bold">
@@ -740,7 +740,7 @@ export default function SettingsS5({
               onClick={() => void updateConsent(false)}
               type="button"
             >
-              동의 철회
+              동의 거두기
             </button>
           </div>
           {consentState.message ? (
@@ -754,7 +754,7 @@ export default function SettingsS5({
           <div>
             <h2 className="m-0 text-xl">함께하는 멤버</h2>
             <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
-              Slack 채널을 연결하려면 채널 멤버가 모두 계정에 연결되고 동의해야
+              슬랙 채널을 연결하려면 채널 멤버가 모두 계정에 연결되고 동의해야
               합니다.
             </p>
           </div>
@@ -788,7 +788,7 @@ export default function SettingsS5({
                 {data.role === "lead" ? (
                   <div className="flex flex-wrap items-center gap-2">
                     <select
-                      aria-label={`${member.display_name} Slack 계정`}
+                      aria-label={`${member.display_name} 슬랙 계정`}
                       className="rounded-lg border border-black/15 bg-white px-3 py-2 text-sm"
                       value={memberMappings[member.user_id] ?? ""}
                       onChange={(event) =>
@@ -798,7 +798,7 @@ export default function SettingsS5({
                         }))
                       }
                     >
-                      <option value="">Slack 계정 선택</option>
+                      <option value="">슬랙 계정 선택</option>
                       {data.slack_users.map((user) => (
                         <option key={user.id} value={user.id}>
                           {user.displayName}
@@ -807,7 +807,7 @@ export default function SettingsS5({
                     </select>
                     <button
                       className="rounded-lg border border-[var(--accent)] px-3 py-2 text-sm font-bold text-[var(--accent)] disabled:opacity-50"
-                      aria-label={`${member.display_name} Slack 계정 저장`}
+                      aria-label={`${member.display_name} 슬랙 계정 저장`}
                       disabled={mappingState.kind === "pending"}
                       onClick={() => void saveMemberMapping(member.user_id)}
                       type="button"
@@ -818,23 +818,23 @@ export default function SettingsS5({
                       <>
                         {member.role === "member" ? (
                           <AdminAction
-                            label="부서장으로 지정"
+                            label="팀장으로 지정"
                             endpoint={`/api/d/${deptId}/members/${member.user_id}/promote`}
-                            description={`${member.display_name}님에게 부서장 권한을 부여합니다.`}
+                            description={`${member.display_name}님에게 팀장 권한을 부여합니다.`}
                             onChanged={load}
                           />
                         ) : (
                           <AdminAction
-                            label="부서장 해제"
+                            label="팀장 해제"
                             endpoint={`/api/d/${deptId}/members/${member.user_id}/demote`}
-                            description={`${member.display_name}님의 부서장 권한을 해제합니다. 마지막 부서장은 해제할 수 없습니다.`}
+                            description={`${member.display_name}님의 팀장 권한을 해제합니다. 마지막 팀장은 해제할 수 없습니다.`}
                             onChanged={load}
                           />
                         )}
                         <AdminAction
                           label="제외"
                           endpoint={`/api/d/${deptId}/members/${member.user_id}/remove`}
-                          description={`${member.display_name}님을 부서에서 제외합니다. 마지막 부서장은 제외할 수 없습니다.`}
+                          description={`${member.display_name}님을 부서에서 제외합니다. 마지막 팀장은 제외할 수 없습니다.`}
                           onChanged={load}
                         />
                       </>
@@ -843,8 +843,8 @@ export default function SettingsS5({
                 ) : (
                   <span className="text-sm text-[var(--muted)]">
                     {member.slack_user_id
-                      ? "Slack 연결됨"
-                      : "Slack 계정 미연결"}
+                      ? "슬랙 연결됨"
+                      : "슬랙 계정 미연결"}
                   </span>
                 )}
               </li>
@@ -874,12 +874,12 @@ export default function SettingsS5({
           <div>
             <h2 className="m-0 text-xl">연결된 자료</h2>
             <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
-              연결 상태와 공개 범위를 확인하고, 필요한 자료를 다시 가져오세요.
+              연결 상태와 볼 수 있는 사람을 확인하고, 필요한 자료를 다시 가져오세요.
             </p>
           </div>
           {data.sources.length === 0 ? (
             <p className="m-0 text-sm text-[var(--muted)]">
-              아직 연결된 자료가 없습니다. Slack 채널을 연결하거나 회의·원칙
+              아직 연결된 자료가 없습니다. 슬랙 채널을 연결하거나 회의·원칙
               문서를 가져와 보세요.
             </p>
           ) : null}
@@ -896,7 +896,7 @@ export default function SettingsS5({
                       ? "Slack"
                       : source.kind === "meeting"
                         ? "회의"
-                        : "Notion"}{" "}
+                        : "노션"}{" "}
                     ·{" "}
                     {source.visibility === "leads_only"
                       ? "팀장만"
@@ -905,7 +905,7 @@ export default function SettingsS5({
                   {source.kind === "notion_page" ? (
                     <span className="text-sm text-[var(--muted)]">
                       마지막 가져오기: {formatKst(source.last_synced_at)}
-                      {source.auto_sync ? " · 5분마다 자동 갱신" : " · 수동 갱신"}
+                      {source.auto_sync ? " · 5분마다 자동 새로 고침" : " · 수동 새로 고침"}
                     </span>
                   ) : null}
                   {source.last_error ? (
@@ -940,7 +940,7 @@ export default function SettingsS5({
                     ) : null}
                     {source.kind === "notion_page" && source.active ? (
                       <button className="rounded-lg border border-accent/30 px-3 py-2 text-sm font-bold text-accent" disabled={notionState.kind === "pending"} onClick={() => void reimportNotion(source.id, !source.auto_sync)} type="button">
-                        {source.auto_sync ? "자동 갱신 중지" : "자동 갱신 켜기"}
+                        {source.auto_sync ? "자동 새로 고침 중지" : "자동 새로 고침 켜기"}
                       </button>
                     ) : null}
                     {source.kind === "notion_page" && source.active ? (
@@ -994,7 +994,7 @@ export default function SettingsS5({
         {data.role === "lead" ? (
           <section className="settings-panel panel">
             <div>
-              <h2 className="m-0 text-xl">Slack 채널 연결</h2>
+              <h2 className="m-0 text-xl">슬랙 채널 연결</h2>
               <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
                 연결하면 채널에 수집 안내를 게시하고 최근 7일 대화를 가져옵니다.
               </p>
@@ -1013,13 +1013,13 @@ export default function SettingsS5({
             ) : null}
             {!data.channels_available ? (
               <p className="m-0 rounded-xl bg-black/5 p-4 text-sm">
-                Slack 연결을 확인하지 못했습니다. 관리자에게 앱 연결 상태를
+                슬랙 연결을 확인하지 못했습니다. 관리자에게 앱 연결 상태를
                 확인해 주세요.
               </p>
             ) : null}
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="grid gap-2 text-sm font-bold">
-                Slack 채널
+                슬랙 채널
                 <select
                   className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
                   value={selectedChannel}
@@ -1051,7 +1051,7 @@ export default function SettingsS5({
                 />
               </label>
               <label className="grid gap-2 text-sm font-bold">
-                공개 범위
+                볼 수 있는 사람
                 <select
                   className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
                   value={visibility}
@@ -1102,17 +1102,17 @@ export default function SettingsS5({
         <div className="inline-feedback">
           <Icon name="file" />
           <span>
-            정책서·기획안·PDF를 정리하려면{" "}
-            <Link href={`/d/${deptId}/documents`}>문서 어시스턴트</Link>를
+            정책서·기획안·.pdf 파일을 정리하려면{" "}
+            <Link href={`/d/${deptId}/documents`}>문서 정리</Link>를
             이용하세요.
           </span>
         </div>
         {data.role === "lead" ? (
           <section className="settings-panel panel">
             <div>
-              <h2 className="m-0 text-xl">회의 전사 업로드</h2>
+              <h2 className="m-0 text-xl">회의 받아쓴 글 업로드</h2>
               <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
-                Zoom·Meet 기본 전사 VTT/TXT를 올리면 화자 동의가 확인된 발언만
+                줌·구글 미트 기본 받아쓴 글 .vtt 파일/.txt 파일을 올리면 화자 동의가 확인된 발언만
                 저장합니다.
               </p>
             </div>
@@ -1127,7 +1127,7 @@ export default function SettingsS5({
                 />
               </label>
               <label className="grid gap-2 text-sm font-bold">
-                공개 범위
+                볼 수 있는 사람
                 <select
                   className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
                   value={meetingVisibility}
@@ -1142,7 +1142,7 @@ export default function SettingsS5({
                 </select>
               </label>
               <label className="grid gap-2 text-sm font-bold sm:col-span-2">
-                전사 파일
+                받아쓴 글 파일
                 <input
                   accept=".vtt,.txt,text/vtt,text/plain"
                   className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
@@ -1159,7 +1159,7 @@ export default function SettingsS5({
               onClick={() => void uploadMeeting()}
               type="button"
             >
-              {meetingState.kind === "pending" ? "업로드 중…" : "전사 업로드"}
+              {meetingState.kind === "pending" ? "업로드 중…" : "받아쓴 글 업로드"}
             </button>
             {meetingState.message ? (
               <p role="status" className="m-0 text-sm text-[var(--muted)]">
@@ -1172,15 +1172,15 @@ export default function SettingsS5({
         {data.role === "lead" ? (
           <section className="settings-panel panel">
             <div>
-              <h2 className="m-0 text-xl">Notion 원칙 문서</h2>
+              <h2 className="m-0 text-xl">노션 원칙 문서</h2>
               <p className="mb-0 mt-2 text-sm text-[var(--muted)]">
-                사수에 공유된 Notion 페이지를 가져옵니다. 문서가 바뀌면 다시
-                가져오기로 갱신하세요.
+                사수에 공유된 노션 페이지를 가져옵니다. 문서가 바뀌면 다시
+                가져오기로 새로 가져오세요.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="grid gap-2 text-sm font-bold sm:col-span-2">
-                페이지 URL 또는 ID (한 줄에 하나, 최대 50개)
+                페이지 주소 또는 고유번호 (한 줄에 하나, 최대 50개)
                 <textarea
                   className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
                   rows={5}
@@ -1198,7 +1198,7 @@ export default function SettingsS5({
                 />
               </label>
               <label className="grid gap-2 text-sm font-bold">
-                공개 범위
+                볼 수 있는 사람
                 <select
                   className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal"
                   value={notionVisibility}

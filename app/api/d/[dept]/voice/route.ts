@@ -3,8 +3,8 @@ import { llm } from "@/lib/llm";
 import { requireMembership } from "@/lib/supabase/membership";
 
 function voiceErrorMessage(error: string): string {
-  if (error === "unsupported_audio_format") return "webm, m4a, mp3, wav, ogg 음성만 사용할 수 있습니다.";
-  if (error === "audio_too_large") return "음성은 10MB 이하로 녹음해주세요.";
+  if (error === "unsupported_audio_format") return ".webm, m4a, mp3, .wav, .ogg 음성만 사용할 수 있습니다.";
+  if (error === "audio_too_large") return "음성은 10메가바이트 이하로 녹음해주세요.";
   if (error === "audio_empty") return "음성이 비어 있습니다.";
   if (error === "voice_transcription_empty") return "음성에서 질문을 확인하지 못했습니다.";
   if (error === "auth") return "음성 기능 설정을 확인해주세요.";

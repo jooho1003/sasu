@@ -39,7 +39,7 @@ export default async function DemoDepartmentLayout({
       showTrailers
     >
       {children}
-      <aside className="workspace-cta" aria-label="게스트 데모 다음 단계">
+      <aside className="workspace-cta" aria-label="로그인 없이 보기 다음 단계">
         <div>
           <strong>결정이 실제 업무로 이어지는 순간</strong>
           <p>예고편을 열고 신입의 첫 업무를 직접 체험해 보세요.</p>

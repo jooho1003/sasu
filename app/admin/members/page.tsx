@@ -21,7 +21,7 @@ export default async function AdminMembersPage() {
           <p className="eyebrow">조직 관리</p>
           <h1>멤버</h1>
           <p>
-            기존 부서의 멤버 초대와 부서장 지정은 부서장이 부서 세팅에서 합니다.
+            기존 부서의 멤버 초대와 팀장 지정은 팀장이 부서 설정에서 합니다.
           </p>
         </div>
       </header>

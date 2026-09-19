@@ -68,7 +68,7 @@ export async function PATCH(
   const membership = await requireMembership(dept);
   if (membership.role !== "lead") {
     return Response.json(
-      { error: "자동 수집 설정은 부서장만 변경할 수 있습니다." },
+      { error: "자동 수집 설정은 팀장만 변경할 수 있습니다." },
       { status: 403 },
     );
   }
@@ -151,7 +151,7 @@ export async function PATCH(
       .eq("dept_id", membership.deptId);
     if (result.error) {
       return Response.json(
-        { error: result.error.code === "42501" ? "권한이 없습니다." : "공개 범위를 변경하지 못했습니다." },
+        { error: result.error.code === "42501" ? "권한이 없습니다." : "볼 수 있는 사람을 바꾸지 못했습니다. 다시 시도하세요." },
         { status: result.error.code === "42501" ? 403 : 500 },
       );
     }
@@ -167,7 +167,7 @@ export async function POST(
 ) {
   const { dept } = await params;
   const membership = await requireMembership(dept);
-  if (membership.role !== "lead") return Response.json({ error: "Notion 원칙 문서는 팀장만 연결할 수 있습니다." }, { status: 403 });
+  if (membership.role !== "lead") return Response.json({ error: "노션 원칙 문서는 팀장만 연결할 수 있습니다." }, { status: 403 });
 
   let body: { source_id?: unknown; page_id?: unknown; title?: unknown; visibility?: unknown; auto_sync?: unknown; convert_v2?: unknown; include_children?: unknown };
   try {
@@ -179,7 +179,7 @@ export async function POST(
     ? body.page_id.split(/\r?\n/u).map(value => value.trim()).filter(Boolean)
     : [];
   if (typeof body.source_id !== "string" && pageLines.length > 50) {
-    return Response.json({ error: "Notion 페이지는 한 번에 최대 50개까지 등록할 수 있습니다." }, { status: 400 });
+    return Response.json({ error: "노션 페이지는 한 번에 최대 50개까지 등록할 수 있습니다." }, { status: 400 });
   }
   if (body.include_children !== undefined && typeof body.include_children !== "boolean") {
     return Response.json({ error: "하위 페이지 포함 설정을 확인해주세요." }, { status: 400 });
@@ -198,12 +198,12 @@ export async function POST(
       Reflect.get(error, "error_code") === "notion_not_configured"
     ) {
       return Response.json(
-        { error: "조직 관리자가 Notion 워크스페이스를 먼저 연결해야 합니다." },
+        { error: "조직 관리자가 노션 부서 메뉴를 먼저 연결해야 합니다." },
         { status: 409 },
       );
     }
     return Response.json(
-      { error: "Notion 연결을 확인하지 못했습니다." },
+      { error: "노션 연결을 확인하지 못했습니다." },
       { status: 500 },
     );
   }
@@ -214,9 +214,9 @@ export async function POST(
       .eq("id", body.source_id)
       .eq("dept_id", membership.deptId)
       .maybeSingle<{ id: string; kind: string; active: boolean }>();
-    if (sourceResult.error) return Response.json({ error: "Notion 연결을 확인하지 못했습니다." }, { status: 500 });
+    if (sourceResult.error) return Response.json({ error: "노션 연결을 확인하지 못했습니다." }, { status: 500 });
     if (!sourceResult.data || sourceResult.data.kind !== "notion_page" || !sourceResult.data.active) {
-      return Response.json({ error: "활성 Notion 원칙 문서를 찾지 못했습니다." }, { status: 404 });
+      return Response.json({ error: "활성 노션 원칙 문서를 찾지 못했습니다." }, { status: 404 });
     }
 
     if (body.convert_v2 === true) {
@@ -228,9 +228,9 @@ export async function POST(
     }
 
     if (body.auto_sync !== undefined) {
-      if (typeof body.auto_sync !== "boolean") return Response.json({ error: "자동 갱신 설정을 확인해주세요." }, { status: 400 });
+      if (typeof body.auto_sync !== "boolean") return Response.json({ error: "자동 새로 고침 설정을 확인해주세요." }, { status: 400 });
       const setting = await supabase.rpc("set_notion_auto_sync", { p_source: sourceResult.data.id, p_enabled: body.auto_sync });
-      if (setting.error) return Response.json({ error: "자동 갱신 설정을 저장하지 못했습니다." }, { status: 500 });
+      if (setting.error) return Response.json({ error: "자동 새로 고침 설정을 저장하지 못했습니다." }, { status: 500 });
       if (body.auto_sync) kickWorker();
       return Response.json({ ok: true });
     }
@@ -241,9 +241,9 @@ export async function POST(
     return Response.json({ ok: true, source_id: sourceResult.data.id, job_id: jobId }, { status: 202 });
   }
 
-  if (pageLines.length === 0) return Response.json({ error: "Notion 페이지 ID를 입력해주세요." }, { status: 400 });
+  if (pageLines.length === 0) return Response.json({ error: "노션 페이지 고유번호를 입력해주세요." }, { status: 400 });
 
-  const title = typeof body.title === "string" && body.title.trim() ? body.title.trim().slice(0, 120) : "Notion 원칙 문서";
+  const title = typeof body.title === "string" && body.title.trim() ? body.title.trim().slice(0, 120) : "노션 원칙 문서";
   const visibility = body.visibility === "leads_only" ? "leads_only" : "dept";
   const includeChildren = body.include_children === true;
   if (includeChildren) registerNotionDiscoverHandler();
@@ -255,7 +255,7 @@ export async function POST(
     try {
       pageId = normalizeNotionPageId(input);
     } catch {
-      results.push({ input, status: "error", error: "Notion 페이지 URL 또는 ID를 확인해주세요." });
+      results.push({ input, status: "error", error: "노션 페이지 주소 또는 고유번호를 확인해주세요." });
       continue;
     }
 
@@ -267,7 +267,7 @@ export async function POST(
         p_visibility: visibility,
       });
       if (root.error || typeof root.data !== "string") {
-        results.push({ input, status: "error", error: "Notion 수집 범위를 저장하지 못했습니다." });
+        results.push({ input, status: "error", error: "노션 수집 범위를 저장하지 못했습니다." });
         continue;
       }
       try {
@@ -277,14 +277,14 @@ export async function POST(
         }
         results.push({ input, status: "created", root_id: root.data });
       } catch {
-        results.push({ input, status: "error", root_id: root.data, error: "Notion 발견을 예약하지 못했습니다." });
+        results.push({ input, status: "error", root_id: root.data, error: "노션 발견을 예약하지 못했습니다." });
       }
       continue;
     }
 
     const existing = await supabase.from("sources").select("id").eq("dept_id", membership.deptId).eq("kind", "notion_page").eq("external_id", pageId).eq("active", true).maybeSingle<{ id: string }>();
     if (existing.error) {
-      results.push({ input, status: "error", error: "기존 Notion 연결을 확인하지 못했습니다." });
+      results.push({ input, status: "error", error: "기존 노션 연결을 확인하지 못했습니다." });
       continue;
     }
     let sourceId = existing.data?.id;
@@ -309,7 +309,7 @@ export async function POST(
         sourceId = inserted.data?.id;
       }
       if (!sourceId) {
-        results.push({ input, status: "error", error: "Notion 연결을 저장하지 못했습니다." });
+        results.push({ input, status: "error", error: "노션 연결을 저장하지 못했습니다." });
         continue;
       }
     }
@@ -321,7 +321,7 @@ export async function POST(
       }
       results.push({ input, status, source_id: sourceId });
     } catch {
-      results.push({ input, status: "error", source_id: sourceId, error: "Notion 가져오기를 예약하지 못했습니다." });
+      results.push({ input, status: "error", source_id: sourceId, error: "노션 가져오기를 예약하지 못했습니다." });
     }
   }
   if (queued.size > 0) kickWorker();

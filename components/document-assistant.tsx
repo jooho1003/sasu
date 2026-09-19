@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { labelFrom } from "@/lib/labels";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/icon";
@@ -59,13 +60,7 @@ function formatDate(value: string): string {
         timeZone: "Asia/Seoul",
       }).format(date);
 }
-function statusLabel(document: Document): string {
-  return document.status === "processing"
-    ? "정리 중"
-    : document.status === "summary_failed"
-      ? "확인 필요"
-      : "정리 완료";
-}
+function statusLabel(document: Document): string { return labelFrom("documentStatus",document.status); }
 function statusClass(document: Document): string {
   return document.status === "summarized"
     ? "badge-green"
@@ -219,7 +214,7 @@ export default function DocumentAssistant({
     <main className="workspace-page">
       <header className="page-heading">
         <div>
-          <p className="eyebrow">문서 어시스턴트</p>
+          <p className="eyebrow">문서 정리</p>
           <h1>문서에서 업무를 꺼내세요</h1>
           <p>긴 문서의 핵심과 다음 할 일. 원문 근거까지 한곳에서 확인하세요.</p>
         </div>
@@ -265,7 +260,7 @@ export default function DocumentAssistant({
               <label className="file-dropzone">
                 <Icon name="file" size={28} />
                 <strong>{file ? file.name : "정리할 파일을 선택하세요"}</strong>
-                <span>TXT · MD · CSV · JSON · PDF · DOCX / 최대 20MB</span>
+                <span>.txt 파일 · .md 파일 · .csv 파일 · .json 파일 · .pdf 파일 · .docx 파일 / 최대 20메가바이트</span>
                 <input
                   ref={fileInput}
                   aria-label="문서 파일"
@@ -285,7 +280,7 @@ export default function DocumentAssistant({
                       setUploadState({
                         kind: "error",
                         message:
-                          "지원하는 형식의 20MB 이하 파일을 선택해 주세요.",
+                          "지원하는 형식의 20메가바이트 이하 파일을 선택해 주세요.",
                       });
                     } else {
                       setFile(next);
@@ -301,11 +296,11 @@ export default function DocumentAssistant({
                     className="field-input"
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
-                    placeholder="비워두면 파일 이름을 사용해요"
+                    placeholder="비워두면 파일 이름을 씁니다"
                   />
                 </label>
                 <label className="field-label">
-                  공개 범위
+                  볼 수 있는 사람
                   <select
                     className="field-input"
                     value={visibility}
@@ -393,7 +388,7 @@ export default function DocumentAssistant({
         {loading && documents.length === 0 ? (
           <div className="panel empty-state" role="status">
             <Icon name="file" size={28} />
-            <h3>문서를 불러오고 있어요</h3>
+            <h3>문서를 불러오고 있습니다</h3>
             <p>내 부서의 문서를 확인하고 있습니다.</p>
           </div>
         ) : !loadError && documents.length === 0 ? (
@@ -405,7 +400,7 @@ export default function DocumentAssistant({
             <p>
               {role === "lead"
                 ? "정책서나 기획안을 올리면, 다음 결정에 쓸 수 있는 근거가 됩니다."
-                : "부서장이 문서를 추가하면 이곳에서 요약과 근거를 확인할 수 있습니다."}
+                : "팀장이 문서를 추가하면 이곳에서 요약과 근거를 확인할 수 있습니다."}
             </p>
             {role === "lead" ? (
               <button
@@ -529,8 +524,8 @@ function DocumentDetail({
           <span className="surface-icon">
             <Icon name="spark" size={25} />
           </span>
-          <h4>핵심과 근거를 정리하고 있어요</h4>
-          <p>정리가 끝나면 자동으로 표시됩니다. 다른 문서를 읽어도 괜찮아요.</p>
+          <h4>핵심과 근거를 정리하고 있습니다</h4>
+          <p>정리가 끝나면 자동으로 표시됩니다. 다른 문서를 읽어도 됩니다.</p>
         </div>
       ) : null}
       {document.status === "summary_failed" ? (
@@ -538,7 +533,7 @@ function DocumentDetail({
           문서 정리를 완료하지 못했습니다.{" "}
           {role === "lead"
             ? "원문을 확인한 뒤 다시 업로드해 주세요."
-            : "부서장에게 문서 확인을 요청해 주세요."}
+            : "팀장에게 문서 확인을 요청해 주세요."}
         </div>
       ) : null}
       {document.status === "summarized" && !hasEvidence ? (
@@ -576,7 +571,7 @@ function DocumentDetail({
                   href={
                     citation.decision_id
                       ? `/d/${deptId}/ledger#decision-${citation.decision_id}`
-                      : `/d/${deptId}#item-${citation.item_id ?? ""}`
+                      : `/d/${deptId}?item=${citation.item_id ?? ""}#item-${citation.item_id ?? ""}`
                   }
                 >
                   <q>{citation.quote}</q>

@@ -1,4 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { RetroActivityRow } from "@/lib/contracts";
+
+it("연결 고유번호가 있는 실제 DB 활동 행을 읽는다", () => {
+  const id="11111111-1111-4111-8111-111111111111";
+  expect(RetroActivityRow.safeParse({id,day_id:id,connection_id:id,kind:"github_pr",ref:"one",title:"기록",text:"",at:"2026-09-19T00:00:00+00:00",meta:{},source_visibility:null,excluded:false}).success).toBe(true);
+});
 import { normalizeActivity, parseRetroBundle } from "@/lib/retro/bundle";
 const date = "2026-09-19";
 const activity = { kind: "git_commit", ref: "abc", title: "연락 010-1234-5678", text: "name@example.com", at: `${date}T01:00:00Z`, meta: {} };
@@ -13,6 +19,9 @@ describe("회고 번들", () => {
   it("서버 활동·중복·날짜·시간대·한도를 거부한다", () => {
     const parse = (value: unknown) => parseRetroBundle(value, new Date(`${date}T02:00:00Z`));
     expect(parse({ ...bundle, activities: [{ ...activity, kind: "sasu_decision" }] })).toEqual({ ok: false, code: "server_only_kind" });
+    for (const kind of ["slack_message", "meeting_attended", "notion_page_changed", "github_pr", "manual_note", "metric_snapshot"]) {
+      expect(parse({ ...bundle, activities: [{ ...activity, kind }] })).toEqual({ ok: false, code: "server_only_kind" });
+    }
     expect(parse({ ...bundle, activities: [activity, activity] })).toEqual({ ok: false, code: "duplicate_ref" });
     expect(parse({ ...bundle, date: "2026-09-01" })).toEqual({ ok: false, code: "date_out_of_range" });
     expect(parse({ ...bundle, tz: "Invalid/Zone" }).ok).toBe(false);

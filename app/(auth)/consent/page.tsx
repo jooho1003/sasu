@@ -26,7 +26,7 @@ export default async function ConsentPage({ searchParams }: ConsentPageProps) {
     .eq("user_id", user.id)
     .order("dept_id", { ascending: true });
   if (membershipsResult.error) {
-    throw new Error("부서 멤버십을 확인하지 못했습니다.", {
+    throw new Error("부서 소속을 확인하지 못했습니다.", {
       cause: membershipsResult.error,
     });
   }

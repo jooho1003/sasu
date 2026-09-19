@@ -16,7 +16,7 @@ export default async function AdminPage() {
       <header className="page-heading">
         <div>
           <p className="eyebrow">조직 관리</p>
-          <h1>조직 개요</h1>
+          <h1>조직 한눈에</h1>
           <p>부서별 멤버, 연결된 자료와 의사결정 현황을 한눈에 확인하세요.</p>
         </div>
       </header>

@@ -55,7 +55,7 @@ test("각 기능 화면이 데이터를 불러온 뒤에도 오류 화면으로 
   for (const feature of DEMO_FEATURES) {
     // 200 응답만으로는 클라이언트 조회 이후의 렌더 오류를 잡지 못한다.
     await page.goto(feature.href, { waitUntil: "networkidle" });
-    await expect(page.getByText("합성 데이터를 불러오지 못했습니다"), feature.title).toHaveCount(0);
+    await expect(page.getByText("가상 회사 자료를 불러오지 못했습니다"), feature.title).toHaveCount(0);
     if (feature.key === "documents") {
       await page.locator(".demo-source > summary").first().click();
       await expect(page.getByText("한눈에 보기").first()).toBeVisible();
@@ -105,14 +105,14 @@ test("390px에서도 기능 지도와 추천 시작점이 잘리지 않는다", 
 
 test("결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 체험한다", async ({ page }) => {
   await page.goto(DEMO_FEATURES.find((feature) => feature.key === "card")!.href);
-  await page.getByLabel("결정 사유").fill("합성 데모에서 재입찰을 우선 검토합니다.");
+  await page.getByLabel("왜 그렇게 정했나요").fill("합성 데모에서 재입찰을 우선 검토합니다.");
   await page.getByRole("button", { name: "재입찰로 결정" }).click();
   await expect(page.getByText("결정 완료 미리보기")).toBeVisible();
 
   await page.goto(DEMO_FEATURES.find((feature) => feature.key === "ledger")!.href);
   await page.getByLabel("결정 내용").fill("외주사 B는 재입찰을 진행합니다.");
   await page.getByLabel("결정 이유").fill("10% 이상 인상 원칙을 적용했습니다.");
-  await page.getByRole("button", { name: "원장 반영 미리보기" }).click();
+  await page.getByRole("button", { name: "결정 기록 반영 미리보기" }).click();
   await expect(page.getByText("결정 미리보기")).toBeVisible();
 
   await page.goto(DEMO_FEATURES.find((feature) => feature.key === "ask")!.href);
@@ -138,7 +138,7 @@ test("결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 
   await page.getByRole("button", { name: "추천 예시 바로 불러오기" }).click();
   await expect(page.getByText("파일 · 온새미로-영업-주간회의.vtt")).toBeVisible();
   await expect(page.getByRole("checkbox")).toBeChecked();
-  await page.getByRole("button", { name: "전사·추출 결과 보기" }).click();
-  await page.getByRole("button", { name: "이 내용으로 근거 확정 체험" }).click();
-  await expect(page.getByText("근거 확정 미리보기 완료")).toBeVisible();
+  await page.getByRole("button", { name: "글로 바꾼 결과 보기" }).click();
+  await page.getByRole("button", { name: "이 내용을 근거로 쓰기" }).click();
+  await expect(page.getByText("근거로 쓰기 미리보기 완료")).toBeVisible();
 });

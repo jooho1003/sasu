@@ -12,6 +12,6 @@ test("합성 회고 체험은 필터·근거·복사만 제공하며 쓰기가 �
   await page.getByRole("article").first().getByRole("button").click();
   await expect(page.getByRole("button",{name:"확정",exact:true})).toBeDisabled();await expect(page.getByRole("button",{name:"삭제",exact:true})).toBeDisabled();
   await page.getByRole("checkbox").first().check();
-  await page.getByText("내보내기",{exact:true}).click();await page.getByRole("button",{name:"Markdown 복사"}).click();
+  await page.getByText("내보내기",{exact:true}).click();await page.getByRole("button",{name:".md 파일 복사"}).click();
   await expect(page.getByRole("alert").filter({hasText:"Markdown을 복사했습니다"})).toContainText("복사했습니다");expect(await page.evaluate(()=>navigator.clipboard.readText())).toContain("[^A1]");expect(writes).toEqual([]);
 });

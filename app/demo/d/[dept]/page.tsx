@@ -1,3 +1,4 @@
+import { LABELS as STATE_LABELS, labelFrom } from "@/lib/labels";
 import Link from "next/link";
 import { DemoRecords, type RecordKind } from "@/components/demo-records";
 import { Icon } from "@/components/ui/icon";
@@ -28,13 +29,7 @@ type Card = { id: string; title: string; status: string; visibility: string };
 const recordKind = (kind?: Source["kind"]): RecordKind =>
   kind === "slack_channel" ? "slack" : kind === "meeting" ? "meeting" : "document";
 
-const LABELS: Record<Classification["label"], string> = {
-  decision: "결정 필요",
-  action: "액션",
-  info: "정보",
-  chatter: "잡담",
-  unclassified: "분류 대기",
-};
+const LABELS = STATE_LABELS.itemLabel;
 
 export default async function DemoDashboardPage({
   params,
@@ -73,7 +68,7 @@ export default async function DemoDashboardPage({
       .order("opened_at", { ascending: false }),
   ]);
   if (sourcesResult.error || itemsResult.error || cardsResult.error) {
-    throw new Error("데모 대시보드 조회 실패");
+    throw new Error("데모 대시보드 보기 실패");
   }
 
   const extra = dept === DEMO_DEFAULT_DEPT_ID ? salesDemoRecords : { sources: [], items: [] };
@@ -115,10 +110,10 @@ export default async function DemoDashboardPage({
   };
 
   return (
-    <main className="workspace-page">
+    <main className="workspace-page demo-dashboard">
       <header className="page-heading">
         <div>
-          <p className="eyebrow">{department.name}의 워크스페이스</p>
+          <p className="eyebrow">{department.name}의 부서 메뉴</p>
           <h1>오늘, 함께 살펴볼 결정.</h1>
           <p>
             흩어진 대화에서 결정할 순간을 모았습니다. 근거부터 확인해보세요.
@@ -162,7 +157,7 @@ export default async function DemoDashboardPage({
           </Link>
         ))}
       </nav>
-      <section className="grid gap-4" aria-labelledby="demo-cards-heading">
+      <section className="demo-card-section grid gap-4" aria-labelledby="demo-cards-heading">
         <div className="section-heading">
           <div>
             <h2 id="demo-cards-heading">
@@ -188,16 +183,7 @@ export default async function DemoDashboardPage({
                   <span
                     className={`badge ${card.status === "open" ? "badge-urgent" : "badge-neutral"}`}
                   >
-                    {(
-                      {
-                        open: "결정 필요",
-                        deferred: "보류",
-                        decided: "결정 완료",
-                        rejected: "반려",
-                        needs_review: "검토 필요",
-                        generating: "정리 중",
-                      } as Record<string, string>
-                    )[card.status] ?? "확인 필요"}
+                    {labelFrom("cardStatus",card.status)}
                   </span>
                   <span className="flex items-center gap-1">
                     <Icon name="lock" size={11} />
@@ -208,7 +194,7 @@ export default async function DemoDashboardPage({
                 </div>
                 <h3>{card.title}</h3>
                 <footer>
-                  <span>원문 근거와 추천 방향</span>
+                  <span>원문 근거와 사수의 제안</span>
                   <span>
                     카드 상세 보기 <Icon name="arrow" size={14} />
                   </span>
@@ -236,6 +222,7 @@ export default async function DemoDashboardPage({
                     sourceId: item.source_id,
                     sourceTitle: sourceMap.get(item.source_id)?.title ?? "입력",
                     sourceKind: recordKind(sourceMap.get(item.source_id)?.kind),
+                    hasDecision: dept===DEMO_DEFAULT_DEPT_ID && salesDemoRecords.decisions.some(d=>d.source_id===item.source_id || d.source_ids?.includes(item.source_id)),
                   })),
                 },
               ]

@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { BrandMark, Icon, type IconName } from "@/components/ui/icon";
 
 const entries: { key: string; label: string; icon: IconName }[] = [
-  { key: "overview", label: "개요", icon: "grid" },
+  { key: "overview", label: "한눈에", icon: "grid" },
   { key: "members", label: "멤버", icon: "people" },
-  { key: "sources", label: "수집 채널", icon: "hash" },
+  { key: "sources", label: "연결한 채널", icon: "hash" },
   { key: "audit", label: "기록", icon: "book" },
   { key: "security", label: "자료 보호", icon: "lock" },
 ];
@@ -32,7 +32,7 @@ export function AdminShell({
       <aside className="workspace-sidebar">
         <Link className="brand" href={demo ? "/demo" : "/"}>
           <BrandMark />
-          사수<span className="brand-caption">팀을 위한 AI</span>
+          사수<span className="brand-caption">팀을 위한 인공지능</span>
         </Link>
         <div className="workspace-team">
           <span className="team-avatar">
@@ -64,7 +64,7 @@ export function AdminShell({
         <div className="sidebar-bottom">
           <div className="sidebar-note">
             <Icon name="lock" />
-            <strong>권한에 맞는 정보만.</strong>
+            <strong>관리자에게 필요한 정보만 보입니다.</strong>
             <p>이곳에서는 조직의 운영 현황과 연결 상태를 확인합니다.</p>
           </div>
           <Link className="sidebar-link" href={demo ? "/demo" : "/"}>
@@ -78,7 +78,7 @@ export function AdminShell({
           <span>
             조직 관리<span className="breadcrumb-divider">/</span>
             <strong>
-              {entries.find((entry) => entry.key === active)?.label ?? "개요"}
+              {entries.find((entry) => entry.key === active)?.label ?? "한눈에"}
             </strong>
           </span>
           {demo ? (
@@ -94,10 +94,10 @@ export function AdminShell({
           )}
         </header>
         {demo ? (
-          <div className="demo-notice">
+          <div className="demo-notice admin-demo-notice">
             <span>
               <Icon name="spark" size={15} />
-              게스트 모드 · 합성 데이터 · 읽기 전용
+              로그인 없이 보기 · 가상 회사 자료 · 보기만 가능
             </span>
           </div>
         ) : null}

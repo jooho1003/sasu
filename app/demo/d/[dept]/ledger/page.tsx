@@ -37,7 +37,7 @@ export default async function DemoLedgerPage({
     .select("id, decided_by_name, decided_at, outcome, rationale")
     .eq("dept_id", dept)
     .order("decided_at", { ascending: false });
-  if (error) throw new Error("게스트 원장 조회 실패");
+  if (error) throw new Error("게스트 결정 기록 보기 실패");
   const rows = (decisions ?? []) as Decision[];
   const { data: citations, error: citationsError } = rows.length
     ? await supabase
@@ -46,13 +46,13 @@ export default async function DemoLedgerPage({
         .eq("owner_kind", "decision")
         .in("owner_id", rows.map((decision) => decision.id))
     : { data: [] as Citation[], error: null };
-  if (citationsError) throw new Error("게스트 원장 근거 조회 실패");
+  if (citationsError) throw new Error("게스트 결정 기록 근거 보기 실패");
   const citationRows = (citations ?? []) as Citation[];
   const itemIds = citationRows.flatMap((citation) => citation.item_id ? [citation.item_id] : []);
   const { data: items, error: itemsError } = itemIds.length
     ? await supabase.from("items").select("id, author").in("id", itemIds)
     : { data: [] as Item[], error: null };
-  if (itemsError) throw new Error("게스트 원장 원문 조회 실패");
+  if (itemsError) throw new Error("게스트 결정 기록 원문 보기 실패");
   const itemMap = new Map(((items ?? []) as Item[]).map((item) => [item.id, item]));
   const citationMap = new Map<string, Citation[]>();
   for (const citation of citationRows) {
@@ -67,7 +67,7 @@ export default async function DemoLedgerPage({
       <header className="page-heading">
         <div>
           <p className="eyebrow">팀이 함께 쌓아온 판단</p>
-          <h1>결정 원장</h1>
+          <h1>결정 기록</h1>
           <p>무엇을 결정했는지, 왜 그렇게 정했는지. 그 맥락을 함께 남깁니다.</p>
         </div>
         <Link
@@ -124,7 +124,7 @@ export default async function DemoLedgerPage({
           ))}
         </div>
       )}
-      </details><DemoLedgerSimulator items={workspaceData.items} />
+      </details><DemoLedgerSimulator items={workspaceData.items} sources={workspaceData.sources} />
       <section className="card-next-step">
         <div><strong>다음 4/4 · 같은 질문 비교</strong><span>부서가 바뀌면 같은 질문에 어떤 답이 달라지는지 확인하세요.</span></div>
         <Link className="button button-primary button-small" href={`/demo/d/${dept}/ask?q=principle`}>

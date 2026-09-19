@@ -8,8 +8,8 @@ import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 function documentErrorMessage(error: string): string {
-  if (error === "unsupported_document_format") return "TXT, MD, CSV, JSON, PDF, DOCX 파일만 업로드할 수 있습니다.";
-  if (error === "document_too_large") return "문서는 20MB 이하이어야 합니다.";
+  if (error === "unsupported_document_format") return ".txt 파일, .md 파일, .csv 파일, .json 파일, .pdf 파일, .docx 파일만 업로드할 수 있습니다.";
+  if (error === "document_too_large") return "문서는 20메가바이트 이하이어야 합니다.";
   if (error === "document_empty") return "빈 문서는 업로드할 수 없습니다.";
   return "문서를 처리하지 못했습니다.";
 }

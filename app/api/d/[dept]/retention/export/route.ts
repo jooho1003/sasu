@@ -55,7 +55,7 @@ export async function POST(
     );
   const bundle = buildRetentionBundle({
     sourceId: source.data.id,
-    title: source.data.title ?? "Slack 채널",
+    title: source.data.title ?? "슬랙 채널",
     from,
     to,
     records: records.data,

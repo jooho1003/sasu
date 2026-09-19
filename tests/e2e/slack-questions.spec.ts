@@ -28,16 +28,16 @@ for (const width of [1440, 390]) {
       citations: [{ quote: "검증 후 배포합니다.", author: "합성 담당자", source: "배포 원칙", href: "#" }],
     } }));
     await page.goto(`/d/${dept}/ask`);
-    const panel = page.getByRole("region", { name: "내 Slack 질문" });
+    const panel = page.getByRole("region", { name: "내 슬랙 질문" });
     await expect(panel.getByRole("button", { name: "최근 질문 확인" })).toBeVisible();
     expect(gets).toBe(0);
     await panel.getByRole("button", { name: "최근 질문 확인" }).click();
     await expect(panel.getByText("전송 재시도 필요")).toBeVisible();
     await panel.getByRole("button", { name: "답변 보기" }).click();
     await expect(page.locator("article")).toContainText("검증 후 배포합니다.");
-    await panel.getByRole("button", { name: "Slack에 다시 보내기" }).click();
+    await panel.getByRole("button", { name: "슬랙에 다시 보내기" }).click();
     await expect(panel.getByRole("status")).toContainText("다시 보내고 있습니다");
-    await expect(panel.getByRole("button", { name: "Slack에 다시 보내기" })).toHaveCount(0);
+    await expect(panel.getByRole("button", { name: "슬랙에 다시 보내기" })).toHaveCount(0);
     expect(retries).toBe(1); expect(asks).toBe(0); expect(gets).toBe(2);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `docs/verification/slack-completion-2026-09-16/fixture-slack-questions-${width}.png`, fullPage: true });
@@ -53,7 +53,7 @@ test("조회 실패 재시도와 인용 없는 생성 본문 차단", async ({ p
   await page.route(`**/api/d/${dept}/answers/${answerId}`, route => route.fulfill({ json: { id: answerId, status: "done", answer: "노출하면 안 되는 본문", citations: [], refused: false } }));
   await page.goto(`/d/${dept}/ask`);
   await page.getByRole("button", { name: "최근 질문 확인" }).click();
-  await expect(page.getByRole("region", { name: "내 Slack 질문" }).getByRole("alert")).toContainText("잠시 후");
+  await expect(page.getByRole("region", { name: "내 슬랙 질문" }).getByRole("alert")).toContainText("잠시 후");
   await page.getByRole("button", { name: "최근 질문 확인" }).click();
   await page.getByRole("button", { name: "답변 보기" }).click();
   await expect(page.getByText("노출하면 안 되는 본문")).toHaveCount(0);

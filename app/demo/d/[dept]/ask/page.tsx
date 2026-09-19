@@ -36,7 +36,7 @@ export default async function DemoAskPage({
         .order("created_at", { ascending: true }),
       supabase.rpc("demo_departments"),
     ]);
-  if (answersError) throw new Error("게스트 답변 조회 실패");
+  if (answersError) throw new Error("게스트 답변 보기 실패");
   const rows = (answers ?? []) as Answer[];
   const departmentRows = (departments ?? []) as DemoDepartment[];
   const otherDepartmentIds = departmentRows
@@ -62,8 +62,8 @@ export default async function DemoAskPage({
       : Promise.resolve({ data: [] as Pick<Answer, "dept_id" | "question_key">[], error: null }),
   ]);
   const { data: citations, error: citationsError } = citationResult;
-  if (citationsError) throw new Error("게스트 답변 근거 조회 실패");
-  if (comparisonResult.error) throw new Error("게스트 비교 질문 조회 실패");
+  if (citationsError) throw new Error("게스트 답변 근거 보기 실패");
+  if (comparisonResult.error) throw new Error("게스트 비교 질문 보기 실패");
   const citationMap = new Map<string, string[]>();
   for (const citation of (citations ?? []) as Citation[]) {
     if (citation.quote.trim())
@@ -92,7 +92,7 @@ export default async function DemoAskPage({
     <main className="workspace-page">
       <header className="page-heading">
         <div>
-          <p className="eyebrow">팀의 맥락을 아는 AI</p>
+          <p className="eyebrow">팀의 맥락을 아는 인공지능</p>
           <h1>사수에게 묻기</h1>
           <p>
             궁금한 질문을 골라보세요. 답변 옆에서 원문 근거를 확인할 수
@@ -116,7 +116,7 @@ export default async function DemoAskPage({
         <div>
           <h2>우리 팀의 이야기도 물어보세요</h2>
           <p>
-            질문을 입력하면 관련된 합성 근거 답변을 찾아드립니다. 음성 체험에서는 샘플 전사를 확인할 수 있어요.
+            질문을 입력하면 준비된 가상 자료에서 답을 찾습니다. 음성 체험에서는 받아쓴 글의 예시를 확인할 수 있습니다.
           </p>
         </div>
         <Link className="button button-secondary button-small" href="/login">

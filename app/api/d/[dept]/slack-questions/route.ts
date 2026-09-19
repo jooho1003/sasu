@@ -7,7 +7,7 @@ export async function GET(_request: Request, context: Context) {
   const membership = await requireMembership((await context.params).dept);
   const client = await createServerSupabaseClient();
   const result = await client.rpc("my_slack_questions", { p_dept: membership.deptId });
-  if (result.error) return Response.json({ error: "Slack 질문을 불러오지 못했습니다." }, { status: 500 });
+  if (result.error) return Response.json({ error: "슬랙 질문을 불러오지 못했습니다." }, { status: 500 });
   return Response.json({ questions: result.data ?? [] });
 }
 

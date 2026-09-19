@@ -242,7 +242,7 @@ async function slackCitations(args: {
         occurredAt: decision.decided_at,
         source: "결정 원장",
         href: `${departmentUrl}/ledger#decision-${encodeURIComponent(decision.id)}`,
-        linkLabel: "결정 원장 확인",
+        linkLabel: "결정 기록 보기",
       };
     const permalink = item ? links.get(item.id) : null;
     return {
@@ -253,7 +253,7 @@ async function slackCitations(args: {
         ? `${item.source_kind === "slack_channel" ? "Slack · " : ""}${item.source_title}`
         : "부서 기록",
       href: permalink ?? departmentUrl,
-      linkLabel: permalink ? "원문 확인" : "부서에서 보기",
+      linkLabel: permalink ? "원문 보기" : "부서에서 보기",
     };
   });
 }

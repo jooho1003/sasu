@@ -80,6 +80,7 @@ const SAFE_ERROR_CODES = new Set([
   "job_failed",
   "llm_refusal",
   "llm_request_failed",
+  "llm_budget_exceeded",
   "llm_timeout",
   "rate_limited",
   "schema_invalid",

@@ -6,10 +6,10 @@ export type SlackAnswerCitation = {
   occurredAt: string | null;
   source: string;
   href: string | null;
-  linkLabel?: "원문 확인" | "부서에서 보기" | "결정 원장 확인";
+  linkLabel?: "원문 보기" | "부서에서 보기" | "결정 기록 보기";
 };
 
-const FOOTER = "이 채널의 부서 공개 기록만 참고했습니다.";
+const FOOTER = "이 채널에서 볼 수 있는 부서 기록만 보고 답했습니다.";
 const MESSAGE_OPTIONS = {
   mrkdwn: false,
   parse: "none",
@@ -70,7 +70,7 @@ export function buildSlackAnswerMessage(input: {
   citations: SlackAnswerCitation[];
   scope?: "user" | "channel";
 }) {
-  const footer = input.scope === "user" ? "내 권한 범위 안의 부서 기록만 참고했습니다." : FOOTER;
+  const footer = input.scope === "user" ? "내가 볼 수 있는 부서 기록만 보고 답했습니다." : FOOTER;
   if (
     !input.citations.length ||
     input.citations.some((citation) => !citation.quote.trim())
@@ -79,7 +79,7 @@ export function buildSlackAnswerMessage(input: {
   }
   const tooLong = () =>
     notice(
-      "답변과 근거가 Slack 메시지 한도를 넘었습니다. 질문을 나누어 다시 물어봐 주세요.",
+      "답변과 근거가 슬랙 메시지 한도를 넘었습니다. 질문을 나누어 다시 물어봐 주세요.",
     );
   // Bound allocation before splitting arbitrarily long model output.
   if (
@@ -114,7 +114,7 @@ export function buildSlackAnswerMessage(input: {
       .join("");
     const metadata = `근거 ${index + 1} · ${author} · ${time}\n${source}`;
     const href = sourceUrl(citation.href);
-    const label = citation.linkLabel ?? "원문 확인";
+    const label = citation.linkLabel ?? "원문 보기";
     blocks.push(
       { type: "context", elements: [plain(metadata)] },
       ...sections(citation.quote),

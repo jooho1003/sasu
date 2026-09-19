@@ -48,11 +48,11 @@ test("합성 번들부터 실제 생성·수정·공유·내보내기까지",asy
     await page.getByRole("button",{name:"확정",exact:true}).click();
     await expect.poll(async()=>(await read()).day?.status).toBe("confirmed");
     await page.getByText("내보내기",{exact:true}).click();const pending=page.waitForEvent("download");
-    await page.getByRole("button",{name:"Markdown 다운로드"}).click();const file=await pending;
+    await page.getByRole("button",{name:".md 파일 다운로드"}).click();const file=await pending;
     expect(readFileSync((await file.path())!,"utf8")).toContain("[^A1]");
     const exported=await context.request.get(`${endpoint}/export`);expect(exported.headers()["cache-control"]).toMatch(/private, no-store(?:, max-age=0)?/);
     expect((await second.request.get(endpoint)).status()).toBe(404);
-    await page.getByLabel("공개 범위").selectOption("dept");
+    await page.getByLabel("볼 수 있는 사람").selectOption("dept");
     await expect.poll(async()=>(await second.request.get(endpoint)).status()).toBe(200);
     await page.getByText("내보내기",{exact:true}).click();
     for(const width of [1440,390]){await page.setViewportSize({width,height:960});await page.screenshot({path:`${evidence}/retro-detail-${width}.png`,fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);}

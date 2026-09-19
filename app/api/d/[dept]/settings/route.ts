@@ -24,7 +24,7 @@ export async function GET(
   ]);
 
   if (membersResult.error || sourcesResult.error) {
-    return Response.json({ error: "부서 세팅을 불러오지 못했습니다." }, { status: 500 });
+    return Response.json({ error: "부서 설정을 불러오지 못했습니다." }, { status: 500 });
   }
 
   let channels: Array<{ id: string; name: string; isPrivate: boolean }> = [];

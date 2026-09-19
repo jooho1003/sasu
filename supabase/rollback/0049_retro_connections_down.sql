@@ -1,3 +1,6 @@
+-- Apply after 0050 rollback in the same transaction.
+drop function if exists public.derive_retro_activities(uuid);
+drop function if exists public.queue_retro_pull(uuid,date);
 drop function if exists public.upsert_retro_activities_as(uuid,uuid,date,jsonb);
 drop function if exists public.add_retro_note(uuid,text,text);
 drop function if exists public.revoke_retro_connection(uuid);

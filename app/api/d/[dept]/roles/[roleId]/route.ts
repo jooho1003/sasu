@@ -47,14 +47,14 @@ export async function PATCH(
     body = withoutAuthorityFields(await request.json());
   } catch {
     return Response.json(
-      { error: "요청 본문이 올바른 JSON이 아닙니다." },
+      { error: "요청 본문이 올바른 .json 파일이 아닙니다." },
       { status: 400 },
     );
   }
 
   if (!ArchiveRoleRequest.safeParse(body).success) {
     return Response.json(
-      { error: "보관 요청은 archived=true만 허용합니다." },
+      { error: "점수 기준표를 치우는 요청만 가능합니다. 다시 확인해 주세요." },
       { status: 400 },
     );
   }

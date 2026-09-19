@@ -1,5 +1,5 @@
 export type DemoSource = { id: string; title: string; kind: string };
-export type DemoItem = { id: string; source_id: string; content: string; author: string | null; label: string };
+export type DemoItem = { id: string; source_id: string; content: string; author: string | null; label: string; spoken_at?: string | null };
 export type DemoDecision = { id: string; source_id: string; source_ids?: string[]; outcome: string; rationale: string; quote: string; status: "decided" | "deferred"; supersedes_id?: string; request_id?: string };
 export type DemoWorkspaceData = { sources: DemoSource[]; items: DemoItem[]; decisions: DemoDecision[] };
 
@@ -27,7 +27,7 @@ export const salesDemoRecords: DemoWorkspaceData = {
       ["sales-slack", `${title}: ${fact}`, "decision"], ["sales-slack", rule, "info"], ["sales-slack", action, "action"],
       [meeting, `${title} 안건입니다. ${fact}`, "info"], [meeting, decision, "decision"], [meeting, action, "action"],
       [`sales-doc-${i}`, `${fact} ${rule}`, "info"], [`sales-doc-${i}`, `${decision} ${action}`, "decision"],
-    ].map(([source_id, content, label], j) => ({ id: `sales-item-${i}-${j}`, source_id, content, label, author: ["이서연", "김민수", "박지훈", "최수진"][i % 4] }));
+    ].map(([source_id, content, label], j) => ({ id: `sales-item-${i}-${j}`, source_id, content, label, spoken_at: `2026-09-${i < 4 ? "16" : "18"}T01:${String(i * 7 + j).padStart(2, "0")}:00+09:00`, author: ["이서연", "김민수", "박지훈", "최수진"][i % 4] }));
   }),
   decisions: topics.map(([, , rule, decision], i) => ({ id: `sales-decision-${i}`, source_id: `sales-meeting-${i < 4 ? 1 : 2}`, source_ids: [`sales-doc-${i}`], outcome: decision, rationale: rule, quote: decision, status: i % 2 === 1 ? "deferred" : "decided" })),
 };

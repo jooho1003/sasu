@@ -71,13 +71,13 @@ export function SiteFooter({ links }: { links: SiteLinks }) {
           </Link>
           <p>팀의 맥락을 기억하고, 다음 결정을 돕습니다.</p>
           <p>
-            원티드 AI Championship 2026 출품작 · 데모의 회사·인물·대화는 모두
-            합성입니다.
+            원티드 인공지능 챔피언십 2026 출품작 · 데모의 회사·인물·대화는 모두
+            가상입니다.
           </p>
         </div>
         <nav aria-label="하단 메뉴">
           <Link href="/privacy">개인정보 처리 안내</Link>
-          <a href="/demo">게스트 데모</a>
+          <a href="/demo">로그인 없이 보기</a>
           {links.guideUrl ? (
             <a href={links.guideUrl} target="_blank" rel="noopener noreferrer">
               사용 가이드<span className="sr-only"> (노션, 새 탭)</span>

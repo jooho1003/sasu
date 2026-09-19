@@ -24,8 +24,8 @@ export default async function AdminSourcesPage({
       <header className="page-heading">
         <div>
           <p className="eyebrow">조직 관리</p>
-          <h1>수집 채널</h1>
-          <p>채널 추가·제거는 부서장이 부서 세팅에서 합니다.</p>
+          <h1>연결한 채널</h1>
+          <p>채널 추가·제거는 팀장이 부서 설정에서 합니다.</p>
         </div>
       </header>
       <SlackInstallation result={slack} />
@@ -48,7 +48,7 @@ export default async function AdminSourcesPage({
           </select>
         </label>
         <button className="rounded-xl border border-accent/30 px-4 py-2 text-sm font-bold text-accent">
-          조회
+          보기
         </button>
       </form>
       {sources ? (

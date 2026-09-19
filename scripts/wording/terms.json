@@ -1,0 +1,1073 @@
+{
+  "version": 1,
+  "terms": [
+    {
+      "term": "결정 원장",
+      "replacement": "결정 기록",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "원장",
+      "replacement": "결정 기록",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "음성·자료 검토",
+      "replacement": "올린 자료",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "자료 검토함",
+      "replacement": "올린 자료 확인",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "문서 어시스턴트",
+      "replacement": "문서 정리",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "문서 평가",
+      "replacement": "문서 점수표",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "부서 에이전트 역할",
+      "replacement": "문서 점수표",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "기준표 평가",
+      "replacement": "문서 점수표",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "평가 역할",
+      "replacement": "점수 기준표",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "기록 보존",
+      "replacement": "기록 보관",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "보존 정책",
+      "replacement": "보관 기간",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "부서 세팅",
+      "replacement": "부서 설정",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "세팅",
+      "replacement": "설정",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "워크스페이스",
+      "replacement": "부서 메뉴",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts",
+        "components/admin/slack-installation.tsx"
+      ]
+    },
+    {
+      "term": "개요",
+      "replacement": "한눈에",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "수집 채널",
+      "replacement": "연결한 채널",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "전체 기능 지도",
+      "replacement": "기능 한눈에 보기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "분류 대시보드",
+      "replacement": "대시보드",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "권한 인지 묻기",
+      "replacement": "묻기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "근거 인용",
+      "replacement": "원문 근거",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "원문 인용",
+      "replacement": "원문 근거",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "인용 검증",
+      "replacement": "원문과 맞는지 확인",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "검증된 인용",
+      "replacement": "원문과 맞는지 확인",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "인용",
+      "replacement": "원문 근거",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "공개 범위",
+      "replacement": "볼 수 있는 사람",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "가시성",
+      "replacement": "볼 수 있는 사람",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "visibility",
+      "replacement": "볼 수 있는 사람",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "결정 권한",
+      "replacement": "결정하는 사람",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "결정자",
+      "replacement": "결정하는 사람",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ],
+      "context": "결정자(?!료)"
+    },
+    {
+      "term": "정정 이력",
+      "replacement": "고친 기록",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "후속 결정",
+      "replacement": "다음 결정",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "정정",
+      "replacement": "결정 고치기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "append-only",
+      "replacement": "지우지 않고 쌓는 기록",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "카드로 승격",
+      "replacement": "카드로 올리기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "승격",
+      "replacement": "카드로 올리기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "전사·추출",
+      "replacement": "글로 바꾸기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "전사",
+      "replacement": "받아쓴 글",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ],
+      "context": "전사(?!원)"
+    },
+    {
+      "term": "추출문",
+      "replacement": "꺼낸 글",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "원문 추출",
+      "replacement": "파일에서 글 꺼내기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "근거 확정",
+      "replacement": "근거로 확정",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "개인정보 마스킹",
+      "replacement": "가리기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "마스킹",
+      "replacement": "가리기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "마지막 동기화",
+      "replacement": "마지막으로 가져온 시각",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "동기화",
+      "replacement": "새로 가져오기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "온보딩",
+      "replacement": "첫 안내",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "멤버십",
+      "replacement": "부서 소속",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "매직링크",
+      "replacement": "로그인 링크",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "합성 데이터",
+      "replacement": "가상 회사 자료",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "합성 자료",
+      "replacement": "가상 회사 자료",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "합성 지원자",
+      "replacement": "가상 지원자",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "합성 사례",
+      "replacement": "가상 사례",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "시드 결과 확인",
+      "replacement": "보기만 가능",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "안전 체험",
+      "replacement": "눌러 볼 수 있음",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "액션",
+      "replacement": "할 일",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ],
+      "context": "(?<!인터)액션"
+    },
+    {
+      "term": "분류 대기",
+      "replacement": "아직 못 나눔",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "unclassified",
+      "replacement": "아직 못 나눔",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "리드타임",
+      "replacement": "걸린 시간",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "열람",
+      "replacement": "보기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "조회",
+      "replacement": "보기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "발행됨",
+      "replacement": "공개됨",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "발행",
+      "replacement": "공개하기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "제출 철회",
+      "replacement": "제출 취소",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "철회",
+      "replacement": "거두기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "파기 완료",
+      "replacement": "지웠음",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "파기",
+      "replacement": "완전히 지우기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "반려",
+      "replacement": "돌려보내기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "보류",
+      "replacement": "미루기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "근거 없음 (0점 반영)",
+      "replacement": "근거 없음 · 0점",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "가중 점수",
+      "replacement": "종합 점수",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "부서 에이전트",
+      "replacement": "사수",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "에이전트",
+      "replacement": "사수",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "워커",
+      "replacement": "처리 작업",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "큐",
+      "replacement": "대기 목록",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "잡",
+      "replacement": "작업",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ],
+      "context": "(?<![가-힣])잡(?![가-힣])"
+    },
+    {
+      "term": "스윕",
+      "replacement": "오래 걸린 작업 정리",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "임베딩",
+      "replacement": "검색용 숫자값",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "벡터",
+      "replacement": "검색용 숫자값",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "RLS",
+      "replacement": "데이터베이스가 직접 권한을 확인",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "행 수준 보안",
+      "replacement": "데이터베이스가 직접 권한을 확인",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "ZDR",
+      "replacement": "입력과 답을 저장하지 않는 설정",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "옵트아웃",
+      "replacement": "학습에 쓰지 않도록 거부",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "OCR",
+      "replacement": "글자 읽기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "VTT",
+      "replacement": ".vtt 파일",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "TXT",
+      "replacement": ".txt 파일",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "MD",
+      "replacement": ".md 파일",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "CSV",
+      "replacement": ".csv 파일",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "JSON",
+      "replacement": ".json 파일",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "PDF",
+      "replacement": ".pdf 파일",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "DOCX",
+      "replacement": ".docx 파일",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "멱등성",
+      "replacement": "같은 요청은 한 번만 처리",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "동시성",
+      "replacement": "여러 요청을 함께 처리",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "집행",
+      "replacement": "확인",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "산정",
+      "replacement": "계산",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "명시",
+      "replacement": "적기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "누락",
+      "replacement": "빠짐",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "갱신",
+      "replacement": "새로 고침",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "수용",
+      "replacement": "받아들이기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "부서장",
+      "replacement": "팀장",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "영업 리드",
+      "replacement": "영업 팀장",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "리드",
+      "replacement": "팀장",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ],
+      "context": "리드(?!타임)"
+    },
+    {
+      "term": "Slack",
+      "replacement": "슬랙",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts",
+        "components/admin/slack-installation.tsx"
+      ]
+    },
+    {
+      "term": "Notion",
+      "replacement": "노션",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    },
+    {
+      "term": "게스트 모드",
+      "replacement": "로그인 없이 보기",
+      "reason": "쉬운말 설계 §3",
+      "allow_in": [
+        "app/(site)/privacy/**",
+        "lib/consent.ts"
+      ]
+    }
+  ],
+  "allow_english": [
+    {
+      "word": "Slack",
+      "allow_in": [
+        "components/admin/slack-installation.tsx"
+      ]
+    },
+    {
+      "word": "AI",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "ZDR",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Groq",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "RLS",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "DM",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "ID",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Inc",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Data",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Controls",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Global",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Inference",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "API",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Voyage",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "opt",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "out",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Supabase",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Vercel",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    },
+    {
+      "word": "Slack",
+      "allow_in": [
+        "lib/consent.ts",
+        "app/(site)/privacy/**"
+      ]
+    }
+  ]
+}

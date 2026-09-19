@@ -98,14 +98,14 @@ export function WorkspaceShell({
       <aside id="workspace-sidebar" className="workspace-sidebar" hidden={!sidebarOpen}>
         <Link className="brand" href={demo ? "/demo" : "/"}>
           <BrandMark />
-          사수<span className="brand-caption">팀을 위한 AI</span>
+          사수<span className="brand-caption">팀의 결정 도우미</span>
         </Link>
         <div className="workspace-team">
           <span className="team-avatar">{departmentName.slice(0, 1)}</span>
           <div>
             <strong>{departmentName}</strong>
             <span>
-              {demo ? "온새미로 · 데모 공간" : "우리 부서 워크스페이스"}
+              {demo ? "온새미로 · 데모 공간" : "우리 부서 공간"}
             </span>
           </div>
           {demo ? (
@@ -118,7 +118,7 @@ export function WorkspaceShell({
             </Link>
           ) : null}
         </div>
-        <p className="nav-caption">워크스페이스</p>
+        <p className="nav-caption">부서 메뉴</p>
         <nav aria-label="부서 메뉴" className="workspace-nav">
           {entries.map(({ label, suffix, icon }) => (
             <Link
@@ -168,12 +168,12 @@ export function WorkspaceShell({
           {demo ? (
             <div className="sidebar-note">
               <Icon name="spark" />
-              <strong>{fullDemo ? "전체 기능 지도" : "우리 팀에도 사수를."}</strong>
+              <strong>{fullDemo ? "기능 한눈에 보기" : "우리 팀에도 사수를."}</strong>
               <p>
-                {fullDemo ? <>확인할 기능과<br />추천 순서를 한눈에.</> : <>흩어진 대화를<br />다음 결정으로 연결하세요.</>}
+                {fullDemo ? <>무엇을 어떤 순서로 보면<br />좋은지 모았습니다.</> : <>흩어진 대화를<br />다음 결정으로 연결하세요.</>}
               </p>
               <Link href={fullDemo ? `/demo/features?dept=${deptId}` : "/#pilot"}>
-                {fullDemo ? "기능 지도로" : "사수 알아보기"} <Icon name="arrow" size={15} />
+                {fullDemo ? "한눈에 보기" : "사수 알아보기"} <Icon name="arrow" size={15} />
               </Link>
             </div>
           ) : null}
@@ -182,9 +182,9 @@ export function WorkspaceShell({
               {demo ? "G" : (displayName?.slice(0, 1) ?? "사")}
             </span>
             <div>
-              <strong>{demo ? "게스트 데모" : (displayName ?? "팀 멤버")}</strong>
+              <strong>{demo ? "로그인 없이 보기" : (displayName ?? "팀 멤버")}</strong>
               <span>
-                {demo ? "로그인 없이 전체 기능 체험" : "부서 권한으로 연결됨"}
+                {demo ? "모든 기능을 눌러 볼 수 있습니다" : "부서 권한으로 연결됨"}
               </span>
             </div>
           </div>
@@ -194,31 +194,34 @@ export function WorkspaceShell({
         <header className="workspace-topbar">
           <button className="sidebar-toggle" type="button" aria-expanded={sidebarOpen} aria-controls="workspace-sidebar" onClick={() => setSidebarOpen(open => !open)}>{sidebarOpen ? "☰ 메뉴 접기" : "☰ 메뉴 열기"}</button>
           <span>
-            {departmentName}
-            <span className="breadcrumb-divider">/</span>
+            <span className="workspace-parent">{departmentName}<span className="breadcrumb-divider">/</span></span>
             <strong>
               {pathname.includes("/cards/")
                 ? "결정 카드"
-                : (activeEntry?.label ?? "워크스페이스")}
+                : (activeEntry?.label ?? "부서 메뉴")}
             </strong>
           </span>
           <span className="badge badge-neutral">
             <Icon name="lock" size={13} />
-            {demo ? "합성 데이터 체험" : "내 부서 공간"}
+            {demo ? "가상 회사 체험" : "내 부서 공간"}
           </span>
         </header>
         {demo ? (
           <>
+            <div className="demo-mobile-progress" aria-label={journey.map(x=>`${x.step}/4 ${x.label}`).join(", ")}>
+              <span>가상 회사 체험</span>
+              {showDemoJourney?<Link href={journey[journeyStep-1].href}>{journeyStep}/4 {journey[journeyStep-1].label}</Link>:<Link href="/demo">다른 부서 보기</Link>}
+            </div>
             <div className="demo-notice">
               <span>
                 <span className="status-dot" />
-                합성 자료로 모든 기능을 체험하세요. 변경은 새로고침하면 초기화됩니다.
+                가상 회사 자료입니다. 눌러 봐도 실제로는 바뀌지 않고, 새로 고치면 처음으로 돌아갑니다.
               </span>
               <Link href="/demo">
                 다른 부서 보기 <Icon name="arrow" size={14} />
               </Link>
             </div>
-            {showDemoJourney ? <nav className="demo-journey" aria-label="게스트 데모 진행 단계">
+            {showDemoJourney ? <nav className="demo-journey" aria-label="로그인 없이 보기 진행 단계">
               {journey.map(({ step, label, href }) => (
                 <Link
                   href={href}

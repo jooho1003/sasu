@@ -137,19 +137,19 @@ export function AdminOverviewView({
               label={data.departments.length ? "부서 만들기" : "첫 부서 만들기"}
               endpoint="/api/admin/departments"
               kind="department"
-              description="부서를 만든 뒤 첫 부서장을 초대할 수 있습니다."
+              description="부서를 만든 뒤 첫 팀장을 초대할 수 있습니다."
             />
           ) : null}
         </div>
         {!data.departments.length ? (
           <p className="m-0 text-muted">
-            아직 부서가 없습니다. 첫 부서를 만들고 부서장을 초대해 주세요.
+            아직 부서가 없습니다. 첫 부서를 만들고 팀장을 초대해 주세요.
           </p>
         ) : (
           <AdminTable
             headers={[
               "부서",
-              "부서장",
+              "팀장",
               "멤버",
               "동의",
               "자료",
@@ -168,7 +168,7 @@ export function AdminOverviewView({
                     dept.lead_names.join(", ")
                   ) : (
                     <span className="rounded-full bg-ink/5 px-2 py-1 text-xs">
-                      부서장 없음
+                      팀장 없음
                     </span>
                   )}
                 </td>
@@ -187,10 +187,10 @@ export function AdminOverviewView({
                   <td className={cell}>
                     {dept.member_count === 0 ? (
                       <AdminAction
-                        label="첫 부서장 초대"
+                        label="첫 팀장 초대"
                         endpoint={`/api/admin/departments/${dept.dept_id}/first-lead-invite`}
                         kind="invite"
-                        description={`${dept.name}의 첫 부서장을 초대합니다. 자기 이메일은 사용할 수 없습니다.`}
+                        description={`${dept.name}의 첫 팀장을 초대합니다. 자기 이메일은 사용할 수 없습니다.`}
                         pendingInvites={invites
                           .filter((invite) => invite.dept_id === dept.dept_id)
                           .map((invite) => ({
@@ -224,8 +224,8 @@ export function AdminOverviewView({
               body={{ enabled: !data.trailer_publish_enabled }}
               description={
                 data.trailer_publish_enabled
-                  ? "공개 중인 예고편이 모두 철회됩니다."
-                  : "부서장이 검사와 항목별 승인을 마친 가상 사례를 공개할 수 있게 합니다."
+                  ? "공개 중인 예고편이 모두 닫힙니다."
+                  : "팀장이 검사와 항목별 승인을 마친 가상 사례를 공개할 수 있게 합니다."
               }
             />
           ) : null}
@@ -237,7 +237,7 @@ export function AdminOverviewView({
           headers={[
             "부서",
             "제목",
-            "발행일",
+            "공개일",
             "체험",
             ...(canWrite && publishingEnabled ? ["관리"] : []),
           ]}
@@ -258,9 +258,9 @@ export function AdminOverviewView({
               {canWrite && publishingEnabled ? (
                 <td className={cell}>
                   <AdminAction
-                    label="철회"
+                    label="거두기"
                     endpoint={`/api/admin/trailers/${trailer.trailer_id}/unpublish`}
-                    description="공개 링크가 닫힙니다. 다시 발행하면 새 링크가 만들어집니다."
+                    description="공개 링크가 닫힙니다. 다시 공개하면 새 링크가 만들어집니다."
                   />
                 </td>
               ) : null}
@@ -269,7 +269,7 @@ export function AdminOverviewView({
         </AdminTable>
       </section>
       <p className="m-0 text-sm text-muted">
-        이번 달 AI 호출 수{" "}
+        이번 달 인공지능 호출 수{" "}
         <strong className="text-ink">
           {data.llm_calls_this_month.toLocaleString("ko-KR")}회
         </strong>
@@ -301,7 +301,7 @@ export function AdminMembersTable({
         {rows.map((row, index) => (
           <article className="admin-member-card" key={`${row.dept_id}-mobile-${"user_id" in row ? row.user_id : index}`}>
             <header>
-              <div><strong>{row.display_name}</strong><span>{row.dept_name} · {row.role === "lead" ? "부서장" : "멤버"}</span></div>
+              <div><strong>{row.display_name}</strong><span>{row.dept_name} · {row.role === "lead" ? "팀장" : "멤버"}</span></div>
               <span className={`badge ${row.consented_at ? "badge-green" : "badge-urgent"}`}>{row.consented_at ? "동의" : "미동의"}</span>
             </header>
             {!readOnly && "email" in row ? <p className="admin-member-email">{row.email}</p> : null}
@@ -330,7 +330,7 @@ export function AdminMembersTable({
               <th scope="row" className={cell}>{row.display_name}</th>
               {!readOnly ? <td className={`${cell} min-w-[180px] break-words`}>{"email" in row ? row.email : "—"}</td> : null}
               <td className={cell}>{row.dept_name}</td>
-              <td className={cell}>{row.role === "lead" ? "부서장" : "멤버"}</td>
+              <td className={cell}>{row.role === "lead" ? "팀장" : "멤버"}</td>
               <td className={cell}><span className={`badge ${row.consented_at ? "badge-green" : "badge-urgent"}`}>{row.consented_at ? "동의" : "미동의"}</span></td>
               <td className={cell}><span className={`badge ${row.slack_linked ? "badge-green" : "badge-neutral"}`}>{row.slack_linked ? "연결됨" : "미연결"}</span></td>
               {canWrite ? (
@@ -338,9 +338,9 @@ export function AdminMembersTable({
                   {"user_id" in row ? (
                     <div className="flex flex-wrap gap-2">
                       {row.role === "lead" && (leadCounts.get(row.dept_id) ?? 0) > 1 ? (
-                        <AdminAction label="부서장 해제" endpoint="/api/admin/members/demote" body={{ userId: row.user_id, deptId: row.dept_id }} description={`${row.display_name}님의 부서장 권한을 해제하고 멤버로 변경합니다.`} />
+                        <AdminAction label="팀장 해제" endpoint="/api/admin/members/demote" body={{ userId: row.user_id, deptId: row.dept_id }} description={`${row.display_name}님의 팀장 권한을 해제하고 멤버로 변경합니다.`} />
                       ) : null}
-                      <AdminAction label="제외" endpoint="/api/admin/members/remove" body={{ userId: row.user_id, deptId: row.dept_id }} description={`${row.display_name}님을 ${row.dept_name}에서 제외합니다. 마지막 부서장은 제외할 수 없습니다.`} />
+                      <AdminAction label="제외" endpoint="/api/admin/members/remove" body={{ userId: row.user_id, deptId: row.dept_id }} description={`${row.display_name}님을 ${row.dept_name}에서 제외합니다. 마지막 팀장은 제외할 수 없습니다.`} />
                     </div>
                   ) : null}
                 </td>
@@ -377,16 +377,16 @@ export function AdminInvitesTable({
         <tr key={row.invite_id}>
           <td className={`${cell} min-w-[180px] break-words`}>{row.email}</td>
           <td className={cell}>{row.dept_name}</td>
-          <td className={cell}>{row.role === "lead" ? "부서장" : "멤버"}</td>
+          <td className={cell}>{row.role === "lead" ? "팀장" : "멤버"}</td>
           <td className={cell}>
-            {row.invited_by_role === "org_admin" ? "조직 관리자" : "부서장"}
+            {row.invited_by_role === "org_admin" ? "조직 관리자" : "팀장"}
           </td>
           <td className={cell}>{formatAdminDate(row.created_at)}</td>
           <td className={cell}>{formatAdminDate(row.expires_at)}</td>
           {writesEnabled ? (
             <td className={cell}>
               <AdminAction
-                label="철회"
+                label="거두기"
                 endpoint={`/api/admin/invites/${row.invite_id}/revoke`}
                 description="이 초대 링크를 더 이상 사용할 수 없게 합니다."
               />
@@ -418,11 +418,11 @@ export function AdminSourcesTable({
       headers={[
         "부서",
         "종류 · 이름",
-        "공개 범위",
+        "볼 수 있는 사람",
         "원칙 문서",
         "상태",
         "항목",
-        "마지막 동기화",
+        "마지막으로 가져온 시각",
         "오류",
       ]}
       empty={!rows.length}
@@ -444,7 +444,7 @@ export function AdminSourcesTable({
             </span>
           </th>
           <td className={cell}>
-            {row.visibility === "dept" ? "부서 전체" : "부서장"}
+            {row.visibility === "dept" ? "부서 전체" : "팀장"}
           </td>
           <td className={cell}>{row.is_principles ? "원칙 문서" : "—"}</td>
           <td className={cell}>
@@ -473,9 +473,9 @@ export function AdminAnswerStatsTable({
         "답변",
         "거절",
         "실패",
-        "부서 인용",
-        "부서장 인용",
-        "결정 인용",
+        "부서 원문 근거",
+        "팀장 원문 근거",
+        "결정 원문 근거",
       ]}
       empty={!rows.length}
     >
@@ -505,12 +505,12 @@ export function AdminAnswerStatsTable({
 
 const eventLabels: Record<AdminEventRow["action"], string> = {
   department_create: "부서 생성",
-  first_lead_invite: "첫 부서장 초대",
+  first_lead_invite: "첫 팀장 초대",
   member_invite: "멤버 초대",
-  invite_revoke: "초대 철회",
+  invite_revoke: "초대 거두기",
   invite_accept: "초대 수락",
-  lead_promote: "부서장 지정",
-  lead_demote: "부서장 해제",
+  lead_promote: "팀장 지정",
+  lead_demote: "팀장 해제",
   member_remove: "멤버 제외",
   review_settings_update: "자료 보호 설정 변경",
 };

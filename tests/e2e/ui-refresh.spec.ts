@@ -76,10 +76,10 @@ for (const width of [1440, 390]) {
       previousContent,
     );
     const record = page.locator("#demo-record-list .record-item").first();
-    await record.locator(".record-toggle").click();
-    await expect(record).toHaveAttribute("data-selected", "true");
-    await expect(record.getByRole("link", { name: /앞뒤 원문 보기/ })).toHaveAttribute("href", /\/documents\?source=/);
-    await expect(record.getByRole("link", { name: /이 자료의 결정 보기/ })).toHaveAttribute("href", /\/ledger\?source=/);
+    const original=record.getByRole("link",{name:/원문 보기/});
+    await expect(original).toHaveAttribute("href", /\/documents\?source=/);
+    await original.click();await expect(page.locator(".demo-source > summary")).toBeVisible();
+    await page.goBack();
     const sources = page.getByRole("group", { name: "기록 출처 선택" }).getByRole("button");
     await sources.nth(2).click();
     await expect(sources.nth(2)).toHaveAttribute("aria-pressed", "true");
@@ -87,11 +87,11 @@ for (const width of [1440, 390]) {
     await categories.first().click();
     await capture("dashboard");
 
-    await page.locator('a[href*="/cards/"]').first().click();
+    await page.locator('a[href*="/cards/"]:visible').first().click();
     await expect(page.locator("q").first()).toBeVisible();
     await capture("card");
-    await menu.getByRole("link", { name: "원장", exact: true }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("원장");
+    await menu.getByRole("link", { name: "결정 기록", exact: true }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("결정 기록");
     await capture("ledger");
     await menu.getByRole("link", { name: "묻기", exact: true }).click();
     await expect(
@@ -166,12 +166,12 @@ for (const width of [1440, 390]) {
     for (const [suffix, label] of [
       ["", "대시보드"],
       ["/ask", "묻기"],
-      ["/ledger", "원장"],
-      ["/reviews", "음성·자료 검토"],
+      ["/ledger", "결정 기록"],
+      ["/reviews", "올린 자료"],
       ["/documents", "문서"],
-      ["/roles", "문서 평가"],
-      ["/retention", "기록 보존"],
-      ["/settings", "세팅"],
+      ["/roles", "문서 점수표"],
+      ["/retention", "기록 보관"],
+      ["/settings", "설정"],
     ]) {
       await page.goto(`${base}${suffix}`);
       const departmentMenu = page.getByRole("navigation", { name: "부서 메뉴" });

@@ -8,7 +8,7 @@ const hiddenChildTitle = "비밀 하위 페이지 제목";
 async function openDemo(page: Page, width = 1440) {
   await page.setViewportSize({ width, height: 1000 });
   await page.goto("/demo/notion");
-  await expect(page.getByRole("heading", { name: "Notion 자동 수집", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "노션 자동 수집", exact: true })).toBeVisible();
 }
 
 test.describe("notion collection UI", () => {
@@ -52,7 +52,7 @@ test.describe("notion collection UI", () => {
     let mockedWrites = 0;
     await page.route("**/api/d/**/settings/notion", async (route) => {
       if (route.request().method() !== "GET") mockedWrites += 1;
-      await route.fulfill({ status: 403, json: { error: "자동 수집 설정은 부서장만 변경할 수 있습니다." } });
+      await route.fulfill({ status: 403, json: { error: "자동 수집 설정은 팀장만 변경할 수 있습니다." } });
     });
     await openDemo(page);
 
@@ -65,7 +65,7 @@ test.describe("notion collection UI", () => {
 
     await page.getByRole("button", { name: "일반 멤버 보기" }).click();
     await expect(page.getByRole("button", { name: "제외", exact: true })).toHaveCount(0);
-    await expect(page.getByRole("button", { name: "부서장만으로", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "팀장만으로", exact: true })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "다시 가져오기", exact: true })).toHaveCount(0);
     const status = await page.evaluate(async () => {
       const response = await fetch("/api/d/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/settings/notion", {
@@ -92,7 +92,7 @@ test.describe("notion collection UI", () => {
     await page.getByLabel("영업 운영 위키 (합성) 부서").selectOption(sales);
     await page.getByLabel("개발 운영 위키 (합성) 부서").selectOption(development);
     await page.getByRole("button", { name: "수집 시작 체험" }).click();
-    await page.getByRole("article", { name: "영업 원칙 문서 자동 수집 문서" }).getByRole("button", { name: "부서장만으로" }).click();
+    await page.getByRole("article", { name: "영업 원칙 문서 자동 수집 문서" }).getByRole("button", { name: "팀장만으로" }).click();
     await page.getByRole("article", { name: "가격·할인 승인 기준 자동 수집 문서" }).getByRole("button", { name: "다시 가져오기" }).click();
     await page.getByRole("button", { name: "연결 해제 체험" }).click();
 

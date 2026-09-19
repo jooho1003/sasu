@@ -28,7 +28,6 @@ export async function POST(request: Request, context: Context) {
   const client = await createServerSupabaseClient();
   const result = await client.rpc("create_retro_day", { p_dept: member.deptId, p_day: input.data.id, p_date: input.data.date, p_tz: input.data.tz, p_collector: bundle.bundle.collector.version, p_bundle: bundle.bundle });
   if (result.error) return fail(result.error);
-  await client.rpc("derive_retro_activities", { p_day: input.data.id });
   kickWorker();
   return Response.json(result.data, { status: 202, headers: noStore });
 }

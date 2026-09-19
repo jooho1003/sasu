@@ -82,7 +82,7 @@ export async function POST(
     body = withoutAuthorityFields(await request.json());
   } catch {
     return Response.json(
-      { error: "요청 본문이 올바른 JSON이 아닙니다." },
+      { error: "요청 본문이 올바른 .json 파일이 아닙니다." },
       { status: 400 },
     );
   }

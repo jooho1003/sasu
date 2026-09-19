@@ -60,6 +60,7 @@ export async function verifyRetroSql({ db, q, check, asUser }) {
     await rejected(()=>q("select save_retro($1,1,'나쁜 근거',$2::jsonb,array['검증'])",[ids.day,JSON.stringify({...body,did:[{text:'오류',citations:[{activity_id:aid,quote:'없는 문자열'}]}]})]),'citation_invalid');
     await q("select save_retro($1,1,'수정 회고',$2::jsonb,array['검증'])",[ids.day,JSON.stringify(body)]);
     await q("select confirm_retro($1,2)",[ids.day]);
+    await q("select consent_retro_share($1)",[ids.dept]);
     await q("select set_retro_visibility($1,'dept')",[ids.day]);
   }));
   await check("retro: shared readers see only confirmed cited activity and revision",async()=>{
@@ -103,6 +104,15 @@ export async function verifyRetroSql({ db, q, check, asUser }) {
       const f=(await q("select p.oid::regprocedure::text f from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname=$1",[name])).rows[0].f;
       for(const actor of ['anon','authenticated','service_role']) assert.equal((await q("select has_function_privilege($1,$2,'execute') ok",[actor,f])).rows[0].ok,actor===role,`${name}:${actor}`);
     }
+  });
+  await check("retro: provider budget failure remains actionable and cannot create a revision",async()=>{
+    await asUser(ids.a,()=>create());
+    const c=(await service(()=>q("select claim_retro_draft($1,0,1) value",[ids.day]))).rows[0].value;
+    assert.equal(await finish(c,'llm_budget_exceeded'),true);
+    const day=(await q("select status,status_reason,lease from retro_days where id=$1",[ids.day])).rows[0];
+    assert.deepEqual(day,{status:'failed',status_reason:'llm_budget_exceeded',lease:null});
+    assert.equal((await q("select count(*)::int n from retro_revisions where day_id=$1",[ids.day])).rows[0].n,0);
+    await asUser(ids.a,()=>q("select delete_retro_day($1)",[ids.day]));
   });
   await check("retro: NULL lease, empty success and exclusion fence cannot create a draft",async()=>{
     await asUser(ids.a,()=>create());

@@ -19,7 +19,7 @@ export default async function AdminSecurityPage() {
       {events === null ? <AdminUnavailable /> : events.length === 0 ? <p>접근 기록이 없습니다.</p> : <ul className="review-list">
         {events.map((event) => <li key={event.id} style={{ overflowWrap: "anywhere" }}>
           <strong>{labels[event.action]}</strong> · <time>{new Date(event.created_at).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}</time>
-          <p>부서 ID: {event.dept_id}<br />자료 ID: {event.review_id}<br />사용자 ID: {event.actor_id}</p>
+          <p>부서 고유번호: {event.dept_id}<br />자료 고유번호: {event.review_id}<br />사용자 고유번호: {event.actor_id}</p>
         </li>)}
       </ul>}
     </section>

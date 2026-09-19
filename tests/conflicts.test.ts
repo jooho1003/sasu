@@ -10,7 +10,7 @@ describe("formatConflictBadge", () => {
   });
 
   it("결정일이 없거나 유효하지 않으면 안전한 기본 문구를 쓴다", () => {
-    expect(formatConflictBadge(null)).toBe("과거 결정과 충돌");
-    expect(formatConflictBadge("not-a-date")).toBe("과거 결정과 충돌");
+    expect(formatConflictBadge(null)).toBe("예전 결정과 다름");
+    expect(formatConflictBadge("not-a-date")).toBe("예전 결정과 다름");
   });
 });

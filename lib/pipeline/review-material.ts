@@ -91,7 +91,8 @@ export async function processReviewPart(payload: {
         "audio_segment_invalid",
         "voice_transcription_empty",
         "auth",
-        "llm_timeout",
+        "llm_budget_exceeded",
+  "llm_timeout",
         "rate_limited",
       ].includes(code)
         ? code

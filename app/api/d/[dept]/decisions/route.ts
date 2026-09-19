@@ -87,7 +87,7 @@ export async function POST(
       return Response.json({ error: "선택한 근거가 올바르지 않습니다." }, { status: 400 });
     }
     return Response.json(
-      { error: "결정을 원장에 기록하지 못했습니다. 잠시 후 다시 시도해주세요." },
+      { error: "결정을 기록에 남기지 못했습니다. 잠시 후 다시 시도해주세요." },
       { status: 500 },
     );
   }
@@ -97,7 +97,7 @@ export async function POST(
       ok: true,
       decision_id: decisionResult.data,
       has_evidence: evidence !== null,
-      message: "결정을 원장에 기록했습니다.",
+      message: "결정을 기록에 남겼습니다.",
     },
     { status: 201 },
   );

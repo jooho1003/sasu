@@ -25,8 +25,8 @@ const steps = [
   ["01", "동의부터", "동의한 구성원의 채널만 연결합니다."],
   ["02", "맥락 수집", "슬랙·회의·문서에서 결정 신호를 찾습니다."],
   ["03", "결정 요청", "담당자에게 원문 근거와 카드를 보냅니다."],
-  ["04", "원장 기록", "결정과 그 이유를 함께 남깁니다."],
-  ["05", "근거로 답변", "질문자의 권한 안에서 기록을 인용합니다."],
+  ["04", "결정 기록", "결정과 그 이유를 함께 남깁니다."],
+  ["05", "근거로 답변", "질문자의 권한 안에서 기록을 근거로 씁니다."],
 ];
 
 export default function HomePage() {
@@ -36,7 +36,7 @@ export default function HomePage() {
       <section className="marketing-hero">
         <div className="hero-label">
           <span className="status-dot" />
-          우리 팀의 맥락을 아는 AI 동료
+          우리 팀의 맥락을 아는 인공지능 동료
         </div>
         <h1>
           대화가 쌓이는 곳에서,
@@ -52,15 +52,15 @@ export default function HomePage() {
           <SiteCta links={links} />
         </div>
         <p className="hero-footnote">
-          가입 없이 바로 체험 · 가상 회사의 합성 데이터
+          가입 없이 바로 체험 · 가상 회사 자료
         </p>
         {/* ADR-043: 제품 화면은 게스트 모드 실제 캡처만 쓴다(HTML로 다시 그린 화면 금지). */}
         <figure className="product-preview">
           <span className="badge badge-green product-preview-badge">
-            게스트 모드 실제 화면 · 합성 데이터
+            로그인 없이 보기 실제 화면 · 가상 회사 자료
           </span>
           <Image
-            alt="영업 사수 게스트 모드의 결정 카드 화면. 원문 근거 인용이 붙은 '외주사 B 12% 인상 견적을 받아들일까요?' 카드 (가상 회사의 합성 데이터)"
+            alt="영업 사수 로그인 없이 보기의 결정 카드 화면. 원문 근거가 붙은 '외주사 B 12% 인상 견적을 받아들일까요?' 카드 (가상 회사 자료)"
             className="product-preview-image"
             height={720}
             priority
@@ -82,7 +82,7 @@ export default function HomePage() {
         </span>
         <span>
           <Icon name="video" size={18} />
-          <strong>회의 전사</strong>
+          <strong>회의 받아쓴 글</strong>
         </span>
         <span>
           <Icon name="book" size={18} />
@@ -158,7 +158,7 @@ export default function HomePage() {
             <span className="eyebrow">사수의 답</span>
             <h3>팀이 남긴 근거를 바탕으로.</h3>
             <p>
-              실제 결정과 부서 원칙을 인용합니다. 확인할 근거가 부족할 때는
+              실제 결정과 부서 원칙을 근거로 씁니다. 확인할 근거가 부족할 때는
               부족하다고 알려줍니다.
             </p>
             <Link className="text-link" href="/demo" prefetch={false}>
@@ -180,8 +180,8 @@ export default function HomePage() {
               "미동의 발언은 저장하지 않음",
               "원문 근거가 있는 답변",
               "부서와 사용자 권한별 접근",
-              "저장 전 개인정보 마스킹",
-              "질문자가 볼 수 있는 기록만 인용",
+              "저장 전 가리기",
+              "질문자가 볼 수 있는 기록만 원문 근거",
             ].map((item) => (
               <li key={item}>
                 <Icon name="check" size={17} />
@@ -195,7 +195,7 @@ export default function HomePage() {
         <section className="marketing-section">
           <div className="difference-grid">
             <div>
-              <p className="eyebrow">합성 사례 · 베타</p>
+              <p className="eyebrow">가상 사례 · 베타</p>
               <h2>
                 입사 전에는 예고편,
                 <br />
@@ -204,9 +204,8 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col items-start justify-center gap-5">
               <p className="text-sm leading-7 text-muted">
-                가상화한 업무 사례로 직무를 먼저 경험해 보세요. AI는 지원자를
-                거르지 않고 담당자가 참고할 근거만 정리합니다. 지금은 합성
-                지원자로 시연합니다.
+                가상화한 업무 사례로 직무를 먼저 경험해 보세요. 인공지능은 지원자를
+                거르지 않고 담당자가 참고할 근거만 정리합니다. 지금은 가상 지원자로 시연합니다.
               </p>
               <Link
                 className="button button-secondary"
@@ -247,7 +246,7 @@ export default function HomePage() {
             <br />
             사수.
           </h2>
-          <p>먼저 둘러보세요. 우리 팀의 일하는 방식이 보일 거예요.</p>
+          <p>먼저 둘러보세요. 우리 팀의 일하는 방식을 확인할 수 있습니다.</p>
           <div className="hero-actions">
             <SiteCta links={links} />
           </div>

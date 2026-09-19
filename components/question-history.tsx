@@ -1,9 +1,10 @@
 "use client";
 
+import { LABELS } from "@/lib/labels";
 import { useEffect, useState } from "react";
 type Question = { id: string; question: string; created_at: string; status: string; parent_id: string | null };
 type Cursor = { before: string; before_id: string } | null;
-const labels: Record<string,string> = { pending: "답변 작성 중", done: "답변 완료", refused: "근거 부족", failed: "답변 실패" };
+const labels: Record<string,string> = LABELS.answerStatus;
 export function QuestionHistory({ deptId, revision, onSelect }: { deptId: string; revision: number; onSelect: (id: string, question: string) => Promise<void> }) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [cursor, setCursor] = useState<Cursor>(null);

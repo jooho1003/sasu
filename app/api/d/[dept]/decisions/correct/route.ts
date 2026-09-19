@@ -7,12 +7,12 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 export async function POST(request: Request, { params }: { params: Promise<{ dept: string }> }) {
   const membership = await requireMembership((await params).dept);
   const body = DecisionCorrectionInput.safeParse(await request.json().catch(() => null));
-  if (!body.success) return Response.json({ error: "정정할 결정과 결과·사유를 확인해주세요." }, { status: 400 });
+  if (!body.success) return Response.json({ error: "고칠 결정과 결과·사유를 확인해주세요." }, { status: 400 });
   const client = await createServerSupabaseClient();
   const result = await client.rpc("correct_decision", { p_dept: membership.deptId, p_previous: body.data.previous_id, p_id: body.data.correction_id, p_outcome: mask(body.data.outcome), p_rationale: mask(body.data.rationale) });
   if (result.error) {
     const conflict = result.error.code === "23505";
-    return Response.json({ error: conflict ? "이미 정정된 결정입니다. 원장을 새로고침해주세요." : "결정을 정정할 수 없습니다. 권한과 동의 상태를 확인해주세요." }, { status: conflict ? 409 : result.error.code === "42501" ? 403 : 500 });
+    return Response.json({ error: conflict ? "이미 고친 결정입니다. 결정 기록을 새로고침해주세요." : "결정을 고칠 수 없습니다. 권한과 동의 상태를 확인해주세요." }, { status: conflict ? 409 : result.error.code === "42501" ? 403 : 500 });
   }
   kickWorker();
   return Response.json({ id: result.data }, { status: 201 });

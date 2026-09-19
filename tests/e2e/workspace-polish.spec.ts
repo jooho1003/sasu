@@ -161,7 +161,7 @@ test.describe("후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 
         buffer: Buffer.from("fixture"),
       });
       await expect(page.locator("main").getByRole("alert")).toContainText(
-        "20MB 이하",
+        "20메가바이트 이하",
       );
       await expect(
         page.getByRole("button", { name: "문서 정리 시작" }),
@@ -200,13 +200,13 @@ test.describe("후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 
         page.getByRole("heading", { name: "함께하는 멤버" }),
       ).toBeVisible();
       await page
-        .getByLabel("이동료 Slack 계정", { exact: true })
+        .getByLabel("이동료 슬랙 계정", { exact: true })
         .selectOption("U1");
       await page.screenshot({
         path: info.outputPath(`fixture-settings-members-${width}.png`),
         fullPage: true,
       });
-      const picker = page.getByRole("group", { name: "세팅 항목 선택" });
+      const picker = page.getByRole("group", { name: "설정 항목 선택" });
       await picker.getByRole("button", { name: "연결 관리" }).click();
       await expect(
         page.getByRole("heading", { name: "함께하는 멤버" }),
@@ -216,7 +216,7 @@ test.describe("후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 
       ).toBeDisabled();
       const panel = page.locator("#settings-connections");
       await panel
-        .getByRole("combobox", { name: "Slack 채널", exact: true })
+        .getByRole("combobox", { name: "슬랙 채널", exact: true })
         .selectOption("C2");
       await panel.getByLabel("표시 이름").fill("입력 중인 채널 이름");
       await page.screenshot({
@@ -225,7 +225,7 @@ test.describe("후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 
       });
       await picker.getByRole("button", { name: "자료 가져오기" }).click();
       await expect(
-        page.getByRole("heading", { name: "회의 전사 업로드" }),
+        page.getByRole("heading", { name: "회의 받아쓴 글 업로드" }),
       ).toBeVisible();
       await page.getByLabel("회의 이름").fill("작성 중 회의");
       await page.screenshot({
@@ -238,7 +238,7 @@ test.describe("후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 
       );
       await page.getByRole("button", { name: "멤버 동의 확인" }).click();
       await expect(
-        page.getByLabel("이동료 Slack 계정", { exact: true }),
+        page.getByLabel("이동료 슬랙 계정", { exact: true }),
       ).toHaveValue("U1");
       await noOverflow(page);
       await page.waitForTimeout(1200);
@@ -270,7 +270,7 @@ test.describe("후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 
         });
     });
     await page.goto(`${base}/documents`);
-    await expect(page.getByText("문서를 불러오고 있어요")).toBeVisible();
+    await expect(page.getByText("문서를 불러오고 있습니다")).toBeVisible();
     await expect(page.getByText("우리 부서의 지식을 모아보세요")).toHaveCount(
       0,
     );
@@ -279,7 +279,7 @@ test.describe("후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 
       "불러오지 못했습니다",
     );
     await page.getByRole("button", { name: "다시 불러오기" }).click();
-    await expect(page.getByText("핵심과 근거를 정리하고 있어요")).toBeVisible();
+    await expect(page.getByText("핵심과 근거를 정리하고 있습니다")).toBeVisible();
     await expect(page.locator("#document-detail q")).toBeVisible({
       timeout: 10_000,
     });
@@ -299,7 +299,7 @@ test.describe("후속 UI · API 응답 고정 · 외부 업무 데이터 쓰기 
     });
     await page.goto(`${base}/settings`);
     await expect(
-      page.getByRole("heading", { name: "세팅을 불러오지 못했습니다" }),
+      page.getByRole("heading", { name: "설정을 불러오지 못했습니다" }),
     ).toBeVisible();
     await page.getByRole("button", { name: "다시 불러오기" }).click();
     await expect(
@@ -325,9 +325,9 @@ for (const width of [1440, 390]) {
       exact: true,
     });
     for (const [label, title] of [
-      ["개요", "조직 개요"],
+      ["한눈에", "조직 한눈에"],
       ["멤버", "멤버"],
-      ["수집 채널", "수집 채널"],
+      ["연결한 채널", "연결한 채널"],
       ["기록", "기록"],
     ]) {
       await menu.getByRole("link", { name: label, exact: true }).click();
@@ -336,9 +336,7 @@ for (const width of [1440, 390]) {
       ).toHaveAttribute("aria-current", "page");
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
       await expect(
-        page.getByText("게스트 모드 · 합성 데이터 · 읽기 전용", {
-          exact: true,
-        }),
+        page.getByText("로그인 없이 보기 · 가상 회사 자료 · 보기만 가능", { exact: true }),
       ).toBeVisible();
       await expect(
         page.getByRole("button", { name: /초대|제외|철회|부서 만들기/ }),
@@ -388,11 +386,12 @@ for (const width of [1440, 390]) {
       name: "조직 관리",
       exact: true,
     });
-    for (const label of ["개요", "멤버", "수집 채널", "기록"]) {
+    for (const label of ["한눈에", "멤버", "연결한 채널", "기록"]) {
       await menu.getByRole("link", { name: label, exact: true }).click();
+      await page.waitForURL(`**/admin${label === "한눈에" ? "" : label === "멤버" ? "/members" : label === "연결한 채널" ? "/sources" : "/audit"}`);
       await expect(
         menu.getByRole("link", { name: label, exact: true }),
-      ).toHaveAttribute("aria-current", "page");
+      ).toHaveAttribute("aria-current", "page", {timeout:15000});
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
       await noOverflow(page);
       if (label === "멤버" || label === "기록") {

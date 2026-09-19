@@ -15,10 +15,10 @@ test.describe("기간 제한 없는 후속 기능 · 합성 API · 업무 데이
       await page.route(`**/api/d/${dept}/settings`,route=>route.fulfill({json:{current_user_id:first,role:"lead",members:[{user_id:first,display_name:"합성 담당자",role:"lead",slack_user_id:null,consented_at:"2026-09-16T00:00:00Z"}],channels:[],slack_users:[],channels_available:false,sources:[{id:first,kind:"notion_page",external_id:"notion-qa",title:"합성 업무 원칙",visibility:"dept",active:true,auto_sync:automatic,last_synced_at:"2026-09-16T00:00:00Z",last_error:null}]}}));
       await page.route(`**/api/d/${dept}/invites`,route=>route.fulfill({json:{invites:[]}}));
       await page.route(`**/api/d/${dept}/settings/notion`,route=>{const body=route.request().postDataJSON();expect(body.source_id).toBe(first);automatic=body.auto_sync;return route.fulfill({json:{ok:true}})});
-      await page.goto(`/d/${dept}/settings`);await page.getByRole("group",{name:"세팅 항목 선택"}).getByRole("button",{name:"연결 관리"}).click();
-      await page.getByRole("button",{name:"자동 갱신 켜기"}).click();await expect(page.getByRole("button",{name:"자동 갱신 중지"})).toBeVisible();expect(automatic).toBe(true);
+      await page.goto(`/d/${dept}/settings`);await page.getByRole("group",{name:"설정 항목 선택"}).getByRole("button",{name:"연결 관리"}).click();
+      await page.getByRole("button",{name:"자동 새로 고침 켜기"}).click();await expect(page.getByRole("button",{name:"자동 새로 고침 중지"})).toBeVisible();expect(automatic).toBe(true);
       await page.screenshot({path:`docs/verification/product-continuity-2026-09-16/notion-sync-${width}.png`,fullPage:true});
-      await page.getByRole("button",{name:"자동 갱신 중지"}).click();await expect(page.getByRole("button",{name:"자동 갱신 켜기"})).toBeVisible();expect(automatic).toBe(false);
+      await page.getByRole("button",{name:"자동 새로 고침 중지"}).click();await expect(page.getByRole("button",{name:"자동 새로 고침 켜기"})).toBeVisible();expect(automatic).toBe(false);
       expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     });
     test(`질문 기록·후속 질문·새 대화 ${width}px`,async({page})=>{
@@ -49,9 +49,9 @@ test.describe("기간 제한 없는 후속 기능 · 합성 API · 업무 데이
         expect(route.request().postDataJSON().correction_id).toMatch(/^[0-9a-f-]{36}$/);
         saved=true; return route.fulfill({status:201,json:{id:second}});
       });
-      await page.goto(`/d/${dept}/ledger`); await page.getByText("결정 정정",{exact:true}).click();
-      await page.getByLabel("정정한 결정 결과").fill("정정된 결정 결과"); await page.getByLabel("정정 사유").fill("후속 검토 결과를 반영합니다.");
-      await page.getByRole("button",{name:"정정 기록 남기기"}).click();
+      await page.goto(`/d/${dept}/ledger`); await page.getByText("결정 고치기",{exact:true}).click();
+      await page.getByLabel("고친 결정 결과").fill("정정된 결정 결과"); await page.getByLabel("왜 고치나요").fill("후속 검토 결과를 반영합니다.");
+      await page.getByRole("button",{name:"고친 결정 남기기"}).click();
       await expect(page.getByRole("heading",{name:"정정된 결정 결과"})).toBeVisible();
       await page.getByText("정정 이력 1건",{exact:true}).click();
       await expect(page.getByRole("heading",{name:"기존 결정 결과"})).toBeVisible();

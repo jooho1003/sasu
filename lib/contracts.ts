@@ -4,8 +4,8 @@ export const RetroActivityKind = z.enum([
   "git_commit", "claude_session", "claude_prompt", "codex_session", "memory_change", "doc_change", "web_visit", "web_search",
   "sasu_decision", "sasu_answer", "sasu_card", "sasu_review", "slack_message", "meeting_attended", "notion_page_changed",
   "manual_note", "voice_note", "figma_version", "figma_comment", "notion_edit", "notion_comment", "gdrive_edit", "gdrive_comment", "gdrive_rename",
-  "confluence_edit", "confluence_comment", "github_pr", "github_review", "github_push", "jira_transition", "jira_worklog", "crm_call", "crm_meeting",
-  "crm_email", "crm_note", "crm_deal", "calendar_event", "ticket_handled", "ticket_closed", "ats_stage", "ats_interview", "social_post", "video_publish", "metric_snapshot",
+  "confluence_edit", "confluence_comment", "github_pr", "github_review", "github_push", "jira_transition", "jira_worklog", "linear_change", "crm_call", "crm_meeting",
+  "crm_email", "crm_note", "crm_deal", "calendar_event", "ticket_handled", "ticket_closed", "ats_stage", "ats_interview", "social_post", "video_publish", "metric_snapshot", "department_snapshot",
 ]);
 export const RetroActivity = z.strictObject({ kind: RetroActivityKind, ref: z.string().min(1).max(200), title: z.string().min(1).max(200), at: z.iso.datetime({ offset: true }), text: z.string().max(500), meta: z.record(z.string(), z.union([z.string().max(500), z.number().finite(), z.boolean()])).default({}) });
 export type RetroActivity = z.infer<typeof RetroActivity>;
@@ -20,7 +20,7 @@ export type RetroDraft = z.infer<typeof RetroDraft>;
 export const RetroEdit = z.strictObject({ revision: z.number().int().nonnegative(), title: z.string().min(1).max(60), body: RetroBody, topics: z.array(z.string().min(1).max(50)).max(5) });
 export const RetroDayRow = z.object({ id: z.uuid(), dept_id: z.uuid(), user_id: z.uuid(), retro_date: z.iso.date(), tz: z.string(), visibility: z.enum(["self", "dept", "leads_only"]), status: z.enum(["collecting", "drafting", "draft", "needs_review", "confirmed", "failed"]), status_reason: z.string().nullable(), activity_count: z.number().int(), revision: z.number().int(), confirmed_revision: z.number().int().nullable(), confirmed_at: z.string().nullable(), topics: z.array(z.string()), generation: z.number().int(), updated_at: z.string(), display_name: z.string().optional(), title: z.string().nullable().optional() });
 export type RetroDayRow = z.infer<typeof RetroDayRow>;
-export const RetroActivityRow = RetroActivity.extend({ id: z.uuid(), day_id: z.uuid(), source_visibility: z.enum(["dept", "leads_only"]).nullable(), excluded: z.boolean() });
+export const RetroActivityRow = RetroActivity.extend({ id: z.uuid(), day_id: z.uuid(), connection_id: z.uuid().nullable().optional(), source_visibility: z.enum(["dept", "leads_only"]).nullable(), excluded: z.boolean() });
 export type RetroActivityRow = z.infer<typeof RetroActivityRow>;
 export const RetroRevisionRow = z.object({ day_id: z.uuid(), revision: z.number().int(), origin: z.enum(["draft", "edit", "confirm"]), title: z.string(), body: RetroBody, topics: z.array(z.string()), highlight: z.string().nullable(), citations: z.array(RetroCitation), created_at: z.string() });
 export type RetroRevisionRow = z.infer<typeof RetroRevisionRow>;
@@ -256,7 +256,7 @@ export const TrailerInviteOpen = z.strictObject({
 });
 export type TrailerInviteOpen = z.infer<typeof TrailerInviteOpen>;
 
-const TrailerInviteStatus = z.enum(["pending", "opened", "consented", "submitted", "scored", "expired", "revoked", "withdrawn", "purged"]);
+export const TrailerInviteStatus = z.enum(["pending", "opened", "consented", "submitted", "scored", "expired", "revoked", "withdrawn", "purged"]);
 export const TrailerInviteRow = z.strictObject({
   invite_id: z.uuid(),
   email: z.string().nullable(),
@@ -297,7 +297,7 @@ export type TrailerInviteOpenBody = z.infer<typeof TrailerInviteOpenBody>;
 const Uuid = z.uuid();
 const Timestamp = NonEmptyString;
 const Count = z.number().int().nonnegative();
-const MemberRole = z.enum(["lead", "member"]);
+export const MemberRole = z.enum(["lead", "member"]);
 
 const AdminDepartmentOverview = z.strictObject({
   dept_id: Uuid,
@@ -535,3 +535,40 @@ export const HiringSubmission = z.object({
   file: HiringFile.nullable(),
 });
 export type HiringSubmission = z.infer<typeof HiringSubmission>;
+
+// ADR-064: URLs and credentials are never accepted as collection scope.
+export const RetroConnectionProvider = z.enum(["github", "figma", "google_calendar", "notion", "jira", "confluence", "linear", "salesmap", "hubspot", "pipedrive", "intercom", "zendesk", "wanted", "stibee", "mailchimp", "meta", "youtube", "ga4"]);
+export type RetroConnectionProvider = z.infer<typeof RetroConnectionProvider>;
+export const RetroConnectionConfig = z.strictObject({
+  repositories: z.array(z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/)).max(10).optional(),
+  files: z.array(z.string().regex(/^[A-Za-z0-9_-]{5,100}$/)).max(10).optional(),
+  pages: z.array(z.uuid()).max(10).optional(),
+  pageIds: z.array(z.string().regex(/^\d{1,30}$/)).max(10).optional(),
+  issues: z.array(z.uuid()).max(10).optional(),
+  projects: z.array(z.string().regex(/^[A-Z][A-Z0-9_]{1,30}$/)).max(10).optional(),
+  subdomain: z.string().regex(/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/).optional(),
+  cloudId: z.uuid().optional(),
+  propertyId: z.string().regex(/^\d{1,20}$/).optional(),
+  pageId: z.string().regex(/^\d{1,30}$/).optional(),
+});
+export type RetroConnectionConfig = z.infer<typeof RetroConnectionConfig>;
+export const RetroConnectionInput = z.strictObject({ provider: RetroConnectionProvider, config: RetroConnectionConfig, secret: z.string().min(1).max(8000), consent: z.literal(true) });
+export const RetroOAuthStart = z.strictObject({ dept: z.string().min(1).max(100), config: RetroConnectionConfig, consent: z.literal(true) });
+export const RetroCredential = z.strictObject({
+  accessToken: z.string().min(1).max(8000), refreshToken: z.string().min(1).max(8000).nullable(),
+  expiresAt: z.number().int().positive().nullable(), subjectId: z.string().min(1).max(150),
+  authKind: z.enum(["token", "oauth"]), scopes: z.array(z.string().max(200)).max(30),
+});
+export type RetroCredential = z.infer<typeof RetroCredential>;
+
+// UI names mirror existing database states; wire values remain unchanged.
+export const CardStatus = z.enum(["open","decided","deferred","rejected","needs_review","merged"]);
+export const AnswerStatus = z.enum(["pending","done","refused","failed"]);
+export const ItemLabel = Classification.shape.label;
+export const Visibility = AgentRoleDefinition.shape.visibility;
+export const TrailerStatus = z.enum(["generating","checking","review","published","unpublished","failed"]);
+export const InviteAttempt = z.enum(["scoring","scored","failed"]);
+export const ReviewStatus = z.enum(["uploading","processing","ready","failed","cancelled","deleted"]);
+export const JobStatus = z.enum(["queued","running","done","failed"]);
+export const NotionRootState = z.enum(["pending","discovering","idle","paused_consent","paused_limit","failed","disabled"]);
+export const AnswerDeliveryState = z.enum(["pending","sent","failed","cancelled"]);

@@ -17,7 +17,8 @@ type SubmissionMode = {
 };
 const characters = [{ name: "초록 재킷", color: "#6da183" }, { name: "노란 니트", color: "#d8af65" }, { name: "파란 셔츠", color: "#7b9dc3" }];
 
-export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null, submission }: { scenarios: TrailerScenario[]; applyUrl?: string | null; notice?: string | null; submission?: SubmissionMode }) {
+export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null, submission, embedded = false }: { scenarios: TrailerScenario[]; applyUrl?: string | null; notice?: string | null; submission?: SubmissionMode; embedded?: boolean }) {
+  const Root = embedded ? "section" : "main";
   const [screen, setScreen] = useState<"intro" | "play" | "finished">("intro");
   const [mode, setMode] = useState<"map" | "list">("map");
   const [quest, setQuest] = useState(0);
@@ -138,8 +139,8 @@ export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null, 
     </>;
     return <>{scenario.facts.filter((fact) => fact.place === place).map((fact) => <blockquote key={fact.id}>{fact.text}<cite>사실집 · {fact.label}</cite></blockquote>)}<p className={styles.collected}>단서 수첩에 담았어요 ✓</p><button className={styles.primary} onClick={() => setOverlay(null)}>계속 둘러보기 →</button></>;
   }
-  return <main className={styles.shell}>
-    <header className={styles.header}><div className={styles.brand}><span className={styles.brandIcon}>ㅅ</span><strong>사수</strong><span className={styles.brandSub}>채용 예고편</span></div><div className={styles.location}><span aria-hidden="true">⌂</span> 사수 오피스 <span className={styles.locationDot} /> 첫 출근</div><span className={styles.badge}>합성 사례 · 1인 체험</span></header>
+  return <Root className={styles.shell}>
+    <header className={styles.header}><div className={styles.brand}><span className={styles.brandIcon}>ㅅ</span><strong>사수</strong><span className={styles.brandSub}>채용 예고편</span></div><div className={styles.location}><span aria-hidden="true">⌂</span> 사수 오피스 <span className={styles.locationDot} /> 첫 출근</div><span className={styles.badge}>가상 사례 · 1인 체험</span></header>
     {screen === "finished" ? <section className={styles.finished}>
       <p className={styles.eyebrow}>오늘의 오피스 체험 완료</p><h1>당신은 어떤 팀에서<br />일하고 싶나요?</h1><p>{scenarios.length}가지 결정에 담긴 나의 기준을 돌아보세요. 점수나 정답은 없습니다.</p>
       {results.map((_, index) => <article key={scenarios[index].id}><h2>{index + 1}. {scenarios[index].title}</h2>{comparison(index)}</article>)}<button className={styles.primary} onClick={restart}>처음부터 다시 체험하기</button><p className={styles.notice}>다시 체험하거나 새로고침하면 이 기록은 사라집니다.</p>
@@ -161,5 +162,5 @@ export function RecruitmentTrailer({ scenarios, applyUrl = null, notice = null, 
       <div className={styles.modalHeader}><div className={styles.speakerIcon} style={{ background: overlay === "place" ? currentPlace.color : "#a4bea7" }}>{overlay === "place" && currentPlace.person ? currentPlace.person.slice(0, 1) : overlay === "notebook" ? "▤" : "◇"}</div><div><span className={styles.eyebrow}>{overlay === "place" ? currentPlace.person ? `가상 동료 · ${currentPlace.name}` : currentPlace.detail : "나의 오피스 탐색"}</span><h2 ref={heading} id="trailer-dialog-title" tabIndex={-1}>{overlay === "place" ? currentPlace.person ? `${currentPlace.person} · ${currentPlace.name}` : currentPlace.name : overlay === "notebook" ? "단서 수첩" : "어디로 가볼까요?"}</h2></div><button className={styles.close} onClick={() => setOverlay(null)} aria-label="닫고 오피스로 돌아가기">×</button></div>
       <div className={styles.modalBody}>{overlay === "notebook" ? notebook() : overlay === "destinations" ? <><p className={styles.muted}>장소를 고르면 캐릭터가 길을 찾아 걸어갑니다.</p><nav className={styles.destinations} aria-label="찾아갈 장소">{INTERACTIONS.map((entry) => <button key={entry.id} onClick={() => mode === "map" ? walkTo(entry.id) : visit(entry.id)} aria-label={`${entry.name}로 걸어가기`}><span style={{ color: entry.color }}>●</span><b>{entry.name}</b><small>{entry.detail}</small><span>→</span></button>)}</nav></> : overlay === "place" ? <section aria-label="장소 상세">{placeContent()}</section> : null}</div>
     </dialog>
-  </main>;
+  </Root>;
 }

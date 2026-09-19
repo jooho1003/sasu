@@ -34,6 +34,6 @@ export async function readTrailerAttempts(supabase: Awaited<ReturnType<typeof cr
   if(result.error)return null;
   const invites = kind === "candidate" ? await supabase.rpc("list_trailer_invites", { p_trailer: trailerId }) : { data: [], error: null };
   if (invites.error) return null;
-  const emails = new Map<string, string>((invites.data ?? []).map((invite: { attempt_id: string; email: string | null }) => [invite.attempt_id, invite.email ?? "파기됨"]));
+  const emails = new Map<string, string>((invites.data ?? []).map((invite: { attempt_id: string; email: string | null }) => [invite.attempt_id, invite.email ?? "완전히 지움"]));
   return (result.data??[]).map(row=>({id:row.id,label:row.label,email:kind === "candidate" ? emails.get(row.id) ?? null : null,createdAt:row.created_at,submissions:row.submissions,result:row.result,weightedScore:row.weighted_score===null?null:Number(row.weighted_score),status:row.status,statusReason:row.status_reason}));
 }

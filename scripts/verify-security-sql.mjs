@@ -1,4 +1,5 @@
 import { verifyRetroSql } from "./verify-retro-sql.mjs";
+import { verifyRetroConnectionsSql } from "./verify-retro-connections-sql.mjs";
 import { verifyTrailerAssessmentSql } from "./verify-trailer-assessment-sql.mjs";
 import { verifySlackAskSql } from "./verify-slack-ask-sql.mjs";
 import { verifySourceLifecycleSql } from "./verify-source-lifecycle-sql.mjs";
@@ -1075,6 +1076,7 @@ try {
   await verifyReviewedMaterialsSql({ db, q, check, asUser });
   await verifyReviewAccessSql({ db, q, check, asUser });
   await verifyRetroSql({ db, q, check, asUser });
+  await verifyRetroConnectionsSql({ db, q, check, asUser });
   console.log(JSON.stringify({ passed, failed: 0, matrix: { organizations:4, departments:12, actors:24, items:72, assertions:matrixAssertions }, database: "isolated PGlite", excluded: ["0004_worker_cron.sql (pg_cron/pg_net not available)"] }));
 } finally {
   await db.close();

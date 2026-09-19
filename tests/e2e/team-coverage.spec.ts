@@ -4,10 +4,10 @@ test("기획팀은 직접 URL로 카드·원장·답변을 열 수 있다", asyn
   test.setTimeout(120_000);
   await page.goto("/demo/d/dddddddd-dddd-4ddd-8ddd-dddddddddddd");
   await expect(page.locator(".workspace-topbar")).toContainText("기획");
-  await page.locator('a[href*="/cards/"]').first().click();
+  await page.locator('a[href*="/cards/"]:visible').first().click();
   await expect(page.locator("q").first()).toBeVisible();
-  await page.getByRole("link", { name: "원장", exact: true }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("원장");
+  await page.getByRole("link", { name: "결정 기록", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("결정 기록");
   await page.getByRole("link", { name: "묻기", exact: true }).click();
   await page.waitForURL(/\/ask$/u, { waitUntil: "commit" });
   await expect(page.locator("article q").first()).toBeVisible();
@@ -22,10 +22,10 @@ for (const team of ["기획", "디자인", "개발"]) {
     const entry = page.locator('a[href^="/demo/d/"]').filter({ hasText: team });
     await expect(entry, `${team}팀 데모가 실제로 제공되어야 합니다`).toHaveCount(1);
     await entry.click();
-    await page.locator('a[href*="/cards/"]').first().click();
+    await page.locator('a[href*="/cards/"]:visible').first().click();
     await expect(page.locator("q").first()).toBeVisible();
-    await page.getByRole("link", { name: "원장", exact: true }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("원장");
+    await page.getByRole("link", { name: "결정 기록", exact: true }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("결정 기록");
     await page.getByRole("link", { name: "묻기", exact: true }).click();
     await page.waitForURL(/\/ask$/u, { waitUntil: "commit" });
     await expect(page.locator("article q").first()).toBeVisible();

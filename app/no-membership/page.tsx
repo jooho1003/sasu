@@ -12,7 +12,7 @@ export default function NoMembershipPage() {
         <h1 className="text-3xl!">초대가 필요합니다</h1>
         <p className="m-0 leading-7 text-[var(--muted)]">
           계정은 만들어졌지만 아직 연결된 부서가 없습니다. 사수의 부서
-          멤버십은 공개 가입으로 생성되지 않고, 팀장이 멤버를 등록해야
+          부서 소속은 공개 가입으로 생성되지 않고, 팀장이 멤버를 등록해야
           만들어집니다.
         </p>
         <p className="m-0 leading-7">
