@@ -1,0 +1,34 @@
+{
+  "slug": "daily-retro",
+  "date": "2026-09-19",
+  "context": {
+    "request": "하루 활동(크롬·대화 세션·메모리/CLAUDE.md 변경·처리된 것)을 자동으로 모아 회고를 만들고 노션·블로그로 내보내며, 사수 안에서 사람×날짜×주제로 열람",
+    "design": "docs/planning/개발_회고_자동화_설계.md",
+    "adr": "ADR-063",
+    "prd": "1.15 §3-6·§8·§8-1",
+    "architecture": "§6-4 불변식 23~26",
+    "phase": "phases/27-daily-retro",
+    "gate_before_start": "설계 §0 사용자 결정 7개 확정(U0) 전에는 S0을 시작하지 않는다. 9/20 제출본은 건드리지 않는다."
+  },
+  "nodes": [
+    { "id": "D0", "title": "설계·상위 문서·플랜·step 파일", "domain": "general", "D1": 2, "D2": 2, "D3": 1, "D4": 2, "score": 7, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": null, "depends_on": [], "output": "docs/planning/개발_회고_자동화_설계.md · PRD §3-6 · ADR-063 · ARCHITECTURE §6-4 · phases/27-daily-retro/*", "status": "completed" },
+    { "id": "U0", "title": "설계 §0 사용자 결정 7개 확정", "domain": "general", "D1": 2, "D2": 1, "D3": 0, "D4": 2, "score": 5, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": null, "depends_on": ["D0"], "output": "설계 §0·ADR-063 미확정 항목을 결정으로 갱신", "status": "pending", "requires_approval": true },
+    { "id": "S0", "title": "retro-schema", "domain": "security", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "powerful", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-sol", "effort": "xhigh", "depends_on": ["U0"], "output": "supabase/migrations/0046_daily_retro.sql · scripts/verify-retro-sql.mjs", "status": "pending", "note": "security floor — self 소유 판정 RLS·RPC 8개·mask_retro_text" },
+    { "id": "S1", "title": "retro-contracts-lib", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["U0"], "output": "lib/contracts.ts(Retro*) · lib/retro/{bundle,verify,export}.ts · lib/retro/collect/*.ts · tests/", "status": "pending", "note": "TDD 대상" },
+    { "id": "S2", "title": "retro-collector", "domain": "general", "D1": 1, "D2": 1, "D3": 0, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S1"], "output": "scripts/retro-collect.ts · docs/setup-guide.md §15", "status": "pending" },
+    { "id": "S3", "title": "retro-draft-job", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S0", "S1"], "output": "lib/pipeline/retro-draft.ts · lib/jobs.ts · lib/llm.ts · lib/worker.ts", "status": "pending" },
+    { "id": "S4", "title": "retro-api", "domain": "general", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S0", "S1"], "output": "app/api/d/[dept]/retros/**", "status": "pending" },
+    { "id": "S5", "title": "retro-ui", "domain": "general", "D1": 1, "D2": 1, "D3": 0, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S4"], "output": "app/(auth)/d/[dept]/retros/** · components/retro-*.tsx · settings 절", "status": "pending" },
+    { "id": "S6", "title": "retro-demo-export", "domain": "general", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S5"], "output": "scripts/seed-demo.ts · app/demo/retros · 내보내기 UI", "status": "pending" },
+    { "id": "S7", "title": "retro-verification", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S2", "S3", "S6"], "output": "docs/verification/daily-retro-<date>/", "status": "pending", "note": "완료 시 blocked — 운영 반영은 사람 판정" },
+    { "id": "O1", "title": "운영 DB 적용·배포", "domain": "security", "D1": 1, "D2": 2, "D3": 2, "D4": 2, "score": 7, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": null, "depends_on": ["S7"], "output": "운영 반영 기록", "status": "pending", "requires_approval": true, "note": "9/20 제출 이후" }
+  ],
+  "gate": {
+    "G1": "PASS",
+    "G2": "PASS — D0·U0·S0·O1 powerful",
+    "G3": "PASS — security floor(S0·O1), general은 balanced/terra",
+    "G4": "PASS(근거 첨부) — powerful 4/11=36%: D0 완료·U0 사용자 결정·S0 새 RLS 소유 판정·O1 운영 반영, 강등 불가",
+    "G5": "PASS — U0·O1 requires_approval",
+    "result": "PASS"
+  }
+}

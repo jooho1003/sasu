@@ -1,0 +1,41 @@
+
+Running 1 test using 1 worker
+
+(node:26216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 (2.8s)
+
+
+  1) [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 ─
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Object {
+    -   "bytes": 32044,
+    +   "bytes": 0,
+        "declared": "32044",
+        "encoding": null,
+    -   "signature": "52494646",
+    +   "signature": "",
+      }
+
+      52 |     expect(original.headers()["content-type"]).toBe("audio/wav");
+      53 |     const received = await original.body();
+    > 54 |     expect({ bytes: received.length, signature: received.subarray(0, 4).toString("hex"), declared: original.headers()["content-length"], encoding: original.headers()["content-encoding"] ?? null }).toEqual({ bytes: fixtures[0][2].length, signature: "52494646", declared: String(fixtures[0][2].length), encoding: null });
+         |                                                                                                                                                                                                      ^
+      55 |     expect(received.equals(fixtures[0][2])).toBe(true);
+      56 |     await expect.poll(() => page.locator("audio").evaluate((element: HTMLAudioElement) => element.duration)).toBe(1);
+      57 |     await page.locator("audio").evaluate(async (element: HTMLAudioElement) => { await element.play(); });
+        at D:\바이브코딩\sasu\tests\e2e\review-access-live.spec.ts:54:198
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\review-access-live-실제-세션·원본-API·Storage-재생과-조직-내려받기-스위치-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\review-access-live-실제-세션·원본-API·Storage-재생과-조직-내려받기-스위치-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 ──

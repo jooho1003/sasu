@@ -1,0 +1,3 @@
+applied 0036_demo_reviewer_read_only.sql
+applied 0037_review_access_controls.sql
+local review QA ready; real transcription key present: true

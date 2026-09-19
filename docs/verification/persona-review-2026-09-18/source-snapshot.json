@@ -1,0 +1,201 @@
+{
+  "at": "2026-09-18T00:07:25.425Z",
+  "scope": "Read-only input fingerprints at document check time; concurrent work may change files",
+  "files": [
+    {
+      "path": "app/(auth)/d/[dept]/cards/[id]/page.tsx",
+      "sha256": "f8ba91596a316ee3306f7dcf29a34a68f07bc0d018d2182422b58527dab9e096",
+      "size": 11435
+    },
+    {
+      "path": "app/api/cards/[id]/decide/route.ts",
+      "sha256": "e401aecc96e29275cb0f218a975afd36c1764ae47373fb21352036d65703eaac",
+      "size": 6992
+    },
+    {
+      "path": "app/api/d/[dept]/cards/route.ts",
+      "sha256": "8719fa39a7f997a2361989e8ccfefbfac46b928ed99c9d94599e1c9e895125ea",
+      "size": 3049
+    },
+    {
+      "path": "app/api/d/[dept]/documents/route.ts",
+      "sha256": "2321f054a860bc5b38a17e322c6c0cf37023a66d05331296642bbbde8a1a7f08",
+      "size": 4741
+    },
+    {
+      "path": "app/auth/callback/route.ts",
+      "sha256": "9c9c37f05de294a258a9a54182fe7867d3af7d28296b810fbd50418ca383449b",
+      "size": 2170
+    },
+    {
+      "path": "components/agent-roles.tsx",
+      "sha256": "7740c2cdb6720c9e45e030ea6562a3299702c9090ac75c85df6545b971dac522",
+      "size": 19557
+    },
+    {
+      "path": "components/ask-s4.tsx",
+      "sha256": "340c4741fc37512d09de136cc426496826e315ff79173f98c780811bb662c5f9",
+      "size": 14150
+    },
+    {
+      "path": "components/card-actions.tsx",
+      "sha256": "82018c2ca335b84c6888aa533f37982bfc8131d15d232a4d93a763825979461d",
+      "size": 5978
+    },
+    {
+      "path": "components/dashboard-s1.tsx",
+      "sha256": "85429160c9d95df6c6a7af5cae50d566ffa78b8ec45afac25927a133c3ef75bd",
+      "size": 15459
+    },
+    {
+      "path": "components/decision-correction.tsx",
+      "sha256": "fa3bfc7928234d51df407b6a9b03908814fed874197fada71ab408c2c2f8fed2",
+      "size": 2705
+    },
+    {
+      "path": "components/ledger-s3.tsx",
+      "sha256": "6995d8749ad7e224a5bc51a2c58bdfdf3396c54e0815cbba501db50d83b9b2c0",
+      "size": 16780
+    },
+    {
+      "path": "components/workspace-shell.tsx",
+      "sha256": "dd5ffc0379aa73eabc72611a1132f74e4a12fcaaa5cba2902e9b146629280582",
+      "size": 8873
+    },
+    {
+      "path": "docs/ADR.md",
+      "sha256": "303e60c392a8e8c48323bc6b55ae6c1c78bf4e6598433a84dae1d7ca443891eb",
+      "size": 105946
+    },
+    {
+      "path": "docs/AI-DEVELOPMENT.md",
+      "sha256": "c61f59c5889446f837bcad5bef54ad7ced9cfdcbbd752f9718518ab23872a282",
+      "size": 5825
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "0499f6c3d744cdb0e917cb06c351d929fbd17308f0b5f324bd4c3806d58b5800",
+      "size": 41457
+    },
+    {
+      "path": "docs/PRD.md",
+      "sha256": "2276fedc215609da22b5066c68481ea353f634472ad05dbb20e627f99eda8711",
+      "size": 168623
+    },
+    {
+      "path": "docs/planning/노션_전체수집_설계.md",
+      "sha256": "7e9eb78e6abdb9e89865f443453ba479c0d336e98b970a50711030b79ce93adc",
+      "size": 22489
+    },
+    {
+      "path": "docs/planning/메인웹사이트_관리자콘솔_설계.md",
+      "sha256": "2aeaf496086d74280d2abe19391de4795cdabc5d13abef2cfdb85d1d83657560",
+      "size": 74539
+    },
+    {
+      "path": "docs/planning/부서_에이전트_공동설계.md",
+      "sha256": "d4399ec3ca0ed9a858cff0dbed40712ca2549334765fc7c508e7f505deaf8732",
+      "size": 11914
+    },
+    {
+      "path": "docs/planning/웹회의_녹음_설계.md",
+      "sha256": "0b8a1eddb8e96819dad4579ac7c784799312a630ca2d825b0a9119bf9d39d523",
+      "size": 51670
+    },
+    {
+      "path": "docs/verification/continuity-production-2026-09-16.md",
+      "sha256": "c3cd2813a36429be1e8969e5da1e4d57f4b903f48c8ae0dc32cb0718f4a939dc",
+      "size": 10242
+    },
+    {
+      "path": "docs/verification/notion-collection/step2-independent-review.md",
+      "sha256": "3c3f4337d78e79c29193a26dc141ada1505615a66beab61029e718eee019cfc5",
+      "size": 8105
+    },
+    {
+      "path": "docs/verification/reviewed-materials-production-2026-09-17.md",
+      "sha256": "a43e7631045b3becea0d700a67b0eb282df5fc60b479b950224325e08f4bace8",
+      "size": 4451
+    },
+    {
+      "path": "fixtures/hiring/missions.ts",
+      "sha256": "a0c0d750253b621f3cfc0175d1f3cb63180dcca6607a2d2e8f12edeb580b7de5",
+      "size": 15349
+    },
+    {
+      "path": "lib/demo-access.ts",
+      "sha256": "88add506cfebeac59243fec0580efb352b5c6c996912979f52da5748a3f156b7",
+      "size": 5052
+    },
+    {
+      "path": "lib/pipeline/answer.ts",
+      "sha256": "6436df679dc40ecfbac77c22c1848b3387947a5a8c413b4278868a8a547b469e",
+      "size": 15362
+    },
+    {
+      "path": "lib/pipeline/card.ts",
+      "sha256": "3612eb309d0abeb7a8e9916a2acf9cec0d889c34cbd5d223f7b260d876f92d62",
+      "size": 25158
+    },
+    {
+      "path": "lib/slack/blocks.ts",
+      "sha256": "185cc94e903056fc103df11501b9d91f4c091c700032db28b7f5dca1e60f4192",
+      "size": 7482
+    },
+    {
+      "path": "lib/supabase/membership.ts",
+      "sha256": "f9a8634d095aa8e1337f5a6044a5cd86dd1f1abc01389b454a30d67f63fb97a2",
+      "size": 2831
+    },
+    {
+      "path": "phases/23-browser-meeting-recording/README.md",
+      "sha256": "462d3b507519bb45bf9970a567c248ad9d8ef60fa36cb30ff9c9ab7727dc0ffd",
+      "size": 2468
+    },
+    {
+      "path": "phases/24-department-hiring-demo/README.md",
+      "sha256": "2a73ef7fcef1d2a8ff4decddacbfdd2d98d726528fdcd941b100edbe208d6409",
+      "size": 862
+    },
+    {
+      "path": "phases/25-notion-collection/README.md",
+      "sha256": "f6a6717b935a0417cc0be50eb6221b3a102e8e0e5d6838a2631c5b448ed4e18b",
+      "size": 2528
+    },
+    {
+      "path": "phases/25-notion-collection/index.json",
+      "sha256": "f0d363a669de8cfea26c5a3219f13d107d9dcfe0687a0f4dca547e777e0dd124",
+      "size": 1868
+    },
+    {
+      "path": "supabase/migrations/0017_card_decision_boundaries.sql",
+      "sha256": "82787f9319268b6bf97611e79e72bd917cbf8538ebb709c1786dcbd0f4a49fe1",
+      "size": 19635
+    },
+    {
+      "path": "supabase/migrations/0018_card_merge.sql",
+      "sha256": "352cac5d1d29f04e947d09e235e78d96794ff05f8d2c3841f1edadc7559836b9",
+      "size": 2197
+    },
+    {
+      "path": "supabase/migrations/0030_source_lifecycle.sql",
+      "sha256": "2562e6aaf93b96aab55d0cd2184e8563e0d404c455889e8dacb6765f1837c275",
+      "size": 18675
+    },
+    {
+      "path": "supabase/migrations/0031_decision_followup.sql",
+      "sha256": "c050fc03e6119afe11c3f67aed501fdb37f68461657d1b861b73d86139b62159",
+      "size": 13787
+    },
+    {
+      "path": "supabase/migrations/0034_reviewed_materials.sql",
+      "sha256": "399771e3ee613af3a1d9f6ce6e14dc6e508bd629531e3599bf5af9a72eed0941",
+      "size": 27932
+    },
+    {
+      "path": "supabase/migrations/0037_review_access_controls.sql",
+      "sha256": "cf758f48289d0530861aa8b88e877182e19025b42f3e5c1bb810e74c94fa7472",
+      "size": 18945
+    }
+  ]
+}

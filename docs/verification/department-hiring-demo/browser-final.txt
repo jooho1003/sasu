@@ -1,0 +1,42 @@
+
+Running 12 tests using 1 worker
+
+(node:8328) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   1 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 1440px: 직접 기록·근거·결과 제출·무전송 (8.6s)
+Testing stopped early after 1 maximum allowed failures.
+
+
+  1) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 1440px: 직접 기록·근거·결과 제출·무전송 ──────────────
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "databases": 0,
+    +   "databases": 1,
+        "local": 0,
+        "session": 0,
+      }
+
+      36 |     await page.screenshot({ path: `${evidence}/${mission.id}-${width}.png`, fullPage: true });
+      37 |     expect(writes).toEqual([]); expect(leakedInputs).toEqual([]); expect(errors).toEqual([]);
+    > 38 |     expect(await page.evaluate(async () => ({ local: localStorage.length, session: sessionStorage.length, databases: (await indexedDB.databases()).length }))).toEqual({ local: 0, session: 0, databases: 0 });
+         |                                                                                                                                                                ^
+      39 |   });
+      40 | }
+      41 |
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:38:160
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-기획팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-기획팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 1440px: 직접 기록·근거·결과 제출·무전송 ───────────────
+  11 did not run
+  1 error was not a part of any test, see above for details

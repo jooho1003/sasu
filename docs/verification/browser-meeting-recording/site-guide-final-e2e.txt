@@ -1,0 +1,10 @@
+
+Running 3 tests using 1 worker
+
+(node:31224) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\site-guide.spec.ts:10:9 › 홈페이지 노션 가이드 동선 › 390px에서 가이드를 찾고 새 탭으로 연다 (734ms)
+  ok 2 [chromium] › tests\e2e\site-guide.spec.ts:10:9 › 홈페이지 노션 가이드 동선 › 768px에서 가이드를 찾고 새 탭으로 연다 (577ms)
+  ok 3 [chromium] › tests\e2e\site-guide.spec.ts:10:9 › 홈페이지 노션 가이드 동선 › 1440px에서 가이드를 찾고 새 탭으로 연다 (645ms)
+
+  3 passed (2.6s)

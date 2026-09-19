@@ -1,0 +1,19 @@
+{
+  "project": "sasu",
+  "phase": "30-retro-connectors",
+  "design": "docs/planning/부서별_회고_커넥터_설계.md",
+  "research": "docs/planning/retro-connectors-research-2026-09-19/",
+  "adr": "ADR-064",
+  "gate_before_start": "phase 27 QA 통과 + 2026-09-19 설계 §0 사용자 결정 10개 확정. 운영 반영은 9/20 제출 이후.",
+  "steps": [
+    { "step": 0, "name": "preset-and-derived", "status": "completed", "summary": "8개 부서 프리셋, 슬랙·노션 부서 문맥 파생, 수동·음성 한 줄 RPC, 부서 문맥·마스킹 인용 차단을 추가했다." },
+    { "step": 1, "name": "connections-schema-oauth", "status": "completed", "summary": "0049 연결·공개 동의·프리셋·해제 삭제 RPC, 암호화 키 저장, 개인 OAuth state 경계를 추가했다. 실제 제공자 OAuth 교환은 자격 증명 전까지 501로 닫는다." },
+    { "step": 2, "name": "pull-job-and-first-connectors", "status": "completed", "summary": "retro_pull 워커·수동 큐·제공자 응답 공통 변환기를 추가하고 개인 식별 필드 미파싱·200건·시간대 경계 테스트를 통과했다." },
+    { "step": 3, "name": "connections-ui", "status": "completed", "summary": "설정의 부서 프리셋·개인 연결·해제 고지, 회고 한 줄 입력, 커넥터 활동 이름표를 추가했다." },
+    { "step": 4, "name": "sales-cs-connectors", "status": "completed", "summary": "CRM·상담 제공자 행을 공통 변환기로 지원하고 회사명·상대 식별정보 제한을 테스트했다. VoIP는 법률 게이트로 제외했다." },
+    { "step": 5, "name": "docs-dev-hr-connectors", "status": "completed", "summary": "문서·개발·인사 제공자 행을 공통 변환기로 지원한다. 실제 외부 API 호출은 개인 자격 증명 미제공으로 실행하지 않았다." },
+    { "step": 6, "name": "marketing-snapshots", "status": "completed", "summary": "게시물·영상·GA4 행을 metric/social/video 활동으로 제한 변환하고 지표를 snapshot 메타로 남기는 테스트를 추가했다." },
+    { "step": 7, "name": "connectors-verification", "status": "blocked", "summary": "합성 변환·SQL 권한 검사는 통과했지만 외부 샌드박스·운영 OAuth는 자격 증명과 9/20 이후 승인 전까지 실행하지 않는다.", "note": "운영 반영은 사람 판정", "scope": "하니스·E2E(파일럿 2개 부서)·샌드박스 실측·누출 grep → docs/verification/retro-connectors-<날짜>/" },
+    { "step": 8, "name": "voip-call-metadata", "status": "blocked", "requires_legal": true, "codex_model": "gpt-5.6-sol", "effort": "xhigh", "note": "통신비밀보호법 §2 11호 통신사실확인자료 — 법률 자문 통과 전 착수 금지", "scope": "RingCentral·Aircall call_in/out/missed(방향·시각·길이만)" }
+  ]
+}

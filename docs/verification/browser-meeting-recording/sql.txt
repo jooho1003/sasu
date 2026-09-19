@@ -1,0 +1,157 @@
+PASS 0028 rollback removes assessment only at its migration boundary
+PASS 0027 rollback restores the exact 0026 overview contract
+PASS 0026 manual rollback removes the complete organization admin surface at its migration boundary
+PASS 0017 backfills card and direct decision visibility from their evidence
+PASS authenticated cannot invoke Slack consent RPC
+PASS Slack consent updates only the clicked user's matching department membership
+PASS 0025 rejects department reassignment, creation, and deletion
+PASS 0025 rejects raw items insertion on public and private sources
+PASS 0025 rejects department reassignment, creation, and deletion
+PASS 0025 rejects raw items insertion on public and private sources
+PASS 0025 preserves service ingestion and guest read-only isolation
+PASS all public tables: authenticated/anon direct-write policy and grant matrix
+PASS member cannot insert agent roles
+PASS lead cannot forge an agent role creator
+PASS lead can insert valid agent roles
+PASS agent role visibility hides leads-only roles from members
+PASS agent roles only allow one-way archival updates
+PASS members cannot request agent role runs
+PASS agent role runs reject cross-department, non-document, and oversized source sets
+PASS agent role runs upsert results with narrowest visibility and fresh timestamps
+PASS members cannot write agent role results or read leads-only results
+PASS archived roles cannot be run
+PASS demo department roles cannot be run
+PASS guests read demo agent roles and results only, without writes
+PASS removing a document source deletes its agent role results
+PASS member cannot remove a source and demo sources are never removable
+PASS lead source removal erases searchable evidence but preserves ledger quotes
+PASS removed item remains updateable for worker cleanup
+PASS inactive source rejects direct item inserts
+PASS inactive source rejects Slack ingestion before an item can persist
+PASS find_merge_candidates includes the 72h/0.55 boundaries and rejects stale, closed, or sub-threshold cards
+PASS find_merge_candidates refuses visibility narrowing and remains service-role-only
+PASS citation owner/item partial unique index rejects duplicate evidence
+PASS expired running lease is reclaimed with a new five-minute lease
+PASS active running lease is not claimed
+PASS exhausted expired lease is failed without another claim
+PASS authenticated cannot call claim_jobs
+PASS member cannot read lead answer or private ledger
+PASS answer citations are visible only to their own questioner
+PASS similar decision RPC excludes superseded rows and is service-role-only
+PASS decision insert queues an embed_decision job
+PASS lead user search sees private evidence; channel search does not
+PASS RPC caller cannot impersonate lead
+PASS authenticated cannot call completion RPC
+PASS missing citation target rolls back every citation and status
+PASS completion is atomic and repeated completion adds no citations
+PASS swept answer cannot be resurrected
+PASS member cannot promote self or forge another person's consent
+PASS own consent and lead Slack mapping remain writable
+PASS ledger is append only for authenticated
+PASS card, conflict, and meeting writes are command-scoped
+PASS only assignee or lead can decide and only lead can reopen
+PASS promotion is visible-item-only, enqueues make_card, and reuses an open card
+PASS command RPC execution grants exclude anon and the Slack actor RPC excludes authenticated
+PASS service-only Slack decision RPC shares the same transition rules
+PASS direct private evidence fixes decision visibility and stays hidden from members
+PASS direct decisions reject invisible evidence and mismatched quotes
+PASS citation insertion failure rolls back the direct decision
+PASS deciding twice returns the original decision and inserts one row
+PASS users cannot manufacture completed AI answers
+PASS Slack event/item/job commit atomically and duplicate delivery is a no-op
+PASS job failure rolls back event and item; retry succeeds
+PASS Slack mention answer and job are idempotent
+PASS daily ASK limit allows 50, rejects 51, resets at KST midnight, and is isolated by user
+PASS rate-limited Slack ASK records its event without creating an answer or job
+PASS consent rechecked inside transaction; no unconsented body persists
+PASS authenticated cannot invoke Slack ingestion RPC
+PASS users cannot rewrite captured evidence or manufacture model classifications
+PASS service worker can still maintain captured evidence
+PASS 4 organizations / 12 departments / 24 actors: complete read and search matrix
+PASS organization admin private helpers are unreachable to API roles
+PASS organization admin functions have exact execution grants
+PASS non-admins are forbidden from every metadata read RPC
+PASS admin overview is organization-scoped and contains metadata keys only
+PASS admin member listing never crosses organization boundaries
+PASS answer statistics are daily aggregates and reject ranges over 31 days
+PASS demo admin wrappers are anon-only and remove account identifiers
+PASS organization admin status never expands can_see content access
+PASS admin tables remain policy-free and admin events append-only even for service role
+PASS department names are unique case-insensitively inside an organization
+PASS organization admins cannot target another organization
+PASS admin write surface has no promotion RPC
+PASS admin creates a trimmed department and cannot duplicate its name
+PASS first-lead invites reject nonempty departments and the admin's own email
+PASS members cannot use lead invite, promotion, or invite listing commands
+PASS demo departments reject lead administration
+PASS the final department lead cannot be demoted or removed
+PASS first-lead invitation is single-use, email-bound, and idempotent for its recipient
+PASS a spare admin first-lead invite cannot be accepted once the department has members (R10)
+PASS revoked invitations remain previewable but cannot be accepted
+PASS expired invitations cannot be accepted
+PASS lead invitations are member-only, pending-deduplicated, and promotable only by a lead
+PASS all write RPCs keep admin event targets identifier-only
+PASS organization pending-invite limit is atomic at the command boundary
+PASS trailer candidates reject members and exclude private, cross-department and superseded decisions
+PASS trailer generation counter atomically rejects the 21st draft without adding a row
+PASS trailer worker RPC and private helper permissions are explicit
+PASS scenario trigger assigns org, protects identity, resets hashes and matches SQL approval golden IDs
+PASS gate reports reject raw excerpts and stale results never mutate trailers
+PASS trailer updates require the current version and reset approvals, with lead-only reads
+PASS publication requires organization permission, passing gate and complete current approval
+PASS published scenario edits immediately stop public reads and unsupported schema is explicit
+PASS unpublishing invalidates the old slug and republishing issues a new one
+PASS only organization admins toggle publication and cannot unpublish another organization
+PASS trailer regeneration and deletion enforce state and keep the daily limit
+PASS assessment candidate is disabled in both service RPC and direct-write trigger
+PASS assessment creation is service-only and retries preserve immutable submissions
+PASS assessment RLS grants only own leads and anonymous demo reads
+PASS deleting a trailer cascades its assessment attempts
+PASS Slack ASK: direct users cannot invoke ingestion or delivery RPCs or access delivery rows
+PASS Slack ASK: context contains only own departments and active connected channels
+PASS Slack ASK: a single identity supports multiple memberships without impersonation
+PASS Slack ASK: forged department and unconsented requests write no answers/events
+PASS Slack ASK: duplicate event creates one answer and two initial jobs
+PASS Slack ASK: progress lease serializes jobs and rejects stale completion
+PASS Slack ASK: completion atomically queues delivery and revalidates quote
+PASS Slack ASK: channel delivery rejects leads_only sources even for lead questioner
+PASS Slack ASK: consent withdrawal cancels retry without disclosing stored answer
+PASS Slack ASK: timeout status schedules failure-message delivery
+PASS Slack ASK: failed delivery can be retried only by its questioner, with no new LLM job
+PASS Slack ASK: demo organization creates no question/delivery/jobs
+PASS source lifecycle: edits are ordered, masked upstream, deduplicated, and enqueue once
+PASS source lifecycle: unconsented/forged edit writes no event or content
+PASS source lifecycle: stale AI completion cannot overwrite the current version
+PASS source lifecycle: delete erases text/vectors/classification and rejects resurrection
+PASS source lifecycle: changing cited content blocks publication/merge, retains decision snapshots and retracts DM
+PASS source lifecycle: Notion snapshots use a lease, remove text, and discard late results
+PASS source lifecycle: automatic sync is lead-controlled and one pending job per source
+PASS source lifecycle: all worker writes/tombstones are unavailable to users
+PASS decision followup: only author/lead can append a correction and retry is idempotent
+PASS decision followup: correction respects narrowed source visibility
+PASS decision followup: corrections copy card-owned citations and fresh retrieval excludes superseded decisions
+PASS decision followup: reminders reject other members and past times, allow reschedule/cancel
+PASS decision followup: due scheduler deduplicates and claims current consenting assignee
+PASS decision followup: withdrawn consent cancels reminders and deadlines only queue once
+PASS decision followup: reminder RPCs and storage cannot be forged by users
+PASS conversations: web ASK queues atomically and history is actor/dept-bound
+PASS conversations: followup only supplies previous questions, never old answers/evidence
+PASS conversations: Slack thread continuity never crosses users, channels or departments
+PASS conversations: history keyset pagination has no duplicates for identical timestamps
+PASS Slack installation: state belongs to admin/session/org, expires and consumes once
+PASS Slack installation: browser cannot forge tokens; workspace and organization cannot be reassigned
+PASS Slack installation: identical Slack IDs in different workspaces never cross organizations
+PASS Slack installation: uninstall destroys token and stops collection/delivery, preserves other organizations
+PASS Slack installation: credentials/state tables and worker RPCs are never browser accessible
+PASS reviews: member/cross-department/unconsented speech denied; repeat create is idempotent
+PASS reviews: drafts are not sources; private storage follows SQL permission
+PASS reviews: jobs contain identifiers only; final segment completes the full draft
+PASS reviews: edits mask text, retain genuine provenance, reject duplicate IDs and stale saves
+PASS reviews: publication is atomic/idempotent and repeated edits revoke prior evidence
+PASS reviews: inactive source clears summaries and fences late completion/direct reads
+PASS reviews: stop clears current searchable text; originals remain until requested deletion
+PASS reviews: cancellation blocks late results; delete clears drafts and revision copies
+PASS reviews: users cannot forge rows or invoke worker completion
+PASS reviews: direct RPC masking, demo rejection, and participant withdrawal purge
+PASS retention: only current consenting records in the caller department are exported
+{"passed":156,"failed":0,"matrix":{"organizations":4,"departments":12,"actors":24,"items":72,"assertions":2016},"database":"isolated PGlite","excluded":["0004_worker_cron.sql (pg_cron/pg_net not available)"]}

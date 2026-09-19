@@ -1,0 +1,62 @@
+{
+  "/": {
+    "status": 200,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-+clmh/TLf/P+xA0XaRyk0g==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+    }
+  },
+  "/privacy": {
+    "status": 200,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-sqWp6k+rgcPYjolTskmTmw==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+    }
+  },
+  "/login": {
+    "status": 200,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-Ji4NnKkOuJO8PDQaolNaxQ==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+    }
+  },
+  "/api/jobs/run": {
+    "status": 405,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-yiCJ/DRMK6jg1ZMWjOMakQ==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+    }
+  },
+  "/d/test/trailers": {
+    "status": 404,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-U9nR8O1Cl7haCsRfmrYPYg==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
+    }
+  }
+}

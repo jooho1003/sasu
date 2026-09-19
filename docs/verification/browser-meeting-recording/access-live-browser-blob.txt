@@ -1,0 +1,32 @@
+
+Running 1 test using 1 worker
+
+(node:11960) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 (5.1s)
+
+
+  1) [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 ─
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      63 |     await page.goto(`/d/${dept}/reviews/${document}`);
+      64 |     await expect(page.getByText("조직에서 원본 내려받기를 허용하지 않았습니다", { exact: true })).toBeVisible();
+    > 65 |     expect((await context.request.get(`/api/d/${dept}/reviews/${document}/original?action=play_original`)).status()).toBe(403);
+         |                                                                                                                      ^
+      66 |     await page.goto("/admin/security");
+      67 |     await page.getByLabel("원본 파일 내려받기 허용").check();
+      68 |     await page.getByRole("button", { name: "원본 보호 설정 저장", exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\review-access-live.spec.ts:65:118
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\review-access-live-실제-세션·원본-API·Storage-재생과-조직-내려받기-스위치-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\review-access-live-실제-세션·원본-API·Storage-재생과-조직-내려받기-스위치-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 ──

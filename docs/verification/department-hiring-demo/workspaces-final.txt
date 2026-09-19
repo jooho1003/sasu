@@ -1,0 +1,12 @@
+
+Running 5 tests using 1 worker
+
+(node:12184) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\hiring-demo.spec.ts:79:43 › 기획팀: 부서 데이터·결정 카드·원장·근거 답변 (4.0s)
+  ok 2 [chromium] › tests\e2e\hiring-demo.spec.ts:79:43 › 인사팀: 부서 데이터·결정 카드·원장·근거 답변 (2.6s)
+  ok 3 [chromium] › tests\e2e\hiring-demo.spec.ts:79:43 › 프론트개발팀: 부서 데이터·결정 카드·원장·근거 답변 (2.8s)
+  ok 4 [chromium] › tests\e2e\hiring-demo.spec.ts:79:43 › 백엔드개발팀: 부서 데이터·결정 카드·원장·근거 답변 (2.7s)
+  ok 5 [chromium] › tests\e2e\hiring-demo.spec.ts:79:43 › 디자인팀: 부서 데이터·결정 카드·원장·근거 답변 (2.7s)
+
+  5 passed (15.9s)

@@ -1,0 +1,14 @@
+{
+  "at": "2026-09-18T00:07:25.984Z",
+  "files": 20,
+  "personas": 50,
+  "departments": 10,
+  "gaps": 28,
+  "designs": 10,
+  "acceptanceCriteria": 52,
+  "journeys": 14,
+  "localLinks": 102,
+  "sourceFiles": 39,
+  "issues": [],
+  "disclaimer": "Checks document structure and relative path existence only. Does not validate product behavior, source claim entailment, external links, or all heading fragments."
+}

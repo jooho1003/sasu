@@ -1,0 +1,105 @@
+{
+  "at": "2026-09-17T23:32:03.605Z",
+  "scope": "Actual client components with synthetic intercepted APIs, navigation stubs and simplified CSS. Not a production or RLS verification.",
+  "results": [
+    {
+      "id": "OBS-01",
+      "observation": "빈 결정 사유 제출 차단",
+      "pass": true
+    },
+    {
+      "id": "OBS-02",
+      "observation": "최종 결과 편집 없이 AI 추천이 outcome으로 전송됨",
+      "defectReproduced": true,
+      "editableFields": 1,
+      "sentBody": {
+        "status": "decided",
+        "outcome": "고객 A의 12% 할인 요청을 승인한다.",
+        "rationale": "가격 정책상 5% 할인만 승인한다. 12% 할인은 승인하지 않는다."
+      }
+    },
+    {
+      "id": "OBS-03",
+      "observation": "처리 권한 없는 카드 UI",
+      "pass": true,
+      "limit": "컴포넌트 속성에 따른 표시 검토, 서버 권한 검증은 아님"
+    },
+    {
+      "id": "OBS-04",
+      "observation": "일반 담당자는 보류 후 재개할 수 없음",
+      "pass": true
+    },
+    {
+      "id": "OBS-05",
+      "observation": "근거 부족의 담당자 인계 CTA 부재",
+      "defectReproduced": true,
+      "actions": [
+        "이어서 질문하기"
+      ]
+    },
+    {
+      "id": "OBS-06",
+      "observation": "이어서 질문하기는 같은 질문 흐름을 연결함",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "blocked": [],
+  "captured": [
+    {
+      "method": "POST",
+      "path": "/api/cards/22222222-2222-4222-8222-222222222222/decide",
+      "body": {
+        "status": "decided",
+        "outcome": "고객 A의 12% 할인 요청을 승인한다.",
+        "rationale": "가격 정책상 5% 할인만 승인한다. 12% 할인은 승인하지 않는다."
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/d/11111111-1111-4111-8111-111111111111/questions",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/d/11111111-1111-4111-8111-111111111111/ask",
+      "body": {
+        "question": "고객 A의 할인 요청을 누가 판단하나요?",
+        "parent_id": null
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/d/11111111-1111-4111-8111-111111111111/answers/synthetic-refused",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/d/11111111-1111-4111-8111-111111111111/questions",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/d/11111111-1111-4111-8111-111111111111/questions",
+      "body": null
+    }
+  ],
+  "sourceHashes": [
+    {
+      "file": "components/card-actions.tsx",
+      "sha256": "82018c2ca335b84c6888aa533f37982bfc8131d15d232a4d93a763825979461d"
+    },
+    {
+      "file": "components/ask-s4.tsx",
+      "sha256": "340c4741fc37512d09de136cc426496826e315ff79173f98c780811bb662c5f9"
+    },
+    {
+      "file": "app/(auth)/d/[dept]/cards/[id]/page.tsx",
+      "sha256": "f8ba91596a316ee3306f7dcf29a34a68f07bc0d018d2182422b58527dab9e096"
+    },
+    {
+      "file": "lib/slack/blocks.ts",
+      "sha256": "185cc94e903056fc103df11501b9d91f4c091c700032db28b7f5dca1e60f4192"
+    }
+  ]
+}

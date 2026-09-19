@@ -1,0 +1,19 @@
+
+Running 12 tests using 1 worker
+
+(node:31056) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 1440px: 직접 기록·근거·결과 제출·무전송 (9.3s)
+  ok  2 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 인사팀 1440px: 직접 기록·근거·결과 제출·무전송 (8.0s)
+  ok  3 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 프론트개발팀 1440px: 직접 기록·근거·결과 제출·무전송 (8.5s)
+  ok  4 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 백엔드개발팀 1440px: 직접 기록·근거·결과 제출·무전송 (8.5s)
+  ok  5 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 디자인팀 1440px: 직접 기록·근거·결과 제출·무전송 (8.5s)
+  ok  6 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 390px: 직접 기록·근거·결과 제출·무전송 (8.4s)
+  ok  7 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 인사팀 390px: 직접 기록·근거·결과 제출·무전송 (5.9s)
+  ok  8 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 프론트개발팀 390px: 직접 기록·근거·결과 제출·무전송 (8.3s)
+  ok  9 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 백엔드개발팀 390px: 직접 기록·근거·결과 제출·무전송 (5.9s)
+  ok 10 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 디자인팀 390px: 직접 기록·근거·결과 제출·무전송 (6.4s)
+  ok 11 [chromium] › tests\e2e\hiring-demo.spec.ts:43:5 › 부서 간 진행 격리·샘플 표시·첨부 형식·코드 비실행·초기화 (6.1s)
+  ok 12 [chromium] › tests\e2e\hiring-demo.spec.ts:67:5 › 키보드로 미션을 시작하고 파일만 첨부한 제출을 확인한다 (4.3s)
+
+  12 passed (1.5m)

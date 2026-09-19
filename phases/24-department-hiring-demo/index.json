@@ -1,0 +1,7 @@
+{
+  "project": "sasu",
+  "phase": "24-department-hiring-demo",
+  "steps": [{ "step": 0, "name": "five-department-synthetic-missions", "status": "completed", "summary": "로컬 5개 부서 미션·과정 기록·메모리 내 파일/결과 제출 구현. 기존 데모 유지 및 신규 3개 부서 시드. 단위 1101, 브라우저 17, lint/build 통과. Graft/Archify 도구 결과 없음; 수동 의존 관계 기록. 운영 미반영." }],
+  "production_deployed": false,
+  "verification": "docs/verification/department-hiring-demo/README.md"
+}

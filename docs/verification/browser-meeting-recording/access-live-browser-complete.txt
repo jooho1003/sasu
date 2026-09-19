@@ -1,0 +1,8 @@
+
+Running 1 test using 1 worker
+
+(node:9244) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 (11.2s)
+
+  1 passed (12.1s)

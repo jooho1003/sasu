@@ -1,0 +1,38 @@
+{
+  "slug": "retro-connectors",
+  "date": "2026-09-19",
+  "context": {
+    "request": "각 부서(디자인 피그마·댓글, 기획 문서 비교, 영업 통화 등)가 당일 회고를 쓸 수 있는 방향을 모두 조사해 설계",
+    "research": "docs/planning/retro-connectors-research-2026-09-19/",
+    "design": "docs/planning/부서별_회고_커넥터_설계.md",
+    "adr": "ADR-064",
+    "prd": "1.16 §3-6 RET-11~16·§8·§8-1",
+    "architecture": "§6-4 불변식 27~29",
+    "phase": "phases/30-retro-connectors",
+    "gate_before_start": "phase 27 QA 통과 + 설계 §0 사용자 결정 10개 확정. 9/20 제출본은 건드리지 않는다."
+  },
+  "nodes": [
+    { "id": "R0", "title": "1차 출처 조사 4건", "domain": "general", "D1": 1, "D2": 0, "D3": 0, "D4": 0, "score": 1, "tier": "balanced", "agent": "general-purpose", "claude_model": "sonnet", "codex_model": null, "depends_on": [], "output": "docs/planning/retro-connectors-research-2026-09-19/{design-planning,sales-cs,dev-marketing-hr,legal-policy}.md", "status": "completed", "note": "조사 폭이 넓어 fast에서 balanced로 올림" },
+    { "id": "D0", "title": "설계·상위 문서·플랜·phase 등록", "domain": "general", "D1": 2, "D2": 2, "D3": 1, "D4": 2, "score": 7, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": null, "depends_on": ["R0"], "output": "설계 · ADR-064 · PRD 1.16 · ARCHITECTURE 1.5 · phases/30-retro-connectors/index.json", "status": "completed" },
+    { "id": "U0", "title": "설계 §0 사용자 결정 10개 확정", "domain": "general", "D1": 2, "D2": 1, "D3": 0, "D4": 2, "score": 5, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": null, "depends_on": ["D0"], "output": "설계 §0·ADR-064 미확정 → 결정", "status": "pending", "requires_approval": true },
+    { "id": "L0", "title": "법률 자문", "domain": "security", "D1": 2, "D2": 1, "D3": 2, "D4": 2, "score": 7, "tier": "powerful", "agent": "user", "claude_model": null, "codex_model": null, "depends_on": ["D0"], "output": "통신사실확인자료 본인 추출·근로자 정보 공개 동의·부서 공개의 제3자 제공 여부 판단", "status": "pending", "requires_approval": true },
+    { "id": "S0", "title": "preset-and-derived", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["U0"], "output": "lib/retro/presets.ts · B 파생 SQL · add_retro_note · verify 규칙", "status": "pending" },
+    { "id": "S1", "title": "connections-schema-oauth", "domain": "security", "D1": 0, "D2": 2, "D3": 1, "D4": 1, "score": 4, "tier": "powerful", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-sol", "effort": "xhigh", "depends_on": ["U0"], "output": "0048_retro_connections.sql · app/api/retro/connect/** · lib/retro/connection-crypto.ts · scripts/verify-retro-connections-sql.mjs", "status": "pending", "note": "security floor — 개인 토큰 저장·OAuth·RLS" },
+    { "id": "S2", "title": "pull-job-and-first-connectors", "domain": "general", "D1": 1, "D2": 1, "D3": 1, "D4": 1, "score": 4, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S1"], "output": "lib/pipeline/retro-pull.ts · lib/retro/connectors/{github,figma,google}/", "status": "pending" },
+    { "id": "S3", "title": "connections-ui", "domain": "general", "D1": 1, "D2": 1, "D3": 0, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S2"], "output": "설정 회고 절 · 만들기 패널 · 활동 패널", "status": "pending" },
+    { "id": "S4", "title": "sales-cs-connectors", "domain": "general", "D1": 1, "D2": 1, "D3": 0, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S2"], "output": "HubSpot·Pipedrive·채널톡·Intercom", "status": "pending" },
+    { "id": "S5", "title": "docs-dev-hr-connectors", "domain": "general", "D1": 1, "D2": 1, "D3": 0, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S2"], "output": "Notion(개인)·Confluence·Jira·Greenhouse·Lever·Workable", "status": "pending" },
+    { "id": "S6", "title": "marketing-snapshots", "domain": "general", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S2"], "output": "Meta·YouTube·GA4 metric_snapshot", "status": "pending" },
+    { "id": "S7", "title": "connectors-verification", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-terra", "effort": "medium", "depends_on": ["S3", "S4", "S5", "S6"], "output": "docs/verification/retro-connectors-<date>/", "status": "pending", "note": "완료 시 blocked" },
+    { "id": "S8", "title": "voip-call-metadata", "domain": "security", "D1": 1, "D2": 1, "D3": 1, "D4": 2, "score": 5, "tier": "powerful", "agent": "codex", "claude_model": null, "codex_model": "gpt-5.6-sol", "effort": "xhigh", "depends_on": ["L0", "S4"], "output": "RingCentral·Aircall call_*", "status": "blocked", "requires_legal": true, "note": "통신사실확인자료 — 법률 자문 통과 전 금지" },
+    { "id": "O1", "title": "운영 반영", "domain": "security", "D1": 1, "D2": 2, "D3": 2, "D4": 2, "score": 7, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": null, "depends_on": ["S7"], "output": "운영 반영 기록", "status": "pending", "requires_approval": true }
+  ],
+  "gate": {
+    "G1": "PASS",
+    "G2": "PASS — D0·U0·L0·S1·S8·O1 powerful",
+    "G3": "PASS — security floor(L0·S1·S8·O1), general은 balanced/terra, R0 조사 폭으로 sonnet",
+    "G4": "PASS(근거 첨부) — powerful 6/15=40%: D0 완료·U0 사용자 결정·L0 법률 자문·S1 새 인증 경로·S8 통신사실확인자료·O1 운영, 강등 불가",
+    "G5": "PASS — U0·L0·O1 requires_approval, S8 requires_legal",
+    "result": "PASS"
+  }
+}

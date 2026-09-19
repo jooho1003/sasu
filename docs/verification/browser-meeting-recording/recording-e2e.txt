@@ -1,0 +1,26 @@
+
+> sasu@0.1.0 e2e:recording
+> playwright test --config playwright.recording.config.ts
+
+[WebServer] (node:28016) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:23160) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+[WebServer]   - ESM syntax in a file loaded as CommonJS (vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+[WebServer] Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+Running 8 tests using 1 worker
+
+(node:2744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\recording\capture.spec.ts:3:5 › real AudioWorklet/Worker records synthetic input, pauses, recovers and emits a playable WAV without uploads (2.4s)
+  ok 2 tests\recording\capture.spec.ts:38:5 › ending a required input interrupts recording and closes all tracks (489ms)
+  ok 3 tests\recording\endurance.spec.ts:4:5 › 30 minutes of 48kHz samples stream to real IndexedDB with bounded retained heap (3.1s)
+  ok 4 tests\recording\realtime-recovery.spec.ts:4:5 › three real minutes of synthetic AudioWorklet capture survive a recording-page reload (3.0m)
+  ok 5 tests\recording\storage.spec.ts:8:5 › committed PCM survives reload, remains scoped, and detects a corrupted checkpoint (238ms)
+  ok 6 tests\recording\storage.spec.ts:53:5 › out-of-order/duplicate writes fail and expired/other-account drafts are removed (176ms)
+  ok 7 tests\recording\storage.spec.ts:77:5 › two tabs cannot record concurrently; releasing allows a new recording (446ms)
+  ok 8 tests\recording\storage.spec.ts:101:5 › a real IndexedDB transaction abort leaves neither a chunk nor an acknowledged header (176ms)
+
+  8 passed (3.2m)

@@ -1,0 +1,16 @@
+
+Running 1 test using 1 worker
+
+(node:25136) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 (2.2m)
+
+
+  1) [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 ─
+
+    Test timeout of 120000ms exceeded.
+
+    Error Context: test-results\review-access-live-실제-세션·원본-API·Storage-재생과-조직-내려받기-스위치-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치 ──

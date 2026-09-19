@@ -1,0 +1,20 @@
+{
+  "login": [],
+  "publicPage": [
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report",
+    "script-src-elem:report"
+  ],
+  "enforcement": false,
+  "note": "Static PRD landing has no request nonce. Resolve rendering contract before CSP enforcement; this is not a V14 pass."
+}

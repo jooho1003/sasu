@@ -1,0 +1,6 @@
+{
+  "database": "local Supabase",
+  "quests": 3,
+  "scoreCalls": 1,
+  "withdrawalPurged": true
+}

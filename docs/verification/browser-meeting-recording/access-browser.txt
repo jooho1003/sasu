@@ -1,0 +1,26 @@
+
+> sasu@0.1.0 e2e:review-controls
+> playwright test --config playwright.review-controls.config.ts
+
+[WebServer] (node:22940) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:10300) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+[WebServer]   - ESM syntax in a file loaded as CommonJS (vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+[WebServer] Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+Running 8 tests using 1 worker
+
+(node:16276) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 tests\review-controls\access.spec.ts:18:5 › 다운로드 off 문서는 원본 열기 숨김, 전사·재추출은 유지 (720ms)
+  ok 2 tests\review-controls\access.spec.ts:24:5 › 만료된 원본은 재생·재추출·재시도 차단, 저장 전 편집 보존 (399ms)
+  ok 3 tests\review-controls\access.spec.ts:33:38 › 음성 재생은 단일 세션 API를 사용하고 내려받기 버튼 숨김 390px (493ms)
+  ok 4 tests\review-controls\access.spec.ts:33:38 › 음성 재생은 단일 세션 API를 사용하고 내려받기 버튼 숨김 1440px (506ms)
+  ok 5 tests\review-controls\access.spec.ts:50:5 › 61회 제한 응답을 표시하고 다시 시도할 수 있다 (404ms)
+  ok 6 tests\review-controls\access.spec.ts:57:5 › 보존 기한 도달 시 재생 버퍼를 폐기하고 재추출 비활성 (390ms)
+  ok 7 tests\review-controls\access.spec.ts:65:5 › 조직 보호 설정 저장과 실패 메시지, 읽기 전용 차단 (718ms)
+  ok 8 tests\review-controls\access.spec.ts:81:5 › 원본 보존 기간 선택은 Slack 보존값과 별도 요청 (348ms)
+
+  8 passed (10.6s)

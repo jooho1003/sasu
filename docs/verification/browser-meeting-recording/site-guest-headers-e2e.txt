@@ -1,0 +1,21 @@
+
+Running 13 tests using 1 worker
+
+(node:13200) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\guest.spec.ts:11:5 › 영업 충돌과 부서 비교 답변의 근거가 의미상 일치한다 (2.6s)
+  ok  2 [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px (5.0s)
+  ok  3 [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 390px (4.7s)
+  ok  4 [chromium] › tests\e2e\guest.spec.ts:87:5 › 게스트는 실제 부서에 접근하지 못하고 잘못된 서명은 거부된다 (348ms)
+  ok  5 [chromium] › tests\e2e\guest.spec.ts:99:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다 (3.5s)
+  ok  6 [chromium] › tests\e2e\security-headers.spec.ts:4:5 › baseline headers and distinct report-only nonces cover pages, API errors and disabled features (71ms)
+  ok  7 [chromium] › tests\e2e\security-headers.spec.ts:29:5 › dynamic login HTML receives the request nonce; static public CSP violations remain observable (519ms)
+  -   8 [chromium] › tests\e2e\site-guide.spec.ts:10:9 › 홈페이지 노션 가이드 동선 › 390px에서 가이드를 찾고 새 탭으로 연다
+  -   9 [chromium] › tests\e2e\site-guide.spec.ts:10:9 › 홈페이지 노션 가이드 동선 › 768px에서 가이드를 찾고 새 탭으로 연다
+  -  10 [chromium] › tests\e2e\site-guide.spec.ts:10:9 › 홈페이지 노션 가이드 동선 › 1440px에서 가이드를 찾고 새 탭으로 연다
+  ok 11 [chromium] › tests\e2e\site.spec.ts:4:7 › 공개 메인 사이트 › 핵심 메시지와 데모 동선을 정적으로 제공한다 (378ms)
+  ok 12 [chromium] › tests\e2e\site.spec.ts:27:7 › 공개 메인 사이트 › 모바일에서 가로로 넘치지 않는다 (353ms)
+  ok 13 [chromium] › tests\e2e\site.spec.ts:37:7 › 공개 메인 사이트 › 개인정보 안내와 검색 노출 경계를 제공한다 (366ms)
+
+  3 skipped
+  10 passed (18.6s)

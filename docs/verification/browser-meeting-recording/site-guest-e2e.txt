@@ -1,0 +1,156 @@
+
+Running 19 tests using 1 worker
+
+(node:19428) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   1 [chromium] › tests\e2e\demo-reviewer.spec.ts:35:5 › 공개 링크가 심사위원 계정으로 연결되고 전체 기능을 연다 (5.8s)
+(node:30920) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   2 [chromium] › tests\e2e\demo-reviewer.spec.ts:48:5 › 심사 계정의 앱 요청과 직접 DB 변경을 모두 거부한다 (5.3s)
+(node:28444) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   3 [chromium] › tests\e2e\demo-reviewer.spec.ts:76:5 › 390px에서도 기능 지도와 추천 시작점이 잘리지 않는다 (5.5s)
+(node:3172) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   4 [chromium] › tests\e2e\demo-reviewer.spec.ts:86:5 › 결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 체험한다 (9.7s)
+(node:30904) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  5 [chromium] › tests\e2e\guest.spec.ts:11:5 › 영업 충돌과 부서 비교 답변의 근거가 의미상 일치한다 (2.3s)
+  ok  6 [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px (5.1s)
+  ok  7 [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 390px (5.0s)
+  ok  8 [chromium] › tests\e2e\guest.spec.ts:87:5 › 게스트는 실제 부서에 접근하지 못하고 잘못된 서명은 거부된다 (336ms)
+  ok  9 [chromium] › tests\e2e\guest.spec.ts:99:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다 (3.4s)
+  ok 10 [chromium] › tests\e2e\site-guide.spec.ts:10:9 › 홈페이지 노션 가이드 동선 › 390px에서 가이드를 찾고 새 탭으로 연다 (658ms)
+  ok 11 [chromium] › tests\e2e\site-guide.spec.ts:10:9 › 홈페이지 노션 가이드 동선 › 768px에서 가이드를 찾고 새 탭으로 연다 (564ms)
+  ok 12 [chromium] › tests\e2e\site-guide.spec.ts:10:9 › 홈페이지 노션 가이드 동선 › 1440px에서 가이드를 찾고 새 탭으로 연다 (593ms)
+  ok 13 [chromium] › tests\e2e\site.spec.ts:4:7 › 공개 메인 사이트 › 핵심 메시지와 데모 동선을 정적으로 제공한다 (417ms)
+  ok 14 [chromium] › tests\e2e\site.spec.ts:27:7 › 공개 메인 사이트 › 모바일에서 가로로 넘치지 않는다 (366ms)
+  ok 15 [chromium] › tests\e2e\site.spec.ts:37:7 › 공개 메인 사이트 › 개인정보 안내와 검색 노출 경계를 제공한다 (352ms)
+  ok 16 [chromium] › tests\e2e\team-coverage.spec.ts:3:5 › 기획팀은 직접 URL로 카드·원장·답변을 열 수 있다 (1.5s)
+  ok 17 [chromium] › tests\e2e\team-coverage.spec.ts:19:7 › 기획팀 데모 진입 → 카드 → 원장 → 근거 답변 (2.0s)
+  ok 18 [chromium] › tests\e2e\team-coverage.spec.ts:19:7 › 디자인팀 데모 진입 → 카드 → 원장 → 근거 답변 (2.0s)
+  ok 19 [chromium] › tests\e2e\team-coverage.spec.ts:19:7 › 개발팀 데모 진입 → 카드 → 원장 → 근거 답변 (1.7s)
+
+
+  1) [chromium] › tests\e2e\demo-reviewer.spec.ts:35:5 › 공개 링크가 심사위원 계정으로 연결되고 전체 기능을 연다 ───────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('심사위원 데모 계정으로 접속했습니다')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('심사위원 데모 계정으로 접속했습니다') with timeout 5000ms
+      - waiting for getByText('심사위원 데모 계정으로 접속했습니다')
+
+
+      36 |   test.setTimeout(120_000);
+      37 |   await page.goto("/demo");
+    > 38 |   await expect(page.getByText("심사위원 데모 계정으로 접속했습니다")).toBeVisible();
+         |                                                       ^
+      39 |   await expect(page.locator(".demo-feature-grid > li")).toHaveCount(DEMO_FEATURES.length);
+      40 |
+      41 |   for (const feature of DEMO_FEATURES) {
+        at D:\바이브코딩\sasu\tests\e2e\demo-reviewer.spec.ts:38:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    .vercel\recording-site-results\demo-reviewer-공개-링크가-심사위원-계정으로-연결되고-전체-기능을-연다-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: .vercel\recording-site-results\demo-reviewer-공개-링크가-심사위원-계정으로-연결되고-전체-기능을-연다-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\demo-reviewer.spec.ts:48:5 › 심사 계정의 앱 요청과 직접 DB 변경을 모두 거부한다 ────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('심사위원 데모 계정으로 접속했습니다')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('심사위원 데모 계정으로 접속했습니다') with timeout 5000ms
+      - waiting for getByText('심사위원 데모 계정으로 접속했습니다')
+
+
+      48 | test("심사 계정의 앱 요청과 직접 DB 변경을 모두 거부한다", async ({ page, context }) => {
+      49 |   await page.goto("/demo");
+    > 50 |   await expect(page.getByText("심사위원 데모 계정으로 접속했습니다")).toBeVisible();
+         |                                                       ^
+      51 |
+      52 |   const appWrite = await context.request.post(
+      53 |     `/api/d/${DEMO_DEFAULT_DEPT_ID}/questions`,
+        at D:\바이브코딩\sasu\tests\e2e\demo-reviewer.spec.ts:50:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    .vercel\recording-site-results\demo-reviewer-심사-계정의-앱-요청과-직접-DB-변경을-모두-거부한다-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: .vercel\recording-site-results\demo-reviewer-심사-계정의-앱-요청과-직접-DB-변경을-모두-거부한다-chromium\error-context.md
+
+  3) [chromium] › tests\e2e\demo-reviewer.spec.ts:76:5 › 390px에서도 기능 지도와 추천 시작점이 잘리지 않는다 ───────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '전체 기능을 순서대로 확인하세요' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: '전체 기능을 순서대로 확인하세요' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: '전체 기능을 순서대로 확인하세요' })
+
+
+      77 |   await page.setViewportSize({ width: 390, height: 844 });
+      78 |   await page.goto("/demo");
+    > 79 |   await expect(page.getByRole("heading", { name: "전체 기능을 순서대로 확인하세요" })).toBeVisible();
+         |                                                                          ^
+      80 |   await expect(page.getByRole("link", { name: /추천 시연 시작/u })).toBeVisible();
+      81 |   expect(
+      82 |     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+        at D:\바이브코딩\sasu\tests\e2e\demo-reviewer.spec.ts:79:74
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    .vercel\recording-site-results\demo-reviewer-390px에서도-기능-지도와-추천-시작점이-잘리지-않는다-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: .vercel\recording-site-results\demo-reviewer-390px에서도-기능-지도와-추천-시작점이-잘리지-않는다-chromium\error-context.md
+
+  4) [chromium] › tests\e2e\demo-reviewer.spec.ts:86:5 › 결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 체험한다 ─────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('예시 자료 5개 포함')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('예시 자료 5개 포함') with timeout 5000ms
+      - waiting for getByText('예시 자료 5개 포함')
+
+
+      104 |
+      105 |   await page.goto(DEMO_FEATURES.find((feature) => feature.key === "reviews")!.href);
+    > 106 |   await expect(page.getByText("예시 자료 5개 포함")).toBeVisible();
+          |                                               ^
+      107 |   await expect(page.locator(".demo-sample-file-grid > article")).toHaveCount(5);
+      108 |   await expect(page.getByRole("link", { name: "파일 보기" })).toHaveCount(5);
+      109 |   const sampleLinks = await page.getByRole("link", { name: "파일 보기" }).evaluateAll((links) =>
+        at D:\바이브코딩\sasu\tests\e2e\demo-reviewer.spec.ts:106:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    .vercel\recording-site-results\demo-reviewer-결정·기록·질문·자료-검토를-브라우저-안에서-끝까지-체험한다-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: .vercel\recording-site-results\demo-reviewer-결정·기록·질문·자료-검토를-브라우저-안에서-끝까지-체험한다-chromium\error-context.md
+
+  4 failed
+    [chromium] › tests\e2e\demo-reviewer.spec.ts:35:5 › 공개 링크가 심사위원 계정으로 연결되고 전체 기능을 연다 ────────────
+    [chromium] › tests\e2e\demo-reviewer.spec.ts:48:5 › 심사 계정의 앱 요청과 직접 DB 변경을 모두 거부한다 ─────────────
+    [chromium] › tests\e2e\demo-reviewer.spec.ts:76:5 › 390px에서도 기능 지도와 추천 시작점이 잘리지 않는다 ────────────
+    [chromium] › tests\e2e\demo-reviewer.spec.ts:86:5 › 결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 체험한다 ──────────
+  15 passed (56.1s)

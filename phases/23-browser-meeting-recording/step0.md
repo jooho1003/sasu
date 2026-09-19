@@ -1,6 +1,6 @@
 # Step 0: 수집·복구 기술 검증
 
-상태: 미실행. 원천은 PRD §3-4·§8, ADR-056, 상세 설계 §3~§4·§10.
+상태: 일부 구현·합성 입력 검증. 실제 마이크/Meet/Zoom V01~V06 미충족. [실행 기록](../../docs/verification/browser-meeting-recording/step0.md). 원천은 PRD §3-4·§8, ADR-056, 상세 설계 §3~§4·§10.
 
 ## 읽을 파일
 
@@ -11,7 +11,7 @@
 
 ## 구현과 검증
 
-1. Graft 코드 관계·Archify 실행 흐름 확인 또는 도구 부재 기록. 새 `lib/` 모듈 테스트를 먼저 작성한다.
+1. Graft 코드 관계·Archify 실행 흐름 확인 또는 도구 부재 기록. 순수 로직(리샘플·혼합 이득·체크포인트·manifest·상태 전이)은 `lib/recording/*.ts`에 테스트를 먼저 작성한다. AudioWorklet 프로세서·IndexedDB·MediaStream 어댑터는 `lib/recording/browser/*`에 두고, 먼저 ARCHITECTURE §8 표와 `scripts/hooks/tdd-guard.sh` 허용 목록에 그 경로를 추가한다. `public/`에 `.js`를 두지 않는다.
 2. Windows Chrome/Edge에서 실제 마이크, Meet 브라우저 탭, Zoom 데스크톱의 공유 음성을 확보하고 각 입력이 들리는지 확인한다. 화면 영상은 저장하지 않는다.
 3. Web Audio 혼합·샘플 기준 시간·PCM 리샘플·1초 checkpoint·5초 backlog 중단을 구현한다. 압축 Blob을 독립 원본으로 간주하지 않는다.
 4. 권한 거절/트랙 없음/장치 분리, 정지·재개, 새로고침/프로세스 종료·IDB 복구, 두 탭, 절전·quota 오류를 시험한다.

@@ -1,0 +1,686 @@
+{
+  "scope": "Hypothetical personas; not interview evidence",
+  "personas": [
+    {
+      "id": "PM-L1",
+      "file": "personas/01-product.md",
+      "role": "PM-L1 신입 기획자. 입사 첫 주, 이전에 빠진 기능의 이유를 매일 질문",
+      "workflow": "웹 ASK → 인용과 원장 확인 → 부족하면 기존 담당자에게 별도 질문. 바로 적용하기 전 대상 기능·날짜 확인",
+      "benefitHypothesis": "사소한 질문을 눈치 보며 반복하지 않고 의사결정 배경을 학습",
+      "drawback": "오래된 예외를 현재 규칙으로 받아들임. 거절에서 인계가 끊김(G02·G06·G21)",
+      "sizeComparisonAndResearchQuestion": "S는 대표 구두 맥락이 적재되지 않음. M은 약어·부서 정책 차이가 큼. **다음 행동과 확인할 사람을 자기 말로 설명하는가?**",
+      "gaps": [
+        "G02",
+        "G06",
+        "G21"
+      ]
+    },
+    {
+      "id": "PM-L2",
+      "file": "personas/01-product.md",
+      "role": "PM-L2 기능 담당 PM. 요구 변경을 주간 단위 조율",
+      "workflow": "Slack 논의가 카드가 되면 관련 근거 확인, 결정자에게 알림. 자기 범위 결정은 근거와 함께 직접 기록",
+      "benefitHypothesis": "범위를 바꾼 이유와 상대 의견이 사라지지 않음",
+      "drawback": "프로젝트/기능 단위 묶음 부족, 직접 기록이 정식 승인처럼 보일 수 있음(G15·G19)",
+      "sizeComparisonAndResearchQuestion": "S는 한 문서에서 실행까지 담당. M은 FE/BE/영업의 수락이 따로 필요. **기록만 남겼는데 출시 승인으로 읽히지 않는가?**",
+      "gaps": [
+        "G15",
+        "G19"
+      ]
+    },
+    {
+      "id": "PM-L3",
+      "file": "personas/01-product.md",
+      "role": "PM-L3 선임·파트 리드. 여러 PM 제안을 검토",
+      "workflow": "lead라면 역할 기준으로 문서 비교, 원장과 상충 근거 확인. member면 읽기·질문과 카드 담당 처리 중심",
+      "benefitHypothesis": "반복 검토 기준을 표준화하고 누락 근거를 드러냄",
+      "drawback": "기준 작성/실행에 lead가 필요, 문서 점수가 사용자 가치 검증을 대체할 위험(G04·G10)",
+      "sizeComparisonAndResearchQuestion": "S는 본인이 기획 초안도 작성. M은 품질 검토자와 예산 결정자가 다름. **낮은 점수의 이유를 근거로 반박·보완할 수 있는가?**",
+      "gaps": [
+        "G04",
+        "G10"
+      ]
+    },
+    {
+      "id": "PM-L4",
+      "file": "personas/01-product.md",
+      "role": "PM-L4 제품 팀장. 경쟁하는 출시 안건을 매일 선택",
+      "workflow": "알림 받은 카드에서 원칙·과거 결정 확인 → 결과/사유 기록 → 원장에서 정정·알림 설정",
+      "benefitHypothesis": "‘결정 대기’를 놓치지 않고 이유를 팀에 남김",
+      "drawback": "웹 결과 편집 결함, 첫 lead 배정, 자기 미결 큐 부재로 모든 안건이 몰림(G01·G03·G05)",
+      "sizeComparisonAndResearchQuestion": "S는 속도·설정 최소화가 중요. M은 영역별 책임과 대행이 필요. **바쁜 날에도 본인이 결정할 안건만 찾는가?**",
+      "gaps": [
+        "G01",
+        "G03",
+        "G05"
+      ]
+    },
+    {
+      "id": "PM-L5",
+      "file": "personas/01-product.md",
+      "role": "PM-L5 CPO·대표. 분기 방향·부서 간 상충 조정",
+      "workflow": "소속 부서 원장 또는 각 부서가 별도 공유한 자료를 읽고 필요한 결정을 자기 범위에서 기록",
+      "benefitHypothesis": "결론만 보고받는 대신 선택 이유와 뒤집힌 가정을 확인",
+      "drawback": "org admin으로 전사 기록을 볼 수 없음. 제품·영업·개발 합의 화면 없음(G07·G14)",
+      "sizeComparisonAndResearchQuestion": "S는 L2~L4 겸임. M은 요약의 출처·공유 범위·부서 수락이 중요. **원문 전체 없이도 어떤 선택을 요청받았는지 알 수 있는가?**",
+      "gaps": [
+        "G07",
+        "G14"
+      ]
+    },
+    {
+      "id": "FE-L1",
+      "file": "personas/02-frontend.md",
+      "role": "FE-L1 주니어 개발자. 폼 오류·로딩 상태 구현 전에 기준을 매일 확인",
+      "workflow": "ASK로 상태 정의 질문 → 원문 인용 확인 → 저장된 결정과 실제 티켓을 대조",
+      "benefitHypothesis": "선임에게 같은 배경을 다시 묻는 비용 감소",
+      "drawback": "추출문에 없는 화면 상태·코드 버전은 답할 수 없음. 그럴듯한 코드 조언을 실행 검증으로 오해(G09·G21)",
+      "sizeComparisonAndResearchQuestion": "S는 문서 미비·구두 요구. M은 디자인시스템과 서비스별 예외 충돌. **없는 상태를 추측하지 않고 확인 요청하는가?**",
+      "gaps": [
+        "G09",
+        "G21"
+      ]
+    },
+    {
+      "id": "FE-L2",
+      "file": "personas/02-frontend.md",
+      "role": "FE-L2 화면 담당 개발자. 요구 변경으로 일정 영향",
+      "workflow": "Slack에서 ‘A 상태를 제외해도 되는가’ 논의 → 카드 → 결정 후 자기 구현 사유 직접 기록",
+      "benefitHypothesis": "범위 축소와 기술적 타협의 이유를 추적",
+      "drawback": "카드 결정이 실제 배포 완료로 읽힘. PR/릴리스와 원장이 수동 연결(G15·G16)",
+      "sizeComparisonAndResearchQuestion": "S는 구현·QA 겸임. M은 리뷰·QA·릴리스 팀이 분리. **결정과 배포 시점을 구별하는가?**",
+      "gaps": [
+        "G15",
+        "G16"
+      ]
+    },
+    {
+      "id": "FE-L3",
+      "file": "personas/02-frontend.md",
+      "role": "FE-L3 선임·UI 플랫폼 담당. 공통 컴포넌트 기준 검토",
+      "workflow": "기준 문서를 근거로 ASK·문서 역할 평가. 불일치는 구체 인용으로 검토",
+      "benefitHypothesis": "접근성·실패 상태 누락을 체크리스트로 반복 검토",
+      "drawback": "문서 점수로 실제 키보드·스크린리더 품질 판단 불가. lead 승격은 과도(G04·G09·G10·G25)",
+      "sizeComparisonAndResearchQuestion": "S는 검토/최종 결정 겸임. M은 전문가 의견과 일정 결정자가 다름. **검토 의견이 최종 승인으로 표시되지 않는가?**",
+      "gaps": [
+        "G04",
+        "G09",
+        "G10",
+        "G25"
+      ]
+    },
+    {
+      "id": "FE-L4",
+      "file": "personas/02-frontend.md",
+      "role": "FE-L4 프론트 팀장. 호환성·속도·인력 선택",
+      "workflow": "카드의 대안·과거 결정 확인 → 책임 범위 내 선택 → 담당자에게 후속 구현을 별도 전달",
+      "benefitHypothesis": "반복된 브라우저 지원 논쟁을 근거와 함께 정리",
+      "drawback": "담당 추정 오류, 대행 부재, 과거 기간 한정 예외 재사용(G03·G06·G24)",
+      "sizeComparisonAndResearchQuestion": "S는 대표에게 예외를 올림. M은 웹/앱/디자인 부서 의존. **‘이 브라우저만 예외’ 범위가 유지되는가?**",
+      "gaps": [
+        "G03",
+        "G06",
+        "G24"
+      ]
+    },
+    {
+      "id": "FE-L5",
+      "file": "personas/02-frontend.md",
+      "role": "FE-L5 엔지니어링 임원. 공통 플랫폼 투자·출시 위험",
+      "workflow": "권한 있는 결정 묶음을 받아 기술 부채·공통 장애 원인을 확인",
+      "benefitHypothesis": "특정 개인 평가 대신 반복되는 의사결정 제약을 볼 가능성",
+      "drawback": "현재 전사 포트폴리오/실시간 품질 지표 없음. 질문/결정 속도로 사람을 평가할 위험(G07·G20)",
+      "sizeComparisonAndResearchQuestion": "S는 직접 코딩하며 L2 겸함. M은 집계라도 작은 집단 식별 위험. **투자 판단에 필요한 정보와 개인 감시를 분리하는가?**",
+      "gaps": [
+        "G07",
+        "G20"
+      ]
+    },
+    {
+      "id": "BE-L1",
+      "file": "personas/03-backend.md",
+      "role": "BE-L1 주니어. 권한 검사·재시도 규칙을 배우는 단계",
+      "workflow": "‘왜 서버에서 이 값을 정하나’ ASK → ADR 인용 → 실제 코드/테스트와 확인",
+      "benefitHypothesis": "이유까지 배우며 위험한 복사 구현을 줄일 가능성",
+      "drawback": "과거 설계와 현재 코드가 다르면 답변이 맞아 보여도 부정확. 비밀값 마스킹이 완전하다고 오해(G06·G09)",
+      "sizeComparisonAndResearchQuestion": "S는 문서 작성자에게 직접 확인. M은 소유 팀 탐색이 길어짐. **인용이 코드를 보증하지 않는다는 점을 이해하는가?**",
+      "gaps": [
+        "G06",
+        "G09"
+      ]
+    },
+    {
+      "id": "BE-L2",
+      "file": "personas/03-backend.md",
+      "role": "BE-L2 API 담당자. 멱등/스키마 변경 제안",
+      "workflow": "논의에서 카드 생성 → 영향 근거 확인 → 승인 후 변경 결과를 별도 기록",
+      "benefitHypothesis": "설계 선택과 재시도 처리 이유가 남음",
+      "drawback": "`decided`가 마이그레이션 적용으로 오해됨. 데이터/서비스 범위 묶음 약함(G15·G16·G19)",
+      "sizeComparisonAndResearchQuestion": "S는 제안·구현·운영 한 사람. M은 DBA·보안·서비스 팀 합의 필요. **누가 실행하며 실제 반영됐는지 찾을 수 있는가?**",
+      "gaps": [
+        "G15",
+        "G16",
+        "G19"
+      ]
+    },
+    {
+      "id": "BE-L3",
+      "file": "personas/03-backend.md",
+      "role": "BE-L3 선임·아키텍트. 여러 제안의 위험 검토",
+      "workflow": "검토 기준 문서와 원장을 읽고 근거 있는 의견 작성; 역할 평가를 쓰면 근거 없는 항목 확인",
+      "benefitHypothesis": "기술적 반대의 맥락이 단순 반대로 잊히지 않음",
+      "drawback": "자동 점수에 정성적 트레이드오프 축약, 자료 기여 권한 묶임(G04·G10·G17)",
+      "sizeComparisonAndResearchQuestion": "S는 최종결정도 겸함. M은 자문자와 서비스 오너 다름. **반대 의견과 최종 결정이 함께 보존되는가?**",
+      "gaps": [
+        "G04",
+        "G10",
+        "G17"
+      ]
+    },
+    {
+      "id": "BE-L4",
+      "file": "personas/03-backend.md",
+      "role": "BE-L4 개발 팀장. 장애 대응 중 임시 정책 승인",
+      "workflow": "과거 유사 결정 확인 후 사람 판단 → 사유/유효 조건 기록 → 후속 점검은 별도 관리",
+      "benefitHypothesis": "급한 판단의 이유를 사후 인계 가능",
+      "drawback": "읽는 근거의 오래됨, 담당자 휴가, 알림 지연. 긴급 runbook을 대체할 수 없음(G06·G23·G24)",
+      "sizeComparisonAndResearchQuestion": "S는 온콜·팀장 겸임. M은 사고 책임자와 서비스별 오너 구분. **AI 지연 때 기존 대응으로 바로 돌아가는가?**",
+      "gaps": [
+        "G06",
+        "G23",
+        "G24"
+      ]
+    },
+    {
+      "id": "BE-L5",
+      "file": "personas/03-backend.md",
+      "role": "BE-L5 CTO·기술 본부장. 공통 기술 투자·위험 수용",
+      "workflow": "각 부서가 공유 가능한 범위의 결정 요약과 근거를 제공하도록 요청",
+      "benefitHypothesis": "비슷한 예외가 반복되는 구조적 원인 탐색",
+      "drawback": "모든 lead 권한을 받아 전사 원문을 읽는 편법, 개인 리드타임 평가 위험(G07·G20)",
+      "sizeComparisonAndResearchQuestion": "S는 상세 맥락 필요. M은 민감 장애 원문 없이 선택·책임·영향만 필요. **요약의 누락/출처/유효 시점을 알 수 있는가?**",
+      "gaps": [
+        "G07",
+        "G20"
+      ]
+    },
+    {
+      "id": "DS-L1",
+      "file": "personas/04-design.md",
+      "role": "DS-L1 주니어 디자이너. 브랜드·컴포넌트 규칙 학습",
+      "workflow": "ASK로 근거 확인 → 원본 가이드 열기 → 실제 화면에서 적용",
+      "benefitHypothesis": "‘그때 왜 이 문구로 했나’를 선임 부재 시 탐색",
+      "drawback": "화면 예시·이미지·톤의 뉘앙스가 추출문에 없으면 답변 제한(G09·G21)",
+      "sizeComparisonAndResearchQuestion": "S는 가이드가 짧고 대표 취향 의존. M은 브랜드/제품 가이드가 분리. **규칙과 사례의 예외를 구별하는가?**",
+      "gaps": [
+        "G09",
+        "G21"
+      ]
+    },
+    {
+      "id": "DS-L2",
+      "file": "personas/04-design.md",
+      "role": "DS-L2 서비스 디자이너. 리뷰 후 수정 범위 정리",
+      "workflow": "리뷰 전사를 lead가 검토 확정 → 카드/원장에서 선택과 보류 이유 확인",
+      "benefitHypothesis": "상충 피드백을 한 선택과 근거로 정리",
+      "drawback": "자신의 추출문 수정/확정을 직접 못함, 디자인 파일 버전과 연결 수동(G04·G15·G22)",
+      "sizeComparisonAndResearchQuestion": "S는 자신이 리서치도 수행. M은 UX writer·리서처·FE와 인계. **어떤 버전의 어떤 화면에 적용하는지 찾는가?**",
+      "gaps": [
+        "G04",
+        "G15",
+        "G22"
+      ]
+    },
+    {
+      "id": "DS-L3",
+      "file": "personas/04-design.md",
+      "role": "DS-L3 선임·디자인 시스템 담당. 반복 리뷰",
+      "workflow": "문서 기준별 누락 점검과 원장 비교, 실제 사용성 평가는 별도 수행",
+      "benefitHypothesis": "‘왜 안 되는지’가 개인 취향 대신 공개 기준을 따름",
+      "drawback": "점수로 심미성·사용성 평가를 대신할 위험, 반박 경로 부족(G10·G17)",
+      "sizeComparisonAndResearchQuestion": "S는 협업 합의 우선. M은 시스템 일관성과 서비스별 예외 균형. **좋은 예외를 낮은 점수로 배제하지 않는가?**",
+      "gaps": [
+        "G10",
+        "G17"
+      ]
+    },
+    {
+      "id": "DS-L4",
+      "file": "personas/04-design.md",
+      "role": "DS-L4 디자인 팀장. 출시 전 위험/범위 결정",
+      "workflow": "미결 접근성·문구·실패 상태 카드 확인, 결과와 사유 기록",
+      "benefitHypothesis": "다음 리뷰에서 같은 결정이 뒤집히는 이유를 추적",
+      "drawback": "웹 결과 수정 불가, 디자인 승인과 구현 검증이 섞임(G01·G16·G25)",
+      "sizeComparisonAndResearchQuestion": "S는 실제 UI 확인도 직접. M은 디자인 승인 후 FE·QA 완료 별개. **승인한 범위만 명시적으로 기록되는가?**",
+      "gaps": [
+        "G01",
+        "G16",
+        "G25"
+      ]
+    },
+    {
+      "id": "DS-L5",
+      "file": "personas/04-design.md",
+      "role": "DS-L5 디자인 총괄·브랜드 책임자. 여러 제품의 일관성",
+      "workflow": "부서가 공개 승인한 결정 묶음으로 예외와 투자 필요 확인",
+      "benefitHypothesis": "브랜드 원칙과 현장 제약의 반복 패턴 탐색",
+      "drawback": "타 부서 자료 접근 안 됨, 원문 링크가 권한 없는 Figma/Notion으로 이어질 수 있음(G07·G12)",
+      "sizeComparisonAndResearchQuestion": "S는 대표 역할과 결합. M은 본사 원칙을 모든 부서 비공개 근거와 섞지 않아야 함. **공용 규칙과 민감 피드백이 분리되는가?**",
+      "gaps": [
+        "G07",
+        "G12"
+      ]
+    },
+    {
+      "id": "HR-L1",
+      "file": "personas/05-people.md",
+      "role": "HR-L1 인사 운영 신입. 온보딩 준비·기본 규정 확인",
+      "workflow": "승인된 공용 정책을 ASK → 시행 시점/대상 확인 → 필요한 담당자에게 인계",
+      "benefitHypothesis": "규정 검색과 반복 질문 감소",
+      "drawback": "다른 부서 직원에게도 같은 자료가 보이는지 착각. 과거 규정을 현재 규정으로 안내(G06·G07·G21)",
+      "sizeComparisonAndResearchQuestion": "S는 대표 구두 관행 의존. M은 고용형태·지역별 차이가 큼. **적용 대상이 다른 경우 답변을 멈추는가?**",
+      "gaps": [
+        "G06",
+        "G07",
+        "G21"
+      ]
+    },
+    {
+      "id": "HR-L2",
+      "file": "personas/05-people.md",
+      "role": "HR-L2 채용·온보딩 담당자. 일정·역할·서류 준비",
+      "workflow": "회의 확정 자료로 일정 결정 기록, 채용 예고편은 합성 데모/승인된 범위만 사용",
+      "benefitHypothesis": "면접관과 입사 준비 담당자의 누락을 추적",
+      "drawback": "외부 지원자 자료의 목적·동의·보존 경계, 문서 점수의 합격 판정 오해(G11·G18·G26)",
+      "sizeComparisonAndResearchQuestion": "S는 채용/입사 준비 한 명. M은 recruiter/HR ops/현업 면접관 분리. **지원자가 실제 제출하는 흐름과 데모를 구별하는가?**",
+      "gaps": [
+        "G11",
+        "G18",
+        "G26"
+      ]
+    },
+    {
+      "id": "HR-L3",
+      "file": "personas/05-people.md",
+      "role": "HR-L3 HRBP·정책 전문가. 예외 해석·현업 상담",
+      "workflow": "공용 규정 근거를 확인하고 비식별화된 일반 해석만 공유, 민감 사건은 기존 제한 시스템 유지",
+      "benefitHypothesis": "일관된 안내와 예외 발생 이유를 기록",
+      "drawback": "비식별화만으로 재식별이 없어지지 않음. 부서 lead 전체 공개가 과도(G07·G20·G26)",
+      "sizeComparisonAndResearchQuestion": "S는 겸직으로 권한 경계가 흐림. M은 보상/노무/채용별 접근이 다름. **누가 보면 안 되는지 구체적으로 말할 수 있는가?**",
+      "gaps": [
+        "G07",
+        "G20",
+        "G26"
+      ]
+    },
+    {
+      "id": "HR-L4",
+      "file": "personas/05-people.md",
+      "role": "HR-L4 인사 팀장. 정책 변경·온보딩 기준 승인",
+      "workflow": "근거가 있는 정책 변경 카드와 적용 시점을 확정, 후속 공지 별도 관리",
+      "benefitHypothesis": "결정 근거와 변경 이력을 다음 담당자에게 인계",
+      "drawback": "역할 이름만으로 법적/조직 승인 완료 오해, 자동 배정이 최종 책임과 다름(G03·G06·G19)",
+      "sizeComparisonAndResearchQuestion": "S는 대표 최종 승인 별도. M은 노무·법무·재무 협의 필요. **사수 기록과 공식 정책 발효가 구별되는가?**",
+      "gaps": [
+        "G03",
+        "G06",
+        "G19"
+      ]
+    },
+    {
+      "id": "HR-L5",
+      "file": "personas/05-people.md",
+      "role": "HR-L5 CHRO·대표. 조직 정책과 채용 경험 점검",
+      "workflow": "공용 정책의 미결·개선 요청을 집계 수준으로 확인, 개인 질문 원문을 요구하지 않음",
+      "benefitHypothesis": "조직 안내의 빈틈과 반복되는 제도 혼란을 발견할 가능성",
+      "drawback": "질문 수/속도를 직원 성과·불만 감시로 활용하면 신뢰 저하(G20·G27)",
+      "sizeComparisonAndResearchQuestion": "S는 구성원 식별이 쉬워 집계도 조심. M은 운영/열람 책임 분리. **직원에게 수집 목적과 보지 않는 정보를 설명하는가?**",
+      "gaps": [
+        "G20",
+        "G27"
+      ]
+    },
+    {
+      "id": "SA-L1",
+      "file": "personas/06-sales.md",
+      "role": "SA-L1 신입 영업. 가격·납기 답변을 매일 준비",
+      "workflow": "모바일/Slack DM에서 기준 질문 → 인용/날짜 확인 → 예외는 담당자에게 확인",
+      "benefitHypothesis": "고객 앞에서 근거 없는 약속을 줄일 가능성",
+      "drawback": "‘지난 고객의 승인’을 모든 고객에게 적용, 근거 부족 인계 없음(G02·G06·G08)",
+      "sizeComparisonAndResearchQuestion": "S는 대표에게 묻기 어려운 시간대. M은 상품/지역별 규칙. **예외 답변을 표준 정책으로 오해하지 않는가?**",
+      "gaps": [
+        "G02",
+        "G06",
+        "G08"
+      ]
+    },
+    {
+      "id": "SA-L2",
+      "file": "personas/06-sales.md",
+      "role": "SA-L2 계정 담당 AE. 특정 고객 할인·납기 조정",
+      "workflow": "Slack 논의를 카드로 만들고 조건/근거 확인, 승인 뒤 CRM·견적에 별도 반영",
+      "benefitHypothesis": "협상 과정의 변경 이유와 내부 확인을 남김",
+      "drawback": "AI 담당자 지정으로 사실상 승인자가 되거나 직접 기록을 회사 승인처럼 표현(G03·G19)",
+      "sizeComparisonAndResearchQuestion": "S는 가격재량 넓을 수 있음. M은 금액별 전결·재무 동의 필요. **본인이 처리 가능한 정확한 범위를 아는가?**",
+      "gaps": [
+        "G03",
+        "G19"
+      ]
+    },
+    {
+      "id": "SA-L3",
+      "file": "personas/06-sales.md",
+      "role": "SA-L3 선임·딜 지원 담당. 복잡한 조건 검토",
+      "workflow": "과거 동일 고객·상품 결정과 원칙을 대조, 위험 조항을 문서 역할로 보조 점검",
+      "benefitHypothesis": "후배의 재확인을 도우며 논거를 통일",
+      "drawback": "비슷한 계약의 문구가 다른 조건에 잘못 적용. 문서 점수는 계약 검토 완료 아님(G08·G10·G15)",
+      "sizeComparisonAndResearchQuestion": "S는 실무 코치. M은 영업/법무/재무를 연결하는 전문가. **적용할 수 없는 선례를 설명하는가?**",
+      "gaps": [
+        "G08",
+        "G10",
+        "G15"
+      ]
+    },
+    {
+      "id": "SA-L4",
+      "file": "personas/06-sales.md",
+      "role": "SA-L4 영업 팀장. 가격 예외 최종 확인",
+      "workflow": "카드에서 추천 검토→결정 기록→알림/원장, 필요시 정정",
+      "benefitHypothesis": "출장 중에도 근거를 확인해 결정 이유 공유",
+      "drawback": "웹은 결과 편집이 없어 다른 조건 승인 의도를 잘못 기록할 수 있음. 고객/기한별 큐 부족(G01·G05·G25)",
+      "sizeComparisonAndResearchQuestion": "S는 대표 결재와 겸함. M은 자신의 한도 밖 추가 승인 필요. **12% 요청을 5%로 수정해 확정할 수 있는가?**",
+      "gaps": [
+        "G01",
+        "G05",
+        "G25"
+      ]
+    },
+    {
+      "id": "SA-L5",
+      "file": "personas/06-sales.md",
+      "role": "SA-L5 영업 본부장·대표. 전략 고객과 수익성 상충",
+      "workflow": "부서가 공개한 딜 판단 요약/예외 추세 확인 → 책임 범위 선택",
+      "benefitHypothesis": "예외가 정책이 된 과정을 발견할 가능성",
+      "drawback": "현재 매출/CRM 연동 통계 없음, 개별 상담 원문을 전사로 확대할 위험(G07·G16·G20)",
+      "sizeComparisonAndResearchQuestion": "S는 직접 고객 담당. M은 재무/제품과 약속 범위를 합의. **전략 선택과 고객에게 전달된 조건이 일치하는가?**",
+      "gaps": [
+        "G07",
+        "G16",
+        "G20"
+      ]
+    },
+    {
+      "id": "MK-L1",
+      "file": "personas/07-marketing.md",
+      "role": "MK-L1 콘텐츠 주니어. 표현·톤 확인",
+      "workflow": "ASK로 승인 문구의 맥락 확인 → 원문 대상/시점 확인 → 초안은 기존 편집도구 작성",
+      "benefitHypothesis": "선임의 반복 문구 설명을 줄임",
+      "drawback": "오래된 캠페인의 예외 표현 재사용, 텍스트만 보고 실제 이미지 판단(G06·G09)",
+      "sizeComparisonAndResearchQuestion": "S는 대표가 브랜드 판단. M은 상품/매체별 가이드. **승인된 문구의 조건을 함께 옮기는가?**",
+      "gaps": [
+        "G06",
+        "G09"
+      ]
+    },
+    {
+      "id": "MK-L2",
+      "file": "personas/07-marketing.md",
+      "role": "MK-L2 캠페인 담당자. 카피·타깃·기간 변경",
+      "workflow": "논의를 카드로 정리 → 사람 결정 → 집행은 광고도구에서 별도 수행 → 결과 요약 연결",
+      "benefitHypothesis": "무엇을 언제 왜 바꿨는지 남아 회고에 도움",
+      "drawback": "자동 집행/실험 결과 수집 없음. 결정 완료를 집행 완료로 오해(G15·G16)",
+      "sizeComparisonAndResearchQuestion": "S는 제작/집행/분석 겸임. M은 콘텐츠/퍼포먼스/제품 협의. **아직 집행하지 않은 결정을 구별하는가?**",
+      "gaps": [
+        "G15",
+        "G16"
+      ]
+    },
+    {
+      "id": "MK-L3",
+      "file": "personas/07-marketing.md",
+      "role": "MK-L3 브랜드·그로스 선임. 문구·실험 설계 검토",
+      "workflow": "역할 평가로 확정된 자료의 체크리스트 누락 확인, 점수 대신 근거 검토",
+      "benefitHypothesis": "검토 기준을 공개하고 일관성 높일 가능성",
+      "drawback": "가중치를 잘못 정하면 얕은 문구가 높은 점수. 성과 인과관계는 문서만으로 모름(G10·G17)",
+      "sizeComparisonAndResearchQuestion": "S는 실험 승인도 담당. M은 브랜드 품질과 성장 목표가 다름. **기준을 바꾸면 왜 결과가 바뀌었는지 보이는가?**",
+      "gaps": [
+        "G10",
+        "G17"
+      ]
+    },
+    {
+      "id": "MK-L4",
+      "file": "personas/07-marketing.md",
+      "role": "MK-L4 마케팅 팀장. 예산·일정·표현 예외",
+      "workflow": "미결 카드의 사실/추천 구분 → 명시적 결과 기록 → 후속 집행 담당 확인",
+      "benefitHypothesis": "회의 후 정리 누락·승인 반복 감소 가능",
+      "drawback": "입력이 불완전하거나 타 부서가 공개 안 한 사실을 마케팅이 확정해 버림(G01·G07·G08)",
+      "sizeComparisonAndResearchQuestion": "S는 예산대표 승인 별도. M은 재무/법무/제품 수락 필요. **제품 사실의 최종 확인 주체가 표시되는가?**",
+      "gaps": [
+        "G01",
+        "G07",
+        "G08"
+      ]
+    },
+    {
+      "id": "MK-L5",
+      "file": "personas/07-marketing.md",
+      "role": "MK-L5 CMO·사업 책임자. 채널 투자·브랜드 위험",
+      "workflow": "공유된 결정 요약과 실제 성과 보고를 함께 검토",
+      "benefitHypothesis": "과거 선택 이유를 숫자 보고 옆에서 이해",
+      "drawback": "사수만으로 ROI·시장 변화·최신 성과를 알 수 없음(G06·G16·G20)",
+      "sizeComparisonAndResearchQuestion": "S는 즉각적 비용 체감. M은 정보 최신성·부서별 성과정의 차이. **데이터 없는 설명에 숫자를 만들어 붙이지 않는가?**",
+      "gaps": [
+        "G06",
+        "G16",
+        "G20"
+      ]
+    },
+    {
+      "id": "CS-L1",
+      "file": "personas/08-customer.md",
+      "role": "CS-L1 신입 상담 담당. 표준 환불·장애 안내",
+      "workflow": "내부 ASK로 현재 기준 확인 → 출처 읽기 → 사람이 고객 응대",
+      "benefitHypothesis": "답변 편차와 교육 중 반복 질문 감소 가능",
+      "drawback": "긴 대기·근거 없음 뒤 인계 없음, 고객 이름/결제정보 질문에 포함 가능(G02·G06·G23)",
+      "sizeComparisonAndResearchQuestion": "S는 개발자가 직접 응대. M은 교대·스크립트 버전 관리. **응대 제한 시간 안에 확인 또는 상향 요청하는가?**",
+      "gaps": [
+        "G02",
+        "G06",
+        "G23"
+      ]
+    },
+    {
+      "id": "CS-L2",
+      "file": "personas/08-customer.md",
+      "role": "CS-L2 고객 성공 담당. 특정 고객 약속/예외 관리",
+      "workflow": "과거 결정 확인 → 내부 카드로 서비스 범위 예외 요청 → 사람이 고객에게 전달",
+      "benefitHypothesis": "고객에게 약속한 조건과 내부 결정 이유 추적",
+      "drawback": "CRM/티켓과 수동 연결, 다른 고객 사례 혼동(G08·G15·G16)",
+      "sizeComparisonAndResearchQuestion": "S는 영업/지원 겸임. M은 AE→CS→지원 인계 분리. **동일 고객의 최신 약속만 찾는가?**",
+      "gaps": [
+        "G08",
+        "G15",
+        "G16"
+      ]
+    },
+    {
+      "id": "CS-L3",
+      "file": "personas/08-customer.md",
+      "role": "CS-L3 시니어·품질 담당. 응대 기준/예외 검토",
+      "workflow": "확정된 FAQ 문서 검토, 반복적인 근거 부족 질문을 비식별·최소 집계로 살핌",
+      "benefitHypothesis": "안내 문서의 빈틈 발견",
+      "drawback": "담당자별 질문 수를 숙련도 평가로 쓰면 질문 회피. lead 승격 요구(G04·G20)",
+      "sizeComparisonAndResearchQuestion": "S는 교육 담당 겸임. M은 QA 권한이 인사/비공개 사례 접근과 달라야 함. **정답률을 직원 점수로 전환하지 않는가?**",
+      "gaps": [
+        "G04",
+        "G20"
+      ]
+    },
+    {
+      "id": "CS-L4",
+      "file": "personas/08-customer.md",
+      "role": "CS-L4 지원 팀장. 긴급 환불·중대 고객 이슈",
+      "workflow": "카드에서 확인할 조건과 책임 범위 판단 → 사유와 결과 확정 → 응대 담당에게 별도 인계",
+      "benefitHypothesis": "여러 교대에 같은 근거를 공유",
+      "drawback": "첫 lead 배정·휴가 대행·동일 이슈 중복 카드·알림 폭주(G03·G24·G28)",
+      "sizeComparisonAndResearchQuestion": "S는 대표 결정 기다림. M은 교대 책임·상품별 한도. **교대 후 미결과 결정 내용을 이어받는가?**",
+      "gaps": [
+        "G03",
+        "G24",
+        "G28"
+      ]
+    },
+    {
+      "id": "CS-L5",
+      "file": "personas/08-customer.md",
+      "role": "CS-L5 고객 경험 책임자. 정책 개선·조직 간 문제 해결",
+      "workflow": "공개 가능한 사례 유형/정책 예외의 원인 요약 확인",
+      "benefitHypothesis": "제품/영업 약속과 실제 지원 간 간극 파악",
+      "drawback": "전사 민원 원문 조회는 현재 admin 권한 아님. 현재 CSAT/티켓 집계 연동 없음(G07·G20)",
+      "sizeComparisonAndResearchQuestion": "S는 대표가 직접 확인. M은 부서 간 개선 요청과 정책 수락 필요. **고객 원문 없이 개선 결정을 내릴 만큼 요약이 충분한가?**",
+      "gaps": [
+        "G07",
+        "G20"
+      ]
+    },
+    {
+      "id": "FN-L1",
+      "file": "personas/09-business.md",
+      "role": "FN-L1 경영지원 신입. 증빙·구매 절차 안내",
+      "workflow": "ASK로 회사 내 확정 규정 확인 → 기준일·항목 확인 → 정식 도구로 제출",
+      "benefitHypothesis": "자료 위치·반복 문의의 부담 감소",
+      "drawback": "사수 답변이 외부 법규의 최신성/정확성을 보장한다고 오해(G06·G08·G21)",
+      "sizeComparisonAndResearchQuestion": "S는 구두 규칙 다수. M은 비용 유형/사업부별 절차 다름. **사내 절차와 전문 판단을 구별하는가?**",
+      "gaps": [
+        "G06",
+        "G08",
+        "G21"
+      ]
+    },
+    {
+      "id": "FN-L2",
+      "file": "personas/09-business.md",
+      "role": "FN-L2 재무·구매 운영 담당. 예외 증빙/납기 조건 요청",
+      "workflow": "내부 예외 카드·원장 근거 확보 → 별도 공식 결재/처리 → 결과 연결",
+      "benefitHypothesis": "같은 예외가 반복된 이유를 파악",
+      "drawback": "카드 ‘결정’과 지급 승인/계약 체결 혼동, 금액 한도 없음(G03·G19)",
+      "sizeComparisonAndResearchQuestion": "S는 대표 한 사람 전결. M은 구매/재무/예산오너 분리. **사수 기록만으로 지급하지 않는가?**",
+      "gaps": [
+        "G03",
+        "G19"
+      ]
+    },
+    {
+      "id": "FN-L3",
+      "file": "personas/09-business.md",
+      "role": "FN-L3 선임·계약 검토 담당. 조항/정책 적용 검토",
+      "workflow": "확정 문서의 근거를 인용해 논점 정리, 필요시 전문 담당자 의견 별도 기록",
+      "benefitHypothesis": "긴 문서에서 검토해야 할 쟁점을 공유",
+      "drawback": "문서 유사도/점수로 계약 위험을 축약, 기밀 가격정보 lead 전체 공유 위험(G10·G12·G26)",
+      "sizeComparisonAndResearchQuestion": "S는 외부 전문가 협업이 잦음. M은 법무·재무 승인 분리. **조건/예외/원문 페이지를 정확히 확인하는가?**",
+      "gaps": [
+        "G10",
+        "G12",
+        "G26"
+      ]
+    },
+    {
+      "id": "FN-L4",
+      "file": "personas/09-business.md",
+      "role": "FN-L4 재무·경영지원 팀장. 지출/계약 예외 검토",
+      "workflow": "예산/정책 근거와 과거 결정을 보고 회사 위임 범위 안에서 결정, 공식 승인과 연결",
+      "benefitHypothesis": "예외 사유·뒤집힌 결정·조건 인계",
+      "drawback": "웹 결과 수정 결함, 예산 최신 값 미수집, 완료 후 실행 구별 부족(G01·G06·G16)",
+      "sizeComparisonAndResearchQuestion": "S는 현금 흐름 대표 확인. M은 금액/유형별 전결표 존재. **현재 예산 근거가 없으면 답변 범위를 제한하는가?**",
+      "gaps": [
+        "G01",
+        "G06",
+        "G16"
+      ]
+    },
+    {
+      "id": "FN-L5",
+      "file": "personas/09-business.md",
+      "role": "FN-L5 CFO·대표. 부서 간 자원 배분·위험 판단",
+      "workflow": "부서가 공유 승인한 결정 요약과 별도 재무 보고를 함께 확인",
+      "benefitHypothesis": "선택의 이유가 숫자 보고에 연결될 가능성",
+      "drawback": "원장으로 공식 회계장부/결재를 대체할 수 없음. admin으로 기밀 전사 열람 불가(G07·G14·G19)",
+      "sizeComparisonAndResearchQuestion": "S는 많은 요청의 최종결정자. M은 경영회의 안건으로만 필요한 최소 정보. **관리자 기능과 경영 판단 자료를 혼동하지 않는가?**",
+      "gaps": [
+        "G07",
+        "G14",
+        "G19"
+      ]
+    },
+    {
+      "id": "OP-L1",
+      "file": "personas/10-operations.md",
+      "role": "OP-L1 운영 신입·헬프데스크. 반복 절차와 담당자 확인",
+      "workflow": "공용 runbook/절차 ASK → 인용 열기 → 현재 티켓/상태 확인",
+      "benefitHypothesis": "야간·선임 부재 시 기본 절차 탐색",
+      "drawback": "오래된 절차를 실행하거나 비밀정보를 질문에 넣음(G06·G09·G21)",
+      "sizeComparisonAndResearchQuestion": "S는 비전문 겸직. M은 교대·권한 분리. **절차와 실제 상태를 따로 확인하는가?**",
+      "gaps": [
+        "G06",
+        "G09",
+        "G21"
+      ]
+    },
+    {
+      "id": "OP-L2",
+      "file": "personas/10-operations.md",
+      "role": "OP-L2 운영 담당자. 납기/장애/계정 예외 처리",
+      "workflow": "내부 논의를 카드로 만들고 결정 기록 → 실제 ERP/IT도구에서 별도 실행",
+      "benefitHypothesis": "인계 시 왜 예외를 허용했는지 남음",
+      "drawback": "실행권한/최신 재고/계정 상태 연동 없음, 작업 완료 오해(G15·G16)",
+      "sizeComparisonAndResearchQuestion": "S는 요청·실행 같은 사람. M은 구매/물류/IT 별도 대기열. **실행되지 않은 결정이 남아 있음을 아는가?**",
+      "gaps": [
+        "G15",
+        "G16"
+      ]
+    },
+    {
+      "id": "OP-L3",
+      "file": "personas/10-operations.md",
+      "role": "OP-L3 선임·보안/품질 전문가. 변경 위험 자문",
+      "workflow": "자료의 확인 가능한 근거로 검토 의견, 운영 메타데이터는 org admin 범위에서 확인",
+      "benefitHypothesis": "근거·조건·검토 책임을 분명히 할 가능성",
+      "drawback": "문서 실행 권한 때문에 lead 부여하면 불필요한 본문 접근. 익명화로도 사건 식별 가능(G04·G20·G27)",
+      "sizeComparisonAndResearchQuestion": "S는 외부 자문 가능. M은 보안 검토와 운영 권한 분리. **‘안전’ 점수가 실제 검증 완료처럼 보이지 않는가?**",
+      "gaps": [
+        "G04",
+        "G20",
+        "G27"
+      ]
+    },
+    {
+      "id": "OP-L4",
+      "file": "personas/10-operations.md",
+      "role": "OP-L4 운영 팀장·책임자. 교대·장애·납기 우선순위",
+      "workflow": "미결·보류 카드 확인 → 우선 처리·대행 지정은 현재 수동 협의 → 원장 인계",
+      "benefitHypothesis": "누락된 판단을 회고·교대 시 찾음",
+      "drawback": "대행/재배정 화면 부족, 여러 원본에서 같은 이슈 알림 중복(G03·G24·G28)",
+      "sizeComparisonAndResearchQuestion": "S는 한 명에게 집중. M은 교대 종료 시 책임 자동 해제 필요. **다음 교대가 처리할 미결만 정확히 받는가?**",
+      "gaps": [
+        "G03",
+        "G24",
+        "G28"
+      ]
+    },
+    {
+      "id": "OP-L5",
+      "file": "personas/10-operations.md",
+      "role": "OP-L5 COO·운영 본부장. 여러 부서의 장애·납기·보안 상충",
+      "workflow": "공유 승인된 최소 요약으로 자원/위험 선택, 운영 admin은 연결/보존 문제 해결",
+      "benefitHypothesis": "조직 간 결정 대기의 원인을 볼 가능성",
+      "drawback": "현재 실시간 전사 상황판 없음. 원문/질문까지 감시하려 하면 도입 신뢰 저하(G07·G20·G27)",
+      "sizeComparisonAndResearchQuestion": "S는 설정까지 직접 담당. M은 운영 책임자와 개인정보 책임 분리. **메타데이터만으로 해결 가능한 문제를 구별하는가?**",
+      "gaps": [
+        "G07",
+        "G20",
+        "G27"
+      ]
+    }
+  ]
+}

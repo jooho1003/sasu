@@ -1,6 +1,6 @@
 # 아키텍처 — 사수 (SASU)
 
-- 문서 버전: 1.3 (ADR-056 웹 녹음 설계 추가, 운영 상태는 별도)
+- 문서 버전: 1.5 (§6-4 불변식 27~29 부서별 회고 커넥터 — ADR-064, 설계 · 1.4: §6-4 개발 회고 설계 불변식 추가 — ADR-063, 미구현 · 1.3: ADR-056 웹 녹음 설계 추가, 운영 상태는 별도)
 - 작성일: 2026-09-08 (1.2: ADR-052·054 구현 구조와 운영 검증 상태 반영)
 - 지위: **파생 문서**. 구조 결정의 근거는 [PRD §6-11(아키텍처)·§6-12(데이터·상태)·§6-1(스키마)](PRD.md)에 있고, 결정의 이유·트레이드오프는 [ADR.md](ADR.md)에 있다.
 - 문서 충돌 시 우선순위: [PRD](PRD.md) → 이 문서 → [ADR](ADR.md). 이 문서와 PRD가 어긋나면 PRD가 옳다.
@@ -22,6 +22,8 @@
 
 ### 자료 검토·원본 보관·기록 보존 — ADR-054
 
+ADR-058의 원본 접근 강화는 `authorize_review_access` → `private.review_access_tickets` → 사용자 세션 Storage GET의 `consume_review_access`로 연결한다. 권한·사용자별 60건/분 제한·append-only 접근 허가 이벤트·60초 접근권은 한 SQL 트랜잭션이고 파일 전달은 별도 요청이다. Storage는 현재 사용자·경로·행위·기한을 다시 확인해 접근권을 한 트랜잭션에만 소비한다. 서명 URL·목록·복사는 차단하고 기존 INSERT-only 업로드와 내부 워커는 유지한다. 조직 관리자는 본문 없이 접근 메타데이터만 확인한다. `sweep_review_originals`는 보존 기한 경과 원본만 접근 차단·파기 예약하고 교정문·리비전·확정 source/items를 유지한다. 상세는 [접근 구조](verification/browser-meeting-recording/access-design.md). 실제 Storage 호환성과 운영 반영은 별도 검증 게이트다.
+
 `reviewed_materials`·`review_parts`·`review_revisions`는 검색 소스와 분리된 검토 저장소다. 세션 RPC가 부서장·동의·버전을 검증하며 `can_see()`와 RLS가 읽기/원본 접근을 집행한다. 비공개 `review-materials` 버킷에 원본과 60초+1초 겹침 WAV를 저장하고 `process_review` 작업이 기존 `llm.transcribeAudio()` 또는 문서 추출기로 전문을 처리한다. lease/attempt가 취소·늦은 완료를 차단하고 2분 sweep이 실패를 드러낸다.
 
 `publish_review`에서만 source/items와 분류·요약 작업을 원자 생성한다. 초안 편집은 저장 버전 충돌을 감지하고 재추출은 별도 후보로 둔다. 재확정/사용 중지는 이전 source와 파생물을 무효화하며 결정 인용은 유지한다. 삭제·참여자 동의 철회/탈퇴는 초안/이력을 지우고 파일 접근을 차단한 뒤 `purge_review_files`를 예약한다.
@@ -32,7 +34,9 @@
 
 상위 범위는 PRD §3-4·§8, 상세 계약은 [웹 회의 녹음 설계](planning/웹회의_녹음_설계.md)다. `getUserMedia` 마이크와 `getDisplayMedia`의 사용자가 허용한 음성을 Web Audio에서 혼합한다. display video 트랙은 권한/종료 감시에만 쓰고 인코딩·저장·전송 경로에 넣지 않는다. AudioWorklet에서 얻은 PCM을 1초 단위로 로컬 복구 저장하고, 서버에는 녹음 종료 후 최대 60초 독립 WAV 원본을 세션·RLS로 업로드한다. `MediaRecorder` 압축 조각을 각각 재생 가능한 구간으로 가정하지 않는다.
 
-`reviewed_materials`에 원본 형식(`single_file` / `audio_segments`)과 입력 경로를 추가하고 `review_original_segments`로 서버가 발급한 경로·순번·길이·해시·검증 상태를 관리한다. 기존 50MiB 단일 파일과 새 64MiB 원본 묶음을 구분한다. finalize는 파일 검증 작업을 예약하며, 워커 검증 완료 전에 전사/확정을 허용하지 않는다. 검증된 원본에서 기존 60초+1초 `review_parts`를 생성하여 `process_review`와 `publish_review`를 재사용한다. 기존 단일 원본 재생·재추출·삭제 경로도 분기 처리해야 한다.
+`reviewed_materials`에 원본 형식(`single_file` / `audio_segments`)과 입력 경로를 추가하고 `review_original_segments`로 서버가 발급한 경로·순번·길이·해시·검증 상태를 관리한다. 기존 50MiB 단일 파일과 새 64MiB 원본 묶음을 구분한다. finalize는 파일 검증 작업을 예약하며, 워커 검증 완료 전에 전사/확정을 허용하지 않는다. 검증된 원본에서 워커가 기존 60초+1초 `review_parts`를 생성하여 `process_review`와 `publish_review`를 재사용한다. 현재 파일 업로드는 클라이언트가 구간을 잘라 올리지만, 이 형식에서는 `review_storage_allowed`가 클라이언트의 `parts/` 쓰기를 거부한다. 생성은 `create_review`가 아니라 64MiB·30구간 한도를 가진 별도 RPC가 담당한다. 브라우저 전용 AudioWorklet·IndexedDB 어댑터는 `lib/recording/browser/*`로 분리해 §8의 SDK 어댑터 행에 넣고, 순수 리샘플·체크포인트·manifest 로직은 `lib/recording/*`에서 TDD로 만든다. 기존 단일 원본 재생·재추출·삭제 경로도 분기 처리해야 한다.
+
+ADR-057 강화(설계 §11~§13): 전사는 `verbose_json` segment의 시각·신뢰도를 `sections[]`에 저장하고 `dept_glossaries`를 Whisper `prompt`와 요약 표기 기준에 쓴다. 요약은 chunk 추출 뒤 인용 보존 병합 1회를 더한다(문서 공용 경로). 보안은 `next.config.ts`·`proxy.ts`의 응답 헤더·CSP nonce, 서버가 HKDF로 파생해 세션에만 주는 로컬 체크포인트 AES-GCM 키(서버 무저장), `review_access_events` append-only 접근 기록과 발급 제한을 같은 세션 RPC 트랜잭션에 두는 구조, `org_settings`의 조직별 스위치, `retention_settings.review_original_days` 보존 sweep이다. 권한·기록·제한을 앱이 아니라 SQL에서 집행하는 원칙은 그대로다. 제3자 처리(Voyage 옵트아웃·Groq DPA) 확인은 코드가 아니라 운영 기록이며 녹음 구현보다 먼저다.
 
 Meet·Zoom 계정/OAuth·공식 artifact 수집은 2단계이며 별도 어댑터로 같은 검토 저장소에 연결한다. 현재 운영 코드에 이 구조가 이미 존재하는 것으로 해석하지 않는다. Graft·Archify 결과는 아직 없으며 설계 문서의 Mermaid와 코드 관계 표가 수동 검토 자료다.
 
@@ -283,6 +287,23 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 
 **상태 추가** — `member_invites`: 대기 → 수락/철회(만료는 `expires_at` 파생, 수락·철회 시 토큰 해시 무효화) · `trailers`: `generating → checking → review ⇄ checking → published → unpublished → (수정) checking`, `generating/checking → failed`, 10분 스윕 `failed(timeout)` · `trailer_attempts`: `scoring → scored/failed`.
 
+### 6-3. 부서별 신입 미션 데모 (ADR-059)
+
+- `/demo/hiring`은 `fixtures/hiring/missions.ts`의 고정 합성 자료만 전달한다. 로그인·DB·LLM·제출 API가 없다. 계약은 `lib/contracts.ts`, 제출/파일 순수 검증은 `lib/hiring-demo.ts`다.
+- `components/hiring-demo.tsx`는 부서 ID별 React 상태에 직접 작성한 단계·판단·첨부 File·제출 스냅샷을 분리한다. File은 메모리 참조만 유지하고 읽기/분석/실행/전송하지 않는다. 결과 문서/코드는 텍스트로만 렌더한다.
+- 단계 기록·샘플 적용·제출 이벤트는 참가자가 누른 동작만 표시한다. 입력 감시·시간 평가·자동 채점·합불·순위는 없다. 초기화는 선택 부서만, 새로고침은 모든 진행을 지운다. 서버/브라우저 영속 저장을 추가하지 않는다.
+- 데모 시드는 기존 4개 부서를 보존하고 인사·프론트·백엔드를 추가한다. `orgs.is_demo` 판정과 기존 RLS·읽기 전용 체험 경계를 그대로 따른다. 런타임 요청에서 시드 실행이나 service role 호출은 없다.
+
+### 6-4. 개발 회고 (ADR-063, PRD §3-6) — 설계, 미구현
+
+23. **회고 활동은 본인 것만, 짧게, 마스킹 후.** `retro_activities`의 `user_id`는 항상 `auth.uid()`이고 번들의 어떤 필드도 사람·부서를 지정하지 못한다. 수집기와 서버 RPC가 각각 마스킹하며 마스킹 전 텍스트·번들 파일은 저장하지 않는다. Claude/Codex 응답·도구 결과·붙여넣은 본문·diff 본문·URL 쿼리스트링은 파서가 읽지 않는다. 활동 1건 500자·하루 500건·번들 1MB.
+24. **`self`는 가시성 등급이 아니라 소유 판정이다.** `retro_days` RLS는 `user_id = auth.uid() or (visibility <> 'self' and can_see(auth.uid(), dept_id, visibility))`. `can_see()`는 바뀌지 않고 다른 테이블은 `self`를 쓰지 않는다. `dept`/`leads_only`로 넓히기는 인용된 Tier 0 활동의 `source_visibility`보다 넓을 수 없다(불변식 4). 개인 범위가 두 번째로 생기면 ACL 테이블로 승격한다(PRD §6-12).
+25. **회고 인용은 활동 원문 포함 검증을 3중으로 통과한다** — `verifyRetroDraft`(job) · `save_retro`/`confirm_retro`(SQL) · UI 렌더 필터. 인용 0개 항목은 어디에서도 남지 않고, 항목 0개면 `needs_review`.
+26. **회고는 결정 원장이 아니다.** revision은 append-only이지만 본인은 하루치 전체를 삭제할 수 있다. 공개 링크(3단계)는 조직 관리자 승인·`dept` 회고·브라우저 활동 미포함이 SQL에서 모두 참일 때만 slug가 생기고, 내리면 `slug = null`. 개인 토큰(2단계)은 sha256 해시만 저장하고 스코프 `retro:upload` 하나, 90일 만료, 본인 폐기이며 토큰 업로드 경로는 수집 어댑터로 분류해 `auth.role() = 'service_role'` 가드가 있는 `*_as` RPC만 부른다.
+27. **회고의 외부 연결은 개인 OAuth·개인 키만이다(ADR-064).** `retro_connections`는 본인 행에만 있고 `encrypted_secret`은 어떤 select·RPC 반환에도 실리지 않는다. 조직 토큰으로 구성원 활동을 읽거나 관리자 감사 API(Figma Activity Logs·Google Admin SDK Reports·Zendesk 관리자 export)를 쓰지 않는다. 부서장은 누가 무엇을 연결했는지 보지 못한다. 연결 해제는 토큰과 그 제공자 접두사의 활동을 같은 트랜잭션에서 지운다. restricted scope(Gmail·Drive 전체) 데이터를 서버에 저장하는 커넥터는 만들지 않는다.
+28. **상대방(고객·지원자·참석자)의 개인 식별 정보는 파싱하지 않는다.** 커넥터 변환은 이름·전화번호·이메일 필드를 읽지 않고(테스트로 증명) 회사명·건수·결과·`상대 N`만 남긴다. VoIP 통화 메타데이터(`call_*`)는 법률 자문 통과 전에는 켜지 않는다. 수집 동의(연결 시)와 공개 동의(첫 `dept`/`leads_only` 전환 시, `retro_user_settings.share_consented_at`)는 분리해 기록하며 공개 동의 없이는 `set_retro_visibility`가 넓히지 않는다.
+29. **집계 지표는 활동이 아니라 스냅샷이고, 작성자 없는 부서 문맥 활동은 "내가 했다"의 인용이 될 수 없다.** `metric_snapshot`은 "확인했다·비교했다" 서술만, `dept_context` 활동을 인용한 항목과 마스킹 토큰이 문장에 옮겨진 항목은 `verifyRetroDraft`가 버린다. 부서 프리셋은 라벨·힌트·추천 커넥터만 바꾸고 섹션 키·스키마·검증·화면은 하나다.
+
 ## 7. 만들지 않는 것 (되살리지 말 것)
 
 | 항목 | 대신 | 근거 |
@@ -308,7 +329,7 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 |---|---|---|---|
 | `lib/rules.ts` · `lib/mask.ts` · `lib/pipeline/*` · `lib/jobs.ts` · `lib/adapters/*`(파서) · `lib/slack/verify.ts` | 순수 로직. 분류 규칙, 마스킹이 금액을 지우지 않는지, 인용 문자열 검증, 병합 임계, visibility 최솟값, 백오프, .vtt 파서 줄 번호 에러, 서명 검증 | Vitest. `llm.ts`·Supabase는 mock. 파일별 미러 `tests/<path>/<name>.test.ts` | **대상** — 테스트 없이 구현 파일 편집 차단 |
 | `supabase/migrations` RLS · `can_see()` · `search_as()` | member 세션으로 `leads_only` select 0건·insert 거부, lead는 보임, anon은 `is_demo`만, 퍼블릭 채널 질문은 member 권한 | `tests/rls/*.test.ts` — 서로 다른 JWT 3개(anon·member·lead)로 같은 쿼리 실행 | 대상 아님 (SQL) — 단 D8 사람이 직접 읽는다 |
-| `app/api/**/route.ts` · `lib/supabase/*` · `lib/slack/{blocks,post}.ts` · `lib/llm.ts` | SDK 어댑터·배선·프레젠테이션. 우리 로직이 아니라 SDK를 테스트하는 꼴이 된다 | E2E로 간접 검증 | **비대상** |
+| `app/api/**/route.ts` · `lib/supabase/*` · `lib/slack/{blocks,post}.ts` · `lib/llm.ts` · `lib/recording/browser/*`(ADR-056, AudioWorklet·IndexedDB·MediaStream 어댑터) | SDK 어댑터·배선·프레젠테이션. 순수 녹음 로직은 `lib/recording/*.ts`에서 TDD | E2E로 간접 검증 | **비대상** |
 | `components/` · `app/**`의 TSX(page·layout·보조 클라이언트 컴포넌트) · Next.js 프록시·메타데이터 파일(`proxy.ts`·`app/robots.ts`·`app/sitemap.ts`·아이콘·OG 이미지) | 표현 | Playwright | 비대상 |
 | E2E `tests/e2e/` | ① 게스트 `/demo` 시크릿 창 완주 + 우리 팀 실데이터 문자열 grep 0건 + LLM 호출 0 ② D3 세로 슬라이스: 슬랙 메시지 → 분류 → 카드 → 웹 결정 → 원장 5분 ③ 같은 질문 lead/member 답 차이 ④ 결정 버튼 연타 → decisions 1건 | Playwright, 배포 URL 대상 | 비대상 |
 
@@ -338,3 +359,11 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 - `answers_current_evidence` SELECT 정책은 현재 인용 전체가 유효하지 않은 done 답변을 직접 REST에서도 숨긴다. 권한 로직을 앱에 복제하지 않는다.
 
 의존성 9개별 거동·사용자 문구·다음 행동은 PRD §6-10 표가 원천이다. 구조 관점의 원칙 하나: **어댑터는 외부 장애와 무관하게 items를 먼저 저장한다.** LLM·임베딩·슬랙 발송·회의 정리는 전부 job이라 나중에 따라잡는다. 사용자에게는 "무엇이 실패했는지 + 다음에 할 수 있는 것"을 보여주고, 내부에는 `error_code`(`llm_timeout|llm_refusal|schema_invalid|citation_invalid|rate_limited`)를 남긴다. "오류가 발생했습니다"만 있는 화면은 만들지 않는다.
+
+### 회고 구현 흐름과 권한 재검사 (2026-09-19)
+
+`retro-collect.ts` → 마스킹한 번들 → 세션 `POST /api/d/[dept]/retros` → `create_retro_day` → job → `retro-draft.ts` → `llm.structured` → 인용 검증 → fenced finish → 본인 편집/확정 → RLS로 읽는 타임라인·Markdown이다. Claude의 중첩 pastedContents는 파싱하지 않으며 Chrome은 복사본만 읽는다. 브라우저에서 service role을 사용하지 않는다.
+
+공유는 `self` 소유 판정 또는 기존 `can_see()`를 사용한다. `retro_activity_live`와 `retro_revision_live`는 원본 삭제·동의·멤버십·자료 검토 권한·인용 유효성을 재검사하고 RLS와 export에 공통 적용한다. 자료 검토함 파생 활동은 review_editor 권한을 유지하며 부서 전체로 넓히지 않는다. day에는 주제를 복제하지 않는다. 초안은 owner만, 다른 사람은 마지막 확정 revision에 인용된 활동만 읽는다. 생성 claim/renew/finish는 generation·lease·만료·동의를 검사하며 2분 sweep은 같은 행 잠금으로 실행된다.
+
+지원자 익명 경로는 0048의 잠금 누적·보관 중 철회 계약을 사용한다. 채용 UI는 자기 부서의 세션/RLS 조회, 제출과 동의는 익명 최소 RPC, 채점·기한 정리는 워커 내부 service role이다. 기능이 꺼진 조직도 이미 수집한 개인정보의 파기 대상에서 제외하지 않는다.

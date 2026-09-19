@@ -1,0 +1,66 @@
+{
+  "project": "sasu",
+  "phase": "27-daily-retro",
+  "design": "docs/planning/개발_회고_자동화_설계.md",
+  "adr": "ADR-063",
+  "gate_before_start": "2026-09-19 사용자 제안값 7개 확정 및 구현 승인. 운영 반영은 제출 이후 별도 승인.",
+  "steps": [
+    {
+      "step": 0,
+      "name": "retro-schema",
+      "status": "completed",
+      "codex_model": "gpt-5.6-sol",
+      "effort": "xhigh"
+    },
+    {
+      "step": 1,
+      "name": "retro-contracts-lib",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 2,
+      "name": "retro-collector",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 3,
+      "name": "retro-draft-job",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 4,
+      "name": "retro-api",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 5,
+      "name": "retro-ui",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 6,
+      "name": "retro-demo-export",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 7,
+      "name": "retro-verification",
+      "status": "blocked",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "note": "완료 시 blocked로 멈춘다 — 운영 반영은 사람 판정, 9/20 이후"
+    }
+  ]
+}

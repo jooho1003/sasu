@@ -250,3 +250,20 @@ D12(9/19)에 영상·스크린샷·제출서를 만들고 **제출** 버튼까�
 토큰 키를 바꾸기 전에는 기존 키로 복호화 후 새 키로 재암호화하거나, 고객사가 재설치해야 한다. 기존 키를 먼저 폐기하면 설치 토큰을 복구할 수 없다.
 
 공식 계약: [Slack OAuth v2 설치](https://docs.slack.dev/authentication/installing-with-oauth/), [oauth.v2.access](https://docs.slack.dev/reference/methods/oauth.v2.access/), [app_uninstalled](https://docs.slack.dev/reference/events/app_uninstalled/).
+
+## 15. 개발 회고 수집과 검토 (ADR-063)
+
+2026-09-19 확정한 1단계는 파일 업로드 방식이다. 운영 환경의 `SASU_RETRO_ENABLED`는 기본 `false`이며, 9/20 제출 이후 승인된 점검 창에서 0046·0047·0048까지 적용하고 검증한 앱과 워커를 함께 반영한다. 적용 전 백업과 배포 ID를 기록한다. 공개 링크·노션 쓰기·개인 토큰 전송은 이 단계에 없다.
+
+1. 로컬 리포에서 `npm ci` 후 `npm run retro:collect -- --dry-run`을 실행한다. 설정이 없으면 `config_required` 안내만 나오며 파일은 만들지 않는다. `npm run retro:collect`를 한 번 실행하면 사용자 홈의 `.sasu/retro.json` 설정 틀을 만든다.
+2. 설정의 `repos`에 본인 리포 절대 경로, `author_emails`에 본인 Git 작성자 이메일을 넣는다. 이메일 목록이 비어 있으면 Git 수집은 0건이다. `claude.enabled`, `codex.enabled`, `memory.enabled`는 각각 끌 수 있다. `tz` 기본은 `Asia/Seoul`이다.
+3. `npm run retro:collect -- --date 2026-09-19 --dry-run`으로 마스킹된 종류별 건수와 첫 5개 제목을 본다. `--out`을 주어도 dry-run은 번들 파일을 쓰지 않는다. 일반 실행은 활동 건수·마스킹 건수·출력 경로만 출력한다.
+4. `npm run retro:collect -- --date 2026-09-19 --out retro-2026-09-19.json`으로 만든 파일을 사수 → 해당 부서 → 회고에 드롭한다. 같은 파일명은 덮어쓰지 않는다. 하루 500개·파일 1MiB·최근 7일 이내의 활동만 받는다. 서버에는 마스킹한 활동만 저장하며 업로드한 번들 자체는 보관하지 않는다.
+5. Chrome은 기본 꺼짐이다. 본인이 원할 때만 `--chrome` 또는 `chrome.enabled=true`로 켠다. `chrome.profile` 기본은 `Default`; `chrome.mode`는 `denylist` 또는 `allowlist`, `chrome.domains`는 추가 도메인 목록이다. 은행·메일·로컬 주소는 제외하고 쿼리·fragment를 지운다. 검색 결과 페이지는 방문 제목에서도 제외하며 검색어는 `--search-terms` 또는 `search_terms=true`의 별도 동의가 있어야 수집한다. 원본 History는 복사해 읽고 임시 복사본은 정리한다. Node의 SQLite를 우선 사용하고 없으면 Windows `py -3` 또는 macOS/Linux `python3`의 표준 SQLite를 사용한다.
+6. 초안의 근거를 확인하고 다음 생성에서 뺄 활동을 선택한다. 편집·확정 후 Markdown을 복사하거나 내려받는다. 기본은 본인만 공개하며 부서 공유는 원본 권한 범위에서만 허용된다. 원본이 삭제되거나 접근권한이 없어지면 해당 내용을 계속 노출하지 않는다. 본인은 하루치 전체를 삭제할 수 있다.
+
+자동 실행을 원하면 먼저 직접 실행을 검증한 뒤 Windows 작업 스케줄러에서 `node.exe`를 프로그램으로, `node_modules/tsx/dist/cli.mjs scripts/retro-collect.ts --out <날짜별 출력 파일>`을 인수로, 리포 경로를 시작 위치로 지정한다. macOS는 같은 명령을 launchd의 `ProgramArguments`와 `WorkingDirectory`로 설정한다. 날짜별 출력 경로는 사용자의 래퍼에서 생성해야 하며 수집기는 기존 파일을 덮어쓰지 않는다. 이 개발에서 사용자 PC에 예약 작업을 등록하지 않았다. 생성한 파일은 사용자가 웹에 올린다.
+
+로컬 QA: `node scripts/verify-retro-collector.mjs`는 실제 개인 기록을 열지 않는 합성 SQLite 검증이다. `node scripts/verify-retro-sql.mjs "D:/바이브코딩/.sasu-qa-db"`는 격리 DB 권한·동시성·롤백을 검증한다. 로컬 Supabase 검증 서버는 `SASU_RETRO_ENABLED=true`, `E2E_RETROS=1`로 `node scripts/review-qa.mjs build`, `start`, `retro-test`를 차례로 실행한다. 운영에서는 매분 `/api/jobs/run` 트리거가 필요하다. 로컬 E2E는 같은 워커 엔드포인트를 직접 호출해 cron을 재현한다.
+
+Vercel CLI가 설치되지 않은 환경에서는 운영 설정·배포 로그 확인 전에 `npm i -g vercel` 설치를 권장한다. 이번 작업은 로컬 커밋·머지까지이며 배포 명령은 실행하지 않는다.

@@ -1,0 +1,34 @@
+{
+  "slug": "plain-language",
+  "date": "2026-09-19",
+  "context": {
+    "request": "전체 UI/UX 점검 + 서비스 문구를 중학교 2학년도 이해하고 쓸 수 있는 수준으로. 확인하고 설계 진행.",
+    "design": "docs/planning/쉬운말_문구_UIUX_설계.md",
+    "adr": "ADR-065",
+    "prd": "§3-7 · §7 문구 원칙",
+    "phase": "phases/31-plain-language",
+    "evidence": "docs/verification/plain-language-audit-2026-09-19/",
+    "gate_before_start": "설계 §0 사용자 결정 8개 확정 전에는 step 0을 시작하지 않는다. 9/20 제출본은 건드리지 않는다. 운영 반영은 step 7 뒤 사용자 승인."
+  },
+  "nodes": [
+    { "id": "A0", "title": "점검 — 공개 데모 18화면 브라우저 실측 + 소스 전수 조사(슬랙·LLM·API 오류 문구)", "domain": "explore", "D1": 1, "D2": 1, "D3": 0, "D4": 0, "score": 2, "tier": "balanced", "agent": "Explore ×2", "claude_model": "sonnet", "codex_model": null, "depends_on": [], "output": "docs/verification/plain-language-audit-2026-09-19/{text-*.txt, *.jpg}", "status": "completed" },
+    { "id": "D0", "title": "설계 — 기준 7개·용어 사전·화면별 명세·강제 장치·LLM 문체·상위 문서·플랜·step 파일", "domain": "general", "D1": 2, "D2": 2, "D3": 1, "D4": 2, "score": 7, "tier": "powerful", "agent": "main(never_delegate: 모호한 판단·아키텍처)", "claude_model": "opus", "codex_model": null, "depends_on": ["A0"], "output": "docs/planning/쉬운말_문구_UIUX_설계.md · PRD §3-7·§7 · ADR-065 · phases/31-plain-language/*", "status": "completed" },
+    { "id": "S0", "title": "wording-guide-lint — docs/wording-guide.md · scripts/wording/terms.json · lib/wording-check.ts(TDD) · scripts/check-wording.mjs · 기준선 보고", "domain": "general", "D1": 1, "D2": 1, "D3": 1, "D4": 1, "score": 4, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["D0"], "output": "step0 산출물 · baseline.txt", "status": "pending" },
+    { "id": "S1", "title": "labels-ssot — lib/labels.ts 전수 이름표(TDD) · 영문 상태값 노출 4곳 제거 · 흩어진 매핑 통합", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S0"], "output": "lib/labels.ts · tests/labels.test.ts · 4개 파일 수정", "status": "pending" },
+    { "id": "S2", "title": "shell-nav-mobile — 메뉴·캡션·404·error 문구 · U1 모바일 헤더 스택 200px 안", "domain": "frontend", "D1": 1, "D2": 1, "D3": 0, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S0", "S1"], "output": "workspace-shell·admin/shell·site-shell·not-found·error·layout", "status": "pending" },
+    { "id": "S3", "title": "core-screens — 대시보드·카드·결정 기록·묻기(로그인+데모) 문구 · U2·U3·U4 · PRD §6-5 고정 문구 개정", "domain": "frontend", "D1": 1, "D2": 1, "D3": 0, "D4": 2, "score": 4, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S2"], "output": "17개 파일 + PRD §6-5", "status": "pending" },
+    { "id": "S4", "title": "lead-screens — 올린 자료·문서·점수표·기록 보관·설정·예고편·초대·미션 문구 · 팀장 통일 · U5·U9·U11", "domain": "frontend", "D1": 1, "D2": 1, "D3": 0, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S2"], "output": "20여 개 파일", "status": "pending" },
+    { "id": "S5", "title": "public-admin-consent — 메인·로그인·개인정보 쉬운 요약·관리자·데모 랜딩 · 동의 전문은 diff 표만(법률 게이트)", "domain": "frontend", "D1": 1, "D2": 1, "D3": 1, "D4": 2, "score": 5, "tier": "powerful", "agent": "codex", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["S2"], "output": "메인·로그인·admin·demo 랜딩 · consent-diff.md", "status": "pending" },
+    { "id": "S6", "title": "slack-llm-style — 슬랙 블록·답변·안내 문구 · lib/llm.ts 문체 블록 · 샘플 11건 준수율", "domain": "general", "D1": 1, "D2": 1, "D3": 1, "D4": 1, "score": 4, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S1"], "output": "lib/slack·app/api/slack·lib/llm.ts · llm-style-samples.md", "status": "pending" },
+    { "id": "S7", "title": "verification — 검사기 lint 편입 · 자동 검증 전부 · 3100 실측 1440/390 · 읽기 테스트 절차 · blocked", "domain": "qa", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S3", "S4", "S5", "S6"], "output": "docs/verification/plain-language-2026-09-XX/", "status": "pending" },
+    { "id": "R1", "title": "최종 리뷰 — step 산출물 실측 재검토(자기 보고 불신) · 운영 반영 판정 자료", "domain": "review", "D1": 2, "D2": 2, "D3": 0, "D4": 2, "score": 6, "tier": "powerful", "agent": "main(never_delegate: 최종 리뷰)", "claude_model": "opus", "codex_model": null, "depends_on": ["S7"], "output": "리뷰 결함 목록 · 사용자 판단 항목", "status": "pending" }
+  ],
+  "gate": {
+    "G1": "PASS — 11개 노드 모두 domain·D1~D4·score·tier·agent·claude_model·codex_model 있음",
+    "G2": "PASS — 모호한 판단·아키텍처(D0)·최종 리뷰(R1)는 powerful + 위임 안 함. 법적 문구 경계(S5)는 powerful",
+    "G3": "PASS — explore 2점 balanced(ceiling 안), frontend 3~5점 balanced/powerful(floor balanced), qa 3점 balanced, general 3~7점",
+    "G4": "PASS — powerful 3/11 = 27% ≤ 30% (D0·S5·R1)",
+    "G5": "PASS — D3=2 노드 없음. 운영 반영·제출 스크린샷 교체는 플랜 밖(사용자 승인). S7은 완료 시 blocked",
+    "result": "PASS"
+  }
+}

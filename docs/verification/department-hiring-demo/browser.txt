@@ -1,0 +1,384 @@
+
+Running 12 tests using 1 worker
+
+(node:29380) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   1 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 1440px: 직접 기록·근거·결과 제출·무전송 (3.1s)
+(node:21060) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   2 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 인사팀 1440px: 직접 기록·근거·결과 제출·무전송 (1.1s)
+(node:27556) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   3 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 프론트개발팀 1440px: 직접 기록·근거·결과 제출·무전송 (1.1s)
+(node:7884) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   4 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 백엔드개발팀 1440px: 직접 기록·근거·결과 제출·무전송 (1.2s)
+(node:27220) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   5 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 디자인팀 1440px: 직접 기록·근거·결과 제출·무전송 (1.4s)
+(node:28824) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   6 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 390px: 직접 기록·근거·결과 제출·무전송 (1.1s)
+(node:21240) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   7 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 인사팀 390px: 직접 기록·근거·결과 제출·무전송 (1.1s)
+(node:13076) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   8 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 프론트개발팀 390px: 직접 기록·근거·결과 제출·무전송 (1.2s)
+(node:12196) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   9 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 백엔드개발팀 390px: 직접 기록·근거·결과 제출·무전송 (1.2s)
+(node:14244) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  10 [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 디자인팀 390px: 직접 기록·근거·결과 제출·무전송 (1.2s)
+(node:17224) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  11 [chromium] › tests\e2e\hiring-demo.spec.ts:42:5 › 부서 간 진행 격리·샘플 표시·첨부 형식·코드 비실행·초기화 (1.1s)
+(node:14684) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 12 [chromium] › tests\e2e\hiring-demo.spec.ts:66:5 › 키보드로 미션을 시작하고 파일만 첨부한 제출을 확인한다 (3.8s)
+
+
+  1) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 1440px: 직접 기록·근거·결과 제출·무전송 ──────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-기획팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-기획팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 인사팀 1440px: 직접 기록·근거·결과 제출·무전송 ──────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-인사팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-인사팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  3) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 프론트개발팀 1440px: 직접 기록·근거·결과 제출·무전송 ───────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-프론트개발팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-프론트개발팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  4) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 백엔드개발팀 1440px: 직접 기록·근거·결과 제출·무전송 ───────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-백엔드개발팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-백엔드개발팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  5) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 디자인팀 1440px: 직접 기록·근거·결과 제출·무전송 ─────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-디자인팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-디자인팀-1440px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  6) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 390px: 직접 기록·근거·결과 제출·무전송 ───────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-기획팀-390px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-기획팀-390px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  7) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 인사팀 390px: 직접 기록·근거·결과 제출·무전송 ───────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-인사팀-390px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-인사팀-390px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  8) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 프론트개발팀 390px: 직접 기록·근거·결과 제출·무전송 ────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-프론트개발팀-390px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-프론트개발팀-390px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  9) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 백엔드개발팀 390px: 직접 기록·근거·결과 제출·무전송 ────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-백엔드개발팀-390px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-백엔드개발팀-390px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  10) [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 디자인팀 390px: 직접 기록·근거·결과 제출·무전송 ─────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "세 작업 단계"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요판단 근거를 30~6,000')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      21 |     await page.getByRole("button", { name: "합성 미션 시작", exact: true }).click();
+      22 |     await page.getByRole("button", { name: "결과 제출 (데모)", exact: true }).click();
+    > 23 |     await expect(page.getByRole("alert")).toContainText("세 작업 단계");
+         |                                           ^
+      24 |     for (const stage of mission.stages) {
+      25 |       await page.getByLabel(stage.label, { exact: true }).fill(`${stage.label}: DEMO_ONLY_INPUT_7c9a 합성 자료를 확인하고 선택 이유와 검증할 항목을 정리했습니다.`);
+      26 |       await page.getByRole("button", { name: `${stage.label} 기록하기`, exact: true }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:23:43
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-디자인팀-390px-직접-기록·근거·결과-제출·무전송-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-디자인팀-390px-직접-기록·근거·결과-제출·무전송-chromium\error-context.md
+
+  11) [chromium] › tests\e2e\hiring-demo.spec.ts:42:5 › 부서 간 진행 격리·샘플 표시·첨부 형식·코드 비실행·초기화 ──────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert')
+    Expected substring: "허용된"
+    Error: strict mode violation: getByRole('alert') resolved to 2 elements:
+        1) <div role="alert" class="hiring-demo_error__5eTXl">…</div> aka getByText('제출 전 확인해 주세요허용된 문서·코드·이미지·ZIP')
+        2) <div role="alert" aria-live="assertive" id="__next-route-announcer__"></div> aka locator('[id="__next-route-announcer__"]')
+
+    Call log:
+      - Expect "toContainText" getByRole('alert') with timeout 5000ms
+      - waiting for getByRole('alert')
+
+
+      45 |   await page.getByRole("button", { name: "합성 샘플로 채우기", exact: true }).click();
+      46 |   await page.getByLabel("합성 산출물 파일 선택", { exact: false }).setInputFiles({ name: "run.exe", mimeType: "application/octet-stream", buffer: Buffer.from("not executable") });
+    > 47 |   await expect(page.getByRole("alert")).toContainText("허용된");
+         |                                         ^
+      48 |   await page.getByLabel("합성 산출물 파일 선택", { exact: false }).setInputFiles({ name: "sample.md", mimeType: "text/markdown", buffer: Buffer.from("합성 산출물입니다.") });
+      49 |   await page.getByLabel("산출물 · 문서/코드/화면 설계 설명", { exact: true }).fill("<script>window.__hiringExecuted = true</script> 합성 코드이며 실행하면 안 됩니다.");
+      50 |   await page.getByRole("button", { name: /^인사팀/ }).click();
+        at D:\바이브코딩\sasu\tests\e2e\hiring-demo.spec.ts:47:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\hiring-demo-부서-간-진행-격리·샘플-표시·첨부-형식·코드-비실행·초기화-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\hiring-demo-부서-간-진행-격리·샘플-표시·첨부-형식·코드-비실행·초기화-chromium\error-context.md
+
+  11 failed
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 1440px: 직접 기록·근거·결과 제출·무전송 ───────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 인사팀 1440px: 직접 기록·근거·결과 제출·무전송 ───────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 프론트개발팀 1440px: 직접 기록·근거·결과 제출·무전송 ────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 백엔드개발팀 1440px: 직접 기록·근거·결과 제출·무전송 ────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 디자인팀 1440px: 직접 기록·근거·결과 제출·무전송 ──────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 기획팀 390px: 직접 기록·근거·결과 제출·무전송 ────────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 인사팀 390px: 직접 기록·근거·결과 제출·무전송 ────────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 프론트개발팀 390px: 직접 기록·근거·결과 제출·무전송 ─────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 백엔드개발팀 390px: 직접 기록·근거·결과 제출·무전송 ─────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:10:7 › 디자인팀 390px: 직접 기록·근거·결과 제출·무전송 ───────────────
+    [chromium] › tests\e2e\hiring-demo.spec.ts:42:5 › 부서 간 진행 격리·샘플 표시·첨부 형식·코드 비실행·초기화 ────────────
+  1 passed (27.6s)

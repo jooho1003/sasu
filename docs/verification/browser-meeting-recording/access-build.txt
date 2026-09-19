@@ -1,0 +1,133 @@
+
+> sasu@0.1.0 build
+> next build
+
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local, .env
+✓ Running next.config.ts took 36ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 35.9s
+  Running TypeScript ...
+  Finished TypeScript in 8.2s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/28) ...
+  Generating static pages using 7 workers (7/28) 
+  Generating static pages using 7 workers (14/28) 
+  Generating static pages using 7 workers (21/28) 
+✓ Generating static pages using 7 workers (28/28) in 312ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/audit
+├ ƒ /admin/members
+├ ƒ /admin/security
+├ ƒ /admin/sources
+├ ƒ /api/admin/departments
+├ ƒ /api/admin/departments/[deptId]/first-lead-invite
+├ ƒ /api/admin/invites/[inviteId]/revoke
+├ ƒ /api/admin/members/demote
+├ ƒ /api/admin/members/remove
+├ ƒ /api/admin/review-settings
+├ ƒ /api/admin/slack
+├ ƒ /api/admin/trailer-publishing
+├ ƒ /api/admin/trailers/[id]/unpublish
+├ ƒ /api/cards/[id]/decide
+├ ƒ /api/d/[dept]/answers/[id]
+├ ƒ /api/d/[dept]/ask
+├ ƒ /api/d/[dept]/backfill
+├ ƒ /api/d/[dept]/cards
+├ ƒ /api/d/[dept]/cards/[id]/reminder
+├ ƒ /api/d/[dept]/decisions
+├ ƒ /api/d/[dept]/decisions/correct
+├ ƒ /api/d/[dept]/documents
+├ ƒ /api/d/[dept]/invites
+├ ƒ /api/d/[dept]/invites/[inviteId]/revoke
+├ ƒ /api/d/[dept]/items
+├ ƒ /api/d/[dept]/ledger
+├ ƒ /api/d/[dept]/meetings/transcript
+├ ƒ /api/d/[dept]/members/[userId]/demote
+├ ƒ /api/d/[dept]/members/[userId]/promote
+├ ƒ /api/d/[dept]/members/[userId]/remove
+├ ƒ /api/d/[dept]/questions
+├ ƒ /api/d/[dept]/retention
+├ ƒ /api/d/[dept]/retention/export
+├ ƒ /api/d/[dept]/retention/originals
+├ ƒ /api/d/[dept]/reviews
+├ ƒ /api/d/[dept]/reviews/[id]
+├ ƒ /api/d/[dept]/reviews/[id]/original
+├ ƒ /api/d/[dept]/reviews/[id]/parts
+├ ƒ /api/d/[dept]/roles
+├ ƒ /api/d/[dept]/roles/[roleId]
+├ ƒ /api/d/[dept]/roles/[roleId]/runs
+├ ƒ /api/d/[dept]/settings
+├ ƒ /api/d/[dept]/settings/consent
+├ ƒ /api/d/[dept]/settings/member
+├ ƒ /api/d/[dept]/settings/notion
+├ ƒ /api/d/[dept]/settings/source
+├ ƒ /api/d/[dept]/slack-questions
+├ ƒ /api/d/[dept]/trailers
+├ ƒ /api/d/[dept]/trailers/[id]
+├ ƒ /api/d/[dept]/trailers/[id]/approve
+├ ƒ /api/d/[dept]/trailers/[id]/publish
+├ ƒ /api/d/[dept]/trailers/[id]/recheck
+├ ƒ /api/d/[dept]/trailers/[id]/regenerate
+├ ƒ /api/d/[dept]/trailers/[id]/unpublish
+├ ƒ /api/d/[dept]/trailers/candidates
+├ ƒ /api/d/[dept]/voice
+├ ƒ /api/invites/accept
+├ ƒ /api/jobs/run
+├ ƒ /api/slack/events
+├ ƒ /api/slack/interactions
+├ ƒ /api/slack/oauth/callback
+├ ƒ /api/slack/oauth/start
+├ ○ /apple-icon.png
+├ ƒ /auth/callback
+├ ƒ /auth/signout
+├ ƒ /consent
+├ ƒ /d/[dept]
+├ ƒ /d/[dept]/ask
+├ ƒ /d/[dept]/cards/[id]
+├ ƒ /d/[dept]/documents
+├ ƒ /d/[dept]/ledger
+├ ƒ /d/[dept]/retention
+├ ƒ /d/[dept]/reviews
+├ ƒ /d/[dept]/reviews/[id]
+├ ƒ /d/[dept]/roles
+├ ƒ /d/[dept]/settings
+├ ƒ /d/[dept]/trailers
+├ ƒ /d/[dept]/trailers/[id]
+├ ƒ /d/[dept]/trailers/new
+├ ƒ /demo
+├ ƒ /demo/access
+├ ƒ /demo/admin
+├ ƒ /demo/d/[dept]
+├ ƒ /demo/d/[dept]/ask
+├ ƒ /demo/d/[dept]/cards/[id]
+├ ƒ /demo/d/[dept]/documents
+├ ƒ /demo/d/[dept]/ledger
+├ ƒ /demo/d/[dept]/retention
+├ ƒ /demo/d/[dept]/reviews
+├ ƒ /demo/d/[dept]/roles
+├ ƒ /demo/d/[dept]/settings
+├ ƒ /demo/d/[dept]/trailers
+├ ○ /icon.svg
+├ ƒ /invite/[token]
+├ ƒ /login
+├ ○ /no-membership
+├ ○ /opengraph-image.png
+├ ○ /privacy
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+├ ƒ /t/[slug]
+└ ƒ /trailers
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
