@@ -1,13 +1,13 @@
 import { loadEnvConfig } from "@next/env";
 import { createClient } from "@supabase/supabase-js";
+import { DEMO_ORG_ID } from "../lib/demo-access";
 
 loadEnvConfig(process.cwd());
 
 async function main() {
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-const orgId = process.env.SASU_SHOWCASE_ORG_ID?.trim() ??
-  "11111111-1111-4111-8111-111111111111";
+const orgId = process.env.SASU_SHOWCASE_ORG_ID?.trim() ?? DEMO_ORG_ID;
 
 if (!url || !key) throw new Error("Supabase 감사 환경 변수가 없습니다.");
 if (!/^[0-9a-f-]{36}$/iu.test(orgId)) throw new Error("쇼케이스 조직 ID 형식이 올바르지 않습니다.");
