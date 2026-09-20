@@ -17,6 +17,9 @@
 | 운영 환경변수 추가 (Production, sensitive) | `SASU_RETRO_ENABLED=true` · `NOTION_TOKEN_ENCRYPTION_KEY`(난수 32바이트 base64, 새로 생성) · `RETRO_CONNECTION_ENCRYPTION_KEY`(난수 32바이트 base64, 새로 생성) | 추가 완료. 값은 Vercel에만 있고 리포·로컬 `.env`에는 없다 |
 | 2차 배포(환경변수 반영) | 같은 스냅샷 재배포 | `dpl_FSDCGFLugavueu7tDjRkgwBiju3K` Ready → `sasu-alpha.vercel.app` |
 | 3차 배포(20:35, 사용성 수정) | `ca598ee` 스냅샷 `vercel deploy --prod --yes` (Windows tar가 한글 파일명 docs·fixtures/mockup·outputs 추출 실패, 빌드 무관) | `dpl_4Uh33gV9ddBMmSW9NGDzqQyWzcoB` Ready → `sasu-alpha.vercel.app`. 데모 묻기 자유 질문란 Enter 전송 확인(Playwright). 게스트 세션 curl 14개 경로 전부 200 |
+| 운영 E2E (21:10) | `E2E_BASE_URL=https://sasu-alpha.vercel.app` · guest·demo-reviewer·demo-public-workspace·site·site-guide·hiring-demo·security-headers·plain-language 8개 스펙 | 33 passed · 12 skipped(서버 키·로컬 시드 전용) · demo-reviewer 1건은 기능 지도 개수 12≠13 실패 → 운영의 `SASU_RETRO_ENABLED=true`로 회고 항목이 1개 더 있는 환경 차이. 같은 플래그로 재실행 시 5/5 통과. 최종 38 passed · 0 failed |
+| 부서·채용 데모 완주 (21:12) | 개발·기획·디자인 사수 대시보드→카드→묻기·기록·점수표·예고편·올린 자료·문서·설정 fetch, `/demo/hiring` 기획팀 미션 샘플 채우기→제출 | 전부 200, 오류 문구 없음, 미션 3/3단계 기록·완료. 콘솔 오류 0 |
+| 미검증 | 로그인 실계정 경로(우리 팀 슬랙 수집·실제 LLM 카드·답변·노션 가져오기) | 매직링크 로그인이 필요해 자동 검증에서 제외. 사용자 직접 확인 필요 |
 
 ## 운영 스모크 (배포 직후, curl)
 
