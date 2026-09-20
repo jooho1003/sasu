@@ -16,6 +16,7 @@
 | 1차 배포 | `vercel deploy --prod --yes` (스냅샷) | `dpl_7swmVdV2qApDydCxHPPfnoTozrM1` Ready |
 | 운영 환경변수 추가 (Production, sensitive) | `SASU_RETRO_ENABLED=true` · `NOTION_TOKEN_ENCRYPTION_KEY`(난수 32바이트 base64, 새로 생성) · `RETRO_CONNECTION_ENCRYPTION_KEY`(난수 32바이트 base64, 새로 생성) | 추가 완료. 값은 Vercel에만 있고 리포·로컬 `.env`에는 없다 |
 | 2차 배포(환경변수 반영) | 같은 스냅샷 재배포 | `dpl_FSDCGFLugavueu7tDjRkgwBiju3K` Ready → `sasu-alpha.vercel.app` |
+| 3차 배포(20:35, 사용성 수정) | `ca598ee` 스냅샷 `vercel deploy --prod --yes` (Windows tar가 한글 파일명 docs·fixtures/mockup·outputs 추출 실패, 빌드 무관) | `dpl_4Uh33gV9ddBMmSW9NGDzqQyWzcoB` Ready → `sasu-alpha.vercel.app`. 데모 묻기 자유 질문란 Enter 전송 확인(Playwright). 게스트 세션 curl 14개 경로 전부 200 |
 
 ## 운영 스모크 (배포 직후, curl)
 
