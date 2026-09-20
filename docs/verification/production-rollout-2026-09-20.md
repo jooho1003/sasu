@@ -19,6 +19,7 @@
 | 3차 배포(20:35, 사용성 수정) | `ca598ee` 스냅샷 `vercel deploy --prod --yes` (Windows tar가 한글 파일명 docs·fixtures/mockup·outputs 추출 실패, 빌드 무관) | `dpl_4Uh33gV9ddBMmSW9NGDzqQyWzcoB` Ready → `sasu-alpha.vercel.app`. 데모 묻기 자유 질문란 Enter 전송 확인(Playwright). 게스트 세션 curl 14개 경로 전부 200 |
 | 운영 E2E (21:10) | `E2E_BASE_URL=https://sasu-alpha.vercel.app` · guest·demo-reviewer·demo-public-workspace·site·site-guide·hiring-demo·security-headers·plain-language 8개 스펙 | 33 passed · 12 skipped(서버 키·로컬 시드 전용) · demo-reviewer 1건은 기능 지도 개수 12≠13 실패 → 운영의 `SASU_RETRO_ENABLED=true`로 회고 항목이 1개 더 있는 환경 차이. 같은 플래그로 재실행 시 5/5 통과. 최종 38 passed · 0 failed |
 | 부서·채용 데모 완주 (21:12) | 개발·기획·디자인 사수 대시보드→카드→묻기·기록·점수표·예고편·올린 자료·문서·설정 fetch, `/demo/hiring` 기획팀 미션 샘플 채우기→제출 | 전부 200, 오류 문구 없음, 미션 3/3단계 기록·완료. 콘솔 오류 0 |
+| 건너뛴 12건 재실행 (21:20~21:50) | ① guest DB 건수 검증: `.env` 서버 키로 운영 DB 대상(읽기 전용) ② site-guide 3건: `E2E_GUIDE_URL`=운영 노션 가이드 링크로 운영 대상 ③ plain-language 4건·hiring-demo 로컬 4건: HEAD worktree(`fb4f08c`) + `scripts/review-qa.mjs build/start/plain-language-test/hiring-test` 로컬 격리 Supabase(review-qa) | ① 5/5 통과 — 게스트 열람 전후 llm_calls·jobs·items·answers·decisions·citations 행 수 불변 ② 3/3 통과 ③ plain-language 4/4 · hiring-demo 17/17 통과. 건너뜀 0 |
 | 미검증 | 로그인 실계정 경로(우리 팀 슬랙 수집·실제 LLM 카드·답변·노션 가져오기) | 매직링크 로그인이 필요해 자동 검증에서 제외. 사용자 직접 확인 필요 |
 
 ## 운영 스모크 (배포 직후, curl)
