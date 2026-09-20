@@ -116,7 +116,7 @@ test("결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 
   await expect(page.getByText("결정 미리보기")).toBeVisible();
 
   await page.goto(DEMO_FEATURES.find((feature) => feature.key === "ask")!.href);
-  await page.getByPlaceholder("예: 외주사 B 견적은 어떻게 됐나요?").fill("외주사 견적은 어떻게 됐나요?");
+  await page.getByPlaceholder("예: 외주사 B 견적은 어떻게 됐나요? (줄바꿈 키로 바로 확인)").fill("외주사 견적은 어떻게 됐나요?");
   await page.getByRole("button", { name: "가까운 근거 답변 보기" }).click();
   await expect(page.getByText(/실제 전송 없이 가장 가까운 준비 질문/u)).toBeVisible();
   await page.getByRole("button", { name: "🎙 음성 질문 동작 보기" }).click();

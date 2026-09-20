@@ -108,7 +108,12 @@ export function DemoQuestions({
             aria-label="데모 질문"
             value={freeQuestion}
             onChange={(event) => setFreeQuestion(event.target.value)}
-            placeholder="예: 외주사 B 견적은 어떻게 됐나요?"
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+              event.preventDefault();
+              if (freeQuestion.trim().length >= 2) previewAsk();
+            }}
+            placeholder="예: 외주사 B 견적은 어떻게 됐나요? (줄바꿈 키로 바로 확인)"
           />
           <div className="flex flex-wrap gap-2">
             <button type="button" disabled={freeQuestion.trim().length < 2} onClick={previewAsk}>가까운 근거 답변 보기</button>
