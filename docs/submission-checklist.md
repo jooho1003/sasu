@@ -124,7 +124,7 @@ PRD §1-2의 5장면 그대로. 총 3분 30초 → 편집에서 3분 이내로.
 | 기획 이력 — 렌즈 5개·Phase 4 삭감·외부 리뷰 2곳 반영 | `docs/PRD.md` §12, `docs/ADR.md` 부록 | 이미 있음 |
 | 구현 로그 — step별 summary·소요 시간·재시도 | `phases/*/index.json`, `phases/*/step*-output.json` | D1부터 |
 | 검증 기록 — PRD §11 각 행의 실행 증거(스크린샷·쿼리 결과) | `docs/verification/`(D3 게이트부터 생성) | D3부터 |
-| 코드 리뷰 — D8 사람 리뷰 + `/review` 결과 | `docs/verification/d8-review.md` | D8 |
+| 코드 리뷰 — D8 사람 리뷰 + `/review` 결과 | `docs/verification/quality-design-review.md`·`quality-test-results.md` (D8 리뷰 기록) | D8 |
 | LLM 비용 | `llm_calls` 집계 → S5 사용액 | 상시 |
 
 ---

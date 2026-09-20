@@ -2,7 +2,7 @@
 
 > **부서별 결정 사수.** 부서 단위로 세팅된 AI가 슬랙과 업로드한 회의 전사를 관찰해 분류하고, 노션의 부서 원칙 문서를 근거로 삼아, "지금 결정해야 할 것"을 담당자에게 밀어주고, 물어보면 부서의 맥락과 과거 결정을 근거로 답하고, 내려진 결정을 원장에 기록한다. (MVP의 노션 입력은 지정 페이지 전체 스냅샷과 5분 자동 갱신)
 >
-> - 문서 버전: 1.16 · 작성일: 2026-09-11 · 갱신: 2026-09-19
+> - 문서 버전: 1.16 · 작성일: 2026-09-11 · 갱신: 2026-09-20
 > - 1.16 확정·개발 중: 부서별 회고 커넥터를 §3-6 RET-11~16·§8에 추가한다(ADR-064). 개인 OAuth·개인 키·부서별 프리셋·pull만·개인 식별정보 미수집·연결 해제 즉시 삭제·개발+기획 파일럿을 적용한다. 개인 휴대폰 통화 기록·Gmail·관리자 감사 API는 만들지 않고, VoIP 통화 메타데이터는 법률 자문 게이트 뒤에 둔다. 운영 반영은 9/20 제출 이후 별도 승인한다.
 > - 1.15 확정: 개발 회고 자동화를 §3-6·§8에 추가한다(ADR-063). 사수 내부 활동·로컬 개발 활동(git·Claude/Codex 세션·메모리·설계 문서)·선택적 브라우저 기록을 활동 항목으로 모아 인용 기반 회고 초안을 만들고, 본인이 검토·확정한 뒤 사수 안에서 사람×날짜×주제로 열람하고 Markdown으로 내보낸다. 기본 공개 범위는 본인만이다. **2026-09-19 사용자 결정 7개 확정 및 개발 승인. phase 27을 구현하며 운영 반영은 9/20 제출 이후 별도 승인한다.**
 > - 1.14 설계: 채용 예고편에 지원자별 개별 링크·동의·제출·채점·파기를 phase 26으로 추가한다(§3-2·§8-1, ADR-062). 조직별 개시는 여전히 운영 스크립트만 켜며 법률 자문 전에는 어떤 실제 조직에도 켜지 않는다. **설계 완료 범위이며 구현·운영 반영을 뜻하지 않는다.**
@@ -12,7 +12,7 @@
 > - 1.10 변경: 음성 전체 전사·원본 보관/재생·편집, 문서 추출문 검토/확정, Slack 기록 내보내기와 암호화 복원 도구를 개발한다(§3-3·§8, ADR-053·054). 사용자 후속 지시로 구현과 TTS 실제 검증이 승인됐다. 부서 에이전트의 업무·권한은 사용자와 공동 설계하며 운영 정기 백업 정책은 별도로 정한다.
 > - 1.9 변경: Slack DM ASK·진행/설정 안내·답변 전달 복구와 본인 Slack 질문 확인을 완성한다(ADR-051). 저장 답변은 현재 인용 권한·원문이 유효할 때만 읽을 수 있다. 운영 적용과 실제 Slack 확인은 개발 후 사용자 테스트 단계다.
 > - 1.8 변경: 사용자 결정(9/15)으로 날짜 기반 기능 프리징과 컷 판정 시각을 없앤다(ADR-049). 개발은 제출 전후 모두 Codex step으로 계속하고, 운영 반영은 검증·사용자 승인 뒤에만 한다. §8-2 컷 순위는 검증 실패·장애 때 끄는 순서로만 쓴다. 외부 일정(9/18 접수·9/20 제출·심사 기간 서비스 링크 유지)은 그대로다.
-> - 1.11 변경: 사용자 결정(9/17)으로 제출 링크의 `/demo`를 심사위원용 자동 로그인 진입점으로 확장한다(ADR-055). 전용 합성 계정은 데모 조직의 부서장·조직 관리자 읽기 권한을 가지며, 모든 제품 기능을 한 화면에서 찾아갈 수 있다. 공유 계정의 실제 DB 변경·LLM 호출·Slack/Notion/메일 발신은 계속 금지하고 브라우저 안 안전 체험 또는 시드 스냅샷으로 대체한다.
+> - 1.11a 변경: 사용자 결정(9/17)으로 제출 링크의 `/demo`를 심사위원용 자동 로그인 진입점으로 확장한다(ADR-055). 전용 합성 계정은 데모 조직의 부서장·조직 관리자 읽기 권한을 가지며, 모든 제품 기능을 한 화면에서 찾아갈 수 있다. 공유 계정의 실제 DB 변경·LLM 호출·Slack/Notion/메일 발신은 계속 금지하고 브라우저 안 안전 체험 또는 시드 스냅샷으로 대체한다.
 > - 1.7 변경: 사용자 결정(9/15)으로 9/20 제출 범위를 넓힌다 — 운영 보안 핫픽스, 메인 웹사이트, 고객사 조직 관리자 콘솔, 채용 예고편 실데이터 발행 + 합성 지원자 채점(§3-2, ADR-042~046). 기능 프리징은 9/19 12:00로 옮기고, 각 phase의 운영 DB 반영은 검증 뒤에만 한다(§8-2). 상세 계약은 §3-2가 참조하는 [planning/메인웹사이트_관리자콘솔_설계.md](planning/메인웹사이트_관리자콘솔_설계.md).
 > - 1.6 변경: 사용자 요청으로 채용 예고편 R1 합성 체험 개발에 착수한다(§3-1, ADR-040). 실데이터 발행·R2·제출 범위 확대는 포함하지 않는다. (→ 1.7에서 발행·합성 채점·제출 포함으로 확대)
 > - 지위: **구현의 입력이 되는 확정 계획.** 이 문서가 문서 체계의 최상위다. 범위와 완료 조건은 여기서 정하고, 구현 중 결정이 바뀌면 이 문서를 함께 고친다 — 특히 §3(기능), §8(범위·컷 라인), §4(기술 스택). 결정의 이유와 포기한 대안은 [ADR.md](ADR.md)에, 구조·불변식·테스트 경계는 [ARCHITECTURE.md](ARCHITECTURE.md)에 있다.
@@ -274,7 +274,7 @@ Slack 서명 검증·동의 확인·선마스킹 후에는 `ingest_slack_atomic(
 
 ---
 
-### 3-4. 웹 회의 녹음과 온라인 회의 기록 — 설계 (2026-09-17)
+### 3-4. 웹 회의 녹음과 온라인 회의 기록 — 설계·부분 구현 (2026-09-17, 하부 모듈만)
 
 사용자가 추천한 단계 구성을 선택했다. **1단계는 웹에서 직접 녹음 → 다시 듣기 → 전사 검토·수정 → 확정 → 요약·액션·결정 요청으로 연결**한다. 오프라인은 마이크, 온라인은 사용자가 선택한 탭/컴퓨터 소리와 마이크를 사용한다. 개인 PC에서 실행할 수 있지만 새 개인 워크스페이스나 팀원 쓰기 권한을 추가하는 결정은 아니다. 현재 부서장·참여자 동의 경계를 따른다.
 
@@ -301,7 +301,7 @@ Slack 서명 검증·동의 확인·선마스킹 후에는 `ingest_slack_atomic(
 
 ---
 
-### 3-5. 노션 전체 수집 — 자동 수집과 직접 등록 — 설계 (2026-09-18)
+### 3-5. 노션 전체 수집 — 자동 수집과 직접 등록 — 구현 완료 (2026-09-18 설계, phase 25 step 0~7 구현, 운영 반영 2026-09-20)
 
 사용자 요구: 도입 초기의 방대한 노션 자료를 사람이 하나씩 넣지 않고 수집·정리해 답변 근거로 쓴다. **최대한 자동화하는 방식과 페이지를 일일이 붙이는 방식을 둘 다 제공한다.** 노션 페이지 1개를 소스 1개로 통일하고, 두 방식은 등록 경로만 다르며 읽기·청크·마스킹·임베딩·갱신은 같은 파이프라인을 쓴다. **9/18 구현 착수 승인:** 제출 전에 구현을 시작하고(`phases/25-notion-collection/`), 노션 API `2025-09-03` 전환을 함께 진행하며, 발언이 담긴 문서도 구성원 동의를 모두 받는 것을 전제로 전부 수집한다. Supabase DB 용량 설계는 나중에 따로 한다. 운영 반영은 step별 검증 기록과 승인 뒤에만 하고, 그 전까지 운영 중인 "지정 페이지 스냅샷 + 5분 자동 갱신"은 그대로 유지된다.
 
@@ -377,7 +377,7 @@ Slack 서명 검증·동의 확인·선마스킹 후에는 `ingest_slack_atomic(
 | 마스킹 | 정규식 선마스킹 (전화·이메일·주민번호·계좌) | Presidio 2차 마스킹은 **나중** |
 | 개발 도구 | Codex (구현) · Claude (기획·리뷰) | 세션 로그를 제출서 "AI 활용" 부록으로 |
 
-**환경 변수**: `GROQ_API_KEY`, `EMBEDDING_PROVIDER`(기본 `voyage`), `VOYAGE_API_KEY`, `EMBEDDING_MODEL`(기본 `voyage-4-lite`), `OPENAI_API_KEY`(호환 provider 선택 시), `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `NOTION_TOKEN`, `RECALL_API_KEY`(선택), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `JOBS_TRIGGER_SECRET`. `NEXT_PUBLIC_` 두 개(Supabase URL·anon key)만 클라이언트에 노출되고 나머지는 서버 전용. 그 외 키가 클라이언트 번들에 들어가면 안 된다.
+**환경 변수**: `GROQ_API_KEY`, `EMBEDDING_PROVIDER`(기본 `voyage`), `VOYAGE_API_KEY`, `EMBEDDING_MODEL`(기본 `voyage-4-lite`), `OPENAI_API_KEY`(호환 provider 선택 시), `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET`, `NOTION_TOKEN`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `JOBS_TRIGGER_SECRET`. `NEXT_PUBLIC_` 두 개(Supabase URL·anon key)만 클라이언트에 노출되고 나머지는 서버 전용. 그 외 키가 클라이언트 번들에 들어가면 안 된다.
 
 **결정 이유와 포기한 대안** → [ADR.md](ADR.md) ADR-003~020 (채널 3개 · 노션 1회 · 회의 봇 D6 판정 · Next.js · Supabase · jobs 워커 · 매분 트리거 · LLM 역할 분리 · structured output 순서 · 인용 문자열 검증 · 가시성 2단계 · 게시 위치 권한 · 이메일 매핑 · 단일 워크스페이스 · 임베딩 D2 · 게스트 합성 데이터 · 공동 키).
 
@@ -412,6 +412,25 @@ Slack 서명 검증·동의 확인·선마스킹 후에는 `ingest_slack_atomic(
 | S17~S19 | **채용 예고편 만들기·검토·발행** (ADR-045) | `/d/[dept]/trailers`, `/new`, `/[id]` | 목록 상태 칩 · 원장 후보 1~3 선택·가릴 고유명사·공고 URL · 원문 대조·위반 표시·다시 검사·항목별 승인·발행·철회·삭제 · 합성 지원자 점수표 탭. 설계 §C-5 | — |
 | S20 | **공개 체험** | `/t/[slug]` | phase 7 컴포넌트 재사용 · 가상화 고지 · 공고 링크 또는 "사수 알아보기" · noindex | — |
 | S6+ | **데모 전체 기능 보강** | `/demo/admin`, `/demo/d/[dept]/{reviews,documents,retention,settings,trailers}` | 전용 합성 계정의 실제 RLS 읽기 경로로 관리자·부서 운영 화면을 확인한다. 저장·업로드·설치·발행 버튼은 안전 체험으로 표시하고 서버 쓰기나 외부 호출을 만들지 않는다. `/demo`에는 권한 상태, 추천 시연 순서, 전체 기능 체크리스트와 실패 복구를 표시한다 | 심사·투표 동선 |
+
+### 추가 화면 (2026-09-20 갱신)
+
+아래는 코드에 존재하지만 위 표에 없던 화면이다. 라우트는 전부 `app/` 아래에서 확인했다.
+
+| # | 화면 | 라우트 | 핵심 요소 | 근거 |
+|---|---|---|---|---|
+| S15 | **보안 점검** | `/admin/security` | 조직 관리자용 보안 설정·응답 헤더·접근 기록 점검 | §3-3, ADR-057 |
+| S21 | **로그인** | `/login` | 매직링크 이메일 입력 · 발송 안내 · 오류 표시 | — |
+| S22 | **소속 없음** | `/no-membership` | 부서 소속이 없을 때의 안내와 다음 행동(초대 요청·로그아웃) | — |
+| S23 | **자료 검토함** | `/d/[dept]/reviews`, `/d/[dept]/reviews/[id]` | 업로드 목록·처리 상태 · 전사/추출 편집 · 구간별 재시도 · 원본 재생·내려받기(승인 보관분) · 근거 확정 | §3-3, ADR-054 |
+| S24 | **기록 보존** | `/d/[dept]/retention` | 보존 기간·원본 보관 설정 · 내보내기 · 접근 기록 | §3-3, ADR-058 |
+| S25 | **개발 회고** | `/d/[dept]/retros`, `/d/[dept]/retros/[id]` | 날짜별 타임라인 · 수집 흔적 목록 · 인용 기반 초안 검토·편집·확정 · 공개 동의/철회 · Markdown 내보내기 · 부서 커넥터 연결 | §3-6, ADR-063·064 |
+| S26 | **지원자 개별 링크** | `/t/i/[token]` | 토큰 열람 · 동의 · 미션 응시·제출 · 철회(파기). 공개 예고편 `/t/[slug]`와 분리 | §3-2, ADR-062 |
+| S27 | **부서별 채용 미션 데모** | `/demo/hiring` | 5개 부서 미션·참고자료·단계·샘플 산출물. 브라우저 메모리 제출, 서버 쓰기·LLM·합불 판정 없음 | ADR-059 |
+| S28 | **데모 기능 지도** | `/demo/features` | 기능 설명과 현재 부서 바로가기(`?dept=`) · 추천 시연 순서 · 체크리스트 | 심사 동선 |
+| S29 | **데모 노션 수집** | `/demo/notion` | 노션 자동 수집·직접 등록 화면을 읽기 전용 스냅샷으로 시연 | §3-5, ADR-060 |
+| S30 | **데모 회고** | `/demo/retros` | 회고 타임라인·상세를 시드 스냅샷으로 시연 (LLM 0·쓰기 0) | §3-6, ADR-063 |
+| S6++ | **데모 부서 화면 보강** | `/demo/d/[dept]/{ask,cards/[id],ledger,retros,roles}` | 로그인 없이 공개 부서의 묻기·카드 상세·원장·회고·역할 점수표를 연다. 조작 결과는 브라우저 메모리에만 남고 새로고침하면 초기화된다 | ADR-055·061 |
 
 S6은 유저 스토리가 아니라 심사 동선을 위한 화면이다. S7은 문서 업무 정리를 위한 P0 화면이다. 음성 생체 식별이나 화자 지문 등록 화면은 만들지 않는다 (§8).
 
@@ -635,6 +654,41 @@ Slack Events / 회의 전사 / Notion 폴링
 | `POST /api/d/[dept]/voice` | 음성 파일을 메모리에서 한국어 전사. 원본 음성 저장 없음 |
 | `GET/POST /api/d/[dept]/documents` | 문서 목록·업로드 및 정리 job 시작 |
 | `GET /api/demo/*` | 게스트 스냅샷 (캐시) |
+
+> 2026-09-20 갱신: `POST /api/notion/import`·`POST /api/consent`·`GET /api/demo/*`는 만들지 않았다 — 노션은 `app/api/d/[dept]/settings/notion`(notion_import job)·`app/api/admin/notion/*`, 동의는 `app/api/d/[dept]/settings/consent`와 Slack interactions, 게스트는 서버 컴포넌트 직접 조회로 대체. 회의 전사는 `POST /api/d/[dept]/meetings/transcript`.
+
+**확장 엔드포인트 (phase 8~31)** — `app/api/**/route.ts`에서 실제로 내보내는 메서드다.
+
+| 경로 | 메서드 | 동작 |
+|---|---|---|
+| `/api/slack/oauth/{start,callback}` | POST / GET | 조직 워크스페이스 설치. origin·단회 state·HttpOnly cookie 검증 (ADR-052) |
+| `/api/admin/departments`, `/api/admin/departments/[deptId]/first-lead-invite` | POST | 부서 생성 · 첫 부서장 초대 |
+| `/api/admin/members/{demote,remove}`, `/api/admin/invites/[inviteId]/revoke` | POST | 조직 관리자 멤버·초대 관리 |
+| `/api/admin/notion`, `/api/admin/notion/{roots,top-level}` | GET/POST/DELETE, GET/POST, GET | 노션 설치·루트 등록·최상위 목록 (ADR-060) |
+| `/api/admin/slack` | GET | 슬랙 설치 상태 |
+| `/api/admin/review-settings` | POST | 원본 보관·접근 정책 (ADR-054·057) |
+| `/api/admin/trailer-publishing`, `/api/admin/trailers/[id]/unpublish` | POST | 조직 단위 예고편 공개 허용·철회 |
+| `/api/invites/accept` | POST | 초대 수락 |
+| `/api/d/[dept]/invites`, `/api/d/[dept]/invites/[inviteId]/revoke` | GET/POST, POST | 부서장의 멤버 초대·철회 |
+| `/api/d/[dept]/members/[userId]/{promote,demote,remove}` | POST | 부서장 지정·해제·제외 |
+| `/api/d/[dept]/settings`, `/settings/{member,consent,source,notion}` | GET, POST / POST / POST·DELETE / GET·PATCH·POST | 세팅 조회 · 멤버 · 동의 · 수집 채널 · 노션 (`notion_import` job) |
+| `/api/d/[dept]/questions`, `/api/d/[dept]/answers/[id]` | GET | 질문 이력 · 답변 상세 |
+| `/api/d/[dept]/slack-questions` | GET/POST | 슬랙 경유 질문 목록·재처리 |
+| `/api/d/[dept]/backfill` | POST | 슬랙 채널 과거 메시지 수집 |
+| `/api/d/[dept]/decisions/correct` | POST | `supersedes_id` 정정 (append-only 유지) |
+| `/api/d/[dept]/cards/[id]/reminder` | GET/POST | 결정 리마인더 조회·발송 예약 |
+| `/api/d/[dept]/meetings/transcript` | POST | `.vtt`/`.txt` 전사 업로드 (ADR-036) |
+| `/api/d/[dept]/reviews`, `/reviews/[id]`, `/[id]/{parts,original}` | GET/POST, GET·PATCH·POST, POST / GET | 자료 검토함 목록·편집·구간 재시도·원본 접근 (ADR-054) |
+| `/api/d/[dept]/retention`, `/retention/{export,originals}` | GET/POST, POST | 보존 설정 · 내보내기 · 원본 일괄 처리 (ADR-058) |
+| `/api/d/[dept]/retros`, `/retros/[id]`, `/[id]/{notes,export}` | GET/POST, GET·PATCH·POST, POST / GET | 회고 생성·검토·확정 · 한 줄 기록 · Markdown 내보내기 (ADR-063) |
+| `/api/d/[dept]/retros/{preset,share-consent}` | PATCH, POST·DELETE | 부서 형식 프리셋 · 공개 동의·철회 |
+| `/api/d/[dept]/retros/connections`, `/connections/[id]`, `/connections{,/[id]}/pull` | GET/POST, DELETE, POST | 회고 커넥터 연결·해제·수집 (ADR-064) |
+| `/api/retro/connect/[provider]/{start,callback}` | POST / GET | 커넥터 개인 OAuth. 단회 state·토큰 암호화 (ADR-064) |
+| `/api/d/[dept]/roles`, `/roles/[roleId]`, `/[roleId]/runs` | GET/POST, PATCH, GET/POST | 부서 에이전트 역할 정의·수정·실행 (ADR-038) |
+| `/api/d/[dept]/trailers`, `/trailers/candidates`, `/trailers/[id]` | GET/POST, GET, PATCH·DELETE | 예고편 목록·원장 후보·수정·삭제 (ADR-045) |
+| `/api/d/[dept]/trailers/[id]/{approve,recheck,regenerate,publish,unpublish}` | POST | 항목 승인 · 재검사 · 재생성 · 발행 · 철회 |
+| `/api/d/[dept]/trailers/[id]/invites{,/[inviteId]{,/revoke}}`, `/invites/attempts/[attemptId]/rescore` | GET/POST, DELETE, POST | 지원자 개별 링크 발급·철회·재채점 (ADR-062) |
+| `/api/t/i/{open,consent,submit,withdraw}` | POST | 지원자 링크 열람·동의·제출·철회(파기) (ADR-062) |
 
 ### 6-9. 권한 모델 (보안·권한 렌즈 반영)
 
@@ -1157,6 +1211,14 @@ Codex가 만든 코드 중 **RLS 정책·워커·슬랙 서명 검증**은 D8 �
 | 예고편 발행 (ADR-045) | `lib/trailer-gate.ts` TDD(20자 겹침·고유명사·마스킹) · `record_trailer_gate`를 authenticated가 직접 부르면 거부 · 검사 실패/항목 미승인/조직 허용 off 각각에서 `publish_trailer` 거부 · 수정 후 두 해시 무효화 · `public_trailer` 응답 키 = `{scenarios, apply_url}` · 철회 후 404 · 재발행 새 slug · 생성 하루 20회를 동시 요청으로 넘길 수 없음 · 데모 발행본 원문 겹침 0건 |
 | 합성 채점 (ADR-045) | 플래그 off에서 `kind='candidate'` 생성이 RPC·트리거 모두 거부 · 렌더되는 모든 기준 점수의 근거가 이유 문자열 포함/이벤트 존재/사실 id 존재 · 모델 출력에 합격·불합격·탈락·추천 0(고정 안내 상수는 예외 목록) · 직무 무관 특성만 다른 합성 제출 2건의 점수 차 ≤ 0.5 · 점수표 기본 정렬 = 제출 순 · 게스트 점수표 LLM 0 |
 | 운영 | 9/21~10/5 매일 1회 헬스체크. **우리가 통제 가능한 장애 0**(배포 실패·키 만료·시드 오류). Vercel·Supabase 플랫폼 장애는 상태 페이지 기록으로 구분해 두고 통제 밖으로 본다 |
+| 노션 전체 수집 (ADR-060) | step 0~7을 Codex 구현 + Claude 리뷰로 완주했다. 마스킹을 자르기 전에 적용, 워크스페이스 범위가 다른 부서 subtree를 복사하던 권한 결함 수정, bulk lane·폴링 재조정·수집 UI까지 확인했다. 기록: [notion-collection/](verification/notion-collection/) (lint·build·test 1,203개, `e2e --grep notion` 7/7, PGlite 208/208). **남은 외부 조건:** step 8 — 노션 공개 통합 앱·credential·웹훅 실측, `NOTION_TOKEN_ENCRYPTION_KEY` 준비, `register-legacy-notion.ts` → migration 0038~0043 → 배포 순서 |
+| 지원자 개별 링크 (ADR-062) | 로컬 Supabase에서 토큰 열람 → 동의 → 3퀘스트 응시 → 제출 → 채점 1회 → 철회 시 자료 파기까지 실제 실행했다. 기록: [trailer-candidate-links-2026-09-19/](verification/trailer-candidate-links-2026-09-19/) ([live-results.json](verification/trailer-candidate-links-2026-09-19/live-results.json), 지원자 동의·제출·부서장 점수표 화면). **남은 외부 조건:** phase 26 step 7 — 법률 확인·조직 개시·운영 승인 |
+| 부서별 채용 미션 데모 (ADR-059) | 5개 부서 미션 15단계·참고자료 15개를 `/demo/hiring`과 시드 부서 양쪽에 연결하고, 부서별 1440/390px 화면·워크스페이스 캡처와 시드 멱등성(부서 간 소스 ID 유일성 회귀 포함)을 확인했다. 브라우저 메모리 제출만 하며 서버 저장·LLM·합불 판정이 없다. 기록: [department-hiring-demo/](verification/department-hiring-demo/) (unit 1,101개·lint·build·browser). 상태: 로컬 검증 통과 / 운영 미반영 |
+| 개발 회고 (ADR-063) | 로컬 Supabase에서 업로드 → 초안 생성 → 근거 제외 → 재생성 → 편집 → 확정 → 공개 → 내보내기 전 흐름을 LLM 2회 실제 호출로 완주했다. 타임라인·상세·세팅·데모 화면을 1440/390px로 캡처했다. 기록: [daily-retro-2026-09-19/](verification/daily-retro-2026-09-19/). 운영 migration은 `0037~0051` dry-run까지만: [retro-production-2026-09-20/](verification/retro-production-2026-09-20/). **남은 외부 조건:** phase 27 step 7 — 제출 이후 운영 반영 승인 |
+| 부서별 회고 커넥터 (ADR-064) | 17개 제공자·8개 부서 형식, 개인 작성자 확인·응답 필드 제한·OAuth 단회 state·토큰 암호화/갱신·수집 임대·재시도·공개 동의/철회/해제 삭제를 서버·SQL에서 집행한다. Vitest 1,319개, `verify-security-sql.mjs` 236개 + 권한 조합 2,016건, 개발·기획 2부서 3일 브라우저 흐름 통과. 기록: [retro-connectors-2026-09-19/](verification/retro-connectors-2026-09-19/). 미구현 5개 제공자의 직접 RPC를 migration 0051로 차단하고 회귀 검사를 추가했다(237개 통과): [retro-provider-contract-2026-09-20.md](verification/retro-provider-contract-2026-09-20.md). **남은 외부 조건:** phase 30 step 4~6 제공자별 인증 경계·계약(채널톡·Greenhouse·Lever·Workable·Meta), step 7 sandbox 실측과 실제 모델 초안 생성(현재 AI 생성 성공 0회, Groq `spend_limit_reached`)·사람 파일럿, step 8 VoIP 법률 자문 |
+| 쉬운 말 문구 (ADR-065) | AST 기반 문구 검사기를 `npm run lint`의 차단 모드로 넣었다. 같은 검사기로 이전 코드(`b9c12dd`) 201개 파일이 차단 914개였고 현재 205개 파일은 차단 0개·검토 경고 77개다. 19개 화면 × 1440/390px에서 가로 넘침·콘솔 오류·게스트 쓰기 요청 0건, 모바일 첫 결정 카드 195px, 단건 원문(`?item=<UUID>`) RLS 검사, 출처별 근거 검색·단일 선택을 확인했다. 기록: [plain-language-audit-2026-09-19/](verification/plain-language-audit-2026-09-19/). **남은 외부 조건:** phase 31 step 6/7 — Groq 사용 한도 복구 후 실제 문체 표본 11개, 비개발자 읽기 테스트, 쇼케이스 정리 판단, 운영 반영 |
+| 자료 검토함·기록 보존 (ADR-054·058) | `0034_reviewed_materials.sql`·`0035_record_retention.sql`을 pre-dump(SHA-256 기록) 후 운영에 적용하고, service role의 `reviewed_materials`·`retention_settings`·비공개 버킷 조회 200 / anon 직접 조회 401을 확인했다: [reviewed-materials-production-2026-09-17.md](verification/reviewed-materials-production-2026-09-17.md). 편집·부분 실패 복구는 원본 삭제/처리 중단 시 미저장 제목·구간 유지, 구간별 폴링 중단 조건, 늦게 도착한 조회의 덮어쓰기를 재현·수정해 검증했다: [review-state-recovery-2026-09-17/](verification/review-state-recovery-2026-09-17/) (red→green E2E·프로덕션 빌드). **남은 외부 조건:** phase 23 step 4-A/0 이후 — 자료 보호 운영 확인, 실제 마이크·Meet·Zoom·복구 검증(합성 입력을 실기기 증거로 쓰지 않음) |
+| 공개 데모 워크스페이스 (ADR-055·061) | 로그인 없이 공개 부서 4곳 9개 메뉴를 완주한다. E2E 13개 통과(공개 메뉴·질문·보류 결정·390px·4개 부서·자료/설정/예고편), 브라우저 쓰기 요청 0건, 첫 진입 인증 쿠키 0개, 열람 전후 `llm_calls`/`jobs`/`items`/`answers`/`decisions`/`citations` 행 수 불변: [demo-workspace/](verification/demo-workspace/). 운영 배포는 SSO 해제 확인, 기능 지도 11개 경로 200, proxy의 `403 demo_read_only`, SECURITY DEFINER RPC 직접 호출도 trigger가 `42501 demo_read_only`로 거부함을 확인했다: [demo-reviewer-release-2026-09-17.md](verification/demo-reviewer-release-2026-09-17.md) |
 | 제출 | 참가 접수 D0(9/8) 완료. 과제 제출은 "임시저장"이 아니라 **제출** 버튼까지(D12). 제출서·스크린샷에 컷된 기능이 "만든 것처럼" 없음 ([submission-checklist.md](submission-checklist.md) 제출 전 확인) |
 
 Codex의 자기 보고("완료했습니다")는 완료 신호가 아니다. 위 표의 검증을 돌린 기록(스크린샷·쿼리 결과·E2E 로그)이 `docs/verification/`에 있어야 완료다(ADR-026). 단위·RLS·E2E의 경계는 [ARCHITECTURE.md §8](ARCHITECTURE.md), `/review` 체크리스트는 `.claude/commands/review.md`.

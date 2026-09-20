@@ -53,7 +53,8 @@
     },
     {
       "dir": "0-vertical-slice",
-      "status": "blocked"
+      "status": "blocked",
+      "note": "0-vertical-slice: step 0~14 완료, step 15 사람의 5분 세로 흐름 확인만 남음"
     },
     {
       "dir": "1-slack-dm-backfill",
@@ -85,7 +86,8 @@
     },
     {
       "dir": "14-slack-answer-citations",
-      "status": "blocked"
+      "status": "blocked",
+      "note": "14: step 0 구현 완료(커밋 377a5f0), step 1 실제 Slack 캡처·운영 반영 대기"
     },
     {
       "dir": "16-source-lifecycle",
@@ -143,6 +145,18 @@
       "status": "blocked",
       "verification": "docs/verification/browser-meeting-recording/access-controls-2026-09-18.md",
       "note": "step4-A·step0 부분 구현. 실제 녹음/복구·자료 보호 게이트 전 step1 이후 순서 유지."
+    },
+    {
+      "dir": "24-department-hiring-demo",
+      "status": "completed",
+      "verification": "docs/verification/department-hiring-demo",
+      "production_deployed": false
+    },
+    {
+      "dir": "25-public-demo-workspace",
+      "status": "completed",
+      "verification": "docs/verification/demo-workspace",
+      "note": "번호 25가 25-notion-collection과 중복. 디렉터리명은 유지한다."
     }
   ]
 }

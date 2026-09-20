@@ -70,7 +70,7 @@
 
 **설정**
 - GitHub 연동, `main` 푸시 = 프로덕션 배포. 하루 마지막 커밋은 항상 배포 가능 상태.
-- 환경 변수 (Production + Preview): `GROQ_API_KEY` · `EMBEDDING_PROVIDER=voyage` · `VOYAGE_API_KEY` · `EMBEDDING_MODEL=voyage-4-lite` · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN_ENCRYPTION_KEY` · `RECALL_API_KEY`(선택) · `RECALL_WEBHOOK_SECRET`(선택) · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · `JOBS_TRIGGER_SECRET`
+- 환경 변수 (Production + Preview): `GROQ_API_KEY` · `EMBEDDING_PROVIDER=voyage` · `VOYAGE_API_KEY` · `EMBEDDING_MODEL=voyage-4-lite` · `SLACK_BOT_TOKEN` · `SLACK_SIGNING_SECRET` · `NOTION_TOKEN_ENCRYPTION_KEY` · `NEXT_PUBLIC_SUPABASE_URL` · `NEXT_PUBLIC_SUPABASE_ANON_KEY` · `SUPABASE_SERVICE_ROLE_KEY` · `JOBS_TRIGGER_SECRET`
 - `NEXT_PUBLIC_` 접두사는 Supabase URL·anon key **둘뿐**. 그 외 키가 클라이언트 번들에 들어가면 안 된다 — 빌드 후 `.next/static`을 grep으로 확인.
 - 도메인: Vercel 기본 도메인으로 제출 가능. 커스텀 도메인은 D11까지 여유 있을 때만.
 - ~~Vercel Cron을 택했으면 `vercel.json`에 `/api/jobs/run` 매분.~~ → Hobby 플랜이라 `pg_cron`으로 확정(위 판정). `vercel.json`에는 `framework: nextjs`만 두고 `crons`를 넣지 않는다 — Hobby에서 매분 표현은 배포를 실패시킨다. 트리거 호출은 `JOBS_TRIGGER_SECRET`을 `x-jobs-secret` 헤더로 넣어 인증한다.
@@ -113,6 +113,8 @@ OAuth "Add to Slack"은 만들지 않는다(ADR-017). 파일럿 2팀째는 별�
 ---
 
 ## 5. Recall.ai — D0 확인, D6 판정
+
+> **2026-09-13 판정 (ADR-036): 회의 봇은 컷.** 회의 입력은 `.vtt`/`.txt` 전사 업로드와 자료 검토함이다. 아래 절은 기록으로만 남긴다.
 
 **D0에 확인할 것** (PRD §10 #1·#13):
 - 가입·승인 소요 (즉시인지, 심사가 있는지) · 가격 (회의 시간당) · 무료 크레딧

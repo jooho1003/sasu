@@ -1,10 +1,10 @@
 # 아키텍처 — 사수 (SASU)
 
-- 문서 버전: 1.5 (§6-4 불변식 27~29 부서별 회고 커넥터 — ADR-064, 설계 · 1.4: §6-4 개발 회고 설계 불변식 추가 — ADR-063, 미구현 · 1.3: ADR-056 웹 녹음 설계 추가, 운영 상태는 별도)
+- 문서 버전: 1.6 (1.6: 2026-09-20 개발 회고·부서별 회고 커넥터·노션 전체 수집 구현 반영, §2 디렉토리 구조 갱신 · §6-4 불변식 27~29 부서별 회고 커넥터 — ADR-064, 설계 · 1.4: §6-4 개발 회고 설계 불변식 추가 — ADR-063, 미구현 · 1.3: ADR-056 웹 녹음 설계 추가, 운영 상태는 별도)
 - 작성일: 2026-09-08 (1.2: ADR-052·054 구현 구조와 운영 검증 상태 반영)
 - 지위: **파생 문서**. 구조 결정의 근거는 [PRD §6-11(아키텍처)·§6-12(데이터·상태)·§6-1(스키마)](PRD.md)에 있고, 결정의 이유·트레이드오프는 [ADR.md](ADR.md)에 있다.
 - 문서 충돌 시 우선순위: [PRD](PRD.md) → 이 문서 → [ADR](ADR.md). 이 문서와 PRD가 어긋나면 PRD가 옳다.
-- 현재 상태: **2026-09-17.** phase 16~19는 운영 반영과 실제 연동 검증 완료, phase 20~22도 운영 DB·앱 반영과 로그인 읽기 회귀를 완료했다. 근거는 `docs/verification/continuity-production-2026-09-16.md`, `docs/verification/reviewed-materials-production-2026-09-17.md`, `docs/verification/review-state-recovery-2026-09-17/`에 있다.
+- 현재 상태: **2026-09-20.** phase 16~22는 운영 반영 완료. phase 23(부분)·25·26·27·30·31은 구현·로컬 검증 완료이며 운영 반영은 2026-09-20 마이그레이션 0038~0051 적용과 배포로 진행한다(`docs/verification/remaining-steps-2026-09-20.md`). 근거는 `docs/verification/continuity-production-2026-09-16.md`, `docs/verification/reviewed-materials-production-2026-09-17.md`, `docs/verification/review-state-recovery-2026-09-17/`에 있다.
 
 ### 2026-09-12 구현 보완
 
@@ -30,7 +30,7 @@ ADR-058의 원본 접근 강화는 `authorize_review_access` → `private.review
 
 `retention_settings`·`retention_exports`는 확인 설정과 내보내기 생성 메타데이터만 보관한다. 내보내기는 현재 권한·동의·삭제 상태를 SQL에서 거른 수집본이다. 별도 원문 영구 아카이브는 없다. 운영자 도구는 암호화 덤프와 파일을 격리 DB에 복원해 검증하며 최신 삭제·부서 멤버십/동의를 재적용하고 모든 작업을 정지한다. 실제 운영 서비스 복구/스토리지 재연결·정기 보관은 [운영 절차](setup-reviewed-materials.md)의 별도 단계다. 범용 부서 에이전트 실행은 [공동 설계](planning/부서_에이전트_공동설계.md)를 유지한다.
 
-### 웹 회의 녹음 — ADR-056 설계 (미구현)
+### 웹 회의 녹음 — ADR-056 설계 (부분 구현: `lib/recording/` 하부 모듈·SEC-02·SEC-04만, 녹음 UI·Meet/Zoom 미구현)
 
 상위 범위는 PRD §3-4·§8, 상세 계약은 [웹 회의 녹음 설계](planning/웹회의_녹음_설계.md)다. `getUserMedia` 마이크와 `getDisplayMedia`의 사용자가 허용한 음성을 Web Audio에서 혼합한다. display video 트랙은 권한/종료 감시에만 쓰고 인코딩·저장·전송 경로에 넣지 않는다. AudioWorklet에서 얻은 PCM을 1초 단위로 로컬 복구 저장하고, 서버에는 녹음 종료 후 최대 60초 독립 WAV 원본을 세션·RLS로 업로드한다. `MediaRecorder` 압축 조각을 각각 재생 가능한 구간으로 가정하지 않는다.
 
@@ -89,41 +89,70 @@ Meet·Zoom 계정/OAuth·공식 artifact 수집은 2단계이며 별도 어댑�
 ```text
 sasu/
 ├── app/
-│   ├── (auth)/d/[dept]/            # S1 page.tsx · cards/[id] · ledger · ask · documents · settings
-│   ├── consent/                    # S0 동의 화면
+│   ├── (site)/                     # 공개 소개 페이지 + privacy (비로그인)
+│   ├── (auth)/
+│   │   ├── consent/                # S0 동의 화면
+│   │   └── d/[dept]/               # S1 대시보드 + cards/[id] · ledger · ask · settings
+│   │       ├── documents/ roles/   # 자료 도우미 · 부서 에이전트 역할
+│   │       ├── reviews/[id]/       # 자료 검토함 (ADR-054)
+│   │       ├── retention/          # 기록 보존·내보내기 (ADR-058)
+│   │       ├── retros/[id]/        # 개발 회고 (ADR-063·064)
+│   │       └── trailers/{new,[id]}/# 채용 예고편 (ADR-050·062)
+│   ├── admin/{members,sources,audit,security}/  # 조직 관리자 콘솔
+│   ├── auth/{callback,signout}/    # 매직링크 콜백 · 로그아웃
+│   ├── login/ no-membership/       # 로그인 · 소속 없음 안내
+│   ├── invite/[token]/             # 초대 수락
+│   ├── t/{[slug],i/[token]}/       # 공개 예고편 · 지원자 개별 링크 (ADR-062)
+│   ├── trailers/                   # 공개 예고편 목록
 │   ├── demo/                       # S6 게스트 (읽기 전용, revalidate 캐시, LLM 호출 0)
+│   │   ├── access/ admin/ features/ notion/ retros/
+│   │   ├── hiring/                 # 부서별 채용 미션 데모 (ADR-059)
+│   │   └── d/[dept]/               # 데모 부서 워크스페이스 (ask·cards·ledger·roles 등)
 │   └── api/
-│       ├── slack/{events,interactions}/route.ts
-│       ├── meetings/transcript/route.ts
-│       ├── notion/import/route.ts
-│       ├── consent/route.ts
-│       ├── jobs/run/route.ts       # 워커. 시크릿 헤더 인증
-│       ├── d/[dept]/{items,cards,ledger,decisions,ask,voice,documents}/route.ts
-│       ├── cards/[id]/decide/route.ts
-│       └── demo/[...]/route.ts
-├── components/                     # 표현 계층. 인용 칩·카드·원장 행 등 (TDD 비대상)
+│       ├── slack/{events,interactions,oauth}/  # 서명 검증 · Block Kit · 설치 OAuth (ADR-052)
+│       ├── jobs/run/               # 워커. 시크릿 헤더 인증
+│       ├── cards/[id]/decide/      # 카드 결정
+│       ├── d/[dept]/...            # 부서 API (items·ledger·ask·decisions·documents·voice·
+│       │                           #  reviews·retention·retros·trailers·roles·invites·members·settings)
+│       ├── admin/...               # 조직 관리자 API (departments·members·invites·notion·slack·trailers)
+│       ├── retro/connect/[provider]/{start,callback}/  # 회고 커넥터 개인 OAuth (ADR-064)
+│       ├── t/i/{open,consent,submit,withdraw}/         # 지원자 링크 응시 흐름
+│       └── invites/accept/
+├── components/                     # 표현 계층 (TDD 비대상). admin/ · trailers/ · ui/ 하위 그룹
 ├── lib/
 │   ├── contracts.ts                # Zod 스키마·타입 단일 소스: IngestItem · Classification · CardDraft · AnswerDraft
 │   ├── llm.ts                      # Groq 게이트웨이 (§3.3)
-│   ├── jobs.ts                     # enqueue(kind, payload, {dedupeKey?}) · runOnce()
+│   ├── jobs.ts · worker.ts         # enqueue(kind, payload, {dedupeKey?}) · runOnce()
 │   ├── search.ts                   # search_as() 호출만. 권한 판정은 SQL 안
 │   ├── mask.ts · rules.ts          # 정규식 마스킹 · 규칙 분류 (순수 함수)
-│   ├── adapters/{slack,transcript,document,voice}.ts # 입력 검증·파싱
-│   ├── notion.ts                               # Notion API 페이지·블록 어댑터
-│   ├── pipeline/{classify,card,answer,meeting-summary,document-summary}.ts # job 본체
-│   ├── slack/{verify,blocks,post}.ts           # 서명 검증 · Block Kit · postMessage
-│   └── supabase/{server,rls-client,service}.ts # 클라이언트 팩토리 3종 (§6 불변식 2)
-├── supabase/migrations/            # 6-1 스키마 · can_see()/search_as() · RLS 정책 · (D2) embedding 컬럼
-├── scripts/
-│   ├── seed-demo.ts                # 게스트 합성 데이터 → 실제 파이프라인 → 스냅샷 (멱등)
-│   ├── execute.py                  # Harness step 실행기
-│   └── hooks/                      # tdd-guard.sh · dangerous-command-guard.sh
-├── tests/                          # lib/ 미러 (lib/pipeline/card.ts ↔ tests/pipeline/card.test.ts) · rls/ · e2e/
-├── phases/                         # Harness step 파일 (index.json + stepN.md)
+│   ├── features.ts                 # 기능 플래그
+│   ├── labels.ts · wording-check.ts            # 쉬운 말 문구 사전·검사 (ADR-065)
+│   ├── reviews.ts · review-access.ts · retention.ts  # 자료 검토함 · 기록 보존 (ADR-054·058)
+│   ├── notion*.ts                              # Notion 어댑터·청크·설치·워크스페이스 (ADR-060)
+│   ├── trailer*.ts                             # 예고편 생성·평가·게이트·초대·스냅샷 (ADR-050·062)
+│   ├── retro.* → lib/retro/                    # 회고 번들·청크·프리셋·내보내기·커넥터 암호화
+│   │   ├── collect/{git,codex,claude,chrome,docs,memory}.ts  # 개발 회고 수집기 (ADR-063)
+│   │   └── connectors/{registry,http,auth,pull,map,...}.ts   # 부서 커넥터 (ADR-064)
+│   ├── adapters/{slack,transcript,document,voice,upload,review-audio,...}.ts # 입력 검증·파싱
+│   ├── pipeline/                               # job 본체 (classify·card·answer·embed·
+│   │                                           #  meeting/document-summary·notion-*·retro-*·trailer-*)
+│   ├── recording/                              # 브라우저 녹음 세션·PCM (ADR-056)
+│   ├── slack/{verify,blocks,post,answer,question,installation,...}.ts
+│   └── supabase/{server,rls-client,service,browser,membership,...}.ts # 클라이언트 팩토리 (§6 불변식 2)
+├── supabase/
+│   ├── migrations/                 # 스키마 · can_see()/search_as() · RLS 정책 (0001~0051)
+│   └── rollback/                   # 되돌림 SQL (*_down.sql)
+├── scripts/                        # seed-demo.ts · execute.py(Harness) · verify-*.mjs · hooks/ · wording/
+├── tests/                          # lib/ 미러 · app/api/ · rls/ · e2e/ · evals/ · retro/ · recording/
+├── fixtures/                       # evaluation · hiring · mockup(.vtt) · retro · trailer 고정 입력
+├── phases/                         # Harness step 파일 (index.json + phase 0~31 디렉터리)
+├── docs/                           # PRD · ARCHITECTURE · ADR · verification/ 실행 기록
+├── proxy.ts                        # 로컬 검증용 프록시
+├── playwright{,.recording,.review-controls,.trailer}.config.ts
 └── vercel.json                     # cron: /api/jobs/run 매분 (Vercel Cron을 택한 경우)
 ```
 
-`src/`를 두지 않는다. Next.js App Router의 `app/`이 루트에 있고 비즈니스 로직은 전부 `lib/`이다.
+`src/`를 두지 않는다. Next.js App Router의 `app/`이 루트에 있고 비즈니스 로직은 전부 `lib/`이다. 2026-09-20 실제 트리 기준으로 갱신했다. 상세는 `find app lib -maxdepth 3`로 확인한다.
 
 ---
 
@@ -294,7 +323,9 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 - 단계 기록·샘플 적용·제출 이벤트는 참가자가 누른 동작만 표시한다. 입력 감시·시간 평가·자동 채점·합불·순위는 없다. 초기화는 선택 부서만, 새로고침은 모든 진행을 지운다. 서버/브라우저 영속 저장을 추가하지 않는다.
 - 데모 시드는 기존 4개 부서를 보존하고 인사·프론트·백엔드를 추가한다. `orgs.is_demo` 판정과 기존 RLS·읽기 전용 체험 경계를 그대로 따른다. 런타임 요청에서 시드 실행이나 service role 호출은 없다.
 
-### 6-4. 개발 회고 (ADR-063, PRD §3-6) — 설계, 미구현
+### 6-4. 개발 회고·부서별 회고 커넥터 (ADR-063·064, PRD §3-6) — 구현 완료(phase 27·30), 운영 반영은 별도 승인
+
+2026-09-20 기준 `lib/retro/`(bundle·chunk·export·verify·presets·collect·connectors 17개 제공자), `app/api/retro/connect/[provider]`, `app/(auth)/d/[dept]/retros`, `components/retro-*.tsx`로 구현되었다.
 
 23. **회고 활동은 본인 것만, 짧게, 마스킹 후.** `retro_activities`의 `user_id`는 항상 `auth.uid()`이고 번들의 어떤 필드도 사람·부서를 지정하지 못한다. 수집기와 서버 RPC가 각각 마스킹하며 마스킹 전 텍스트·번들 파일은 저장하지 않는다. Claude/Codex 응답·도구 결과·붙여넣은 본문·diff 본문·URL 쿼리스트링은 파서가 읽지 않는다. 활동 1건 500자·하루 500건·번들 1MB.
 24. **`self`는 가시성 등급이 아니라 소유 판정이다.** `retro_days` RLS는 `user_id = auth.uid() or (visibility <> 'self' and can_see(auth.uid(), dept_id, visibility))`. `can_see()`는 바뀌지 않고 다른 테이블은 `self`를 쓰지 않는다. `dept`/`leads_only`로 넓히기는 인용된 Tier 0 활동의 `source_visibility`보다 넓을 수 없다(불변식 4). 개인 범위가 두 번째로 생기면 ACL 테이블로 승격한다(PRD §6-12).

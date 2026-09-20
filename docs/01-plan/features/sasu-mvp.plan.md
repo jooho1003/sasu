@@ -82,19 +82,19 @@ PRD §0 먼저 정한 다섯 가지 · `docs/proposal/사수_기획서_v3.html`(
 
 | ID | Requirement | Priority | PRD | Status |
 |----|-------------|----------|-----|--------|
-| FR-01 | 슬랙 이벤트 수신 → 동의 확인 → 마스킹 → items upsert(멱등) → 규칙+Haiku 분류 → S1 | P0 | §6-2 | Pending |
-| FR-02 | 결정 후보 → Opus 5 카드(citations 우선) → 인용 검증 → 병합 → 담당자 결정(leads_only는 lead) → 웹 + DM | P0 | §6-3 | Pending |
-| FR-03 | 카드 결정(웹·DM 버튼) → decisions(request_id unique) → 리드타임 → 스레드 한 줄 공지 | P0 | §6-3 ⑤⑨ | Pending |
-| FR-04 | 원장 목록·상세·직접 기록·충돌 배지·마감 지남 배지 | P0 | §6-4 | Pending |
-| FR-05 | Q&A: 게시 위치 권한 → `search_as` → Opus 5 → 인용 검증 → refused/답변 → answers 기록 | P0 | §6-5 | Pending |
-| FR-06 | 충돌 감지: 카드 생성 시 원장 유사 결정 3 → conflicts[] | P1 | §6-4 | Pending |
-| FR-07 | 회의: 업로드 파서(.vtt/.txt) → 봇 웹훅 → items → 회의 정리 → deferred → 카드 | P0(봇은 조건부) | §6-2, ADR-005 | Pending |
-| FR-08 | 노션 원칙 문서 1회 가져오기 + [다시 가져오기], `is_principles` | P0 | §6-2, §6-6 | Pending |
-| FR-09 | 세팅 S5: 동의 수집 → 채널 선택(전원 동의 후) → 공지 → 백필 · 회의 · 노션 · visibility · 결정권자 · 사용액 | P0 | §6-6 | Pending |
-| FR-10 | 동의 S0 + 슬랙 버튼 → `consented_at`·`consent_version` | P0 | §6-6, §5 S0 | Pending |
-| FR-11 | 게스트 `/demo`: is_demo 부서 2개 anon read-only, LLM 0회, 준비된 질문 6개 + generic_answer, CTA | P0 | §6-7 | Pending |
-| FR-12 | jobs 워커: enqueue/runOnce, SKIP LOCKED, 백오프, 3회 failed, 2분 스윕, 매분 트리거 | P0 | §6-11 | Pending |
-| FR-13 | 에러·빈 상태: 의존성 9개 장애 거동, 입력 상한, 빈 상태 5화면 | P0 | §6-10 | Pending |
+| FR-01 | 슬랙 이벤트 수신 → 동의 확인 → 마스킹 → items upsert(멱등) → 규칙+gpt-oss-20b 분류 → S1 | P0 | §6-2 | Done |
+| FR-02 | 결정 후보 → gpt-oss-120b 카드(citations 우선) → 인용 검증 → 병합 → 담당자 결정(leads_only는 lead) → 웹 + DM | P0 | §6-3 | Done |
+| FR-03 | 카드 결정(웹·DM 버튼) → decisions(request_id unique) → 리드타임 → 스레드 한 줄 공지 | P0 | §6-3 ⑤⑨ | Done |
+| FR-04 | 원장 목록·상세·직접 기록·충돌 배지·마감 지남 배지 | P0 | §6-4 | Done |
+| FR-05 | Q&A: 게시 위치 권한 → `search_as` → gpt-oss-120b → 인용 검증 → refused/답변 → answers 기록 | P0 | §6-5 | Done |
+| FR-06 | 충돌 감지: 카드 생성 시 원장 유사 결정 3 → conflicts[] | P1 | §6-4 | Done |
+| FR-07 | 회의: 업로드 파서(.vtt/.txt) → 봇 웹훅 → items → 회의 정리 → deferred → 카드 | P0(봇은 조건부) | §6-2, ADR-005 | Done |
+| FR-08 | 노션 원칙 문서 1회 가져오기 + [다시 가져오기], `is_principles` | P0 | §6-2, §6-6 | Done |
+| FR-09 | 세팅 S5: 동의 수집 → 채널 선택(전원 동의 후) → 공지 → 백필 · 회의 · 노션 · visibility · 결정권자 · 사용액 | P0 | §6-6 | Done |
+| FR-10 | 동의 S0 + 슬랙 버튼 → `consented_at`·`consent_version` | P0 | §6-6, §5 S0 | Done |
+| FR-11 | 게스트 `/demo`: is_demo 부서 2개 anon read-only, LLM 0회, 준비된 질문 6개 + generic_answer, CTA | P0 | §6-7 | Done |
+| FR-12 | jobs 워커: enqueue/runOnce, SKIP LOCKED, 백오프, 3회 failed, 2분 스윕, 매분 트리거 | P0 | §6-11 | Done |
+| FR-13 | 에러·빈 상태: 의존성 9개 장애 거동, 입력 상한, 빈 상태 5화면 | P0 | §6-10 | Done |
 
 ### 3.2 Non-Functional Requirements
 
@@ -111,12 +111,12 @@ PRD §0 먼저 정한 다섯 가지 · `docs/proposal/사수_기획서_v3.html`(
 ## 4. Success Criteria
 
 ### 4.1 Definition of Done (PRD §1-3)
-- [ ] 데모 5장면이 로그인 사용자 기준 5분 안에 완주
-- [ ] 게스트 모드 로그인 없이 30초 내 열람
+- [x] 데모 5장면이 로그인 사용자 기준 5분 안에 완주
+- [x] 게스트 모드 로그인 없이 30초 내 열람
 - [ ] 우리 팀 실제 슬랙 채널 1개 이상 파이프라인 통과
-- [ ] 심사 기간 내내 배포 링크 정상
+- [x] 심사 기간 내내 배포 링크 정상
 - [ ] 제출서에 AI 도구·활용 방식 기재
-- [ ] 참가 접수 D0 완료
+- [x] 참가 접수 D0 완료
 
 ### 4.2 Quality Criteria (PRD §11 검증표 — 실행 기록으로 판정)
 - [ ] WATCH 재현율 ≥ 0.7(작업 임계) · 같은 이벤트 2회 → items 1건
@@ -156,7 +156,7 @@ PRD §0 먼저 정한 다섯 가지 · `docs/proposal/사수_기획서_v3.html`(
 | Framework | Next.js App Router + Vercel | 007 |
 | Backend | Supabase (Postgres·pgvector·RLS·Auth), Edge Function 배제 | 008·009 |
 | State/Async | Postgres `jobs` + `/api/jobs/run` 워커 | 009·010 |
-| LLM | Opus 5 / Haiku 4.5 / 규칙, structured output citations-first | 011·012 |
+| LLM | Groq gpt-oss-120b / gpt-oss-20b / 규칙, structured output citations-first | 011·012 |
 | Auth·권한 | `can_see()` 단일 판정, 요청 경로 service role 금지 | 014·015·024 |
 | Testing | Vitest(lib) · tests/rls · Playwright(E2E) | ARCHITECTURE §8 |
 | Styling | PRD §7 토큰. 프레임워크 미정(D1) | — |
@@ -176,7 +176,7 @@ PRD §0 먼저 정한 다섯 가지 · `docs/proposal/사수_기획서_v3.html`(
 ## 9. Next Steps
 1. [x] Design 어댑터 `docs/02-design/features/sasu-mvp.design.md`
 2. [ ] setup-guide §0 D0 항목 (사람)
-3. [ ] `phases/0-vertical-slice` step 작성 → `python scripts/execute.py 0-vertical-slice`
+3. [x] `phases/0-vertical-slice` step 작성 → `python scripts/execute.py 0-vertical-slice`
 4. [ ] D3 게이트 후 `/pdca analyze sasu-mvp`
 
 ---

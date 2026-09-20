@@ -50,16 +50,18 @@ plan: docs/01-plan/features/sasu-mvp.plan.md
 
 | 외부 | 용도 | 장애 시 (PRD §6-10) |
 |---|---|---|
-| Anthropic (Opus 5 · Haiku 4.5) | 카드·답변·회의 정리 · 분류 | 백오프 3회 → unclassified / needs_review / failed |
+| Groq (gpt-oss-120b · gpt-oss-20b) | 카드·답변·회의 정리 · 분류 | 백오프 3회 → unclassified / needs_review / failed |
 | Supabase | DB·RLS·Auth·pgvector | 전 기능 불가, 상단 배너 |
 | Slack Events/Web API | 수신·DM·버튼·@사수 | 재시도 3회 → 웹 카드만 + lead 알림 |
 | Recall.ai (조건부, D6) | 회의 봇 전사 | `bot_failed` → 전사 업로드 |
 | Notion API | 원칙 문서 1회 가져오기 | 이전 인덱스 유지, 세팅에 실패 표시 |
-| 임베딩 API (D2 확정) | 병합·검색·충돌 | `embed_status=failed` 재시도 큐 |
+| Voyage AI voyage-4-lite 1024차원 (ADR-030) | 병합·검색·충돌 | `embed_status=failed` 재시도 큐 |
 
 ---
 
 ## 3. Data Model → PRD §6-1 (SQL 전문) · §6-12 (전이·삭제·진실 규칙)
+
+> 아래 표는 2026-09-08 초기 목록이다. 현재 스키마·API·job 종류는 PRD §6-1·§6-8과 `supabase/migrations/`가 정본이다.
 
 ### 3.1 Entities (16 테이블)
 
@@ -84,6 +86,8 @@ plan: docs/01-plan/features/sasu-mvp.plan.md
 ### 3.2 SQL 함수: `can_see(p_user, p_dept, p_visibility)` · `search_as(p_user, p_dept, p_query_embedding, k)` SECURITY DEFINER
 
 ---
+
+> 아래 표는 2026-09-08 초기 목록이다. 현재 스키마·API·job 종류는 PRD §6-1·§6-8과 `supabase/migrations/`가 정본이다.
 
 ## 4. API Specification → PRD §6-8
 
@@ -183,6 +187,8 @@ supabase/       스키마·함수·RLS
 ### 11.1 Modules (lib/)
 `contracts.ts` · `llm.ts` · `jobs.ts` · `search.ts` · `mask.ts` · `rules.ts` · `adapters/{slack,meeting,notion}.ts` · `pipeline/{classify,card,answer,summarize,merge,conflict}.ts` · `slack/{verify,blocks,post}.ts` · `supabase/{server,rls-client,service}.ts`
 
+> 아래 표는 2026-09-08 초기 목록이다. 현재 스키마·API·job 종류는 PRD §6-1·§6-8과 `supabase/migrations/`가 정본이다.
+
 ### 11.2 Job kinds (9)
 `classify` · `embed` · `summarize_meeting` · `make_card` · `answer` · `send_slack` · `notion_import` · `slack_backfill` · `sweep`
 
@@ -192,11 +198,7 @@ supabase/       스키마·함수·RLS
 |---|---|---|
 | `0-vertical-slice` | D1~D3 | D3 자정 사람 판정 |
 | `1-slack-dm-backfill` | D4 | 컷 ① |
-| `2-meeting` | D5~D6 | D6 봇 판정 · 컷 ③ |
-| `3-notion-ask-rls` | D7~D8 | D8 코드 리뷰 |
-| `4-settings-consent` | D9 | 컷 ⑤⑥⑦ |
-| `5-demo-seed` | D10 | 프리징 |
-| `6-polish` | D11 | — |
+실제 phase 목록과 상태는 `phases/index.json`을 따른다 (2-mvp-completion · 3-d6-d10-completion · 4-agent-roles · 6-polish 등).
 
 ---
 
