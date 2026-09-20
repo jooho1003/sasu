@@ -54,7 +54,10 @@
     {
       "dir": "0-vertical-slice",
       "status": "blocked",
-      "note": "0-vertical-slice: step 0~14 완료, step 15 사람의 5분 세로 흐름 확인만 남음"
+      "note": "0-vertical-slice: step 0~14 완료, step 15 사람의 5분 세로 흐름 확인만 남음",
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     },
     {
       "dir": "1-slack-dm-backfill",
@@ -87,7 +90,10 @@
     {
       "dir": "14-slack-answer-citations",
       "status": "blocked",
-      "note": "14: step 0 구현 완료(커밋 377a5f0), step 1 실제 Slack 캡처·운영 반영 대기"
+      "note": "14: step 0 구현 완료(커밋 377a5f0), step 1 실제 Slack 캡처·운영 반영 대기",
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     },
     {
       "dir": "16-source-lifecycle",
@@ -115,48 +121,71 @@
     },
     {
       "dir": "25-notion-collection",
-      "status": "blocked"
+      "status": "blocked",
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     },
     {
       "dir": "26-trailer-candidate-links",
       "status": "blocked",
-      "verification": "docs/verification/trailer-candidate-links-2026-09-19/live-results.json"
+      "verification": "docs/verification/trailer-candidate-links-2026-09-19/live-results.json",
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     },
     {
       "dir": "27-daily-retro",
       "status": "blocked",
       "verification": "docs/verification/daily-retro-2026-09-19/live-results.json",
-      "note": "phase 27 steps 0-6 구현·QA 완료. step 7은 9/20 제출 이후 운영 승인 대기"
+      "note": "phase 27 steps 0-6 구현·QA 완료. step 7은 9/20 제출 이후 운영 승인 대기",
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     },
     {
       "dir": "30-retro-connectors",
       "status": "blocked",
       "verification": "docs/verification/retro-connectors-2026-09-19/README.md",
-      "note": "17개 제공자 구현·보안/로컬 검증 완료. 5개 제공자 인증/API 계약·실계정 실측·Groq 한도·VoIP 법률·운영 게이트 대기."
+      "note": "17개 제공자 구현·보안/로컬 검증 완료. 5개 제공자 인증/API 계약·실계정 실측·Groq 한도·VoIP 법률·운영 게이트 대기.",
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     },
     {
       "dir": "31-plain-language",
       "status": "blocked",
       "verification": "docs/verification/plain-language-audit-2026-09-19/README.md",
-      "note": "steps 0–5 완료. 실제 모델 표본은 Groq 사용 한도, 사람 읽기·운영 반영·쇼케이스 정리 판단 대기."
+      "note": "steps 0–5 완료. 실제 모델 표본은 Groq 사용 한도, 사람 읽기·운영 반영·쇼케이스 정리 판단 대기.",
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     },
     {
       "dir": "23-browser-meeting-recording",
       "status": "blocked",
       "verification": "docs/verification/browser-meeting-recording/access-controls-2026-09-18.md",
-      "note": "step4-A·step0 부분 구현. 실제 녹음/복구·자료 보호 게이트 전 step1 이후 순서 유지."
+      "note": "step4-A·step0 부분 구현. 실제 녹음/복구·자료 보호 게이트 전 step1 이후 순서 유지.",
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     },
     {
       "dir": "24-department-hiring-demo",
       "status": "completed",
       "verification": "docs/verification/department-hiring-demo",
-      "production_deployed": false
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     },
     {
       "dir": "25-public-demo-workspace",
       "status": "completed",
       "verification": "docs/verification/demo-workspace",
-      "note": "번호 25가 25-notion-collection과 중복. 디렉터리명은 유지한다."
+      "note": "번호 25가 25-notion-collection과 중복. 디렉터리명은 유지한다.",
+      "production_deployed": true,
+      "deployed_at": "2026-09-20T12:30:00+09:00",
+      "deployment": "docs/verification/production-rollout-2026-09-20.md"
     }
   ]
 }

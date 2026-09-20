@@ -4,7 +4,7 @@
 - 작성일: 2026-09-08 (1.2: ADR-052·054 구현 구조와 운영 검증 상태 반영)
 - 지위: **파생 문서**. 구조 결정의 근거는 [PRD §6-11(아키텍처)·§6-12(데이터·상태)·§6-1(스키마)](PRD.md)에 있고, 결정의 이유·트레이드오프는 [ADR.md](ADR.md)에 있다.
 - 문서 충돌 시 우선순위: [PRD](PRD.md) → 이 문서 → [ADR](ADR.md). 이 문서와 PRD가 어긋나면 PRD가 옳다.
-- 현재 상태: **2026-09-20.** phase 16~22는 운영 반영 완료. phase 23(부분)·25·26·27·30·31은 구현·로컬 검증 완료이며 운영 반영은 2026-09-20 마이그레이션 0038~0051 적용과 배포로 진행한다(`docs/verification/remaining-steps-2026-09-20.md`). 근거는 `docs/verification/continuity-production-2026-09-16.md`, `docs/verification/reviewed-materials-production-2026-09-17.md`, `docs/verification/review-state-recovery-2026-09-17/`에 있다.
+- 현재 상태: **2026-09-20.** phase 16~22는 운영 반영 완료. phase 23(부분)·24·25·26·27·30·31은 구현·로컬 검증 완료이고, 2026-09-20 마이그레이션 0037~0051 적용·앱 배포·`SASU_RETRO_ENABLED=true`로 운영 반영했다(`docs/verification/production-rollout-2026-09-20.md`). 남은 것은 외부·사람 조건뿐이다(`docs/verification/remaining-steps-2026-09-20.md`). 근거는 `docs/verification/continuity-production-2026-09-16.md`, `docs/verification/reviewed-materials-production-2026-09-17.md`, `docs/verification/review-state-recovery-2026-09-17/`에 있다.
 
 ### 2026-09-12 구현 보완
 
