@@ -2,8 +2,8 @@ import { RecordingSession } from "../session";
 import { openRecordingStore, type RecordingScope } from "./storage";
 
 const endpoint = self as unknown as { postMessage: (message: unknown) => void; onmessage: ((event: MessageEvent) => void) | null };
-endpoint.onmessage = async ({ data }: MessageEvent<{ scope: RecordingScope; inputRate: number; port: MessagePort }>) => {
-  const { scope, inputRate, port } = data;
+endpoint.onmessage = async ({ data }: MessageEvent<{ scope: RecordingScope; inputRate: number; port: MessagePort; recordingKey: CryptoKey }>) => {
+  const { scope, inputRate, port, recordingKey } = data;
   let store: Awaited<ReturnType<typeof openRecordingStore>> | undefined;
   let session: RecordingSession | undefined;
   let timer: ReturnType<typeof setInterval> | undefined;
@@ -27,7 +27,7 @@ endpoint.onmessage = async ({ data }: MessageEvent<{ scope: RecordingScope; inpu
     const estimate = await navigator.storage.estimate();
     if (estimate.quota !== undefined && estimate.usage !== undefined && estimate.quota - estimate.usage < 64 * 1024 * 1024)
       throw new Error("storage_space_insufficient");
-    store = await openRecordingStore();
+    store = await openRecordingStore(recordingKey);
     await store.cleanup(scope.ownerUserId);
     await store.create(scope);
     session = new RecordingSession(inputRate, (frame) => store!.append(scope, frame));

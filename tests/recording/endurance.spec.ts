@@ -9,8 +9,8 @@ test("30 minutes of 48kHz samples stream to real IndexedDB with bounded retained
   await cdp.send("HeapProfiler.collectGarbage");
   const before = await cdp.send("Runtime.getHeapUsage");
   const result = await page.evaluate(async () => {
-    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & { RecordingSession: typeof import("../../lib/recording/session").RecordingSession } }).recordingLab;
-    const store = await lab.openRecordingStore();
+    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") & { RecordingSession: typeof import("../../lib/recording/session").RecordingSession } }).recordingLab;
+    const store = await lab.openRecordingStore(await lab.importRecordingKey(new Uint8Array(32).fill(42)));
     const scope = { ownerUserId: "endurance-user", deptId: "synthetic", recordingId: "thirty-minutes" };
     await store.create(scope);
     let committed: (() => void) | undefined;

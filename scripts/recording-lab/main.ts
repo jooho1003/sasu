@@ -1,11 +1,12 @@
 import * as storage from "../../lib/recording/browser/storage";
+import * as checkpointCrypto from "../../lib/recording/checkpoint-crypto";
 import { startRecording } from "../../lib/recording/browser/capture";
-import { stopInputs } from "../../lib/recording/browser/inputs";
+import { captureInputs, stopInputs } from "../../lib/recording/browser/inputs";
 import { pcmWav } from "../../lib/recording/pcm";
 import { RecordingSession } from "../../lib/recording/session";
 
 // Test harness only: this synthetic identity is never accepted by app/API routes.
-Object.assign(window, { recordingLab: { ...storage, RecordingSession } });
+Object.assign(window, { recordingLab: { ...storage, ...checkpointCrypto, RecordingSession } });
 document.querySelector("#status")!.textContent = "검증 준비 완료";
 
 const status = document.querySelector("#status")!;
@@ -16,12 +17,60 @@ let streams: MediaStream[] = [];
 let synthesizer: AudioContext | undefined;
 let playbackUrl: string | undefined;
 let starting = false;
+let testingInput = false;
 const scope = () => ({ ownerUserId: "lab-synthetic-user", deptId: "lab-synthetic-dept", recordingId: sessionStorage.getItem("recording-lab-id") ?? "none" });
+const labKey = () => checkpointCrypto.importRecordingKey(new Uint8Array(32).fill(42));
 const button = (label: string, action: () => void | Promise<void>) => {
   const element = document.createElement("button");
   element.textContent = label;
   element.onclick = () => { void Promise.resolve().then(action).catch((error) => { status.textContent = error instanceof Error ? error.message : "검증 실패"; }); };
   controls.append(element, document.createTextNode(" "));
+};
+const testActualInputs = async (mode: "microphone" | "system_and_microphone") => {
+  if (recorder || starting || testingInput) throw new Error("먼저 현재 작업을 종료하세요.");
+  testingInput = true;
+  let actualInputs: MediaStream[] = [];
+  let context: AudioContext | undefined;
+  try {
+    status.textContent = "브라우저 입력 선택을 기다리는 중";
+    actualInputs = await captureInputs(mode);
+    context = new AudioContext();
+    await context.resume();
+    const sink = context.createGain();
+    sink.gain.value = 0;
+    sink.connect(context.destination);
+    const analysers = actualInputs.map((stream) => {
+      const analyser = context!.createAnalyser();
+      analyser.fftSize = 256;
+      context!.createMediaStreamSource(stream).connect(analyser).connect(sink);
+      return analyser;
+    });
+    const peaks = analysers.map(() => 0);
+    const startedAt = performance.now();
+    while (performance.now() - startedAt < 5000) {
+      analysers.forEach((analyser, index) => {
+        const samples = new Float32Array(analyser.fftSize);
+        analyser.getFloatTimeDomainData(samples);
+        const rms = Math.sqrt(samples.reduce((sum, value) => sum + value * value, 0) / samples.length);
+        peaks[index] = Math.max(peaks[index], rms);
+      });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    status.textContent = JSON.stringify({
+      mode,
+      durationMs: Math.round(performance.now() - startedAt),
+      audioTracks: actualInputs.map((stream) => stream.getAudioTracks().length),
+      videoFramesStored: 0,
+      peakRms: peaks.map((value) => Number(value.toFixed(4))),
+      signalDetected: peaks.map((value) => value > 0.0001),
+      persisted: false,
+      transmitted: false,
+    }, null, 2);
+  } finally {
+    stopInputs(actualInputs);
+    if (context && context.state !== "closed") await context.close();
+    testingInput = false;
+  }
 };
 const start = async () => {
   if (recorder || starting) throw new Error("먼저 현재 녹음을 종료하세요.");
@@ -44,7 +93,7 @@ const start = async () => {
       });
     Object.assign(window, { labTracks: streams.flatMap((stream) => stream.getTracks()) });
     sessionStorage.setItem("recording-lab-id", crypto.randomUUID());
-    recorder = await startRecording(scope(), streams, (snapshot) => {
+    recorder = await startRecording(scope(), streams, await labKey(), (snapshot) => {
       status.textContent = JSON.stringify(snapshot, null, 2);
       if (["stopped", "interrupted"].includes(snapshot.state)) {
         recorder = undefined;
@@ -58,6 +107,9 @@ const start = async () => {
   } finally { starting = false; }
 };
 
+button("마이크 5초 시험", () => testActualInputs("microphone"));
+button("공유 음성+마이크 5초 시험", () => testActualInputs("system_and_microphone"));
+controls.append(document.createElement("hr"));
 button("합성 입력 시작", start);
 controls.append(document.createElement("hr"));
 button("일시정지", () => { recorder?.pause(); });
@@ -71,7 +123,7 @@ button("입력 종료 시험", () => {
 });
 button("확인 구간 복구", async () => {
   if (recorder || starting) throw new Error("먼저 녹음을 종료하세요.");
-  const store = await storage.openRecordingStore();
+  const store = await storage.openRecordingStore(await labKey());
   try {
     const recovery = await store.inspect(scope());
     status.textContent = JSON.stringify(recovery, null, 2);
@@ -92,7 +144,7 @@ button("확인 구간 복구", async () => {
 });
 button("로컬 원본 폐기", async () => {
   if (recorder || starting) throw new Error("먼저 녹음을 종료하세요.");
-  const store = await storage.openRecordingStore();
+  const store = await storage.openRecordingStore(await labKey());
   try { await store.remove(scope()); } finally { store.close(); }
   audio.pause();
   audio.removeAttribute("src");

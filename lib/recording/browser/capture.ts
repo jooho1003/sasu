@@ -6,7 +6,7 @@ import { acquireCaptureLock, type RecordingScope } from "./storage";
 /** Technical gate only. App callers must revalidate session/membership/consent
  * before capture or recovery; this module makes no authorization decision.
  */
-export async function startRecording(scope: RecordingScope, inputs: MediaStream[],
+export async function startRecording(scope: RecordingScope, inputs: MediaStream[], recordingKey: CryptoKey,
   onSnapshot: (snapshot: RecordingSnapshot) => void) {
   let release: (() => void) | undefined;
   let context: AudioContext | undefined;
@@ -57,7 +57,7 @@ export async function startRecording(scope: RecordingScope, inputs: MediaStream[
         if (data.type === "ready") { clearTimeout(timeout); resolve(); }
         if (data.type === "error") { clearTimeout(timeout); reject(new Error(data.reason)); }
       };
-      worker!.postMessage({ scope, inputRate: context!.sampleRate, port: channel.port1 }, [channel.port1]);
+    worker!.postMessage({ scope, inputRate: context!.sampleRate, port: channel.port1, recordingKey }, [channel.port1]);
     });
     if (leaseLost) throw new Error("capture_lease_lost");
     node = new AudioWorkletNode(context, "sasu-meeting-capture");
