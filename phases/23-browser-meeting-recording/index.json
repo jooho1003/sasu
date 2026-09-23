@@ -4,7 +4,7 @@
   "steps": [
     { "step": 4, "name": "security-and-accuracy-hardening", "status": "pending", "progress": "partial", "note": "4-A privacy/report-only headers plus access tickets, audit, rate limits, org settings and original retention implemented locally. Docker restored: real local Storage 8 checks and authenticated browser access E2E 1 pass; SQL 173 + matrix 2016 and mocked component browser 8 pass. Latest combined suite 1101 unit tests, lint/build pass. Production verification, real retention purge, provider key linkage/opt-out, CSP enforcement and recording gates remain. See access-controls-2026-09-18.md. 4-B runs after step 2." },
     { "step": 0, "name": "capture-and-recovery-validation", "status": "pending", "progress": "partial", "note": "Synthetic capture/storage validation only; no real inputs until SEC-06. Hardware V01-V06 remain incomplete." },
-    { "step": 1, "name": "segmented-originals-and-rls", "status": "pending" },
+    { "step": 1, "name": "segmented-originals-and-rls", "status": "pending", "progress": "partial", "note": "SEC-06 기반 완료: AES-GCM 로컬 체크포인트, HKDF 키 파생, 세션/RLS 검증용 recording_key_context RPC와 /recordings/[id]/key 라우트 구현. 녹음 세션 생성 시점이 상세 설계에 빠져 실제 영속 녹음 연결은 보류." },
     { "step": 2, "name": "recording-review-flow", "status": "pending" },
     { "step": 3, "name": "demo-and-regression", "status": "pending" }
   ],

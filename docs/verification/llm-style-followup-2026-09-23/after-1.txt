@@ -1,0 +1,12 @@
+{"id":"answer-1","status":"generated","citationCount":2,"sentenceCount":0,"over40":0,"wrongEnding":0}
+{"id":"answer-2","status":"generated","citationCount":1,"sentenceCount":0,"over40":0,"wrongEnding":0}
+{"id":"answer-3","status":"generated","citationCount":1,"sentenceCount":0,"over40":0,"wrongEnding":0}
+{"id":"answer-4","status":"llm_refusal"}
+{"id":"answer-5","status":"generated","citationCount":1,"sentenceCount":0,"over40":0,"wrongEnding":0}
+{"id":"answer-6","status":"generated","citationCount":1,"sentenceCount":0,"over40":0,"wrongEnding":0}
+{"id":"card-1","status":"generated","citationCount":2,"sentenceCount":2,"over40":0,"wrongEnding":1}
+{"id":"card-2","status":"generated","citationCount":2,"sentenceCount":2,"over40":0,"wrongEnding":0}
+{"id":"card-3","status":"generated","citationCount":4,"sentenceCount":2,"over40":0,"wrongEnding":0}
+{"id":"summary-1","status":"generated","citationCount":2,"sentenceCount":2,"over40":0,"wrongEnding":0}
+{"id":"summary-2","status":"generated","citationCount":2,"sentenceCount":2,"over40":0,"wrongEnding":0}
+{"generated":10,"expectedRefusals":1,"styleEvaluated":5,"violations":1,"violationRate":0.2,"complianceRate":0.8}

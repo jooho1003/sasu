@@ -2,8 +2,8 @@
   "browser": "153.0.8010.12",
   "platform": "win32",
   "accelerated": true,
-  "beforeHeap": 1637376,
-  "afterHeap": 1767712,
+  "beforeHeap": 1658996,
+  "afterHeap": 1816120,
   "snapshot": {
     "state": "stopped",
     "samples": 28800000,
@@ -17,7 +17,7 @@
     "expectedSamples": 28800000,
     "partial": false,
     "interrupted": false,
-    "createdAt": 1789602155741
+    "createdAt": 1789907429305
   },
   "largestCheckpoint": 32000,
   "warningAt29": true,

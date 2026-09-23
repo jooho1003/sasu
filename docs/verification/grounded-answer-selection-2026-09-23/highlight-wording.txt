@@ -1,0 +1,7 @@
+banned: 0
+english: 0
+template: 0
+length: 0
+style_mix: 0
+button_noun: 0
+scanned: 2; blocking: 0; warnings: 0

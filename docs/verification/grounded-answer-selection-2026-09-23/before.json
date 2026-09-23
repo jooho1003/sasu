@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-09-23T00:46:58.500Z",
+  "synthetic": true,
+  "independentlyReviewed": false,
+  "scope": "actual answerQuestion + Groq; retrieval/embedding/persistence mocked; telemetry local only; no Slack sends",
+  "model": "openai/gpt-oss-120b",
+  "total": 3,
+  "passed": 2,
+  "calls": 4,
+  "inputTokens": 6858,
+  "outputTokens": 2159,
+  "rows": [
+    {
+      "id": "A08",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "decisionPresent": true,
+      "errorCode": null,
+      "calls": 1,
+      "inputTokens": 3401,
+      "outputTokens": 420,
+      "durationMs": 1349
+    },
+    {
+      "id": "A09",
+      "correct": false,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": false,
+      "decisionPresent": true,
+      "errorCode": null,
+      "calls": 2,
+      "inputTokens": 1946,
+      "outputTokens": 1216,
+      "durationMs": 3030
+    },
+    {
+      "id": "A10",
+      "correct": true,
+      "expectedRefused": false,
+      "actualRefused": false,
+      "citationValid": true,
+      "factPresent": true,
+      "decisionPresent": true,
+      "errorCode": null,
+      "calls": 1,
+      "inputTokens": 1511,
+      "outputTokens": 523,
+      "durationMs": 1405
+    }
+  ]
+}

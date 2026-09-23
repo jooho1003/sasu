@@ -165,10 +165,16 @@ export const CardDraft = z.strictObject({
 
 export type CardDraft = z.infer<typeof CardDraft>;
 
-// 위와 마찬가지로 citations의 필드 순서 자체는 강제 장치가 아니다.
+// 모델은 번호만 고른다. 인용 텍스트는 서버가 원문에서 자른다(ADR-067).
+// citations 이름은 게이트웨이의 빈 근거 거절 판정에도 사용한다.
+export const AnswerSelection = z.strictObject({
+  evidence: z.number().int().min(1),
+  first_paragraph: z.number().int().min(1),
+  last_paragraph: z.number().int().min(1),
+});
+
 export const AnswerDraft = z.strictObject({
-  citations: z.array(Citation).min(1),
-  answer: NonEmptyString,
+  citations: z.array(AnswerSelection).min(1).max(8),
   refused: z.boolean(),
   refusal_reason: NullableString,
 });

@@ -1,0 +1,47 @@
+{
+  "database": "local Supabase",
+  "departments": 2,
+  "daysPerDepartment": 3,
+  "flow": "C file RPC + B internal + D manual -> actual AI draft -> reviewed edit -> confirm -> share -> withdraw -> revoke",
+  "realExternalProviderCalls": 0,
+  "llmCalls": 6,
+  "generatedDays": [
+    {
+      "department": "development",
+      "offset": 2,
+      "items": 3,
+      "citations": 3
+    },
+    {
+      "department": "development",
+      "offset": 1,
+      "items": 4,
+      "citations": 3
+    },
+    {
+      "department": "development",
+      "offset": 0,
+      "items": 3,
+      "citations": 3
+    },
+    {
+      "department": "planning",
+      "offset": 2,
+      "items": 3,
+      "citations": 0
+    },
+    {
+      "department": "planning",
+      "offset": 1,
+      "items": 2,
+      "citations": 0
+    },
+    {
+      "department": "planning",
+      "offset": 0,
+      "items": 3,
+      "citations": 0
+    }
+  ],
+  "errors": []
+}

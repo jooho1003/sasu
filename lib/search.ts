@@ -72,3 +72,16 @@ export async function recentDecisionsAs(
   }
   return (result.data ?? []) as DecisionSearchResult[];
 }
+
+export async function searchDecisionsAs(
+  client: SearchClient,
+  args: { userId: string; deptId: string; queryVector: number[]; queryText: string; limit: number; scope?: "user" | "channel" },
+): Promise<DecisionSearchResult[]> {
+  const result = await client.rpc("search_decisions_as", {
+    p_user: args.userId, p_dept: args.deptId,
+    p_query: formatVector(args.queryVector), p_text: args.queryText,
+    p_limit: args.limit, p_scope: args.scope ?? "user",
+  });
+  if (result.error) throw new SearchDatabaseError();
+  return (result.data ?? []) as DecisionSearchResult[];
+}

@@ -1,0 +1,1 @@
+PASS: all SQL from candidates CTE through grants in 0053 and 0054 is byte-for-byte identical.

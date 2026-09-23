@@ -1,0 +1,37 @@
+
+Running 1 test using 1 worker
+
+
+
+(node:40752) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/1] [chromium] › tests\e2e\grounded-answer-live.spec.ts:13:5 › 실제 DB: 질문 → 오래된 결정·문서·회의 원문 → 재열람·권한 차단
+  1) [chromium] › tests\e2e\grounded-answer-live.spec.ts:13:5 › 실제 DB: 질문 → 오래된 결정·문서·회의 원문 → 재열람·권한 차단 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "refused"
+    Received: undefined
+
+      133 |     expect((await page.request.get(`${api}/evidence/${privateItem}`)).status()).toBe(404);
+      134 |     const downgraded = await page.request.get(`${api}/answers/${privateAnswer.id}`);
+    > 135 |     expect((await downgraded.json()).status).toBe("refused");
+          |                                              ^
+      136 |     await checked(await db.from("members").update({ role: "lead" }).eq("user_id", lead.session.user.id).eq("dept_id", dept));
+      137 |     completed.push({ scenario: "lead_demotion_revokes_saved_answer_and_original" });
+      138 |
+        at D:\바이브코딩\sasu\tests\e2e\grounded-answer-live.spec.ts:135:46
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\grounded-answer-live-실제-DB-질문-→-오래된-결정·문서·회의-원문-→-재열람·권한-차단-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\grounded-answer-live-실제-DB-질문-→-오래된-결정·문서·회의-원문-→-재열람·권한-차단-chromium\test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\grounded-answer-live-실제-DB-질문-→-오래된-결정·문서·회의-원문-→-재열람·권한-차단-chromium\error-context.md
+
+
+  1 failed
+    [chromium] › tests\e2e\grounded-answer-live.spec.ts:13:5 › 실제 DB: 질문 → 오래된 결정·문서·회의 원문 → 재열람·권한 차단 

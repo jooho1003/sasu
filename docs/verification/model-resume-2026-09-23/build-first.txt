@@ -1,0 +1,15 @@
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local, .env
+✓ Running next.config.ts took 68ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 79s
+  Running TypeScript ...
+.next-verify/dev/types/validator.ts(1286,1): error TS1128: Declaration or statement expected.
+.next-verify/dev/types/validator.ts(1286,7): error TS1003: Identifier expected.
+.next-verify/dev/types/validator.ts(1286,8): error TS1003: Identifier expected.
+.next-verify/dev/types/validator.ts(1286,36): error TS1005: ';' expected.
+.next-verify/dev/types/validator.ts(1286,38): error TS1002: Unterminated string literal.
+.next-verify/dev/types/validator.ts(1290,1): error TS1128: Declaration or statement expected.
+Failed to type check.
+

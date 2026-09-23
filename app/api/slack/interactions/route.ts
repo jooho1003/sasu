@@ -186,7 +186,7 @@ function messageBlocks(message: string): Array<Record<string, unknown>> {
 }
 
 function formatDecisionTime(value: string | null): string {
-  if (!value) return "시각 미상";
+  if (!value) return "시각 모름";
   return new Intl.DateTimeFormat("ko-KR", {
     dateStyle: "medium",
     timeStyle: "short",

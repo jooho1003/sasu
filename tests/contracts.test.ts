@@ -245,11 +245,21 @@ describe("MergeConfirmation", () => {
 
 describe("AnswerDraft", () => {
   const valid = {
-    citations: [itemCitation],
-    answer: "외주사 B 견적은 재입찰 검토 대상으로 결정되었습니다.",
+    citations: [{ evidence: 1, first_paragraph: 1, last_paragraph: 1 }],
     refused: false,
     refusal_reason: null,
   };
+
+  it("번호는 1 이상의 정수이며 추가 필드·9개 선택을 거부한다", () => {
+    const selection = valid.citations[0];
+    for (const field of ["evidence", "first_paragraph", "last_paragraph"]) {
+      for (const value of [0, -1, 1.5, "1"]) expect(AnswerDraft.safeParse({ ...valid, citations: [{ ...selection, [field]: value }] }).success).toBe(false);
+    }
+    expect(AnswerDraft.safeParse({ ...valid, citations: [{ ...selection, quote: "원문" }] }).success).toBe(false);
+    expect(AnswerDraft.safeParse({ ...valid, citations: [itemCitation] }).success).toBe(false);
+    expect(AnswerDraft.safeParse({ ...valid, citations: Array(8).fill(selection) }).success).toBe(true);
+    expect(AnswerDraft.safeParse({ ...valid, citations: Array(9).fill(selection) }).success).toBe(false);
+  });
 
   it("정상 입력을 파싱한다", () => {
     expect(AnswerDraft.parse(valid)).toEqual(valid);
@@ -266,6 +276,10 @@ describe("AnswerDraft", () => {
 
     expect(AnswerDraft.safeParse(missingRefused).success).toBe(false);
     expect(AnswerDraft.safeParse({ ...valid, answer: 123 }).success).toBe(false);
+  });
+
+  it("근거와 별개인 자유 서술 결론을 받지 않는다", () => {
+    expect(AnswerDraft.safeParse({ ...valid, answer: "근거와 반대인 결론" }).success).toBe(false);
   });
 });
 

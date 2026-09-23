@@ -51,17 +51,31 @@
     {
       "step": 6,
       "name": "slack-llm-style",
-      "status": "blocked",
-      "summary": "Slack 문구·공통 LLM 문체 지시·한도 오류 처리 구현 및 단위 검증. 실제 모델 표본 11개는 Groq spend_limit_reached로 성공 0건이므로 문체 실측 대기.",
-      "verification": "docs/verification/plain-language-audit-2026-09-19/README.md"
+      "status": "completed",
+      "summary": "Slack·공통 문체 구현 후 step9에서 카드·요약 전용 지시와 남은 안내를 보완했다. 실제 11표본씩 후속 두 번에서 문체 4/5(80%)로 목표 충족. 과거 40% 기록은 보존. lint/build·단위 1,391검사 통과.",
+      "verification": "docs/verification/llm-style-followup-2026-09-23/README.md"
     },
     {
       "step": 7,
       "name": "verification",
       "status": "blocked",
-      "summary": "전체 단위 1319·UI 회귀 63·예고편 14(3 skipped)·19화면x2·RLS 6·Storage 8 통과. 사람 읽기·실제 모델·쇼케이스 기존 QA 표식 정리 판단·운영 승인 대기. Graft/Archify 미제공 범위 별도 기록.",
+      "summary": "UI·RLS·Storage 이전 회귀 기록 유지. step9 문체 목표 80% 두 번·ASK 10/10 두 번·전체 단위 1,391 통과. 사람 읽기·쇼케이스 판단·신규 변경 운영 반영 대기. Graft/Archify 실제 결과 미제공.",
       "note": "운영 반영·제출 스크린샷 교체는 사람 판정",
       "verification": "docs/verification/plain-language-audit-2026-09-19/README.md"
+    },
+    {
+      "step": 8,
+      "name": "model-verification-resume",
+      "status": "completed",
+      "summary": "현재 답변 계약·본문 미저장 평가 보완, 실제 표본 11건씩 2회 및 회고 초안 6건의 dev/production-build E2E 통과. 문체 준수 40%로 품질 목표는 계속 미완료. lint/build·단위 1358항목 검증(녹음 시간 초과 재검증 포함).",
+      "verification": "docs/verification/model-resume-2026-09-23/README.md"
+    },
+    {
+      "step": 9,
+      "name": "generated-prose-quality",
+      "status": "completed",
+      "summary": "생성 카드·요약 전용 문체 지시·본문 없는 규칙 진단·실행별 보고서·남은 Slack 안내 보완. 문체 60%→80%·80%, ASK A09 실패 보존 후 마지막 허용 보완으로 10/10 두 번. lint/build·단위 139파일 1,391검사 통과.",
+      "verification": "docs/verification/llm-style-followup-2026-09-23/README.md"
     }
   ],
   "production_deployed": false

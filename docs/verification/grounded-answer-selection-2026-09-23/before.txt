@@ -1,0 +1,40 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.eval.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+stdout | tests/evals/answer-live.eval.ts
+{"total":3,"passed":2,"calls":4}
+
+ ❯ tests/evals/answer-live.eval.ts (3 tests | 1 failed) 5802ms
+   × A09 3038ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/evals/answer-live.eval.ts > A09
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/evals/answer-live.eval.ts:91:19
+     89|   rows.push({ id: row.id, correct, expectedRefused: row.refused, actua…
+     90|     calls: calls - before.calls, inputTokens: inputTokens - before.inp…
+     91|   expect(correct).toBe(true);
+       |                   ^
+     92| });
+     93| afterAll(() => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  09:46:48
+   Duration  10.01s (tests 65%, import 29%, transform 6%, worker 1%)
+

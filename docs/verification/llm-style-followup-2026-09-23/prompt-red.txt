@@ -1,0 +1,60 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/llm-schema-retry.test.ts (11 tests | 6 failed) 40ms
+   ❯ LLM 공급자 스키마 실패 재시도 (11)
+     × make_card의 새 문장에만 구체적인 쉬운말 지시를 더한다 19ms
+     × summarize_document의 새 문장에만 구체적인 쉬운말 지시를 더한다 3ms
+     × answer 계약과 원문 선택에 생성 문장 전용 지시를 섞지 않는다 2ms
+     × classify 계약과 원문 선택에 생성 문장 전용 지시를 섞지 않는다 1ms
+     × trailer_generate 계약과 원문 선택에 생성 문장 전용 지시를 섞지 않는다 2ms
+     × retro_draft 계약과 원문 선택에 생성 문장 전용 지시를 섞지 않는다 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/llm-schema-retry.test.ts > LLM 공급자 스키마 실패 재시도 > make_card의 새 문장에만 구체적인 쉬운말 지시를 더한다
+ FAIL  tests/llm-schema-retry.test.ts > LLM 공급자 스키마 실패 재시도 > summarize_document의 새 문장에만 구체적인 쉬운말 지시를 더한다
+AssertionError: expected 'undefined' to be 'string' // Object.is equality
+
+Expected: "string"
+Received: "undefined"
+
+ ❯ tests/llm-schema-retry.test.ts:13:48
+     11|     mocks.create.mockResolvedValue({choices:[{message:{content:'{"answ…
+     12|     await llm.structured(purpose,schema,prompt);
+     13|     expect(typeof GENERATED_PROSE_INSTRUCTION).toBe("string");
+       |                                                ^
+     14|     expect(mocks.create.mock.calls[0][0].messages[0].content).toContai…
+     15|     expect(GENERATED_PROSE_INSTRUCTION).toContain("보류");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/llm-schema-retry.test.ts > LLM 공급자 스키마 실패 재시도 > answer 계약과 원문 선택에 생성 문장 전용 지시를 섞지 않는다
+ FAIL  tests/llm-schema-retry.test.ts > LLM 공급자 스키마 실패 재시도 > classify 계약과 원문 선택에 생성 문장 전용 지시를 섞지 않는다
+ FAIL  tests/llm-schema-retry.test.ts > LLM 공급자 스키마 실패 재시도 > trailer_generate 계약과 원문 선택에 생성 문장 전용 지시를 섞지 않는다
+ FAIL  tests/llm-schema-retry.test.ts > LLM 공급자 스키마 실패 재시도 > retro_draft 계약과 원문 선택에 생성 문장 전용 지시를 섞지 않는다
+AssertionError: expected 'undefined' to be 'string' // Object.is equality
+
+Expected: "string"
+Received: "undefined"
+
+ ❯ tests/llm-schema-retry.test.ts:23:48
+     21|     mocks.create.mockResolvedValue({choices:[{message:{content:'{"answ…
+     22|     await llm.structured(purpose,schema,prompt);
+     23|     expect(typeof GENERATED_PROSE_INSTRUCTION).toBe("string");
+       |                                                ^
+     24|     expect(mocks.create.mock.calls[0][0].messages[0].content).not.toCo…
+     25|     expect(mocks.create).toHaveBeenCalledTimes(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 5 passed (11)
+   Start at  10:57:31
+   Duration  879ms (import 56%, transform 34%, tests 8%, worker 2%)
+

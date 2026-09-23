@@ -7,43 +7,63 @@ test.beforeEach(async ({ page }) => {
 
 test("committed PCM survives reload, remains scoped, and detects a corrupted checkpoint", async ({ page }) => {
   const result = await page.evaluate(async () => {
-    const { openRecordingStore } = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") }).recordingLab;
-    const store = await openRecordingStore();
+    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") }).recordingLab;
+    const key = await lab.importRecordingKey(new Uint8Array(32).fill(42));
+    const store = await lab.openRecordingStore(key);
     const scope = { ownerUserId: "synthetic-user", deptId: "synthetic-dept", recordingId: "capture-1" };
     await store.create(scope);
     await store.append(scope, { sequence: 0, pcm: new Int16Array(16000).fill(123) });
     await store.append(scope, { sequence: 1, pcm: new Int16Array(73).fill(-123) });
     const recovery = await store.inspect(scope);
     const other = await store.inspect({ ...scope, ownerUserId: "other" });
+    const stored = await new Promise<{ pcm?: unknown; sampleCount: number; ciphertext: ArrayBuffer }>((resolve, reject) => {
+      const request = indexedDB.open("sasu-meeting-recordings", 2);
+      request.onsuccess = () => {
+        const db = request.result;
+        const tx = db.transaction("chunks", "readonly");
+        const row = tx.objectStore("chunks").get([scope.ownerUserId, scope.deptId, scope.recordingId, 0]);
+        row.onsuccess = () => resolve(row.result);
+        row.onerror = () => reject(row.error);
+        tx.oncomplete = () => db.close();
+      };
+      request.onerror = () => reject(request.error);
+    });
     store.close();
-    return { recovery, other };
+    return { recovery, other, stored: { hasPcm: "pcm" in stored, sampleCount: stored.sampleCount, encryptedBytes: stored.ciphertext.byteLength } };
   });
   expect(result.recovery).toMatchObject({ samples: 16073, chunks: 2, partial: false });
   expect(result.other).toBeNull();
+  expect(result.stored).toEqual({ hasPcm: false, sampleCount: 16000, encryptedBytes: 32016 });
   await page.reload();
   await expect(page.locator("#status")).toHaveText("검증 준비 완료");
   expect(await page.evaluate(async () => {
-    const { openRecordingStore } = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") }).recordingLab;
-    const store = await openRecordingStore();
+    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") }).recordingLab;
+    const key = await lab.importRecordingKey(new Uint8Array(32).fill(42));
+    const store = await lab.openRecordingStore(key);
     const scope = { ownerUserId: "synthetic-user", deptId: "synthetic-dept", recordingId: "capture-1" };
     const values: number[] = [];
     for await (const chunk of store.read(scope)) values.push(chunk.pcm[0]);
     store.close();
     // Deliberate local corruption: the reader must stop at the first bad hash.
     await new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open("sasu-meeting-recordings", 1);
+      const request = indexedDB.open("sasu-meeting-recordings", 2);
       request.onsuccess = () => {
         const db = request.result;
         const tx = db.transaction("chunks", "readwrite");
         const os = tx.objectStore("chunks");
         const row = os.get([scope.ownerUserId, scope.deptId, scope.recordingId, 1]);
-        row.onsuccess = () => { const value = row.result; value.pcm[0] = 999; os.put(value); };
+        row.onsuccess = () => {
+          const value = row.result;
+          const bytes = new Uint8Array(value.ciphertext);
+          bytes[0] ^= 0xff;
+          os.put(value);
+        };
         tx.oncomplete = () => { db.close(); resolve(); };
         tx.onabort = () => reject(tx.error);
       };
       request.onerror = () => reject(request.error);
     });
-    const reopened = await openRecordingStore();
+    const reopened = await lab.openRecordingStore(key);
     const damaged = await reopened.inspect(scope);
     reopened.close();
     return { values, damaged };
@@ -52,8 +72,8 @@ test("committed PCM survives reload, remains scoped, and detects a corrupted che
 
 test("out-of-order/duplicate writes fail and expired/other-account drafts are removed", async ({ page }) => {
   const result = await page.evaluate(async () => {
-    const { openRecordingStore } = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") }).recordingLab;
-    const store = await openRecordingStore();
+    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") }).recordingLab;
+    const store = await lab.openRecordingStore(await lab.importRecordingKey(new Uint8Array(32).fill(42)));
     const scope = { ownerUserId: "user", deptId: "dept", recordingId: "one" };
     await store.create(scope);
     const frame = { sequence: 0, pcm: new Int16Array(16000) };
@@ -102,8 +122,8 @@ test("a real IndexedDB transaction abort leaves neither a chunk nor an acknowled
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.name));
   const result = await page.evaluate(async () => {
-    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") }).recordingLab;
-    const store = await lab.openRecordingStore();
+    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") }).recordingLab;
+    const store = await lab.openRecordingStore(await lab.importRecordingKey(new Uint8Array(32).fill(42)));
     const scope = { ownerUserId: "quota", deptId: "synthetic", recordingId: "aborted" };
     await store.create(scope);
     const add = IDBObjectStore.prototype.add;

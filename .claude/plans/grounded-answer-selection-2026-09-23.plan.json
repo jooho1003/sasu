@@ -1,0 +1,176 @@
+{
+  "slug": "grounded-answer-selection",
+  "date": "2026-09-23",
+  "context": {
+    "request": "설계가 제대로 되어 있는지 확인해줘 → 검토 결과(고칠 것 3개·작은 문제 4개) → 진행해 줘",
+    "adr": "ADR-067 (ADR-066 보완)",
+    "prd": "§3 ASK 근거 확인 보완 · §6-5 3~5항 · §8",
+    "architecture": "§1 Q&A 줄 · §3.5",
+    "phase": "phases/32-grounded-answer (step0 완료, step1~4 신규)",
+    "evidence": "docs/verification/grounded-answer-selection-2026-09-23/",
+    "gate_before_start": "step0 변경과 이번 설계 문서를 먼저 커밋해 작업 트리를 비운다. execute.py가 step마다 git add -A로 커밋하므로 다른 세션의 미커밋 변경이 섞이면 안 된다. 운영 DB(0053·0054)·배포는 플랜 밖이며 사용자 승인."
+  },
+  "nodes": [
+    {
+      "id": "R0",
+      "title": "설계 검토 — ADR-066 문서·0053·코드 대조, 결함 3개·작은 문제 4개",
+      "domain": "review",
+      "D1": 2,
+      "D2": 2,
+      "D3": 0,
+      "D4": 2,
+      "score": 6,
+      "tier": "powerful",
+      "agent": "main(never_delegate: 최종 리뷰)",
+      "claude_model": "opus",
+      "codex_model": null,
+      "depends_on": [],
+      "output": "대화 내 검토 결과",
+      "status": "completed"
+    },
+    {
+      "id": "D0",
+      "title": "설계 — ADR-067 · PRD §3·§6-5·§8 · ARCHITECTURE Q&A·§3.5 · 플랜 · phase index/README/step1~4",
+      "domain": "general",
+      "D1": 1,
+      "D2": 2,
+      "D3": 1,
+      "D4": 2,
+      "score": 6,
+      "tier": "powerful",
+      "agent": "main(never_delegate: 아키텍처·모호한 판단)",
+      "claude_model": "opus",
+      "codex_model": null,
+      "depends_on": [
+        "R0"
+      ],
+      "output": "docs/ADR.md ADR-067 · docs/PRD.md · docs/ARCHITECTURE.md · phases/32-grounded-answer/*",
+      "status": "completed"
+    },
+    {
+      "id": "S1",
+      "title": "answer-selection — AnswerDraft 번호 범위 계약 · resolveSelections(TDD) · 단일 인코딩 프롬프트 · 실패 코드 재시도 · 고정 안내 본문 · 실제 모델 평가(before/after)",
+      "domain": "general",
+      "D1": 1,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 4,
+      "tier": "balanced",
+      "agent": "codex",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "depends_on": [
+        "D0"
+      ],
+      "output": "lib/contracts.ts · lib/answer-grounding.ts · lib/pipeline/answer.ts · tests · tests/evals/answer-live.eval.ts · answer-selection-live.json",
+      "status": "completed",
+      "summary": "번호/연속 범위 선택·원문 slice·고정 안내·실패 코드 재시도 완료. 실제 Groq 10/10, 단위 1,383·lint/build 통과.",
+      "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md"
+    },
+    {
+      "id": "S2",
+      "title": "decision-search-terms — 0054 search_decisions_as 단어 추출(뒤쪽 우선·조사 제거), 권한 절 0053과 동일 · SQL 하니스",
+      "domain": "general",
+      "D1": 0,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 3,
+      "tier": "balanced",
+      "agent": "codex",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "depends_on": [
+        "D0"
+      ],
+      "output": "supabase/migrations/0054_decision_search_terms.sql · scripts/verify-answer-grounding-sql.mjs",
+      "status": "completed",
+      "note": "권한 절(WHERE·grant)을 바꾸게 되면 security 도메인(powerful)으로 재배정하고 게이트를 다시 통과시킨다",
+      "summary": "0054 조사 제거·최근 질문 단어 우선 구현. 후보/권한/점수 동일, SQL 243검사·2,016권한 조합 통과.",
+      "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md"
+    },
+    {
+      "id": "S3",
+      "title": "evidence-highlight — 원문 링크 ?answer= · API 세션 citations RLS로 인용 부분 조회 · <mark> 표시 · 안내 문구",
+      "domain": "frontend",
+      "D1": 1,
+      "D2": 1,
+      "D3": 0,
+      "D4": 1,
+      "score": 3,
+      "tier": "balanced",
+      "agent": "codex",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "depends_on": [
+        "S1"
+      ],
+      "output": "evidence route·page·component · answers route · answer.ts/slack-answer-delivery.ts 링크 · tests/evidence-read.test.ts · verify-grounded-answer-ui.mjs",
+      "status": "completed",
+      "summary": "답변 ID 링크·세션 citations RLS·React mark 구현. 화면 12검사·실DB 본인 강조/타인 비강조 통과.",
+      "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md"
+    },
+    {
+      "id": "S4",
+      "title": "verification — lint·build·test·SQL 하니스·화면 1440/390·로컬 실DB E2E · 기록 · 완료 시 blocked",
+      "domain": "qa",
+      "D1": 0,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 3,
+      "tier": "balanced",
+      "agent": "codex",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "depends_on": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "output": "docs/verification/grounded-answer-selection-2026-09-23/",
+      "status": "blocked",
+      "summary": "로컬 검증 완료: 단위 1,383·SQL 243·화면 12·모델 10/10·실DB E2E 1건/질문 5건 통과. 운영 승인 대기.",
+      "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md",
+      "blocked_reason": "검증 완료. 운영 DB(0053·0054) 적용·배포·운영 연결 E2E는 사용자 승인 대기(ADR-049)"
+    },
+    {
+      "id": "R1",
+      "title": "최종 리뷰 — step 산출물 실측 재검토(자기 보고 불신) · 운영 반영 판정 자료",
+      "domain": "review",
+      "D1": 2,
+      "D2": 2,
+      "D3": 0,
+      "D4": 2,
+      "score": 6,
+      "tier": "powerful",
+      "agent": "main(never_delegate: 최종 리뷰)",
+      "claude_model": "opus",
+      "codex_model": null,
+      "depends_on": [
+        "S4"
+      ],
+      "output": "리뷰 결함 목록 · 사용자 판단 항목",
+      "status": "completed",
+      "summary": "주 에이전트가 권한 경계·모델 계약·원문 추출·실행 기록을 검토했다. 운영 반영은 승인 대기이며 독립 사람 검수는 아니다.",
+      "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md"
+    }
+  ],
+  "gate": {
+    "G1": "PASS — 7개 노드 모두 domain·D1~D4·score·tier·agent·claude_model·codex_model 있음 (main 노드는 codex_model null)",
+    "G2": "PASS — 설계 검토(R0)·아키텍처 결정(D0)·최종 리뷰(R1)는 powerful + 위임 안 함. S2는 security definer 함수를 다시 만들지만 권한 절을 바꾸지 않는다(바뀌면 재배정 조건을 노드에 명시)",
+    "G3": "PASS — general 3~6점(floor fast·ceiling powerful 안), frontend 3점 balanced(floor balanced), qa 3점 balanced(floor balanced), review 6점 powerful",
+    "G4": "PASS — powerful 3/7 = 43% > 30%. 초과 1개 근거: R0·D0·R1은 모두 하드 오버라이드(최종 리뷰·아키텍처)이자 never_delegate라 강등할 수 없다. 실행 노드 S1~S4는 전부 balanced",
+    "G5": "PASS — D3=2 노드 없음. 운영 DB 0053·0054 적용과 배포는 플랜 밖(requires_approval, ADR-049·AGENTS.md). S4는 완료 시 blocked로 멈춘다",
+    "result": "PASS"
+  },
+  "followup_verification": {
+    "verification": "docs/verification/llm-style-followup-2026-09-23/README.md",
+    "summary": "2026-09-23 문체 후속 중 A09 회귀 9/10을 보존. 마지막 허용 프롬프트 보완 후 같은 코드로 실제 Groq 10/10 두 번 통과. 누적 보완 2/2회; 운영 승인 대기 유지."
+  }
+}

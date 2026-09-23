@@ -1,3 +1,4 @@
+import { answerLead } from "@/lib/answer-grounding";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -20,7 +21,7 @@ vi.mock("@/lib/embeddings", () => ({
 }));
 vi.mock("@/lib/search", () => ({
   searchAs: mocks.search,
-  recentDecisionsAs: mocks.decisions,
+  searchDecisionsAs: mocks.decisions,
 }));
 vi.mock("@/lib/llm", () => ({ llm: { structured: mocks.structured } }));
 vi.mock("@/lib/slack/post", () => ({
@@ -33,6 +34,36 @@ vi.mock("@/lib/pipeline/slack-answer-delivery", () => ({ deliverSlackAnswer: vi.
 import { answerQuestion } from "@/lib/pipeline/answer";
 
 describe("answer publication boundary", () => {
+  it("조건·예외 범위를 저장하고 원문은 프롬프트와 Slack 인용에 한 번만 넣는다", async () => {
+    const content = "지원 한도는 50만 원입니다.\n\n필수 교육은 한도가 없습니다.";
+    mocks.search.mockResolvedValue([{ id: "policy", content, source_kind: "document", source_title: "교육 기준", source_visibility: "dept" }]);
+    mocks.structured.mockResolvedValue({ data: { refused: false, citations: [{ evidence: 1, first_paragraph: 1, last_paragraph: 2 }] } });
+    await answerQuestion("answer-1", { channel: "C123", threadTs: "1.1" });
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_answer: answerLead(1), p_citations: [{ item_id: "policy", decision_id: null, quote: content }] }));
+    const user = mocks.structured.mock.calls[0][2].user;
+    expect(Array.isArray(JSON.parse(user).evidence)).toBe(true);
+    expect(user.split("지원 한도는 50만 원입니다.")).toHaveLength(2);
+    for (const value of ["policy", "content", "visibility"]) expect(user).not.toContain(value);
+    expect(mocks.post.mock.calls[0][0].text.split(content)).toHaveLength(2);
+  });
+  it("재시도에는 선택 번호와 고정 실패 사유만 추가한다", async () => {
+    mocks.structured.mockResolvedValueOnce({ data: { refused: false, citations: [{ evidence: 1, first_paragraph: 1, last_paragraph: 999 }] } });
+    await answerQuestion("answer-1");
+    const system = mocks.structured.mock.calls[1][2].system;
+    expect(system).toContain("1번째 선택: 문단 번호가 근거의 문단 범위를 벗어났습니다");
+    expect(system).not.toContain("확인된 근거");
+    expect(system).not.toContain("합성 테스트 질문");
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: false, p_answer: answerLead(1) }));
+  });
+  it("올바른 인용에 붙인 잘못된 결론은 저장·게시하지 않는다", async () => {
+    mocks.search.mockResolvedValue([{ id: "policy", content: "인상률 10% 이상이면 승인하지 않습니다.", source_kind: "document", source_title: "견적 기준", source_visibility: "dept" }]);
+    mocks.structured.mockResolvedValue({ data: { answer: "12% 인상 견적을 승인하세요.", refused: false, citations: [{ evidence: 1, first_paragraph: 1, last_paragraph: 1 }] } });
+    await answerQuestion("answer-1", { channel: "C123", threadTs: "1.1" });
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_answer: answerLead(1) }));
+    expect(JSON.stringify(mocks.rpc.mock.calls)).not.toContain("승인하세요");
+    expect(JSON.stringify(mocks.post.mock.calls)).not.toContain("승인하세요");
+    expect(mocks.decisions).toHaveBeenCalledWith(mocks, expect.objectContaining({ queryText: "합성 테스트 질문", queryVector: [0.1], limit: 8, scope: "channel" }));
+  });
   it("후속 질문은 SQL이 허용한 질문 맥락으로 원문을 다시 검색하며 이전 본문을 인용하지 않는다", async () => {
     const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-2", dept_id: "dept-1", asked_by: "lead-1", question: "그럼 담당자는 누구인가요?", parent_id: "answer-1", status: "pending" }, error: null }) };
     mocks.from.mockReturnValue(query);
@@ -41,7 +72,7 @@ describe("answer publication boundary", () => {
     expect(mocks.rpc).toHaveBeenCalledWith("answer_conversation_context", { p_answer: "answer-2", p_scope: "user" });
     const input = JSON.parse(mocks.structured.mock.calls[0][2].user);
     expect(input.previous_questions).toEqual([{ question: "계약 승인 기준은 무엇인가요?" }]);
-    expect(input.evidence).toContain("확인된 근거");
+    expect(input.evidence[0].paragraphs).toEqual([{ paragraph: 1, text: "확인된 근거" }]);
     expect(mocks.search).toHaveBeenCalledWith(mocks, expect.objectContaining({ userId: "lead-1", deptId: "dept-1", scope: "user" }));
   });
   it("DM은 user 검색을 사용하고 내구성 전달은 생성 워커에서 직접 게시하지 않는다", async () => {
@@ -106,10 +137,10 @@ describe("answer publication boundary", () => {
     mocks.structured.mockResolvedValue({
       data: {
         citations: [
-          { item_id: "item-1", decision_id: null, quote: "확인된 근거" },
+          { evidence: 1, first_paragraph: 1, last_paragraph: 1 },
         ],
-        answer: "근거를 확인했습니다.",
         refused: false,
+        refusal_reason: null,
       },
     });
     mocks.rpc.mockResolvedValue({ data: true, error: null });
@@ -157,7 +188,7 @@ describe("answer publication boundary", () => {
       mrkdwn: false,
     });
     for (const text of [
-      "근거를 확인했습니다.",
+      answerLead(1),
       "확인된 근거",
       "민서",
       "2026. 9. 15.",
@@ -168,12 +199,12 @@ describe("answer publication boundary", () => {
       expect(JSON.stringify(message.blocks)).toContain(text);
   });
 
-  it("링크 조회 실패에도 인용을 유지하고 부서 페이지를 제공한다", async () => {
+  it("링크 조회 실패에도 인용을 유지하고 원문 화면을 제공한다", async () => {
     mocks.permalink.mockRejectedValue(new Error("unavailable"));
     await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
     expect(mocks.post.mock.calls[0][0].text).toContain("확인된 근거");
-    expect(mocks.post.mock.calls[0][0].text).toContain("부서에서 보기");
-    expect(mocks.post.mock.calls[0][0].text).toContain("/d/dept-1");
+    expect(mocks.post.mock.calls[0][0].text).toContain("원문 보기");
+    expect(mocks.post.mock.calls[0][0].text).toContain("/d/dept-1/evidence/item-1?answer=answer-1");
   });
 
   it("메타데이터 조회 오류에도 저장된 답변과 인용을 게시한다", async () => {
@@ -182,11 +213,11 @@ describe("answer publication boundary", () => {
     });
     await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
     expect(mocks.post.mock.calls[0][0].text).toContain("확인된 근거");
-    expect(mocks.post.mock.calls[0][0].text).toContain("부서에서 보기");
+    expect(mocks.post.mock.calls[0][0].text).toContain("원문 보기");
     expect(mocks.permalink).not.toHaveBeenCalled();
   });
 
-  it("검색됐어도 인용하지 않은 항목은 조회하지 않고 중복 인용의 링크는 한 번만 조회한다", async () => {
+  it("중복 출처 초안은 저장하지 않고 전체를 거절한다", async () => {
     const item = (await mocks.search())[0];
     mocks.search.mockResolvedValue([
       item,
@@ -197,17 +228,27 @@ describe("answer publication boundary", () => {
         answer: "확인한 답변",
         refused: false,
         citations: [
-          { item_id: "item-1", decision_id: null, quote: "확인된 근거" },
-          { item_id: "item-1", decision_id: null, quote: "근거" },
+          { evidence: 1, first_paragraph: 1, last_paragraph: 1 },
+          { evidence: 1, first_paragraph: 1, last_paragraph: 1 },
         ],
       },
     });
     await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
-    expect(mocks.metadata).toHaveBeenCalledWith("id", ["item-1"]);
-    expect(mocks.permalink).toHaveBeenCalledOnce();
+    expect(mocks.metadata).not.toHaveBeenCalled();
+    expect(mocks.permalink).not.toHaveBeenCalled();
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: true, p_citations: [] }));
     expect(JSON.stringify(mocks.post.mock.calls)).not.toContain(
       "인용하지 않은 본문",
     );
+  });
+
+  it("검색됐어도 선택하지 않은 항목의 메타데이터와 원문은 추가 조회하지 않는다", async () => {
+    const item = (await mocks.search())[0];
+    mocks.search.mockResolvedValue([item, { ...item, id: "uncited", content: "선택하지 않은 원문" }]);
+    await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1.1" });
+    expect(mocks.metadata).toHaveBeenCalledWith("id", ["item-1"]);
+    expect(mocks.permalink).toHaveBeenCalledOnce();
+    expect(JSON.stringify(mocks.post.mock.calls)).not.toContain("선택하지 않은 원문");
   });
 
   it("모델이 검색 밖 ID를 인용하면 해당 원문을 재조회하지 않고 거절한다", async () => {
@@ -216,7 +257,7 @@ describe("answer publication boundary", () => {
         answer: "숨겨진 내용",
         refused: false,
         citations: [
-          { item_id: "hidden", decision_id: null, quote: "숨겨진 내용" },
+          { evidence: 999, first_paragraph: 1, last_paragraph: 1 },
         ],
       },
     });
@@ -246,7 +287,7 @@ describe("answer publication boundary", () => {
         answer: "재입찰로 결정했습니다.",
         refused: false,
         citations: [
-          { item_id: null, decision_id: "decision-1", quote: "비용 원칙" },
+          { evidence: 1, first_paragraph: 1, last_paragraph: 1 },
         ],
       },
     });
@@ -301,8 +342,8 @@ describe("answer publication boundary", () => {
         answer: "확인된 근거와 근거 없는 추가 주장",
         refused: false,
         citations: [
-          { item_id: "item-1", decision_id: null, quote: "확인된 근거" },
-          { item_id: "item-1", decision_id: null, quote: "존재하지 않는 내용" },
+          { evidence: 1, first_paragraph: 1, last_paragraph: 1 },
+          { evidence: 1, first_paragraph: 1, last_paragraph: 2 },
         ],
       },
     });
@@ -330,7 +371,7 @@ describe("answer publication boundary", () => {
       "complete_answer",
       expect.objectContaining({
         p_refused: false,
-        p_answer: "근거를 확인했습니다.",
+        p_answer: answerLead(1),
       }),
     );
     expect(JSON.stringify(mocks.post.mock.calls)).not.toContain("잘못된 초안");

@@ -38,7 +38,7 @@ function relation<T>(value: T | T[]): T {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function itemHref(item: ItemRow): string {
+function itemHref(item: ItemRow, deptId: string, answerId: string): string {
   const source = relation(item.sources);
   if (source.kind === "slack_channel" && item.external_ref) {
     return `https://slack.com/archives/${encodeURIComponent(source.external_id)}/p${item.external_ref.replace(/\D/gu, "")}`;
@@ -48,7 +48,7 @@ function itemHref(item: ItemRow): string {
       ? source.external_id
       : `https://www.notion.so/${source.external_id.replace(/-/gu, "")}`;
   }
-  return "#";
+  return `/d/${encodeURIComponent(deptId)}/evidence/${encodeURIComponent(item.id)}?answer=${encodeURIComponent(answerId)}`;
 }
 
 export async function GET(
@@ -88,7 +88,9 @@ export async function GET(
     .from("citations")
     .select("quote, item_id, decision_id")
     .eq("owner_kind", "answer")
-    .eq("owner_id", answer.id);
+    .eq("owner_id", answer.id)
+    .order("ordinal", { ascending: true, nullsFirst: false })
+    .order("id", { ascending: true });
   if (citationResult.error) {
     return Response.json({ error: "답변 근거를 불러오지 못했습니다." }, { status: 500 });
   }
@@ -122,7 +124,7 @@ export async function GET(
       const item = items.get(citation.item_id);
       if (!item || item.deleted_at || !citation.quote || !item.content.includes(citation.quote)) return [];
       const source = relation(item.sources);
-      return [{ quote: citation.quote, author: item.author ?? "작성자 미상", source: source.title ?? source.kind, href: itemHref(item) }];
+      return [{ quote: citation.quote, author: item.author ?? "작성자 미상", source: source.title ?? source.kind, href: itemHref(item, membership.deptId, answer.id) }];
     }
     if (citation.decision_id) {
       const decision = decisions.get(citation.decision_id);

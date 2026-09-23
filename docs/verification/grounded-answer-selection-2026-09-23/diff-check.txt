@@ -1,0 +1,54 @@
+warning: LF will be replaced by CRLF in app/api/d/[dept]/answers/[id]/route.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in components/ask-s4.tsx.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in docs/ADR.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in docs/AI-DEVELOPMENT.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in docs/PRD.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in docs/submission-checklist.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in docs/verification/plain-language-audit-2026-09-19/README.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in docs/verification/retro-connectors-2026-09-19/README.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in lib/contracts.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in lib/llm.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in lib/pipeline/answer.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in lib/pipeline/slack-answer-delivery.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in lib/search.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in phases/31-plain-language/step6.md.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in phases/index.json.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in scripts/review-qa.mjs.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in scripts/sample-llm-style.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in scripts/verify-security-sql.mjs.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in tests/answer-read-boundary.test.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in tests/contracts.test.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in tests/e2e/retro-connectors.spec.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in tests/evals/answer-live.eval.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in tests/pipeline/answer-persistence.test.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in tests/pipeline/answer.test.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in tests/pipeline/slack-answer-delivery.test.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in tests/search.test.ts.
+The file will have its original line endings in your working directory
+warning: LF will be replaced by CRLF in tests/slack/answer.test.ts.
+The file will have its original line endings in your working directory

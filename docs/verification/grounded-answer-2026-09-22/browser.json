@@ -1,0 +1,20 @@
+{
+  "scope": "actual components and CSS; all API responses mocked; external traffic blocked",
+  "results": [
+    {
+      "width": 1440,
+      "questionToCitationToSource": true,
+      "revokedSourceHidden": true,
+      "htmlEscaped": true,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 390,
+      "questionToCitationToSource": true,
+      "revokedSourceHidden": true,
+      "htmlEscaped": true,
+      "horizontalOverflow": false
+    }
+  ],
+  "errors": []
+}

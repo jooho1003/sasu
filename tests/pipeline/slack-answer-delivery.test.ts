@@ -1,3 +1,4 @@
+import { answerLead } from "@/lib/answer-grounding";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ rpc: vi.fn(), post: vi.fn(), update: vi.fn(), permalink: vi.fn(), register: vi.fn() }));
 vi.mock("@/lib/supabase/service", () => ({ createServiceSupabaseClient: () => ({ rpc: (...args: unknown[]) => ({ abortSignal: () => mocks.rpc(...args) }) }) }));
@@ -6,6 +7,11 @@ vi.mock("@/lib/jobs", () => ({ registerHandler: mocks.register }));
 import { deliverSlackAnswer } from "@/lib/pipeline/slack-answer-delivery";
 const row = { answer_id: "answer-1", channel: "D123", thread_ts: "1.1", message_ts: null as string | null, status: "pending", scope: "user", dept_id: "dept-1", answer: null as string | null, citations: [] as unknown[] };
 describe("Slack 답변 전달", () => {
+  it("문서·회의 근거는 원문 화면으로 연결한다", async () => {
+    mocks.rpc.mockResolvedValueOnce({ data: { ...row, message_ts: "2.2", status: "done", answer: answerLead(1), citations: [{ itemId: "item-1", quote: "원문", author: "팀장", source: "회의", href: null }] }, error: null });
+    await deliverSlackAnswer("answer-1");
+    expect(mocks.update.mock.calls[0][0].text).toContain("/d/dept-1/evidence/item-1?answer=answer-1");
+  });
   beforeEach(() => {
     vi.resetAllMocks();
     mocks.rpc.mockImplementation(async (name: string) => ({ data: name === "claim_slack_answer_delivery" ? { ...row } : true, error: null }));
@@ -14,7 +20,7 @@ describe("Slack 답변 전달", () => {
   });
   it("처리 안내 timestamp를 저장하고 pending 답변을 보내지 않는다", async () => {
     await deliverSlackAnswer("answer-1");
-    expect(mocks.post).toHaveBeenCalledWith(expect.objectContaining({ text: expect.stringContaining("찾아보고"), thread_ts: "1.1" }));
+    expect(mocks.post).toHaveBeenCalledWith(expect.objectContaining({ text: expect.stringContaining("부서 기록을 찾고 있습니다"), thread_ts: "1.1" }));
     expect(mocks.rpc).toHaveBeenCalledWith("finish_slack_answer_delivery", expect.objectContaining({ p_message_ts: "2.2", p_sent: false }));
     expect(mocks.update).not.toHaveBeenCalled();
   });
@@ -22,7 +28,7 @@ describe("Slack 답변 전달", () => {
     mocks.rpc.mockResolvedValueOnce({ data: { ...row, message_ts: "2.2", status: "failed" }, error: null });
     await deliverSlackAnswer("answer-1");
     expect(mocks.post).not.toHaveBeenCalled();
-    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ ts: "2.2", text: expect.stringContaining("완료하지 못했습니다") }));
+    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ ts: "2.2", text: expect.stringContaining("답변을 만들지 못했습니다") }));
   });
   it("SQL에서 전체 검증된 답변만 DM 권한 문구와 함께 갱신한다", async () => {
     mocks.rpc.mockResolvedValueOnce({ data: { ...row, message_ts: "2.2", status: "done", answer: "오늘 배포합니다.", citations: [{ quote: "오늘 배포합니다.", author: "팀장", occurredAt: null, source: "문서", href: null }] }, error: null });

@@ -2,6 +2,8 @@
 
 상태: **step4-A·step0 일부 구현 및 로컬 검증 / 완료 게이트 미충족 / 운영 미반영**.
 
+2026-09-20: SEC-06 기반으로 로컬 체크포인트를 AES-GCM 암호문으로 교체하고, 서버 HKDF 키 파생·세션/RLS 검증 RPC·키 라우트를 구현했다. 실제 입력은 5초 메모리 시험만 허용하며 음성 바이트를 저장·전송하지 않는다. Chrome 마이크 권한 응답과 SQL 실실행은 아직 대기 중이다. [step0 실행 기록](../../docs/verification/browser-meeting-recording/step0.md).
+
 재시작 후 추가 검증: Docker 복구 확인, 실제 로컬 Storage 8개 체크와 로그인 웹 접근 E2E 1개 통과. 아래의 Docker 차단은 해소됐다. 실제 원본 자동 파기·제공사/CSP·녹음 구현 게이트는 계속 남아 있다.
 
 2026-09-18: 원본 접근권·접근 기록·분당 제한·조직 설정·원본 보존/파기를 구현했다. 단위 1,091개, 격리 SQL 173개+권한 행렬 2,016개, 컴포넌트 브라우저 8개, lint·build 통과. 실제 Storage 통합은 Docker 엔진 불응 및 재시작 액세스 거부로 미검증이다. [실행·인계 기록](../../docs/verification/browser-meeting-recording/access-controls-2026-09-18.md).

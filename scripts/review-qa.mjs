@@ -309,6 +309,8 @@ if (command === "refresh-retro-connectors") {
               ? ["node_modules/tsx/dist/cli.mjs", "scripts/sample-llm-style.ts"]
             : command === "plain-language-test"
               ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/plain-language.spec.ts", ...process.argv.slice(3)]
+            : command === "grounded-answer-test"
+              ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/grounded-answer-live.spec.ts", ...process.argv.slice(3)]
             : command === "connector-test"
               ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/retro-connectors.spec.ts", ...process.argv.slice(3)]
             : command === "ui-regression"

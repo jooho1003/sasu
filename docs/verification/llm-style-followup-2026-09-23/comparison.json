@@ -1,0 +1,155 @@
+{
+  "synthetic": true,
+  "independentlyReviewed": false,
+  "criterion": "At least 4 of 5 generated card/summary samples per run; answer extraction excluded",
+  "rows": [
+    {
+      "run": "before",
+      "id": "card-1",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "before",
+      "id": "card-2",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "before",
+      "id": "card-3",
+      "passed": false,
+      "over40": 1,
+      "wrongEnding": 0,
+      "rules": [
+        {
+          "kind": "banned",
+          "field": "background",
+          "rule": "팀장"
+        },
+        {
+          "kind": "banned",
+          "field": "background",
+          "rule": "적기"
+        },
+        {
+          "kind": "banned",
+          "field": "recommendation",
+          "rule": "적기"
+        }
+      ]
+    },
+    {
+      "run": "before",
+      "id": "summary-1",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "before",
+      "id": "summary-2",
+      "passed": false,
+      "over40": 1,
+      "wrongEnding": 0,
+      "rules": [
+        {
+          "kind": "banned",
+          "field": "overview",
+          "rule": "미루기"
+        }
+      ]
+    },
+    {
+      "run": "after-1",
+      "id": "card-1",
+      "passed": false,
+      "over40": 0,
+      "wrongEnding": 1,
+      "rules": []
+    },
+    {
+      "run": "after-1",
+      "id": "card-2",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "after-1",
+      "id": "card-3",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "after-1",
+      "id": "summary-1",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "after-1",
+      "id": "summary-2",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "after-2",
+      "id": "card-1",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "after-2",
+      "id": "card-2",
+      "passed": false,
+      "over40": 0,
+      "wrongEnding": 1,
+      "rules": [
+        {
+          "kind": "banned",
+          "field": "title",
+          "rule": "미루기"
+        }
+      ]
+    },
+    {
+      "run": "after-2",
+      "id": "card-3",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "after-2",
+      "id": "summary-1",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    },
+    {
+      "run": "after-2",
+      "id": "summary-2",
+      "passed": true,
+      "over40": 0,
+      "wrongEnding": 0,
+      "rules": []
+    }
+  ]
+}

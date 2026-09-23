@@ -1,22 +1,33 @@
 import { MAX_RECORDING_SAMPLES, RECORDING_RATE } from "../pcm";
 import type { Checkpoint } from "../session";
-
-// Synthetic technical gate only. SEC-06 encrypted storage and session key
-// issuance must replace this format before any real recording integration.
+import {
+  decryptRecordingCheckpoint,
+  encryptRecordingCheckpoint,
+  type EncryptedRecordingCheckpoint,
+} from "../checkpoint-crypto";
 
 export type RecordingScope = { ownerUserId: string; deptId: string; recordingId: string };
-type Header = RecordingScope & { key: string[]; createdAt: number; samples: number; chunks: number; shortTail: boolean; complete: boolean; capturedSamples: number };
-type StoredCheckpoint = RecordingScope & Checkpoint & { sha256: string };
+type Header = RecordingScope & {
+  key: string[];
+  createdAt: number;
+  samples: number;
+  chunks: number;
+  shortTail: boolean;
+  complete: boolean;
+  capturedSamples: number;
+  noncePrefix: Uint8Array<ArrayBuffer>;
+};
+type StoredCheckpoint = RecordingScope & EncryptedRecordingCheckpoint;
 const TTL = 24 * 60 * 60 * 1000;
 const key = (scope: RecordingScope) => [scope.ownerUserId, scope.deptId, scope.recordingId];
 
-function openDatabase(name: string, upgrade: (db: IDBDatabase) => void): Promise<IDBDatabase> {
+function openDatabase(name: string, upgrade: (db: IDBDatabase, oldVersion: number) => void, version = 1): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     let settled = false;
-    const request = indexedDB.open(name, 1);
+    const request = indexedDB.open(name, version);
     const fail = () => { settled = true; clearTimeout(timer); reject(new Error("recording_storage_unavailable")); };
     const timer = setTimeout(fail, 5000);
-    request.onupgradeneeded = () => upgrade(request.result);
+    request.onupgradeneeded = (event) => upgrade(request.result, event.oldVersion);
     request.onsuccess = () => {
       clearTimeout(timer);
       if (settled) { request.result.close(); return; }
@@ -26,14 +37,6 @@ function openDatabase(name: string, upgrade: (db: IDBDatabase) => void): Promise
     request.onerror = fail;
     request.onblocked = fail;
   });
-}
-
-async function digest(pcm: Int16Array<ArrayBuffer>): Promise<string> {
-  const bytes = new Uint8Array(pcm.length * 2);
-  const view = new DataView(bytes.buffer);
-  for (let i = 0; i < pcm.length; i++) view.setInt16(i * 2, pcm[i], true);
-  const hash = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function transaction<T>(db: IDBDatabase, names: string[], mode: IDBTransactionMode,
@@ -50,11 +53,20 @@ function transaction<T>(db: IDBDatabase, names: string[], mode: IDBTransactionMo
   });
 }
 
-export async function openRecordingStore() {
-  const db = await openDatabase("sasu-meeting-recordings", (db) => {
+export async function openRecordingStore(recordingKey: CryptoKey) {
+  if (recordingKey.algorithm.name !== "AES-GCM" || !recordingKey.usages.includes("decrypt")) {
+    throw new Error("recording_key_invalid");
+  }
+  const db = await openDatabase("sasu-meeting-recordings", (db, oldVersion) => {
+    // Version 1 contained plaintext PCM and was a synthetic-only technical gate.
+    // It cannot be migrated safely, so remove it before real-input support exists.
+    if (oldVersion < 2) {
+      if (db.objectStoreNames.contains("recordings")) db.deleteObjectStore("recordings");
+      if (db.objectStoreNames.contains("chunks")) db.deleteObjectStore("chunks");
+    }
     db.createObjectStore("recordings", { keyPath: "key" });
     db.createObjectStore("chunks", { keyPath: ["ownerUserId", "deptId", "recordingId", "sequence"] });
-  });
+  }, 2);
   db.onversionchange = () => db.close();
   const getHeader = (scope: RecordingScope) => transaction<Header | undefined>(db, ["recordings"], "readonly", (tx, result) => {
     const request = tx.objectStore("recordings").get(key(scope));
@@ -72,13 +84,17 @@ export async function openRecordingStore() {
     const header = await getHeader(scope);
     if (!header || Date.now() - header.createdAt >= TTL) return;
     if (!Number.isInteger(header.chunks) || header.chunks < 0 || header.chunks > 1800) return;
+    if (!(header.noncePrefix instanceof Uint8Array) || header.noncePrefix.byteLength !== 8) return;
     for (let sequence = 0; sequence < header.chunks; sequence++) {
       const chunk = await getChunk(scope, sequence);
-      if (!chunk || !(chunk.pcm instanceof Int16Array) || chunk.sequence !== sequence ||
-        chunk.pcm.length < 1 || chunk.pcm.length > RECORDING_RATE ||
-        (sequence < header.chunks - 1 && chunk.pcm.length !== RECORDING_RATE) ||
-        chunk.sha256 !== await digest(chunk.pcm)) return;
-      yield { sequence, pcm: chunk.pcm };
+      if (!chunk || !(chunk.ciphertext instanceof ArrayBuffer) || chunk.sequence !== sequence ||
+        !Number.isInteger(chunk.sampleCount) || chunk.sampleCount < 1 || chunk.sampleCount > RECORDING_RATE ||
+        (sequence < header.chunks - 1 && chunk.sampleCount !== RECORDING_RATE)) return;
+      try {
+        yield await decryptRecordingCheckpoint(recordingKey, scope, header.noncePrefix, chunk);
+      } catch {
+        return;
+      }
     }
   }
   return {
@@ -87,27 +103,32 @@ export async function openRecordingStore() {
       if (key(scope).some((value) => !value || value.length > 128)) throw new Error("recording_scope_invalid");
       await transaction<void>(db, ["recordings"], "readwrite", (tx) => {
         tx.objectStore("recordings").add({ ...scope, key: key(scope), createdAt, samples: 0, chunks: 0,
-          shortTail: false, complete: false, capturedSamples: 0 } satisfies Header);
+          shortTail: false, complete: false, capturedSamples: 0,
+          noncePrefix: crypto.getRandomValues(new Uint8Array(8)) } satisfies Header);
       });
       if (!(await getHeader(scope))) throw new Error("recording_storage_unavailable");
     },
     async append(scope: RecordingScope, frame: Checkpoint) {
       if (!Number.isInteger(frame.sequence) || frame.sequence < 0 || frame.sequence >= 1800 ||
         frame.pcm.length < 1 || frame.pcm.length > RECORDING_RATE) throw new Error("recording_checkpoint_invalid");
-      const pcm = frame.pcm.slice();
-      const sha256 = await digest(pcm);
+      const header = await getHeader(scope);
+      if (!header) throw new Error("recording_transaction_aborted");
+      const encrypted = await encryptRecordingCheckpoint(recordingKey, scope, header.noncePrefix, frame);
       await transaction<void>(db, ["recordings", "chunks"], "readwrite", (tx) => {
         const headers = tx.objectStore("recordings");
         const request = headers.get(key(scope));
         request.onsuccess = () => {
-          const header: Header | undefined = request.result;
-          if (!header || header.complete || header.shortTail || header.chunks !== frame.sequence ||
-            Date.now() - header.createdAt >= TTL || header.samples + pcm.length > MAX_RECORDING_SAMPLES) {
+          const current: Header | undefined = request.result;
+          if (!current || current.complete || current.shortTail || current.chunks !== frame.sequence ||
+            Date.now() - current.createdAt >= TTL || current.samples + encrypted.sampleCount > MAX_RECORDING_SAMPLES ||
+            !(current.noncePrefix instanceof Uint8Array) ||
+            current.noncePrefix.some((value, index) => value !== header.noncePrefix[index])) {
             tx.abort(); return;
           }
           try {
-            tx.objectStore("chunks").add({ ...scope, sequence: frame.sequence, pcm, sha256 } satisfies StoredCheckpoint);
-            headers.put({ ...header, samples: header.samples + pcm.length, chunks: header.chunks + 1, shortTail: pcm.length < RECORDING_RATE });
+            tx.objectStore("chunks").add({ ...scope, ...encrypted } satisfies StoredCheckpoint);
+            headers.put({ ...current, samples: current.samples + encrypted.sampleCount,
+              chunks: current.chunks + 1, shortTail: encrypted.sampleCount < RECORDING_RATE });
           } catch { try { tx.abort(); } catch { /* already aborted */ } }
         };
       });

@@ -1,0 +1,50 @@
+{
+  "startedAt": "2026-09-22T09:25:11.122Z",
+  "finishedAt": "2026-09-22T09:25:45.059Z",
+  "database": "local Supabase PostgreSQL",
+  "mocks": false,
+  "dept": "6373dec5-e721-4ff9-8694-b0ee20cb5cb3",
+  "source": "86303109-e06d-4629-a631-4ca0677ccd8d",
+  "item": "16b4fb86-b4f4-429b-b7b8-f0fbcec78a84",
+  "meetingItem": "9d4a7f7d-0630-43ff-8c0d-53603aab740a",
+  "privateItem": "9b50264c-6826-4fd3-8b4e-1c9b0d8d869e",
+  "oldDecision": "79329fce-55dd-4453-8caa-2a8d51a5b1b5",
+  "embeddingModel": "voyage-4-lite",
+  "fixtureEmbeddings": 9,
+  "automaticWorkerJobs": 4,
+  "completed": [
+    {
+      "scenario": "lead_old_decision_document_meeting",
+      "answerId": "f22125e7-cd0c-47d5-99a0-e5aadeb2e54d",
+      "elapsedMs": 6717
+    },
+    {
+      "scenario": "history_document_meeting_and_2020_ledger_links"
+    },
+    {
+      "scenario": "lead_private_budget",
+      "answerId": "0c8c84e3-4819-47de-bd42-31a228881321",
+      "elapsedMs": 4650
+    },
+    {
+      "scenario": "member_private_query_safe",
+      "answerId": "be05b386-22ed-4045-80d5-820e34eea1b8",
+      "elapsedMs": 8910
+    },
+    {
+      "scenario": "member_public_meeting",
+      "answerId": "6a736c94-bd55-459d-a0d5-85ead4f5e5de",
+      "elapsedMs": 3736
+    },
+    {
+      "scenario": "member_api_and_direct_rls_deny_private_other_dept_and_other_owner"
+    },
+    {
+      "scenario": "lead_demotion_revokes_saved_answer_and_original"
+    },
+    {
+      "scenario": "source_removal_hides_original_and_saved_answer"
+    }
+  ],
+  "clientErrors": []
+}

@@ -1,0 +1,38 @@
+
+Running 1 test using 1 worker
+
+
+
+(node:8960) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/1] [chromium] › tests\e2e\grounded-answer-live.spec.ts:13:5 › 실제 DB: 질문 → 오래된 결정·문서·회의 원문 → 재열람·권한 차단
+  1) [chromium] › tests\e2e\grounded-answer-live.spec.ts:13:5 › 실제 DB: 질문 → 오래된 결정·문서·회의 원문 → 재열람·권한 차단 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "done"
+    Received: "refused"
+
+      75 |       return answer!.status;
+      76 |     }, { timeout: 95_000, intervals: [1000, 2000] }).not.toBe("pending");
+    > 77 |     expect(answer!.status).toBe("done");
+         |                            ^
+      78 |     await expect(target.locator("article")).toBeVisible();
+      79 |     expect(answer!.answer).toBe(answer!.citations.map((c, i) => `[${i + 1}] ${c.quote}`).join("\n\n"));
+      80 |     const stored = await db.from("citations").select("quote,ordinal").eq("owner_kind", "answer").eq("owner_id", answerId).order("ordinal");
+        at ask (D:\바이브코딩\sasu\tests\e2e\grounded-answer-live.spec.ts:77:28)
+        at D:\바이브코딩\sasu\tests\e2e\grounded-answer-live.spec.ts:113:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\grounded-answer-live-실제-DB-질문-→-오래된-결정·문서·회의-원문-→-재열람·권한-차단-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\grounded-answer-live-실제-DB-질문-→-오래된-결정·문서·회의-원문-→-재열람·권한-차단-chromium\test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\grounded-answer-live-실제-DB-질문-→-오래된-결정·문서·회의-원문-→-재열람·권한-차단-chromium\error-context.md
+
+
+  1 failed
+    [chromium] › tests\e2e\grounded-answer-live.spec.ts:13:5 › 실제 DB: 질문 → 오래된 결정·문서·회의 원문 → 재열람·권한 차단 
