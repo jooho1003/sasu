@@ -84,6 +84,35 @@ describe("Notion 범위 발견", () => {
     mocks.queryDataSource.mockResolvedValue({ pages: [], nextCursor: null });
   });
 
+  it("새 단일 페이지 범위는 첫 실행에서 원본 페이지를 등록한다", async () => {
+    mocks.rpc.mockImplementation(async (name: string) => {
+      if (name === "claim_notion_discovery") return {
+        data: { ...root, scope: "subtree", notion_id: "page-1", notion_kind: "page" }, error: null,
+      };
+      if (name === "register_notion_page") return { data: "created", error: null };
+      if (name === "settle_notion_root") return { data: false, error: null };
+      return { data: true, error: null };
+    });
+
+    await expect(discoverNotionRoot("root-1")).resolves.toMatchObject({ registered: 1 });
+    expect(mocks.rpc).toHaveBeenCalledWith("register_notion_page", expect.objectContaining({ p_page: "page-1" }));
+    expect(mocks.listDataSources).not.toHaveBeenCalled();
+    expect(mocks.enqueue).not.toHaveBeenCalled();
+  });
+
+  it("현재 발견 작업이 실행 중이어도 미배정 확인 후속 작업을 예약한다", async () => {
+    mocks.rpc.mockImplementation(async (name: string) => {
+      if (name === "claim_notion_discovery") return {
+        data: { ...root, scope: "subtree", notion_id: "page-1", notion_kind: "page", discover_cursor: { mode: "imports", unassignedDone: false } }, error: null,
+      };
+      return { data: true, error: null };
+    });
+
+    await expect(discoverNotionRoot("root-1")).resolves.toMatchObject({ continued: true });
+    expect(mocks.enqueue).toHaveBeenCalledWith("notion_discover", { rootId: "root-1" });
+    expect(mocks.rpc).not.toHaveBeenCalledWith("register_notion_page", expect.anything());
+  });
+
   it("workspace 검색에서 page만 등록하고 data_source 결과는 건너뛴다", async () => {
     mocks.searchNotion.mockResolvedValue({
       results: [
@@ -186,8 +215,9 @@ describe("Notion 범위 발견", () => {
     await expect(discoverNotionRoot("root-1")).resolves.toMatchObject({
       registered: 3,
       unsupported: 0,
-      continued: false,
+      continued: true,
     });
+    expect(mocks.enqueue).toHaveBeenCalledWith("notion_discover", { rootId: "root-1" });
 
     expect(mocks.queryDataSource.mock.calls).toEqual([
       ["data-source-1", null],
@@ -222,8 +252,9 @@ describe("Notion 범위 발견", () => {
     await expect(discoverNotionRoot("root-1")).resolves.toEqual({
       registered: 1,
       unsupported: 1,
-      continued: false,
+      continued: true,
     });
+    expect(mocks.enqueue).toHaveBeenCalledWith("notion_discover", { rootId: "root-1" });
     expect(mocks.rpc).toHaveBeenCalledWith("record_notion_discover_unsupported", {
       p_root: "root-1",
       p_count: 1,
