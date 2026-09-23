@@ -16,7 +16,7 @@
 | 공유 소리+마이크 재시험 | 5,067ms, 공유 RMS 0.2384·마이크 0.0007, 양쪽 신호 감지. 화면 프레임 저장 0·저장/전송 없음 | [재시험 결과](shared-audio-user-result-2.json) |
 | Whisper | 사용자가 운영 묻기 화면에서 녹음·전사 후 “전사 완료” 보고. 운영 Whisper 모델 호출 3건 확인 | [사용자 확인](user-verification.json), [본문 없는 호출 집계](db-telemetry.txt) |
 | Slack 실계정 | 활성 설치 1개. 세션 설정 화면에서 실제 channels/users API 목록 조회 성공 | [DB 설치 수](db-inventory.txt), [브라우저 관찰](browser-verification.json) |
-| Notion·회고 계정 | 최초 Notion 0개에서 사용자 지시 후 기존 통합 키로 연결 1개. 페이지 발견 정체를 재현해 수정 중. 회고 연결 0개 | [최초 DB 설치 수](db-inventory.txt), [연결 후 상태](db-followup.txt), [수정 기록](notion-fix/README.md) |
+| Notion·회고 계정 | 기존 통합 키 연결 성공. 페이지 발견 정체를 수정·배포하고 QA 1개 수집·임베딩·수동 재수집·자동 poll done 확인. 회고 연결은 0개 | [최초 실패 상태](db-followup.txt), [수정·운영 검증](notion-fix/README.md), [최종 SQL](db-notion-final.txt) |
 | Graft | 596/596 파일, 2,677 노드·6,738 관계, graph check OK, ASK 호출 관계 조회 | [build](graft-build.txt), [check](graft-check.txt), [호출자](graft-resolve-callers.json), [호출 대상](graft-answer-callees.json), [LLM API](graft-llm-api.txt) |
 | Archify | validate 9/9, showcase 형식·구성 통과, deliver 완료, 실제 Chrome 4개 화면 검사 통과 | [명세](answer-flow.json), [HTML](answer-flow.html), [최종 검증](archify-validate-2.json), [배포 영수증](archify-delivery.json), [화면 검사](answer-flow.visual-check.json) |
 | 쇼케이스 데이터 | 공개 데모 4개 부서에서 QA 표식 findings 0 | [읽기 전용 감사](showcase-audit.txt) |
@@ -43,7 +43,7 @@ Archify 공식 저장소 커밋 `8809b273c278a813a47fa37698864779c0d4cf08`으로
 
 - 공유 오디오+마이크 재시험은 양쪽 신호를 감지했다. 첫 무음 결과는 보존하며 원인을 확정하지 않는다. 두 번째 마이크는 감지 기준 0.0001보다 크지만 낮은 음량이므로 음성 명료도 검증으로 보지 않는다. 5초 입력 시험을 Meet/Zoom·30분 녹음·장애 복구 성공으로 확장하지 않는다.
 - 독립 비개발자의 5분 읽기 검수는 사용자 요청으로 에이전트 수행으로 전환했다. [에이전트 결과](agent-reading-review.json)는 3개 완료·카드 원문 열기 1개 부분 완료이며 독립 사람 검수 기준을 충족하지 않는다.
-- Notion 기존 통합 키 연결·QA 페이지 선택 완료. 페이지 수집 정체를 재현해 수정 후 재검증한다. 회고 제공자별 실제 OAuth/API 경로는 계정·선택 자료가 없어 미실행이다.
+- Notion 내부 통합의 QA 1개 페이지 수집·재조회는 완료했다. 원문 편집 후 변경 감지, 공개 OAuth·webhook, 회고 제공자별 실제 OAuth/API 경로는 미실행이다.
 - Slack 실계정 조회는 성공했으나 DM/채널 신규 질문→발송 검증은 미실행. 발송할 시험 대상·범위를 정해야 한다. 현재 로그인 사용자 자체의 Slack 매핑도 비어 있어 기존 파일럿 계정과 구분한다.
 - 실제 업로드 전체 경로, 장시간 녹음, Meet/Zoom 완성, 독립 업무 정확도 검수 등 기존 미완료 항목은 그대로다. 형식 검사·합성 질문 성공을 모든 설계의 완료로 판정하지 않는다.
 

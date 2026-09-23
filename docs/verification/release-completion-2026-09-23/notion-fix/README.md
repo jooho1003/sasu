@@ -17,4 +17,8 @@
 - Graft [수정 전 호출 관계](graft-before.json), [수정 후](graft-after.json), [build](graft-build.txt), [check](graft-check.txt). 기존 앱 스냅샷에 이번 구현·테스트 2개 파일을 반영해 다시 분석했다. 실제 구조 그래프 확인이며 LLM 의미 요약은 실행하지 않았다.
 - Archify [명세](flow.json), [검증](archify-validate.json), [deliver](archify-delivery.json), [HTML](flow.html), [실제 Chrome 검사](flow.visual-check.json). 1440×900 밝은 화면의 글자·화살표·겹침을 에이전트가 확인했다. 독립 사람 시각 검수는 아니다.
 
-운영 검증은 수정 배포 후 같은 QA 페이지 범위를 다시 시작해 root idle·문서 수집 완료·갱신을 확인한다. 아직 확인하지 않은 결과를 완료로 쓰지 않는다.
+## 운영 재검증 완료
+
+[PR #4](https://github.com/jooho1003/sasu/pull/4)를 머지하고 [운영 배포 Ready](production-deployment.json)를 확인한 뒤 같은 QA 페이지 범위를 다시 시작했다. [첫 수집 결과](production-first-pass.txt): 원본 1개·임베딩 1개, 두 발견 작업·수집·임베딩 모두 done, root idle, 오류 없음. 관리자 화면도 ‘가져옴 · 완료 1 / 대기 0 / 실패 0’을 표시했다.
+
+설정의 자동 수집 문서에서 **다시 가져오기**를 실행했다. [최종 SQL 결과](../db-notion-final.txt)에서 수동 import와 자동 notion_poll 작업 모두 done, 마지막 수집 시각은 07:48:08Z → 07:49:54Z로 갱신, 문서·임베딩 수는 각각 1개로 유지됐다. 실제 원문을 수정하는 편집→변경 감지 시험은 하지 않았으므로 이 결과는 재조회·주기 작업·멱등 수집 확인이다. QA 페이지 하나의 내부 통합 경로 검증이며 공개 OAuth·webhook·다른 제공자 완료를 뜻하지 않는다.

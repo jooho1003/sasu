@@ -9,3 +9,5 @@
 - 실제 Graft 수정 전·후 호출 관계, Archify 명세·HTML·실제 Chrome 측정·에이전트 화면 검토 완료.
 - [실행 기록 및 운영 재검증](../../docs/verification/release-completion-2026-09-23/notion-fix/README.md).
 - 공개 통합 OAuth·webhook 심사/인증 등 step8의 외부 조건은 기존대로 미완료다. 내부 통합 키 연결 성공으로 이를 대체하지 않는다.
+
+PR #4 운영 배포 후 같은 QA 페이지 재시작으로 발견·수집·임베딩·후속 발견 완료, root idle·문서 1개·오류 없음 확인. 수동 다시 가져오기와 자동 notion_poll도 완료했고 문서 수 1개를 유지했다. 최종 운영 SQL은 위 실행 기록에 연결했다.
