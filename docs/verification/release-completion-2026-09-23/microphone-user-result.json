@@ -1,0 +1,18 @@
+{
+  "at": "2026-09-23T06:54:05.244Z",
+  "evidence": "user-reported actual device result; not synthetic",
+  "mode": "microphone",
+  "durationMs": 5055,
+  "audioTracks": [
+    1
+  ],
+  "videoFramesStored": 0,
+  "peakRms": [
+    0.3434
+  ],
+  "signalDetected": [
+    true
+  ],
+  "persisted": false,
+  "transmitted": false
+}

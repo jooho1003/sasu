@@ -1,0 +1,8 @@
+{"upToDate":false,"dryRun":true,"migrations":["0052_recording_key_context.sql","0053_answer_decision_search.sql","0054_decision_search_terms.sql"],"seeds":[],"roles":[],"message":"Finished supabase db push."}
+DRY RUN: migrations will *not* be pushed to the database.
+Connecting to remote database...
+Skipping migration .gitkeep... (file name must match pattern "<timestamp>_name.sql")
+Would push these migrations:
+ • 0052_recording_key_context.sql
+ • 0053_answer_decision_search.sql
+ • 0054_decision_search_terms.sql

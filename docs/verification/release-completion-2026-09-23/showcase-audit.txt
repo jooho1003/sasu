@@ -1,0 +1,9 @@
+
+> sasu@0.1.0 audit:showcase
+> tsx scripts/audit-showcase-data.ts
+
+{
+  "org_id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  "department_count": 4,
+  "findings": []
+}

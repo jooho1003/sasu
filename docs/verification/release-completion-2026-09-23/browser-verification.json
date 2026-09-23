@@ -1,0 +1,27 @@
+{
+  "date": "2026-09-23",
+  "environment": "production Chrome authenticated pilot department",
+  "method": "CUA accessibility observations and visual screenshot inspection",
+  "ask": {
+    "answerId": "f22cdcb5-01d1-47b3-a090-6e29d6ebd19d",
+    "syntheticFixture": true,
+    "doneVisible": true,
+    "fixedLeadVisible": true,
+    "citationsVisible": 2,
+    "documentLinkContainsAnswerId": true,
+    "documentLoaded": true,
+    "threeConsecutiveParagraphsHighlightedVisually": true,
+    "screenshotReviewedInToolSession": true,
+    "screenshotFileSaved": false
+  },
+  "slack": {
+    "installationConnected": true,
+    "usersListVisible": true,
+    "channelOptionsVisible": true,
+    "codePath": "app/api/d/[dept]/settings/route.ts: withSlackDepartment -> listConversations + listUsers",
+    "messagesSent": 0,
+    "channelConnectionsChanged": 0,
+    "currentSignedInMemberSlackMapping": "missing"
+  },
+  "limits": ["one synthetic ASK smoke only", "no live Slack delivery", "no new permission grants"]
+}

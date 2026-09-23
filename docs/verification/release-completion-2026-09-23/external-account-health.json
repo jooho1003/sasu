@@ -1,0 +1,21 @@
+{
+  "at": "2026-09-23T06:51:58.561Z",
+  "slack": {
+    "http": 200,
+    "ok": false,
+    "error": "invalid_auth",
+    "workspace": null,
+    "teamId": null,
+    "botId": null
+  },
+  "notion": {
+    "http": 401,
+    "ok": false,
+    "type": null,
+    "error": "unauthorized",
+    "workspace": null
+  },
+  "retro": {
+    "configuredProviders": []
+  }
+}

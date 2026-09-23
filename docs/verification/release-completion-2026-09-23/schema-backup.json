@@ -1,0 +1,7 @@
+{
+  "at": "2026-09-23T06:54:05.235Z",
+  "path": ".vercel/release-schema-before.sql",
+  "bytes": 547417,
+  "sha256": "e394921597285ffc9353457574604802276b2d156bf6773eca9f78e472acde3c",
+  "scope": "schema-only; private ignored file"
+}

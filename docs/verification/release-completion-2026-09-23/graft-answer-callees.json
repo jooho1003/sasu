@@ -1,0 +1,164 @@
+{
+  "query": "answerQuestion",
+  "matches": [
+    {
+      "symbol": {
+        "id": "lib/pipeline/answer.ts#answerQuestion",
+        "name": "answerQuestion",
+        "kind": "function",
+        "path": "lib/pipeline/answer.ts",
+        "span": "L301-L450"
+      },
+      "hits": [
+        {
+          "id": "lib/answer-grounding.ts#answerLead",
+          "relation": "calls",
+          "depth": 1,
+          "name": "answerLead",
+          "kind": "function",
+          "path": "lib/answer-grounding.ts",
+          "span": "L74-L76"
+        },
+        {
+          "id": "lib/answer-grounding.ts#resolveSelections",
+          "relation": "calls",
+          "depth": 1,
+          "name": "resolveSelections",
+          "kind": "function",
+          "path": "lib/answer-grounding.ts",
+          "span": "L37-L72"
+        },
+        {
+          "id": "lib/embeddings.ts#embedText",
+          "relation": "calls",
+          "depth": 1,
+          "name": "embedText",
+          "kind": "function",
+          "path": "lib/embeddings.ts",
+          "span": "L158-L168"
+        },
+        {
+          "id": "lib/mask.ts#mask",
+          "relation": "calls",
+          "depth": 1,
+          "name": "mask",
+          "kind": "function",
+          "path": "lib/mask.ts",
+          "span": "L33-L38"
+        },
+        {
+          "id": "lib/pipeline/answer.ts#buildAnswerEvidence",
+          "relation": "calls",
+          "depth": 1,
+          "name": "buildAnswerEvidence",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L92-L110"
+        },
+        {
+          "id": "lib/pipeline/answer.ts#ensureNoDatabaseError",
+          "relation": "calls",
+          "depth": 1,
+          "name": "ensureNoDatabaseError",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L57-L61"
+        },
+        {
+          "id": "lib/pipeline/answer.ts#replyInSlack",
+          "relation": "calls",
+          "depth": 1,
+          "name": "replyInSlack",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L148-L164"
+        },
+        {
+          "id": "lib/pipeline/answer.ts#saveAnswer",
+          "relation": "calls",
+          "depth": 1,
+          "name": "saveAnswer",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L276-L299"
+        },
+        {
+          "id": "lib/pipeline/answer.ts#saveRefused",
+          "relation": "calls",
+          "depth": 1,
+          "name": "saveRefused",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L259-L274"
+        },
+        {
+          "id": "lib/pipeline/answer.ts#slackCitations",
+          "relation": "calls",
+          "depth": 1,
+          "name": "slackCitations",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L166-L257"
+        },
+        {
+          "id": "lib/pipeline/answer.ts#verifyAnswerCitations",
+          "relation": "calls",
+          "depth": 1,
+          "name": "verifyAnswerCitations",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L63-L83"
+        },
+        {
+          "id": "lib/pipeline/slack-answer-delivery.ts#deliverSlackAnswer",
+          "relation": "calls",
+          "depth": 1,
+          "name": "deliverSlackAnswer",
+          "kind": "function",
+          "path": "lib/pipeline/slack-answer-delivery.ts",
+          "span": "L17-L68"
+        },
+        {
+          "id": "lib/search.ts#searchAs",
+          "relation": "calls",
+          "depth": 1,
+          "name": "searchAs",
+          "kind": "function",
+          "path": "lib/search.ts",
+          "span": "L39-L59"
+        },
+        {
+          "id": "lib/search.ts#searchDecisionsAs",
+          "relation": "calls",
+          "depth": 1,
+          "name": "searchDecisionsAs",
+          "kind": "function",
+          "path": "lib/search.ts",
+          "span": "L76-L87"
+        },
+        {
+          "id": "lib/slack/answer.ts#buildSlackAnswerMessage",
+          "relation": "calls",
+          "depth": 1,
+          "name": "buildSlackAnswerMessage",
+          "kind": "function",
+          "path": "lib/slack/answer.ts",
+          "span": "L68-L145"
+        },
+        {
+          "id": "lib/supabase/service.ts#createServiceSupabaseClient",
+          "relation": "calls",
+          "depth": 1,
+          "name": "createServiceSupabaseClient",
+          "kind": "function",
+          "path": "lib/supabase/service.ts",
+          "span": "L7-L25"
+        }
+      ]
+    }
+  ],
+  "saved": {
+    "files": 8,
+    "baselineChars": 37527
+  }
+}

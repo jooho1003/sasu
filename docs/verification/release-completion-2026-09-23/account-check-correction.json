@@ -1,0 +1,14 @@
+{
+  "at": "2026-09-23T07:09:04.022Z",
+  "invalidReports": [
+    "external-account-health.json",
+    "integration-inventory.json"
+  ],
+  "reason": "Vercel production Secret values pull as [SENSITIVE], not usable credentials. Initial REST inventory also failed to check the error object when error.code was absent; empty arrays are not evidence of no installations.",
+  "observedAdminUi": {
+    "slackWorkspace": "사수(SASU)",
+    "slackConnected": true,
+    "notionConnected": false
+  },
+  "followup": "Use actual app session/provider RPC or direct operator SQL; never use pulled secret placeholders."
+}
