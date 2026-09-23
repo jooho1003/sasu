@@ -270,8 +270,9 @@ export default function AskS4({ deptId }: { deptId: string }) {
               <h2 className="m-0 text-xl">근거</h2>
               {answer.citations.map((citation, index) => (
                 <a key={`${citation.href}-${index}`} className="grid gap-1 rounded-xl border border-[var(--accent)]/20 bg-[var(--accent)]/5 p-4 no-underline" href={citation.href}>
-                  <span className="text-xs text-[var(--muted)]" data-meta>{citation.author} · {citation.source}</span>
+                  <span className="text-xs text-[var(--muted)]" data-meta>근거 {index + 1} · {citation.author} · {citation.source}</span>
                   <q className="font-normal leading-7 text-[var(--ink)]">{citation.quote}</q>
+                  <span className="text-sm font-bold">원문 보기</span>
                 </a>
               ))}
             </section>

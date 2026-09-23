@@ -10,7 +10,7 @@
 
 - Slack 수신: 서명·동의·마스킹 후 `ingest_slack_atomic`으로 event/item 또는 answer/job을 원자 저장한다. SQL에서 활성 소스·동의를 잠금 후 재확인한다. 아래 일반 입력 흐름 중 Slack 경로는 이 원자 저장을 사용한다.
 - 워커: `lib/worker.ts`가 전체 핸들러 등록 → pending sweep → `runOnce`를 수행한다. HTTP 트리거와 `kickWorker`의 after 콜백 모두 이 진입점을 쓴다. 완료 기록 실패를 handler 실패로 오인하여 재큐잉하지 않는다. 프로세스 중단 시 lease 복구는 아직 별도 작업이다.
-- Q&A: 인용 일부 실패도 전체 초안을 1회 재생성하고, 재실패/게이트웨이 거절은 canonical refused로 종료한다. 실제 답변과 인용은 complete_answer에서 원자 저장한다. 단순 문자열 검증은 의미적 뒷받침 평가를 대체하지 않는다.
+- Q&A(ADR-066·067): 원문 벡터 검색과 `search_decisions_as`의 결정 관련도 검색을 함께 수행한다. 모델은 근거 번호와 연속 문단 범위만 고르고, `lib/answer-grounding.ts`가 범위를 검증해 원문의 부분 문자열 인용으로 바꾼다(출처 중복·범위 밖은 실패 코드). 모델 자유 서술은 출력 계약에서 제거했다. 새 답변 본문은 고정 안내 문장이며 근거 원문은 인용에만 있다. 선택 실패는 실패 코드를 붙여 전체를 1회 재생성하고, 재실패/게이트웨이 거절은 canonical refused로 종료한다. `complete_answer`가 답변·인용·ordinal을 원자 저장하고 웹/Slack은 ordinal 순서를 유지한다. `/d/[dept]/evidence/[id]`와 대응 API는 세션·멤버십·현재 RLS·삭제/소스 활성 상태로 마스킹 원문을 확인하고, `?answer=`가 있으면 세션 citations RLS(질문자 본인)로 인용 부분을 표시한다. 문단의 질문 관련성·원문의 사실성·조각 경계에서 나뉜 조건은 별도 평가 대상이다. 0053·0054는 로컬 검증 단계이며 운영 적용은 별도다.
 
 ---
 
@@ -180,7 +180,7 @@ job 종류 11개: `classify` · `embed` · `embed_decision` · `summarize_meetin
 
 ### 3.5 인용이 없으면 출력이 없다
 
-카드(`CardDraft`)와 답변(`AnswerDraft`)의 `citations[]`는 최소 1개 required이고, 파이프라인이 `item_id|decision_id` 실존 + `quote`가 원문에 문자열로 포함되는지 검증한다. 실패한 인용은 제거하고, 0개가 되면 답변은 `refused`, 카드는 1회 재생성 후 `needs_review`(대시보드에만, DM 없음). UI는 인용 칩이 없는 문장을 렌더하지 않는다. LLM 심판(2차)은 없다 — 문자열 검증이 전부다.
+카드(`CardDraft`)와 답변(`AnswerDraft`)의 `citations[]`는 최소 1개 required이고, 파이프라인이 검색된 `item_id|decision_id`와 원문 내 `quote`를 검증한다. ASK는 ADR-067에 따라 모델이 근거 번호·연속 문단 범위만 고르고 코드가 원문에서 인용을 잘라 만든다. 범위·출처 중복 검사 중 하나라도 실패한 선택은 전체를 한 번 다시 생성하고 재실패하면 `refused`로 닫는다. 새 ASK 본문은 고정 안내 문장이며 별도 모델 결론을 렌더하지 않는다. 카드의 자유 서술과 기존 저장 답변이 이 추출 방식으로 검증된 것은 아니다. LLM 심판(2차)은 없으며 문단 선택의 관련성과 원문 사실성은 자동 보증하지 않는다.
 
 ### 3.6 계약은 `contracts.ts` Zod 단일 소스
 

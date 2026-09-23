@@ -46,7 +46,7 @@ describe("answer pipeline pure rules", () => {
 
     expect(evidence.texts.get("item-1")).toBe("공개 원문");
     expect(evidence.texts.get("decision-1")).toBe("재입찰\n원칙에 따른다.");
-    expect(evidence.prompt).toContain("item-1");
-    expect(evidence.prompt).toContain("decision-1");
+    expect(evidence.prompt).toEqual([{ evidence: 1, kind: "item", source: "#공개", paragraphs: [{ paragraph: 1, text: "공개 원문" }] }, { evidence: 2, kind: "decision", source: "결정 기록", paragraphs: [{ paragraph: 1, text: "재입찰\n원칙에 따른다." }] }]);
+    for (const field of ["item-1", "decision-1", "content", "visibility"]) expect(JSON.stringify(evidence.prompt)).not.toContain(field);
   });
 });

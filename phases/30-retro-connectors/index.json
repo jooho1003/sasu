@@ -59,10 +59,10 @@
       "step": 7,
       "name": "connectors-verification",
       "status": "blocked",
-      "summary": "격리 SQL·단위·개발/기획 각 3일 수동 검토→확정→공개 철회→연결 해제 통과. 실제 제공자 sandbox·Groq 한도 복구 후 AI 초안·사람 판정·제출 후 운영 반영 미완료.",
+      "summary": "2026-09-23 개발·기획 각 3일의 실제 Groq 초안 6건→인용 확인→편집→확정→공개 철회→해제 로컬 DB/브라우저 통과. 실제 제공자 sandbox·사람 파일럿은 미완료. Groq 한도 차단 해소.",
       "note": "운영 반영은 사람 판정",
       "scope": "하니스·E2E(파일럿 2개 부서)·샌드박스 실측·누출 grep → docs/verification/retro-connectors-<날짜>/",
-      "verification": "docs/verification/retro-connectors-2026-09-19/README.md"
+      "verification": "docs/verification/model-resume-2026-09-23/README.md"
     },
     {
       "step": 8,

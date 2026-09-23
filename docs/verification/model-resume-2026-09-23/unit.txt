@@ -1,0 +1,39 @@
+
+> sasu@0.1.0 test
+> vitest run --passWithNoTests --maxWorkers=2
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/recording/session.test.ts (6 tests | 1 failed) 5315ms
+   ❯ meeting recording checkpoints (6)
+     × streams 30 minutes with exactly 1800 bounded checkpoints and ignores further input 5268ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/recording/session.test.ts > meeting recording checkpoints > streams 30 minutes with exactly 1800 bounded checkpoints and ignores further input
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/recording/session.test.ts:74:3
+     72|   });
+     73|
+     74|   it("streams 30 minutes with exactly 1800 bounded checkpoints and ign…
+       |   ^
+     75|     let frames = 0;
+     76|     let largest = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 138 passed (139)
+      Tests  1 failed | 1357 passed (1358)
+   Start at  07:18:12
+   Duration  123.41s (import 55%, tests 25%, transform 17%, worker 3%)
+
+    Isolate  139 workers spawned · ~1.19s startup each (spawn + environment, per file)
+             at least ~81.72s faster with isolate: false — reuses workers across files instead of one per file
+

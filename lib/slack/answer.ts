@@ -105,8 +105,8 @@ export function buildSlackAnswerMessage(input: {
     const time =
       date && Number.isFinite(date.getTime())
         ? `${dateFormatter.format(date)} (KST)`
-        : "시각 미상";
-    const author = Array.from(citation.author?.trim() || "작성자 미상")
+        : "시각 모름";
+    const author = Array.from(citation.author?.trim() || "누가 썼는지 모름")
       .slice(0, 200)
       .join("");
     const source = Array.from(citation.source || "부서 기록")

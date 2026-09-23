@@ -1,0 +1,132 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/evidence-read.test.ts (14 tests | 10 failed) 81ms
+   ❯ 원문 열람 (14)
+     × 보이는 원문을 확인한 뒤 세션 RLS로 해당 답변의 인용만 강조한다 48ms
+     × 유효한 UUID가 아니면 인용을 조회하지 않는다 3ms
+     × 유효한 UUID가 아니면 인용을 조회하지 않는다 2ms
+     × 유효한 UUID가 아니면 인용을 조회하지 않는다 1ms
+     × 유효한 UUID가 아니면 인용을 조회하지 않는다 3ms
+     × 강조 실패는 원문 읽기를 막지 않는다 3ms
+     × 강조 실패는 원문 읽기를 막지 않는다 2ms
+     × 강조 실패는 원문 읽기를 막지 않는다 2ms
+     × 강조 실패는 원문 읽기를 막지 않는다 4ms
+     × 선택적인 강조 조회가 예외를 던져도 원문을 반환한다 2ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 보이는 원문을 확인한 뒤 세션 RLS로 해당 답변의 인용만 강조한다
+AssertionError: expected { id: 'item-1', …(3) } to match object { kind: 'meeting_transcript', …(1) }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "highlight": "마스킹된",
+-   "kind": "meeting_transcript",
++   "author": null,
++   "content": "마스킹된 원문",
++   "id": "item-1",
++   "title": "회의 기록",
+  }
+
+ ❯ tests/evidence-read.test.ts:24:35
+     22|   it("보이는 원문을 확인한 뒤 세션 RLS로 해당 답변의 인용만 강조한다", async () => {
+     23|     const response = await read(answerId);
+     24|     expect(await response.json()).toMatchObject({ kind: "meeting_trans…
+       |                                   ^
+     25|     expect(mocks.from.mock.calls.map(call => call[0])).toEqual(["items…
+     26|     expect(citation.select).toHaveBeenCalledWith("quote");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 유효한 UUID가 아니면 인용을 조회하지 않는다
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 유효한 UUID가 아니면 인용을 조회하지 않는다
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 유효한 UUID가 아니면 인용을 조회하지 않는다
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 유효한 UUID가 아니면 인용을 조회하지 않는다
+AssertionError: expected { id: 'item-1', …(3) } to match object { highlight: null }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "highlight": null,
++   "author": null,
++   "content": "마스킹된 원문",
++   "id": "item-1",
++   "title": "회의 기록",
+  }
+
+ ❯ tests/evidence-read.test.ts:31:47
+     29|   });
+     30|   it.each([undefined, "", "invalid", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaa…
+     31|     expect(await (await read(answer)).json()).toMatchObject({ highligh…
+       |                                               ^
+     32|     expect(citation.select).not.toHaveBeenCalled();
+     33|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 강조 실패는 원문 읽기를 막지 않는다
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 강조 실패는 원문 읽기를 막지 않는다
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 강조 실패는 원문 읽기를 막지 않는다
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 강조 실패는 원문 읽기를 막지 않는다
+AssertionError: expected { id: 'item-1', …(3) } to match object { highlight: null, content: '마스킹된 원문' }
+(3 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "content": "마스킹된 원문",
+-   "highlight": null,
+  }
+
+ ❯ tests/evidence-read.test.ts:38:35
+     36|     const response = await read(answerId);
+     37|     expect(response.status).toBe(200);
+     38|     expect(await response.json()).toMatchObject({ highlight: null, con…
+       |                                   ^
+     39|   });
+     40|   it("선택적인 강조 조회가 예외를 던져도 원문을 반환한다", async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  tests/evidence-read.test.ts > 원문 열람 > 선택적인 강조 조회가 예외를 던져도 원문을 반환한다
+AssertionError: expected { id: 'item-1', …(3) } to match object { highlight: null }
+(4 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "highlight": null,
++   "author": null,
++   "content": "마스킹된 원문",
++   "id": "item-1",
++   "title": "회의 기록",
+  }
+
+ ❯ tests/evidence-read.test.ts:44:35
+     42|     const response = await read(answerId);
+     43|     expect(response.status).toBe(200);
+     44|     expect(await response.json()).toMatchObject({ highlight: null });
+       |                                   ^
+     45|   });
+     46|   it("세션 부서의 삭제되지 않은 활성 원문만 조회한다", async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  10 failed | 4 passed (14)
+   Start at  09:58:26
+   Duration  395ms (tests 44%, transform 36%, import 17%, worker 4%)
+

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { answerLead } from "@/lib/answer-grounding";
 import {
   buildSlackAnswerMessage,
   type SlackAnswerCitation,
@@ -34,6 +35,14 @@ function textObjects(message: ReturnType<typeof buildSlackAnswerMessage>) {
 }
 
 describe("Slack 답변과 인용 표시", () => {
+  it("2,400자 근거 8개도 고정 안내와 함께 온전히 보낸다", () => {
+    const quote = "가".repeat(2400);
+    const message = buildSlackAnswerMessage({ answer: answerLead(8), citations: Array.from({ length: 8 }, () => ({ ...citation, quote })) });
+    expect(message.text).toContain(answerLead(8));
+    expect(message.text.split(quote)).toHaveLength(9);
+    expect(message.blocks.length).toBeLessThanOrEqual(50);
+    expect(message.text).not.toContain("질문을 나누어");
+  });
   it("본문·인용·발언자·KST 시각·링크를 블록과 접근성 text에 모두 넣는다", () => {
     const message = buildSlackAnswerMessage({
       answer: "이번 견적은 재입찰 원칙을 확인해야 합니다.",
@@ -84,8 +93,8 @@ describe("Slack 답변과 인용 표시", () => {
       answer: "확인된 내용",
       citations: [{ ...citation, author: null, occurredAt: "bad-date" }],
     });
-    expect(message.text).toContain("작성자 미상");
-    expect(message.text).toContain("시각 미상");
+    expect(message.text).toContain("누가 썼는지 모름");
+    expect(message.text).toContain("시각 모름");
     expect(message.text).not.toContain("Invalid Date");
   });
 

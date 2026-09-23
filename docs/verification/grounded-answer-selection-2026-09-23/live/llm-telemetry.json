@@ -1,0 +1,44 @@
+{
+  "startedAt": "2026-09-23T01:23:28.021Z",
+  "calls": 5,
+  "inputTokens": 6102,
+  "outputTokens": 3232,
+  "rows": [
+    {
+      "purpose": "answer",
+      "model": "openai/gpt-oss-120b",
+      "input_tokens": 1272,
+      "output_tokens": 659
+    },
+    {
+      "purpose": "answer",
+      "model": "openai/gpt-oss-120b",
+      "input_tokens": 1260,
+      "output_tokens": 352
+    },
+    {
+      "purpose": "answer",
+      "model": "openai/gpt-oss-120b",
+      "input_tokens": 1205,
+      "output_tokens": 1065
+    },
+    {
+      "purpose": "answer",
+      "model": "openai/gpt-oss-120b",
+      "input_tokens": 1202,
+      "output_tokens": 823
+    },
+    {
+      "purpose": "answer",
+      "model": "openai/gpt-oss-120b",
+      "input_tokens": 1163,
+      "output_tokens": 333
+    }
+  ],
+  "previous": {
+    "calls": 5,
+    "inputTokens": 5707,
+    "outputTokens": 4094
+  },
+  "comparison": "Added conditions/exception query and evidence; scenarios are not identical."
+}

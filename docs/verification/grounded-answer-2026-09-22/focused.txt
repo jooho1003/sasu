@@ -1,0 +1,58 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/contracts.test.ts (27 tests | 1 failed) 28ms
+   ❯ AnswerDraft (3)
+     × 정상 입력을 파싱한다 3ms
+ ❯ tests/pipeline/answer-persistence.test.ts (20 tests | 1 failed) 21ms
+   ❯ answer publication boundary (20)
+     × 검색됐어도 인용하지 않은 항목은 조회하지 않고 중복 인용의 링크는 한 번만 조회한다 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/contracts.test.ts > AnswerDraft > 정상 입력을 파싱한다
+ZodError: [
+  {
+    "code": "unrecognized_keys",
+    "keys": [
+      "answer"
+    ],
+    "path": [],
+    "message": "Unrecognized key: \"answer\""
+  }
+]
+ ❯ tests/contracts.test.ts:255:24
+    253|
+    254|   it("정상 입력을 파싱한다", () => {
+    255|     expect(AnswerDraft.parse(valid)).toEqual(valid);
+       |                        ^
+    256|   });
+    257|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/pipeline/answer-persistence.test.ts > answer publication boundary > 검색됐어도 인용하지 않은 항목은 조회하지 않고 중복 인용의 링크는 한 번만 조회한다
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'id', [ 'item-1' ] ]
+
+Number of calls: 0
+
+ ❯ tests/pipeline/answer-persistence.test.ts:215:28
+    213|     });
+    214|     await answerQuestion("answer-1", { channel: "C_TEST", threadTs: "1…
+    215|     expect(mocks.metadata).toHaveBeenCalledWith("id", ["item-1"]);
+       |                            ^
+    216|     expect(mocks.permalink).toHaveBeenCalledOnce();
+    217|     expect(JSON.stringify(mocks.post.mock.calls)).not.toContain(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 5 passed (7)
+      Tests  2 failed | 77 passed (79)
+   Start at  17:46:29
+   Duration  528ms (transform 52%, import 34%, tests 11%, worker 3%)
+

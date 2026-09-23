@@ -1,0 +1,177 @@
+{
+  "at": "2026-09-22T22:00:06.620Z",
+  "environment": "isolated local database; real Groq calls; synthetic evidence",
+  "generated": 10,
+  "expectedRefusals": 1,
+  "styleEvaluated": 5,
+  "violations": 5,
+  "violationRate": 1,
+  "complianceRate": 0,
+  "records": [
+    {
+      "id": "answer-1",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "answer-2",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "answer-3",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "answer-4",
+      "purpose": "answer",
+      "status": "refused",
+      "expected": true
+    },
+    {
+      "id": "answer-5",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "answer-6",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "card-1",
+      "purpose": "make_card",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": true,
+      "findings": [],
+      "sentenceCount": 5,
+      "over40": 1,
+      "wrongEnding": 0,
+      "violates": true
+    },
+    {
+      "id": "card-2",
+      "purpose": "make_card",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": true,
+      "findings": [
+        {
+          "field": "background",
+          "kind": "banned",
+          "blocking": true
+        }
+      ],
+      "sentenceCount": 4,
+      "over40": 2,
+      "wrongEnding": 0,
+      "violates": true
+    },
+    {
+      "id": "card-3",
+      "purpose": "make_card",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": true,
+      "findings": [
+        {
+          "field": "background",
+          "kind": "banned",
+          "blocking": true
+        },
+        {
+          "field": "recommendation",
+          "kind": "banned",
+          "blocking": true
+        }
+      ],
+      "sentenceCount": 3,
+      "over40": 1,
+      "wrongEnding": 0,
+      "violates": true
+    },
+    {
+      "id": "summary-1",
+      "purpose": "summarize_document",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": true,
+      "findings": [
+        {
+          "field": "overview",
+          "kind": "length",
+          "blocking": false
+        }
+      ],
+      "sentenceCount": 1,
+      "over40": 1,
+      "wrongEnding": 1,
+      "violates": true
+    },
+    {
+      "id": "summary-2",
+      "purpose": "summarize_document",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "styleApplicable": true,
+      "findings": [
+        {
+          "field": "overview",
+          "kind": "banned",
+          "blocking": true
+        }
+      ],
+      "sentenceCount": 1,
+      "over40": 1,
+      "wrongEnding": 0,
+      "violates": true
+    }
+  ]
+}

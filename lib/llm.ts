@@ -36,7 +36,18 @@ const GROQ_REQUEST_TIMEOUT_MS = 60_000;
 const FIELD_ORDER_INSTRUCTION =
   "응답 스키마에 citations가 있으면 citations를 먼저 채우고, 그다음 근거(background 또는 reasoning), 결론(answer 또는 recommendation)은 마지막에 작성하세요.";
 export const PLAIN_LANGUAGE_INSTRUCTION =
-  "한국어로 씁니다. 중학교 2학년도 이해할 수 있는 쉬운 낱말을 씁니다. 한 문장은 한 가지 뜻만 담고 40자를 넘기지 않습니다. 안내·오류·답변은 합니다/하세요로 끝냅니다. 어려운 사무 용어와 영어 단어·약어를 풀어 씁니다(원장→결정 기록, 인용→원문 근거, 산정→계산). 내부 코드·영문 상태값·근거 없는 계획은 쓰지 않습니다. 원문 그대로 옮기는 quote 필드는 한 글자도 바꾸지 않고, 새로 쓰는 문장에만 이 규칙을 적용합니다.";
+  "한국어로 씁니다. 중학교 2학년도 이해할 수 있는 쉬운 낱말을 씁니다. 새 문장은 20~30자를 목표로 쓰고 공백·문장부호를 포함해 40자를 넘기지 않습니다. 한 문장에 사실 하나만 씁니다. 조건·이유·행동이 길게 이어지면 각각 마침표로 나누되 조건과 부정 표현은 빼지 않습니다. background·recommendation·overview도 짧은 여러 문장으로 씁니다. 예: '견적이 12% 올랐습니다. 기준을 넘으면 재입찰을 확인합니다.' 제목·이름표 외의 새 문장은 합니다/습니다/하세요로 끝냅니다. 어려운 사무 용어와 영어 단어·약어를 풀어 씁니다(원장→결정 기록, 인용→원문 근거, 산정→계산). 내부 코드·영문 상태값·근거 없는 계획은 쓰지 않습니다. 원문 그대로 옮기는 quote 필드는 한 글자도 바꾸지 않고, 새로 쓰는 문장에만 이 규칙을 적용합니다. 원문 복사가 요구된 다른 필드도 그대로 유지합니다. 반환 전에 새 문장마다 길이와 끝맺음을 확인하세요.";
+
+// Quality guidance only. Never rewrite evidence or reject a response for style.
+export const GENERATED_PROSE_INSTRUCTION = [
+  "카드·문서 요약의 새 문장 작성:",
+  "title은 핵심 할 일을 20자 안으로 적으세요. background·recommendation·overview는 한 문장을 15~25자로 짧게 잡고, 공백과 마침표를 포함해 최대 40자로 쓰세요. 문장마다 마침표를 넣으세요.",
+  "여러 사실을 한 문장으로 압축하지 마세요. 특히 overview는 전체 내용을 한 문장에 모으지 말고 짧은 문장 여러 개로 나누세요. 제목을 제외한 각 문장은 합니다·습니다·하세요로 끝내세요.",
+  "새 문장의 용어는 문맥에 맞게 풀어 쓰세요: 보류→미루다, 반려→돌려보내다, 명시→적다, 누락→빠지다, 산정→계산하다, 수용→받아들이다, 부서장·영업 리드→팀장, 열람·조회→보기, 인용→원문 근거, 원장→결정 기록, 갱신→새로 고치다, 집행→확인하다. 해당 용어를 다시 괄호에 적지 마세요.",
+  "예: '계약 확정을 보류합니다'는 '계약 확정을 미룹니다.'로, '담당자를 명시하세요'는 '담당자를 적으세요.'로 적습니다. 이 예문의 사실을 응답에 추가하지 마세요.",
+  "문장을 나눠도 조건·부정·숫자·담당자·기한과 원문의 뜻을 유지하세요. 조건부 행동을 무조건 실행하는 문장으로 바꾸지 마세요. 짧게 쓰기 위해 사실을 빼지 마세요.",
+  "이 지시는 새로 쓰는 title·background·recommendation·overview에만 적용합니다. quote와 그 밖에 원문 복사가 요구된 필드는 길거나 어려운 말이 있어도 한 글자도 바꾸지 마세요. 필드 이름·ID·상태값도 바꾸지 마세요.",
+].join("\n");
 
 const REFUSAL_TEXT_PATTERNS = [
   /(?:도와|답변|제공|처리).{0,12}(?:드릴|할) 수 없(?:습니다|어요)/,
@@ -285,7 +296,7 @@ async function createCompletion(
       messages: [
         {
           role: "system",
-          content: `${PLAIN_LANGUAGE_INSTRUCTION}\n${prompt.system}\n\n${FIELD_ORDER_INSTRUCTION}`,
+          content: `${PLAIN_LANGUAGE_INSTRUCTION}\n${prompt.system}\n${purpose === "make_card" || purpose === "summarize_document" ? GENERATED_PROSE_INSTRUCTION + "\n" : ""}\n${FIELD_ORDER_INSTRUCTION}`,
         },
         { role: "user", content: prompt.user },
       ],

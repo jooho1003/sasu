@@ -6,7 +6,7 @@ import { GET } from "@/app/api/d/[dept]/answers/[id]/route";
 const answer = { id: "answer-1", asked_by: "user-1", answer: "공개 사실과 기밀 사실을 결합한 답변", status: "done", refused: false, verified: true };
 function query(data: unknown) {
   const result = { data, error: null };
-  const q = { select: () => q, eq: () => q, in: () => q, maybeSingle: async () => result, then: (fn: (v: unknown) => unknown) => Promise.resolve(result).then(fn) };
+  const q = { select: () => q, eq: () => q, in: () => q, order: () => q, maybeSingle: async () => result, then: (fn: (v: unknown) => unknown) => Promise.resolve(result).then(fn) };
   return q;
 }
 const read = async () => (await GET(new Request("http://localhost"), { params: Promise.resolve({ dept: "dept-1", id: "answer-1" }) })).json();
@@ -27,5 +27,9 @@ describe("저장 답변 재열람 경계", () => {
   it("원문 문자열이 바뀌면 예전 본문을 반환하지 않는다", async () => {
     mocks.from.mockImplementation((table: string) => query(table === "answers" ? answer : table === "citations" ? [{ item_id: "i1", quote: "옛 원문", decision_id: null }] : [{ id: "i1", content: "새 원문", deleted_at: null, sources: { kind: "document", external_id: "doc", active: true } }]));
     expect((await read()).refused).toBe(true);
+  });
+  it.each(["document", "meeting"])("%s 인용은 권한을 다시 확인하는 원문 화면으로 연결한다", async kind => {
+    mocks.from.mockImplementation((table: string) => query(table === "answers" ? answer : table === "citations" ? [{ item_id: "i1", quote: "공개 사실", decision_id: null }] : [{ id: "i1", content: "공개 사실", deleted_at: null, sources: { kind, external_id: "doc", active: true } }]));
+    expect((await read()).citations[0].href).toBe("/d/dept-1/evidence/i1?answer=answer-1");
   });
 });

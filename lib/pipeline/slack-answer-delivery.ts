@@ -8,7 +8,7 @@ import { createServiceSupabaseClient } from "@/lib/supabase/service";
 type Delivery = {
   answer_id: string; channel: string; thread_ts: string; message_ts: string | null;
   status: string; scope: "user" | "channel"; dept_id: string; answer: string | null;
-  citations: Array<SlackAnswerCitation & { slackChannel?: string; slackTs?: string; decisionId?: string }>;
+  citations: Array<SlackAnswerCitation & { slackChannel?: string; slackTs?: string; decisionId?: string; itemId?: string }>;
 };
 const OPTIONS = { mrkdwn: false, parse: "none", unfurl_links: false, unfurl_media: false } as const;
 function failure() { return new Error("slack_delivery_database_failed"); }
@@ -30,7 +30,7 @@ export async function deliverSlackAnswer(answerId: string): Promise<void> {
       // after its timestamp is durably saved, so a lost POST response cannot
       // result in multiple independently posted answers.
       const posted = await postMessage({ channel: row.channel, thread_ts: row.thread_ts,
-        text: "부서 기록을 찾아보고 있습니다. 최대 2분 정도 걸릴 수 있습니다. 결과가 늦으면 웹의 사수에게 묻기에서 확인해 주세요.", blocks: [], ...OPTIONS,
+        text: "부서 기록을 찾고 있습니다. 2분쯤 걸릴 수 있습니다. 늦으면 웹의 '묻기'에서 확인해 주세요.", blocks: [], ...OPTIONS,
         client_msg_id: answerId });
       messageTs = posted.ts;
       if (posted.channel !== row.channel) throw failure();
@@ -40,15 +40,15 @@ export async function deliverSlackAnswer(answerId: string): Promise<void> {
     if (row.status !== "pending") {
       const citations = await Promise.all(row.citations.map(async citation => {
         const deptUrl = new URL(`/d/${encodeURIComponent(row.dept_id)}`, metadataBase()).href;
-        const enriched: SlackAnswerCitation = { ...citation, href: citation.decisionId ? `${deptUrl}/ledger#decision-${encodeURIComponent(citation.decisionId)}` : deptUrl,
-          linkLabel: citation.decisionId ? "결정 기록 보기" : "부서에서 보기" };
+        const enriched: SlackAnswerCitation = { ...citation, href: citation.decisionId ? `${deptUrl}/ledger#decision-${encodeURIComponent(citation.decisionId)}` : citation.itemId ? `${deptUrl}/evidence/${encodeURIComponent(citation.itemId)}?answer=${encodeURIComponent(row.answer_id)}` : deptUrl,
+          linkLabel: citation.decisionId ? "결정 기록 보기" : citation.itemId ? "원문 보기" : "부서에서 보기" };
         if (citation.slackChannel && citation.slackTs) {
           try { enriched.href = await getMessagePermalink({ channel: citation.slackChannel, messageTs: citation.slackTs }); enriched.linkLabel = "원문 보기"; } catch { /* Quote remains valid without optional link. */ }
         }
         return enriched;
       }));
       const text = row.status === "failed"
-        ? "답변을 완료하지 못했습니다. 웹의 사수에게 묻기에서 다시 질문해 주세요."
+        ? "답변을 만들지 못했습니다. 웹의 '묻기'에서 다시 질문해 주세요."
         : "이 질문에 답할 근거를 부서 기록에서 확인하지 못했습니다. 웹에서 기록과 연결 상태를 확인해 주세요.";
       const message = row.status === "done" && row.answer
         ? buildSlackAnswerMessage({ answer: row.answer, citations, scope: row.scope })

@@ -1,0 +1,49 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/llm-style-report.test.ts (7 tests | 1 failed) 50ms
+   ❯ 실제 모델 문체 측정 (7)
+     × 금지어 원문 대신 고정 사전의 대체어만 진단에 남긴다 38ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/llm-style-report.test.ts > 실제 모델 문체 측정 > 금지어 원문 대신 고정 사전의 대체어만 진단에 남긴다
+AssertionError: expected [ { field: 'title', …(2) } ] to deep equally contain { Object (field, kind, ...) }
+
+- Expected:
+{
+  "blocking": true,
+  "field": "title",
+  "kind": "banned",
+  "rule": "미루기",
+}
+
++ Received:
+[
+  {
+    "blocking": true,
+    "field": "title",
+    "kind": "banned",
+  },
+]
+
+ ❯ tests/llm-style-report.test.ts:8:29
+      6|     const terms = [{ term: "보류", replacement: "미루기", reason: "고정 사전", …
+      7|     const result = measureStyle("make_card", { title: "계약 보류", backgro…
+      8|     expect(result.findings).toContainEqual({ field: "title", kind: "ba…
+       |                             ^
+      9|     expect(JSON.stringify(result)).not.toMatch(/계약|고객 원문|보류/);
+     10|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  10:55:36
+   Duration  3.28s (transform 60%, import 32%, worker 5%, tests 3%)
+

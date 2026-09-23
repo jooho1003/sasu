@@ -1,0 +1,23 @@
+.\lib\llm.ts:42: export const GENERATED_PROSE_INSTRUCTION = [
+.\lib\llm.ts:140: if (purpose === "classify" || purpose === "merge_confirm") {
+.\lib\llm.ts:143: if (purpose === "transcribe_voice") return TRANSCRIPTION_MODEL;
+.\lib\llm.ts:299: content: `${PLAIN_LANGUAGE_INSTRUCTION}\n${prompt.system}\n${purpose === "make_card" || purpose === "summarize_document" ? GENERATED_PROSE_INSTRUCTION + "\n" : ""}\n${FIELD_ORDER_INSTRUCTION}`,
+.\lib\pipeline\card.ts:219: const result = await llm.structured(
+.\lib\pipeline\card.ts:498: const confirmation = await llm.structured(
+.\lib\pipeline\document-summary.ts:140: const result = await llm.structured(
+.\lib\pipeline\answer.ts:380: result = await llm.structured(
+.\lib\pipeline\answer.ts:388: '범위 선택 예시: evidence 1의 1번 문단이 일반 기준이고 2번 문단이 그 예외이면, 예외만 묻는 질문에도 {"evidence":1,"first_paragraph":1,"last_paragraph":2}를 선택합니다. 2~2만 선택하면 앞 기준이 빠져 불완전합니다. 독자가 선택한 범위만 읽고 조건과 예외를 함께 알 수 있는지 확인하세요. 이 예시는 번호 선택 방식이며 실제 근거 번호와 문단 수에 맞게 적용하세요.',
+.\scripts\sample-llm-style.ts:8: import { measureStyle, summarizeSamples } from "./llm-style-report";
+.\scripts\sample-llm-style.ts:30: const result=await llm.structured(purpose,schema,{system,user:JSON.stringify(user)});
+.\scripts\sample-llm-style.ts:37: const resolved = purpose === "answer" ? resolveSelections((data as z.infer<typeof AnswerDraft>).citations,evidence.map(e=>({kind:"item",id:e.id,text:e.content}))) : null;
+.\scripts\sample-llm-style.ts:41: const metrics = measureStyle(purpose,data,dictionary.terms);
+.\scripts\sample-llm-style.ts:62: const summary=summarizeSamples(records as {status:string;styleApplicable?:boolean;violates?:boolean|null}[]);
+.\scripts\llm-style-report.ts:3: export function measureStyle(purpose: string, data: Record<string, unknown>, terms: Term[]) {
+.\scripts\llm-style-report.ts:5: if (purpose === "answer") return { styleApplicable: false, sentenceCount: 0, over40: 0, wrongEnding: 0, findings: [], violates: null };
+.\scripts\llm-style-report.ts:6: const keys = purpose === "make_card" ? ["title", "background", "recommendation"] : ["overview"];
+.\scripts\llm-style-report.ts:20: export function summarizeSamples(records: { status: string; styleApplicable?: boolean; violates?: boolean | null }[]) {
+.\lib\slack\answer.ts:108: : "시각 모름";
+.\lib\slack\answer.ts:109: const author = Array.from(citation.author?.trim() || "누가 썼는지 모름")
+.\lib\pipeline\slack-answer-delivery.ts:33: text: "부서 기록을 찾고 있습니다. 2분쯤 걸릴 수 있습니다. 늦으면 웹의 '묻기'에서 확인해 주세요.", blocks: [], ...OPTIONS,
+.\lib\pipeline\slack-answer-delivery.ts:51: ? "답변을 만들지 못했습니다. 웹의 '묻기'에서 다시 질문해 주세요."
+.\lib\pipeline\reminder.ts:26: const text = delivery.kind === "deadline" ? "마감이 지난 결정이 있습니다. 결정 카드를 확인해 주세요." : "다시 확인할 결정이 있습니다. 결정 카드를 확인해 주세요.";

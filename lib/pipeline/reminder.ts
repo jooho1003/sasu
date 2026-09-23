@@ -23,7 +23,7 @@ export async function sendCardReminder(reminderId: string, generation: number): 
   try {
     const dm = await openDirectMessage(delivery.slackUserId);
     const href = new URL(`/d/${encodeURIComponent(delivery.deptId)}/cards/${encodeURIComponent(delivery.requestId)}`, metadataBase()).href;
-    const text = delivery.kind === "deadline" ? "마감이 지난 담당 결정이 있습니다. 결정 카드를 확인해주세요." : "확인을 예약한 담당 결정이 있습니다. 결정 카드를 확인해주세요.";
+    const text = delivery.kind === "deadline" ? "마감이 지난 결정이 있습니다. 결정 카드를 확인해 주세요." : "다시 확인할 결정이 있습니다. 결정 카드를 확인해 주세요.";
     await postMessage({ channel: dm.id, text, blocks: [
       { type: "section", text: { type: "plain_text", text, emoji: false } },
       { type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: "결정 카드 보기", emoji: false }, url: href, action_id: "reminder_open_card" }] },

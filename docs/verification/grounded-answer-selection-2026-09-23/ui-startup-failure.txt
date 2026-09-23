@@ -1,0 +1,18 @@
+오전 10:01:57 [vite] (client) Re-optimizing dependencies because vite config has changed
+오전 10:02:16 [vite] (client) [optimizer] bundling dependencies...
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "http://127.0.0.1:3196/", waiting until "load"
+
+    at D:\바이브코딩\sasu\scripts\verify-grounded-answer-ui.mjs:35:16 {
+  log: [
+    '  - navigating to "http://127.0.0.1:3196/", waiting until "load"'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.18.0

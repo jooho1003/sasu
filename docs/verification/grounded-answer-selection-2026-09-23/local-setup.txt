@@ -1,0 +1,2 @@
+applied 0054_decision_search_terms.sql
+local review QA ready; real transcription key present: true

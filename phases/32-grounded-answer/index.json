@@ -1,0 +1,59 @@
+{
+  "project": "sasu",
+  "phase": "32-grounded-answer",
+  "adr": "ADR-066 · ADR-067",
+  "plan": ".claude/plans/grounded-answer-selection-2026-09-23.plan.json",
+  "gate_before_start": "step1 실행 전 step0 변경과 ADR-067 설계 문서를 커밋해 작업 트리를 비운다(execute.py가 step마다 git add -A로 커밋). 운영 DB(0053·0054)·배포는 step4 뒤 사용자 승인.",
+  "steps": [
+    {
+      "step": 0,
+      "name": "grounded-answer",
+      "status": "completed",
+      "summary": "관련 결정 검색(0053 search_decisions_as)·원문 열람 API/화면·완전 문단 인용·citations.ordinal 구현. 단위 1,352·SQL 240·화면 8·실제 모델 7/7·로컬 실DB E2E 통과. 9/23 설계 검토에서 같은 출처 1문단 제한·문단 복사·본문 중복 결함 확인 → step1~3.",
+      "verification": "docs/verification/grounded-answer-2026-09-22/README.md"
+    },
+    {
+      "step": 1,
+      "name": "answer-selection",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "번호/연속 범위 선택·원문 slice·고정 안내·실패 코드 재시도 완료. 실제 Groq 10/10, 단위 1,383·lint/build 통과.",
+      "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md"
+    },
+    {
+      "step": 2,
+      "name": "decision-search-terms",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "0054 조사 제거·최근 질문 단어 우선 구현. 후보/권한/점수 동일, SQL 243검사·2,016권한 조합 통과.",
+      "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md"
+    },
+    {
+      "step": 3,
+      "name": "evidence-highlight",
+      "status": "completed",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "답변 ID 링크·세션 citations RLS·React mark 구현. 화면 12검사·실DB 본인 강조/타인 비강조 통과.",
+      "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md"
+    },
+    {
+      "step": 4,
+      "name": "verification",
+      "status": "blocked",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium",
+      "summary": "로컬 검증 완료: 단위 1,383·SQL 243·화면 12·모델 10/10·실DB E2E 1건/질문 5건 통과. 운영 승인 대기.",
+      "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md",
+      "blocked_reason": "검증 완료. 운영 DB(0053·0054) 적용·배포·운영 연결 E2E는 사용자 승인 대기(ADR-049)"
+    }
+  ],
+  "production_deployed": false,
+  "execution_note": "다른 작업의 미커밋 변경을 보존하기 위해 execute.py 자동 전체 커밋 대신 step 명세를 직접 실행했다. 이번 작업에서 커밋·운영 반영 없음.",
+  "followup_verification": {
+    "verification": "docs/verification/llm-style-followup-2026-09-23/README.md",
+    "summary": "2026-09-23 문체 후속 중 A09 회귀 9/10을 보존. 마지막 허용 프롬프트 보완 후 같은 코드로 실제 Groq 10/10 두 번 통과. 누적 보완 2/2회; 운영 승인 대기 유지."
+  }
+}

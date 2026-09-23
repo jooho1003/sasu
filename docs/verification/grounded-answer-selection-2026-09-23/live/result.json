@@ -1,0 +1,60 @@
+{
+  "startedAt": "2026-09-23T01:23:28.021Z",
+  "finishedAt": "2026-09-23T01:25:23.231Z",
+  "database": "local Supabase PostgreSQL",
+  "mocks": false,
+  "dept": "fab5b42b-6259-4c38-bb64-0b36bb131329",
+  "source": "7347814a-85e7-4171-8377-4905a41bccc5",
+  "item": "e7530b14-e871-4f53-a8b9-ac922ee13694",
+  "meetingItem": "458d0250-53d7-43e9-b9db-0abffe8436e6",
+  "privateItem": "dc29854c-7da1-42a8-a7c1-7a3cb1483071",
+  "oldDecision": "f74629ae-7fda-4ef6-a70e-65907adcaa3c",
+  "embeddingModel": "voyage-4-lite",
+  "fixtureEmbeddings": 10,
+  "automaticWorkerJobs": 5,
+  "completed": [
+    {
+      "scenario": "lead_old_decision_document_meeting",
+      "answerId": "bbdcdd3e-846d-4efd-9f88-6ba233a7d99b",
+      "elapsedMs": 13649
+    },
+    {
+      "scenario": "history_document_meeting_and_2020_ledger_links"
+    },
+    {
+      "scenario": "lead_private_budget",
+      "answerId": "ac56a96e-5eea-460d-b938-4f4d17217b60",
+      "elapsedMs": 6496
+    },
+    {
+      "scenario": "member_private_query_safe",
+      "answerId": "2a87cfe6-7136-4c00-9d3b-7205d4047a2b",
+      "elapsedMs": 7739
+    },
+    {
+      "scenario": "member_public_meeting",
+      "answerId": "3f2cbd03-fb99-4f60-9614-c31a6878115d",
+      "elapsedMs": 5716
+    },
+    {
+      "scenario": "member_api_and_direct_rls_deny_private_other_dept_and_other_owner"
+    },
+    {
+      "scenario": "conditions_and_exception",
+      "answerId": "7f12b381-a299-4048-8434-8fe63ddd758d",
+      "elapsedMs": 4167
+    },
+    {
+      "scenario": "conditions_and_exception_result",
+      "status": "done",
+      "errorCode": null
+    },
+    {
+      "scenario": "lead_demotion_revokes_saved_answer_and_original"
+    },
+    {
+      "scenario": "source_removal_hides_original_and_saved_answer"
+    }
+  ],
+  "clientErrors": []
+}

@@ -1,0 +1,16 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+
+ Test Files  6 passed (6)
+      Tests  114 passed (114)
+   Start at  11:01:00
+   Duration  34.31s (import 84%, transform 15%, worker 1%)
+
+    Isolate  6 workers spawned · ~3.06s startup each (spawn + environment, per file)
+             at least ~6.12s faster with isolate: false — reuses workers across files instead of one per file
+

@@ -1,0 +1,194 @@
+{
+  "at": "2026-09-23T01:57:14.434Z",
+  "environment": "isolated local database; real Groq calls; synthetic evidence",
+  "generated": 10,
+  "expectedRefusals": 1,
+  "styleEvaluated": 5,
+  "violations": 2,
+  "violationRate": 0.4,
+  "complianceRate": 0.6,
+  "records": [
+    {
+      "id": "answer-1",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 887,
+      "outputTokens": 467,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "answer-2",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 884,
+      "outputTokens": 252,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "answer-3",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 885,
+      "outputTokens": 422,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "answer-4",
+      "purpose": "answer",
+      "status": "refused",
+      "expected": true
+    },
+    {
+      "id": "answer-5",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 883,
+      "outputTokens": 289,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "answer-6",
+      "purpose": "answer",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 885,
+      "outputTokens": 368,
+      "styleApplicable": false,
+      "sentenceCount": 0,
+      "over40": 0,
+      "wrongEnding": 0,
+      "findings": [],
+      "violates": null
+    },
+    {
+      "id": "card-1",
+      "purpose": "make_card",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 1116,
+      "outputTokens": 2555,
+      "styleApplicable": true,
+      "findings": [],
+      "sentenceCount": 4,
+      "over40": 0,
+      "wrongEnding": 0,
+      "violates": false
+    },
+    {
+      "id": "card-2",
+      "purpose": "make_card",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 1140,
+      "outputTokens": 2497,
+      "styleApplicable": true,
+      "findings": [],
+      "sentenceCount": 3,
+      "over40": 0,
+      "wrongEnding": 0,
+      "violates": false
+    },
+    {
+      "id": "card-3",
+      "purpose": "make_card",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 1110,
+      "outputTokens": 1187,
+      "styleApplicable": true,
+      "findings": [
+        {
+          "field": "background",
+          "kind": "banned",
+          "blocking": true,
+          "rule": "팀장"
+        },
+        {
+          "field": "background",
+          "kind": "banned",
+          "blocking": true,
+          "rule": "적기"
+        },
+        {
+          "field": "recommendation",
+          "kind": "banned",
+          "blocking": true,
+          "rule": "적기"
+        }
+      ],
+      "sentenceCount": 5,
+      "over40": 1,
+      "wrongEnding": 0,
+      "violates": true
+    },
+    {
+      "id": "summary-1",
+      "purpose": "summarize_document",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 1002,
+      "outputTokens": 2306,
+      "styleApplicable": true,
+      "findings": [],
+      "sentenceCount": 2,
+      "over40": 0,
+      "wrongEnding": 0,
+      "violates": false
+    },
+    {
+      "id": "summary-2",
+      "purpose": "summarize_document",
+      "status": "generated",
+      "model": "openai/gpt-oss-120b",
+      "citationsValid": true,
+      "inputTokens": 1009,
+      "outputTokens": 2249,
+      "styleApplicable": true,
+      "findings": [
+        {
+          "field": "overview",
+          "kind": "banned",
+          "blocking": true,
+          "rule": "미루기"
+        }
+      ],
+      "sentenceCount": 2,
+      "over40": 1,
+      "wrongEnding": 0,
+      "violates": true
+    }
+  ]
+}

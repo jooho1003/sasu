@@ -1,4 +1,5 @@
 import { verifyRetroSql } from "./verify-retro-sql.mjs";
+import { verifyAnswerGroundingSql } from "./verify-answer-grounding-sql.mjs";
 import { verifyRetroConnectionsSql } from "./verify-retro-connections-sql.mjs";
 import { verifyTrailerAssessmentSql } from "./verify-trailer-assessment-sql.mjs";
 import { verifySlackAskSql } from "./verify-slack-ask-sql.mjs";
@@ -1061,6 +1062,7 @@ try {
     });
   });
 
+  await verifyAnswerGroundingSql({ q, check, asUser });
   await verifyTrailerSql({ db, q, check, asUser, ids, adminIds });
   await verifyTrailerAssessmentSql({ db, q, check, asUser, ids });
   await verifySlackAskSql({ db, q, check, asUser });

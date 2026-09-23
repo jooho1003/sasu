@@ -1,0 +1,159 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/answer-grounding.test.ts (21 tests | 21 failed) 21ms
+   ❯ 번호 범위로 선택하는 원문 근거 (21)
+     × 조건부터 예외까지 빈 줄을 포함한 원문 범위를 만든다 6ms
+     × 문단 offset과 기존 split/trim이 일치한다 2ms
+     × 문단 offset과 기존 split/trim이 일치한다 1ms
+     × 문단 offset과 기존 split/trim이 일치한다 1ms
+     × 문단 offset과 기존 split/trim이 일치한다 1ms
+     × 한 문단 선택과 결정의 출력 순서를 유지한다 0ms
+     × CRLF·공백으로 된 구분선도 다시 쓰지 않는다 0ms
+     × empty 실패를 보고한다 0ms
+     × too_many 실패를 보고한다 0ms
+     × evidence_out_of_range 실패를 보고한다 0ms
+     × evidence_out_of_range 실패를 보고한다 0ms
+     × evidence_out_of_range 실패를 보고한다 2ms
+     × paragraph_out_of_range 실패를 보고한다 1ms
+     × paragraph_out_of_range 실패를 보고한다 1ms
+     × paragraph_out_of_range 실패를 보고한다 0ms
+     × range_reversed 실패를 보고한다 0ms
+     × duplicate_evidence 실패를 보고한다 0ms
+     × 다른 선택들의 실패를 번호와 함께 모두 모은다 0ms
+     × 번호가 달라도 동일한 출처를 중복 저장하지 않는다 0ms
+     × 문단 경계에서 시작하고 끝나는 범위만 검증한다 0ms
+     × 고정 안내 본문에는 원문을 포함하지 않는다 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 21 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 조건부터 예외까지 빈 줄을 포함한 원문 범위를 만든다
+TypeError: resolveSelections is not a function
+ ❯ tests/answer-grounding.test.ts:9:12
+      7| describe("번호 범위로 선택하는 원문 근거", () => {
+      8|   it("조건부터 예외까지 빈 줄을 포함한 원문 범위를 만든다", () => {
+      9|     expect(resolveSelections([selection], sources)).toEqual({ ok: true…
+       |            ^
+     10|   });
+     11|   it.each([text, text.replaceAll("\n", "\r\n"), "\n \n\t", "첫 줄\n둘째 줄\…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/21]⎯
+
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 문단 offset과 기존 split/trim이 일치한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 문단 offset과 기존 split/trim이 일치한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 문단 offset과 기존 split/trim이 일치한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 문단 offset과 기존 split/trim이 일치한다
+TypeError: paragraphSpans is not a function
+ ❯ tests/answer-grounding.test.ts:14:12
+     12|     const paragraphs = value.split(/\r?\n[\t ]*\r?\n/u).map(p => p.tri…
+     13|     expect(evidenceParagraphs(value)).toEqual(paragraphs);
+     14|     expect(paragraphSpans(value).map(s => value.slice(s.start, s.end))…
+       |            ^
+     15|   });
+     16|   it("한 문단 선택과 결정의 출력 순서를 유지한다", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/21]⎯
+
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 한 문단 선택과 결정의 출력 순서를 유지한다
+TypeError: resolveSelections is not a function
+ ❯ tests/answer-grounding.test.ts:17:12
+     15|   });
+     16|   it("한 문단 선택과 결정의 출력 순서를 유지한다", () => {
+     17|     expect(resolveSelections([{ evidence: 2, first_paragraph: 1, last_…
+       |            ^
+     18|       { decisionId: "decision", quote: sources[1].text }, { itemId: "p…
+     19|     ] });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/21]⎯
+
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > CRLF·공백으로 된 구분선도 다시 쓰지 않는다
+TypeError: resolveSelections is not a function
+ ❯ tests/answer-grounding.test.ts:23:20
+     21|   it("CRLF·공백으로 된 구분선도 다시 쓰지 않는다", () => {
+     22|     const raw = "  첫 문단\r\n둘째 줄 \r\n\t \r\n  예외 문단  ";
+     23|     const result = resolveSelections([selection], [{ kind: "item", id:…
+       |                    ^
+     24|     expect(result).toEqual({ ok: true, citations: [{ itemId: "crlf", q…
+     25|     if (result.ok) expect(raw.includes(result.citations[0].quote)).toB…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/21]⎯
+
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > empty 실패를 보고한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > too_many 실패를 보고한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > evidence_out_of_range 실패를 보고한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > evidence_out_of_range 실패를 보고한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > evidence_out_of_range 실패를 보고한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > paragraph_out_of_range 실패를 보고한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > paragraph_out_of_range 실패를 보고한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > paragraph_out_of_range 실패를 보고한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > range_reversed 실패를 보고한다
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > duplicate_evidence 실패를 보고한다
+TypeError: resolveSelections is not a function
+ ❯ tests/answer-grounding.test.ts:39:20
+     37|     { selections: [selection, selection], code: "duplicate_evidence" },
+     38|   ])("$code 실패를 보고한다", ({ selections, code }) => {
+     39|     const result = resolveSelections(selections, sources);
+       |                    ^
+     40|     expect(result.ok).toBe(false);
+     41|     if (!result.ok) expect(result.failures).toEqual(expect.arrayContai…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/21]⎯
+
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 다른 선택들의 실패를 번호와 함께 모두 모은다
+TypeError: resolveSelections is not a function
+ ❯ tests/answer-grounding.test.ts:44:12
+     42|   });
+     43|   it("다른 선택들의 실패를 번호와 함께 모두 모은다", () => {
+     44|     expect(resolveSelections([{ ...selection, evidence: 99 }, { ...sel…
+       |            ^
+     45|       { selection: 1, code: "evidence_out_of_range" }, { selection: 2,…
+     46|     ] });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/21]⎯
+
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 번호가 달라도 동일한 출처를 중복 저장하지 않는다
+TypeError: resolveSelections is not a function
+ ❯ tests/answer-grounding.test.ts:49:12
+     47|   });
+     48|   it("번호가 달라도 동일한 출처를 중복 저장하지 않는다", () => {
+     49|     expect(resolveSelections([selection, { ...selection, evidence: 2 }…
+       |            ^
+     50|   });
+     51|   it("문단 경계에서 시작하고 끝나는 범위만 검증한다", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/21]⎯
+
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 문단 경계에서 시작하고 끝나는 범위만 검증한다
+TypeError: isParagraphRange is not a function
+ ❯ tests/answer-grounding.test.ts:52:12
+     50|   });
+     51|   it("문단 경계에서 시작하고 끝나는 범위만 검증한다", () => {
+     52|     expect(isParagraphRange(text, text.trim())).toBe(true);
+       |            ^
+     53|     expect(isParagraphRange(text, evidenceParagraphs(text)[1])).toBe(t…
+     54|     for (const quote of ["", "50만 원까지 지원합니다.", "한도를 적용하지 않습니다.", "외부 교…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/21]⎯
+
+ FAIL  tests/answer-grounding.test.ts > 번호 범위로 선택하는 원문 근거 > 고정 안내 본문에는 원문을 포함하지 않는다
+TypeError: answerLead is not a function
+ ❯ tests/answer-grounding.test.ts:58:12
+     56|   });
+     57|   it("고정 안내 본문에는 원문을 포함하지 않는다", () => {
+     58|     expect(answerLead(3)).toBe("관련 부서 기록 3개를 찾았습니다. 아래 원문을 확인해 주세요.");
+       |            ^
+     59|   });
+     60| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/21]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  21 failed (21)
+   Start at  09:48:14
+   Duration  352ms (transform 51%, import 22%, tests 20%, worker 7%)
+

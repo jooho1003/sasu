@@ -21,6 +21,8 @@
 
 [local-pilot-results.json](local-pilot-results.json)은 파일 C·내부 활동 B·한 줄 D → **사람이 검토한 내용 저장** → 확정 → 공개 → 공개 철회 → 연결 해제를 실행한 결과다. 실제 모델 호출은 0회이며 AI 초안 생성 파일럿 완료로 간주하지 않는다. Groq 사용 한도 때문에 실제 초안 생성은 [외부 조건 기록](../plain-language-audit-2026-09-19/external-gates.md)에 남겼다.
 
+2026-09-23 후속: [실제 모델 재개](../model-resume-2026-09-23/README.md)에서 개발·기획 각 3일, Groq 6회로 초안 생성 → 문장별 인용 확인 → 편집·확정·공개·철회·해제를 실제 로컬 DB·브라우저로 검증했다. 외부 계정 수집과 사람 파일럿은 여전히 미완료다.
+
 - [개발 390px](development-390.png) · [1440px](development-1440.png)
 - [기획 390px](planning-390.png) · [1440px](planning-1440.png)
 - [개발 연결 설정](settings-0.png) · [기획 연결 설정](settings-1.png)

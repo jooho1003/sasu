@@ -6,8 +6,13 @@ import {
   signInSeedUser,
   SEED_LEAD,
   SEED_MEMBER,
+  requiredEnv,
 } from "./support/auth";
 import { localDate } from "../../lib/retro/bundle";
+import { RETRO_SECTIONS, verifyRetroDraft } from "../../lib/retro/verify";
+import { RetroRevisionRow } from "../../lib/contracts";
+
+const liveDrafts = process.env.E2E_RETRO_CONNECTORS_LIVE === "1";
 
 test.skip(
   !/^http:\/\/(localhost|127\.0\.0\.1):/.test(
@@ -21,7 +26,7 @@ test("개발·기획 3일: 파일·내부 활동·한 줄 기록, 검토·확정
   browser,
   baseURL,
 }) => {
-  test.setTimeout(120000);
+  test.setTimeout(liveDrafts ? 600000 : 120000);
   const admin = serviceClient(),
     owner = await signInSeedUser(context, baseURL!, SEED_LEAD);
   const peerContext = await browser.newContext(),
@@ -30,7 +35,8 @@ test("개발·기획 3일: 파일·내부 활동·한 줄 기록, 검토·확정
     depts = [randomUUID(), randomUUID()],
     days: string[] = [],
     errors: string[] = [];
-  const evidence = "docs/verification/retro-connectors-2026-09-19";
+  const evidence = liveDrafts ? "docs/verification/model-resume-2026-09-23/retro" : "docs/verification/retro-connectors-2026-09-19";
+  const generatedDays: { department: string; offset: number; items: number; citations: number }[] = [];
   mkdirSync(evidence, { recursive: true });
   page.on("pageerror", (e) => errors.push(e.name));
   page.on("dialog", (d) => d.accept());
@@ -61,6 +67,7 @@ test("개발·기획 3일: 파일·내부 활동·한 줄 기록, 검토·확정
             user_id: owner.session.user.id,
             role: "lead",
             display_name: "합성 작성자",
+            // Synthetic identity for internal activity attribution. This fresh org has no Slack installation.
             slack_user_id: "U_CONNECTOR_OWNER",
             consented_at: new Date().toISOString(),
           },
@@ -140,7 +147,7 @@ test("개발·기획 3일: 파일·내부 활동·한 줄 기록, 검토·확정
             })
           ).error,
         ).toBeNull();
-        // Do not represent synthetic manually reviewed text as model output. No worker is triggered.
+        // Stage all evidence first. Live mode explicitly enqueues a fresh generation below.
         expect(
           (
             await admin
@@ -173,6 +180,37 @@ test("개발·기획 3일: 파일·내부 활동·한 줄 기록, 검토·확정
           (a: { kind: string }) => a.kind === "manual_note",
         );
         expect(note).toBeTruthy();
+        if (liveDrafts) {
+          await page.getByRole("button", { name: "다시 생성", exact: true }).click();
+          const worker = await context.request.post("/api/jobs/run", {
+            headers: { "x-jobs-secret": requiredEnv("JOBS_TRIGGER_SECRET") }, timeout: 120000,
+          });
+          expect(worker.status()).toBe(200);
+          await expect.poll(async () => {
+            const current = await (await context.request.get(endpoint)).json();
+            return { status: current.day.status, reason: current.day.status_reason };
+          }, { timeout: 120000, intervals: [2000] }).toEqual({ status: "draft", reason: null });
+          data = await (await context.request.get(endpoint)).json();
+          const revision = RetroRevisionRow.parse(data.revision);
+          expect(revision.origin).toBe("draft");
+          const verified = verifyRetroDraft(revision, data.activities);
+          expect(verified.valid).toBe(true);
+          expect(verified.dropped).toBe(0);
+          expect(verified.body).toEqual(revision.body);
+          const generatedItems = RETRO_SECTIONS.flatMap(section => revision.body[section]);
+          expect(generatedItems.length).toBeGreaterThan(0);
+          expect(generatedItems.every(item => item.citations.length > 0)).toBe(true);
+          // Both per-sentence and top-level quotes must still match the available activities.
+          expect(verified.citations).toEqual(revision.citations);
+          generatedDays.push({ department: index ? "planning" : "development", offset,
+            items: generatedItems.length, citations: verified.citations.length });
+          await page.reload();
+          await expect(page.getByRole("region", { name: "회고 본문" })).toBeVisible();
+          if (offset === 0) {
+            await page.setViewportSize({ width: 390, height: 960 });
+            await page.screenshot({ path: `${evidence}/${index ? "planning" : "development"}-ai-draft.png`, fullPage: true });
+          }
+        }
         const text = "담당자와 검토 순서를 정했습니다.",
           body = {
             did: [{ text, citations: [{ activity_id: note.id, quote: text }] }],
@@ -325,7 +363,10 @@ test("개발·기획 3일: 파일·내부 활동·한 줄 기록, 검토·확정
       .from("llm_calls")
       .select("id", { count: "exact", head: true })
       .in("dept_id", depts);
-    expect(calls.count).toBe(0);
+    if (liveDrafts) {
+      expect(calls.count).toBeGreaterThanOrEqual(6);
+      expect(generatedDays).toHaveLength(6);
+    } else expect(calls.count).toBe(0);
     expect(errors).toEqual([]);
     writeFileSync(
       `${evidence}/local-pilot-results.json`,
@@ -334,9 +375,10 @@ test("개발·기획 3일: 파일·내부 활동·한 줄 기록, 검토·확정
           database: "local Supabase",
           departments: 2,
           daysPerDepartment: 3,
-          flow: "C file RPC + B internal + D manual -> manually reviewed revision -> confirm -> share -> withdraw -> revoke",
+          flow: liveDrafts ? "C file RPC + B internal + D manual -> actual AI draft -> reviewed edit -> confirm -> share -> withdraw -> revoke" : "C file RPC + B internal + D manual -> manually reviewed revision -> confirm -> share -> withdraw -> revoke",
           realExternalProviderCalls: 0,
-          llmCalls: 0,
+          llmCalls: calls.count,
+          generatedDays,
           errors,
         },
         null,
