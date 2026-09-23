@@ -32,6 +32,7 @@
     { "step": 7, "name": "collection-ui", "status": "completed", "summary": "S5 자동 수집 문서 200행 목록과 오류 안내·제외/하위 포함·부서장 전용·재가져오기·root 카드 후보 토글을 세션/RLS 경로로 완성했다. 합성 root 2개·source 9개·카운트를 seed와 /demo/notion 브라우저 전용 체험에 연결했고, 라우트 mock E2E·PC/390px 캡처를 포함해 전체 lint/build/1,203 tests, Notion E2E 7/7, PGlite 208 checks를 통과했다. 운영 DB/시드/배포와 실제 Notion·LLM 호출은 미실행했다." },
     { "step": 8, "name": "notion-oauth-webhook", "status": "blocked", "blocked_reason": "선행 사람 작업 미완: 노션 공개 통합 생성·심사 제출·승인 URL·redirect URI, 서버 환경 변수 NOTION_CLIENT_ID·NOTION_CLIENT_SECRET(.env.local에 없음, 2026-09-18 확인), webhook 구독 검증 토큰. 준비되면 pending으로 바꾸고 재실행." }
   ],
-  "production_deployed": false,
+  "production_deployed": true,
+  "release_verification": "docs/verification/release-completion-2026-09-23/notion-fix/README.md",
   "verification": "docs/verification/notion-collection/README.md"
 }

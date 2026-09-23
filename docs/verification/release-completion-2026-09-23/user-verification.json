@@ -21,10 +21,11 @@
     "interpretation": "First run had no shared-audio signal. Retest with a playing browser tab detected both inputs. Microphone RMS was low (0.0007), above the 0.0001 detection threshold; this is not a speech intelligibility or long meeting test."
   },
   "independentNonDeveloperFiveMinuteReading": {
-    "status": "participant-ready-awaiting-results",
-    "userReport": "준비됨",
+    "status": "replaced-by-agent-review-at-user-request",
+    "userReport": "준비됨 이후 네가 진행해 줘라고 요청",
     "surface": "authenticated pilot department containing synthetic QA fixtures",
     "tasks": ["find decision card and source", "understand changed decision reason", "record a synthetic decision with selected evidence", "open an answer source"],
-    "result": null
+    "result": null,
+    "agentReviewEvidence": "agent-reading-review.json"
   }
 }

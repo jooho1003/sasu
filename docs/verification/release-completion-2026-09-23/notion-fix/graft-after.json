@@ -1,0 +1,65 @@
+{
+  "query": "discoverNotionRoot",
+  "matches": [
+    {
+      "symbol": {
+        "id": "lib/pipeline/notion-discover.ts#discoverNotionRoot",
+        "name": "discoverNotionRoot",
+        "kind": "function",
+        "path": "lib/pipeline/notion-discover.ts",
+        "span": "L541-L758"
+      },
+      "hits": [
+        {
+          "id": "lib/pipeline/notion-discover.ts#registerNotionDiscoverHandler",
+          "relation": "calls",
+          "depth": 1,
+          "name": "registerNotionDiscoverHandler",
+          "kind": "function",
+          "path": "lib/pipeline/notion-discover.ts",
+          "span": "L760-L765"
+        },
+        {
+          "id": "tests/pipeline/notion-discover.test.ts",
+          "relation": "calls",
+          "depth": 1,
+          "name": "notion-discover.test.ts",
+          "kind": "file",
+          "path": "tests/pipeline/notion-discover.test.ts",
+          "span": "L1-L668"
+        },
+        {
+          "id": "app/api/admin/notion/roots/route.ts#POST",
+          "relation": "calls",
+          "depth": 2,
+          "name": "POST",
+          "kind": "function",
+          "path": "app/api/admin/notion/roots/route.ts",
+          "span": "L14-L41"
+        },
+        {
+          "id": "app/api/d/[dept]/settings/notion/route.ts#POST",
+          "relation": "calls",
+          "depth": 2,
+          "name": "POST",
+          "kind": "function",
+          "path": "app/api/d/[dept]/settings/notion/route.ts",
+          "span": "L164-L329"
+        },
+        {
+          "id": "lib/worker.ts#registerWorkerHandlers",
+          "relation": "calls",
+          "depth": 2,
+          "name": "registerWorkerHandlers",
+          "kind": "function",
+          "path": "lib/worker.ts",
+          "span": "L24-L46"
+        }
+      ]
+    }
+  ],
+  "saved": {
+    "files": 5,
+    "baselineChars": 65043
+  }
+}

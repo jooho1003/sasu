@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "workflow",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\release-completion-2026-09-23\\notion-fix\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\docs\\verification\\release-completion-2026-09-23\\notion-fix\\flow.html",
+  "specification": {
+    "sha256": "c753491b7d7b2a31f376adf3b47485e5e5a83d49afbe810f0b0c9313eb58781f",
+    "bytes": 1621
+  },
+  "artifact": {
+    "sha256": "3bd6194256a337520d9837114132d684527a6e5ad3d3005fe6e028c3e569fed1",
+    "bytes": 801385
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

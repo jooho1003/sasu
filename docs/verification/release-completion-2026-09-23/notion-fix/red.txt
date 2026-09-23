@@ -1,0 +1,65 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+[tsconfig-paths] An error occurred while parsing "D:/바이브코딩/sasu/.vercel/verification-tools/archify/website/tsconfig.json". See below for details. To disable this message, set the `ignoreConfigErrors` option to true.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/pipeline/notion-discover.test.ts (17 tests | 2 failed) 31ms
+   ❯ Notion 범위 발견 (17)
+     × 새 단일 페이지 범위는 첫 실행에서 원본 페이지를 등록한다 13ms
+     × 현재 발견 작업이 실행 중이어도 미배정 확인 후속 작업을 예약한다 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/pipeline/notion-discover.test.ts > Notion 범위 발견 > 새 단일 페이지 범위는 첫 실행에서 원본 페이지를 등록한다
+AssertionError: expected { registered: +0, …(2) } to match object { registered: 1 }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "registered": 1,
++   "registered": 0,
+  }
+
+ ❯ tests/pipeline/notion-discover.test.ts:97:47
+     95|     });
+     96|
+     97|     await expect(discoverNotionRoot("root-1")).resolves.toMatchObject(…
+       |                                               ^
+     98|     expect(mocks.rpc).toHaveBeenCalledWith("register_notion_page", exp…
+     99|     expect(mocks.listDataSources).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/pipeline/notion-discover.test.ts > Notion 범위 발견 > 현재 발견 작업이 실행 중이어도 미배정 확인 후속 작업을 예약한다
+AssertionError: expected { registered: +0, …(2) } to match object { continued: true }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "continued": true,
++   "continued": false,
+  }
+
+ ❯ tests/pipeline/notion-discover.test.ts:111:47
+    109|     });
+    110|
+    111|     await expect(discoverNotionRoot("root-1")).resolves.toMatchObject(…
+       |                                               ^
+    112|     expect(mocks.enqueue).toHaveBeenCalledWith("notion_discover", { ro…
+    113|     expect(mocks.rpc).not.toHaveBeenCalledWith("register_notion_page",…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 15 passed (17)
+   Start at  16:34:05
+   Duration  1.94s (transform 66%, import 15%, worker 14%, tests 5%)
+

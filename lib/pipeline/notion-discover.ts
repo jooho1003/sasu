@@ -39,7 +39,7 @@ type DatabaseTask = {
 };
 
 type DiscoverCursor = {
-  mode: "workspace" | "database" | "imports";
+  mode: "workspace" | "page" | "database" | "imports";
   rootRegistered?: boolean;
   searchCursor?: string | null;
   searchDone?: boolean;
@@ -165,8 +165,11 @@ function cursorFrom(root: RootRow): DiscoverCursor {
   ) {
     return root.discover_cursor as DiscoverCursor;
   }
-  return root.scope === "workspace"
-    ? { mode: "workspace", searchCursor: null, searchDone: false, pending: [], databases: [], databaseIndex: 0, dataSourceCursor: null }
+  if (root.scope === "workspace") {
+    return { mode: "workspace", searchCursor: null, searchDone: false, pending: [], databases: [], databaseIndex: 0, dataSourceCursor: null };
+  }
+  return root.notion_kind === "page"
+    ? { mode: "page" }
     : { mode: "database", pending: [], databases: [], databaseIndex: 0, dataSourceCursor: null };
 }
 
@@ -568,6 +571,16 @@ export async function discoverNotionRoot(
     await continueLater();
     return true;
   };
+  const settle = async (): Promise<boolean> => {
+    const ready = await rpc<boolean>(client, "settle_notion_root", { p_root: rootId });
+    // The SQL function sees this job as running and cannot enqueue its own
+    // continuation. Once imports are settled, hand off the unassigned scan.
+    if (ready && root.scope === "subtree" && !cursor.unassignedDone) {
+      await enqueue("notion_discover", { rootId });
+      return true;
+    }
+    return false;
+  };
 
   try {
     if (
@@ -581,8 +594,7 @@ export async function discoverNotionRoot(
         }
         cursor = { mode: "imports", unassignedDone: true };
         await saveCursor(client, rootId, lease, cursor, false);
-        await rpc(client, "settle_notion_root", { p_root: rootId });
-        return { registered, unsupported, continued: false };
+        return { registered, unsupported, continued: await settle() };
       }
       if (cursor.mode !== "imports") {
         const status = await registerCandidate(client, rootId, {
@@ -598,8 +610,7 @@ export async function discoverNotionRoot(
       }
       cursor = { mode: "imports", unassignedDone: false };
       await saveCursor(client, rootId, lease, cursor, false);
-      await rpc(client, "settle_notion_root", { p_root: rootId });
-      return { registered, unsupported, continued: false };
+      return { registered, unsupported, continued: await settle() };
     }
 
     if (
@@ -733,8 +744,7 @@ export async function discoverNotionRoot(
       cursor = { mode: "imports", unassignedDone: false };
     }
     await saveCursor(client, rootId, lease, cursor, false);
-    await rpc(client, "settle_notion_root", { p_root: rootId });
-    return { registered, unsupported, continued: false };
+    return { registered, unsupported, continued: await settle() };
   } catch (error) {
     if (
       typeof error === "object" &&
