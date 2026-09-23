@@ -1,0 +1,77 @@
+{
+  "date": "2026-09-23",
+  "sourceCommit": "1683558ab51c3de0a07892019f10a0095439d79e",
+  "graft": {
+    "package": "@nanonets/graft",
+    "version": "0.19.0",
+    "image": "node:22-bookworm",
+    "imageDigest": "sha256:dd5847a04b0deee391fa145f1f4c6d214196668b6bcc7988ebed67249f226844",
+    "files": 596,
+    "nodes": 2677,
+    "edges": 6738,
+    "structuralCheck": "OK",
+    "deep": false,
+    "telemetryDisabled": true,
+    "preImplementationExecution": "not-run"
+  },
+  "archify": {
+    "repository": "https://github.com/tt-a1i/archify",
+    "commit": "8809b273c278a813a47fa37698864779c0d4cf08",
+    "validationChecks": 9,
+    "automatedBrowser": "pass",
+    "agentVisualReview": "1440x900 light reviewed; no overlap or clipping observed",
+    "independentHumanVisualReview": "not-run"
+  },
+  "files": [
+    {
+      "name": "graft-build.txt",
+      "bytes": 40748,
+      "sha256": "59c91a4857ca9aa5afdda9560d647aeb5b0a24e68dc0a5a8e04e85bc6684740c"
+    },
+    {
+      "name": "graft-check.txt",
+      "bytes": 823,
+      "sha256": "15f3078439ebbe93fe487ea1115202a839c7686becf984292d0b7b1277271b26"
+    },
+    {
+      "name": "graft-resolve-callers.json",
+      "bytes": 2584,
+      "sha256": "60fc4a8ae861a971403e020074610bbec516dd4e16a6141bce790b9798336a42"
+    },
+    {
+      "name": "graft-answer-callees.json",
+      "bytes": 4673,
+      "sha256": "5fed631f7a86037338657b534625b4a57ddfdb30e1ec415bcd83f20f1e015afc"
+    },
+    {
+      "name": "graft-llm-api.txt",
+      "bytes": 4100,
+      "sha256": "71ec544907d76d5d1e035b8ff8164dfefda24dffc56d7a3f948bd737008e336a"
+    },
+    {
+      "name": "answer-flow.json",
+      "bytes": 3338,
+      "sha256": "3ff716ac39da7e6cf2bed820e43673dcf42d3017e3228306a227166068f6301f"
+    },
+    {
+      "name": "answer-flow.html",
+      "bytes": 808245,
+      "sha256": "586e4c3aa4d7e8d491f388432815a5712e10aaf55fdcaee396f8f7815b225a13"
+    },
+    {
+      "name": "archify-validate-2.json",
+      "bytes": 2016,
+      "sha256": "97323a14c7ba2c1cc9544f5c08c101b68f1020a6215a145e80782f620f3718a9"
+    },
+    {
+      "name": "archify-delivery.json",
+      "bytes": 750,
+      "sha256": "21a1f588fb49f895031911581a7ab382753e7bd6bf37b53c94511b3adeb8c789"
+    },
+    {
+      "name": "answer-flow.visual-check.json",
+      "bytes": 16905,
+      "sha256": "945b038b898c3f3fb033d61d4aa28e443fdd5fff7cb29912c22020047138916a"
+    }
+  ]
+}

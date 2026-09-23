@@ -1,0 +1,14 @@
+{
+  "observedAt": "2026-09-23T07:12:00Z",
+  "method": "vercel inspect https://sasu-alpha.vercel.app and GitHub commit status",
+  "cliVersion": "59.23.2",
+  "mergeCommit": "7d8c7f60b39e632f0ace5d49111c9290ee56c55f",
+  "pullRequest": "https://github.com/jooho1003/sasu/pull/2",
+  "deploymentId": "dpl_2KmDkF49HAxHXpki58VPG2sz611c",
+  "target": "production",
+  "status": "Ready",
+  "alias": "https://sasu-alpha.vercel.app",
+  "deploymentUrl": "https://sasu-qgbzrj0x0-wadelee1005-3954s-projects.vercel.app",
+  "trigger": "main Git merge after git.deploymentEnabled.main=false was removed",
+  "buildSeconds": 46
+}

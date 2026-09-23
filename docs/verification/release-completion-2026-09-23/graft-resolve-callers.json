@@ -1,0 +1,92 @@
+{
+  "query": "resolveSelections",
+  "matches": [
+    {
+      "symbol": {
+        "id": "lib/answer-grounding.ts#resolveSelections",
+        "name": "resolveSelections",
+        "kind": "function",
+        "path": "lib/answer-grounding.ts",
+        "span": "L37-L72"
+      },
+      "hits": [
+        {
+          "id": "lib/pipeline/answer.ts#answerQuestion",
+          "relation": "calls",
+          "depth": 1,
+          "name": "answerQuestion",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L301-L450"
+        },
+        {
+          "id": "scripts/sample-llm-style.ts#main.sample",
+          "relation": "calls",
+          "depth": 1,
+          "name": "sample",
+          "kind": "function",
+          "path": "scripts/sample-llm-style.ts",
+          "span": "L27-L52"
+        },
+        {
+          "id": "tests/answer-grounding.test.ts",
+          "relation": "calls",
+          "depth": 1,
+          "name": "answer-grounding.test.ts",
+          "kind": "file",
+          "path": "tests/answer-grounding.test.ts",
+          "span": "L1-L61"
+        },
+        {
+          "id": "lib/pipeline/answer.ts#registerAnswerHandler",
+          "relation": "calls",
+          "depth": 2,
+          "name": "registerAnswerHandler",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L452-L457"
+        },
+        {
+          "id": "tests/evals/answer-live.eval.ts",
+          "relation": "calls",
+          "depth": 2,
+          "name": "answer-live.eval.ts",
+          "kind": "file",
+          "path": "tests/evals/answer-live.eval.ts",
+          "span": "L1-L104"
+        },
+        {
+          "id": "tests/evals/team-workflows.eval.ts",
+          "relation": "calls",
+          "depth": 2,
+          "name": "team-workflows.eval.ts",
+          "kind": "file",
+          "path": "tests/evals/team-workflows.eval.ts",
+          "span": "L1-L105"
+        },
+        {
+          "id": "tests/pipeline/answer-persistence.test.ts",
+          "relation": "calls",
+          "depth": 2,
+          "name": "answer-persistence.test.ts",
+          "kind": "file",
+          "path": "tests/pipeline/answer-persistence.test.ts",
+          "span": "L1-L409"
+        },
+        {
+          "id": "scripts/sample-llm-style.ts#main",
+          "relation": "calls",
+          "depth": 2,
+          "name": "main",
+          "kind": "function",
+          "path": "scripts/sample-llm-style.ts",
+          "span": "L13-L66"
+        }
+      ]
+    }
+  ],
+  "saved": {
+    "files": 7,
+    "baselineChars": 61934
+  }
+}

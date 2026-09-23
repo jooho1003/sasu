@@ -1,0 +1,10 @@
+{
+  "mode": "system_and_microphone",
+  "durationMs": 5015,
+  "audioTracks": [1, 1],
+  "videoFramesStored": 0,
+  "peakRms": [0, 0.2897],
+  "signalDetected": [false, true],
+  "persisted": false,
+  "transmitted": false
+}

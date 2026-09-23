@@ -59,7 +59,7 @@
       "step": 7,
       "name": "verification",
       "status": "blocked",
-      "summary": "UI·RLS·Storage 이전 회귀 기록 유지. step9 문체 목표 80% 두 번·ASK 10/10 두 번·전체 단위 1,391 통과. 사람 읽기·쇼케이스 판단·신규 변경 운영 반영 대기. Graft/Archify 실제 결과 미제공.",
+      "summary": "기존 UI·RLS·Storage 및 문체 80% 두 번·ASK 10/10 두 번·단위 1,391 기록 유지. 사용자 승인 후 운영 배포, Graft/Archify 실행, 공개 데모 쇼케이스 선택 완료. 독립 비개발자 읽기 검수 미완료.",
       "note": "운영 반영·제출 스크린샷 교체는 사람 판정",
       "verification": "docs/verification/plain-language-audit-2026-09-19/README.md"
     },
@@ -78,5 +78,10 @@
       "verification": "docs/verification/llm-style-followup-2026-09-23/README.md"
     }
   ],
-  "production_deployed": false
+  "production_deployed": true,
+  "release_verification": {
+    "verification": "docs/verification/release-completion-2026-09-23/README.md",
+    "independent_reading": "not-run",
+    "showcase": "public-demo-selected"
+  }
 }

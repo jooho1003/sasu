@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "workflow",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\release-completion-2026-09-23\\answer-flow.json",
+  "output": "D:\\바이브코딩\\sasu\\docs\\verification\\release-completion-2026-09-23\\answer-flow.html",
+  "specification": {
+    "sha256": "3ff716ac39da7e6cf2bed820e43673dcf42d3017e3228306a227166068f6301f",
+    "bytes": 3338
+  },
+  "artifact": {
+    "sha256": "586e4c3aa4d7e8d491f388432815a5712e10aaf55fdcaee396f8f7815b225a13",
+    "bytes": 808245
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

@@ -1,0 +1,29 @@
+npm warn cleanup Failed to remove some directories [
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\이주호\\AppData\\Local\\npm-cache\\_npx\\d5a11b0d8b6c00d8\\node_modules\\@anthropic-ai',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'C:\Users\이주호\AppData\Local\npm-cache\_npx\d5a11b0d8b6c00d8\node_modules\@anthropic-ai\sdk\internal'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\이주호\\AppData\\Local\\npm-cache\\_npx\\d5a11b0d8b6c00d8\\node_modules\\@anthropic-ai\\sdk\\internal'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\이주호\\AppData\\Local\\npm-cache\\_npx\\d5a11b0d8b6c00d8\\node_modules',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'C:\Users\이주호\AppData\Local\npm-cache\_npx\d5a11b0d8b6c00d8\node_modules\@babel'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\이주호\\AppData\\Local\\npm-cache\\_npx\\d5a11b0d8b6c00d8\\node_modules\\@babel'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\이주호\\AppData\\Local\\npm-cache\\_npx\\d5a11b0d8b6c00d8\\node_modules\\openai',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'C:\Users\이주호\AppData\Local\npm-cache\_npx\d5a11b0d8b6c00d8\node_modules\openai\src\resources\beta'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\이주호\\AppData\\Local\\npm-cache\\_npx\\d5a11b0d8b6c00d8\\node_modules\\openai\\src\\resources\\beta'
+npm warn cleanup     }
+npm warn cleanup   ]
+npm warn cleanup ]

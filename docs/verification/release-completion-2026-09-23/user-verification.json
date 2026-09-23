@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-23",
+  "microphone": {"status": "user-completed", "evidence": "microphone-user-result.json"},
+  "whisper": {
+    "status": "user-confirmed",
+    "report": "전사 완료.",
+    "surface": "production authenticated ASK voice input",
+    "model": "whisper-large-v3-turbo",
+    "telemetryCalls": 3,
+    "telemetryEvidence": "db-telemetry.txt",
+    "telemetryDoesNotProveAllCallsSucceeded": true,
+    "transcriptStoredInVerificationReport": false,
+    "audioStoredInVerificationReport": false
+  },
+  "sharedAudioAndMicrophone": {
+    "status": "user-completed-both-signals-detected-on-retest",
+    "evidence": ["shared-audio-user-result-1.json", "shared-audio-user-result-2.json"],
+    "inputOrder": ["shared audio", "microphone"],
+    "trackCounts": [1, 1],
+    "signalDetected": [true, true],
+    "interpretation": "First run had no shared-audio signal. Retest with a playing browser tab detected both inputs. Microphone RMS was low (0.0007), above the 0.0001 detection threshold; this is not a speech intelligibility or long meeting test."
+  },
+  "independentNonDeveloperFiveMinuteReading": {
+    "status": "participant-ready-awaiting-results",
+    "userReport": "준비됨",
+    "surface": "authenticated pilot department containing synthetic QA fixtures",
+    "tasks": ["find decision card and source", "understand changed decision reason", "record a synthetic decision with selected evidence", "open an answer source"],
+    "result": null
+  }
+}

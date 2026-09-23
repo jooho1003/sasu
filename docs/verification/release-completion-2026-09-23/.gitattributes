@@ -1,0 +1,7 @@
+# Preserve tool receipts and frozen HTML byte-for-byte for recorded SHA-256 hashes.
+* -text
+*.md text
+*.json whitespace=cr-at-eol
+*.txt -diff
+*.html -diff
+*.png binary

@@ -45,15 +45,21 @@
       "status": "blocked",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "summary": "로컬 검증 완료: 단위 1,383·SQL 243·화면 12·모델 10/10·실DB E2E 1건/질문 5건 통과. 운영 승인 대기.",
+      "summary": "기존 로컬 검증 유지. 사용자 승인 후 운영 0052~0054·자동 배포·웹 ASK 1건 및 원문 강조 확인. Slack DM/채널 실제 발송 검증은 남음.",
       "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md",
-      "blocked_reason": "검증 완료. 운영 DB(0053·0054) 적용·배포·운영 연결 E2E는 사용자 승인 대기(ADR-049)"
+      "blocked_reason": "운영 승인·DB·배포·웹 스모크 완료. Slack DM/채널 신규 질문→발송 등 운영 외부 경로 검증 미완료."
     }
   ],
-  "production_deployed": false,
-  "execution_note": "다른 작업의 미커밋 변경을 보존하기 위해 execute.py 자동 전체 커밋 대신 step 명세를 직접 실행했다. 이번 작업에서 커밋·운영 반영 없음.",
+  "production_deployed": true,
+  "execution_note": "초기 step은 execute.py 대신 직접 실행. 후속 사용자 승인으로 PR #1·#2 머지 및 운영 적용 완료. 초기 검증 기록은 보존.",
   "followup_verification": {
     "verification": "docs/verification/llm-style-followup-2026-09-23/README.md",
-    "summary": "2026-09-23 문체 후속 중 A09 회귀 9/10을 보존. 마지막 허용 프롬프트 보완 후 같은 코드로 실제 Groq 10/10 두 번 통과. 누적 보완 2/2회; 운영 승인 대기 유지."
+    "summary": "2026-09-23 문체 후속 중 A09 회귀 9/10을 보존. 마지막 허용 프롬프트 보완 후 같은 코드로 실제 Groq 10/10 두 번 통과. 누적 보완 2/2회; 당시 운영 승인 대기; 이후 release_verification에서 승인·배포 확인."
+  },
+  "release_verification": {
+    "verification": "docs/verification/release-completion-2026-09-23/README.md",
+    "merge_commit": "7d8c7f60b39e632f0ace5d49111c9290ee56c55f",
+    "production_web_smoke": "passed",
+    "slack_delivery": "not-run"
   }
 }

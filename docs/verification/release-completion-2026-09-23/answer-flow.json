@@ -1,0 +1,174 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "사수 · 질문에서 원문 확인까지",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "request",
+      "label": "질문 접수"
+    },
+    {
+      "id": "answer",
+      "label": "근거 답변"
+    },
+    {
+      "id": "recovery",
+      "label": "완료와 복구",
+      "variant": "exception"
+    }
+  ],
+  "mainPath": [
+    "question",
+    "session",
+    "queued",
+    "worker",
+    "search",
+    "select",
+    "resolve"
+  ],
+  "nodes": [
+    {
+      "id": "question",
+      "lane": "request",
+      "col": 0,
+      "type": "frontend",
+      "label": "질문",
+      "sublabel": "웹 · Slack",
+      "width": 160
+    },
+    {
+      "id": "session",
+      "lane": "request",
+      "col": 1,
+      "type": "security",
+      "label": "질문자 확인",
+      "sublabel": "세션 · 멤버십",
+      "width": 160
+    },
+    {
+      "id": "queued",
+      "lane": "request",
+      "col": 2,
+      "type": "database",
+      "label": "질문과 작업 저장",
+      "sublabel": "202 응답",
+      "width": 170
+    },
+    {
+      "id": "worker",
+      "lane": "answer",
+      "col": 2,
+      "type": "messagebus",
+      "label": "작업 실행",
+      "sublabel": "after · 주기 실행",
+      "width": 170
+    },
+    {
+      "id": "search",
+      "lane": "answer",
+      "col": 3,
+      "type": "security",
+      "label": "볼 수 있는 근거",
+      "sublabel": "can_see · RLS",
+      "width": 170
+    },
+    {
+      "id": "select",
+      "lane": "answer",
+      "col": 4,
+      "type": "cloud",
+      "label": "문단 번호 선택",
+      "sublabel": "Groq · 조건과 예외",
+      "width": 170
+    },
+    {
+      "id": "resolve",
+      "lane": "answer",
+      "col": 5,
+      "type": "backend",
+      "label": "원문 범위 검증",
+      "sublabel": "연속 문단 추출",
+      "width": 170
+    },
+    {
+      "id": "saved",
+      "lane": "request",
+      "col": 4,
+      "type": "database",
+      "label": "답변과 인용 저장",
+      "sublabel": "검증 실패 시 거절",
+      "width": 180
+    },
+    {
+      "id": "source",
+      "lane": "request",
+      "col": 5,
+      "type": "frontend",
+      "label": "원문 열기",
+      "sublabel": "세션 권한 · 인용 강조",
+      "width": 180
+    },
+    {
+      "id": "timeout",
+      "lane": "recovery",
+      "col": 2,
+      "type": "backend",
+      "label": "오래 걸린 작업 정리",
+      "sublabel": "2분 경과 시 failed",
+      "width": 185
+    }
+  ],
+  "edges": [
+    {
+      "id": "q-s",
+      "from": "question",
+      "to": "session"
+    },
+    {
+      "id": "s-q",
+      "from": "session",
+      "to": "queued"
+    },
+    {
+      "id": "q-w",
+      "from": "queued",
+      "to": "worker",
+      "role": "async"
+    },
+    {
+      "id": "w-s",
+      "from": "worker",
+      "to": "search"
+    },
+    {
+      "id": "s-m",
+      "from": "search",
+      "to": "select"
+    },
+    {
+      "id": "m-r",
+      "from": "select",
+      "to": "resolve"
+    },
+    {
+      "id": "r-d",
+      "from": "resolve",
+      "to": "saved",
+      "role": "return"
+    },
+    {
+      "id": "d-s",
+      "from": "saved",
+      "to": "source"
+    },
+    {
+      "id": "q-t",
+      "from": "worker",
+      "to": "timeout",
+      "role": "error"
+    }
+  ]
+}
