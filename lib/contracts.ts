@@ -174,7 +174,7 @@ export const AnswerSelection = z.strictObject({
 });
 
 export const AnswerDraft = z.strictObject({
-  citations: z.array(AnswerSelection).min(1).max(8),
+  citations: z.array(AnswerSelection).max(8),
   refused: z.boolean(),
   refusal_reason: NullableString,
 });

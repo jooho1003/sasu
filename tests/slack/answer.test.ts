@@ -94,7 +94,7 @@ describe("Slack 답변과 인용 표시", () => {
       citations: [{ ...citation, author: null, occurredAt: "bad-date" }],
     });
     expect(message.text).toContain("누가 썼는지 모름");
-    expect(message.text).toContain("시각 모름");
+    expect(message.text).toContain("날짜 미상");
     expect(message.text).not.toContain("Invalid Date");
   });
 

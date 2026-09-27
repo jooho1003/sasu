@@ -32,4 +32,9 @@ describe("저장 답변 재열람 경계", () => {
     mocks.from.mockImplementation((table: string) => query(table === "answers" ? answer : table === "citations" ? [{ item_id: "i1", quote: "공개 사실", decision_id: null }] : [{ id: "i1", content: "공개 사실", deleted_at: null, sources: { kind, external_id: "doc", active: true } }]));
     expect((await read()).citations[0].href).toBe("/d/dept-1/evidence/i1?answer=answer-1");
   });
+  it("권한 검증을 통과한 근거에만 사건 시각을 반환한다", async () => {
+    mocks.from.mockImplementation((table: string) => query(table === "answers" ? answer : table === "citations" ? [{ item_id: "i1", quote: "공개 사실", decision_id: null }] : [{ id: "i1", content: "공개 사실", deleted_at: null, author: "팀원", spoken_at: "2026-09-15T00:00:00Z", sources: { kind: "meeting", title: "검토 회의", external_id: "meeting-1" } }]));
+    const body = await read();
+    expect(body.citations[0].occurred_at).toBe("2026-09-15T00:00:00Z");
+  });
 });

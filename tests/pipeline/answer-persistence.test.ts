@@ -34,6 +34,86 @@ vi.mock("@/lib/pipeline/slack-answer-delivery", () => ({ deliverSlackAnswer: vi.
 import { answerQuestion } from "@/lib/pipeline/answer";
 
 describe("answer publication boundary", () => {
+  it.each(["그거 어떻게 됐어요?", "결국 승인됐나?"])("단독 질문 '%s'의 대상을 임의의 기록으로 추정하지 않는다", async question => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question, status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    await answerQuestion("answer-1");
+    expect(mocks.structured).not.toHaveBeenCalled();
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: true, p_citations: [], p_answer: expect.stringContaining("어떤 안건") }));
+  });
+
+  it("승인 상태 질문은 늦은 같은 안건의 보류 기록을 빠뜨리면 재선택하고 날짜·불확실성을 표시한다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "외주사 B 승인됐나요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.search.mockResolvedValue([{ id: "hold", content: "외주사 B 승인은 보류합니다.", spoken_at: "2026-09-15T00:00:00Z", source_kind: "meeting", source_title: "검토 회의", source_visibility: "dept" }]);
+    mocks.decisions.mockResolvedValue([{ id: "approved", outcome: "외주사 B 승인", rationale: "견적 확인", decided_at: "2026-09-10T00:00:00Z", decided_by_name: "팀장" }]);
+    mocks.structured.mockResolvedValueOnce({ data: { refused: false, citations: [{ evidence: 2, first_paragraph: 1, last_paragraph: 1 }] } }).mockResolvedValueOnce({ data: { refused: false, citations: [{ evidence: 1, first_paragraph: 1, last_paragraph: 1 }, { evidence: 2, first_paragraph: 1, last_paragraph: 1 }] } });
+    await answerQuestion("answer-1");
+    const input = JSON.parse(mocks.structured.mock.calls[0][2].user);
+    expect(input.evidence[0].occurred_at).toBe("2026-09-15T00:00:00Z");
+    expect(input.evidence[1].occurred_at).toBe("2026-09-10T00:00:00Z");
+    expect(mocks.structured).toHaveBeenCalledTimes(2);
+    expect(mocks.structured.mock.calls[1][2].system).toContain("늦은 같은 안건");
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: false, p_answer: expect.stringContaining("현재 상태를 확정"), p_citations: expect.arrayContaining([{ item_id: "hold", decision_id: null, quote: "외주사 B 승인은 보류합니다." }]) }));
+  });
+
+  it("늦은 다른 안건은 오래된 관련 결정을 막지 않는다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "외주사 B 승인됐나요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.search.mockResolvedValue([{ id: "other", content: "외주사 C 승인은 보류합니다.", spoken_at: "2026-09-15T00:00:00Z", source_kind: "meeting", source_title: "검토 회의", source_visibility: "dept" }]);
+    mocks.decisions.mockResolvedValue([{ id: "approved", outcome: "외주사 B 승인", rationale: "견적 확인", decided_at: "2026-09-10T00:00:00Z", decided_by_name: "팀장" }]);
+    mocks.structured.mockResolvedValue({ data: { refused: false, citations: [{ evidence: 2, first_paragraph: 1, last_paragraph: 1 }] } });
+    await answerQuestion("answer-1");
+    expect(mocks.structured).toHaveBeenCalledTimes(1);
+  });
+
+  it("질문에 조사가 붙어도 같은 안건의 늦은 기록을 찾는다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "외주사 B의 계약은 승인됐나요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.search.mockResolvedValue([{ id: "hold", content: "외주사 B 계약은 보류합니다.", spoken_at: "2026-09-15T00:00:00Z", source_kind: "meeting", source_title: "검토 회의", source_visibility: "dept" }]);
+    mocks.decisions.mockResolvedValue([{ id: "approved", outcome: "외주사 B 계약 승인", rationale: "견적 확인", decided_at: "2026-09-10T00:00:00Z", decided_by_name: "팀장" }]);
+    mocks.structured.mockResolvedValue({ data: { refused: false, citations: [{ evidence: 2, first_paragraph: 1, last_paragraph: 1 }] } });
+    await answerQuestion("answer-1");
+    expect(mocks.structured).toHaveBeenCalledTimes(2);
+  });
+
+  it("시각을 모르는 같은 안건 기록도 오래된 결정과 함께 고르게 한다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "외주사 B 승인됐나요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.search.mockResolvedValue([{ id: "meeting", content: "외주사 B 승인을 보류합니다.", spoken_at: null, source_kind: "meeting", source_title: "검토 회의", source_visibility: "dept" }]);
+    mocks.decisions.mockResolvedValue([{ id: "approved", outcome: "외주사 B 승인", rationale: "견적 확인", decided_at: "2026-09-10T00:00:00Z", decided_by_name: "팀장" }]);
+    mocks.structured.mockResolvedValue({ data: { refused: false, citations: [{ evidence: 2, first_paragraph: 1, last_paragraph: 1 }] } });
+    await answerQuestion("answer-1");
+    expect(mocks.structured).toHaveBeenCalledTimes(2);
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: true, p_citations: [] }));
+  });
+
+  it("실제 이전 질문이 반환된 후속 상태 질문에는 그 안건을 사용한다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-2", dept_id: "dept-1", asked_by: "lead-1", question: "그거 어떻게 됐어요?", parent_id: "answer-1", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.rpc.mockImplementation(async name => ({ data: name === "answer_conversation_context" ? [{ question: "외주사 B 승인됐나요?" }] : true, error: null }));
+    mocks.search.mockResolvedValue([{ id: "meeting", content: "외주사 B 승인을 보류합니다.", spoken_at: "2026-09-15T00:00:00Z", source_kind: "meeting", source_title: "검토 회의", source_visibility: "dept" }]);
+    await answerQuestion("answer-2");
+    expect(mocks.structured).toHaveBeenCalledTimes(1);
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: false, p_answer: expect.stringContaining("현재 상태를 확정") }));
+  });
+
+  it("지시어 뒤에 안건을 직접 적은 단독 질문은 검색한다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "그거 외주사 B 승인됐나요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    await answerQuestion("answer-1");
+    expect(mocks.structured).toHaveBeenCalledTimes(1);
+  });
+
+  it("parent_id가 있어도 허용된 이전 질문이 없으면 지시어 대상을 추정하지 않는다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-2", dept_id: "dept-1", asked_by: "lead-1", question: "그거 어떻게 됐어요?", parent_id: "answer-1", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.rpc.mockImplementation(async name => ({ data: name === "answer_conversation_context" ? [] : true, error: null }));
+    await answerQuestion("answer-2");
+    expect(mocks.structured).not.toHaveBeenCalled();
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: true, p_error_code: "subject_missing" }));
+  });
+
   it("조건·예외 범위를 저장하고 원문은 프롬프트와 Slack 인용에 한 번만 넣는다", async () => {
     const content = "지원 한도는 50만 원입니다.\n\n필수 교육은 한도가 없습니다.";
     mocks.search.mockResolvedValue([{ id: "policy", content, source_kind: "document", source_title: "교육 기준", source_visibility: "dept" }]);
@@ -396,6 +476,13 @@ describe("answer publication boundary", () => {
       "complete_answer",
       expect.objectContaining({ p_refused: true, p_citations: [] }),
     );
+  });
+
+  it("실제 스키마 오류는 근거 부족으로 숨기지 않는다", async () => {
+    mocks.structured.mockRejectedValue({ error_code: "schema_invalid" });
+    await expect(answerQuestion("answer-1")).rejects.toMatchObject({ error_code: "schema_invalid" });
+    expect(mocks.structured).toHaveBeenCalledOnce();
+    expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
   it("네트워크 오류를 근거 부족으로 숨기지 않는다", async () => {

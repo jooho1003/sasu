@@ -39,7 +39,9 @@ export default function LoginForm({ initialError, next }: LoginFormProps) {
 
     if (error) {
       setErrorMessage(
-        "로그인 메일을 보내지 못했습니다. 이메일 주소를 확인하고 다시 시도해주세요.",
+        error.status === 429 || error.code === "over_email_send_rate_limit"
+          ? "로그인 요청이 많아 메일을 보낼 수 없습니다. 잠시 후 다시 시도해 주세요."
+          : "로그인 메일을 보내지 못했습니다. 이메일 주소를 확인하고 다시 시도해주세요.",
       );
       return;
     }

@@ -105,7 +105,7 @@ export function buildSlackAnswerMessage(input: {
     const time =
       date && Number.isFinite(date.getTime())
         ? `${dateFormatter.format(date)} (KST)`
-        : "시각 모름";
+        : "날짜 미상";
     const author = Array.from(citation.author?.trim() || "누가 썼는지 모름")
       .slice(0, 200)
       .join("");
