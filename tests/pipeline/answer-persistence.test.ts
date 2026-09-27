@@ -77,6 +77,26 @@ describe("answer publication boundary", () => {
     expect(mocks.structured).toHaveBeenCalledTimes(2);
   });
 
+  it("운영 질문의 '건은 결국'을 안건으로 오인하지 않고 늦은 보류 기록을 다시 고르게 한다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "외주사 B 12% 인상 건은 결국 승인됐나요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.search.mockResolvedValue([{ id: "hold", content: "외주사 B 12% 인상 승인은 보류합니다.", spoken_at: "2026-09-15T00:00:00Z", source_kind: "meeting", source_title: "검토 회의", source_visibility: "dept" }]);
+    mocks.decisions.mockResolvedValue([{ id: "approved", outcome: "외주사 B 12% 인상 승인", rationale: "견적 확인", decided_at: "2026-09-09T00:00:00Z", decided_by_name: "팀장" }]);
+    mocks.structured.mockResolvedValueOnce({ data: { refused: false, citations: [{ evidence: 2, first_paragraph: 1, last_paragraph: 1 }] } }).mockResolvedValueOnce({ data: { refused: false, citations: [{ evidence: 1, first_paragraph: 1, last_paragraph: 1 }, { evidence: 2, first_paragraph: 1, last_paragraph: 1 }] } });
+    await answerQuestion("answer-1");
+    expect(mocks.structured).toHaveBeenCalledTimes(2);
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_citations: expect.arrayContaining([{ item_id: "hold", decision_id: null, quote: "외주사 B 12% 인상 승인은 보류합니다." }]) }));
+  });
+
+  it("승인 기준을 묻는 질문에는 현재 상태 불확실성 문장을 붙이지 않는다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "12% 인상 건을 바로 승인하면 안 되나요? 기준이 뭔가요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.search.mockResolvedValue([{ id: "policy", content: "12% 인상 건은 승인 전에 검토합니다.", source_kind: "document", source_title: "승인 기준", source_visibility: "dept" }]);
+    mocks.structured.mockResolvedValue({ data: { refused: false, citations: [{ evidence: 1, first_paragraph: 1, last_paragraph: 1 }] } });
+    await answerQuestion("answer-1");
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_answer: answerLead(1) }));
+  });
+
   it("시각을 모르는 같은 안건 기록도 오래된 결정과 함께 고르게 한다", async () => {
     const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "외주사 B 승인됐나요?", status: "pending" }, error: null }) };
     mocks.from.mockReturnValue(query);

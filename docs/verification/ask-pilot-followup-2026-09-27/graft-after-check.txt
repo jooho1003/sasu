@@ -1,0 +1,4 @@
+⬆ graft 0.19.0 → 0.20.0 available: run `npm i -g @nanonets/graft@latest` (restart your agent after).
+deep layer: not built (run `graft build --deep` for concept nodes) — wiring graph is the source of truth
+
+graph check: OK — the wiring graph is in sync with the code. (meaning tier 0% complete — 2684 of 2684 node(s) pending: app/(auth)/consent/consent-actions.tsx, app/(auth)/consent/consent-actions.tsx#ConsentActions, app/(auth)/consent/consent-actions.tsx#ConsentActions.consent, app/(auth)/consent/consent-actions.tsx#ConsentActions.later, app/(auth)/consent/consent-actions.tsx#ConsentActionsProps, app/(auth)/consent/page.tsx, app/(auth)/consent/page.tsx#ConsentPage, app/(auth)/consent/page.tsx#ConsentPageProps, … +2676 more. Run `graft build --deep` to summarize them; if a deep build already left these pending, that meaning pass failed — see that build's errors (re-running alone will not clear them))

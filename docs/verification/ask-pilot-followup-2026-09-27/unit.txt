@@ -1,0 +1,41 @@
+
+> sasu@0.1.0 test
+> vitest run --passWithNoTests
+
+node.exe : (!) Your Vite config uses feature
+s that are unsupported by `configLoader: 'na
+tive'`, which is planned to become the defau
+lt in a future major version of Vite:
+At C:\Program Files\nodejs\npm.ps1:29 char:3
++   & $NODE_EXE $NPM_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified:
+    ((!) Your Vite c...ersion of Vite::Str
+  ing) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommand
+   Error
+
+  - ESM syntax in a file loaded as CommonJS
+(vitest.config.ts:1:1). Use a `.mjs` extensi
+on or set `"type": "module"` in the closest
+package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true`
+ to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected
+. Vite now supports tsconfig paths resolutio
+n natively via the resolve.tsconfigPaths opt
+ion. You can remove the plugin and set resol
+ve.tsconfigPaths: true in your Vite config i
+nstead.
+
+ RUN  v5.0.2 C:/Users/ssool/개발/바이브코딩/sasu
+
+
+ Test Files  139 passed (139)
+      Tests  1409 passed (1409)
+   Start at  10:08:01
+   Duration  14.34s (import 48%, transform 37%, tests 13%, worker 2%)
+
+  Transform  transforming modules took 37.85s · 37% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns

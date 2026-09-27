@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/mnt/c/Users/ssool/개발/바이브코딩/sasu/docs/verification/ask-pilot-followup-2026-09-27/answer-flow.json",
+  "output": "/mnt/c/Users/ssool/개발/바이브코딩/sasu/docs/verification/ask-pilot-followup-2026-09-27/answer-flow.html",
+  "specification": {
+    "sha256": "7c78275dbc24c8919051d79981ed17fecbb578b947504f49a6f37b5721455029",
+    "bytes": 3202
+  },
+  "artifact": {
+    "sha256": "310b00eb70556545469e282663e08de92a6ab9e28034e60748891a8b627d209c",
+    "bytes": 811864
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

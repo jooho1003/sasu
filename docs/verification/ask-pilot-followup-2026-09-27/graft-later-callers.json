@@ -1,0 +1,66 @@
+⬆ graft 0.19.0 → 0.20.0 available: run `npm i -g @nanonets/graft@latest` (restart your agent after).
+{
+  "query": "laterRelatedEvidence",
+  "matches": [
+    {
+      "symbol": {
+        "id": "lib/pipeline/answer.ts#laterRelatedEvidence",
+        "name": "laterRelatedEvidence",
+        "kind": "function",
+        "path": "lib/pipeline/answer.ts",
+        "span": "L130-L139"
+      },
+      "hits": [
+        {
+          "id": "lib/pipeline/answer.ts#answerQuestion",
+          "relation": "calls",
+          "depth": 1,
+          "name": "answerQuestion",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L331-L494"
+        },
+        {
+          "id": "lib/pipeline/answer.ts#registerAnswerHandler",
+          "relation": "calls",
+          "depth": 2,
+          "name": "registerAnswerHandler",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L496-L501"
+        },
+        {
+          "id": "tests/evals/answer-live.eval.ts",
+          "relation": "calls",
+          "depth": 2,
+          "name": "answer-live.eval.ts",
+          "kind": "file",
+          "path": "tests/evals/answer-live.eval.ts",
+          "span": "L1-L104"
+        },
+        {
+          "id": "tests/evals/team-workflows.eval.ts",
+          "relation": "calls",
+          "depth": 2,
+          "name": "team-workflows.eval.ts",
+          "kind": "file",
+          "path": "tests/evals/team-workflows.eval.ts",
+          "span": "L1-L105"
+        },
+        {
+          "id": "tests/pipeline/answer-persistence.test.ts",
+          "relation": "calls",
+          "depth": 2,
+          "name": "answer-persistence.test.ts",
+          "kind": "file",
+          "path": "tests/pipeline/answer-persistence.test.ts",
+          "span": "L1-L496"
+        }
+      ]
+    }
+  ],
+  "saved": {
+    "files": 4,
+    "baselineChars": 57387
+  }
+}
