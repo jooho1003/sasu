@@ -6,7 +6,7 @@ import {
 import { registerHandler } from "@/lib/jobs";
 import { llm } from "@/lib/llm";
 import { mask } from "@/lib/mask";
-import { searchDecisionsAs, searchAs, type SearchResult } from "@/lib/search";
+import { searchDecisionsAs, searchAs, searchTopicItemsAs, type SearchResult } from "@/lib/search";
 import { answerLead, evidenceParagraphs, resolveSelections, type EvidenceSource, type SelectionFailureCode } from "@/lib/answer-grounding";
 import { metadataBase } from "@/lib/site";
 import {
@@ -375,7 +375,7 @@ export async function answerQuestion(
   const topic = statusTopic(question, context);
   const searchQuestion = [...context.map(turn => mask(turn.question)), question].join("\n").slice(-7000);
   const embedding = await embedText(searchQuestion, { inputType: "query" });
-  const [items, decisions] = await Promise.all([
+  const [semanticItems, decisions, topicItems] = await Promise.all([
     searchAs(client, {
       userId: answer.asked_by,
       deptId: answer.dept_id,
@@ -391,7 +391,15 @@ export async function answerQuestion(
       limit: 8,
       scope,
     }),
+    topic.length > 0 ? searchTopicItemsAs(client, {
+      userId: answer.asked_by,
+      deptId: answer.dept_id,
+      terms: topic.slice(0, 12),
+      limit: 8,
+      scope,
+    }) : Promise.resolve([]),
   ]);
+  const items = [...topicItems, ...semanticItems].filter((item, index, all) => all.findIndex(candidate => candidate.id === item.id) === index);
 
   if (items.length === 0 && decisions.length === 0) {
     const saved = await saveRefused(

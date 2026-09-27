@@ -115,6 +115,28 @@ describe("live Supabase RLS", () => {
     expect(citations.data).toHaveLength(1);
   });
 
+  it("상태 질문 보조 검색은 lead 전용 기록과 채널 범위를 SQL에서 제한한다", async () => {
+    const memberUser = (await member.auth.getUser()).data.user?.id;
+    const leadUser = (await lead.auth.getUser()).data.user?.id;
+    expect(memberUser).toBeTruthy();
+    expect(leadUser).toBeTruthy();
+    const args = { p_dept: SEED_IDS.department, p_terms: ["외주사", "견적", "인상"], p_limit: 8 };
+    const [memberResult, spoofed, leadResult, channelResult] = await Promise.all([
+      member.rpc("search_topic_items_as", { ...args, p_user: memberUser, p_scope: "user" }),
+      member.rpc("search_topic_items_as", { ...args, p_user: leadUser, p_scope: "user" }),
+      lead.rpc("search_topic_items_as", { ...args, p_user: leadUser, p_scope: "user" }),
+      lead.rpc("search_topic_items_as", { ...args, p_user: leadUser, p_scope: "channel" }),
+    ]);
+    expect(memberResult.error).toBeNull();
+    expect(memberResult.data).toEqual([]);
+    expect(spoofed.error).toBeNull();
+    expect(spoofed.data).toEqual([]);
+    expect(leadResult.error).toBeNull();
+    expect(leadResult.data?.map((row: { id: string }) => row.id)).toContain(SEED_IDS.leadsOnlyItem);
+    expect(channelResult.error).toBeNull();
+    expect(channelResult.data).toEqual([]);
+  });
+
   it("member cannot insert a leads_only card", async () => {
     const response = await member.from("decision_requests").insert({
       id: crypto.randomUUID(),
