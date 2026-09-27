@@ -20,3 +20,5 @@
 
 - 운영 재확인에서 F2의 늦은 보류 기록 누락과 기준 질문의 과도한 현재 상태 안내를 확인했다. Graft 구현 전·후 그래프와 Archify 도식·브라우저 검증을 수행하고, 두 사례를 재현 테스트로 수정했다. 대상 35건·전체 1,409건, lint·TypeScript·프로덕션 빌드 통과. [실행 결과와 남은 운영 재시험](../../docs/verification/ask-pilot-followup-2026-09-27/README.md).
 - 사용자 승인에 따라 PR #8을 머지했고 Vercel 운영 배포가 성공했다. 공개 데모 URL은 HTTP 200을 확인했다. 파일럿 웹 묻기 재시험에서 기준 질문의 불필요한 현재 상태 안내는 사라졌지만, 상태 질문과 9/15 회의 결론 질문은 `근거 없음`으로 끝나 F2는 미해결이다. [운영 반영 기록](../../docs/verification/ask-pilot-followup-2026-09-27/production-release.md). 기존 step4의 Slack 실제 발송 미완료 상태는 유지한다.
+- 후속으로 상태 질문의 SQL 안건 단어 검색(0055)을 구현하고 Graft 전·후 관계·Archify 흐름·단위 1,412건·lint·TypeScript·빌드를 확인했다. 이 로컬 검증 시점에는 운영 SQL 연결이 없어 코드 PR을 대기시켰다. [후속 로컬 검증](../../docs/verification/ask-f2-retrieval-2026-09-27/README.md).
+- 운영 Supabase SQL Editor에서 0055 함수를 적용했다. 함수·권한·9/15 보류 항목의 검색 결과와 팀장 전용 항목의 범위 차단을 확인했다. CLI 마이그레이션 이력과 API 세션 RLS 자동화는 아직 미확인이다. [운영 DB 확인](../../docs/verification/ask-f2-retrieval-2026-09-27/production-db.md).

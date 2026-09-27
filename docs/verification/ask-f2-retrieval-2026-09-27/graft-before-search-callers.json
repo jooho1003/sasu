@@ -1,0 +1,38 @@
+﻿{
+  "query": "searchAs",
+  "matches": [
+    {
+      "symbol": {
+        "id": "lib/search.ts#searchAs",
+        "name": "searchAs",
+        "kind": "function",
+        "path": "lib/search.ts",
+        "span": "L39-L59"
+      },
+      "hits": [
+        {
+          "id": "lib/pipeline/answer.ts#answerQuestion",
+          "relation": "calls",
+          "depth": 1,
+          "name": "answerQuestion",
+          "kind": "function",
+          "path": "lib/pipeline/answer.ts",
+          "span": "L331-L494"
+        },
+        {
+          "id": "tests/search.test.ts",
+          "relation": "calls",
+          "depth": 1,
+          "name": "search.test.ts",
+          "kind": "file",
+          "path": "tests/search.test.ts",
+          "span": "L1-L60"
+        }
+      ]
+    }
+  ],
+  "saved": {
+    "files": 3,
+    "baselineChars": 23960
+  }
+}

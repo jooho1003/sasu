@@ -1,0 +1,42 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "ASK F2: 상태 질문 검색 보강",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    { "id": "request", "label": "질문 접수" },
+    { "id": "answer", "label": "근거 선택과 검증" },
+    { "id": "recovery", "label": "거절과 복구", "variant": "exception" }
+  ],
+  "mainPath": ["question", "context", "subject", "search", "select", "verify"],
+  "nodes": [
+    { "id": "question", "lane": "request", "col": 0, "type": "frontend", "label": "질문", "sublabel": "웹 · Slack", "width": 150 },
+    { "id": "context", "lane": "request", "col": 1, "type": "security", "label": "질문자와 대화 확인", "sublabel": "세션 · 허용된 이전 질문", "width": 172 },
+    { "id": "subject", "lane": "answer", "col": 2, "type": "backend", "label": "안건 특정", "sublabel": "지시어만 있으면 중단", "width": 166 },
+    { "id": "search", "lane": "answer", "col": 3, "type": "security", "label": "권한 검색 병합", "sublabel": "의미 8 + 상태 단어 8 · can_see", "width": 178 },
+    { "id": "select", "lane": "answer", "col": 4, "type": "cloud", "label": "원문 문단 선택", "sublabel": "Groq · 사건 시각 포함", "width": 166 },
+    { "id": "verify", "lane": "answer", "col": 5, "type": "backend", "label": "인용과 시간 순서 확인", "sublabel": "원문 일치 · 늦은 같은 안건", "width": 184 },
+    { "id": "saved", "lane": "request", "col": 4, "type": "database", "label": "답변과 인용 저장", "sublabel": "현재 상태는 불확실성 표시", "width": 180 },
+    { "id": "source", "lane": "request", "col": 5, "type": "frontend", "label": "원문 열기", "sublabel": "권한 확인 · 인용 강조", "width": 166 },
+    { "id": "clarify", "lane": "recovery", "col": 2, "type": "security", "label": "안건 확인 요청", "sublabel": "subject_missing", "width": 166 },
+    { "id": "refused", "lane": "recovery", "col": 4, "type": "database", "label": "근거 부족 거절", "sublabel": "인용 0건 · refused", "width": 166 },
+    { "id": "retry", "lane": "recovery", "col": 5, "type": "messagebus", "label": "한 번 더 선택", "sublabel": "누락된 늦은 기록 안내", "width": 178 },
+    { "id": "failed", "lane": "recovery", "col": 3, "type": "backend", "label": "형식 오류 실패", "sublabel": "schema_invalid 유지", "width": 166 }
+  ],
+  "edges": [
+    { "id": "e01", "from": "question", "to": "context" },
+    { "id": "e02", "from": "context", "to": "subject" },
+    { "id": "e03", "from": "subject", "to": "search" },
+    { "id": "e04", "from": "search", "to": "select" },
+    { "id": "e05", "from": "select", "to": "verify" },
+    { "id": "e06", "from": "verify", "to": "saved", "role": "return" },
+    { "id": "e07", "from": "saved", "to": "source" },
+    { "id": "e08", "from": "subject", "to": "clarify", "role": "error" },
+    { "id": "e09", "from": "search", "to": "refused", "role": "error" },
+    { "id": "e10", "from": "select", "to": "refused", "role": "error" },
+    { "id": "e11", "from": "verify", "to": "retry", "role": "error" },
+    { "id": "e12", "from": "select", "to": "failed", "role": "error" }
+  ]
+}

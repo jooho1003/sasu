@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   rpc: vi.fn(),
   from: vi.fn(),
   search: vi.fn(),
+  topicItems: vi.fn(),
   decisions: vi.fn(),
   structured: vi.fn(),
   post: vi.fn(),
@@ -21,6 +22,7 @@ vi.mock("@/lib/embeddings", () => ({
 }));
 vi.mock("@/lib/search", () => ({
   searchAs: mocks.search,
+  searchTopicItemsAs: mocks.topicItems,
   searchDecisionsAs: mocks.decisions,
 }));
 vi.mock("@/lib/llm", () => ({ llm: { structured: mocks.structured } }));
@@ -34,6 +36,19 @@ vi.mock("@/lib/pipeline/slack-answer-delivery", () => ({ deliverSlackAnswer: vi.
 import { answerQuestion } from "@/lib/pipeline/answer";
 
 describe("answer publication boundary", () => {
+  it("상태 질문은 의미 검색에서 빠진 늦은 안건 기록도 보조 검색으로 근거에 넣는다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "외주사 B 12% 인상 건은 결국 승인된 건가요, 보류된 건가요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.search.mockResolvedValue([]);
+    mocks.topicItems.mockResolvedValue([{ id: "hold", content: "외주사 B 12% 인상 승인은 보류합니다.", spoken_at: "2026-09-15T00:00:00Z", source_kind: "meeting", source_title: "검토 회의", source_visibility: "dept" }]);
+    mocks.decisions.mockResolvedValue([{ id: "approved", outcome: "외주사 B 12% 인상 승인", rationale: "견적 확인", decided_at: "2026-09-09T00:00:00Z", decided_by_name: "팀장" }]);
+    mocks.structured.mockResolvedValue({ data: { refused: false, citations: [{ evidence: 1, first_paragraph: 1, last_paragraph: 1 }, { evidence: 2, first_paragraph: 1, last_paragraph: 1 }] } });
+    await answerQuestion("answer-1");
+    expect(mocks.topicItems).toHaveBeenCalledWith(mocks, expect.objectContaining({ terms: ["외주사", "B", "12", "인상"], scope: "user" }));
+    const input = JSON.parse(mocks.structured.mock.calls[0][2].user);
+    expect(input.evidence[0].paragraphs[0].text).toContain("보류합니다");
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: false, p_citations: expect.arrayContaining([{ item_id: "hold", decision_id: null, quote: "외주사 B 12% 인상 승인은 보류합니다." }]) }));
+  });
   it.each(["그거 어떻게 됐어요?", "결국 승인됐나?"])("단독 질문 '%s'의 대상을 임의의 기록으로 추정하지 않는다", async question => {
     const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question, status: "pending" }, error: null }) };
     mocks.from.mockReturnValue(query);
@@ -230,6 +245,7 @@ describe("answer publication boundary", () => {
         spoken_at: "2026-09-15T00:15:00.000Z",
       },
     ]);
+    mocks.topicItems.mockResolvedValue([]);
     mocks.permalink.mockResolvedValue(
       "https://example.slack.com/archives/C123/p1789431300000000",
     );

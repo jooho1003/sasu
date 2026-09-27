@@ -58,6 +58,21 @@ export async function searchAs(
   return (result.data ?? []) as SearchResult[];
 }
 
+export async function searchTopicItemsAs(
+  client: SearchClient,
+  args: { userId: string; deptId: string; terms: string[]; limit: number; scope?: "user" | "channel" },
+): Promise<SearchResult[]> {
+  const result = await client.rpc("search_topic_items_as", {
+    p_user: args.userId,
+    p_dept: args.deptId,
+    p_terms: args.terms,
+    p_limit: args.limit,
+    p_scope: args.scope ?? "user",
+  });
+  if (result.error) throw new SearchDatabaseError();
+  return (result.data ?? []) as SearchResult[];
+}
+
 export async function recentDecisionsAs(
   client: SearchClient,
   args: { userId: string; deptId: string; limit: number; scope?: "user" | "channel" },

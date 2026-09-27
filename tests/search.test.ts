@@ -1,8 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { recentDecisionsAs, searchAs, searchDecisionsAs } from "@/lib/search";
+import { recentDecisionsAs, searchAs, searchDecisionsAs, searchTopicItemsAs } from "@/lib/search";
 
 describe("권한 검색", () => {
+  it.each(["user", "channel"] as const)("상태 질문 보조 검색은 %s 범위와 안건 단어를 SQL에 전달한다", async scope => {
+    const rpc = vi.fn().mockResolvedValue({ data: [{ id: "hold" }], error: null });
+    await expect(searchTopicItemsAs({ rpc }, { userId: "user", deptId: "dept", terms: ["외주사", "12", "인상"], limit: 8, scope })).resolves.toEqual([{ id: "hold" }]);
+    expect(rpc).toHaveBeenCalledWith("search_topic_items_as", { p_user: "user", p_dept: "dept", p_terms: ["외주사", "12", "인상"], p_limit: 8, p_scope: scope });
+  });
   it.each(["user", "channel"] as const)("결정 검색은 %s 권한과 질문 벡터·단어를 SQL에 전달한다", async scope => {
     const rpc = vi.fn().mockResolvedValue({ data: [{ id: "old-decision" }], error: null });
     await expect(searchDecisionsAs({ rpc }, { userId: "user", deptId: "dept", queryVector: [1, 0], queryText: "오래된 견적 결정", limit: 8, scope })).resolves.toEqual([{ id: "old-decision" }]);
