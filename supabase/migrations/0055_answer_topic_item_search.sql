@@ -1,5 +1,5 @@
 -- Status questions also need same-topic records that semantic top-eight retrieval misses.
-create function public.search_topic_items_as(
+create or replace function public.search_topic_items_as(
   p_user uuid, p_dept uuid, p_terms text[], p_limit int default 8, p_scope text default 'user'
 )
 returns table (
