@@ -19,4 +19,4 @@
 ## 2026-09-27 ASK 파일럿 후속
 
 - 운영 재확인에서 F2의 늦은 보류 기록 누락과 기준 질문의 과도한 현재 상태 안내를 확인했다. Graft 구현 전·후 그래프와 Archify 도식·브라우저 검증을 수행하고, 두 사례를 재현 테스트로 수정했다. 대상 35건·전체 1,409건, lint·TypeScript·프로덕션 빌드 통과. [실행 결과와 남은 운영 재시험](../../docs/verification/ask-pilot-followup-2026-09-27/README.md).
-- 사용자 승인에 따라 PR #8을 머지했고 Vercel 운영 배포가 성공했다. 공개 데모 URL은 HTTP 200을 확인했다. 파일럿 계정의 활성 로그인 세션이 없어 동일 질문의 실제 답변·인용 재시험은 대기 중이다. [운영 반영 기록](../../docs/verification/ask-pilot-followup-2026-09-27/production-release.md). 기존 step4의 Slack 실제 발송 미완료 상태는 유지한다.
+- 사용자 승인에 따라 PR #8을 머지했고 Vercel 운영 배포가 성공했다. 공개 데모 URL은 HTTP 200을 확인했다. 파일럿 웹 묻기 재시험에서 기준 질문의 불필요한 현재 상태 안내는 사라졌지만, 상태 질문과 9/15 회의 결론 질문은 `근거 없음`으로 끝나 F2는 미해결이다. [운영 반영 기록](../../docs/verification/ask-pilot-followup-2026-09-27/production-release.md). 기존 step4의 Slack 실제 발송 미완료 상태는 유지한다.
