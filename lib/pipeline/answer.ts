@@ -138,6 +138,17 @@ function laterRelatedEvidence(selected: CitationReference[], prompt: EvidencePro
   }));
 }
 
+function historicalStatusCitation(items: SearchResult[], terms: string[]): CitationReference | null {
+  const explicitStatus = /(?:승인\s*보류(?:입니다|합니다|했습니다)|승인을?\s*보류(?:합니다|했습니다)|보류(?:입니다|합니다|했습니다|로 결정)|승인(?:됐습니다|되었습니다|했습니다|으로 결정))/u;
+  for (const item of items) {
+    if (!item.spoken_at || Number.isNaN(Date.parse(item.spoken_at))) continue;
+    const quote = evidenceParagraphs(item.content).find(paragraph =>
+      terms.every(term => paragraph.toLocaleLowerCase().includes(term.toLocaleLowerCase())) && explicitStatus.test(paragraph));
+    if (quote) return { itemId: item.id, quote };
+  }
+  return null;
+}
+
 const selectionFailureReasons: Record<SelectionFailureCode, string> = {
   empty: "선택한 근거가 없습니다",
   too_many: "근거는 최대 8개까지 선택할 수 있습니다",
@@ -491,6 +502,16 @@ export async function answerQuestion(
         slackReply,
         buildSlackAnswerMessage({ answer: topic.length > 0 ? `${answerLead(verified.valid.length)} 검색된 기록만으로 현재 상태를 확정할 수 없습니다.` : answerLead(verified.valid.length), citations, scope }),
       );
+    }
+    return;
+  }
+  const historical = topic.length > 0 ? historicalStatusCitation(topicItems, topic) : null;
+  if (historical) {
+    const saved = await saveAnswer(client, answer.id, { citations: [], refused: false, refusal_reason: null }, [historical], true);
+    if (!saved) return;
+    if (slackReply && !slackReply.durable) {
+      const citations = await slackCitations({ answerId: answer.id, client, deptId: answer.dept_id, citations: [historical], items, decisions });
+      await replyInSlack(slackReply, buildSlackAnswerMessage({ answer: `${answerLead(1)} 검색된 기록만으로 현재 상태를 확정할 수 없습니다.`, citations, scope }));
     }
     return;
   }

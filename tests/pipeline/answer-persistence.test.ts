@@ -49,6 +49,32 @@ describe("answer publication boundary", () => {
     expect(input.evidence[0].paragraphs[0].text).toContain("보류합니다");
     expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: false, p_citations: expect.arrayContaining([{ item_id: "hold", decision_id: null, quote: "외주사 B 12% 인상 승인은 보류합니다." }]) }));
   });
+  it("모델이 인용을 고르지 못해도 명시적인 상태 기록은 원문 그대로 제시한다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "외주사 B 12% 인상 건은 결국 승인된 건가요, 보류된 건가요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.search.mockResolvedValue([]);
+    mocks.topicItems.mockResolvedValue([
+      { id: "qa", content: "외주사 B 12% 인상 승인 보류인가요?", spoken_at: "2026-09-16T00:00:00Z", source_kind: "slack_channel", source_visibility: "dept" },
+      { id: "hold", content: "외주사 B 12% 인상 승인은 보류합니다.", spoken_at: "2026-09-15T00:00:00Z", source_kind: "slack_channel", source_visibility: "dept" },
+    ]);
+    mocks.decisions.mockResolvedValue([]);
+    mocks.structured.mockRejectedValue({ error_code: "llm_refusal" });
+    await answerQuestion("answer-1");
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: false, p_citations: [{ item_id: "hold", decision_id: null, quote: "외주사 B 12% 인상 승인은 보류합니다." }] }));
+  });
+  it("상태 기록의 안건이나 시각이 불명확하면 자동 원문 제시를 하지 않는다", async () => {
+    const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question: "외주사 B 12% 인상 건은 결국 승인된 건가요?", status: "pending" }, error: null }) };
+    mocks.from.mockReturnValue(query);
+    mocks.search.mockResolvedValue([]);
+    mocks.topicItems.mockResolvedValue([
+      { id: "other", content: "외주사 C 12% 인상 승인은 보류합니다.", spoken_at: "2026-09-16T00:00:00Z" },
+      { id: "undated", content: "외주사 B 12% 인상 승인은 보류합니다.", spoken_at: null },
+    ]);
+    mocks.decisions.mockResolvedValue([]);
+    mocks.structured.mockRejectedValue({ error_code: "llm_refusal" });
+    await answerQuestion("answer-1");
+    expect(mocks.rpc).toHaveBeenCalledWith("complete_answer", expect.objectContaining({ p_refused: true, p_citations: [] }));
+  });
   it.each(["그거 어떻게 됐어요?", "결국 승인됐나?"])("단독 질문 '%s'의 대상을 임의의 기록으로 추정하지 않는다", async question => {
     const query = { select: () => query, eq: () => query, maybeSingle: async () => ({ data: { id: "answer-1", dept_id: "dept-1", asked_by: "lead-1", question, status: "pending" }, error: null }) };
     mocks.from.mockReturnValue(query);
