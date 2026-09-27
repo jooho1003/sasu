@@ -398,6 +398,13 @@ describe("answer publication boundary", () => {
     );
   });
 
+  it("실제 스키마 오류는 근거 부족으로 숨기지 않는다", async () => {
+    mocks.structured.mockRejectedValue({ error_code: "schema_invalid" });
+    await expect(answerQuestion("answer-1")).rejects.toMatchObject({ error_code: "schema_invalid" });
+    expect(mocks.structured).toHaveBeenCalledOnce();
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
   it("네트워크 오류를 근거 부족으로 숨기지 않는다", async () => {
     mocks.structured.mockRejectedValue(new Error("network unavailable"));
     await expect(answerQuestion("answer-1")).rejects.toThrow(

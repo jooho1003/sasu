@@ -265,10 +265,8 @@ describe("AnswerDraft", () => {
     expect(AnswerDraft.parse(valid)).toEqual(valid);
   });
 
-  it("citations 0개인 AnswerDraft를 거부한다", () => {
-    expect(AnswerDraft.safeParse({ ...valid, citations: [] }).success).toBe(
-      false,
-    );
+  it("근거 부족 거절을 위해 citations 0개를 허용한다", () => {
+    expect(AnswerDraft.safeParse({ ...valid, citations: [], refused: true }).success).toBe(true);
   });
 
   it("필수 필드 누락과 타입 불일치를 거부한다", () => {
