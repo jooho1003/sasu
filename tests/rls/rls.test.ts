@@ -71,6 +71,18 @@ describe("live Supabase RLS", () => {
     expect(items.error ? [] : items.data).toHaveLength(0);
   });
 
+  it("anon cannot invoke the membership visibility function", async () => {
+    const userId = (await lead.auth.getUser()).data.user?.id;
+    expect(userId).toBeTruthy();
+    const [anonymous, authenticated] = await Promise.all([
+      anon.rpc("can_see", { p_user: userId, p_dept: SEED_IDS.department, p_visibility: "dept" }),
+      lead.rpc("can_see", { p_user: userId, p_dept: SEED_IDS.department, p_visibility: "dept" }),
+    ]);
+    expect(anonymous.error).not.toBeNull();
+    expect(authenticated.error).toBeNull();
+    expect(authenticated.data).toBe(true);
+  });
+
   it("member sees dept items but not leads_only items or cards", async () => {
     const publicItems = await member
       .from("items")

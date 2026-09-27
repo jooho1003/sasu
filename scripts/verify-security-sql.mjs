@@ -120,6 +120,10 @@ try {
   const boundaryMigration = "0017_card_decision_boundaries.sql";
   for (const file of migrations.filter(name => name < boundaryMigration)) {
     await db.exec(readFileSync(resolve("supabase/migrations", file), "utf8"));
+    if (file === "0002_can_see_rls.sql") {
+      // Reproduce the direct anon EXECUTE grant observed in the hosted project.
+      await db.exec("grant execute on function public.can_see(uuid,uuid,text) to anon");
+    }
     if (file === "0001_schema_v1.sql") {
       // Supabase grants must precede the hardening migrations. Granting again
       // after the migrations would undo their REVOKEs and invalidate the test.
@@ -841,6 +845,8 @@ try {
       assert.equal((await q("select has_function_privilege('authenticated',$1,'execute') as allowed", [name])).rows[0].allowed, true, name);
       assert.equal((await q("select has_function_privilege('anon',$1,'execute') as allowed", [name])).rows[0].allowed, false, name);
     }
+    for (const role of ["anon", "authenticated", "service_role"])
+      assert.equal((await q("select has_function_privilege($1,'public.can_see(uuid,uuid,text)','execute') as allowed", [role])).rows[0].allowed, role !== "anon", `${role} can_see`);
     for (const name of anonFunctions) {
       assert.equal((await q("select has_function_privilege('anon',$1,'execute') as allowed", [name])).rows[0].allowed, true, name);
       assert.equal((await q("select has_function_privilege('authenticated',$1,'execute') as allowed", [name])).rows[0].allowed, false, name);
