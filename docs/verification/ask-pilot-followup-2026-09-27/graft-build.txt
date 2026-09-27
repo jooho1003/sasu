@@ -1,0 +1,4 @@
+✓ wiring: 2684 nodes (1411 function, 597 file, 457 type, 177 method, 42 class), 6754 edges, 597 cards [javascript, jsx, python, tsx, typescript]
+  parsed: 597 of 597 files (0 replayed from cache)
+  → /home/wade/sasu-graft-graph
+  ../../../../../../../home/wade/sasu-graft-graph/ is git-ignored (added automatically) — a local cache; teammates run `graft build` to get their own.

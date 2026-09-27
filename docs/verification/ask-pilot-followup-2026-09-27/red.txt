@@ -1,0 +1,11 @@
+실행 명령: npx vitest run tests/pipeline/answer-persistence.test.ts --maxWorkers=2 --testTimeout=30000
+수정 전 실행 결과: Test Files 1 failed (1), Tests 2 failed | 33 passed (35)
+
+1. 운영 질문의 '건은 결국'을 안건으로 오인하지 않고 늦은 보류 기록을 다시 고르게 한다
+   AssertionError: expected "vi.fn()" to be called 2 times, but got 1 times
+
+2. 승인 기준을 묻는 질문에는 현재 상태 불확실성 문장을 붙이지 않는다
+   기대 본문: 관련 부서 기록 1개를 찾았습니다. 아래 원문을 확인해 주세요.
+   실제 본문: 관련 부서 기록 1개를 찾았습니다. 아래 원문을 확인해 주세요. 검색된 기록만으로 현재 상태를 확정할 수 없습니다.
+
+이 파일은 명령 출력의 실패 요약을 옮긴 기록이다. 전체 터미널 출력 파일은 저장하지 않았다.

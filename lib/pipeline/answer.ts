@@ -115,14 +115,14 @@ function needsSubject(question: string, context: { question: string }[]): boolea
 
 function statusTopic(question: string, context: { question: string }[]): string[] {
   const current = question.trim();
-  if (!/(?:승인|보류|결정|확정|어떻게 됐|진행|완료|끝났)/u.test(current)) return [];
+  if (!/(?:승인|보류|결정|확정)(?:됐|되었|된|했|인가|인지|여부|상태|현황)|어떻게 됐|(?:진행|완료)(?:됐|되었|된|했|상태|현황)|끝났/u.test(current)) return [];
   const terms = (text: string) => (text.match(/^(.*?)\s*(?:승인|보류|결정|확정|어떻게|진행|완료|끝났)/u)?.[1].match(/[가-힣A-Za-z0-9]+/gu) ?? [])
     .filter(term => !["결국", "그거", "그건", "그게", "그것", "이거", "이건", "그", "이"].includes(term))
     .map(term => {
       const stem = term.replace(/(?:에서|으로|에게|의|은|는|이|가|을|를|도|와|과)$/u, "");
       return stem.length > 1 || /^[A-Za-z0-9]$/u.test(stem) ? stem : term;
     })
-    .filter(Boolean);
+    .filter(term => !/^(?:건|일)(?:은|는|이|가|을|를|도)?$/u.test(term));
   const currentTerms = terms(current);
   return currentTerms.length > 0 ? currentTerms : terms(context.at(-1)?.question ?? "");
 }
