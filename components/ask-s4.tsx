@@ -8,8 +8,17 @@ type Citation = {
   quote: string;
   author: string;
   source: string;
+  occurred_at: string | null;
   href: string;
 };
+
+const citationDate = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "numeric", day: "numeric" });
+
+function citationTime(value: string | null): string {
+  if (!value) return "날짜 미상";
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? `${citationDate.format(date)} (KST)` : "날짜 미상";
+}
 
 type AnswerState = {
   id: string;
@@ -270,7 +279,7 @@ export default function AskS4({ deptId }: { deptId: string }) {
               <h2 className="m-0 text-xl">근거</h2>
               {answer.citations.map((citation, index) => (
                 <a key={`${citation.href}-${index}`} className="grid gap-1 rounded-xl border border-[var(--accent)]/20 bg-[var(--accent)]/5 p-4 no-underline" href={citation.href}>
-                  <span className="text-xs text-[var(--muted)]" data-meta>근거 {index + 1} · {citation.author} · {citation.source}</span>
+                  <span className="text-xs text-[var(--muted)]" data-meta>근거 {index + 1} · {citation.author} · {citationTime(citation.occurred_at)} · {citation.source}</span>
                   <q className="font-normal leading-7 text-[var(--ink)]">{citation.quote}</q>
                   <span className="text-sm font-bold">원문 보기</span>
                 </a>

@@ -124,12 +124,12 @@ export async function GET(
       const item = items.get(citation.item_id);
       if (!item || item.deleted_at || !citation.quote || !item.content.includes(citation.quote)) return [];
       const source = relation(item.sources);
-      return [{ quote: citation.quote, author: item.author ?? "작성자 미상", source: source.title ?? source.kind, href: itemHref(item, membership.deptId, answer.id) }];
+      return [{ quote: citation.quote, author: item.author ?? "작성자 미상", source: source.title ?? source.kind, occurred_at: item.spoken_at ?? null, href: itemHref(item, membership.deptId, answer.id) }];
     }
     if (citation.decision_id) {
       const decision = decisions.get(citation.decision_id);
       if (!decision || !citation.quote || !`${decision.outcome}\n${decision.rationale}`.includes(citation.quote)) return [];
-      return [{ quote: citation.quote, author: decision.decided_by_name, source: `결정 기록 #${decision.id.slice(0, 8)}`, href: `/d/${membership.deptId}/ledger#decision-${decision.id}` }];
+      return [{ quote: citation.quote, author: decision.decided_by_name, source: `결정 기록 #${decision.id.slice(0, 8)}`, occurred_at: decision.decided_at ?? null, href: `/d/${membership.deptId}/ledger#decision-${decision.id}` }];
     }
     return [];
   });

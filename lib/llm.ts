@@ -418,7 +418,12 @@ async function structured<T>(
       throw new SchemaInvalidError();
     }
 
-    if (isRefusalPayload(candidate)) {
+    const parsed = schema.safeParse(candidate);
+    // ASK의 거절은 필수 필드와 타입이 유효할 때만 인정한다.
+    const refused = purpose === "answer"
+      ? parsed.success && isRefusalPayload(parsed.data)
+      : isRefusalPayload(candidate);
+    if (refused) {
       if (refusalRetries < 1) {
         refusalRetries += 1;
         continue;
@@ -427,7 +432,6 @@ async function structured<T>(
       throw new RefusalError();
     }
 
-    const parsed = schema.safeParse(candidate);
     if (!parsed.success) {
       if (schemaRetries < 1) {
         schemaRetries += 1;
