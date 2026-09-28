@@ -1,0 +1,2 @@
+applied 0055_private_visibility_functions.sql
+local review QA ready; real transcription key present: true

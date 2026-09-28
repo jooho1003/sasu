@@ -1,0 +1,12 @@
+
+Running 4 tests using 1 worker
+
+
+
+(node:45896) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/4] [chromium] › tests\e2e\security-headers.spec.ts:11:5 › security headers and distinct request nonces cover public pages and error responses
+[2/4] [chromium] › tests\e2e\security-headers.spec.ts:36:5 › public, demo and not-found HTML receive matching nonces with zero normal-flow violations
+[3/4] [chromium] › tests\e2e\security-headers.spec.ts:78:5 › nonce-free inline code is blocked only in enforcement mode
+[4/4] [chromium] › tests\e2e\security-headers.spec.ts:102:5 › Blob audio and a storage worker remain available under CSP
+  4 passed (3.5s)

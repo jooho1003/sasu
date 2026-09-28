@@ -1,0 +1,7 @@
+   role_name   | visibility | decision_trigger | source_trigger 
+---------------+------------+------------------+----------------
+ anon          | f          | f                | f
+ authenticated | t          | f                | f
+ service_role  | t          | f                | f
+(3 rows)
+

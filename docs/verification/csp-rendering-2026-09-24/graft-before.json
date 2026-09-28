@@ -1,0 +1,47 @@
+{
+  "query": "contentSecurityPolicy",
+  "matches": [
+    {
+      "symbol": {
+        "id": "lib/security-headers.ts#contentSecurityPolicy",
+        "name": "contentSecurityPolicy",
+        "kind": "function",
+        "path": "lib/security-headers.ts",
+        "span": "L12-L39"
+      },
+      "hits": [
+        {
+          "id": "proxy.ts#proxy",
+          "relation": "calls",
+          "depth": 1,
+          "name": "proxy",
+          "kind": "function",
+          "path": "proxy.ts",
+          "span": "L7-L91"
+        },
+        {
+          "id": "tests/security-headers.test.ts",
+          "relation": "calls",
+          "depth": 1,
+          "name": "security-headers.test.ts",
+          "kind": "file",
+          "path": "tests/security-headers.test.ts",
+          "span": "L1-L31"
+        },
+        {
+          "id": "tests/proxy.test.ts",
+          "relation": "calls",
+          "depth": 2,
+          "name": "proxy.test.ts",
+          "kind": "file",
+          "path": "tests/proxy.test.ts",
+          "span": "L1-L71"
+        }
+      ]
+    }
+  ],
+  "saved": {
+    "files": 4,
+    "baselineChars": 11890
+  }
+}

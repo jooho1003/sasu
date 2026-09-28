@@ -1,0 +1,9 @@
+
+Running 1 test using 1 worker
+
+
+
+(node:20668) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/1] [chromium] › tests\e2e\review-retention-live.spec.ts:7:5 › 원본 파기 뒤에도 전사를 읽고 원본 재생·재추출은 차단된다
+  1 passed (20.1s)

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": { "title": "사수 · 요청마다 일치하는 보안 정책", "quality_profile": "showcase", "column_fit": "spread", "viewBox": [1050, 640] },
+  "participants": [
+    { "id": "browser", "type": "frontend", "label": "브라우저", "sublabel": "페이지 요청" },
+    { "id": "proxy", "type": "security", "label": "Proxy", "sublabel": "난수 nonce" },
+    { "id": "render", "type": "backend", "label": "Next.js", "sublabel": "요청 시 렌더링" },
+    { "id": "checks", "type": "security", "label": "검증 · 운영", "sublabel": "관찰 후 강제" }
+  ],
+  "messages": [
+    { "id": "request", "from": "browser", "to": "proxy", "y": 180, "label": "HTML 요청" },
+    { "id": "nonce", "from": "proxy", "to": "render", "y": 235, "label": "요청 CSP · nonce", "variant": "security" },
+    { "id": "html", "from": "render", "to": "proxy", "y": 290, "label": "같은 nonce의 script", "variant": "return" },
+    { "id": "response", "from": "proxy", "to": "browser", "y": 345, "label": "HTML · CSP · no-store", "variant": "return" },
+    { "id": "observe", "from": "browser", "to": "checks", "y": 405, "label": "정상 흐름 위반 관찰", "variant": "dashed" },
+    { "id": "gate", "from": "checks", "to": "proxy", "y": 465, "label": "운영 관찰 · 승인 후 강제", "variant": "security" },
+    { "id": "enforce", "from": "proxy", "to": "browser", "y": 525, "label": "강제 정책으로 다음 응답", "variant": "return" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "공개 읽기 유지", "items": ["소개 · 개인정보 · 데모 · 오류 화면", "새 인증 조회 · DB 쓰기 없음"] },
+    { "dot": "amber", "title": "운영 전환 게이트", "items": ["기본 Report-Only · 운영 1일 관찰", "로컬 강제 검증과 운영 승인을 구분"] }
+  ]
+}

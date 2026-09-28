@@ -7,11 +7,14 @@ import { contentSecurityPolicy } from "@/lib/security-headers";
 export async function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString("base64");
   const policy = contentSecurityPolicy(nonce, process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NODE_ENV === "development");
+  const policyHeader = process.env.SASU_CSP_ENFORCE === "true"
+    ? "Content-Security-Policy"
+    : "Content-Security-Policy-Report-Only";
   // Replace any client-supplied nonce/CSP. Next extracts this nonce on dynamic SSR.
   request.headers.set("x-nonce", nonce);
   request.headers.set("Content-Security-Policy", policy);
   const protect = (response: NextResponse) => {
-    response.headers.set("Content-Security-Policy-Report-Only", policy);
+    response.headers.set(policyHeader, policy);
     if (/^\/t\/i\/[^/]+\/?$/u.test(request.nextUrl.pathname)) {
       response.headers.set("Referrer-Policy", "no-referrer");
     }

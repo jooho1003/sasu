@@ -18,10 +18,26 @@ test("실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치
   test.setTimeout(180_000);
   const admin = serviceClient();
   const org = randomUUID(), dept = randomUUID(), audio = randomUUID(), document = randomUUID();
-  const evidence = "docs/verification/browser-meeting-recording";
+  const evidence = process.env.E2E_ACCESS_EVIDENCE_DIR ?? "docs/verification/browser-meeting-recording";
   mkdirSync(evidence, { recursive: true });
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.name));
+  const violations: string[] = [];
+  await page.exposeFunction("observeAccessCsp", (directive: string) => violations.push(directive));
+  await page.addInitScript(() => {
+    const blobs = new Map<string, Blob>();
+    const createObjectURL = URL.createObjectURL.bind(URL);
+    URL.createObjectURL = object => {
+      const url = createObjectURL(object);
+      if (object instanceof Blob) blobs.set(url, object);
+      return url;
+    };
+    Reflect.set(window, "readAccessBlob", (url: string) => blobs.get(url)?.arrayBuffer());
+    window.document.addEventListener("securitypolicyviolation", event => {
+      const observe = Reflect.get(window, "observeAccessCsp") as (directive: string) => Promise<void>;
+      void observe(`${event.effectiveDirective}:${event.disposition}`);
+    });
+  });
   process.env.ACCESS_QA_EMAIL = `browser-access-${randomUUID()}@example.test`;
   process.env.ACCESS_QA_PASSWORD = randomBytes(32).toString("base64url");
   const created = await admin.auth.admin.createUser({ email: process.env.ACCESS_QA_EMAIL, password: process.env.ACCESS_QA_PASSWORD, email_confirm: true });
@@ -51,8 +67,12 @@ test("실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치
     expect(original.headers()["cache-control"]).toContain("no-store");
     expect(original.headers()["content-type"]).toBe("audio/wav");
     await expect.poll(() => page.locator("audio").evaluate((element: HTMLAudioElement) => element.duration)).toBe(1);
-    // Check bytes actually received by the page, not CDP's media response capture.
-    const received = await page.locator("audio").evaluate(async (element: HTMLAudioElement) => Array.from(new Uint8Array(await (await fetch(element.src)).arrayBuffer())));
+    // Inspect the Blob the page received. Fetching a blob URL adds an unrelated
+    // connect-src request (playback only needs media-src), and CDP drops media bodies.
+    const received = await page.locator("audio").evaluate(async (element: HTMLAudioElement) => {
+      const read = Reflect.get(window, "readAccessBlob") as (url: string) => Promise<ArrayBuffer>;
+      return Array.from(new Uint8Array(await read(element.src)));
+    });
     expect(Buffer.from(received).equals(fixtures[0][2])).toBe(true);
     await page.locator("audio").evaluate(async (element: HTMLAudioElement) => { await element.play(); });
     await expect.poll(() => page.locator("audio").evaluate((element: HTMLAudioElement) => element.currentTime)).toBeGreaterThan(0);
@@ -79,6 +99,7 @@ test("실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치
     expect(audit.error).toBeNull();
     expect(audit.data?.map(row => row.action)).toEqual(expect.arrayContaining(["play_original", "download_original"]));
     expect(errors).toEqual([]);
+    expect(violations).toEqual([]);
   } finally {
     for (const [id] of fixtures) {
       await supabase.rpc("review_action", { p_review: id, p_revision: 1, p_action: "delete" });
