@@ -5,6 +5,26 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator("#status")).toHaveText("검증 준비 완료");
 });
 
+test("preflight checks encrypted storage without occupying the real recording ID", async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") }).recordingLab;
+    const key = await lab.importRecordingKey(new Uint8Array(32).fill(42));
+    const scope = { ownerUserId: "preflight-user", deptId: "preflight-dept", recordingId: "preflight-recording" };
+    await lab.probeRecordingStore(scope, key);
+    const before = await lab.openRecordingStore(key);
+    const occupied = await before.inspect(scope);
+    before.close();
+    const prepared = await lab.prepareRecordingStore(scope, key);
+    await prepared.append(scope, { sequence: 0, pcm: new Int16Array([7, -7]) });
+    const saved = await prepared.inspect(scope);
+    await prepared.remove(scope);
+    prepared.close();
+    return { occupied, saved };
+  });
+  expect(result.occupied).toBeNull();
+  expect(result.saved).toMatchObject({ samples: 2, chunks: 1, partial: false });
+});
+
 test("committed PCM survives reload, remains scoped, and detects a corrupted checkpoint", async ({ page }) => {
   const result = await page.evaluate(async () => {
     const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") }).recordingLab;

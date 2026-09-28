@@ -29,6 +29,9 @@ describe("meeting input acquisition", () => {
     const devices = { getDisplayMedia: vi.fn().mockResolvedValue(display.value), getUserMedia: vi.fn().mockResolvedValue(microphone.value) };
     const inputs = await captureInputs("system_and_microphone", devices);
     expect(display.applyConstraints).toHaveBeenCalledWith({ frameRate: { ideal: 1, max: 1 } });
+    expect(devices.getUserMedia).toHaveBeenCalledWith({ audio: {
+      echoCancellation: true, noiseSuppression: true, autoGainControl: true,
+    }, video: false });
     expect(inputs).toEqual([display.value, microphone.value]);
     stopInputs(inputs);
     expect(display.stop).toHaveBeenCalledTimes(2);
@@ -49,6 +52,9 @@ describe("meeting input acquisition", () => {
     const devices = { getDisplayMedia: vi.fn(), getUserMedia: vi.fn().mockResolvedValue(microphone.value) };
     await expect(captureInputs("microphone", devices)).rejects.toThrow("microphone_missing");
     expect(devices.getDisplayMedia).not.toHaveBeenCalled();
+    expect(devices.getUserMedia).toHaveBeenCalledWith({ audio: {
+      echoCancellation: true, noiseSuppression: true, autoGainControl: false,
+    }, video: false });
     expect(microphone.stop).toHaveBeenCalledTimes(1);
   });
 });

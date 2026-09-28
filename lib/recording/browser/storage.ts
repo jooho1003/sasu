@@ -14,6 +14,7 @@ type Header = RecordingScope & {
   chunks: number;
   shortTail: boolean;
   complete: boolean;
+  paused: boolean;
   capturedSamples: number;
   noncePrefix: Uint8Array<ArrayBuffer>;
 };
@@ -103,7 +104,7 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
       if (key(scope).some((value) => !value || value.length > 128)) throw new Error("recording_scope_invalid");
       await transaction<void>(db, ["recordings"], "readwrite", (tx) => {
         tx.objectStore("recordings").add({ ...scope, key: key(scope), createdAt, samples: 0, chunks: 0,
-          shortTail: false, complete: false, capturedSamples: 0,
+          shortTail: false, complete: false, paused: false, capturedSamples: 0,
           noncePrefix: crypto.getRandomValues(new Uint8Array(8)) } satisfies Header);
       });
       if (!(await getHeader(scope))) throw new Error("recording_storage_unavailable");
@@ -146,6 +147,17 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
         };
       });
     },
+    async markPaused(scope: RecordingScope) {
+      await transaction<void>(db, ["recordings"], "readwrite", (tx) => {
+        const headers = tx.objectStore("recordings");
+        const request = headers.get(key(scope));
+        request.onsuccess = () => {
+          const header: Header | undefined = request.result;
+          if (!header) { tx.abort(); return; }
+          headers.put({ ...header, paused: true });
+        };
+      });
+    },
     async inspect(scope: RecordingScope) {
       const header = await getHeader(scope);
       if (!header) return null;
@@ -155,6 +167,7 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
       for await (const frame of read(scope)) { samples += frame.pcm.length; chunks++; }
       const expectedSamples = Math.max(header.samples, header.capturedSamples);
       return { samples, chunks, expectedSamples, partial: samples !== expectedSamples || chunks !== header.chunks,
+        paused: header.paused === true,
         interrupted: !header.complete, createdAt: header.createdAt };
     },
     read,
@@ -168,6 +181,55 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
         if (header.ownerUserId !== currentUserId || Date.now() - header.createdAt >= TTL) await remove(header);
     },
   };
+}
+
+/** Exercise the encrypted PCM path before any live samples are accepted.
+ * Only this small synthetic probe is written, then removed. A recording ID
+ * is created only after encryption, commit, read and decryption all succeed.
+ */
+export async function probeRecordingStore(scope: RecordingScope, recordingKey: CryptoKey) {
+  const estimate = await navigator.storage.estimate();
+  if (estimate.quota !== undefined && estimate.usage !== undefined && estimate.quota - estimate.usage < 64 * 1024 * 1024)
+    throw new Error("storage_space_insufficient");
+  const store = await openRecordingStore(recordingKey);
+  const probe = { ...scope, recordingId: `probe-${crypto.randomUUID()}` };
+  try {
+    await store.cleanup(scope.ownerUserId);
+    const pcm = new Int16Array([17, -17, 32767, -32768]);
+    try {
+      await store.create(probe);
+      await store.append(probe, { sequence: 0, pcm });
+      let verified = false;
+      for await (const frame of store.read(probe)) {
+        verified = frame.sequence === 0 && frame.pcm.length === pcm.length &&
+          frame.pcm.every((sample, index) => sample === pcm[index]);
+      }
+      if (!verified) throw new Error("recording_storage_unavailable");
+    } finally { await store.remove(probe); }
+    return;
+  } finally { store.close(); }
+}
+
+export async function prepareRecordingStore(scope: RecordingScope, recordingKey: CryptoKey) {
+  await probeRecordingStore(scope, recordingKey);
+  const store = await openRecordingStore(recordingKey);
+  try {
+    await store.create(scope);
+    return store;
+  } catch (error) { store.close(); throw error; }
+}
+
+export async function removeLocalRecording(scope: RecordingScope) {
+  // Deletion needs no recording secret; a temporary key only opens the store adapter.
+  const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const store = await openRecordingStore(key);
+  try { await store.remove(scope); } finally { store.close(); }
+}
+
+export async function cleanupLocalRecordings(userId: string) {
+  const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const store = await openRecordingStore(key);
+  try { await store.cleanup(userId); } finally { store.close(); }
 }
 
 /** The lock is held by the page, not its worker; closing/crashing releases it.

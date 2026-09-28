@@ -40,7 +40,17 @@ html { scrollbar-gutter: stable; }
 
 .review-workspace .panel { padding: 24px; }
 .review-workspace fieldset { border: 0; padding: 0; min-width: 0; }
-.review-workspace input:not([type="checkbox"]):not([type="file"]), .review-workspace select, .review-workspace textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); color: var(--ink); font: inherit; }
+.review-workspace input:not([type="checkbox"]):not([type="file"]):not([type="radio"]):not([type="range"]), .review-workspace select, .review-workspace textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); color: var(--ink); font: inherit; }
+.meeting-recorder .panel { display: grid; gap: 14px; }
+.meeting-recorder .panel > button { justify-self: start; }
+.meeting-recorder .panel > label { display: grid; gap: 6px; }
+.meeting-recorder .panel > label:has(input[type="checkbox"]) { display: flex; align-items: flex-start; gap: 9px; }
+.meeting-recorder fieldset { display: flex; flex-wrap: wrap; gap: 10px 20px; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.meeting-recorder fieldset legend { padding: 0 6px; font-weight: 650; }
+.meeting-recorder fieldset label { display: inline-flex; align-items: center; gap: 8px; }
+.meeting-recorder meter { width: min(220px, 55vw); vertical-align: middle; }
+.meeting-recorder .panel ul { display: grid; gap: 12px; padding-left: 18px; }
+.meeting-recorder .panel li { line-height: 2; }
 .review-workspace textarea { resize: vertical; line-height: 1.8; margin: 12px 0; }
 .review-workspace audio { width: 100%; margin-top: 16px; }
 .review-tabs, .review-actions, .review-list-heading { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0; }

@@ -9,9 +9,11 @@ import type {
 } from "@/lib/contracts";
 import { audioPlan, encodeMonoWav } from "@/lib/adapters/review-audio";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import { RecordingSegmentPlayer } from "@/components/recording-segment-player";
 
-type Detail = ReviewedMaterial & { candidate_sections: ReviewSection[] | null };
+type Detail = ReviewedMaterial & { candidate_sections: ReviewSection[] | null; original_layout?: string };
 type History = { revision: number; title: string; created_at: string };
+type OriginalSegment = { index: number; status: string };
 const time = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
@@ -20,6 +22,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
   const [review, setReview] = useState<Detail | null>(null);
   const [parts, setParts] = useState<ReviewPart[]>([]);
   const [history, setHistory] = useState<History[]>([]);
+  const [segments, setSegments] = useState<OriginalSegment[]>([]);
+  const [segmentSeek, setSegmentSeek] = useState<{ seconds: number; serial: number } | null>(null);
   const [title, setTitle] = useState("");
   const [sections, setSections] = useState<ReviewSection[]>([]);
   const [dirty, setDirty] = useState(false);
@@ -59,6 +63,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       setReview(body.review);
       setParts(body.parts);
       setHistory(body.history);
+      setSegments(body.segments ?? []);
       setDownloadAllowed(body.original_download_allowed === true);
       setOriginalExpiresAt(body.original_expires_at ?? null);
       setOriginalExpired(!!body.original_expires_at && new Date(body.original_expires_at).getTime() <= Date.now());
@@ -231,7 +236,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
     if (!review) return;
     const storage =
       createBrowserSupabaseClient().storage.from("review-materials");
-    if (review.kind === "audio") {
+    if (review.kind === "audio" && review.original_layout !== "audio_segments") {
       const missing = parts.filter((p) => p.status === "waiting");
       if (missing.length) {
         const original = await fetchOriginal("play_original");
@@ -441,7 +446,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       <section className="panel" aria-label="보관 원본">
         <div className="review-list-heading">
           <h2>보관된 원본</h2>
-          {!originalUnavailable && (review.kind === "audio" || downloadAllowed) ? (
+          {!originalUnavailable && review.original_layout !== "audio_segments" && (review.kind === "audio" || downloadAllowed) ? (
             <button
               type="button"
               disabled={busy}
@@ -454,11 +459,13 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             >
               원본 {review.kind === "audio" ? "듣기" : "열기"}
             </button>
-          ) : (
+          ) : originalUnavailable || review.original_layout !== "audio_segments" ? (
             <span>{originalUnavailable ? "원본이 지워졌거나 보관 기한이 지났습니다" : "조직에서 원본 내려받기를 허용하지 않았습니다"}</span>
-          )}
+          ) : null}
         </div>
-        {originalUrl ? (
+        {review.original_layout === "audio_segments" && !originalUnavailable ? (
+          <RecordingSegmentPlayer deptId={deptId} reviewId={id} duration={review.duration ?? 0} segments={segments} seekRequest={segmentSeek} />
+        ) : originalUrl ? (
           review.kind === "audio" ? (
             <audio ref={audio} controls controlsList={downloadAllowed ? undefined : "nodownload"} src={originalUrl} preload="metadata" />
           ) : (
@@ -549,7 +556,11 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                     className="button button-ghost"
                     type="button"
                     disabled={busy || originalUnavailable}
-                    onClick={() =>
+                    onClick={() => {
+                      if (review.original_layout === "audio_segments") {
+                        setSegmentSeek((current) => ({ seconds: s.start_seconds!, serial: (current?.serial ?? 0) + 1 }));
+                        return;
+                      }
                       void perform(async () => {
                         if (!originalRef.current) await openOriginal();
                         setTimeout(() => {
@@ -562,8 +573,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                               );
                           }
                         }, 100);
-                      })
-                    }
+                      });
+                    }}
                   >
                     {time(s.start_seconds)}부터 듣기
                   </button>

@@ -218,12 +218,10 @@ export function ReviewedMaterials({
             확정합니다.
           </p>
         </div>
-        <Link
-          className="button button-secondary"
-          href={`/d/${deptId}/documents`}
-        >
-          확정 자료 요약
-        </Link>
+        <div>
+          <Link className="button button-primary" href={`/d/${deptId}/reviews/record`}>회의 녹음</Link>{" "}
+          <Link className="button button-secondary" href={`/d/${deptId}/documents`}>확정 자료 요약</Link>
+        </div>
       </header>
       <section className="panel review-upload" aria-label="자료 업로드">
         <div className="review-tabs" role="group" aria-label="자료 종류">

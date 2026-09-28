@@ -15,7 +15,10 @@ export async function captureInputs(mode: "microphone" | "system_and_microphone"
         catch { /* Some browsers ignore frame-rate constraints on display capture. */ }
       }
     }
-    const microphone = await devices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true }, video: false });
+    const microphone = await devices.getUserMedia({ audio: {
+      echoCancellation: true, noiseSuppression: true,
+      autoGainControl: mode === "system_and_microphone",
+    }, video: false });
     streams.push(microphone);
     if (!microphone.getAudioTracks().some((track) => track.readyState === "live")) throw new Error("microphone_missing");
     // The display may have ended while the microphone permission dialog was open.
