@@ -22,3 +22,11 @@
 - 따라서 운영의 0055·0056 마이그레이션 이력 및 현재 `can_see` 권한을 확인할 수 없었고, 0057도 적용하지 못했다. 실제 API 재시험도 수행하지 못했다. SQL 적용이나 이력 수정을 성공했다고 기록하지 않는다.
 - 동일 커밋에서 격리 SQL 하니스를 재실행해 243/243, 권한 조합 2,016/2,016 통과했다. 이 결과는 운영 DB 권한의 증거가 아니다.
 - 프로젝트 연결 후 0055·0056의 적용 내용과 이력을 먼저 대조하고, 필요하면 이력만 정합화한 다음 0057을 적용한다. 이후 DB 권한 행렬과 비로그인·인증 세션의 실제 RPC를 재시험한다.
+
+## 운영 적용과 재시험 — 2026-09-28
+
+- Supabase CLI 로그인 후 `sasu` 프로젝트(`fzpnidoyhejrmhymggpp`)에 연결했다. 적용 전 `migration list`와 `db push --dry-run`에서 0055·0056·0057만 이력에 없음을 확인했다. 0055·0056은 앞서 SQL 편집기에서 적용한 것과 같은 `create or replace function` 및 권한 설정이므로, `db push --skip-vault --yes`로 두 파일을 재실행하고 0057을 적용했다.
+- 적용 후 `migration list`의 0001~0057 로컬·원격 버전이 모두 일치했고 `db push --dry-run --skip-vault`는 `upToDate=true`, 미적용 파일 0개를 반환했다.
+- 운영 DB 읽기 전용 SQL에서 함수 EXECUTE는 `can_see`: `anon=false`, `authenticated=true`, `service_role=true`; `retro_can_read`: `anon=true`였다.
+- 운영 PostgREST에서 공개 키를 사용한 비로그인 `can_see` RPC는 HTTP 401, SQLSTATE `42501`, `permission denied for function can_see`를 반환했다. 같은 비로그인 세션의 `retro_can_read` RPC는 존재하지 않는 UUID에 HTTP 200·`false`를 반환해 공개 회고 함수 접근이 유지됨을 확인했다. 실제 사용자·부서 ID나 질문 원문은 사용하지 않았다.
+- 인증된 사용자 API 호출은 이 환경에 테스트 계정 세션이 없어 실행하지 않았다. 인증 역할의 함수 EXECUTE는 위 운영 DB 권한 조회로 확인했다. ASK F2의 전체 웹 질문 재시험은 9/27 기록을 유지하며 이번 권한 변경 후 반복하지 않았다.
