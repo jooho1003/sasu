@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RecordingSaveResult, RecordingSegmentState, ReviewRecordingStart } from "@/lib/contracts";
-import { captureInputs, stopInputs } from "@/lib/recording/browser/inputs";
+import { captureInputs, captureMicrophone, stopInputs } from "@/lib/recording/browser/inputs";
 import { startRecording } from "@/lib/recording/browser/capture";
 import {
   cleanupLocalRecordings, openRecordingStore, probeRecordingStore, removeLocalRecording,
@@ -12,6 +12,7 @@ import {
 } from "@/lib/recording/browser/storage";
 import { prepareRecordingOriginalManifest, streamRecordingOriginals } from "@/lib/recording/original-segments";
 import { RECORDING_RATE } from "@/lib/recording/pcm";
+import { encodeRecordingLevels, quantizeRecordingLevel } from "@/lib/recording/levels";
 import type { RecordingSnapshot } from "@/lib/recording/session";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
@@ -46,11 +47,15 @@ async function importRecordingKey(encoded: string) {
   return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
 }
 
-export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: string }) {
+export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
+  deptId: string; userId: string; initialContinuesId?: string | null;
+}) {
   const router = useRouter();
   const base = `/api/d/${deptId}`;
   const [members, setMembers] = useState<Member[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [recent, setRecent] = useState<Session[]>([]);
+  const [continuesId, setContinuesId] = useState(initialContinuesId ?? "");
   const [selected, setSelected] = useState<Session | null>(null);
   const [local, setLocal] = useState<LocalInfo>(null);
   const [segments, setSegments] = useState<RecordingSegmentState[]>([]);
@@ -64,6 +69,8 @@ export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: st
   const [testLevels, setTestLevels] = useState<number[]>([]);
   const [liveLevels, setLiveLevels] = useState<number[]>([]);
   const [inputNotice, setInputNotice] = useState("");
+  const [microphoneDisconnected, setMicrophoneDisconnected] = useState(false);
+  const [wakeNotice, setWakeNotice] = useState("");
   const [heardTest, setHeardTest] = useState(false);
   const [partialAccepted, setPartialAccepted] = useState(false);
   const [snapshot, setSnapshot] = useState<RecordingSnapshot | null>(null);
@@ -78,18 +85,26 @@ export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: st
   const testAudioRef = useRef<string | null>(null);
   const meterTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const inputCleanupRef = useRef<(() => void) | null>(null);
+  const profileStoreRef = useRef<Awaited<ReturnType<typeof openRecordingStore>> | null>(null);
+  const profileWriteRef = useRef<Promise<void>>(Promise.resolve());
+  const profileFlushRef = useRef<Promise<void> | null>(null);
+  const microphoneReselectsRef = useRef(0);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const wakeLockPendingRef = useRef(false);
   const scope = useCallback((id: string): RecordingScope => ({ ownerUserId: userId, deptId, recordingId: id }), [userId, deptId]);
 
   const refresh = useCallback(async () => {
     if (loadingRef.current) return;
     loadingRef.current = true;
     try {
-      const [list, review] = await Promise.all([
+      const [list, recentList, review] = await Promise.all([
         api<{ recordings: Session[] }>(`${base}/recordings`),
+        api<{ recordings: Session[] }>(`${base}/recordings?recent=1`),
         api<{ members: Member[] }>(`${base}/reviews`),
       ]);
       setSessions(list.recordings ?? []);
+      setRecent(recentList.recordings ?? []);
+      setContinuesId((current) => current && !(recentList.recordings ?? []).some((recording) => recording.id === current) ? "" : current);
       setMembers(review.members ?? []);
     } finally { loadingRef.current = false; }
   }, [base]);
@@ -101,21 +116,85 @@ export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: st
     });
     return () => { active = false; };
   }, [refresh, userId]);
-  useEffect(() => () => {
-    if (testAudioRef.current) URL.revokeObjectURL(testAudioRef.current);
-    if (meterTimerRef.current) clearInterval(meterTimerRef.current);
-    inputCleanupRef.current?.();
-    if (wakeLockRef.current) void wakeLockRef.current.release().catch(() => {});
+  useEffect(() => {
+    const onPageHide = () => { void controlRef.current?.interrupt("page_left"); };
+    window.addEventListener("pagehide", onPageHide);
+    return () => {
+      window.removeEventListener("pagehide", onPageHide);
+      const control = controlRef.current;
+      controlRef.current = null;
+      if (control) void control.interrupt("page_left");
+      if (testAudioRef.current) URL.revokeObjectURL(testAudioRef.current);
+      if (meterTimerRef.current) clearInterval(meterTimerRef.current);
+      profileStoreRef.current?.close();
+      profileStoreRef.current = null;
+      inputCleanupRef.current?.();
+      const wakeLock = wakeLockRef.current;
+      wakeLockRef.current = null;
+      if (wakeLock) void wakeLock.release().catch(() => {});
+    };
   }, []);
+
+  const requestWakeLock = useCallback(async (control: CaptureControl) => {
+    if (wakeLockPendingRef.current || wakeLockRef.current || document.visibilityState !== "visible") return;
+    if (!navigator.wakeLock) {
+      setWakeNotice("화면 꺼짐 방지를 지원하지 않습니다. 기기가 잠기지 않게 확인해 주세요.");
+      return;
+    }
+    wakeLockPendingRef.current = true;
+    try {
+      const lock = await navigator.wakeLock.request("screen");
+      if (controlRef.current !== control) { await lock.release().catch(() => {}); return; }
+      wakeLockRef.current = lock;
+      setWakeNotice("");
+      lock.addEventListener("release", () => {
+        if (wakeLockRef.current === lock) {
+          wakeLockRef.current = null;
+          if (controlRef.current === control) setWakeNotice("화면 꺼짐 방지가 해제됐습니다. 녹음 상태를 확인해 주세요.");
+        }
+      }, { once: true });
+    } catch {
+      if (controlRef.current === control) setWakeNotice("화면 꺼짐 방지를 켜지 못했습니다. 기기가 잠기지 않게 확인해 주세요.");
+    } finally { wakeLockPendingRef.current = false; }
+  }, []);
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible" && controlRef.current)
+        void requestWakeLock(controlRef.current);
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [requestWakeLock]);
 
   function cleanupCapture() {
     if (meterTimerRef.current) clearInterval(meterTimerRef.current);
     meterTimerRef.current = null;
     inputCleanupRef.current?.();
     inputCleanupRef.current = null;
-    if (wakeLockRef.current) void wakeLockRef.current.release().catch(() => {});
+    const wakeLock = wakeLockRef.current;
     wakeLockRef.current = null;
+    if (wakeLock) void wakeLock.release().catch(() => {});
     setLiveLevels([]);
+  }
+
+  async function flushProfile(id: string, control: CaptureControl, sampleCount: number) {
+    if (profileFlushRef.current) return profileFlushRef.current;
+    const store = profileStoreRef.current;
+    if (!store) return;
+    profileFlushRef.current = (async () => {
+      try {
+        await profileWriteRef.current;
+        const health = control.health();
+        await store.recordProfile(scope(id), control.profile().slice(0, Math.floor(sampleCount / RECORDING_RATE))
+          .map((vector) => vector.map(quantizeRecordingLevel)), { ...health,
+            microphone_reselects: microphoneReselectsRef.current });
+      } finally {
+        store.close();
+        if (profileStoreRef.current === store) profileStoreRef.current = null;
+      }
+    })();
+    return profileFlushRef.current;
   }
 
   const inspect = useCallback(async (id: string, key: CryptoKey) => {
@@ -202,6 +281,7 @@ export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: st
     const input: ReviewRecordingStart = {
       id, title: title.trim(), input_method: mode, visibility, participants,
       consent_confirmed: true, meeting_provider: provider,
+      continues_recording_id: continuesId || null,
     };
     const session = await api<Session>(`${base}/recordings`, input);
     try {
@@ -247,16 +327,29 @@ export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: st
       // Source selection may take minutes; recheck consent and the org switch before writing any sample.
       const freshKey = await keyFor(selected.id);
       keyRef.current = freshKey;
+      let latestSnapshot: RecordingSnapshot = { state: "recording", samples: 0, persistedSamples: 0, reason: null, warning: false };
       const control = await startRecording(scope(selected.id), inputs, freshKey, (next) => {
+        latestSnapshot = next;
         setSnapshot(next);
         if (next.state === "interrupted" || next.state === "stopped") {
+          const activeControl = controlRef.current;
+          if (activeControl) void flushProfile(selected.id, activeControl, next.samples).catch(() =>
+            setInputNotice("녹음 품질 정보를 보관하지 못했습니다. 확인 저장된 음성은 유지됩니다."));
           controlRef.current = null;
           setCaptureActive(false);
           cleanupCapture();
         }
+      }, () => {
+        setMicrophoneDisconnected(true);
+        setInputNotice("마이크 연결이 끊겨 녹음을 일시정지했습니다. 마이크를 다시 선택해 주세요.");
       });
       controlRef.current = control;
+      profileStoreRef.current = await openRecordingStore(freshKey);
+      profileFlushRef.current = null;
+      profileWriteRef.current = Promise.resolve();
+      microphoneReselectsRef.current = 0;
       setCaptureActive(true);
+      setMicrophoneDisconnected(false);
       setPrepared(false);
       setInputNotice("");
       const onDeviceChange = () => setInputNotice("입력 장치가 바뀌었습니다. 소리가 계속 들어오는지 확인해 주세요.");
@@ -274,18 +367,47 @@ export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: st
           track.removeEventListener("unmute", onUnmute);
         }
       };
-      meterTimerRef.current = setInterval(() => setLiveLevels(control.levels()), 250);
-      const wakeLock = await navigator.wakeLock?.request("screen").catch(() => null) ?? null;
-      if (controlRef.current === control) wakeLockRef.current = wakeLock;
-      else if (wakeLock) await wakeLock.release().catch(() => {});
+      let lastProfileSecond = 0;
+      meterTimerRef.current = setInterval(() => {
+        const levels = control.levels();
+        setLiveLevels(levels);
+        const vectors = control.profile();
+        const seconds = Math.min(Math.floor(latestSnapshot.samples / RECORDING_RATE), vectors.length);
+        if (seconds <= lastProfileSecond || !profileStoreRef.current) return;
+        lastProfileSecond = seconds;
+        const store = profileStoreRef.current;
+        const bytes = vectors.slice(0, seconds).map((vector) => vector.map(quantizeRecordingLevel));
+        const health = { ...control.health(), microphone_reselects: microphoneReselectsRef.current };
+        profileWriteRef.current = profileWriteRef.current.then(() => store.recordProfile(scope(selected.id), bytes, health));
+        void profileWriteRef.current.catch(() => { void control.interrupt("profile_storage_failed"); });
+      }, 250);
+      await requestWakeLock(control);
       setMessage("녹음 중입니다. 확인 저장된 길이를 보면서 진행해 주세요.");
-    } catch (cause) { stopInputs(inputs); throw cause; }
+    } catch (cause) {
+      if (controlRef.current) await controlRef.current.interrupt("recording_setup_failed");
+      stopInputs(inputs);
+      throw cause;
+    }
+  }
+
+  async function reselectMicrophone() {
+    if (!selected || !controlRef.current) return;
+    await keyFor(selected.id);
+    const microphone = await captureMicrophone(selected.input_method);
+    try {
+      await controlRef.current.replaceMicrophone(microphone);
+      microphoneReselectsRef.current++;
+      setMicrophoneDisconnected(false);
+      setInputNotice("마이크를 다시 연결했습니다. 입력 미터를 확인한 뒤 녹음을 재개해 주세요.");
+    } catch (cause) { stopInputs([microphone]); throw cause; }
   }
 
   async function stop() {
     if (!selected || !controlRef.current) return;
     const control = controlRef.current;
     await control.stop();
+    await flushProfile(selected.id, control, snapshot?.samples ?? 0).catch(() =>
+      setInputNotice("녹음 품질 정보를 보관하지 못했습니다. 확인 저장된 음성은 유지됩니다."));
     controlRef.current = null;
     setCaptureActive(false);
     cleanupCapture();
@@ -301,9 +423,18 @@ export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: st
       if (!info || info.samples < 1) throw new Error("저장할 확인 구간이 없습니다.");
       if (info.partial && !partialAccepted) throw new Error("끊긴 구간을 확인하고 부분 기록 저장에 동의해 주세요.");
       const { manifest } = await prepareRecordingOriginalManifest(store.read(scope(selected.id)), info.samples);
+      const levels = encodeRecordingLevels(info.levelVectors);
       const saved = await api<RecordingSaveResult>(`${base}/recordings/${selected.id}/save`, {
         manifest, capture: { paused: info.paused, interrupted: info.interrupted || info.partial,
-          captured_samples: Math.max(info.expectedSamples, info.samples) },
+          captured_samples: Math.max(info.expectedSamples, info.samples), levels,
+          clipping_ratio: info.captureHealth.clipping_ratio,
+          health: {
+            checkpoint_delays: info.captureHealth.checkpoint_delays,
+            max_pending_samples: info.captureHealth.max_pending_samples,
+            backlog_stops: info.captureHealth.backlog_stops,
+            max_sample_wall_gap_ms: info.captureHealth.max_sample_wall_gap_ms,
+            microphone_reselects: info.captureHealth.microphone_reselects,
+          } },
       });
       setSelected({ ...selected, state: saved.state });
       setSegments(saved.segments);
@@ -365,6 +496,7 @@ export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: st
       <label>회의 제목 <input value={title} maxLength={120} onChange={(event) => setTitle(event.target.value)} /></label>
       <fieldset><legend>녹음 방식</legend><label><input type="radio" checked={mode === "microphone"} onChange={() => { setMode("microphone"); setHeardTest(false); }} /> 마이크</label><label><input type="radio" checked={mode === "system_and_microphone"} onChange={() => { setMode("system_and_microphone"); setHeardTest(false); }} /> 컴퓨터 소리 + 마이크</label></fieldset>
       <label>회의 출처 <select value={provider} onChange={(event) => setProvider(event.target.value as typeof provider)}><option value="in_person">대면 회의</option><option value="meet">Google Meet</option><option value="zoom">Zoom</option><option value="other">기타</option></select></label>
+      <label>이어서 녹음 <select value={continuesId} onChange={(event) => setContinuesId(event.target.value)}><option value="">새 회의 기록</option>{recent.map((recording) => <option key={recording.id} value={recording.id}>{recording.title} · {new Date(recording.started_at).toLocaleString("ko-KR")}</option>)}</select></label>
       <label>확정 후 볼 수 있는 사람 <select value={visibility} onChange={(event) => setVisibility(event.target.value as typeof visibility)}><option value="leads_only">팀장만</option><option value="dept">부서 멤버</option></select></label>
       <fieldset><legend>동의한 참석자</legend>{members.map((member) => <label key={member.user_id}><input type="checkbox" checked={participants.includes(member.user_id)} disabled={member.user_id === userId} onChange={(event) => setParticipants((current) => event.target.checked ? [...current, member.user_id] : current.filter((id) => id !== member.user_id))} /> {member.display_name}{member.user_id === userId ? " (녹음자)" : ""}</label>)}</fieldset>
       <label><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /> 참석자 전원 녹음 동의를 확인했고, 이 기기의 임시 보관과 비공개 원본 보관을 확인했습니다.</label>
@@ -379,9 +511,11 @@ export function MeetingRecorder({ deptId, userId }: { deptId: string; userId: st
       {snapshot && <p role="status">{snapshot.state === "recording" ? "녹음 중" : snapshot.state === "paused" ? "잠시 멈춤" : snapshot.state === "interrupted" ? "중단됨" : "녹음 종료"} · 녹음 {time(snapshot.samples)} / 30:00 · 이 기기에 확인 저장 {time(snapshot.persistedSamples)}{snapshot.warning ? " · 29분 경고" : ""}</p>}
       {liveLevels.map((level, index) => <p key={index}>{selected.input_method === "microphone" ? "마이크" : index === 0 ? "컴퓨터 소리" : "마이크"} 입력 <meter min={0} max={0.3} value={Math.min(0.3, level)} /> {level < 0.002 ? "소리 확인 필요" : "입력 감지"}</p>)}
       {inputNotice && <p role="status">{inputNotice}</p>}
+      {microphoneDisconnected && capturing && <button type="button" className="button button-secondary" disabled={busy} onClick={() => void run(reselectMicrophone)}>마이크 다시 선택</button>}
+      {wakeNotice && <p role="status">{wakeNotice}</p>}
       {snapshot?.reason && <p role="alert">녹음 중단 사유: {snapshot.reason}. 확인 저장된 구간만 복구합니다.</p>}
       {prepared && <button className="button button-primary" type="button" disabled={busy} onClick={() => void run(begin)}>입력 장치 선택하고 녹음 시작</button>}
-      {capturing && <><button className="button button-secondary" type="button" disabled={busy} onClick={() => { if (snapshot.state === "paused") controlRef.current?.resume(); else controlRef.current?.pause(); }}>{snapshot.state === "paused" ? "녹음 다시 시작" : "녹음 잠시 멈추기"}</button><button className="button button-primary" type="button" disabled={busy} onClick={() => void run(stop)}>녹음 종료</button></>}
+      {capturing && <><button className="button button-secondary" type="button" disabled={busy || microphoneDisconnected} onClick={() => { if (snapshot.state === "paused") controlRef.current?.resume(); else controlRef.current?.pause(); }}>{snapshot.state === "paused" ? "녹음 다시 시작" : "녹음 잠시 멈추기"}</button><button className="button button-primary" type="button" disabled={busy} onClick={() => void run(stop)}>녹음 종료</button></>}
       {(snapshot?.state === "interrupted" || snapshot?.state === "stopped") && !local && <button className="button button-secondary" type="button" disabled={busy} onClick={() => keyRef.current && void run(() => inspect(selected.id, keyRef.current!))}>확인 구간 보기</button>}
       {local && <><p>이 기기의 연속 확인 구간: {time(local.samples)}{local.partial ? ` · 원래 기록 ${time(local.expectedSamples)} 중 일부만 남았습니다.` : ""}{local.interrupted ? " · 중단된 녹음" : ""}</p>{local.partial && <label><input type="checkbox" checked={partialAccepted} onChange={(event) => setPartialAccepted(event.target.checked)} /> 빠진 구간 뒤의 소리는 포함되지 않으며, 표시된 확인 구간만 저장합니다.</label>}<button className="button button-primary" type="button" disabled={busy || !!capturing || local.samples < 1 || (local.partial && !partialAccepted)} onClick={() => void run(upload)}>음성 저장하고 받아쓰기</button></>}
       {selected.state === "saving" && <><p>원본 확인: {segments.filter((segment) => segment.status === "verified").length}/{segments.length} 구간</p>{segments.some((segment) => segment.status === "failed" || segment.status === "awaiting_upload") && <button type="button" className="button button-secondary" disabled={busy || !local} onClick={() => void run(upload)}>남은 구간 다시 올리기</button>}</>}

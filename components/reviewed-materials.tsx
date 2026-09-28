@@ -85,7 +85,7 @@ export function ReviewedMaterials({
           decoded = await context.decodeAudioData(bytes.slice(0));
         } catch {
           throw new Error(
-            "음성을 읽을 수 없습니다. 손상 여부를 확인하거나 .wav, .mp3, M4A 파일로 변환해 주세요.",
+            "음성을 읽을 수 없습니다. 손상 여부를 확인하거나 .wav, .mp3, .m4a, .mp4 파일로 변환해 주세요.",
           );
         }
         if (!validateAudioMetadata(file.size, decoded.duration))
@@ -275,7 +275,7 @@ export function ReviewedMaterials({
                 type="file"
                 accept={
                   kind === "audio"
-                    ? "audio/*,.webm,.m4a"
+                    ? "audio/*,.webm,.m4a,.mp4"
                     : ".txt,.md,.markdown,.csv,.json,.pdf,.docx"
                 }
                 onChange={(e) => {

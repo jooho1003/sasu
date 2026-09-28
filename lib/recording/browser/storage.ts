@@ -16,6 +16,9 @@ type Header = RecordingScope & {
   complete: boolean;
   paused: boolean;
   capturedSamples: number;
+  levelVectors: number[][];
+  captureHealth: { clipping_ratio: number; checkpoint_delays: number; max_pending_samples: number;
+    backlog_stops: number; max_sample_wall_gap_ms: number; microphone_reselects: number };
   noncePrefix: Uint8Array<ArrayBuffer>;
 };
 type StoredCheckpoint = RecordingScope & EncryptedRecordingCheckpoint;
@@ -105,6 +108,8 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
       await transaction<void>(db, ["recordings"], "readwrite", (tx) => {
         tx.objectStore("recordings").add({ ...scope, key: key(scope), createdAt, samples: 0, chunks: 0,
           shortTail: false, complete: false, paused: false, capturedSamples: 0,
+          levelVectors: [], captureHealth: { clipping_ratio: 0, checkpoint_delays: 0,
+            max_pending_samples: 0, backlog_stops: 0, max_sample_wall_gap_ms: 0, microphone_reselects: 0 },
           noncePrefix: crypto.getRandomValues(new Uint8Array(8)) } satisfies Header);
       });
       if (!(await getHeader(scope))) throw new Error("recording_storage_unavailable");
@@ -158,6 +163,30 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
         };
       });
     },
+    async recordProfile(scope: RecordingScope, levels: number[][], health: Header["captureHealth"]) {
+      if (levels.length > 1800 || levels.some((vector) => ![1, 2].includes(vector.length) ||
+        vector.length !== levels[0].length || vector.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) ||
+        !Number.isFinite(health.clipping_ratio) || health.clipping_ratio < 0 || health.clipping_ratio > 1 ||
+        !Number.isInteger(health.checkpoint_delays) || health.checkpoint_delays < 0 || health.checkpoint_delays > 1800 ||
+        !Number.isInteger(health.max_pending_samples) || health.max_pending_samples < 0 || health.max_pending_samples > 1_000_000 ||
+        !Number.isInteger(health.backlog_stops) || health.backlog_stops < 0 || health.backlog_stops > 1 ||
+        !Number.isInteger(health.max_sample_wall_gap_ms) || health.max_sample_wall_gap_ms < 0 ||
+        health.max_sample_wall_gap_ms > 1_800_000 ||
+        !Number.isInteger(health.microphone_reselects) || health.microphone_reselects < 0 || health.microphone_reselects > 100)
+        throw new Error("recording_profile_invalid");
+      await transaction<void>(db, ["recordings"], "readwrite", (tx) => {
+        const headers = tx.objectStore("recordings");
+        const request = headers.get(key(scope));
+        request.onsuccess = () => {
+          const header: Header | undefined = request.result;
+          if (!header) { tx.abort(); return; }
+          const vectors = header.levelVectors ?? [];
+          if (levels.length < vectors.length || (vectors.length && levels.length && vectors[0].length !== levels[0].length))
+            { tx.abort(); return; }
+          headers.put({ ...header, levelVectors: levels.map((vector) => vector.slice()), captureHealth: health });
+        };
+      });
+    },
     async inspect(scope: RecordingScope) {
       const header = await getHeader(scope);
       if (!header) return null;
@@ -168,7 +197,11 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
       const expectedSamples = Math.max(header.samples, header.capturedSamples);
       return { samples, chunks, expectedSamples, partial: samples !== expectedSamples || chunks !== header.chunks,
         paused: header.paused === true,
-        interrupted: !header.complete, createdAt: header.createdAt };
+        interrupted: !header.complete, createdAt: header.createdAt,
+        levelVectors: header.levelVectors ?? [], captureHealth: Object.assign({
+          clipping_ratio: 0, checkpoint_delays: 0, max_pending_samples: 0,
+          backlog_stops: 0, max_sample_wall_gap_ms: 0, microphone_reselects: 0,
+        }, header.captureHealth ?? {}) };
     },
     read,
     remove,

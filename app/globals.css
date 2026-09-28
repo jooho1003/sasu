@@ -313,6 +313,14 @@ div.review-consent { display: block; }
 .demo-review-intro h2 { margin: 2px 0 6px; }
 .demo-review-intro p:not(.eyebrow) { margin: 0; color: var(--muted); line-height: 1.6; }
 .demo-review-intro .button { flex: 0 0 auto; }
+.demo-meeting-recorder { display: grid; gap: 16px; padding: clamp(18px, 4vw, 28px); }
+.demo-meeting-recorder label { display: grid; gap: 7px; font-size: 14px; font-weight: 800; }
+.demo-meeting-recorder select { border: 1px solid rgb(0 0 0 / 13%); border-radius: 10px; background: white; padding: 10px; color: var(--ink); }
+.demo-recorded-audio { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.demo-recorded-audio p { width: 100%; margin: 0; font-weight: 750; }
+.demo-recorded-audio audio,
+.demo-review-editor audio { width: min(100%, 440px); }
+.demo-review-editor blockquote { margin: 0; border-left: 3px solid var(--accent); padding-left: 12px; color: var(--ink); }
 .demo-sample-file-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .demo-sample-file-grid article { display: grid; gap: 10px; border: 1px solid rgb(0 0 0 / 10%); border-radius: 15px; background: white; padding: 15px; }
 .demo-sample-file-grid article[data-selected="true"] { border-color: color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent); }

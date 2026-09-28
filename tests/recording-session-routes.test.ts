@@ -38,6 +38,14 @@ describe("recording metadata routes", () => {
     expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("start_review_recording", { p_dept: dept, p_input: body, p_key_version: 2 });
     expect(JSON.stringify(await result.json())).not.toContain("012345");
   });
+  it("fixes a same-owner predecessor at session start through the continuation RPC", async () => {
+    const continued = { ...body, continues_recording_id: "44444444-4444-4444-8444-444444444444" };
+    expect((await POST(request(continued), ctx)).status).toBe(201);
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("start_continued_review_recording", {
+      p_dept: dept, p_input: continued, p_key_version: 1,
+    });
+    expect((await POST(request({ ...body, continues_recording_id: "bad" }), ctx)).status).toBe(400);
+  });
   it.each(["dept_id", "created_by", "key_version", "original_path", "audio"])("rejects forged %s before SQL", async (key) => {
     expect((await POST(request({ ...body, [key]: "forged" }), ctx)).status).toBe(400);
     expect(mocks.rpc).not.toHaveBeenCalled();
@@ -55,6 +63,15 @@ describe("recording metadata routes", () => {
     expect(mocks.rpc).toHaveBeenLastCalledWith("list_review_recordings", { p_dept: dept, p_recording: id });
     mocks.rpc.mockResolvedValue({ data: [{ id, state: "expired" }], error: null });
     expect(await (await getOne(request(), ctx)).json()).toEqual({ recording: { id, state: "expired" } });
+  });
+  it("lists only the session owner's recent recordings for continuation", async () => {
+    const query = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(), limit: vi.fn().mockResolvedValue({ data: [{ id }], error: null }) };
+    mocks.create.mockResolvedValue({ rpc: mocks.rpc, from: vi.fn().mockReturnValue(query) });
+    const result = await GET(new Request("https://sasu.example/api/d/department-slug/recordings?recent=1"), ctx);
+    expect(await result.json()).toEqual({ recordings: [{ id }] });
+    expect(query.eq).toHaveBeenCalledWith("dept_id", dept);
+    expect(query.eq).toHaveBeenCalledWith("created_by", userId);
   });
   it("discards only the route ID with the session department and kicks the worker", async () => {
     mocks.rpc.mockResolvedValue({ data: { id, state: "discarded" }, error: null });
@@ -123,7 +140,7 @@ describe("recording metadata routes", () => {
   // recordingFailure's per-code and per-message mapping (incl. recording_not_saved /
   // recording_failed / recording_already_saved and the unknown-code fallback) is unit
   // tested directly in tests/recording/recording-routes.test.ts, next to its module.
-  it.each([["42501", 403], ["P0002", 404], ["40001", 409], ["55000", 409], ["54000", 429], ["22023", 400], ["XX000", 500]])("maps %s without exposing SQL details", async (code, status) => {
+  it.each([["42501", 403], ["P0002", 404], ["40001", 409], ["23505", 409], ["55000", 409], ["54000", 429], ["22023", 400], ["XX000", 500]])("maps %s without exposing SQL details", async (code, status) => {
     mocks.rpc.mockResolvedValue({ data: null, error: { code, message: "private database text" } });
     const result = await POST(request(), ctx);
     expect(result.status).toBe(status);

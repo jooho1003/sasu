@@ -481,6 +481,7 @@ export const ReviewRecordingStart = z.strictObject({
   participants: z.array(z.string().uuid()).max(100).refine((ids) => new Set(ids).size === ids.length),
   consent_confirmed: z.literal(true),
   meeting_provider: z.enum(["in_person", "meet", "zoom", "other"]),
+  continues_recording_id: z.string().uuid().nullable().optional(),
 });
 export type ReviewRecordingStart = z.infer<typeof ReviewRecordingStart>;
 
@@ -506,7 +507,20 @@ export const RecordingCaptureMetadata = z.strictObject({
   paused: z.boolean(),
   interrupted: z.boolean(),
   captured_samples: z.number().int().min(1).max(28_800_000),
-});
+  levels: z.strictObject({ microphone: z.string().max(2400).regex(/^[A-Za-z0-9+/]*={0,2}$/),
+    system: z.string().max(2400).regex(/^[A-Za-z0-9+/]*={0,2}$/).nullable() }).optional(),
+  clipping_ratio: z.number().min(0).max(1).optional(),
+  health: z.strictObject({
+    checkpoint_delays: z.number().int().min(0).max(1800),
+    max_pending_samples: z.number().int().min(0).max(1_000_000),
+    backlog_stops: z.number().int().min(0).max(1),
+    max_sample_wall_gap_ms: z.number().int().min(0).max(1_800_000),
+    microphone_reselects: z.number().int().min(0).max(100),
+  }).optional(),
+}).refine((value) => {
+  const fields = [value.levels, value.clipping_ratio, value.health];
+  return fields.every((field) => field === undefined) || fields.every((field) => field !== undefined);
+}, { message: "recording_profile_incomplete" });
 export type RecordingCaptureMetadata = z.infer<typeof RecordingCaptureMetadata>;
 export const RecordingSave = z.strictObject({ manifest: RecordingManifest, capture: RecordingCaptureMetadata })
   .refine(({ manifest, capture }) => capture.captured_samples >= manifest.segments.reduce((total, segment) => total + segment.sample_count, 0),
@@ -531,6 +545,7 @@ export type ReviewedMaterial = {
   fingerprint:string; duration:number|null; file_size:number; original_path:string|null; status:string; status_reason:string|null;
   revision:number; sections:ReviewSection[]; published_revision:number|null; published_source_id:string|null;
   created_at:string; updated_at:string; confirmed_at:string|null; original_deleted_at:string|null;
+  original_layout?:string; capture_metadata?:Record<string,unknown>|null; created_by?:string;
 };
 export type ReviewPart = { id:string; part_index:number; start_seconds:number|null; end_seconds:number|null; status:string; error_code:string|null; attempt:number };
 

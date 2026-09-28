@@ -16,10 +16,10 @@ async function accessible(context: Context) {
     .eq("id", id)
     .eq("dept_id", member.deptId)
     .maybeSingle<ReviewedMaterial>();
-  return { client, review: result.data, error: result.error };
+  return { client, review: result.data, error: result.error, member };
 }
 export async function GET(request: Request, context: Context) {
-  const { client, review, error } = await accessible(context);
+  const { client, review, error, member } = await accessible(context);
   if (error)
     return Response.json(
       { error: "자료를 불러오지 못했습니다." },
@@ -72,6 +72,16 @@ export async function GET(request: Request, context: Context) {
       { error: "자료 처리 상태를 확인하지 못했습니다." },
       { status: 500 },
     );
+  const capture = review.capture_metadata;
+  const previousId = typeof capture?.continues_review_id === "string" ? capture.continues_review_id : null;
+  const [previous, next] = review.original_layout === "audio_segments" ? await Promise.all([
+    previousId ? client.from("reviewed_materials").select("id,title").eq("id", previousId)
+      .eq("dept_id", review.dept_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    client.from("reviewed_materials").select("id,title").eq("dept_id", review.dept_id)
+      .contains("capture_metadata", { continues_review_id: review.id }).limit(1).maybeSingle(),
+  ]) : [{ data: null, error: null }, { data: null, error: null }];
+  if (previous.error || next.error)
+    return Response.json({ error: "이어진 회의 기록을 확인하지 못했습니다." }, { status: 500 });
   // Even if the scheduled sweep is delayed, don't render an endless spinner.
   const visibleParts = (parts.data ?? []).map((p) =>
     ["queued", "processing"].includes(p.status) &&
@@ -102,6 +112,9 @@ export async function GET(request: Request, context: Context) {
         error_code: segment.error_code,
         updated_at: segment.updated_at,
       })),
+      continuation: { previous: previous.data, next: next.data },
+      can_continue: review.original_layout === "audio_segments" && review.created_by === member.userId &&
+        member.role === "lead" && !!member.consentedAt && settings.data?.browser_recording_enabled === true,
     },
     { headers: { "cache-control": "no-store" } },
   );

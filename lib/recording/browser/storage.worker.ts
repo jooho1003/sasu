@@ -10,7 +10,8 @@ endpoint.onmessage = async ({ data }: MessageEvent<{ scope: RecordingScope; inpu
   let timer: ReturnType<typeof setInterval> | undefined;
   let finishing = false;
   let inputSamples = 0;
-  const update = () => endpoint.postMessage({ type: "snapshot", snapshot: session!.snapshot() });
+  let checkpointDelays = 0;
+  const update = () => endpoint.postMessage({ type: "snapshot", snapshot: session!.snapshot(), checkpointDelays });
   const finish = async (reason?: string) => {
     if (finishing || !session || !store) return;
     finishing = true;
@@ -20,13 +21,17 @@ endpoint.onmessage = async ({ data }: MessageEvent<{ scope: RecordingScope; inpu
     const snapshot = session.snapshot();
     try { await store.finish(scope, snapshot.samples, snapshot.state === "stopped"); }
     catch { snapshot.state = "interrupted"; snapshot.reason = "storage_failed"; }
-    endpoint.postMessage({ type: "done", snapshot });
+    endpoint.postMessage({ type: "done", snapshot, checkpointDelays });
     store.close();
     port.close();
   };
   try {
     store = await prepareRecordingStore(scope, recordingKey);
-    session = new RecordingSession(inputRate, (frame) => store!.append(scope, frame));
+    session = new RecordingSession(inputRate, async (frame) => {
+      const started = performance.now();
+      try { await store!.append(scope, frame); }
+      finally { if (performance.now() - started >= 1000) checkpointDelays++; }
+    });
     const watchdog = new CaptureWatchdog(performance.now());
     timer = setInterval(() => {
       const failure = watchdog.observe(performance.now(), session!.snapshot().state === "recording");

@@ -10,6 +10,7 @@ import type {
 import { audioPlan, encodeMonoWav } from "@/lib/adapters/review-audio";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { RecordingSegmentPlayer } from "@/components/recording-segment-player";
+import { recordingInputSide, type RecordingLevels } from "@/lib/recording/levels";
 
 type Detail = ReviewedMaterial & { candidate_sections: ReviewSection[] | null; original_layout?: string };
 type History = { revision: number; title: string; created_at: string };
@@ -23,6 +24,11 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
   const [parts, setParts] = useState<ReviewPart[]>([]);
   const [history, setHistory] = useState<History[]>([]);
   const [segments, setSegments] = useState<OriginalSegment[]>([]);
+  const [continuation, setContinuation] = useState<{
+    previous: { id: string; title: string } | null;
+    next: { id: string; title: string } | null;
+  }>({ previous: null, next: null });
+  const [canContinue, setCanContinue] = useState(false);
   const [segmentSeek, setSegmentSeek] = useState<{ seconds: number; serial: number } | null>(null);
   const [title, setTitle] = useState("");
   const [sections, setSections] = useState<ReviewSection[]>([]);
@@ -38,6 +44,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
   const [downloadAllowed, setDownloadAllowed] = useState(false);
   const [originalExpiresAt, setOriginalExpiresAt] = useState<string | null>(null);
   const [originalExpired, setOriginalExpired] = useState(false);
+  const levelProfile = review?.capture_metadata?.levels as RecordingLevels | undefined;
+  const clippingRatio = review?.capture_metadata?.clipping_ratio;
   const [checked, setChecked] = useState(false);
   const [destructive, setDestructive] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement>(null);
@@ -64,6 +72,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       setParts(body.parts);
       setHistory(body.history);
       setSegments(body.segments ?? []);
+      setContinuation(body.continuation ?? { previous: null, next: null });
+      setCanContinue(body.can_continue === true);
       setDownloadAllowed(body.original_download_allowed === true);
       setOriginalExpiresAt(body.original_expires_at ?? null);
       setOriginalExpired(!!body.original_expires_at && new Date(body.original_expires_at).getTime() <= Date.now());
@@ -339,6 +349,14 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                 : "확인 필요"}
         </span>
       </header>
+      {review.original_layout === "audio_segments" && (continuation.previous || continuation.next || canContinue) ? (
+        <section className="panel" aria-label="이어진 회의 기록">
+          <h2>이어진 회의 기록</h2>
+          {continuation.previous ? <p><Link href={`/d/${deptId}/reviews/${continuation.previous.id}`}>이전 기록 · {continuation.previous.title}</Link></p> : null}
+          {continuation.next ? <p><Link href={`/d/${deptId}/reviews/${continuation.next.id}`}>다음 기록 · {continuation.next.title}</Link></p> : null}
+          {canContinue && !continuation.next ? <p><Link href={`/d/${deptId}/reviews/record?continues=${id}`}>이 회의 이어서 녹음</Link></p> : null}
+        </section>
+      ) : null}
       {error ? (
         <div className="panel" role="alert">
           <p>{error}</p>
@@ -463,8 +481,10 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             <span>{originalUnavailable ? "원본이 지워졌거나 보관 기한이 지났습니다" : "조직에서 원본 내려받기를 허용하지 않았습니다"}</span>
           ) : null}
         </div>
+        {typeof clippingRatio === "number" && clippingRatio > 0.05 ?
+          <p className="review-notice" role="status">입력이 과했습니다. 원본을 들으며 받아쓴 글을 확인해 주세요.</p> : null}
         {review.original_layout === "audio_segments" && !originalUnavailable ? (
-          <RecordingSegmentPlayer deptId={deptId} reviewId={id} duration={review.duration ?? 0} segments={segments} seekRequest={segmentSeek} />
+          <RecordingSegmentPlayer deptId={deptId} reviewId={id} duration={review.duration ?? 0} segments={segments} downloadAllowed={downloadAllowed} seekRequest={segmentSeek} />
         ) : originalUrl ? (
           review.kind === "audio" ? (
             <audio ref={audio} controls controlsList={downloadAllowed ? undefined : "nodownload"} src={originalUrl} preload="metadata" />
@@ -551,6 +571,9 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                         : "꺼낸 글"}
                 </span>
                 <span>{s.location ?? "위치 정보 없음"}</span>
+                {levelProfile && s.start_seconds !== null && s.end_seconds !== null &&
+                  recordingInputSide(levelProfile, s.start_seconds, s.end_seconds) ?
+                  <span className="badge badge-neutral">{recordingInputSide(levelProfile, s.start_seconds, s.end_seconds)}</span> : null}
                 {s.start_seconds !== null ? (
                   <button
                     className="button button-ghost"

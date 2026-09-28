@@ -1,16 +1,18 @@
 import { expect, test } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 import { encodeMonoWav } from "../../lib/adapters/review-audio";
 
 const endpoint = "/api/d/dept/reviews/review";
-function fixture(status = "done") {
+function fixture(status = "done", downloadAllowed = false, twoSegments = false) {
   return {
     review: { id: "review", dept_id: "dept", kind: "audio", title: "합성 회의", filename: "fixture.wav",
-      original_layout: "audio_segments", status: "ready", revision: 1, duration: 2,
+      original_layout: "audio_segments", status: "ready", revision: 1, duration: twoSegments ? 61 : 2,
       sections: [{ id: "s1", text: "합성 발언", original_text: "합성 발언", origin: "transcribed",
         edited: false, location: null, start_seconds: 0, end_seconds: 2 }],
       published_source_id: null, published_revision: null, original_deleted_at: null, candidate_sections: null },
     parts: [{ id: "part", part_index: 0, status, start_seconds: 0, end_seconds: 2 }],
-    segments: [{ index: 0, status: "verified" }], history: [], original_download_allowed: false,
+    segments: twoSegments ? [{ index: 0, status: "verified" }, { index: 1, status: "verified" }] : [{ index: 0, status: "verified" }],
+    history: [], original_download_allowed: downloadAllowed,
     original_expires_at: null,
   };
 }
@@ -33,6 +35,27 @@ test("verified original plays by segment number and seeks from a transcript sect
   await expect.poll(() => requests.length).toBe(2);
   expect(requests).toEqual([0, 0]);
   await expect(page.locator("audio")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "전체 녹음 WAV 내려받기" })).toHaveCount(0);
+});
+
+test("download setting gates a sequential two-segment WAV export", async ({ page }) => {
+  const actions: string[] = [];
+  await page.route(`**${endpoint}/original?*`, route => {
+    const params = new URL(route.request().url()).searchParams;
+    actions.push(`${params.get("action")}:${params.get("segment")}`);
+    const samples = params.get("segment") === "0" ? 960_000 : 16_000;
+    return route.fulfill({ contentType: "application/octet-stream", body: Buffer.from(encodeMonoWav(new Float32Array(samples), 16000)) });
+  });
+  await page.route(`**${endpoint}`, route => route.fulfill({ json: fixture("done", true, true) }));
+  await page.goto("/");
+  const pending = page.waitForEvent("download");
+  await page.getByRole("button", { name: "전체 녹음 음성 파일 내려받기" }).click();
+  const download = await pending;
+  const bytes = await readFile((await download.path())!);
+  expect(download.suggestedFilename()).toBe("meeting-recording.wav");
+  expect(bytes.toString("ascii", 0, 4)).toBe("RIFF");
+  expect(bytes.length).toBe(44 + 976_000 * 2);
+  expect(actions).toEqual(["download_original:0", "download_original:1"]);
 });
 
 test("segment transcription retry queues the server path without legacy parts upload", async ({ page }) => {

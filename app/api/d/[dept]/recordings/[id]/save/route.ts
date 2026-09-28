@@ -11,7 +11,7 @@ export async function POST(
   if (!ReviewRecordingStart.shape.id.safeParse(id).success) return recordingFailure({ code: "22023" });
   const input = RecordingSave.safeParse(await request.json().catch(() => null));
   if (!input.success) return recordingFailure({ code: "22023" });
-  const result = await access.client.rpc("create_review_recording", {
+  const result = await access.client.rpc(input.data.capture.levels ? "create_review_recording_with_profile" : "create_review_recording", {
     p_dept: access.member.deptId,
     p_recording: id,
     p_manifest: input.data.manifest,

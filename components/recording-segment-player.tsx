@@ -1,17 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { combineRecordingOriginals } from "@/lib/recording/original-segments";
+import { RECORDING_RATE } from "@/lib/recording/pcm";
 
 type Segment = { index: number; status: string };
 const SEGMENT_SECONDS = 60;
 
-export function RecordingSegmentPlayer({ deptId, reviewId, duration, segments, seekRequest }: {
-  deptId: string; reviewId: string; duration: number; segments: Segment[];
+export function RecordingSegmentPlayer({ deptId, reviewId, duration, segments, downloadAllowed, seekRequest }: {
+  deptId: string; reviewId: string; duration: number; segments: Segment[]; downloadAllowed: boolean;
   seekRequest?: { seconds: number; serial: number } | null;
 }) {
   const [position, setPosition] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [buffering, setBuffering] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState("");
   const contextRef = useRef<AudioContext | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -96,8 +99,31 @@ export function RecordingSegmentPlayer({ deptId, reviewId, duration, segments, s
   useEffect(() => { playAtRef.current = playAt; });
   useEffect(() => { if (seekRequest) void playAtRef.current(Math.min(seekRequest.seconds, Math.max(0, duration - 0.01))); }, [seekRequest, duration]);
 
+  async function downloadCombined() {
+    if (!available || !downloadAllowed || downloading) return;
+    stop(); setError(""); setDownloading(true);
+    try {
+      async function* originals() {
+        for (const segment of sorted) {
+          const response = await fetch(`/api/d/${deptId}/reviews/${reviewId}/original?action=download_original&segment=${segment.index}`, { cache: "no-store" });
+          if (!response.ok) throw new Error((await response.json().catch(() => ({}))).error ?? "원본 구간을 내려받지 못했습니다.");
+          yield new Uint8Array(await response.arrayBuffer());
+        }
+      }
+      const blob = await combineRecordingOriginals(originals(), Math.round(duration * RECORDING_RATE), sorted.length);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url; link.download = "meeting-recording.wav";
+      document.body.append(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "원본 구간을 내려받지 못했습니다.");
+    } finally { setDownloading(false); }
+  }
+
   return <div>
     <div><button className="button button-secondary" type="button" disabled={!available || buffering} onClick={() => playing ? stop() : void playAt(position >= duration ? 0 : position)}>{playing ? "듣기 잠시 멈추기" : buffering ? "원본 불러오는 중" : "원본 듣기"}</button></div>
+    {downloadAllowed && <button className="button button-secondary" type="button" disabled={!available || downloading} onClick={() => void downloadCombined()}>{downloading ? "원본 결합 중" : "전체 녹음 음성 파일 내려받기"}</button>}
     <label>녹음 시각 {Math.floor(position / 60)}:{String(Math.floor(position % 60)).padStart(2, "0")}
       <input type="range" min={0} max={duration || 1} step={1} value={position} disabled={!available} onChange={(event) => {
         const next = Number(event.target.value);

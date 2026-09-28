@@ -25,6 +25,32 @@ test("preflight checks encrypted storage without occupying the real recording ID
   expect(result.saved).toMatchObject({ samples: 2, chunks: 1, partial: false });
 });
 
+test("one-byte per-input profile and capture health survive a reload", async ({ page }) => {
+  await page.evaluate(async () => {
+    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") }).recordingLab;
+    const store = await lab.openRecordingStore(await lab.importRecordingKey(new Uint8Array(32).fill(42)));
+    const scope = { ownerUserId: "profile-user", deptId: "profile-dept", recordingId: "profile-1" };
+    await store.create(scope);
+    await store.append(scope, { sequence: 0, pcm: new Int16Array(16000) });
+    await store.recordProfile(scope, [[30, 210]], { clipping_ratio: 0.06, checkpoint_delays: 1,
+      max_pending_samples: 2048, backlog_stops: 0, max_sample_wall_gap_ms: 300, microphone_reselects: 1 });
+    store.close();
+  });
+  await page.reload();
+  expect(await page.evaluate(async () => {
+    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") }).recordingLab;
+    const store = await lab.openRecordingStore(await lab.importRecordingKey(new Uint8Array(32).fill(42)));
+    const scope = { ownerUserId: "profile-user", deptId: "profile-dept", recordingId: "profile-1" };
+    const result = await store.inspect(scope);
+    await store.remove(scope);
+    store.close();
+    return result;
+  })).toMatchObject({ levelVectors: [[30, 210]], captureHealth: {
+    clipping_ratio: 0.06, checkpoint_delays: 1, max_pending_samples: 2048,
+    backlog_stops: 0, max_sample_wall_gap_ms: 300, microphone_reselects: 1,
+  } });
+});
+
 test("committed PCM survives reload, remains scoped, and detects a corrupted checkpoint", async ({ page }) => {
   const result = await page.evaluate(async () => {
     const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") & typeof import("../../lib/recording/checkpoint-crypto") }).recordingLab;
@@ -49,11 +75,19 @@ test("committed PCM survives reload, remains scoped, and detects a corrupted che
       request.onerror = () => reject(request.error);
     });
     store.close();
-    return { recovery, other, stored: { hasPcm: "pcm" in stored, sampleCount: stored.sampleCount, encryptedBytes: stored.ciphertext.byteLength } };
+    const ciphertext = new Uint8Array(stored.ciphertext);
+    let plaintextPatternFound = false;
+    for (let offset = 0; offset <= ciphertext.length - 64; offset++) {
+      if (Array.from(ciphertext.subarray(offset, offset + 64)).every((byte, index) => byte === (index % 2 === 0 ? 123 : 0))) {
+        plaintextPatternFound = true; break;
+      }
+    }
+    return { recovery, other, stored: { hasPcm: "pcm" in stored, sampleCount: stored.sampleCount,
+      encryptedBytes: stored.ciphertext.byteLength, plaintextPatternFound } };
   });
   expect(result.recovery).toMatchObject({ samples: 16073, chunks: 2, partial: false });
   expect(result.other).toBeNull();
-  expect(result.stored).toEqual({ hasPcm: false, sampleCount: 16000, encryptedBytes: 32016 });
+  expect(result.stored).toEqual({ hasPcm: false, sampleCount: 16000, encryptedBytes: 32016, plaintextPatternFound: false });
   await page.reload();
   await expect(page.locator("#status")).toHaveText("검증 준비 완료");
   expect(await page.evaluate(async () => {

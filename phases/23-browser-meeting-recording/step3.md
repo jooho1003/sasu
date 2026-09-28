@@ -1,6 +1,6 @@
 # Step 3: 심사위원 데모와 회귀 인계
 
-상태: 미실행. step2 통과 후 수행. 원천은 PRD REC-05, 상세 설계 §8·V11~V12, ADR-055·056.
+상태: 기능 구현·로컬 제품 검증 완료, 운영 반영 게이트 미완료. 실행 기록은 `docs/verification/browser-meeting-recording/step3.md`를 따른다. 원천은 PRD REC-05, 상세 설계 §8·V11~V12, ADR-055·056.
 
 ## 작업
 

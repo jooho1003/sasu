@@ -12,7 +12,7 @@ function fixture(kind = "audio", allowed = false, expired = false) {
 }
 async function mount(page: Page, state: ReturnType<typeof fixture>) {
   await page.route(`**${endpoint}`, route => route.fulfill({ json: state }));
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.getByLabel("구간 1 텍스트")).toBeVisible();
 }
 test("다운로드 off 문서는 원본 열기 숨김, 전사·재추출은 유지", async ({ page }) => {
@@ -77,6 +77,31 @@ test("조직 보호 설정 저장과 실패 메시지, 읽기 전용 차단", as
   await expect(page.getByRole("alert")).toContainText("저장하지 못했습니다");
   await page.goto("/?view=settings&readonly=1");
   await expect(page.getByRole("button", { name: "원본 보호 설정 저장" })).toBeDisabled();
+});
+test("녹음 스위치를 끌 때 진행 중 건수를 확인하고 취소할 수 있다", async ({ page }) => {
+  let saves = 0;
+  let dialogs = 0;
+  await page.route("**/api/admin/review-settings", route => {
+    if (route.request().method() === "GET") return route.fulfill({ json: { active_recordings: 2 } });
+    saves++;
+    expect(route.request().postDataJSON()).toEqual({ browser_recording_enabled: false, allow_original_download: false });
+    return route.fulfill({ json: { ok: true } });
+  });
+  await page.goto("/?view=settings&recording=1");
+  await page.getByRole("checkbox", { name: "웹 회의 녹음 사용" }).uncheck();
+  page.on("dialog", async dialog => {
+    dialogs++;
+    expect(dialog.message()).toContain("2건");
+    if (dialogs === 1) await dialog.dismiss();
+    else await dialog.accept();
+  });
+  await page.getByRole("button", { name: "원본 보호 설정 저장" }).click();
+  await expect.poll(() => dialogs).toBe(1);
+  expect(saves).toBe(0);
+  await page.getByRole("button", { name: "원본 보호 설정 저장" }).click();
+  await expect(page.getByRole("status")).toContainText("저장했습니다");
+  expect(dialogs).toBe(2);
+  expect(saves).toBe(1);
 });
 test("원본 보존 기간 선택은 Slack 보존값과 별도 요청", async ({ page }) => {
   let days: number | null = null;

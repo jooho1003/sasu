@@ -6,6 +6,14 @@ import { useDemoWorkspace } from "./demo-workspace-state";
 import type { DemoItem } from "@/lib/demo-workspace";
 import type { DemoSource } from "@/lib/demo-workspace";
 import { EvidencePicker } from "@/components/evidence-picker";
+import { DemoMeetingRecorder } from "@/components/demo-meeting-recorder";
+
+const DEMO_MEETING_TRANSCRIPT = "영업 리드: 외주사 B가 기존 계약보다 12% 오른 견적을 보냈습니다.\n영업 담당자: 영업 원칙에는 연 10% 이상 인상 시 자동 연장하지 않고 재입찰을 검토한다고 적혀 있습니다.\n영업 리드: 오늘 17시까지 대체 업체 두 곳의 일정과 비용을 비교해 결정 카드에 올리겠습니다.\n참석자: 이 파일의 인물과 회사는 모두 사수 데모를 위한 합성 정보입니다."; // wording-ok: 합성 음성에 실제로 발화된 예시 원문과 일치해야 합니다.
+const DEMO_MEETING_QUOTES = [
+  "외주사 B가 기존 계약보다 12% 오른 견적을 보냈습니다.",
+  "영업 원칙에는 연 10% 이상 인상 시 자동 연장하지 않고 재입찰을 검토한다고 적혀 있습니다.",
+  "오늘 17시까지 대체 업체 두 곳의 일정과 비용을 비교해 결정 카드에 올리겠습니다.",
+];
 
 const DEMO_REVIEW_FILES = [
   {
@@ -162,6 +170,8 @@ export function DemoReviewSimulator() {
   const [selectedSample, setSelectedSample] = useState("");
   const [stage, setStage] = useState<"ready" | "review" | "confirmed">("ready");
   const [draft, setDraft] = useState("회의 참석자는 외주사 B의 12% 인상안보다 재입찰 검토가 우선이라고 정리했습니다.");
+  const [meetingStage, setMeetingStage] = useState<"sample" | "edit" | "confirmed">("sample");
+  const [meetingDraft, setMeetingDraft] = useState(DEMO_MEETING_TRANSCRIPT);
 
   const chooseSample = (sample: (typeof DEMO_REVIEW_FILES)[number]) => {
     setFileName(sample.name);
@@ -179,6 +189,30 @@ export function DemoReviewSimulator() {
           <p>파일 선택부터 사용자 확인과 근거로 확정까지, 서버 전송 없이 체험합니다.</p>
         </div>
       </header>
+      <DemoMeetingRecorder />
+      <section className="panel demo-review-editor" aria-labelledby="demo-sample-meeting-heading">
+        <header><div><p className="eyebrow">준비된 합성 회의 · 실제 녹음과 별개</p><h2 id="demo-sample-meeting-heading">합성 음성에서 결정 근거까지</h2></div><span className="badge badge-neutral">서버 처리 없음</span></header>
+        <p>직접 녹음한 소리를 받아쓴 결과가 아닙니다. 아래 예시 음성·글·요약은 함께 만든 가상 회사 자료입니다.</p>
+        <audio controls src="/demo-files/onsaemiro-sales-weekly-meeting.wav" aria-label="합성 회의 음성 재생" />
+        <a href="/demo-files/onsaemiro-sales-weekly-meeting.wav" download>합성 회의 음성 내려받기</a>
+        {meetingStage === "sample" ? <div className="demo-action-result">
+          <div><strong>가상 회의를 받아쓴 글</strong><p style={{ whiteSpace: "pre-line" }}>{DEMO_MEETING_TRANSCRIPT}</p></div>
+          <button className="button button-primary button-small" type="button" onClick={() => setMeetingStage("edit")}>받아쓴 글 고치기</button>
+        </div> : null}
+        {meetingStage !== "sample" ? <label>가상 회의를 받아쓴 글 고치기
+          <textarea aria-label="가상 회의 받아쓴 글" value={meetingDraft} onChange={(event) => { setMeetingDraft(event.target.value); setMeetingStage("edit"); }} />
+        </label> : null}
+        {meetingStage === "edit" ? <button className="button button-primary" type="button" disabled={!meetingDraft.trim()} onClick={() => setMeetingStage("confirmed")}>합성 예시 확정하기</button> : null}
+        {meetingStage === "confirmed" && DEMO_MEETING_QUOTES.every((quote) => meetingDraft.includes(quote)) ? <div className="demo-action-result" role="status">
+          <div><strong>근거 요약 미리보기</strong>
+            <p>외주사 B는 12% 인상을 제안했습니다. 재입찰 검토 원칙과 대체 업체 비교를 바탕으로 오늘 17시까지 계약을 이어갈지 결정합니다.</p>
+            {DEMO_MEETING_QUOTES.map((quote) => <blockquote key={quote}>“{quote}”</blockquote>)}
+            <p>가상 회의의 원문 근거 예시입니다. 입력한 수정 내용은 서버에 보내거나 실제 근거로 저장하지 않습니다.</p>
+          </div>
+          <button type="button" onClick={() => { setMeetingStage("sample"); setMeetingDraft(DEMO_MEETING_TRANSCRIPT); }}>다시 체험</button>
+        </div> : null}
+        {meetingStage === "confirmed" && !DEMO_MEETING_QUOTES.every((quote) => meetingDraft.includes(quote)) ? <div className="demo-action-result" role="status"><p>수정한 글에 예시 원문 근거가 없어 요약을 표시할 수 없습니다. 가상 회의 글을 다시 확인해 주세요.</p><button type="button" onClick={() => setMeetingStage("edit")}>글 다시 고치기</button></div> : null}
+      </section>
       <section className="demo-review-steps" aria-label="자료 검토 단계">
         {["파일 선택", "글로 바꾸기", "사용자 검토", "근거로 확정"].map((label, index) => (
           <span key={label} data-active={stage === "confirmed" || (stage === "review" && index <= 2) || (stage === "ready" && index === 0)}><b>{index + 1}</b>{label}</span>

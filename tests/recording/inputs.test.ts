@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { captureInputs, stopInputs } from "@/lib/recording/browser/inputs";
+import { captureInputs, captureMicrophone, stopInputs } from "@/lib/recording/browser/inputs";
 
 function stream(audio = true) {
   const stop = vi.fn();
@@ -28,6 +28,10 @@ describe("meeting input acquisition", () => {
     const microphone = stream();
     const devices = { getDisplayMedia: vi.fn().mockResolvedValue(display.value), getUserMedia: vi.fn().mockResolvedValue(microphone.value) };
     const inputs = await captureInputs("system_and_microphone", devices);
+    expect(devices.getDisplayMedia).toHaveBeenCalledWith({
+      audio: true, video: true, systemAudio: "include", selfBrowserSurface: "exclude",
+      surfaceSwitching: "include", monitorTypeSurfaces: "include",
+    });
     expect(display.applyConstraints).toHaveBeenCalledWith({ frameRate: { ideal: 1, max: 1 } });
     expect(devices.getUserMedia).toHaveBeenCalledWith({ audio: {
       echoCancellation: true, noiseSuppression: true, autoGainControl: true,
@@ -56,5 +60,13 @@ describe("meeting input acquisition", () => {
       echoCancellation: true, noiseSuppression: true, autoGainControl: false,
     }, video: false });
     expect(microphone.stop).toHaveBeenCalledTimes(1);
+  });
+  it("reselects only a microphone with the original mode constraints", async () => {
+    const microphone = stream();
+    const devices = { getUserMedia: vi.fn().mockResolvedValue(microphone.value) };
+    expect(await captureMicrophone("system_and_microphone", devices)).toBe(microphone.value);
+    expect(devices.getUserMedia).toHaveBeenCalledWith({ audio: {
+      echoCancellation: true, noiseSuppression: true, autoGainControl: true,
+    }, video: false });
   });
 });

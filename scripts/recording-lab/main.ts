@@ -118,12 +118,36 @@ button("합성 입력 시작", start);
 controls.append(document.createElement("hr"));
 button("일시정지", () => { recorder?.pause(); });
 button("재개", async () => { await recorder?.resume(); });
-button("종료", async () => { await recorder?.stop(); recorder = undefined; });
+button("종료", async () => {
+  const current = recorder;
+  await current?.stop();
+  Object.assign(window, { labProfile: current?.profile() ?? [], labHealth: current?.health() ?? null });
+  recorder = undefined;
+});
 button("입력 종료 시험", () => {
   const track = streams[0]?.getAudioTracks()[0];
   track?.stop();
   // stop() itself does not dispatch ended; simulate the browser's device loss.
   track?.dispatchEvent(new Event("ended"));
+});
+button("마이크 분리 시험", () => {
+  const track = streams[streams.length - 1]?.getAudioTracks()[0];
+  track?.stop();
+  track?.dispatchEvent(new Event("ended"));
+});
+button("마이크 다시 선택", () => {
+  if (!recorder || !synthesizer) throw new Error("녹음 중이 아닙니다.");
+  const oscillator = synthesizer.createOscillator();
+  oscillator.frequency.value = 660;
+  const gain = synthesizer.createGain();
+  gain.gain.value = 0.2;
+  const destination = synthesizer.createMediaStreamDestination();
+  oscillator.connect(gain).connect(destination);
+  oscillator.start();
+  void recorder.replaceMicrophone(destination.stream).then(() => {
+    streams[streams.length - 1] = destination.stream;
+    recorder?.resume();
+  });
 });
 button("확인 구간 복구", async () => {
   if (recorder || starting) throw new Error("먼저 녹음을 종료하세요.");

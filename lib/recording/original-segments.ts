@@ -105,6 +105,46 @@ export async function verifyRecordingOriginal(wav: Uint8Array, expected: Recordi
   if (await sha256(bytes) !== segment.sha256) throw new Error("recording_hash_mismatch");
 }
 
+/** Browser-side export of separately authorized originals. Each source must
+ * come from the download_original endpoint, which enforces the setting and
+ * records access. This function validates format and sequence before download.
+ */
+export async function combineRecordingOriginals(
+  originals: AsyncIterable<Uint8Array> | Iterable<Uint8Array>,
+  expectedSamples: number,
+  expectedSegments: number,
+): Promise<Blob> {
+  if (!Number.isInteger(expectedSamples) || expectedSamples < 1 || expectedSamples > MAX_RECORDING_SAMPLES ||
+    !Number.isInteger(expectedSegments) || expectedSegments < 1 || expectedSegments > 30)
+    throw new Error("recording_bundle_invalid");
+  const payloads: Uint8Array<ArrayBuffer>[] = [];
+  let total = 0;
+  for await (const input of originals) {
+    const wav = new Uint8Array(input);
+    const view = new DataView(wav.buffer);
+    const label = (offset: number, value: string) => Array.from(value).every((char, i) => wav[offset + i] === char.charCodeAt(0));
+    const samples = (wav.byteLength - 44) / 2;
+    if (wav.byteLength < 46 || wav.byteLength > 1_920_044 || !Number.isInteger(samples) ||
+      !label(0, "RIFF") || !label(8, "WAVE") || !label(12, "fmt ") || !label(36, "data") ||
+      view.getUint32(4, true) !== wav.byteLength - 8 || view.getUint32(16, true) !== 16 ||
+      view.getUint16(20, true) !== 1 || view.getUint16(22, true) !== 1 ||
+      view.getUint32(24, true) !== RECORDING_RATE || view.getUint32(28, true) !== RECORDING_RATE * 2 ||
+      view.getUint16(32, true) !== 2 || view.getUint16(34, true) !== 16 ||
+      view.getUint32(40, true) !== wav.byteLength - 44) throw new Error("recording_wav_invalid");
+    if (payloads.length >= expectedSegments ||
+      (payloads.length < expectedSegments - 1 && samples !== SEGMENT_SAMPLES) ||
+      total + samples > expectedSamples) throw new Error("recording_bundle_invalid");
+    payloads.push(wav.slice(44));
+    total += samples;
+  }
+  if (payloads.length !== expectedSegments || total !== expectedSamples) throw new Error("recording_bundle_invalid");
+  const header = new Uint8Array(pcmWav(new Int16Array(0)));
+  const view = new DataView(header.buffer);
+  view.setUint32(4, 36 + total * 2, true);
+  view.setUint32(40, total * 2, true);
+  return new Blob([header, ...payloads], { type: "audio/wav" });
+}
+
 /** Uses at most this original and its declared successor. A missing or invalid
  * successor fails the part; it is never replaced with silence or unchecked PCM.
  */
