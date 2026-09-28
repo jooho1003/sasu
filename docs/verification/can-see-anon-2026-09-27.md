@@ -30,3 +30,4 @@
 - 운영 DB 읽기 전용 SQL에서 함수 EXECUTE는 `can_see`: `anon=false`, `authenticated=true`, `service_role=true`; `retro_can_read`: `anon=true`였다.
 - 운영 PostgREST에서 공개 키를 사용한 비로그인 `can_see` RPC는 HTTP 401, SQLSTATE `42501`, `permission denied for function can_see`를 반환했다. 같은 비로그인 세션의 `retro_can_read` RPC는 존재하지 않는 UUID에 HTTP 200·`false`를 반환해 공개 회고 함수 접근이 유지됨을 확인했다. 실제 사용자·부서 ID나 질문 원문은 사용하지 않았다.
 - 인증된 사용자 API 호출은 이 환경에 테스트 계정 세션이 없어 실행하지 않았다. 인증 역할의 함수 EXECUTE는 위 운영 DB 권한 조회로 확인했다. ASK F2의 전체 웹 질문 재시험은 9/27 기록을 유지하며 이번 권한 변경 후 반복하지 않았다.
+- PR #13은 `main`에 병합됐다(병합 커밋 `a1e3579`). 해당 커밋의 Vercel 운영 상태는 `success`였고, 공개 `https://sasu-alpha.vercel.app/demo`는 HTTP 200을 반환했다.
