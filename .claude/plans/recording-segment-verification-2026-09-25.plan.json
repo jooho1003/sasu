@@ -1,0 +1,207 @@
+{
+  "slug": "recording-segment-verification",
+  "date": "2026-09-25",
+  "version": 1,
+  "context": {
+    "request": "지금 codex 한도 없으니까 너가 다음 착수 사항 개발 진행해줘",
+    "target": "phase 23 step1의 남은 서버 단계(step1-C): 녹음 저장(manifest v1 → 자료·구간 행) → 구간 원본 업로드 정책 → finalize → verify_review_segment 워커 → 전 구간 검증 1회 전이(전사 창 예약·세션 completed) → 전사 창 메모리 조립 → 구간 접근권·재생 → 폐기·만료·취소·철회 파기",
+    "why_this_is_next": "phase 23 README 순서상 step1은 step2(화면)의 선행이다. step1-A(순수 모듈)와 step1-B(세션 수명 주기)는 구현·검증 기록이 있고, step1b 명세가 '자료 전환·구간 업로드/검증은 다음 서버 단계에서 연결한다'고 남겼다. step1-B의 검증 README는 비어 있어 이번에 함께 마감한다",
+    "sources": "docs/PRD.md §3-4(REC-03·04·06, SEC-03·04) → docs/ARCHITECTURE.md §6-5 불변식 30~34 → docs/ADR.md ADR-054·057·058·069 → docs/planning/웹회의_녹음_설계.md §4.3·§5.0~§5.3·§6·§9·§10(V07~V10·V21) → phases/23-browser-meeting-recording/step1.md 1~7",
+    "out_of_scope": "녹음 화면·ReviewDetail 구간 재생(step2), 단어 타임스탬프 경계 처리·신뢰도(step4-B, ADR-070 결정 7), 운영 DB migration 적용, 배포, 커밋·푸시, 외부 발신, 실제 Groq 호출",
+    "pre_plan_fact_finding": "메인이 경로를 아는 파일을 직접 읽었다(0034·0037·0052·0058·0059, lib/pipeline/review-material.ts, lib/jobs.ts, lib/worker.ts, lib/recording/original-segments.ts, reviews/recordings 라우트, SQL 하니스, tdd-guard). 탐색 노드가 아니라 계획 입력이다",
+    "environment": "Graft·Archify는 D:/바이브코딩/.sasu-verification-tools-20260923/에 있다. Docker 엔진이 꺼져 있어(13:1x 확인) 격리 Graft와 실제 로컬 Storage는 Docker 기동 성공 여부에 달렸다. PGlite 하니스는 C:/Users/이주호/AppData/Local/Temp/sasu-pglite-verify-20260920"
+  },
+  "nodes": [
+    {
+      "id": "P0",
+      "title": "step1-C 명세와 구현 결정(함수 시그니처·반환·오류 코드·잠금 순서·검증 재시도 한도)",
+      "domain": "general",
+      "D1": 1,
+      "D2": 2,
+      "D3": 0,
+      "D4": 2,
+      "score": 5,
+      "tier": "powerful",
+      "agent": "main(never_delegate: 아키텍처)",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [],
+      "output": "phases/23-browser-meeting-recording/step1c-segment-verification.md, 상세 설계 §5.2 구현 메모",
+      "status": "completed",
+      "summary": "step1c-segment-verification.md 작성(시그니처·반환·오류 코드·잠금 순서·검증 한도), 상세 설계 §5.3.1 구현 메모"
+    },
+    {
+      "id": "S1",
+      "title": "계약 Zod(TDD)와 migration 0060 — 저장·구간 행·Storage INSERT 정책·finalize·claim/finish·1회 전이·구간 접근권·폐기/만료/취소/철회",
+      "domain": "security",
+      "D1": 1,
+      "D2": 2,
+      "D3": 1,
+      "D4": 2,
+      "score": 6,
+      "tier": "powerful",
+      "agent": "main",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [
+        "P0"
+      ],
+      "output": "lib/contracts.ts, tests/contracts.test.ts 또는 tests/recording/server-session-contract.test.ts, supabase/migrations/0060_review_recording_segments.sql",
+      "status": "completed",
+      "summary": "contracts 5개(18 red → 77 green), 0060 작성. 테스트 전 재검토로 least() NULL 버그(마지막 창 +1초) 수정"
+    },
+    {
+      "id": "T1",
+      "title": "격리 PGlite SQL 하니스 — 권한 행렬·상태 전이·경로·동시 완료 1회·접근권·파기 예약",
+      "domain": "security",
+      "D1": 1,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 4,
+      "tier": "powerful",
+      "clamp_note": "security floor=powerful로 승격",
+      "agent": "main",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [
+        "S1"
+      ],
+      "output": "scripts/verify-recording-segments-sql.mjs, scripts/verify-security-sql.mjs 연결, 실행 로그",
+      "status": "completed",
+      "summary": "verify-recording-segments-sql.mjs 18개, 최종 277·2016 통과. 첫 두 실행은 fixture 문제(한도 54000·CHECK 23514). 돌연변이 6/6 검출(첫 돌연변이 실행은 fixtures 누락으로 무효 처리 후 대조군 추가)"
+    },
+    {
+      "id": "B1",
+      "title": "워커 TDD — verify_review_segment 핸들러·process_review 전사 창 분기·purge 구간/접두사 파기·JobKind·등록",
+      "domain": "general",
+      "D1": 0,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 3,
+      "tier": "balanced",
+      "agent": "claude(subagent)",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "depends_on": [
+        "P0",
+        "S1(계약만)"
+      ],
+      "output": "lib/pipeline/review-material.ts, lib/jobs.ts, tests/pipeline/review-material.test.ts, tests/worker.test.ts",
+      "status": "completed",
+      "summary": "sonnet: verifyReviewSegment·전사 창 분기·구간 파기, 20 red → 38 green, eslint 통과. 메인이 코드와 테스트 재검토"
+    },
+    {
+      "id": "B2",
+      "title": "라우트 — save·finalize·discard kick·원본 구간 분기·검토 상세 구간 상태, lib/review-access TDD",
+      "domain": "general",
+      "D1": 0,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 3,
+      "tier": "balanced",
+      "agent": "claude(subagent)",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "depends_on": [
+        "P0",
+        "S1(계약만)"
+      ],
+      "output": "app/api/d/[dept]/recordings/[id]/{save,finalize}/route.ts, discard·_shared, reviews/[id]/original·[id]/route.ts, lib/review-access.ts, tests",
+      "status": "completed",
+      "summary": "sonnet: save·finalize·원본 segment·상세 segments·requestOriginalSegmentAccess, 12 red → 63 green. TDD 가드 우회(_shared.ts Bash 편집)를 보고받고 lib/recording/recording-routes.ts로 이동하게 재지시(모듈 없음 red → 82 green), _shared.ts 삭제"
+    },
+    {
+      "id": "V1",
+      "title": "실제 로컬 Supabase Storage 통합 검증(업로드→불일치→재업로드→검증→예약→접근권→파기)",
+      "domain": "qa",
+      "D1": 1,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 4,
+      "tier": "balanced",
+      "agent": "claude(subagent)",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "depends_on": [
+        "S1",
+        "T1",
+        "B1"
+      ],
+      "condition": "Docker 엔진과 로컬 Supabase 기동 성공 시에만. 실패하면 blocked와 사유를 기록하고 대체 결과로 주장하지 않는다",
+      "output": "scripts/verify-recording-storage.ts, docs/verification/recording-segments-2026-09-25/storage-*.json|txt",
+      "status": "completed",
+      "summary": "sonnet: verify-recording-storage.ts·recording-storage-test, 실제 로컬 Supabase 18/18, LLM 0·외부 요청 0, 로컬 Storage 5xx만 재시도. 메인이 미사용 변수 제거 후 재실행 18/18"
+    },
+    {
+      "id": "A1",
+      "title": "Archify 실행 흐름도(save→upload→finalize→verify→전이→전사 창→접근·파기)와 Graft 시도",
+      "domain": "general",
+      "D1": 1,
+      "D2": 0,
+      "D3": 0,
+      "D4": 1,
+      "score": 2,
+      "tier": "balanced",
+      "agent": "claude(subagent)",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-luna",
+      "depends_on": [
+        "S1",
+        "B1",
+        "B2"
+      ],
+      "output": "docs/verification/recording-segments-2026-09-25/segments-flow.{json,html}, archify-*.json, graft-*.txt 또는 미실행 사유",
+      "status": "completed",
+      "summary": "sonnet: Archify 9/9·0/0·전달·브라우저 통과. Graft 첫 after가 워커 구현 전 스냅샷이라 midtdd로 보존하고 최종 코드로 재실행(2770노드·7031관계)"
+    },
+    {
+      "id": "R1",
+      "title": "최종 리뷰(보안·정합성)와 검증 기록 — step1-B README 마감, step1-C README, phase/ARCHITECTURE 상태",
+      "domain": "review",
+      "D1": 2,
+      "D2": 2,
+      "D3": 0,
+      "D4": 2,
+      "score": 6,
+      "tier": "powerful",
+      "agent": "main(never_delegate: 최종 리뷰)",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [
+        "P0",
+        "S1",
+        "T1",
+        "B1",
+        "B2",
+        "V1",
+        "A1"
+      ],
+      "output": "docs/verification/recording-sessions-2026-09-25/README.md, docs/verification/recording-segments-2026-09-25/README.md, phases/23-*/index.json·README·step1.md, phases/index.json, docs/ARCHITECTURE.md 녹음 절 상태",
+      "status": "completed",
+      "summary": "메인 최종 리뷰: B1·B2·V1 코드와 결과 파일 재확인, step1-B README 마감, step1-C README·browser-meeting-recording/step1.md·phase 상태·ARCHITECTURE·PRD §3-4 상태 표기 갱신. 전체 단위 1,592·lint·build 통과"
+    }
+  ],
+  "gates": {
+    "G1_completeness": "PASS — 8개 노드 모두 domain·4축·score·tier·agent·모델·depends_on·산출물 있음",
+    "G2_override": "PASS — 아키텍처(P0)·보안 권한 설계(S1·T1)·최종 리뷰(R1)는 powerful. B2는 SQL이 집행하는 권한 계약의 얇은 배선(ARCHITECTURE §8 비대상)이며 권한 판단을 새로 만들지 않는다",
+    "G3_clamp": "PASS — security floor로 T1 승격, qa(V1)·general(B1·B2·A1)은 범위 안, mechanical 노드 없음",
+    "G4_cost": "PASS(근거 부착) — powerful 4/8=50%. P0 아키텍처 never_delegate, S1 보안·권한 하드 오버라이드, T1 security floor, R1 최종 리뷰 never_delegate. 강등할 수 있는 노드 없음",
+    "G5_safety": "PASS — D3=2 노드 없음. 운영 DB 적용·배포·커밋·외부 발신은 범위 밖이며 별도 사용자 승인 대상"
+  },
+  "result": "PASS",
+  "execution": {
+    "date": "2026-09-25",
+    "deviations": [
+      "B2 서브에이전트가 tdd-guard가 막은 app/api/.../_shared.ts 편집을 Bash로 우회 → 메인이 되돌림 대신 lib/로 옮기는 TDD 정리를 지시(규칙 준수로 복구)",
+      "A1 Graft 첫 after 스냅샷이 B1 구현 전 → 재실행, 이전 결과는 *-midtdd로 보존",
+      "SQL 돌연변이 첫 실행 무효(복사본에 tests/fixtures 없음) → 대조군 포함 재실행"
+    ],
+    "tier_changes": "없음(즉흥 승격 없음)",
+    "not_done": "운영 DB 적용·배포·커밋, 녹음 화면(step2), 실제 동시 트랜잭션 경합, 실제 Groq 전사"
+  },
+  "status": "completed"
+}

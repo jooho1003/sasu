@@ -1,0 +1,167 @@
+{
+  "slug": "recording-session-redesign",
+  "date": "2026-09-25",
+  "version": 2,
+  "context": {
+    "request": "설계 검증 해주고 미흡한 설계는 다시 해줘",
+    "target": "docs/planning/웹회의_녹음_설계.md (phase 23 상세 설계). 근거: 작업 트리의 변경 설계 문서가 이것뿐이고, phase 23 step1 note·step0 기록·CSP 요약이 '녹음 시작 전 영속 세션 생성 계약 미정'을 차단점으로 남겼다",
+    "sources": "docs/PRD.md §3-4·§8 → docs/ARCHITECTURE.md → docs/ADR.md ADR-054·056·057·058·068 → 상세 설계 → phases/23-browser-meeting-recording/*",
+    "out_of_scope": "구현 코드·migration 작성, 운영 DB 적용, 배포, 커밋, 외부 발신. 재설계는 문서(PRD·ADR·ARCHITECTURE·상세 설계·phase 명세)만 바꾼다",
+    "concurrency": "2026-09-25 09:20~09:37 다른 작업(Codex 추정)이 같은 트리에서 step0 후속(lib/recording/**, tests/recording/**, docs/verification/recording-capture-2026-09-25/)과 step1a-original-segments.md를 만들었다. 이 플랜은 그 파일들을 수정하지 않는다. 공유 상태 파일(phase README·index.json)은 편집 직전에 다시 읽고 줄 단위로만 추가한다. step1a의 manifest v1 형식을 그대로 채택한다"
+  },
+  "nodes": [
+    {
+      "id": "E1",
+      "title": "사실 조사 A — 자료 검토 SQL·API·워커",
+      "domain": "explore",
+      "D1": 1,
+      "D2": 1,
+      "D3": 0,
+      "D4": 0,
+      "score": 2,
+      "tier": "balanced",
+      "agent": "Explore",
+      "claude_model": "sonnet",
+      "codex_model": null,
+      "depends_on": [],
+      "output": "파일:줄 인용 사실 목록(대화 내)",
+      "status": "completed",
+      "summary": "create_review·review_storage_allowed·접근권 발급/소비·purge·보존 sweep·동의 철회 trigger 확인. review_original_available이 original_path를 요구, uploading 방치 sweep 없음, 0052 컬럼을 쓰는 행 생성 경로 없음"
+    },
+    {
+      "id": "E2",
+      "title": "사실 조사 B — 브라우저 녹음 코드·CSP·오디오 계약",
+      "domain": "explore",
+      "D1": 1,
+      "D2": 1,
+      "D3": 0,
+      "D4": 0,
+      "score": 2,
+      "tier": "balanced",
+      "agent": "Explore",
+      "claude_model": "sonnet",
+      "codex_model": null,
+      "depends_on": [],
+      "output": "파일:줄 인용 사실 목록(대화 내)",
+      "status": "completed",
+      "summary": "recordingId는 호출자 입력이며 제품 호출자 없음, 키 route를 부르는 클라이언트 0, IDB lease·BroadcastChannel은 쓰기 전용(Web Locks만 판정), 녹음 실험실은 CSP 없는 Vite"
+    },
+    {
+      "id": "R0",
+      "title": "설계 검증 — 결함 16건(차단 2·높음 4·중간 7·낮음 3) 분류와 검증 기록",
+      "domain": "review",
+      "D1": 2,
+      "D2": 2,
+      "D3": 0,
+      "D4": 2,
+      "score": 6,
+      "tier": "powerful",
+      "agent": "main(never_delegate: 최종 리뷰·아키텍처)",
+      "claude_model": "opus",
+      "codex_model": null,
+      "depends_on": [
+        "E1",
+        "E2"
+      ],
+      "output": "docs/verification/recording-session-design-2026-09-25/README.md",
+      "status": "completed"
+    },
+    {
+      "id": "D0",
+      "title": "상위 계약 — PRD §3-4·§6-8·§8·§11 → ADR-070(녹음 세션·키·구간 검증·구간 접근권·전사 창·단어 경계) → ARCHITECTURE 녹음 절·§6-5 불변식",
+      "domain": "security",
+      "D1": 2,
+      "D2": 2,
+      "D3": 1,
+      "D4": 2,
+      "score": 7,
+      "tier": "powerful",
+      "agent": "main(never_delegate: 아키텍처·보안 설계)",
+      "claude_model": "opus",
+      "codex_model": null,
+      "depends_on": [
+        "R0"
+      ],
+      "output": "docs/PRD.md · docs/ADR.md · docs/ARCHITECTURE.md",
+      "status": "completed",
+      "summary": "PRD 1.17(REC-03·06·ACC-01·SEC-03·04·§6-8 키 route·§8 ADR-070 경계·§11), ADR-070(결정 8개·기각 대안 6개), ARCHITECTURE 녹음 절·§6-5 불변식 30~34"
+    },
+    {
+      "id": "D1",
+      "title": "상세 설계·phase 명세 — 웹회의_녹음_설계.md §4~§6·§9·§10·§11.2·§13·§14 재작성, step1.md·step2.md 새 계약 반영",
+      "domain": "general",
+      "D1": 1,
+      "D2": 2,
+      "D3": 1,
+      "D4": 2,
+      "score": 6,
+      "tier": "powerful",
+      "agent": "main(never_delegate: 아키텍처)",
+      "claude_model": "opus",
+      "codex_model": null,
+      "depends_on": [
+        "D0"
+      ],
+      "output": "docs/planning/웹회의_녹음_설계.md · phases/23-browser-meeting-recording/step1.md · step2.md",
+      "status": "completed",
+      "summary": "상세 설계 머리말·§2.2·§4.1~§4.3·§5 도입·§5.0 신규·§5.1~§5.3·§6·§9·§10(V05·V07~V10·V21)·§11.2·§12·§13(번호 대응표·SEC-06~12·V15·V17·V19)·§14, step1 본문·step2 작업 갱신. 동시 작업의 §5.1.1·step1 상단은 보존하고 필드명을 그 코드(ReviewRecordingStart)에 맞춤"
+    },
+    {
+      "id": "W0",
+      "title": "상태 동기화 — ADR-069 제목 수준 통일, phase 23 README·index.json(step1 note)·phases/index.json 문구에 ADR-070 설계 보완 한 줄 추가",
+      "domain": "mechanical",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 0,
+      "score": 1,
+      "tier": "fast",
+      "agent": "worker",
+      "claude_model": "haiku",
+      "codex_model": null,
+      "depends_on": [
+        "D1"
+      ],
+      "output": "docs/ADR.md(제목 1줄) · phases/23-browser-meeting-recording/README.md · index.json · phases/index.json",
+      "status": "completed",
+      "summary": "worker(haiku): ADR-069 제목 수준 통일, phase 23 README 문단·index.json step1 note·phases/index.json note 갱신, JSON 검증 ok"
+    },
+    {
+      "id": "R1",
+      "title": "최종 리뷰 — 문서 간 정합성·CLAUDE.md 불변식·검증 가능성·동시 작업 파일 미변경 확인",
+      "domain": "review",
+      "D1": 2,
+      "D2": 2,
+      "D3": 0,
+      "D4": 2,
+      "score": 6,
+      "tier": "powerful",
+      "agent": "main(never_delegate: 최종 리뷰)",
+      "claude_model": "opus",
+      "codex_model": null,
+      "depends_on": [
+        "W0"
+      ],
+      "output": "리뷰 결과 · 사용자 확인 항목",
+      "status": "completed",
+      "summary": "용어·RPC 이름·상태·404/403 구분·멱등 규칙·전사 창 식별자 쓰기 차단·이어서 녹음 필드·상대 링크 점검 후 불일치 7건 수정. 코드·migration·동시 작업 파일 미변경. 독립 사람 검수는 아님"
+    }
+  ],
+  "gate": {
+    "G1": "PASS — 7개 노드 모두 domain·D1~D4·score·tier·agent·claude_model 있음. 전부 Claude 쪽 실행이라 codex_model은 null",
+    "G2": "PASS — 설계 검증(R0)·보안 계약(D0)·아키텍처(D1)·최종 리뷰(R1)는 powerful + 위임 안 함. 키 발급·Storage 정책·접근권은 보안 설계라 D0를 security 도메인으로 두었다",
+    "G3": "PASS — explore 2점 balanced(ceiling balanced 안), security 7점 powerful(floor powerful), general 6점 powerful, mechanical 1점 fast(ceiling balanced 안), review 6점 powerful",
+    "G4": "PASS — powerful 4/7 = 57% > 30%. 초과 근거: R0·D0·D1·R1은 모두 하드 오버라이드(최종 리뷰·아키텍처·보안 설계)이자 never_delegate라 강등 불가. phase step 명세는 이전 플랜(grounded-answer-selection D0) 선례대로 설계 노드에 포함했다. 위임 가능한 조사(E1·E2)는 balanced, 상태 문구(W0)는 fast",
+    "G5": "PASS — D3=2 노드 없음. migration 적용·배포·커밋·외부 발신은 범위 밖",
+    "result": "PASS",
+    "v1_to_v2": "R0 결과로 D0를 상위 계약(D0)·상세 설계(D1)·상태 문구(W0)로 분해하고 게이트를 다시 통과시켰다"
+  },
+  "result": {
+    "verification": "docs/verification/recording-session-design-2026-09-25/README.md",
+    "user_confirmation": [
+      "ADR-070 결정 5: 전사 창 WAV를 저장하지 않음(ADR-056의 116MB 감수를 57.6MB로 대체)",
+      "ADR-070 결정 8: 조직 녹음 스위치 off 시 진행 중 녹음도 저장 불가",
+      "설계 §5.2: 기존 파일 업로드의 uploading 방치 정리는 범위 밖으로 둠"
+    ]
+  }
+}

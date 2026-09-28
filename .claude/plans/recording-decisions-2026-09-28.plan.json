@@ -1,0 +1,38 @@
+{
+  "slug": "recording-decisions",
+  "date": "2026-09-28",
+  "request": "설계 확인하고 내가 결정해야 하는 거 알려줘 → \"너가 고칠건 해주고. 1~6 승인할게\"",
+  "approved_decisions": {
+    "1": "ADR-069 결정 5 확정: 전사 창 WAV 미저장",
+    "2": "ADR-069 결정 8 확정: 조직 스위치 off는 진행 중 녹음 저장도 차단",
+    "3": "기존 파일 업로드 uploading 방치 정리는 범위 밖, 후속 과제로 등록",
+    "4": "작업 트리를 브랜치에서 묶음 커밋 + PR (병합·배포는 별도). 동시 Codex step2 작업이 끝난 뒤",
+    "5": "anon can_see 회수 운영 적용 — 조사 결과 origin/main 0057_revoke_can_see_anon으로 이미 운영 적용됨(anon=false 실측)",
+    "6": "녹음 migration 운영 적용은 step2·실기기 게이트 뒤"
+  },
+  "facts_found": [
+    "origin/main이 로컬 main(009fcc8)보다 17커밋 앞섬(9/27~28 ASK 수정, PR #6~#12)",
+    "운영 migration 0055~0057은 answer_topic_item_search·answer_topic_active_sources·revoke_can_see_anon. 로컬 미커밋 0055~0057(private_visibility_functions·review_recording_sessions·review_recording_segments)과 번호 충돌. 운영에 review_recordings 없음",
+    "supabase migration list는 버전만 비교해 전부 일치로 표시한다. 이대로 db push하면 녹음 migration이 적용된 것으로 간주돼 건너뛰어진다",
+    "origin/main ADR-068(ASK 지시 대상, 9/27)이 로컬 미커밋 ADR-068(CSP)·ADR-069(녹음)와 번호 충돌",
+    "겹치는 파일: docs/ADR.md, docs/PRD.md, lib/contracts.ts, scripts/verify-security-sql.mjs",
+    "Codex가 18:5x 현재 step2(녹음 화면)를 같은 작업 트리에서 진행 중"
+  ],
+  "nodes": [
+    { "id": "F0", "title": "운영 DB·git 원격 상태 사실 조사", "domain": "explore", "D1": 1, "D2": 1, "D3": 0, "D4": 0, "score": 2, "tier": "balanced", "agent": "main", "claude_model": "opus", "codex_model": null, "depends_on": [], "output": "이 플랜의 facts_found", "status": "done", "note": "운영 DB 자격 증명으로 읽기 전용 조회가 필요해 메인이 직접 실행(위임 안 함). 쓰기 0건" },
+    { "id": "A1", "title": "상세 설계: 세션 생성 뒤 키·사전 검사 실패 시 즉시 폐기 계약(§4.1·§6·§9)", "domain": "general", "D1": 1, "D2": 1, "D3": 0, "D4": 2, "score": 4, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["F0"], "output": "docs/planning/웹회의_녹음_설계.md", "override": "아키텍처(never_delegate)", "status": "done" },
+    { "id": "D1", "title": "결정 1~6 기록·PRD API 표 현행화·위험 수용·후속 과제 등록", "domain": "general", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "main", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["F0"], "output": "docs/ADR.md(ADR-069 확정 메모)·docs/PRD.md(1.17a·API 표)·설계 §5.2·§5.3.1", "status": "done", "note": "결정 기록 문안 작성은 기계 편집이 아니다(전역 위임 규칙 대상 아님). 파일당 수 줄이라 메인이 직접 쓴다" },
+    { "id": "R1", "title": "최종 리뷰", "domain": "review", "D1": 2, "D2": 2, "D3": 0, "D4": 2, "score": 6, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["A1", "D1"], "output": "사용자 보고", "override": "최종 리뷰(never_delegate)", "status": "done" },
+    { "id": "M1", "title": "번호 재배정: 로컬 migration 0055~0057→0058~0060, ADR-068·069→069·070과 참조", "domain": "mechanical", "D1": 0, "D2": 2, "D3": 1, "D4": 0, "score": 3, "tier": "balanced", "agent": "worker", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["codex-step2-done"], "output": "재번호 diff", "status": "done", "note": "Codex step2가 같은 파일을 쓰는 중이라 대기. 공개된 origin/main 번호를 유지하고 미커밋 쪽을 옮긴다" },
+    { "id": "C1", "title": "origin/main 위로 재정렬·충돌 해결·묶음 커밋·브랜치 push·PR", "domain": "general", "D1": 1, "D2": 2, "D3": 2, "D4": 1, "score": 6, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["M1"], "output": "PR(병합·배포 없음)", "requires_approval": true, "approved": "2026-09-28 사용자 결정 4", "status": "blocked" },
+    { "id": "V1", "title": "재정렬 뒤 재검증: 격리 SQL·단위·lint·build", "domain": "qa", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "claude", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["M1"], "output": "docs/verification 실행 기록", "status": "blocked" }
+  ],
+  "gates": {
+    "G1_completeness": "PASS",
+    "G2_override": "PASS — A1 아키텍처·R1 최종 리뷰는 powerful·메인",
+    "G3_clamp": "PASS — mechanical M1은 ceiling balanced 이내",
+    "G4_cost": "PASS(근거) — powerful 3/7=43%. A1 아키텍처 오버라이드, R1 최종 리뷰 오버라이드, C1 외부 발신(D3=2)과 충돌 해결 판단. 강등 가능한 노드 없음",
+    "G5_safety": "PASS — D3=2인 C1에 requires_approval, 사용자 결정 4로 승인. 운영 DB 쓰기 노드 없음",
+    "result": "PASS"
+  }
+}

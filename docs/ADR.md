@@ -579,6 +579,33 @@
 - 기각한 대안: ① 문단 전체를 복사하게 두고 검증만 강화한다: 실패 원인(복사)이 남는다. ② 고유 인덱스를 답변에서 풀어 같은 출처를 여러 번 인용한다: 스키마 변경이 필요하고, 연속 범위로 같은 목적을 이룬다. ③ 인용 카드에서 원문을 빼고 본문에만 둔다: 기존 저장 답변의 근거 표시가 사라진다.
 - 검증·기록: `phases/32-grounded-answer/step1~4`, `.claude/plans/grounded-answer-selection-2026-09-23.*`. 운영 DB(0053·0054) 적용과 배포는 검증 후 사용자 승인 단계다.
 
+### ADR-069: 요청별 CSP nonce를 위한 HTML 동적 렌더링 (9/24)
+
+- 날짜: 2026-09-24. 상태: 사용자 승인·개발. 운영 반영은 검증 뒤 별도 승인.
+- 배경: ADR-043의 정적 소개·개인정보 페이지는 빌드 시 생성되어 요청별 nonce를 받을 수 없었다. 실제 관찰에서 소개 페이지의 CSP script 위반 13건이 있었으며, 전역 강제를 켜면 정상 스크립트도 차단된다. 설치된 Next.js 16.3.4의 CSP 가이드는 nonce에 요청 시 렌더링이 필요하다고 명시한다.
+- 결정: 공통 `app/layout.tsx`에서 `await connection()`으로 HTML 렌더링을 요청 시점으로 옮긴다. 두 소개 페이지뿐 아니라 같은 정책을 받는 데모 일부·권한 없음·404 화면도 포함한다. `proxy.ts`가 매 요청 난수 nonce를 생성하고 클라이언트가 보낸 nonce/CSP를 덮어쓴다. Next.js가 그 값을 framework/inline script에 붙인다. 공개 페이지에 새 세션 조회나 DB 쓰기를 넣지 않는다.
+- 적용: 서버 전용 `SASU_CSP_ENFORCE=true`는 강제 헤더를 선택한다. 미설정·다른 값은 Report-Only를 유지한다. 같은 정책을 두 헤더로 동시에 보내지 않는다. HTML과 정책 응답은 `private, no-store`이며 쿠키 갱신·403·404에도 유지한다. 정적 자산은 요청별 nonce를 필요로 하는 HTML과 구분한다.
+- 브라우저 호환: 실제 `/demo/hiring`에서 Zod의 eval 가능 여부 검사도 CSP 위반을 남겼다. `lib/contracts.ts`는 브라우저일 때 스키마 생성 전에 `jitless`를 켠다. 서버의 기존 파서 모드와 검증 계약은 유지한다. 정책에 `unsafe-eval`을 추가하지 않는다.
+- 검증: 로컬 프로덕션 빌드에서 Report-Only 위반 0을 확인한 뒤 강제 모드의 페이지·탐색·미디어·Worker·기존 로그인/게스트 흐름을 확인한다. 의도적으로 nonce 없는 inline script를 주입하는 차단 검사는 정상 흐름 위반 집계와 분리한다. 운영 1일 관찰과 실제 녹음·기기 게이트를 로컬 검사로 대체하지 않는다.
+- 트레이드오프: 정적 HTML/CDN 캐시의 이점을 포기하고 요청별 서버 렌더링 비용이 생긴다. 게스트 데이터 조회의 권한 경계와 정적 JS·폰트·이미지 캐시는 유지한다. `unsafe-inline`로 script 정책을 완화하거나 고정 nonce를 재사용하는 대안은 채택하지 않는다. 기존 style 속성 허용은 유지한다.
+- 근거: `node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md`, `03-api-reference/04-functions/connection.md`. 실행 기록: `docs/verification/csp-rendering-2026-09-24/`.
+
+### ADR-070: 녹음 세션은 녹음 시작 때 만들고, 구간 원본은 같은 ID로 검증·전달한다 (9/25)
+
+- 배경: 2026-09-25 설계 검증에서 녹음 시작 전에 서버 상태가 없다는 결함이 확인됐다. 상세 설계 §5.2는 녹음이 끝나 manifest가 생긴 뒤에 자료를 만든다. 그런데 ADR-057 ③은 녹음 시작 때 키를 발급하고, 폐기·철회 뒤에는 재발급을 거부하라고 요구한다. 운영에 적용된 0052의 `recording_key_context`는 `status='uploading'`·`audio_segments` 행을 요구하지만, 그런 행을 만드는 함수가 없다. 그래서 제품 경로의 키 발급은 항상 404이고, 실제 입력을 로컬에 저장하지 못했다. 같은 검토에서 네 가지가 더 확인됐다. ① `private.review_original_available`이 `original_path`를 요구해 구간 원본의 업로드·접근권·전사 예약을 모두 거부한다. ② 해시가 맞지 않을 때 새 ID로 다시 보내면, 이전 ID로 암호화한 로컬 자료를 풀 수 없다. ③ 구간 재생이 ADR-058이 금지한 서명 URL을 쓴다. ④ segment 기준 경계 처리로는 PRD ACC-01을 만족할 수 없다. 결함 목록과 근거 줄: `docs/verification/recording-session-design-2026-09-25/`.
+- 결정 1 — 녹음 세션: `녹음 시작`을 누르면 클라이언트가 만든 UUID로 `review_recordings` 행을 먼저 만든다. 이 UUID는 멱등 키이고, 이후 자료 ID이며, HKDF·AAD의 녹음 ID다. SQL은 네 가지를 확인한다: 동의한 부서장인지, 조직 녹음 스위치가 켜져 있는지, 참여자 전원이 현재 동의했는지(녹음자는 자동 포함), 진행 한도(사용자 3건·부서 10건) 안인지. 동의 스냅샷·확인자·입력 방식·공개 범위·회의 출처·키 버전은 이때 고정한다. 상태는 `active → saving → completed`다. 끝 상태는 `discarded`(폐기), `expired`(시작 후 24시간), `revoked`(참여자 동의 철회·탈퇴, 기존 trigger 확장)다. 녹음자가 부서장 자격을 잃으면 상태를 바꾸지 않고, 모든 요청의 `review_editor` 확인으로 막는다. `saving` 중인 자료가 취소·삭제되면 세션도 `discarded`가 된다. 세션은 녹음자 본인만 읽고, 쓰기는 RPC로만 한다.
+- 결정 2 — 키: `recording_key_context`는 세션이 `active`·`saving`이고 만료 전이며 스위치가 켜져 있고, 녹음자가 여전히 동의한 부서장이고 참여자 전원이 동의 상태일 때만 문맥을 돌려준다. 원본 검증 완료·폐기·만료·철회 뒤에는 거부한다. 따라서 복구는 서버 세션이 살아 있을 때만 된다. 꺼져 있던 기기에 남은 암호문도 만료 뒤에는 복호화할 수 없다. 비밀을 회전할 때는 새 키 버전으로 바꾸고, 이전 비밀은 진행 중 세션이 끝나는 24시간 동안 유지한다.
+- 결정 3 — 저장: `저장하고 전사하기`는 step1a의 manifest v1과 같은 canonical 문자열로 SQL이 fingerprint를 다시 계산한다. 그다음 `reviewed_materials`(같은 ID, `audio_segments`, `original_path` null)와 `review_original_segments`를 한 트랜잭션으로 만들고 세션을 `saving`으로 바꾼다. 같은 fingerprint로 다시 요청하면 기존 결과를, 다른 fingerprint면 409를 돌려준다. 원본 가용성은 형식별로 판정한다. `single_file`은 `original_path`, `audio_segments`는 구간 행과 구간 상태로 본다.
+- 결정 4 — 업로드·검증: 구간은 발급된 `original-segments/{index}-{attempt}.wav`에 녹음자만 INSERT한다. 409 Duplicate는 업로드된 것으로 본다. `finalize`가 구간별 `verify_review_segment` 작업을 예약한다. 워커는 WAV 헤더·바이트·샘플 수·해시를 확인한다. 객체가 없으면 그 구간을 다시 업로드 대기로 돌린다. 내용이 다르면 객체를 지우고 같은 녹음 ID로 attempt를 올린다(구간당 3회). 전 구간 검증 완료는 SQL이 자료 행을 잠근 뒤 한 번만 전이한다. 이때 전사 창 행을 만들어 예약하고 세션을 `completed`로 바꾼다. 이 상태를 확인한 클라이언트가 로컬 자료를 지운다.
+- 결정 5 — 전사 창: 워커가 검증된 원본 i와 i+1의 첫 1초로 61초 WAV를 메모리에서 만들어 전사한다. `parts/` 객체는 저장하지 않는다. 30분 저장량은 약 57.6MB이며, ADR-056이 감수했던 약 116MB를 대체한다. 이 형식에서는 클라이언트의 `parts/` 쓰기를 모두 거부한다. 재추출은 서버가 원본에서 다시 만든다.
+- 결정 6 — 접근: 구간 재생·내려받기에는 ADR-058 규칙을 구간 단위로 적용한다. 구간 번호가 붙은 접근 허가 1건마다 60초 단회 접근권 1개를 발급하고, 같은 분당 60건 제한을 쓴다. 플레이어는 필요한 구간만 가져온다. 전체 내려받기는 브라우저에서 PCM을 이어 WAV 하나로 만든다. 서명 URL과 목록 조회는 쓰지 않는다. 관리자 기록 화면은 같은 사용자·자료·행위의 연속 구간 접근을 한 줄로 묶어 보여 준다.
+- 결정 7 — 경계: 전사 호출은 word·segment 타임스탬프를 함께 받는다. 창 i는 시작 시각이 60초 미만인 단어를 갖는다. 창 i+1은 창 i의 마지막 단어가 끝나기 전에 시작한 단어를 버린다. 단어 시각이 없으면 segment 규칙으로 처리하고 해당 경계를 확인 필요로 표시한다. 신뢰도는 단어가 속한 segment 값을 쓴다.
+- 결정 8 — 조직 스위치 off: 새 시작·키·저장·구간 업로드·확인 요청을 모두 막는다. 진행 중인 녹음도 저장할 수 없고 24시간 뒤 만료된다. 관리자 화면은 끄기 전에 진행 중 건수를 알린다.
+- 기각한 대안: ① 시작 때 `reviewed_materials`에 `recording` 상태 행을 둔다 — 운영 중인 자료 검토함의 상태 전이·목록·sweep·RLS 전부에 새 상태가 퍼지고, 버려진 녹음이 다른 부서장의 목록에 남는다. ② 클라이언트 ID만으로 키를 파생한다 — 폐기·만료·철회 뒤 재발급 거부(ADR-057 ③)를 할 수 없다. ③ 저장 때만 키를 발급한다 — 첫 샘플부터 암호화해야 한다(PRD SEC-03). ④ 불일치 때 새 ID로 다시 보낸다(기존 설계) — 로컬 자료를 복호화할 수 없고, 30분 WAV는 파일 가져오기 한도를 넘는다. ⑤ 구간 묶음 전체에 다회용 접근권을 준다 — ADR-058의 단회 소비와 충돌하고, 30분 재생 동안 유효한 권한이 필요하다. ⑥ 전사 창을 저장한다(기존 설계) — 원본과 함께 지워지므로 이득 없이 저장량과 정책만 늘어난다.
+- 영향: 새 migration으로 `review_recordings`·`review_original_segments`와 세션 RPC(`start_review_recording`·`create_review_recording`·`finalize_review_recording`·`discard_review_recording`·`claim_review_segment`·`finish_review_segment`·`sweep_review_recordings`), 구간 접근권(`authorize_review_segment_access`)을 추가한다. `recording_key_context`·`private.review_original_available`·`review_storage_allowed`·`consume_review_access`·`revoke_participant_reviews`는 교체한다. `process_review`·`purge_review_files` 워커에 형식 분기를 넣는다. 0052는 운영에 있으므로 새 migration이 함수 본문을 교체한다. 적용 전에 운영의 `input_method<>'upload'` 행이 0건인지 확인한다.
+- 상태: 설계. 구현은 phase 23 step1(서버)·step2(화면)에서 하고, 운영 반영은 검증과 사용자 승인 뒤에 한다. 상세: [웹 회의 녹음 설계](planning/웹회의_녹음_설계.md) §4~§6·§11.2·§13.
+- 사용자 확정(2026-09-28): 결정 5(전사 창을 저장하지 않음)와 결정 8(스위치를 끄면 진행 중 녹음도 저장 불가, 24시간 안에 다시 켜면 복구 가능)을 확정했다. 기존 파일 업로드의 `uploading` 방치 정리는 이 결정의 범위 밖이며, 녹음과 별개인 후속 과제로 둔다. 녹음 migration의 운영 적용은 step2 화면과 실제 기기 게이트를 통과한 뒤 함께 한다. 같은 기간 origin/main이 migration 0055~0057과 ADR-068(ASK)을 먼저 반영해, 이 작업의 migration을 0058~0060으로, 이 ADR을 ADR-070(구 069)으로, CSP ADR을 ADR-069(구 068)로 옮겼다(설계 §5). 세션을 만든 뒤 키나 저장소 사전 검사가 실패하면 클라이언트가 곧바로 폐기한다는 계약을 설계 §4.1·§6에 보탰다(step2 명세와 같음). 기록: `.claude/plans/recording-decisions-2026-09-28.*`.
+
 ## 부록: 재검토되었으나 기각된 안
 
 
