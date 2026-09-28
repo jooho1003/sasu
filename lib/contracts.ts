@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+// Configure before constructing schemas: even Zod's eval capability probe
+// raises a CSP violation. Keep the server parser's existing compilation mode.
+if (typeof window !== "undefined") z.config({ jitless: true });
+
 export const RetroActivityKind = z.enum([
   "git_commit", "claude_session", "claude_prompt", "codex_session", "memory_change", "doc_change", "web_visit", "web_search",
   "sasu_decision", "sasu_answer", "sasu_card", "sasu_review", "slack_message", "meeting_attended", "notion_page_changed",
@@ -467,6 +471,61 @@ export const ReviewCreate = z.object({
   fingerprint:z.string().regex(/^[a-f0-9]{64}$/), duration:z.number().positive().max(1800).nullable(),
   visibility:z.enum(["dept","leads_only"]), participants:z.array(z.uuid()).max(100), synthetic:z.boolean(), consent_confirmed:z.literal(true),
 });
+// Recording v1 fixes 16 kHz / mono / PCM16 LE with a 44-byte WAV header.
+// Client declarations contain no storage paths or authorization identifiers.
+export const ReviewRecordingStart = z.strictObject({
+  id: z.string().uuid(),
+  title: z.string().trim().min(1).max(120),
+  input_method: z.enum(["microphone", "system_and_microphone"]),
+  visibility: z.enum(["dept", "leads_only"]),
+  participants: z.array(z.string().uuid()).max(100).refine((ids) => new Set(ids).size === ids.length),
+  consent_confirmed: z.literal(true),
+  meeting_provider: z.enum(["in_person", "meet", "zoom", "other"]),
+});
+export type ReviewRecordingStart = z.infer<typeof ReviewRecordingStart>;
+
+export const RecordingOriginalSegment = z.strictObject({
+  index: z.number().int().min(0).max(29),
+  sample_count: z.number().int().min(1).max(960_000),
+  bytes: z.number().int().min(46).max(1_920_044),
+  sha256: z.string().regex(/^[a-f0-9]{64}$/),
+}).refine((segment) => segment.bytes === 44 + segment.sample_count * 2, { message: "recording_segment_size_invalid" });
+export type RecordingOriginalSegment = z.infer<typeof RecordingOriginalSegment>;
+export const RecordingManifest = z.strictObject({
+  version: z.literal(1),
+  segments: z.array(RecordingOriginalSegment).min(1).max(30),
+}).refine(({ segments }) => segments.every((segment, index) => segment.index === index &&
+  (index === segments.length - 1 || segment.sample_count === 960_000)) &&
+  segments.reduce((total, segment) => total + segment.sample_count, 0) <= 28_800_000 &&
+  segments.reduce((total, segment) => total + segment.bytes, 0) <= 64 * 1024 * 1024,
+{ message: "recording_manifest_invalid" });
+export type RecordingManifest = z.infer<typeof RecordingManifest>;
+// Descriptive only: SQL stores it with the session's consent snapshot and never
+// uses it for authorization or completion. Captured may exceed the retained prefix.
+export const RecordingCaptureMetadata = z.strictObject({
+  paused: z.boolean(),
+  interrupted: z.boolean(),
+  captured_samples: z.number().int().min(1).max(28_800_000),
+});
+export type RecordingCaptureMetadata = z.infer<typeof RecordingCaptureMetadata>;
+export const RecordingSave = z.strictObject({ manifest: RecordingManifest, capture: RecordingCaptureMetadata })
+  .refine(({ manifest, capture }) => capture.captured_samples >= manifest.segments.reduce((total, segment) => total + segment.sample_count, 0),
+    { message: "recording_capture_invalid" });
+export type RecordingSave = z.infer<typeof RecordingSave>;
+export const RecordingSegmentState = z.object({
+  index: z.number().int().min(0).max(29),
+  attempt: z.number().int().min(1).max(3),
+  path: z.string().min(1),
+  status: z.enum(["awaiting_upload", "verifying", "verified", "failed"]),
+  error_code: z.string().nullable(),
+});
+export type RecordingSegmentState = z.infer<typeof RecordingSegmentState>;
+export const RecordingSaveResult = z.object({
+  review_id: z.string().uuid(),
+  state: z.enum(["saving", "completed"]),
+  segments: z.array(RecordingSegmentState).min(1).max(30),
+});
+export type RecordingSaveResult = z.infer<typeof RecordingSaveResult>;
 export type ReviewedMaterial = {
   id:string; dept_id:string; kind:"audio"|"document"; title:string; filename:string; visibility:"dept"|"leads_only";
   fingerprint:string; duration:number|null; file_size:number; original_path:string|null; status:string; status_reason:string|null;
@@ -516,6 +575,12 @@ export function toStrictJsonSchema(
 export const OriginalAccessGrant = z.object({
   token: z.string().min(1), path: z.string().min(1),
   kind: z.enum(["audio", "document"]), filename: z.string().min(1),
+});
+// ADR-070 decision 6: one grant, one ticket, one verified segment.
+export const OriginalSegmentAccessGrant = OriginalAccessGrant.extend({
+  kind: z.literal("audio"),
+  segment_index: z.number().int().min(0).max(29),
+  sample_count: z.number().int().min(1).max(960_000),
 });
 export const ReviewOrgSettings = z.object({
   browser_recording_enabled: z.boolean(), allow_original_download: z.boolean(),

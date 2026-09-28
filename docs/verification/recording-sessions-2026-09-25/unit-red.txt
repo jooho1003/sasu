@@ -1,0 +1,132 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/recording/server-session-contract.test.ts (30 tests | 22 failed) 26ms
+   ❯ recording start contract (19)
+     × accepts metadata without any audio, with the recorder added by SQL 4ms
+     × rejects client dept_id 1ms
+     × rejects client created_by 0ms
+     × rejects client key_version 0ms
+     × rejects client consent_snapshot 0ms
+     × rejects client original_path 0ms
+     × rejects client status 0ms
+     × rejects client audio 0ms
+     × rejects client synthetic 0ms
+     × rejects invalid session metadata 0 0ms
+     × rejects invalid session metadata 1 0ms
+     × rejects invalid session metadata 2 0ms
+     × rejects invalid session metadata 3 0ms
+     × rejects invalid session metadata 4 0ms
+     × rejects invalid session metadata 5 1ms
+     × rejects invalid session metadata 6 1ms
+     × rejects invalid session metadata 7 0ms
+     × rejects invalid session metadata 8 0ms
+     × rejects invalid session metadata 9 0ms
+   ❯ recording key rotation (11)
+     × keeps legacy configuration at version 1 0ms
+     × uses the session version, including an explicitly retained previous secret 0ms
+     × binds version 2 while preserving the existing version 1 derivation 6ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 22 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > accepts metadata without any audio, with the recorder added by SQL
+TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ tests/recording/server-session-contract.test.ts:15:33
+     13| describe("recording start contract", () => {
+     14|   it("accepts metadata without any audio, with the recorder added by S…
+     15|     expect(ReviewRecordingStart.parse(input)).toEqual(input);
+       |                                 ^
+     16|   });
+     17|   it.each(["dept_id", "created_by", "key_version", "consent_snapshot",…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/22]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects client dept_id
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects client created_by
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects client key_version
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects client consent_snapshot
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects client original_path
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects client status
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects client audio
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects client synthetic
+TypeError: Cannot read properties of undefined (reading 'safeParse')
+ ❯ tests/recording/server-session-contract.test.ts:18:33
+     16|   });
+     17|   it.each(["dept_id", "created_by", "key_version", "consent_snapshot",…
+     18|     expect(ReviewRecordingStart.safeParse({ ...input, [key]: "forged" …
+       |                                 ^
+     19|   });
+     20|   it.each([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/22]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 0
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 1
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 2
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 3
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 4
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 5
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 6
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 7
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 8
+ FAIL  tests/recording/server-session-contract.test.ts > recording start contract > rejects invalid session metadata 9
+TypeError: Cannot read properties of undefined (reading 'safeParse')
+ ❯ tests/recording/server-session-contract.test.ts:26:33
+     24|     { participants: Array(101).fill(input.id) }, { participants: [inpu…
+     25|   ])("rejects invalid session metadata %#", (change) => {
+     26|     expect(ReviewRecordingStart.safeParse({ ...input, ...change }).suc…
+       |                                 ^
+     27|   });
+     28| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/22]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording key rotation > keeps legacy configuration at version 1
+TypeError: activeRecordingKey is not a function
+ ❯ tests/recording/server-session-contract.test.ts:32:12
+     30| describe("recording key rotation", () => {
+     31|   it("keeps legacy configuration at version 1", () => {
+     32|     expect(activeRecordingKey({ RECORDING_KEY_SECRET: secret })).toEqu…
+       |            ^
+     33|     expect(recordingSecretForVersion({ RECORDING_KEY_SECRET: secret },…
+     34|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/22]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording key rotation > uses the session version, including an explicitly retained previous secret
+TypeError: activeRecordingKey is not a function
+ ❯ tests/recording/server-session-contract.test.ts:37:12
+     35|   it("uses the session version, including an explicitly retained previ…
+     36|     const env = { RECORDING_KEY_VERSION: "2", RECORDING_KEY_SECRET: ne…
+     37|     expect(activeRecordingKey(env)).toEqual({ version: 2, secret: next…
+       |            ^
+     38|     expect(recordingSecretForVersion(env, 1)).toBe(secret);
+     39|     expect(recordingSecretForVersion(env, 2)).toBe(next);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/22]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording key rotation > binds version 2 while preserving the existing version 1 derivation
+AssertionError: expected Uint8Array[ 55, 88, 16, 133, 173, …(-186) ] to not deeply equal Uint8Array[ 55, 88, 16, 133, 173, …(-186) ]
+
+Compared values have no visual difference.
+
+ ❯ tests/recording/server-session-contract.test.ts:59:81
+     57|     const legacy = await deriveRecordingKey(secret, context);
+     58|     expect(await deriveRecordingKey(secret, { ...context, keyVersion: …
+     59|     expect(await deriveRecordingKey(secret, { ...context, keyVersion: …
+       |                                                                                 ^
+     60|     await expect(deriveRecordingKey(secret, { ...context, keyVersion: …
+     61|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/22]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  22 failed | 8 passed (30)
+   Start at  09:54:32
+   Duration  341ms (import 54%, transform 31%, tests 13%, worker 2%)
+

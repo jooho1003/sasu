@@ -1,4 +1,4 @@
-import { OriginalAccessGrant } from "@/lib/contracts";
+import { OriginalAccessGrant, OriginalSegmentAccessGrant } from "@/lib/contracts";
 
 type Rpc = (name: string, args: Record<string, unknown>) => PromiseLike<{
   data: unknown;
@@ -16,6 +16,22 @@ export async function requestOriginalAccess(
   });
   if (result.error) throw result.error;
   const parsed = OriginalAccessGrant.safeParse(result.data);
+  if (!parsed.success) throw new Error("invalid_access_response");
+  return parsed.data;
+}
+
+export async function requestOriginalSegmentAccess(
+  rpc: Rpc,
+  deptId: string,
+  reviewId: string,
+  index: number,
+  action: "play_original" | "download_original",
+) {
+  const result = await rpc("authorize_review_segment_access", {
+    p_dept: deptId, p_review: reviewId, p_index: index, p_action: action,
+  });
+  if (result.error) throw result.error;
+  const parsed = OriginalSegmentAccessGrant.safeParse(result.data);
   if (!parsed.success) throw new Error("invalid_access_response");
   return parsed.data;
 }

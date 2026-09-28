@@ -323,6 +323,14 @@ if (command === "refresh-retro-connectors") {
               ? ["node_modules/tsx/dist/cli.mjs", "scripts/audit-showcase-data.ts"]
             : command === "access-test"
               ? ["scripts/verify-review-storage.mjs"]
+            : command === "retention-test"
+              ? ["node_modules/tsx/dist/cli.mjs", "scripts/verify-review-retention.ts"]
+            : command === "recording-storage-test"
+              ? ["node_modules/tsx/dist/cli.mjs", "scripts/verify-recording-storage.ts"]
+            : command === "retention-browser-test"
+              ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/review-retention-live.spec.ts", ...process.argv.slice(3)]
+            : command === "csp-test"
+              ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/security-headers.spec.ts", ...process.argv.slice(3)]
             : [
                 "node_modules/@playwright/test/cli.js",
                 "test",

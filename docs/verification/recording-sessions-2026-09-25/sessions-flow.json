@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "사수 · 음성 전송 전 녹음 세션",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1050,
+      640
+    ]
+  },
+  "participants": [
+    {
+      "id": "caller",
+      "type": "frontend",
+      "label": "녹음 요청",
+      "sublabel": "동의한 부서장"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "세션 API",
+      "sublabel": "사용자 세션"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "녹음 세션",
+      "sublabel": "권한 · 동의 · 만료"
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "정리 워커",
+      "sublabel": "만료 처리"
+    }
+  ],
+  "messages": [
+    {
+      "id": "start",
+      "from": "caller",
+      "to": "api",
+      "y": 170,
+      "label": "시작 · 회의 정보만 전송"
+    },
+    {
+      "id": "authorize",
+      "from": "api",
+      "to": "db",
+      "y": 207,
+      "label": "동의 · 스위치 · 한도 검사",
+      "variant": "security"
+    },
+    {
+      "id": "created",
+      "from": "db",
+      "to": "api",
+      "y": 244,
+      "label": "동일 ID · 24시간 세션",
+      "variant": "return"
+    },
+    {
+      "id": "keyRequest",
+      "from": "caller",
+      "to": "api",
+      "y": 281,
+      "label": "체크포인트 키 요청"
+    },
+    {
+      "id": "keyContext",
+      "from": "api",
+      "to": "db",
+      "y": 318,
+      "label": "현재 권한 · 세션 재검사",
+      "variant": "security"
+    },
+    {
+      "id": "keyReturn",
+      "from": "api",
+      "to": "caller",
+      "y": 355,
+      "label": "버전에 맞는 키 · 캐시 금지",
+      "variant": "return"
+    },
+    {
+      "id": "discard",
+      "from": "caller",
+      "to": "api",
+      "y": 392,
+      "label": "로컬 자료 없는 세션도 폐기"
+    },
+    {
+      "id": "closed",
+      "from": "api",
+      "to": "db",
+      "y": 429,
+      "label": "폐기 상태 고정"
+    },
+    {
+      "id": "expiry",
+      "from": "worker",
+      "to": "db",
+      "y": 466,
+      "label": "24시간 만료 처리"
+    },
+    {
+      "id": "refused",
+      "from": "db",
+      "to": "api",
+      "y": 503,
+      "label": "폐기 · 만료 · 철회 후 키 거부",
+      "variant": "dashed"
+    }
+  ]
+}

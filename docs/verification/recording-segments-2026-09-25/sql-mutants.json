@@ -1,0 +1,49 @@
+{
+  "control_exit": 0,
+  "mutants": 6,
+  "killed": 6,
+  "results": [
+    {
+      "mutant": "control (no mutation)",
+      "exit": 0,
+      "killed": false,
+      "last_passing_check": "recording segments: RLS, direct writes, reviewer stop and function privilege matrix"
+    },
+    {
+      "mutant": "upload accepted after verification starts",
+      "exit": 1,
+      "killed": true,
+      "last_passing_check": "recording segments: Storage INSERT accepts only the recorder's issued awaiting path"
+    },
+    {
+      "mutant": "completion before every segment is verified",
+      "exit": 1,
+      "killed": true,
+      "last_passing_check": "recording segments: finalize queues one deterministic verification per awaiting segment and never marks saved"
+    },
+    {
+      "mutant": "segment ticket not bound to its segment path",
+      "exit": 1,
+      "killed": true,
+      "last_passing_check": "recording segments: transcription, reextract and publish require every segment verified"
+    },
+    {
+      "mutant": "live lease does not block a second claim",
+      "exit": 1,
+      "killed": true,
+      "last_passing_check": "recording segments: finalize queues one deterministic verification per awaiting segment and never marks saved"
+    },
+    {
+      "mutant": "mismatch keeps the old attempt path",
+      "exit": 1,
+      "killed": true,
+      "last_passing_check": "recording segments: worker claims are exclusive and bound to attempt, run and lease"
+    },
+    {
+      "mutant": "client fingerprint trusted over SQL canonical bytes",
+      "exit": 1,
+      "killed": true,
+      "last_passing_check": "recording segments: SQL re-validates manifest v1 and capture metadata; failures create nothing"
+    }
+  ]
+}

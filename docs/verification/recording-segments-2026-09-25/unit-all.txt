@@ -1,0 +1,21 @@
+
+> sasu@0.1.0 test
+> vitest run --passWithNoTests --maxWorkers=2 --testTimeout=15000
+
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+[33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+
+ Test Files  145 passed (145)
+      Tests  1592 passed (1592)
+   Start at  14:08:52
+   Duration  30.51s (import 57%, tests 21%, transform 19%, worker 2%)
+
+     Import  344 modules were evaluated 510 times · 18.75s total, 57% of tracked time
+             ~2.17s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+

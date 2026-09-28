@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "sequence",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\recording-sessions-2026-09-25\\sessions-flow.json",
+  "output": "D:\\바이브코딩\\sasu\\docs\\verification\\recording-sessions-2026-09-25\\sessions-flow.html",
+  "specification": {
+    "sha256": "4e01072dcd0b4599fa4da4bdcf6fd4a13a9637d3d2d4f507ec78d20c56d8fdb9",
+    "bytes": 2482
+  },
+  "artifact": {
+    "sha256": "302d293bc7ef85676bf872e6ff90ec313a2b8501c2d74a632c989b01c502a27c",
+    "bytes": 804451
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

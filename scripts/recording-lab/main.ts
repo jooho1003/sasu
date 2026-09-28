@@ -1,12 +1,16 @@
 import * as storage from "../../lib/recording/browser/storage";
 import * as checkpointCrypto from "../../lib/recording/checkpoint-crypto";
+import * as originalSegments from "../../lib/recording/original-segments";
 import { startRecording } from "../../lib/recording/browser/capture";
 import { captureInputs, stopInputs } from "../../lib/recording/browser/inputs";
 import { pcmWav } from "../../lib/recording/pcm";
 import { RecordingSession } from "../../lib/recording/session";
 
 // Test harness only: this synthetic identity is never accepted by app/API routes.
-Object.assign(window, { recordingLab: { ...storage, ...checkpointCrypto, RecordingSession } });
+Object.assign(window, { recordingLab: {
+  ...storage, ...checkpointCrypto, ...originalSegments, RecordingSession,
+  createStorageWorker: () => new Worker(new URL("../../lib/recording/browser/storage.worker.ts", import.meta.url), { type: "module" }),
+} });
 document.querySelector("#status")!.textContent = "검증 준비 완료";
 
 const status = document.querySelector("#status")!;
@@ -140,6 +144,20 @@ button("확인 구간 복구", async () => {
     const download = document.querySelector<HTMLAnchorElement>("#download")!;
     download.href = playbackUrl;
     download.hidden = false;
+  } finally { store.close(); }
+});
+button("원본 구간 검사", async () => {
+  if (recorder || starting || testingInput) throw new Error("먼저 현재 작업을 종료하세요.");
+  const store = await storage.openRecordingStore(await labKey());
+  try {
+    const recovery = await store.inspect(scope());
+    if (!recovery?.samples) throw new Error("검사할 확인 구간이 없습니다.");
+    if (recovery.partial) throw new Error("일부 구간이 손상됐습니다. 부분 기록을 확인한 뒤 다시 준비해야 합니다.");
+    const prepared = await originalSegments.prepareRecordingOriginalManifest(store.read(scope()), recovery.samples);
+    status.textContent = JSON.stringify({
+      stage: "원본 구간 검사 완료", ...originalSegments.recordingManifestTotals(prepared.manifest),
+      ...prepared, interrupted: recovery.interrupted, transmitted: false,
+    }, null, 2);
   } finally { store.close(); }
 });
 button("로컬 원본 폐기", async () => {

@@ -1,0 +1,25 @@
+{
+  "browser": "153.0.8010.12",
+  "platform": "win32",
+  "accelerated": true,
+  "beforeHeap": 5153092,
+  "afterHeap": 5309560,
+  "snapshot": {
+    "state": "stopped",
+    "samples": 28800000,
+    "persistedSamples": 28800000,
+    "reason": "duration_limit",
+    "warning": true
+  },
+  "recovery": {
+    "samples": 28800000,
+    "chunks": 1800,
+    "expectedSamples": 28800000,
+    "partial": false,
+    "interrupted": false,
+    "createdAt": 1790297159831
+  },
+  "largestCheckpoint": 32000,
+  "warningAt29": true,
+  "mismatches": 0
+}

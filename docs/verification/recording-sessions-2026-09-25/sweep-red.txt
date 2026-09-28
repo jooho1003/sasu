@@ -1,0 +1,58 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/pipeline/review-material.test.ts (11 tests | 2 failed) 28ms
+   ❯ 자료 변환 워커 (5)
+     × 원본 만료 처리를 구간 정리보다 먼저 하고 실패 시 중단한다 8ms
+     × 녹음 세션 만료 정리가 실패하면 뒤 작업을 중단하고 원문 없는 코드만 반환한다 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 자료 변환 워커 > 원본 만료 처리를 구간 정리보다 먼저 하고 실패 시 중단한다
+AssertionError: expected [ 'sweep_review_originals', …(1) ] to deeply equal [ 'sweep_review_originals', …(2) ]
+
+- Expected
++ Received
+
+  [
+    "sweep_review_originals",
+-   "sweep_review_recordings",
+    "sweep_review_parts",
+  ]
+
+ ❯ tests/pipeline/review-material.test.ts:61:55
+     59|   it("원본 만료 처리를 구간 정리보다 먼저 하고 실패 시 중단한다", async () => {
+     60|     await sweepReviewParts();
+     61|     expect(mock.rpc.mock.calls.map(([name]) => name)).toEqual(["sweep_…
+       |                                                       ^
+     62|     mock.rpc.mockClear();
+     63|     mock.rpc.mockResolvedValueOnce({ error: { message: "private raw" }…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 자료 변환 워커 > 녹음 세션 만료 정리가 실패하면 뒤 작업을 중단하고 원문 없는 코드만 반환한다
+AssertionError: expected [Function] to throw error including 'recording_session_sweep_failed' but got 'review_sweep_failed'
+
+Expected: "recording_session_sweep_failed"
+Received: "review_sweep_failed"
+
+ ❯ tests/pipeline/review-material.test.ts:69:37
+     67|   it("녹음 세션 만료 정리가 실패하면 뒤 작업을 중단하고 원문 없는 코드만 반환한다", async () => {
+     68|     mock.rpc.mockResolvedValueOnce({ data: 0, error: null }).mockResol…
+     69|     await expect(sweepReviewParts()).rejects.toThrow("recording_sessio…
+       |                                     ^
+     70|     expect(mock.rpc.mock.calls.map(([name]) => name)).toEqual(["sweep_…
+     71|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 passed (11)
+   Start at  10:01:07
+   Duration  445ms (import 49%, transform 41%, tests 9%, worker 1%)
+

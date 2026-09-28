@@ -1,0 +1,120 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+[33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/recording/server-session-contract.test.ts (48 tests | 18 failed) 31ms
+   ❯ recording save contract (18)
+     × accepts only the v1 manifest and bounded capture metadata 4ms
+     × rejects client dept_id 1ms
+     × rejects client created_by 0ms
+     × rejects client review_id 1ms
+     × rejects client path 0ms
+     × rejects client attempt 0ms
+     × rejects client status 0ms
+     × rejects client consent_snapshot 0ms
+     × rejects client audio 0ms
+     × rejects invalid capture metadata 0 0ms
+     × rejects invalid capture metadata 1 0ms
+     × rejects invalid capture metadata 2 0ms
+     × rejects invalid capture metadata 3 0ms
+     × rejects invalid capture metadata 4 0ms
+     × rejects invalid capture metadata 5 0ms
+     × does not let capture metadata claim fewer samples than the saved originals 0ms
+     × parses the server result without trusting unknown states 1ms
+     × binds a segment access grant to one bounded segment 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 18 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > accepts only the v1 manifest and bounded capture metadata
+TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ tests/recording/server-session-contract.test.ts:73:26
+     71| describe("recording save contract", () => {
+     72|   it("accepts only the v1 manifest and bounded capture metadata", () =…
+     73|     expect(RecordingSave.parse({ manifest, capture })).toEqual({ manif…
+       |                          ^
+     74|     expect(RecordingCaptureMetadata.parse(capture)).toEqual(capture);
+     75|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/18]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects client dept_id
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects client created_by
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects client review_id
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects client path
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects client attempt
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects client status
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects client consent_snapshot
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects client audio
+TypeError: Cannot read properties of undefined (reading 'safeParse')
+ ❯ tests/recording/server-session-contract.test.ts:77:26
+     75|   });
+     76|   it.each(["dept_id", "created_by", "review_id", "path", "attempt", "s…
+     77|     expect(RecordingSave.safeParse({ manifest, capture, [key]: "forged…
+       |                          ^
+     78|     expect(RecordingCaptureMetadata.safeParse({ ...capture, [key]: "fo…
+     79|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/18]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects invalid capture metadata 0
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects invalid capture metadata 1
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects invalid capture metadata 2
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects invalid capture metadata 3
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects invalid capture metadata 4
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > rejects invalid capture metadata 5
+TypeError: Cannot read properties of undefined (reading 'safeParse')
+ ❯ tests/recording/server-session-contract.test.ts:84:37
+     82|     { captured_samples: "976073" }, { paused: "false" }, { interrupted…
+     83|   ])("rejects invalid capture metadata %#", (change) => {
+     84|     expect(RecordingCaptureMetadata.safeParse({ ...capture, ...change …
+       |                                     ^
+     85|   });
+     86|   it("does not let capture metadata claim fewer samples than the saved…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/18]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > does not let capture metadata claim fewer samples than the saved originals
+TypeError: Cannot read properties of undefined (reading 'safeParse')
+ ❯ tests/recording/server-session-contract.test.ts:87:26
+     85|   });
+     86|   it("does not let capture metadata claim fewer samples than the saved…
+     87|     expect(RecordingSave.safeParse({ manifest, capture: { ...capture, …
+       |                          ^
+     88|     expect(RecordingSave.safeParse({ manifest: { version: 1, segments:…
+     89|     expect(RecordingSave.safeParse({ manifest }).success).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/18]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > parses the server result without trusting unknown states
+TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ tests/recording/server-session-contract.test.ts:96:32
+     94|       segments: [{ index: 0, attempt: 1, path: `dept/${input.id}/origi…
+     95|     };
+     96|     expect(RecordingSaveResult.parse(result)).toEqual(result);
+       |                                ^
+     97|     expect(RecordingSaveResult.safeParse({ ...result, state: "active" …
+     98|     expect(RecordingSaveResult.safeParse({ ...result, segments: [{ ...…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/18]⎯
+
+ FAIL  tests/recording/server-session-contract.test.ts > recording save contract > binds a segment access grant to one bounded segment
+TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ tests/recording/server-session-contract.test.ts:103:39
+    101|   it("binds a segment access grant to one bounded segment", () => {
+    102|     const grant = { token: input.id, path: "dept/review/original-segme…
+    103|     expect(OriginalSegmentAccessGrant.parse(grant)).toEqual(grant);
+       |                                       ^
+    104|     expect(OriginalSegmentAccessGrant.safeParse({ ...grant, segment_in…
+    105|     expect(OriginalSegmentAccessGrant.safeParse({ ...grant, sample_cou…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/18]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  18 failed | 30 passed (48)
+   Start at  13:29:51
+   Duration  564ms (import 53%, transform 34%, tests 11%, worker 2%)
+

@@ -1,0 +1,31 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/recording/original-segments.test.ts (50 tests | 1 failed) 2733ms
+   ❯ bounded checkpoint to independent original WAV conversion (12)
+     × refuses a silently shortened recovery instead of declaring a complete bundle 132ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/recording/original-segments.test.ts > bounded checkpoint to independent original WAV conversion > refuses a silently shortened recovery instead of declaring a complete bundle
+TypeError: prepareRecordingOriginalManifest is not a function
+ ❯ tests/recording/original-segments.test.ts:135:18
+    133|
+    134|   it("refuses a silently shortened recovery instead of declaring a com…
+    135|     await expect(prepareRecordingOriginalManifest(checkpoints(60), 61 …
+       |                  ^
+    136|       .rejects.toThrow("recording_recovery_changed");
+    137|     await expect(prepareRecordingOriginalManifest(checkpoints(61), 60 …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 49 passed (50)
+   Start at  09:40:39
+   Duration  7.57s (tests 42%, import 36%, transform 21%, worker 1%)
+

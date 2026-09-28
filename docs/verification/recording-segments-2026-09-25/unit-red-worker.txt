@@ -1,0 +1,368 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+[33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/pipeline/review-material.test.ts (33 tests | 20 failed) 66ms
+   ❯ 구간 검증 워커 (10)
+     × 검증에 성공하면 verified로 완료하고 삭제하지 않는다 9ms
+     × Storage 404(status)는 missing으로 완료하고 삭제하지 않는다 1ms
+     × Storage 404(statusCode 문자열)도 missing으로 완료한다 1ms
+     × 404가 아닌 저장소 오류는 retry로 완료하고 재시도 가능한 오류를 던지며 원문을 남기지 않는다 0ms
+     × 크기가 다르면 내용을 읽지 않고 삭제 후 mismatch로 완료한다 0ms
+     × 크기는 같지만 해시·헤더가 다르면 삭제 후 mismatch로 완료한다 0ms
+     × mismatch 삭제가 실패하면 attempt를 넘기지 않고 retry로 완료 후 재시도 가능한 오류를 던진다 0ms
+     × 획득 결과가 없으면 다운로드하지 않는다 0ms
+     × claim 실패는 원문을 남기지 않고 일반 코드로 던진다 0ms
+     × finish 실패는 원문을 남기지 않고 일반 코드로 던진다 3ms
+   ❯ 자료 변환 워커 — audio_segments 창 (4)
+     × 두 원본으로 61초 창을 만들어 한 번만 변환한다 12ms
+     × 다음 원본이 없는 마지막 창은 다운로드를 한 번만 한다 5ms
+     × 다음 원본이 손상되면 변환하지 않고 audio_segment_invalid로 완료한다 8ms
+     × 원본 다운로드가 실패하면 file_unavailable로 완료한다 7ms
+   ❯ 구간 원본 파기 워커 (audio_segments) (7)
+     × 모든 attempt 경로와 뒤늦게 발견된 객체를 함께 지운다 1ms
+     × 목록을 100개씩 끝까지 페이지네이션한다 0ms
+     × 두 번째 목록에서 발견된 잔여 객체를 다시 지운다 0ms
+     × 마지막 확인에도 남아 있으면 review_purge_incomplete로 재시도한다 2ms
+     × 삭제가 실패하면 재시도할 수 있도록 성공으로 처리하지 않는다 1ms
+   ❯ registerReviewHandlers (1)
+     × verify_review_segment 핸들러를 등록한다 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 20 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > 검증에 성공하면 verified로 완료하고 삭제하지 않는다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:174:11
+    172|     mock.download.mockResolvedValue({ data: new Blob([segment.wav]), e…
+    173|
+    174|     await verifyReviewSegment({ reviewId: "review", index: 0, attempt:…
+       |           ^
+    175|
+    176|     expect(mock.remove).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > Storage 404(status)는 missing으로 완료하고 삭제하지 않는다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:190:11
+    188|     mock.download.mockResolvedValue({ data: null, error: { message: "p…
+    189|
+    190|     await verifyReviewSegment({ reviewId: "review", index: 0, attempt:…
+       |           ^
+    191|
+    192|     expect(mock.remove).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > Storage 404(statusCode 문자열)도 missing으로 완료한다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:204:11
+    202|     mock.download.mockResolvedValue({ data: null, error: { message: "p…
+    203|
+    204|     await verifyReviewSegment({ reviewId: "review", index: 0, attempt:…
+       |           ^
+    205|
+    206|     const finishArgs = mock.rpc.mock.calls.find((c) => c[0] === "finis…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > 404가 아닌 저장소 오류는 retry로 완료하고 재시도 가능한 오류를 던지며 원문을 남기지 않는다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:217:18
+    215|     mock.download.mockResolvedValue({ data: null, error: { message: "p…
+    216|
+    217|     await expect(verifyReviewSegment({ reviewId: "review", index: 0, a…
+       |                  ^
+    218|       .rejects.toMatchObject({ message: "recording_segment_unavailable…
+    219|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > 크기가 다르면 내용을 읽지 않고 삭제 후 mismatch로 완료한다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:234:11
+    232|     mock.remove.mockResolvedValue({ data: [], error: null });
+    233|
+    234|     await verifyReviewSegment({ reviewId: "review", index: 0, attempt:…
+       |           ^
+    235|
+    236|     expect(arrayBufferSpy).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > 크기는 같지만 해시·헤더가 다르면 삭제 후 mismatch로 완료한다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:253:11
+    251|     mock.remove.mockResolvedValue({ data: [], error: null });
+    252|
+    253|     await verifyReviewSegment({ reviewId: "review", index: 0, attempt:…
+       |           ^
+    254|
+    255|     expect(mock.remove).toHaveBeenCalledExactlyOnceWith(["dept/review/…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > mismatch 삭제가 실패하면 attempt를 넘기지 않고 retry로 완료 후 재시도 가능한 오류를 던진다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:268:18
+    266|     mock.remove.mockResolvedValue({ data: null, error: { message: "pri…
+    267|
+    268|     await expect(verifyReviewSegment({ reviewId: "review", index: 0, a…
+       |                  ^
+    269|       .rejects.toMatchObject({ message: "recording_segment_unavailable…
+    270|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > 획득 결과가 없으면 다운로드하지 않는다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:278:11
+    276|     mock.rpc.mockResolvedValue({ data: null, error: null });
+    277|
+    278|     await verifyReviewSegment({ reviewId: "review", index: 0, attempt:…
+       |           ^
+    279|
+    280|     expect(mock.download).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > claim 실패는 원문을 남기지 않고 일반 코드로 던진다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:287:18
+    285|     mock.rpc.mockResolvedValue({ data: null, error: { message: "provid…
+    286|
+    287|     await expect(verifyReviewSegment({ reviewId: "review", index: 0, a…
+       |                  ^
+    288|       .rejects.toThrow("recording_segment_claim_failed");
+    289|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 검증 워커 > finish 실패는 원문을 남기지 않고 일반 코드로 던진다
+TypeError: verifyReviewSegment is not a function
+ ❯ tests/pipeline/review-material.test.ts:303:18
+    301|     mock.download.mockResolvedValue({ data: new Blob([segment.wav]), e…
+    302|
+    303|     await expect(verifyReviewSegment({ reviewId: "review", index: 0, a…
+       |                  ^
+    304|       .rejects.toThrow("recording_segment_finish_failed");
+    305|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 자료 변환 워커 — audio_segments 창 > 두 원본으로 61초 창을 만들어 한 번만 변환한다
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "dept/review/original-segments/0-1.wav",
++   null,
+  ]
+
+
+Number of calls: 1
+
+ ❯ tests/pipeline/review-material.test.ts:346:27
+    344|     await processReviewPart({ partId: "part", attempt: 1 });
+    345|
+    346|     expect(mock.download).toHaveBeenCalledWith("dept/review/original-s…
+       |                           ^
+    347|     expect(mock.download).toHaveBeenCalledWith("dept/review/original-s…
+    348|     expect(mock.transcribe).toHaveBeenCalledOnce();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 자료 변환 워커 — audio_segments 창 > 다음 원본이 없는 마지막 창은 다운로드를 한 번만 한다
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "dept/review/original-segments/0-1.wav",
++   null,
+  ]
+
+
+Number of calls: 1
+
+ ❯ tests/pipeline/review-material.test.ts:370:27
+    368|
+    369|     expect(mock.download).toHaveBeenCalledOnce();
+    370|     expect(mock.download).toHaveBeenCalledWith("dept/review/original-s…
+       |                           ^
+    371|     expect(mock.transcribe).toHaveBeenCalledOnce();
+    372|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 자료 변환 워커 — audio_segments 창 > 다음 원본이 손상되면 변환하지 않고 audio_segment_invalid로 완료한다
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "dept/review/original-segments/0-1.wav",
++   null,
+  ]
+
+
+Number of calls: 1
+
+ ❯ tests/pipeline/review-material.test.ts:397:27
+    395|     await processReviewPart({ partId: "part", attempt: 1 });
+    396|
+    397|     expect(mock.download).toHaveBeenCalledWith("dept/review/original-s…
+       |                           ^
+    398|     expect(mock.download).toHaveBeenCalledWith("dept/review/original-s…
+    399|     expect(mock.transcribe).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 자료 변환 워커 — audio_segments 창 > 원본 다운로드가 실패하면 file_unavailable로 완료한다
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(1) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "dept/review/original-segments/0-1.wav",
++   null,
+  ]
+
+
+Number of calls: 1
+
+ ❯ tests/pipeline/review-material.test.ts:421:27
+    419|     await processReviewPart({ partId: "part", attempt: 1 });
+    420|
+    421|     expect(mock.download).toHaveBeenCalledWith("dept/review/original-s…
+       |                           ^
+    422|     expect(mock.transcribe).not.toHaveBeenCalled();
+    423|     const completion = mock.rpc.mock.calls.find((c) => c[0] === "finis…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 원본 파기 워커 (audio_segments) > 모든 attempt 경로와 뒤늦게 발견된 객체를 함께 지운다
+Error: review_purge_lookup_failed
+ ❯ Module.purgeReviewFiles lib/pipeline/review-material.ts:125:26
+    123|     .select("object_path")
+    124|     .eq("review_id", payload.reviewId);
+    125|   if (parts.error) throw new Error("review_purge_lookup_failed");
+       |                          ^
+    126|   const paths = Array.from(
+    127|     new Set([
+ ❯ tests/pipeline/review-material.test.ts:451:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 원본 파기 워커 (audio_segments) > 목록을 100개씩 끝까지 페이지네이션한다
+Error: review_purge_lookup_failed
+ ❯ Module.purgeReviewFiles lib/pipeline/review-material.ts:125:26
+    123|     .select("object_path")
+    124|     .eq("review_id", payload.reviewId);
+    125|   if (parts.error) throw new Error("review_purge_lookup_failed");
+       |                          ^
+    126|   const paths = Array.from(
+    127|     new Set([
+ ❯ tests/pipeline/review-material.test.ts:473:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 원본 파기 워커 (audio_segments) > 두 번째 목록에서 발견된 잔여 객체를 다시 지운다
+Error: review_purge_lookup_failed
+ ❯ Module.purgeReviewFiles lib/pipeline/review-material.ts:125:26
+    123|     .select("object_path")
+    124|     .eq("review_id", payload.reviewId);
+    125|   if (parts.error) throw new Error("review_purge_lookup_failed");
+       |                          ^
+    126|   const paths = Array.from(
+    127|     new Set([
+ ❯ tests/pipeline/review-material.test.ts:489:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 원본 파기 워커 (audio_segments) > 마지막 확인에도 남아 있으면 review_purge_incomplete로 재시도한다
+AssertionError: expected [Function] to throw error including 'review_purge_incomplete' but got 'review_purge_lookup_failed'
+
+Expected: "review_purge_incomplete"
+Received: "review_purge_lookup_failed"
+
+ ❯ tests/pipeline/review-material.test.ts:502:59
+    500|       .mockResolvedValueOnce({ data: [{ id: "stubborn", name: "0-9.wav…
+    501|
+    502|     await expect(purgeReviewFiles({ reviewId: "review" })).rejects.toT…
+       |                                                           ^
+    503|     expect(mock.remove).toHaveBeenCalledTimes(2);
+    504|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > 구간 원본 파기 워커 (audio_segments) > 삭제가 실패하면 재시도할 수 있도록 성공으로 처리하지 않는다
+AssertionError: expected [Function] to throw error including 'review_purge_failed' but got 'review_purge_lookup_failed'
+
+Expected: "review_purge_failed"
+Received: "review_purge_lookup_failed"
+
+ ❯ tests/pipeline/review-material.test.ts:527:59
+    525|     mock.remove.mockResolvedValueOnce({ data: null, error: { message: …
+    526|
+    527|     await expect(purgeReviewFiles({ reviewId: "review" })).rejects.toT…
+       |                                                           ^
+    528|   });
+    529| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/20]⎯
+
+ FAIL  tests/pipeline/review-material.test.ts > registerReviewHandlers > verify_review_segment 핸들러를 등록한다
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'verify_review_segment', undefined ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "verify_review_segment",
+-   undefined,
++   "process_review",
++   [Function processReviewPart],
+  ]
+
+  2nd vi.fn() call:
+
+  [
+-   "verify_review_segment",
+-   undefined,
++   "purge_review_files",
++   [Function purgeReviewFiles],
+  ]
+
+
+Number of calls: 2
+
+ ❯ tests/pipeline/review-material.test.ts:535:27
+    533|     vi.clearAllMocks();
+    534|     registerReviewHandlers();
+    535|     expect(mock.register).toHaveBeenCalledWith("verify_review_segment"…
+       |                           ^
+    536|   });
+    537| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/20]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  20 failed | 18 passed (38)
+   Start at  14:07:04
+   Duration  533ms (transform 50%, import 34%, tests 14%, worker 2%)
+

@@ -1,0 +1,20 @@
+
+> sasu@0.1.0 build
+> next build
+
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local, .env
+✓ Running next.config.ts took 6.5s
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.2min
+  Running TypeScript ...
+tests/recording/original-segments.test.ts(126,83): error TS2345: Argument of type '(source: { sequence: number; pcm: Int16Array<ArrayBuffer>; } | { sequence: number; pcm: Int16Array<ArrayBuffer>; } | undefined) => Promise<...>' is not assignable to parameter of type '(...args: [] | [{ sequence: number; pcm: Int16Array<ArrayBuffer>; }] | [{ sequence: number; pcm: Int16Array<ArrayBuffer>; }, { sequence: number; pcm: Int16Array<...>; }]) => Awaitable<...>'.
+  Types of parameters 'source' and 'args' are incompatible.
+    Type '[] | [{ sequence: number; pcm: Int16Array<ArrayBuffer>; }] | [{ sequence: number; pcm: Int16Array<ArrayBuffer>; }, { sequence: number; pcm: Int16Array<...>; }]' is not assignable to type '[source: { sequence: number; pcm: Int16Array<ArrayBuffer>; } | { sequence: number; pcm: Int16Array<ArrayBuffer>; } | undefined]'.
+      Type '[]' is not assignable to type '[source: { sequence: number; pcm: Int16Array<ArrayBuffer>; } | { sequence: number; pcm: Int16Array<ArrayBuffer>; } | undefined]'.
+        Source has 0 element(s) but target requires 1.
+tests/recording/original-segments.test.ts(127,51): error TS2345: Argument of type '{ sequence: number; pcm: Int16Array<ArrayBuffer>; } | { sequence: number; pcm: Int16Array<ArrayBuffer>; } | undefined' is not assignable to parameter of type 'AsyncIterable<Checkpoint> | Iterable<Checkpoint>'.
+  Type 'undefined' is not assignable to type 'AsyncIterable<Checkpoint> | Iterable<Checkpoint>'.
+Failed to type check.
+

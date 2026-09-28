@@ -1,4 +1,5 @@
-import { deriveRecordingKey } from "@/lib/recording/recording-key";
+import { deriveRecordingKey, recordingSecretForVersion } from "@/lib/recording/recording-key";
+import { ReviewRecordingStart } from "@/lib/contracts";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -17,6 +18,7 @@ export async function POST(
   if (membership.role !== "lead" || !membership.consentedAt) {
     return denied(403, "recording_key_forbidden");
   }
+  if (!ReviewRecordingStart.shape.id.safeParse(id).success) return denied(400, "recording_id_invalid");
 
   const client = await createServerSupabaseClient();
   const result = await client.rpc("recording_key_context", {
@@ -40,14 +42,13 @@ export async function POST(
     return denied(403, "recording_key_forbidden");
   }
 
-  const secret = process.env.RECORDING_KEY_SECRET ?? "";
-  if (!secret) return denied(503, "recording_key_unavailable");
-
   try {
+    const secret = recordingSecretForVersion(process.env, context.key_version);
     const key = await deriveRecordingKey(secret, {
       recordingId: id,
       userId: membership.userId,
       deptId: membership.deptId,
+      keyVersion: context.key_version as number,
     });
     return Response.json(
       { key: Buffer.from(key).toString("base64url") },

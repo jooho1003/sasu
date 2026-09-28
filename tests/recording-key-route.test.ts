@@ -33,7 +33,7 @@ describe("recording key route", () => {
     });
     mocks.create.mockResolvedValue({ rpc: mocks.rpc });
     mocks.rpc.mockResolvedValue({
-      data: { recording_id: recordingId, user_id: userId, dept_id: deptId },
+      data: { recording_id: recordingId, user_id: userId, dept_id: deptId, key_version: 1 },
       error: null,
     });
   });
@@ -78,5 +78,19 @@ describe("recording key route", () => {
 
     vi.stubEnv("RECORDING_KEY_SECRET", "");
     expect((await POST(new Request("http://localhost"), context)).status).toBe(503);
+  });
+
+  it("uses the SQL session version and rejects missing or unavailable versions", async () => {
+    vi.stubEnv("RECORDING_KEY_VERSION", "2");
+    vi.stubEnv("RECORDING_KEY_SECRET", "abcdef0123456789abcdef0123456789abcdef0123456789");
+    vi.stubEnv("RECORDING_KEY_PREVIOUS_VERSION", "1");
+    vi.stubEnv("RECORDING_KEY_PREVIOUS_SECRET", secret);
+    const response = await POST(new Request("http://localhost"), context);
+    const expected = await deriveRecordingKey(secret, { recordingId, userId, deptId });
+    expect(await response.json()).toEqual({ key: Buffer.from(expected).toString("base64url") });
+    for (const version of [undefined, 3, "1"]) {
+      mocks.rpc.mockResolvedValueOnce({ data: { recording_id: recordingId, user_id: userId, dept_id: deptId, key_version: version }, error: null });
+      expect((await POST(new Request("http://localhost"), context)).status).toBe(503);
+    }
   });
 });

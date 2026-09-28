@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "sequence",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\recording-originals-2026-09-25\\originals-flow.json",
+  "output": "D:\\바이브코딩\\sasu\\docs\\verification\\recording-originals-2026-09-25\\originals-flow.html",
+  "specification": {
+    "sha256": "60b7f4bda3bf14e3052e60d3aeac9caa346ae964807b20d6ffd6d4621e60dbb7",
+    "bytes": 1773
+  },
+  "artifact": {
+    "sha256": "d49c6b889a7e9a3a0850bc6856f4c15f7ff245f7a12cb47c1f3aa4eafc3cbff5",
+    "bytes": 802734
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

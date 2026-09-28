@@ -45,7 +45,7 @@ export async function GET(request: Request, context: Context) {
       },
     });
   }
-  const [parts, history, settings, retention] = await Promise.all([
+  const [parts, history, settings, retention, segments] = await Promise.all([
     client
       .from("review_parts")
       .select(
@@ -61,8 +61,13 @@ export async function GET(request: Request, context: Context) {
       .limit(50),
     client.rpc("review_org_settings", { p_dept: review.dept_id }),
     client.from("retention_settings").select("review_original_days").eq("dept_id", review.dept_id).maybeSingle(),
+    client
+      .from("review_original_segments")
+      .select("segment_index,attempt,status,error_code,object_path,updated_at")
+      .eq("review_id", review.id)
+      .order("segment_index"),
   ]);
-  if (parts.error || history.error || settings.error || retention.error)
+  if (parts.error || history.error || settings.error || retention.error || segments.error)
     return Response.json(
       { error: "자료 처리 상태를 확인하지 못했습니다." },
       { status: 500 },
@@ -89,6 +94,14 @@ export async function GET(request: Request, context: Context) {
       original_download_allowed: settings.data?.allow_original_download === true,
       original_expires_at: review.confirmed_at && retention.data?.review_original_days
         ? new Date(new Date(review.confirmed_at).getTime() + retention.data.review_original_days * 86400000).toISOString() : null,
+      segments: (segments.data ?? []).map((segment) => ({
+        index: segment.segment_index,
+        attempt: segment.attempt,
+        path: segment.object_path,
+        status: segment.status,
+        error_code: segment.error_code,
+        updated_at: segment.updated_at,
+      })),
     },
     { headers: { "cache-control": "no-store" } },
   );

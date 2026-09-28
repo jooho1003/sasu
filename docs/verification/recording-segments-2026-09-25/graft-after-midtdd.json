@@ -1,0 +1,409 @@
+{
+  "processReviewPart": {
+    "callers_in": {
+      "ok": true,
+      "data": {
+        "query": "processReviewPart",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/pipeline/review-material.ts#processReviewPart",
+              "name": "processReviewPart",
+              "kind": "function",
+              "path": "lib/pipeline/review-material.ts",
+              "span": "L10-L108"
+            },
+            "hits": [
+              {
+                "id": "tests/pipeline/review-material.test.ts",
+                "relation": "calls",
+                "depth": 1,
+                "name": "review-material.test.ts",
+                "kind": "file",
+                "path": "tests/pipeline/review-material.test.ts",
+                "span": "L1-L532"
+              }
+            ]
+          }
+        ],
+        "saved": {
+          "files": 2,
+          "baselineChars": 28702
+        }
+      }
+    },
+    "callees_out": {
+      "ok": true,
+      "data": {
+        "query": "processReviewPart",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/pipeline/review-material.ts#processReviewPart",
+              "name": "processReviewPart",
+              "kind": "function",
+              "path": "lib/pipeline/review-material.ts",
+              "span": "L10-L108"
+            },
+            "hits": [
+              {
+                "id": "lib/adapters/document.ts#extractDocumentText",
+                "relation": "calls",
+                "depth": 1,
+                "name": "extractDocumentText",
+                "kind": "function",
+                "path": "lib/adapters/document.ts",
+                "span": "L89-L115"
+              },
+              {
+                "id": "lib/adapters/review-audio.ts#validateAudioPart",
+                "relation": "calls",
+                "depth": 1,
+                "name": "validateAudioPart",
+                "kind": "function",
+                "path": "lib/adapters/review-audio.ts",
+                "span": "L58-L75"
+              },
+              {
+                "id": "lib/reviews.ts#sectionsFromText",
+                "relation": "calls",
+                "depth": 1,
+                "name": "sectionsFromText",
+                "kind": "function",
+                "path": "lib/reviews.ts",
+                "span": "L7-L24"
+              },
+              {
+                "id": "lib/supabase/service.ts#createServiceSupabaseClient",
+                "relation": "calls",
+                "depth": 1,
+                "name": "createServiceSupabaseClient",
+                "kind": "function",
+                "path": "lib/supabase/service.ts",
+                "span": "L7-L25"
+              }
+            ]
+          }
+        ],
+        "saved": {
+          "files": 5,
+          "baselineChars": 15631
+        }
+      }
+    }
+  },
+  "purgeReviewFiles": {
+    "callers_in": {
+      "ok": true,
+      "data": {
+        "query": "purgeReviewFiles",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/pipeline/review-material.ts#purgeReviewFiles",
+              "name": "purgeReviewFiles",
+              "kind": "function",
+              "path": "lib/pipeline/review-material.ts",
+              "span": "L110-L134"
+            },
+            "hits": [
+              {
+                "id": "scripts/verify-review-retention.ts#main",
+                "relation": "calls",
+                "depth": 1,
+                "name": "main",
+                "kind": "function",
+                "path": "scripts/verify-review-retention.ts",
+                "span": "L9-L149"
+              },
+              {
+                "id": "tests/pipeline/review-material.test.ts",
+                "relation": "calls",
+                "depth": 1,
+                "name": "review-material.test.ts",
+                "kind": "file",
+                "path": "tests/pipeline/review-material.test.ts",
+                "span": "L1-L532"
+              }
+            ]
+          }
+        ],
+        "saved": {
+          "files": 3,
+          "baselineChars": 41114
+        }
+      }
+    },
+    "callees_out": {
+      "ok": true,
+      "data": {
+        "query": "purgeReviewFiles",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/pipeline/review-material.ts#purgeReviewFiles",
+              "name": "purgeReviewFiles",
+              "kind": "function",
+              "path": "lib/pipeline/review-material.ts",
+              "span": "L110-L134"
+            },
+            "hits": [
+              {
+                "id": "lib/supabase/service.ts#createServiceSupabaseClient",
+                "relation": "calls",
+                "depth": 1,
+                "name": "createServiceSupabaseClient",
+                "kind": "function",
+                "path": "lib/supabase/service.ts",
+                "span": "L7-L25"
+              }
+            ]
+          }
+        ],
+        "saved": {
+          "files": 2,
+          "baselineChars": 5823
+        }
+      }
+    }
+  },
+  "verifyReviewSegment": {
+    "callers_in": {
+      "ok": false,
+      "exitCode": 1,
+      "stderr": "✗ no symbol \"verifyReviewSegment\" in the graph — check spelling or run graft build\n",
+      "stdout": ""
+    },
+    "callees_out": {
+      "ok": false,
+      "exitCode": 1,
+      "stderr": "✗ no symbol \"verifyReviewSegment\" in the graph — check spelling or run graft build\n",
+      "stdout": ""
+    }
+  },
+  "registerReviewHandlers": {
+    "callers_in": {
+      "ok": true,
+      "data": {
+        "query": "registerReviewHandlers",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/pipeline/review-material.ts#registerReviewHandlers",
+              "name": "registerReviewHandlers",
+              "kind": "function",
+              "path": "lib/pipeline/review-material.ts",
+              "span": "L135-L138"
+            },
+            "hits": [
+              {
+                "id": "lib/worker.ts#registerWorkerHandlers",
+                "relation": "calls",
+                "depth": 1,
+                "name": "registerWorkerHandlers",
+                "kind": "function",
+                "path": "lib/worker.ts",
+                "span": "L24-L46"
+              },
+              {
+                "id": "tests/pipeline/review-material.test.ts",
+                "relation": "calls",
+                "depth": 1,
+                "name": "review-material.test.ts",
+                "kind": "file",
+                "path": "tests/pipeline/review-material.test.ts",
+                "span": "L1-L532"
+              }
+            ]
+          }
+        ],
+        "saved": {
+          "files": 3,
+          "baselineChars": 32347
+        }
+      }
+    },
+    "callees_out": {
+      "ok": true,
+      "data": {
+        "query": "registerReviewHandlers",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/pipeline/review-material.ts#registerReviewHandlers",
+              "name": "registerReviewHandlers",
+              "kind": "function",
+              "path": "lib/pipeline/review-material.ts",
+              "span": "L135-L138"
+            },
+            "hits": [
+              {
+                "id": "lib/jobs.ts#registerHandler",
+                "relation": "calls",
+                "depth": 1,
+                "name": "registerHandler",
+                "kind": "function",
+                "path": "lib/jobs.ts",
+                "span": "L450-L452"
+              }
+            ]
+          }
+        ],
+        "saved": {
+          "files": 2,
+          "baselineChars": 24694
+        }
+      }
+    }
+  },
+  "requestOriginalSegmentAccess": {
+    "callers_in": {
+      "ok": true,
+      "data": {
+        "query": "requestOriginalSegmentAccess",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/review-access.ts#requestOriginalSegmentAccess",
+              "name": "requestOriginalSegmentAccess",
+              "kind": "function",
+              "path": "lib/review-access.ts",
+              "span": "L23-L37"
+            },
+            "hits": [
+              {
+                "id": "app/api/d/[dept]/reviews/[id]/original/route.ts#GET",
+                "relation": "calls",
+                "depth": 1,
+                "name": "GET",
+                "kind": "function",
+                "path": "app/api/d/[dept]/reviews/[id]/original/route.ts",
+                "span": "L7-L41"
+              },
+              {
+                "id": "tests/review-access.test.ts",
+                "relation": "calls",
+                "depth": 1,
+                "name": "review-access.test.ts",
+                "kind": "file",
+                "path": "tests/review-access.test.ts",
+                "span": "L1-L53"
+              }
+            ]
+          }
+        ],
+        "saved": {
+          "files": 3,
+          "baselineChars": 7542
+        }
+      }
+    },
+    "callees_out": {
+      "ok": true,
+      "data": {
+        "query": "requestOriginalSegmentAccess",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/review-access.ts#requestOriginalSegmentAccess",
+              "name": "requestOriginalSegmentAccess",
+              "kind": "function",
+              "path": "lib/review-access.ts",
+              "span": "L23-L37"
+            },
+            "hits": [],
+            "note": "  no indexed callees — the graph has no outgoing call/reference edges for this symbol as written. Check the name (try the bare symbol, or \"Type.method\"), or find its uses with graft grep \"requestOriginalSegmentAccess\". Fall back to raw grep -rn only for unindexed files"
+          }
+        ],
+        "saved": {
+          "files": 1,
+          "baselineChars": 1972
+        }
+      }
+    }
+  },
+  "createRecordingTranscriptionPart": {
+    "callers_in": {
+      "ok": true,
+      "data": {
+        "query": "createRecordingTranscriptionPart",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/recording/original-segments.ts#createRecordingTranscriptionPart",
+              "name": "createRecordingTranscriptionPart",
+              "kind": "function",
+              "path": "lib/recording/original-segments.ts",
+              "span": "L111-L134"
+            },
+            "hits": [
+              {
+                "id": "tests/recording/original-segments.test.ts",
+                "relation": "calls",
+                "depth": 1,
+                "name": "original-segments.test.ts",
+                "kind": "file",
+                "path": "tests/recording/original-segments.test.ts",
+                "span": "L1-L217"
+              }
+            ]
+          }
+        ],
+        "saved": {
+          "files": 2,
+          "baselineChars": 18811
+        }
+      }
+    },
+    "callees_out": {
+      "ok": true,
+      "data": {
+        "query": "createRecordingTranscriptionPart",
+        "matches": [
+          {
+            "symbol": {
+              "id": "lib/recording/original-segments.ts#createRecordingTranscriptionPart",
+              "name": "createRecordingTranscriptionPart",
+              "kind": "function",
+              "path": "lib/recording/original-segments.ts",
+              "span": "L111-L134"
+            },
+            "hits": [
+              {
+                "id": "lib/recording/original-segments.ts#verifyRecordingOriginal",
+                "relation": "calls",
+                "depth": 1,
+                "name": "verifyRecordingOriginal",
+                "kind": "function",
+                "path": "lib/recording/original-segments.ts",
+                "span": "L94-L106"
+              },
+              {
+                "id": "lib/recording/pcm.ts#pcmWav",
+                "relation": "calls",
+                "depth": 1,
+                "name": "pcmWav",
+                "kind": "function",
+                "path": "lib/recording/pcm.ts",
+                "span": "L45-L61"
+              },
+              {
+                "id": "lib/contracts.ts#RecordingManifest",
+                "relation": "references",
+                "depth": 1,
+                "name": "RecordingManifest",
+                "kind": "type",
+                "path": "lib/contracts.ts",
+                "span": "L502-L502"
+              }
+            ]
+          }
+        ],
+        "saved": {
+          "files": 3,
+          "baselineChars": 40642
+        }
+      }
+    }
+  }
+}

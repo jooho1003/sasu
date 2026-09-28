@@ -1,0 +1,46 @@
+{
+  "checks": [
+    "fixtures_created",
+    "save_creates_two_segments_in_uploading_review",
+    "recorder_uploads_correct_segment0",
+    "recorder_uploads_wrong_same_length_segment1",
+    "storage_denials_confirmed_for_cross_user_wrong_prefix_and_duplicate_paths",
+    "finalize_marks_both_segments_verifying_and_verify_handler_runs",
+    "segment0_verified_segment1_mismatch_bumped_attempt_and_old_object_deleted",
+    "second_upload_and_verify_completes_recording",
+    "completion_creates_two_review_parts_and_process_review_jobs_suppressed",
+    "recording_key_context_rejected_after_completion",
+    "window_assembly_matches_manifest_boundaries_without_llm",
+    "whole_file_access_rejected_for_segmented_original",
+    "segment_grant_download_matches_uploaded_bytes_exactly",
+    "single_use_cross_segment_and_download_switch_denials_confirmed",
+    "delete_original_enqueues_purge_and_real_handler_runs_twice",
+    "purge_removes_all_attempts_and_late_objects_idempotently_and_blocks_further_upload",
+    "discard_marks_cancelled_and_purge_removes_the_single_segment",
+    "zero_llm_calls_and_zero_external_requests"
+  ],
+  "passed": 18,
+  "failed": 0,
+  "storage": "real local Supabase",
+  "handlers": [
+    "verifyReviewSegment",
+    "purgeReviewFiles"
+  ],
+  "dispatcher": "not-run",
+  "llmCalls": 0,
+  "externalRequests": 0,
+  "denials": {
+    "lead2CrossUpload": true,
+    "partsPathUpload": true,
+    "windowsPathUpload": true,
+    "wrongAttemptPathUpload": true,
+    "duplicateNoUpsert409": true,
+    "duplicateWithUpsert": true,
+    "oldAttemptPathAfterMismatch": true,
+    "secondDownloadSameToken": true,
+    "crossSegmentGrant": true,
+    "signedUrlRejected": true,
+    "downloadOriginalSwitchOff": true,
+    "uploadAfterPurge": true
+  }
+}

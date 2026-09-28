@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ register: vi.fn(), run: vi.fn(), sweep: vi.fn(), reviewSweep:vi.fn(), notionPollSchedule: vi.fn() }));
-vi.mock("@/lib/pipeline/review-material",()=>({registerReviewHandlers:()=>{mocks.register("process_review");mocks.register("purge_review_files");},sweepReviewParts:mocks.reviewSweep}));
+vi.mock("@/lib/pipeline/review-material",()=>({registerReviewHandlers:()=>{mocks.register("process_review");mocks.register("purge_review_files");mocks.register("verify_review_segment");},sweepReviewParts:mocks.reviewSweep}));
 vi.mock("@/lib/jobs", () => ({ runOnce: mocks.run, sweepPendingRows: mocks.sweep, registerHandler: vi.fn() }));
 vi.mock("@/lib/pipeline/classify", () => ({ registerClassifyHandler: () => mocks.register("classify") }));
 vi.mock("@/lib/pipeline/embed", () => ({ registerEmbedHandler: () => { mocks.register("embed"); mocks.register("embed_batch"); } }));
@@ -35,7 +35,7 @@ describe("공통 워커 진입점", () => {
   it("큐를 claim하기 전에 모든 파이프라인을 등록하고 독립 sweep을 실행한다", async () => {
     await runWorkerOnce();
     expect(mocks.register.mock.calls.map(([kind]) => kind).sort()).toEqual([
-      "answer", "classify", "embed", "embed_batch", "make_card", "notion_discover", "notion_import", "notion_poll", "run_agent_role", "send_slack", "slack_backfill", "summarize_document", "summarize_meeting", "generate_trailer", "check_trailer_gate", "score_trailer_attempt", "deliver_slack_answer", "send_reminder", "process_review", "purge_review_files", "purge_trailer_invites", "retro_draft",
+      "answer", "classify", "embed", "embed_batch", "make_card", "notion_discover", "notion_import", "notion_poll", "run_agent_role", "send_slack", "slack_backfill", "summarize_document", "summarize_meeting", "generate_trailer", "check_trailer_gate", "score_trailer_attempt", "deliver_slack_answer", "send_reminder", "process_review", "verify_review_segment", "purge_review_files", "purge_trailer_invites", "retro_draft",
       "retro_pull",
     ].sort());
     expect(mocks.sweep).toHaveBeenCalledOnce();

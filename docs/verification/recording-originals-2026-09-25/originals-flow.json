@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": { "title": "사수 · 확인 구간에서 검증된 전사 파일까지", "quality_profile": "showcase", "column_fit": "spread", "viewBox": [1050, 640] },
+  "participants": [
+    { "id": "checkpointStore", "type": "database", "label": "복구 저장소", "sublabel": "연속 확인 구간" },
+    { "id": "originalBuilder", "type": "backend", "label": "원본 분할", "sublabel": "최대 60초 WAV" },
+    { "id": "originalVerifier", "type": "security", "label": "원본 검증", "sublabel": "헤더 · 샘플 · 해시" },
+    { "id": "partBuilder", "type": "backend", "label": "전사 구간", "sublabel": "현재 구간 + 경계" }
+  ],
+  "messages": [
+    { "id": "inspectPrefix", "from": "originalBuilder", "to": "checkpointStore", "y": 170, "label": "연속 확인 샘플 수 검사" },
+    { "id": "readPcm", "from": "checkpointStore", "to": "originalBuilder", "y": 225, "label": "1초씩 복호화한 PCM", "variant": "return" },
+    { "id": "declareOriginals", "from": "originalBuilder", "to": "originalVerifier", "y": 280, "label": "구간 목록 · fingerprint" },
+    { "id": "requestFiles", "from": "partBuilder", "to": "originalVerifier", "y": 335, "label": "현재 원본 · 다음 원본 검사", "variant": "security" },
+    { "id": "verifiedBytes", "from": "originalVerifier", "to": "partBuilder", "y": 390, "label": "검증한 바이트만 사용", "variant": "return" },
+    { "id": "rejectCorrupt", "from": "originalVerifier", "to": "originalBuilder", "y": 445, "label": "손상 · 누락은 완료 거부", "variant": "dashed" },
+    { "id": "partResult", "from": "partBuilder", "to": "originalBuilder", "y": 500, "label": "60초 + 다음 최대 1초 WAV", "variant": "return" }
+  ]
+}

@@ -1,0 +1,203 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+[33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/review-access.test.ts (10 tests | 2 failed) 16ms
+   ❯ 구간 원본 접근권 (2)
+     × 세션 RPC로 구간 접근권을 요청하고 검증된 결과만 반환한다 4ms
+     × 오류를 그대로 전달하고 잘못된 성공 응답은 거부한다 1ms
+ ❯ tests/recording-session-routes.test.ts (0 test)
+ ❯ tests/review-detail-route.test.ts (4 tests | 3 failed) 48ms
+   ❯ GET /reviews/[id] 구간 응답 (4)
+     × review_original_segments를 index·attempt·path·status·error_code·updated_at으로 매핑한다 40ms
+     × 구간이 없으면 빈 배열을 반환한다(single_file) 2ms
+     × 구간 조회 실패는 500이며 DB 오류 문구를 노출하지 않는다 3ms
+ ❯ tests/review-original-route.test.ts (15 tests | 7 failed) 172ms
+   ❯ 원본 API의 세션 접근권 전달 (15)
+     × 구간 접근권 요청은 authorize_review_segment_access를 호출하고 접근권 토큰으로 내려받는다 8ms
+     × 잘못된 구간 번호 -1는 RPC 호출 없이 400을 반환한다 2ms
+     × 잘못된 구간 번호 30는 RPC 호출 없이 400을 반환한다 1ms
+     × 잘못된 구간 번호 1.5는 RPC 호출 없이 400을 반환한다 1ms
+     × 잘못된 구간 번호 03는 RPC 호출 없이 400을 반환한다 1ms
+     × 잘못된 구간 번호 abc는 RPC 호출 없이 400을 반환한다 1ms
+     × 잘못된 구간 번호 는 RPC 호출 없이 400을 반환한다 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/recording-session-routes.test.ts [ tests/recording-session-routes.test.ts ]
+Error: Cannot find package '@/app/api/d/[dept]/recordings/[id]/save/route' imported from D:/바이브코딩/sasu/tests/recording-session-routes.test.ts
+ ❯ tests/recording-session-routes.test.ts:11:1
+      9| import { GET as getOne } from "@/app/api/d/[dept]/recordings/[id]/rout…
+     10| import { POST as discard } from "@/app/api/d/[dept]/recordings/[id]/di…
+     11| import { POST as save } from "@/app/api/d/[dept]/recordings/[id]/save/…
+       | ^
+     12| import { POST as finalize } from "@/app/api/d/[dept]/recordings/[id]/f…
+     13| import { recordingFailure } from "@/app/api/d/[dept]/recordings/_share…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/review-access.test.ts > 구간 원본 접근권 > 세션 RPC로 구간 접근권을 요청하고 검증된 결과만 반환한다
+TypeError: requestOriginalSegmentAccess is not a function
+ ❯ tests/review-access.test.ts:36:26
+     34|       error: null,
+     35|     });
+     36|     const result = await requestOriginalSegmentAccess(rpc, "dept", "re…
+       |                          ^
+     37|     expect(rpc).toHaveBeenCalledWith("authorize_review_segment_access"…
+     38|     expect(result).toEqual({ token: "ticket", path: "dept/review/origi…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  tests/review-access.test.ts > 구간 원본 접근권 > 오류를 그대로 전달하고 잘못된 성공 응답은 거부한다
+TypeError: requestOriginalSegmentAccess is not a function
+ ❯ tests/review-access.test.ts:43:7
+     41|     const denied = { code: "22023", message: "segment_required" };
+     42|     await expect(
+     43|       requestOriginalSegmentAccess(vi.fn().mockResolvedValue({ data: n…
+       |       ^
+     44|     ).rejects.toEqual(denied);
+     45|     await expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  tests/review-detail-route.test.ts > GET /reviews/[id] 구간 응답 > review_original_segments를 index·attempt·path·status·error_code·updated_at으로 매핑한다
+AssertionError: expected undefined to deeply equal [ …(2) ]
+
+- Expected:
+[
+  {
+    "attempt": 1,
+    "error_code": null,
+    "index": 0,
+    "path": "dept/review/original-segments/0-1.wav",
+    "status": "verified",
+    "updated_at": "2026-09-25T00:00:00Z",
+  },
+  {
+    "attempt": 2,
+    "error_code": "segment_invalid",
+    "index": 1,
+    "path": "dept/review/original-segments/1-2.wav",
+    "status": "failed",
+    "updated_at": "2026-09-25T00:01:00Z",
+  },
+]
+
++ Received:
+undefined
+
+ ❯ tests/review-detail-route.test.ts:69:30
+     67|     expect(result.status).toBe(200);
+     68|     const payload = await result.json();
+     69|     expect(payload.segments).toEqual([
+       |                              ^
+     70|       { index: 0, attempt: 1, path: "dept/review/original-segments/0-1…
+     71|       { index: 1, attempt: 2, path: "dept/review/original-segments/1-2…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  tests/review-detail-route.test.ts > GET /reviews/[id] 구간 응답 > 구간이 없으면 빈 배열을 반환한다(single_file)
+AssertionError: expected undefined to deeply equal []
+
+- Expected:
+[]
+
++ Received:
+undefined
+
+ ❯ tests/review-detail-route.test.ts:79:30
+     77|     const result = await GET(request(), ctx);
+     78|     const payload = await result.json();
+     79|     expect(payload.segments).toEqual([]);
+       |                              ^
+     80|   });
+     81|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+ FAIL  tests/review-detail-route.test.ts > GET /reviews/[id] 구간 응답 > 구간 조회 실패는 500이며 DB 오류 문구를 노출하지 않는다
+AssertionError: expected 200 to be 500 // Object.is equality
+
+- Expected
++ Received
+
+- 500
++ 200
+
+ ❯ tests/review-detail-route.test.ts:85:27
+     83|     mocks.create.mockResolvedValue(buildClient({ segments: { data: nul…
+     84|     const result = await GET(request(), ctx);
+     85|     expect(result.status).toBe(500);
+       |                           ^
+     86|     expect(await result.text()).not.toContain("sensitive db text");
+     87|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
+
+ FAIL  tests/review-original-route.test.ts > 원본 API의 세션 접근권 전달 > 구간 접근권 요청은 authorize_review_segment_access를 호출하고 접근권 토큰으로 내려받는다
+AssertionError: expected "vi.fn()" to be called with arguments: [ …(2) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "authorize_review_segment_access",
++   "authorize_review_access",
+    {
+      "p_action": "play_original",
+      "p_dept": "validated-dept",
+-     "p_index": 3,
+      "p_review": "review",
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ tests/review-original-route.test.ts:65:23
+     63|     const response = await GET(segmentRequest("3"), context);
+     64|     expect(response.status).toBe(200);
+     65|     expect(mocks.rpc).toHaveBeenCalledWith("authorize_review_segment_a…
+       |                       ^
+     66|     expect(mocks.create).toHaveBeenLastCalledWith({ reviewAccessToken:…
+     67|     expect(mocks.download).toHaveBeenCalledWith("dept/review/original-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
+
+ FAIL  tests/review-original-route.test.ts > 원본 API의 세션 접근권 전달 > 잘못된 구간 번호 -1는 RPC 호출 없이 400을 반환한다
+ FAIL  tests/review-original-route.test.ts > 원본 API의 세션 접근권 전달 > 잘못된 구간 번호 30는 RPC 호출 없이 400을 반환한다
+ FAIL  tests/review-original-route.test.ts > 원본 API의 세션 접근권 전달 > 잘못된 구간 번호 1.5는 RPC 호출 없이 400을 반환한다
+ FAIL  tests/review-original-route.test.ts > 원본 API의 세션 접근권 전달 > 잘못된 구간 번호 03는 RPC 호출 없이 400을 반환한다
+ FAIL  tests/review-original-route.test.ts > 원본 API의 세션 접근권 전달 > 잘못된 구간 번호 abc는 RPC 호출 없이 400을 반환한다
+ FAIL  tests/review-original-route.test.ts > 원본 API의 세션 접근권 전달 > 잘못된 구간 번호 는 RPC 호출 없이 400을 반환한다
+AssertionError: expected 200 to be 400 // Object.is equality
+
+- Expected
++ Received
+
+- 400
++ 200
+
+ ❯ tests/review-original-route.test.ts:71:29
+     69|   it.each(["-1", "30", "1.5", "03", "abc", ""])("잘못된 구간 번호 %s는 RPC 호출 …
+     70|     const response = await GET(segmentRequest(segment), context);
+     71|     expect(response.status).toBe(400);
+       |                             ^
+     72|     expect(await response.json()).toEqual({ error: "구간 번호를 확인해 주세요." }…
+     73|     expect(mocks.rpc).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  12 failed | 17 passed (29)
+   Start at  13:38:29
+   Duration  572ms (import 44%, transform 31%, tests 23%, worker 2%)
+
