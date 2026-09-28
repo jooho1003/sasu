@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "sequence",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\recording-capture-2026-09-25\\capture-flow-v2.json",
+  "output": "D:\\바이브코딩\\sasu\\docs\\verification\\recording-capture-2026-09-25\\capture-flow-v2.html",
+  "specification": {
+    "sha256": "815870a571142f9bee81fe61eb656987f9904191bd482d92342939bb66ea4b81",
+    "bytes": 2443
+  },
+  "artifact": {
+    "sha256": "d543e86dfa8f485312af316ce565cca80e9b48637e77ba7691e2f11ac4568b5c",
+    "bytes": 803695
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

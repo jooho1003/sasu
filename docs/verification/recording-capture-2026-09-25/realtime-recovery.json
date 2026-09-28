@@ -1,0 +1,22 @@
+{
+  "browser": "153.0.8010.12",
+  "platform": "win32",
+  "synthetic": true,
+  "accelerated": false,
+  "elapsedMs": 181191,
+  "before": {
+    "state": "recording",
+    "samples": 2883584,
+    "persistedSamples": 2880000,
+    "reason": null,
+    "warning": false
+  },
+  "after": {
+    "samples": 2880000,
+    "chunks": 180,
+    "expectedSamples": 2880000,
+    "partial": false,
+    "interrupted": true,
+    "createdAt": 1790295899379
+  }
+}

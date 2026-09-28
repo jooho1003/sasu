@@ -18,9 +18,11 @@ export async function startRecording(scope: RecordingScope, inputs: MediaStream[
   let resolveDone!: () => void;
   const done = new Promise<void>((resolve) => { resolveDone = resolve; });
   let stopTimer: ReturnType<typeof setTimeout> | undefined;
+  let workerTimer: ReturnType<typeof setInterval> | undefined;
   const cleanup = () => {
     ending = true;
     clearTimeout(stopTimer);
+    clearInterval(workerTimer);
     stopInputs(inputs);
     node?.disconnect();
     node?.port.close();
@@ -61,14 +63,25 @@ export async function startRecording(scope: RecordingScope, inputs: MediaStream[
     });
     if (leaseLost) throw new Error("capture_lease_lost");
     node = new AudioWorkletNode(context, "sasu-meeting-capture");
+    let lastWorkerMessage = performance.now();
     worker.onmessage = ({ data }) => {
+      lastWorkerMessage = performance.now();
       if (data.snapshot) { lastSnapshot = data.snapshot; onSnapshot(lastSnapshot); }
+      else if (data.type === "error") {
+        onSnapshot({ ...lastSnapshot, state: "interrupted", reason: "capture_worker_failed" });
+      }
       if (data.type === "done" || data.type === "error") cleanup();
     };
     worker.onerror = () => {
       onSnapshot({ ...lastSnapshot, state: "interrupted", reason: "capture_worker_failed" });
       cleanup();
     };
+    workerTimer = setInterval(() => {
+      if (!ending && performance.now() - lastWorkerMessage >= 5000) {
+        onSnapshot({ ...lastSnapshot, state: "interrupted", reason: "capture_worker_timeout" });
+        cleanup();
+      }
+    }, 500);
     node.port.onmessage = ({ data }) => { if (data.type === "interrupt") void end(data.reason); };
     node.onprocessorerror = () => { void end("capture_processor_failed"); };
     const meters: AnalyserNode[] = [];

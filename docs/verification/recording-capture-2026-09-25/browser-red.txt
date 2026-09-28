@@ -1,0 +1,88 @@
+
+> sasu@0.1.0 e2e:recording
+> playwright test --config playwright.recording.config.ts tests/recording/worker-recovery.spec.ts --reporter=line
+
+
+[WebServer] (node:31100) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:17344) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[WebServer] (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+[WebServer]   - ESM syntax in a file loaded as CommonJS (vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+[WebServer] Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+Running 5 tests using 1 worker
+
+
+(node:26000) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/5] tests\recording\worker-recovery.spec.ts:11:5 › input starvation ends the real worker and preserves its final encrypted partial second
+  1) tests\recording\worker-recovery.spec.ts:11:5 › input starvation ends the real worker and preserves its final encrypted partial second 
+
+    Error: expect(received).toMatchObject(expected)
+
+    - Expected  - 7
+    + Received  + 1
+
+      Object {
+    -   "snapshot": Object {
+    -     "persistedSamples": 8000,
+    -     "reason": "capture_input_stalled",
+    -     "samples": 8000,
+    -     "state": "interrupted",
+    -   },
+    -   "type": "done",
+    +   "type": "deadline",
+      }
+
+      34 |     } finally { store.close(); }
+      35 |   });
+    > 36 |   expect(result.terminal).toMatchObject({ type: "done", snapshot: {
+         |                           ^
+      37 |     state: "interrupted", reason: "capture_input_stalled", samples: 8000, persistedSamples: 8000,
+      38 |   } });
+      39 |   expect(result.recovery).toMatchObject({ samples: 8000, interrupted: true, partial: false });
+        at D:\바이브코딩\sasu\tests\recording\worker-recovery.spec.ts:36:27
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\worker-recovery-input-star-29b3f-al-encrypted-partial-second\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\worker-recovery-input-star-29b3f-al-encrypted-partial-second\error-context.md
+
+
+
+(node:21620) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[2/5] tests\recording\worker-recovery.spec.ts:43:5 › an intentional pause longer than the watchdog window resumes without a false interruption
+[3/5] tests\recording\worker-recovery.spec.ts:75:5 › storage preflight round-trips encrypted samples and removes its probe before creating the recording
+  2) tests\recording\worker-recovery.spec.ts:75:5 › storage preflight round-trips encrypted samples and removes its probe before creating the recording 
+
+    Error: page.evaluate: TypeError: lab.prepareRecordingStore is not a function
+        at eval (eval at evaluate (:311:30), <anonymous>:8:29)
+        at async <anonymous>:337:30
+        at eval (eval at evaluate (:311:30), <anonymous>:8:29)
+        at async <anonymous>:337:30
+        at D:\바이브코딩\sasu\tests\recording\worker-recovery.spec.ts:76:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\worker-recovery-storage-pr-12f78-fore-creating-the-recording\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\worker-recovery-storage-pr-12f78-fore-creating-the-recording\error-context.md
+
+
+
+(node:27020) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[4/5] tests\recording\worker-recovery.spec.ts:102:5 › a quota failure writing encrypted PCM prevents recording creation
+[5/5] tests\recording\worker-recovery.spec.ts:123:5 › a decryption failure prevents ready and leaves no recording header
+  2 failed
+    tests\recording\worker-recovery.spec.ts:11:5 › input starvation ends the real worker and preserves its final encrypted partial second 
+    tests\recording\worker-recovery.spec.ts:75:5 › storage preflight round-trips encrypted samples and removes its probe before creating the recording 
+  3 passed (22.0s)
