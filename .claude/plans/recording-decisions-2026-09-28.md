@@ -31,8 +31,8 @@
 | D1 | 결정 기록·PRD API 표·위험 수용·후속 등록 | general | 0/1/0/1=2 | balanced | main(문안 작성, 기계 편집 아님) | 완료 |
 | R1 | 최종 리뷰 | review | 2/2/0/2=6 | powerful | main | 완료 |
 | M1 | 번호 재배정(migration 0058~0060, ADR 069·070) | mechanical | 0/2/1/0=3 | balanced | worker(sonnet) | 완료 |
-| C1 | origin/main 위 재정렬·커밋·PR | general | 1/2/2/1=6 | powerful | main, 승인됨(결정 4) | 대기 |
-| V1 | 재정렬 뒤 SQL·단위·lint·build | qa | 0/1/0/1=2 | balanced | claude(sonnet) | 대기 |
+| C1 | origin/main 위 재정렬·커밋·PR | general | 1/2/2/1=6 | powerful | main, 승인됨(결정 4) | 완료(PR, 병합 안 함) |
+| V1 | 재정렬 뒤 SQL·단위·lint·build | qa | 0/1/0/1=2 | balanced | claude(sonnet) + main(SQL 하니스) | 완료 |
 
 ## 게이트
 
