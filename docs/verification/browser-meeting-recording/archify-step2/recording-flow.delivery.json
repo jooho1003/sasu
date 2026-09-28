@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "b3032c66-deee-496a-9bf0-f0f86c1656ac",
+  "status": "current",
+  "command": "deliver",
+  "type": "sequence",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\candidate.json",
+  "output": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+  "specification": {
+    "sha256": "59d560a5ab8493bfd6bc5bcdc195c4cd92de8af1170467f8b2f372ab36b6c50b",
+    "bytes": 4726
+  },
+  "artifact": {
+    "sha256": "068cb1a1cf6e62339c3432c8b70402e7cc9b77b836e4f55db01f002cbd19aa48",
+    "bytes": 760517
+  }
+}

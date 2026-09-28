@@ -1,0 +1,978 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "sequence",
+  "quality": "showcase",
+  "startedAt": "2026-09-28T15:30:14.401Z",
+  "specification": {
+    "path": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\candidate.json",
+    "sha256": "59d560a5ab8493bfd6bc5bcdc195c4cd92de8af1170467f8b2f372ab36b6c50b",
+    "bytes": 4726
+  },
+  "artifact": {
+    "path": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+    "sha256": "068cb1a1cf6e62339c3432c8b70402e7cc9b77b836e4f55db01f002cbd19aa48",
+    "bytes": 760517
+  },
+  "stages": {
+    "validate": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": null,
+      "execution": "embedded-in-deliver",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\이주호\\AppData\\Local\\Temp\\archify-sasu-20260928\\archify\\bin\\archify.mjs",
+        "deliver",
+        "sequence",
+        "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\candidate.json",
+        "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "D:\\바이브코딩\\sasu",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "validate",
+        "specification": {
+          "sha256": "59d560a5ab8493bfd6bc5bcdc195c4cd92de8af1170467f8b2f372ab36b6c50b",
+          "bytes": 4726
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      }
+    },
+    "deliver": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 11260,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\이주호\\AppData\\Local\\Temp\\archify-sasu-20260928\\archify\\bin\\archify.mjs",
+        "deliver",
+        "sequence",
+        "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\candidate.json",
+        "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "D:\\바이브코딩\\sasu",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "receiptId": "b3032c66-deee-496a-9bf0-f0f86c1656ac",
+        "ok": true,
+        "command": "deliver",
+        "type": "sequence",
+        "input": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\candidate.json",
+        "output": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+        "specification": {
+          "sha256": "59d560a5ab8493bfd6bc5bcdc195c4cd92de8af1170467f8b2f372ab36b6c50b",
+          "bytes": 4726
+        },
+        "artifact": {
+          "sha256": "068cb1a1cf6e62339c3432c8b70402e7cc9b77b836e4f55db01f002cbd19aa48",
+          "bytes": 760517
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        },
+        "evidence": {
+          "verified": true,
+          "repository": "https://github.com/jooho1003/sasu",
+          "revision": "d52c002893675e76855a6e724e9cce9b87b5b799",
+          "references": 13,
+          "linkMode": "local-only"
+        }
+      }
+    },
+    "check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 2194,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\이주호\\AppData\\Local\\Temp\\archify-sasu-20260928\\archify\\bin\\archify.mjs",
+        "check",
+        "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+        "--require-provenance"
+      ],
+      "receipt": {
+        "ok": true,
+        "file": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+        "artifact": {
+          "sha256": "068cb1a1cf6e62339c3432c8b70402e7cc9b77b836e4f55db01f002cbd19aa48",
+          "bytes": 760517
+        },
+        "checks": [
+          {
+            "name": "single_svg",
+            "ok": true,
+            "details": [
+              "found 1 <svg> block(s)"
+            ]
+          },
+          {
+            "name": "finite_svg",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "orthogonal_arrows",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "label_route_clearance",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_crossings",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_corridors",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "container_border_runs",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "route_rhythm",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "legend_clearance",
+            "ok": true,
+            "details": []
+          }
+        ],
+        "composition": {
+          "schemaVersion": 1,
+          "profile": "showcase",
+          "status": "pass",
+          "summary": {
+            "errors": 0,
+            "warnings": 0
+          },
+          "metrics": {
+            "properCrossings": 0,
+            "resolvedCrossovers": 0,
+            "ambiguousCorridors": 0,
+            "arrowheadCollisions": 0,
+            "containerBorderRuns": 0,
+            "labelRouteClearanceIssues": 0,
+            "labelCanvasOverflowIssues": 0,
+            "minLabelRouteClearance": 9,
+            "desktopReadabilityIssues": 0,
+            "viewportHeightIssues": 0,
+            "minProjectedNodeTextPx": 6,
+            "maxBends": 0,
+            "routesOverSuggestedBends": 0,
+            "maxStretch": 1,
+            "routesOverSuggestedStretch": 0,
+            "minSegmentPx": 155.4,
+            "minInteriorSegmentPx": null,
+            "shortSegmentCount": 0,
+            "shortEndpointSegmentCount": 0,
+            "shortInteriorSegmentCount": 0,
+            "microSegmentCount": 0
+          },
+          "suggestedLimits": {
+            "bendsPerRelationship": 2,
+            "stretch": 1.35,
+            "segmentPx": 16,
+            "microSegmentPx": 8
+          },
+          "routeReview": {
+            "crossings": [],
+            "detours": []
+          },
+          "leadingSpace": {
+            "measured": false,
+            "reviewSuggested": false
+          },
+          "sequenceColumnSpace": {
+            "measured": true,
+            "columnFit": "spread",
+            "participantCount": 6,
+            "occupiedRight": 1045,
+            "viewBoxLeft": 0,
+            "canvasWidth": 1085,
+            "emptyRightPx": 40,
+            "emptyRightRatio": 0.037,
+            "typicalParticipantWidth": 136,
+            "reviewSuggested": false
+          },
+          "desktopReadability": {
+            "budgetBasis": "legacy-930",
+            "readerContract": "declared-wide-v1",
+            "availableDiagramWidth": 930,
+            "actualBudgetPx": 930,
+            "limit": "legacy",
+            "requestedTargetPx": null,
+            "requestedTargetMet": null,
+            "hardFloorPx": 6,
+            "hardFloorMet": true,
+            "minimumOwner": {
+              "kind": "node",
+              "id": "browser"
+            },
+            "minimumSourceTextPx": 7,
+            "minimumProjectedTextPx": 6,
+            "semanticTextCount": 25
+          },
+          "issues": []
+        },
+        "provenance": "current",
+        "deliveryReceiptId": "b3032c66-deee-496a-9bf0-f0f86c1656ac"
+      }
+    },
+    "browser-check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 5520,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\이주호\\AppData\\Local\\Temp\\archify-sasu-20260928\\archify\\bin\\archify.mjs",
+        "browser-check",
+        "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+        "--json",
+        "--require-provenance",
+        "--out-dir",
+        "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\width-review"
+      ],
+      "execution": "in-process",
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "browser-check",
+        "evidenceKind": "automated-browser",
+        "status": "pass",
+        "visualReview": "not-requested",
+        "provenance": "current",
+        "deliveryReceiptId": "b3032c66-deee-496a-9bf0-f0f86c1656ac",
+        "artifact": {
+          "path": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+          "sha256": "068cb1a1cf6e62339c3432c8b70402e7cc9b77b836e4f55db01f002cbd19aa48",
+          "bytes": 760517
+        },
+        "state": {
+          "detail": "read",
+          "motion": "still"
+        },
+        "chrome": {
+          "status": "available",
+          "executable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        },
+        "diagnostics": [],
+        "containment": {
+          "status": "pass",
+          "policy": "fit-or-reader-declared-readable-vertical-scroll",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1193,
+              "diagramWidth": 1163,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 52,
+                "diagramChromePx": 78,
+                "svgPx": 746,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1000,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1246,
+              "diagramWidth": 1216,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 780,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1080,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1371,
+              "diagramWidth": 1341,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 860,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1320,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1737,
+              "diagramWidth": 1687,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1082,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "themeStates": {
+          "status": "pass",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1440,
+              "height": 900,
+              "requestedTheme": "dark",
+              "resolvedTheme": "dark",
+              "ok": true
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "requestedTheme": "dark",
+              "resolvedTheme": "dark",
+              "ok": true
+            }
+          ]
+        },
+        "readability": {
+          "status": "pass",
+          "minimumProjectedNodeTextPx": 6,
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1193,
+              "diagramWidth": 1163,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 52,
+                "diagramChromePx": 78,
+                "svgPx": 746,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1000,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1246,
+              "diagramWidth": 1216,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 780,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1080,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1371,
+              "diagramWidth": 1341,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 860,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1320,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1737,
+              "diagramWidth": 1687,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1082,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "viewerChrome": {
+          "status": "pass",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1193,
+              "diagramWidth": 1163,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 52,
+                "diagramChromePx": 78,
+                "svgPx": 746,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1000,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1246,
+              "diagramWidth": 1216,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 780,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1080,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1371,
+              "diagramWidth": 1341,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 860,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1320,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1737,
+              "diagramWidth": 1687,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1082,
+                "cardsPx": 0,
+                "viewBoxHeight": 696
+              },
+              "viewBoxWidth": 1085,
+              "minimumProjectedNodeTextPx": 7,
+              "minimumProjectedNonEdgeTextPx": 7,
+              "minimumProjectedEdgeTextPx": 11,
+              "minimumProjectedNodeText": "화면·캡처",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "browser"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "captures": {
+          "status": "not-requested",
+          "screenshots": [],
+          "contactSheet": null
+        },
+        "sidecars": {
+          "directory": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\width-review",
+          "receipt": "recording-flow.browser-check.json",
+          "files": []
+        }
+      }
+    }
+  },
+  "diagnostics": [],
+  "evidence": {
+    "receipt": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\width-review\\recording-flow.finalize.json",
+    "summaryReceipt": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\width-review\\recording-flow.finalize-summary.json",
+    "browserCheckReceipt": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\width-review\\recording-flow.browser-check.json"
+  },
+  "visualReview": "not-requested",
+  "finishedAt": "2026-09-28T15:30:38.394Z",
+  "durationMs": 23992
+}
