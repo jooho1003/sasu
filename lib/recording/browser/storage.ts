@@ -260,6 +260,8 @@ export async function removeLocalRecording(scope: RecordingScope) {
 }
 
 export async function cleanupLocalRecordings(userId: string) {
+  // Best-effort cleanup for the pre-Web Locks lease; never delay recording recovery.
+  try { indexedDB.deleteDatabase("sasu-meeting-capture-lease"); } catch { /* ignored */ }
   const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["decrypt"]);
   const store = await openRecordingStore(key);
   try { await store.cleanup(userId); } finally { store.close(); }
@@ -268,44 +270,19 @@ export async function cleanupLocalRecordings(userId: string) {
 /** The lock is held by the page, not its worker; closing/crashing releases it.
  * Never steal an old recording. The caller must allocate a new recording ID.
  */
-export function acquireCaptureLock(onLost: () => void = () => {}): Promise<() => void> {
+export function acquireCaptureLock(): Promise<() => void> {
   if (!navigator.locks) return Promise.reject(new Error("recording_lock_unavailable"));
   return new Promise((resolve, reject) => {
     void navigator.locks.request("sasu-meeting-capture", { ifAvailable: true }, async (lock) => {
       if (!lock) { reject(new Error("recording_other_tab")); return; }
-      const leaseId = crypto.randomUUID();
-      const leaseDb = await openDatabase("sasu-meeting-capture-lease", (db) => db.createObjectStore("lease"));
-      const channel = new BroadcastChannel("sasu-meeting-capture");
-      const heartbeat = () => transaction<void>(leaseDb, ["lease"], "readwrite", (tx) => {
-        tx.objectStore("lease").put({ leaseId, expiresAt: Date.now() + 5000 }, "active");
-      });
-      try {
-        await heartbeat();
-        await new Promise<void>((unlock) => {
-          let stopped = false;
-          let previous = Date.now();
-          const release = () => {
-            if (stopped) return;
-            stopped = true;
-            clearInterval(timer);
-            channel.postMessage({ type: "released", leaseId });
-            unlock();
-          };
-          const lose = () => { onLost(); release(); };
-          const timer = setInterval(() => {
-            const now = Date.now();
-            if (now - previous > 5000) { lose(); return; }
-            previous = now;
-            void heartbeat().then(() => { if (!stopped) channel.postMessage({ type: "heartbeat", leaseId }); }, lose);
-          }, 1000);
-          channel.postMessage({ type: "started", leaseId });
-          resolve(release);
+      await new Promise<void>((unlock) => {
+        let released = false;
+        resolve(() => {
+          if (released) return;
+          released = true;
+          unlock();
         });
-      } finally {
-        await transaction<void>(leaseDb, ["lease"], "readwrite", (tx) => tx.objectStore("lease").delete("active")).catch(() => {});
-        leaseDb.close();
-        channel.close();
-      }
+      });
     }).catch(reject);
   });
 }

@@ -14,7 +14,6 @@ export async function startRecording(scope: RecordingScope, inputs: MediaStream[
   let worker: Worker | undefined;
   let node: AudioWorkletNode | undefined;
   let ending = false;
-  let leaseLost = false;
   let lastSnapshot: RecordingSnapshot = { state: "recording", samples: 0, persistedSamples: 0, reason: null, warning: false };
   let resolveDone!: () => void;
   const done = new Promise<void>((resolve) => { resolveDone = resolve; });
@@ -64,7 +63,7 @@ export async function startRecording(scope: RecordingScope, inputs: MediaStream[
   try {
     if (!inputs.length || inputs.some((input) => !input.getAudioTracks().some((track) => track.readyState === "live")))
       throw new Error("recording_input_missing");
-    release = await acquireCaptureLock(() => { leaseLost = true; if (node) void end("capture_lease_lost"); });
+    release = await acquireCaptureLock();
     context = new AudioContext();
     await context.resume();
     await context.audioWorklet.addModule(new URL("./capture.worklet.js", import.meta.url).href);
@@ -79,7 +78,6 @@ export async function startRecording(scope: RecordingScope, inputs: MediaStream[
       };
     worker!.postMessage({ scope, inputRate: context!.sampleRate, port: channel.port1, recordingKey }, [channel.port1]);
     });
-    if (leaseLost) throw new Error("capture_lease_lost");
     node = new AudioWorkletNode(context, "sasu-meeting-capture");
     let lastWorkerMessage = performance.now();
     worker.onmessage = ({ data }) => {

@@ -172,6 +172,37 @@ test("two tabs cannot record concurrently; releasing allows a new recording", as
   })).toBe(true);
 });
 
+test("Web Lock survives a six-second main-thread stall, releases idempotently, and cleanup removes the legacy lease DB", async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const lab = (window as unknown as { recordingLab: typeof import("../../lib/recording/browser/storage") }).recordingLab;
+    const release = await lab.acquireCaptureLock();
+    const until = performance.now() + 6000;
+    while (performance.now() < until) { /* deliberately block the main thread */ }
+    const held = (await navigator.locks.query()).held?.some((lock) => lock.name === "sasu-meeting-capture") ?? false;
+    const rejected = await lab.acquireCaptureLock().then(() => false, (error: Error) => error.message === "recording_other_tab");
+    release();
+    release();
+
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("sasu-meeting-capture-lease");
+      request.onupgradeneeded = () => request.result.createObjectStore("lease");
+      request.onsuccess = () => { request.result.close(); resolve(); };
+      request.onerror = () => reject(request.error);
+    });
+    await lab.cleanupLocalRecordings("legacy-lease-user");
+    for (let attempt = 0; attempt < 20; attempt++) {
+      if (!(await indexedDB.databases()).some((database) => database.name === "sasu-meeting-capture-lease")) break;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    const legacyDbRemoved = !(await indexedDB.databases()).some((database) => database.name === "sasu-meeting-capture-lease");
+    return { held, rejected, legacyDbRemoved };
+  });
+  expect(result).toEqual({ held: true, rejected: true, legacyDbRemoved: true });
+  await expect.poll(() => page.evaluate(async () =>
+    !(await navigator.locks.query()).held?.some((lock) => lock.name === "sasu-meeting-capture"),
+  )).toBe(true);
+});
+
 test("a real IndexedDB transaction abort leaves neither a chunk nor an acknowledged header", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.name));
