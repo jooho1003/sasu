@@ -44,7 +44,7 @@ test("가상 영업 검토 생성부터 근거 결과와 팀장 내부 확인까
   const response = await posted;
   expect(response.status()).toBe(202);
   const { task_id: taskId } = await response.json() as { task_id: string };
-  await expect(page.getByRole("button", { name: /전체 · .* · 검토 준비/ }).first()).toHaveAttribute("aria-pressed", "true", { timeout: 30_000 });
+  await expect(page.locator(`[data-task-id="${taskId}"]`)).toHaveAttribute("aria-pressed", "true", { timeout: 30_000 });
 
   const service = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { persistSession: false },
@@ -75,9 +75,12 @@ test("가상 영업 검토 생성부터 근거 결과와 팀장 내부 확인까
     await signIn(member, "review-member@example.test", password);
     const memberPage = await member.newPage();
     await memberPage.goto(`${baseURL}${path}`);
-    await expect(memberPage.getByText("첫 12개월 견적 총액은 기존보다 6,000,000원 높습니다.")).toBeVisible();
+    const memberTask = memberPage.locator(`[data-task-id="${taskId}"]`);
+    await expect(memberTask).toBeVisible({ timeout: 20_000 });
+    await memberTask.click();
+    await expect(memberPage.getByText("첫 12개월 견적 총액은 기존보다 6,000,000원 높습니다.")).toBeVisible({ timeout: 20_000 });
     await expect(memberPage.getByRole("button", { name: "내부 확인", exact: true })).toHaveCount(0);
-    const denied = await memberPage.request.post(`${baseURL}/api/d/${dept}/sales-review/${taskId}/review`, { data: { action: "approve" } });
+    const denied = await memberPage.request.post(`${baseURL}/api/d/${dept}/sales-review/${taskId}/review`, { data: { action: "approve", reason_code: null } });
     expect(denied.status()).toBe(403);
   } finally {
     await member.close();
@@ -85,7 +88,7 @@ test("가상 영업 검토 생성부터 근거 결과와 팀장 내부 확인까
 
   await page.getByRole("button", { name: "내부 확인", exact: true }).click();
   await expect(page.getByText("내부 확인 완료", { exact: false })).toBeVisible();
-  const duplicate = await page.request.post(`${baseURL}/api/d/${dept}/sales-review/${taskId}/review`, { data: { action: "approve" } });
+  const duplicate = await page.request.post(`${baseURL}/api/d/${dept}/sales-review/${taskId}/review`, { data: { action: "approve", reason_code: null } });
   expect(duplicate.status()).toBe(409);
   const actions = await service.from("sales_review_actions").select("id,action").eq("task_id", taskId);
   expect(actions.error).toBeNull();

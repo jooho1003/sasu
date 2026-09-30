@@ -7,6 +7,7 @@ vi.mock("@/lib/jobs", () => ({ kickWorker: mocks.kick }));
 
 import { GET, POST } from "@/app/api/d/[dept]/sales-review/route";
 import { POST as review } from "@/app/api/d/[dept]/sales-review/[taskId]/review/route";
+import { POST as revise } from "@/app/api/d/[dept]/sales-review/[taskId]/revision/route";
 import { buildSalesReview } from "@/lib/sales-review";
 
 const dept = "22222222-2222-4222-8222-222222222222";
@@ -57,13 +58,32 @@ describe("synthetic sales review routes", () => {
   });
 
   it("allows only lead review through the session RPC", async () => {
-    const denied = await review(request({ action: "approve" }), actionParams);
+    const denied = await review(request({ action: "approve", reason_code: null }), actionParams);
     expect(denied.status).toBe(403);
     mocks.membership.mockResolvedValue({ deptId: dept, role: "lead", consentedAt: "2026-09-30T00:00:00Z" });
     mocks.from.mockReturnValue({ select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { status: "ready", result: buildSalesReview("all", { priority: "price", reply_style: "brief" }) }, error: null }) }) }) }) });
     mocks.rpc.mockResolvedValue({ data: requestId, error: null });
-    const allowed = await review(request({ action: "approve" }), actionParams);
+    const allowed = await review(request({ action: "approve", reason_code: null }), actionParams);
     expect(allowed.status).toBe(201);
-    expect(mocks.rpc).toHaveBeenCalledWith("review_sales_task", { p_task: taskId, p_action: "approve" });
+    expect(mocks.rpc).toHaveBeenCalledWith("review_sales_task", { p_task: taskId, p_action: "approve", p_reason: null });
+  });
+
+  it("requires a fixed reason for rejection", async () => {
+    mocks.membership.mockResolvedValue({ deptId: dept, role: "lead", consentedAt: "2026-09-30T00:00:00Z" });
+    expect((await review(request({ action: "reject", reason_code: null }), actionParams)).status).toBe(400);
+    expect((await review(request({ action: "approve", reason_code: "price" }), actionParams)).status).toBe(400);
+    mocks.from.mockReturnValue({ select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { status: "ready", result: buildSalesReview("all", { priority: "price", reply_style: "brief" }) }, error: null }) }) }) }) });
+    mocks.rpc.mockResolvedValue({ data: requestId, error: null });
+    expect((await review(request({ action: "reject", reason_code: "schedule" }), actionParams)).status).toBe(201);
+    expect(mocks.rpc).toHaveBeenCalledWith("review_sales_task", { p_task: taskId, p_action: "reject", p_reason: "schedule" });
+  });
+
+  it("revises only through the session RPC and kicks the worker", async () => {
+    mocks.rpc.mockResolvedValue({ data: requestId, error: null });
+    expect((await revise(request({ request_id: requestId, dept_id: dept }), actionParams)).status).toBe(400);
+    const response = await revise(request({ request_id: requestId }), actionParams);
+    expect(response.status).toBe(202);
+    expect(mocks.rpc).toHaveBeenCalledWith("request_sales_review_revision", { p_dept: dept, p_parent: taskId, p_request_id: requestId });
+    expect(mocks.kick).toHaveBeenCalledTimes(1);
   });
 });

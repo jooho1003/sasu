@@ -229,6 +229,13 @@
       "verification": "docs/verification/sales-agent-review-2026-09-30.md",
       "note": "고정 합성 영업 검토의 작업·근거 결과·팀장 내부 확인 구현과 격리 SQL·인증 브라우저 검증 완료. 실제 자료 연결·운영 반영 없음.",
       "production_deployed": false
+    },
+    {
+      "dir": "37-sales-review-revision",
+      "status": "completed",
+      "verification": "docs/verification/sales-review-revision-2026-09-30.md",
+      "note": "합성 돌려보내기 사유와 연결 재검토·별도 팀장 확인 구현. 격리 SQL 289·단위 1719·인증 브라우저 2건·게스트 5건 통과. 운영 미반영.",
+      "production_deployed": false
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { SalesReviewFocus, SalesReviewResult } from "@/lib/contracts";
+import type { SalesReviewFocus, SalesReviewRejectReason, SalesReviewResult } from "@/lib/contracts";
 
 type SourceId = "S1" | "S2" | "S3" | "S4";
 type Task = {
@@ -11,12 +11,14 @@ type Task = {
   status: "queued" | "processing" | "ready" | "failed";
   status_reason: string | null;
   result: SalesReviewResult | null;
-  action: { action: "approve" | "reject"; created_at: string } | null;
+  revision_of: string | null;
+  action: { action: "approve" | "reject"; reason_code: SalesReviewRejectReason | null; created_at: string } | null;
   created_at: string;
 };
 type Line = SalesReviewResult["comparison"][number];
 
 const FOCUS_LABELS: Record<SalesReviewFocus, string> = { all: "전체", price: "가격", schedule: "일정" };
+const REASON_LABELS: Record<SalesReviewRejectReason, string> = { price: "가격 조건", schedule: "시작일" };
 
 function failureLabel(reason: string | null): string {
   if (reason === "llm_timeout" || reason === "timeout") return "처리 시간이 지나 검토를 완료하지 못했습니다. 새로 요청해 주세요.";
@@ -46,9 +48,10 @@ export default function SalesReview({ deptId, role, consented, sources, titles }
   titles: Record<SourceId, string>;
 }) {
   const [focus, setFocus] = useState<SalesReviewFocus>("all");
+  const [rejectReason, setRejectReason] = useState<SalesReviewRejectReason>("price");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [busy, setBusy] = useState<"create" | "approve" | "reject" | null>(null);
+  const [busy, setBusy] = useState<"create" | "approve" | "reject" | "revision" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const endpoint = `/api/d/${encodeURIComponent(deptId)}/sales-review`;
@@ -101,12 +104,28 @@ export default function SalesReview({ deptId, role, consented, sources, titles }
     setBusy(action); setError(null);
     try {
       const response = await fetch(`${endpoint}/${encodeURIComponent(selected.id)}/review`, {
-        method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action }),
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action, reason_code: action === "reject" ? rejectReason : null }),
       });
       const body = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(body.error ?? "팀장 검토를 기록하지 못했습니다.");
       await load();
     } catch (cause) { setError(cause instanceof Error ? cause.message : "팀장 검토를 기록하지 못했습니다."); }
+    finally { setBusy(null); }
+  }
+
+  async function revise() {
+    if (!selected || selected.action?.action !== "reject" || !selected.action.reason_code) return;
+    setBusy("revision"); setError(null);
+    try {
+      const response = await fetch(`${endpoint}/${encodeURIComponent(selected.id)}/revision`, {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ request_id: crypto.randomUUID() }),
+      });
+      const body = (await response.json()) as { task_id?: string; error?: string };
+      if (!response.ok || !body.task_id) throw new Error(body.error ?? "다시 검토를 시작하지 못했습니다.");
+      await load(body.task_id);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "다시 검토를 시작하지 못했습니다."); }
     finally { setBusy(null); }
   }
 
@@ -117,10 +136,26 @@ export default function SalesReview({ deptId, role, consented, sources, titles }
     {error ? <p className="rounded-xl bg-[var(--urgent)]/10 p-4" role="alert">{error}</p> : null}
     <section className="panel grid gap-4 p-6"><div><p className="m-0 text-sm text-[var(--muted)]">가상 입력</p><h2 className="m-0 text-2xl">이번에 볼 자료</h2></div><div className="grid gap-3 lg:grid-cols-2">{(Object.keys(sources) as SourceId[]).map((id) => <article className="rounded-xl border border-black/10 bg-white p-4" id={`sales-source-${id}`} key={id}><h3 className="mt-0 text-base">{id} · {titles[id]}</h3><p className="m-0 whitespace-pre-wrap text-sm leading-6">{sources[id]}</p></article>)}</div></section>
     {consented ? <section className="panel grid gap-4 p-6"><div><p className="m-0 text-sm text-[var(--muted)]">새 검토</p><h2 className="m-0 text-2xl">어디를 먼저 볼까요?</h2></div><label className="grid max-w-xs gap-2 text-sm font-bold">검토 초점<select className="rounded-lg border border-black/15 bg-white px-3 py-2 font-normal" onChange={(event) => setFocus(event.target.value as SalesReviewFocus)} value={focus}><option value="all">전체</option><option value="price">가격</option><option value="schedule">일정</option></select></label><button className="w-fit rounded-lg bg-[var(--accent)] px-4 py-2 font-bold text-white disabled:opacity-50" disabled={busy !== null} onClick={() => void createTask()} type="button">{busy === "create" ? "요청 중…" : "가상 검토안 만들기"}</button><p className="m-0 text-sm text-[var(--muted)]">하루 10건까지 실행합니다. 결과는 이 부서 구성원만 볼 수 있습니다.</p></section> : null}
-    <section className="panel grid gap-4 p-6"><div><p className="m-0 text-sm text-[var(--muted)]">작업 기록</p><h2 className="m-0 text-2xl">검토안</h2></div>{loading ? <p>불러오는 중…</p> : tasks.length === 0 ? <p className="m-0 text-[var(--muted)]">아직 검토한 작업이 없습니다.</p> : <div className="flex flex-wrap gap-2">{tasks.map((task) => <button aria-pressed={selectedId === task.id} className={`rounded-lg border px-3 py-2 text-sm ${selectedId === task.id ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-black/10"}`} key={task.id} onClick={() => setSelectedId(task.id)} type="button">{FOCUS_LABELS[task.focus]} · {new Date(task.created_at).toLocaleString("ko-KR")} · {task.status === "ready" ? "검토 준비" : task.status === "failed" ? "실패" : "진행 중"}</button>)}</div>}
+    <section className="panel grid gap-4 p-6"><div><p className="m-0 text-sm text-[var(--muted)]">작업 기록</p><h2 className="m-0 text-2xl">검토안</h2></div>{loading ? <p>불러오는 중…</p> : tasks.length === 0 ? <p className="m-0 text-[var(--muted)]">아직 검토한 작업이 없습니다.</p> : <div className="flex flex-wrap gap-2">{tasks.map((task) => <button aria-pressed={selectedId === task.id} className={`rounded-lg border px-3 py-2 text-sm ${selectedId === task.id ? "border-[var(--accent)] bg-[var(--accent)]/10" : "border-black/10"}`} data-task-id={task.id} key={task.id} onClick={() => setSelectedId(task.id)} type="button">{FOCUS_LABELS[task.focus]} · {new Date(task.created_at).toLocaleString("ko-KR")} · {task.status === "ready" ? "검토 준비" : task.status === "failed" ? "실패" : "진행 중"}</button>)}</div>}
       {selected?.status === "failed" ? <p role="status">{failureLabel(selected.status_reason)}</p> : null}
       {selected && (selected.status === "queued" || selected.status === "processing") ? <p role="status">검토안을 만드는 중입니다. 잠시 뒤 결과가 나타납니다.</p> : null}
-      {selected?.status === "ready" && selected.result ? <div className="grid gap-4"><Lines title="변경 비교" lines={selected.result.comparison} /><Lines title="원칙과 승인" lines={selected.result.policy_flags} /><Lines title="확인 질문" lines={selected.result.questions} /><Lines title="고객 회신 초안 · 발송 안 됨" lines={selected.result.reply_draft} /><section className="rounded-2xl border border-black/10 bg-white p-5"><h3 className="mt-0 text-lg">팀장 내부 확인</h3>{selected.action ? <p className="m-0 font-bold">{selected.action.action === "approve" ? "내부 확인 완료" : "돌려보낸 작업"} · 실제 고객 발송/가격 승인이 아닙니다.</p> : role === "lead" ? <div className="flex flex-wrap gap-2"><button className="rounded-lg bg-[var(--accent)] px-4 py-2 font-bold text-white disabled:opacity-50" disabled={busy !== null} onClick={() => void review("approve")} type="button">내부 확인</button><button className="rounded-lg border px-4 py-2 font-bold disabled:opacity-50" disabled={busy !== null} onClick={() => void review("reject")} type="button">검토안 돌려보내기</button><p className="w-full text-sm text-[var(--muted)]">이 행동은 가상 결과의 내부 검토 기록만 남깁니다.</p></div> : <p className="m-0 text-[var(--muted)]">팀장 확인을 기다립니다.</p>}</section></div> : null}
+      {selected?.revision_of ? <p className="m-0 rounded-xl bg-[var(--accent)]/5 p-4 text-sm">이전 검토안을 다시 요청한 작업입니다. 자료와 금액은 그대로이며, 질문 우선순위와 회신 초안을 다시 검토합니다. {tasks.some((task) => task.id === selected.revision_of) ? <button className="ml-2 underline" onClick={() => setSelectedId(selected.revision_of)} type="button">이전 검토안 보기</button> : null}</p> : null}
+      {selected?.status === "ready" && selected.result ? <div className="grid gap-4">
+        <Lines title="변경 비교" lines={selected.result.comparison} />
+        <Lines title="원칙과 승인" lines={selected.result.policy_flags} />
+        <Lines title="확인 질문" lines={selected.result.questions} />
+        <Lines title="고객 회신 초안 · 발송 안 됨" lines={selected.result.reply_draft} />
+        <section className="rounded-2xl border border-black/10 bg-white p-5">
+          <h3 className="mt-0 text-lg">팀장 내부 확인</h3>
+          {selected.action ? <p className="m-0 font-bold">{selected.action.action === "approve" ? "내부 확인 완료" : `돌려보낸 작업${selected.action.reason_code ? ` · ${REASON_LABELS[selected.action.reason_code]} 먼저 확인` : ""}`} · 실제 고객 발송/가격 승인이 아닙니다.</p> : role === "lead" ? <div className="flex flex-wrap gap-2">
+            <button className="rounded-lg bg-[var(--accent)] px-4 py-2 font-bold text-white disabled:opacity-50" disabled={busy !== null} onClick={() => void review("approve")} type="button">내부 확인</button>
+            <button className="rounded-lg border px-4 py-2 font-bold disabled:opacity-50" disabled={busy !== null} onClick={() => void review("reject")} type="button">검토안 돌려보내기</button>
+            <label className="flex w-full items-center gap-2 text-sm">돌려보내는 이유 <select className="rounded-lg border border-black/15 bg-white px-3 py-2" onChange={(event) => setRejectReason(event.target.value as SalesReviewRejectReason)} value={rejectReason}><option value="price">가격 조건</option><option value="schedule">시작일</option></select></label>
+            <p className="w-full text-sm text-[var(--muted)]">이 행동은 가상 결과의 내부 검토 기록만 남깁니다.</p>
+          </div> : <p className="m-0 text-[var(--muted)]">팀장 확인을 기다립니다.</p>}
+          {selected.action?.action === "reject" && selected.action.reason_code ? <div className="mt-4 grid gap-2 border-t border-black/10 pt-4"><p className="m-0 text-sm">같은 가상 자료로 {REASON_LABELS[selected.action.reason_code]}을 먼저 검토합니다. 견적 금액·시작일은 바뀌지 않습니다. 새 결과에는 별도의 팀장 확인이 필요합니다.</p><button className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 font-bold text-[var(--accent)] disabled:opacity-50" disabled={busy !== null} onClick={() => void revise()} type="button">{busy === "revision" ? "요청 중…" : "같은 자료로 다시 검토"}</button></div> : null}
+        </section>
+      </div> : null}
     </section>
   </main>;
 }

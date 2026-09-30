@@ -17,9 +17,10 @@ type TaskRow = {
   status: "queued" | "processing" | "ready" | "failed";
   status_reason: string | null;
   result: unknown;
+  revision_of: string | null;
   created_at: string;
 };
-type ActionRow = { task_id: string; action: "approve" | "reject"; created_at: string };
+type ActionRow = { task_id: string; action: "approve" | "reject"; reason_code: "price" | "schedule" | null; created_at: string };
 
 export async function GET(
   _request: Request,
@@ -30,7 +31,7 @@ export async function GET(
   if (!membership.consentedAt) return Response.json({ error: "동의 후 이용할 수 있습니다." }, { status: 403 });
   const client = await createServerSupabaseClient();
   const tasks = await client.from("sales_review_tasks")
-    .select("id, focus, status, status_reason, result, created_at")
+    .select("id, focus, status, status_reason, result, revision_of, created_at")
     .eq("dept_id", membership.deptId).order("created_at", { ascending: false }).limit(30);
   if (tasks.error) return Response.json({ error: "검토 목록을 불러오지 못했습니다." }, { status: 500 });
   const rows = (tasks.data ?? []) as TaskRow[];
@@ -38,7 +39,7 @@ export async function GET(
   let actions: ActionRow[] = [];
   if (ids.length > 0) {
     const read = await client.from("sales_review_actions")
-      .select("task_id, action, created_at").in("task_id", ids);
+      .select("task_id, action, reason_code, created_at").in("task_id", ids);
     if (read.error) return Response.json({ error: "팀장 검토 기록을 불러오지 못했습니다." }, { status: 500 });
     actions = (read.data ?? []) as ActionRow[];
   }
@@ -52,6 +53,7 @@ export async function GET(
         status: row.status === "ready" && !result ? "failed" : row.status,
         status_reason: row.status === "ready" && !result ? "citation_invalid" : row.status_reason,
         result,
+        revision_of: row.revision_of,
         action: byTask.get(row.id) ?? null,
         created_at: row.created_at,
       };

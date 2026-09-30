@@ -38,22 +38,64 @@ export async function verifySalesReviewSql({ q, check, asUser, denied, ids }) {
   });
   await q("update sales_review_tasks set status='ready',result='{}'::jsonb where id=$1", [taskId]);
   await check("sales review: only lead records a single append-only internal action", async () => {
-    await asUser(actor.member, async () => denied("select review_sales_task($1,'approve')", [taskId]));
+    await asUser(actor.member, async () => denied("select review_sales_task($1,'approve',null)", [taskId]));
     let actionId;
     await asUser(actor.lead, async () => {
-      actionId = (await q("select review_sales_task($1,'approve') id", [taskId])).rows[0].id;
+      actionId = (await q("select review_sales_task($1,'approve',null) id", [taskId])).rows[0].id;
       assert.ok(actionId);
-      await assert.rejects(() => q("select review_sales_task($1,'reject')", [taskId]), error => error.code === "23505");
+      await assert.rejects(() => q("select review_sales_task($1,'reject','price')", [taskId]), error => error.code === "23505");
       assert.equal((await q("select action from sales_review_actions where task_id=$1", [taskId])).rows[0].action, "approve");
     });
     await asUser(actor.outsider, async () => assert.equal((await q("select id from sales_review_actions where task_id=$1", [taskId])).rows.length, 0));
     await denied("update sales_review_actions set action='reject' where id=$1", [actionId]);
     await denied("delete from sales_review_actions where id=$1", [actionId]);
   });
+  let rejectedTaskId;
+  await check("sales review revision: lead reason is fixed and append-only", async () => {
+    await asUser(actor.lead, async () => {
+      rejectedTaskId = (await q("select request_sales_review($1,'all',$2) id", [actor.dept, randomUUID()])).rows[0].id;
+      await assert.rejects(() => q("select review_sales_task($1,'reject',null)", [rejectedTaskId]), error => error.code === "22023");
+      await assert.rejects(() => q("select review_sales_task($1,'approve','price')", [rejectedTaskId]), error => error.code === "22023");
+    });
+    await q("update sales_review_tasks set status='ready',result='{}'::jsonb where id=$1", [rejectedTaskId]);
+    await asUser(actor.lead, async () => {
+      await q("select review_sales_task($1,'reject','schedule')", [rejectedTaskId]);
+      assert.equal((await q("select reason_code from sales_review_actions where task_id=$1", [rejectedTaskId])).rows[0].reason_code, "schedule");
+      await assert.rejects(() => q("select review_sales_task($1,'approve',null)", [rejectedTaskId]), error => error.code === "23505");
+    });
+    assert.equal((await q("select to_regprocedure('public.review_sales_task(uuid,text)') value")).rows[0].value, null);
+  });
+  await check("sales review revision: member creates linked task and job without inheriting approval", async () => {
+    const revisionRequest = randomUUID();
+    let childId;
+    await asUser(actor.member, async () => {
+      childId = (await q("select request_sales_review_revision($1,$2,$3) id", [actor.dept, rejectedTaskId, revisionRequest])).rows[0].id;
+      assert.equal((await q("select request_sales_review_revision($1,$2,$3) id", [actor.dept, rejectedTaskId, revisionRequest])).rows[0].id, childId);
+      await assert.rejects(() => q("select request_sales_review_revision($1,$2,$3)", [actor.dept, taskId, randomUUID()]), error => error.code === "42501");
+      await assert.rejects(() => q("select request_sales_review_revision($1,$2,$3)", [actor.dept, rejectedTaskId, requestId]), error => error.code === "22023");
+    });
+    const child = (await q("select focus,revision_of,status from sales_review_tasks where id=$1", [childId])).rows[0];
+    assert.deepEqual(child, { focus: "schedule", revision_of: rejectedTaskId, status: "queued" });
+    assert.equal((await q("select count(*)::int count from sales_review_actions where task_id=$1", [childId])).rows[0].count, 0);
+    assert.equal((await q("select count(*)::int count from jobs where payload->>'taskId'=$1", [childId])).rows[0].count, 1);
+    await asUser(actor.outsider, async () => denied("select request_sales_review_revision($1,$2,$3)", [actor.dept, rejectedTaskId, randomUUID()]));
+    await asUser(actor.unconsented, async () => denied("select request_sales_review_revision($1,$2,$3)", [actor.dept, rejectedTaskId, randomUUID()]));
+    await assert.rejects(() => q("insert into sales_review_tasks(dept_id,requested_by,client_request_id,focus,revision_of) values($1,$2,$3,'all',$4)", [actor.outsiderDept, actor.member, randomUUID(), rejectedTaskId]), error => error.code === "23503");
+  });
+  await check("sales review revision: legacy rejection without reason cannot be reused", async () => {
+    let legacyId;
+    await asUser(actor.lead, async () => {
+      legacyId = (await q("select request_sales_review($1,'all',$2) id", [actor.dept, randomUUID()])).rows[0].id;
+    });
+    await q("update sales_review_tasks set status='ready',result='{}'::jsonb where id=$1", [legacyId]);
+    await q("insert into sales_review_actions(task_id,dept_id,reviewer_id,action) values($1,$2,$3,'reject')", [legacyId, actor.dept, actor.lead]);
+    await asUser(actor.member, async () => denied("select request_sales_review_revision($1,$2,$3)", [actor.dept, legacyId, randomUUID()]));
+  });
   await check("sales review: ten-per-day limit and invalid focus", async () => {
     await asUser(actor.member, async () => {
-      for (let i = 0; i < 9; i++) await q("select request_sales_review($1,'all',$2)", [actor.dept, randomUUID()]);
+      for (let i = 0; i < 8; i++) await q("select request_sales_review($1,'all',$2)", [actor.dept, randomUUID()]);
       await assert.rejects(() => q("select request_sales_review($1,'all',$2)", [actor.dept, randomUUID()]), error => error.code === "22023");
+      await assert.rejects(() => q("select request_sales_review_revision($1,$2,$3)", [actor.dept, rejectedTaskId, randomUUID()]), error => error.code === "22023");
       await assert.rejects(() => q("select request_sales_review($1,'other',$2)", [actor.dept, randomUUID()]), error => error.code === "22023");
     });
   });

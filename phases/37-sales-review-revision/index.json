@@ -1,0 +1,9 @@
+{
+  "project": "sasu",
+  "phase": "37-sales-review-revision",
+  "design": "docs/02-design/features/sales-review-revision.design.md",
+  "steps": [
+    { "step": 0, "name": "linked-synthetic-revision", "status": "completed", "verification": "docs/verification/sales-review-revision-2026-09-30.md", "summary": "합성 돌려보내기 사유·연결 재검토·별도 내부 확인 구현. 격리 SQL 289, 단위 1719, 인증 브라우저 2건·게스트 5건 통과. 운영 미반영." }
+  ],
+  "production_deployed": false
+}

@@ -128,6 +128,8 @@ export type AgentRoleEvaluation = z.infer<typeof AgentRoleEvaluation>;
 
 export const SalesReviewFocus = z.enum(["all", "price", "schedule"]);
 export type SalesReviewFocus = z.infer<typeof SalesReviewFocus>;
+export const SalesReviewRejectReason = z.enum(["price", "schedule"]);
+export type SalesReviewRejectReason = z.infer<typeof SalesReviewRejectReason>;
 export const SalesReviewPriority = z.enum(["price", "schedule", "sso"]);
 export const SalesReviewChoice = z.strictObject({
   priority: SalesReviewPriority,
