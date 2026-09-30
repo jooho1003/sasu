@@ -215,6 +215,13 @@
       "note": "격리 SQL 282·단위 1705·검토 화면 31과 phase 34 분리 배포본 검증 완료. 운영 DB 0065 적용, 배포 dpl_3evfKgQbvRurLNKGSsGQgCvBab2r 확인. 실제 24시간 업로드 실측은 없음.",
       "production_deployed": true,
       "deployment": "docs/verification/review-upload-timeout-2026-09-30.md"
+    },
+    {
+      "dir": "35-sales-agent-design",
+      "status": "completed",
+      "verification": "docs/verification/sales-agent-design-2026-09-30.md",
+      "note": "영업팀 고객 요청·견적 변경 검토의 합성 사례와 PDCA plan/design·설계 검증 완료. 기능 구현·DB 시드·운영 반영은 이 phase 범위 밖.",
+      "production_deployed": false
     }
   ]
 }
