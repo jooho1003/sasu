@@ -2,8 +2,8 @@
   "browser": "153.0.8010.12",
   "platform": "win32",
   "accelerated": true,
-  "beforeHeap": 5322124,
-  "afterHeap": 5479476,
+  "beforeHeap": 5372940,
+  "afterHeap": 5530316,
   "snapshot": {
     "state": "stopped",
     "samples": 28800000,
@@ -18,7 +18,7 @@
     "partial": false,
     "paused": false,
     "interrupted": false,
-    "createdAt": 1790603833387,
+    "createdAt": 1790690437537,
     "levelVectors": [],
     "captureHealth": {
       "clipping_ratio": 0,

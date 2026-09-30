@@ -1,0 +1,7 @@
+Graft 실행 불가: 로컬 명령/MCP 도구 없음, Docker 엔진 소켓 없음.
+변경 후 수동 관계:
+- ReviewSettingsForm props와 사용처(app/admin/security/page.tsx, scripts/review-controls-lab/main.tsx) 유지.
+- writable·초기 녹음 스위치 on이면 마운트 때 기존 GET을 1회 호출해 건수 표시. 읽기 전용은 조회하지 않음.
+- 끄기 확인 직전 GET 재조회와 POST 처리, 관리자 RPC 및 admin_events 경로는 유지.
+- tests/review-controls/access.spec.ts에서 두 설명 연결·건수·읽기 전용 조회 0건 검증.
+Graft 그래프 결과가 아님.

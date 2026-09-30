@@ -10,6 +10,7 @@ const mock = vi.hoisted(() => ({
   segments: vi.fn(),
   remove: vi.fn(),
   list: vi.fn(),
+  glossary: vi.fn(async () => ({ data: [] as Array<{ term: string; reading: string | null; note: string | null; updated_at: string }>, error: null })),
 }));
 vi.mock("@/lib/supabase/service", () => ({
   createServiceSupabaseClient: () => ({
@@ -17,7 +18,9 @@ vi.mock("@/lib/supabase/service", () => ({
     from: (table: string) => ({
       select: () => ({
         eq: () =>
-          table === "reviewed_materials"
+          table === "dept_glossaries"
+            ? { order: () => mock.glossary() }
+            : table === "reviewed_materials"
             ? { maybeSingle: mock.review }
             : table === "review_original_segments"
               ? mock.segments()
@@ -76,6 +79,13 @@ describe("자료 변환 워커", () => {
     )![1];
     expect(completion.p_sections[0].text).toContain("[이메일]");
     expect(JSON.stringify(completion)).not.toContain("qa@example.com");
+  });
+  it("현재 부서 용어만 음성 전사 prompt에 전달한다", async () => {
+    mock.glossary.mockResolvedValueOnce({ data: [
+      { term: "사수", reading: null, note: null, updated_at: "2026-09-29T00:00:00Z" },
+    ], error: null });
+    await processReviewPart({ partId: "part", attempt: 1 });
+    expect(mock.transcribe.mock.calls[0][0].prompt).toBe("사수");
   });
   it("원본 만료 처리를 구간 정리보다 먼저 하고 실패 시 중단한다", async () => {
     await sweepReviewParts();
@@ -319,7 +329,7 @@ describe("자료 변환 워커 — audio_segments 창", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mock.transcribe.mockResolvedValue({ data: { text: "안녕하세요." } });
+    mock.transcribe.mockResolvedValue({ data: { text: "안녕하세요.", segments: [], words: [] } });
   });
 
   it("두 원본으로 61초 창을 만들어 한 번만 변환한다", async () => {
@@ -348,6 +358,8 @@ describe("자료 변환 워커 — audio_segments 창", () => {
     expect(mock.transcribe).toHaveBeenCalledOnce();
     const [audioInput] = mock.transcribe.mock.calls[0];
     expect(validateAudioPart(audioInput.bytes, 61)).toBe(true);
+    expect(audioInput.includeTimestamps).toBe(true);
+    expect(mock.rpc.mock.calls.some(([name]) => name === "finish_review_recording_part")).toBe(true);
   });
 
   it("다음 원본이 없는 마지막 창은 다운로드를 한 번만 한다", async () => {
@@ -397,7 +409,7 @@ describe("자료 변환 워커 — audio_segments 창", () => {
     expect(mock.download).toHaveBeenCalledWith("dept/review/original-segments/0-1.wav");
     expect(mock.download).toHaveBeenCalledWith("dept/review/original-segments/1-1.wav");
     expect(mock.transcribe).not.toHaveBeenCalled();
-    const completion = mock.rpc.mock.calls.find((c) => c[0] === "finish_review_part")![1];
+    const completion = mock.rpc.mock.calls.find((c) => c[0] === "finish_review_recording_part")![1];
     expect(completion.p_error).toBe("audio_segment_invalid");
   });
 
@@ -420,9 +432,35 @@ describe("자료 변환 워커 — audio_segments 창", () => {
 
     expect(mock.download).toHaveBeenCalledWith("dept/review/original-segments/0-1.wav");
     expect(mock.transcribe).not.toHaveBeenCalled();
-    const completion = mock.rpc.mock.calls.find((c) => c[0] === "finish_review_part")![1];
+    const completion = mock.rpc.mock.calls.find((c) => c[0] === "finish_review_recording_part")![1];
     expect(completion.p_error).toBe("file_unavailable");
     expect(JSON.stringify(completion)).not.toContain("private raw");
+  });
+  it("앞 창 마지막 단어 끝을 받아 겹친 단어 없이 시각·신뢰도를 저장한다", async () => {
+    const first = wavSegment(0, FULL_SAMPLES, 5);
+    const second = wavSegment(1, FULL_SAMPLES, 7);
+    const manifest: RecordingManifest = { version: 1, segments: [first.descriptor, second.descriptor] };
+    mock.rpc.mockImplementation(async (name: string) => ({
+      data: name === "claim_review_part"
+        ? claimAudioSegments({ part_index: 1, start_seconds: 60, end_seconds: 120,
+            previous_last_word_end_in_window: 0.3, manifest,
+            segment_paths: { current: "second.wav", next: null } })
+        : true,
+      error: null,
+    }));
+    mock.download.mockResolvedValue({ data: new Blob([second.wav]), error: null });
+    mock.transcribe.mockResolvedValue({ data: {
+      text: "경계 후속",
+      segments: [{ text: "경계 후속", start: 0, end: 0.8, avg_logprob: -1.2, no_speech_prob: 0.1 }],
+      words: [{ word: "경계", start: 0, end: 0.3 }, { word: "후속", start: 0.4, end: 0.8 }],
+    } });
+
+    await processReviewPart({ partId: "part1", attempt: 1 });
+
+    const finish = mock.rpc.mock.calls.find(([name]) => name === "finish_review_recording_part")![1];
+    expect(finish.p_sections.map((section: { text: string }) => section.text)).toEqual(["후속"]);
+    expect(finish.p_sections[0]).toMatchObject({ start_seconds: 60.4, end_seconds: 60.8, confidence: "low", boundary_review: false });
+    expect(finish.p_last_word_end).toBe(0.8);
   });
 });
 

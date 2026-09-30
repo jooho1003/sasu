@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "녹음 인용에서 원본 구간으로 이동",
+    "output": "docs/verification/browser-meeting-recording/step4b5-citation-location.html",
+    "viewBox": [1000, 620],
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "standard"
+  },
+  "participants": [
+    { "id": "person", "type": "external", "label": "질문자" },
+    { "id": "api", "type": "backend", "label": "인용 API" },
+    { "id": "db", "type": "database", "label": "RLS·자료 DB" },
+    { "id": "review", "type": "backend", "label": "검토 화면" },
+    { "id": "audio", "type": "cloud", "label": "원본 접근 API" }
+  ],
+  "segments": [
+    { "from": 130, "to": 360, "label": "인용 대상 판정" },
+    { "from": 380, "to": 540, "label": "원본 위치 확인" }
+  ],
+  "messages": [
+    { "from": "person", "to": "api", "y": 170, "label": "답변·문서·카드·원장 인용 조회", "variant": "default" },
+    { "from": "api", "to": "db", "y": 195, "label": "세션 RLS로 발행 항목·검토 자료 조회", "variant": "emphasis" },
+    { "from": "db", "to": "api", "y": 240, "label": "보이는 녹음의 발행 순번·구간", "variant": "return" },
+    { "from": "api", "to": "person", "y": 285, "label": "인용 검증 후 구간 링크·신뢰도 표시", "variant": "return" },
+    { "from": "api", "to": "person", "y": 330, "label": "대상 없음·변경됨: 기존 원문 링크", "variant": "default" },
+    { "from": "person", "to": "review", "y": 405, "label": "인용 구간 열기", "variant": "emphasis" },
+    { "from": "review", "to": "person", "y": 450, "label": "구간으로 스크롤·재생 버튼 초점", "variant": "return" },
+    { "from": "person", "to": "audio", "y": 495, "label": "버튼 클릭 시 단회 권한으로 원본 듣기", "variant": "default" }
+  ]
+}

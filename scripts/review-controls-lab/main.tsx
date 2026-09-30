@@ -10,4 +10,4 @@ createRoot(document.getElementById("root")!).render(view === "settings"
   ? <ReviewSettingsForm initial={{ browser_recording_enabled: query.get("recording") === "1", allow_original_download: false }} writable={query.get("readonly") !== "1"} />
   : view === "retention" ? <RetentionConsole deptId="dept" />
     : view === "recorder" ? <MeetingRecorder deptId="dept" userId="synthetic-user" />
-      : <ReviewDetail deptId="dept" id="review" />);
+      : <ReviewDetail deptId="dept" id="review" citationSection={query.get("section") === null ? null : Number(query.get("section"))} />);

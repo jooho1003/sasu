@@ -1,0 +1,6 @@
+Graft 실행 불가: 로컬 명령/MCP 도구 없음, Docker 엔진 소켓 없음.
+변경 전 수동 git grep:
+- ReviewSettingsForm 사용: app/admin/security/page.tsx, scripts/review-controls-lab/main.tsx
+- GET/POST: app/api/admin/review-settings/route.ts. GET은 active_recordings, POST는 RPC로 설정 저장.
+- 기존 컴포넌트는 진행 중 건수를 스위치 끄기 확인 직전에만 조회.
+Graft 그래프 결과가 아님.

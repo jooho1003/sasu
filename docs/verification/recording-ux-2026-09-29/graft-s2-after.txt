@@ -1,0 +1,15 @@
+Step 2 implementation-after relationship check (2026-09-29)
+
+Graft build/grep unavailable for the same reason recorded in graft-s2-before.txt. This is a manual source search, not a Graft graph.
+
+Manual Select-String on components/meeting-recorder.tsx after editing:
+- lines 107-108, 566-581: document.title saved, updated from recorderTabTitle, restored on visibility/unmount.
+- lines 539-557: beforeunload and capture-phase same-origin Link interception, both removed when capture ends.
+- line 591: <Link href={`/d/${deptId}/reviews`}> remains; sidebar links in WorkspaceShell also hit the document capture listener.
+- line 594: one hidden recording-state role="status" without elapsed time.
+- lines 597,614,633: translated role="alert" inside form, session, list panels.
+- line 618: timer role="timer" aria-live="off" and persisted duration outside status region.
+- line 624: stopReasonNotice replaces raw reason, with info status for duration_limit.
+- lines 625-626: inline stop confirmation and separate pause/resume primary action.
+
+Changed edges: MeetingRecorder now imports recorderStage, recorderTabTitle, sessionStateLabel and stopReasonNotice from recorder-copy. `run(panel, task)` records panel origin while retaining raw causes; rendering translates them. CSS additions are scoped to `.meeting-recorder`. Synthetic Playwright tests cover Link interception, beforeunload dialog, stop confirmation, title restoration and accessible status. No route, database or job edge changed.

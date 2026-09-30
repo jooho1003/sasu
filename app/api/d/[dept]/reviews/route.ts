@@ -14,7 +14,7 @@ export async function GET(
   const result = await client
     .from("reviewed_materials")
     .select(
-      "id,kind,title,filename,status,status_reason,visibility,revision,published_revision,published_source_id,duration,created_at,updated_at,original_deleted_at",
+      "id,kind,title,filename,status,status_reason,visibility,revision,published_revision,published_source_id,duration,created_at,updated_at,original_deleted_at,original_layout",
     )
     .eq("dept_id", member.deptId)
     .order("created_at", { ascending: false })
@@ -26,8 +26,15 @@ export async function GET(
     .select("user_id,display_name,consented_at")
     .eq("dept_id", member.deptId)
     .not("consented_at", "is", null);
+  let recordingEnabled = false;
+  try {
+    const settings = await client.rpc("review_org_settings", { p_dept: member.deptId });
+    recordingEnabled = !settings.error && settings.data?.browser_recording_enabled === true;
+  } catch {
+    // The list remains available when the optional recording setting cannot be read.
+  }
   return Response.json(
-    { reviews: result.data, members: members.data ?? [], role: member.role },
+    { reviews: result.data, members: members.data ?? [], role: member.role, recording_enabled: recordingEnabled },
     { headers: { "cache-control": "no-store" } },
   );
 }

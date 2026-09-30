@@ -14,6 +14,8 @@ type LedgerCitation = {
   occurred_at: string | null;
   source: string;
   href: string;
+  low_confidence?: boolean;
+  boundary_review?: boolean;
 };
 
 type LedgerConflict = {
@@ -152,7 +154,9 @@ function DecisionDetail({ decision, historical = false }: { decision: LedgerDeci
               <span className="text-xs text-[var(--muted)]" data-meta>
                 {citation.author} · {formatDate(citation.occurred_at)} · {citation.source}
               </span>
-              <q className="font-normal text-[var(--ink)]">{citation.quote}</q>
+                <q className="font-normal text-[var(--ink)]">{citation.quote}</q>
+                {citation.low_confidence ? <span className="badge badge-urgent">낮은 신뢰</span> : null}
+                {citation.boundary_review ? <span className="badge badge-urgent">경계 확인 필요</span> : null}
             </a>
           ))}
         </div>

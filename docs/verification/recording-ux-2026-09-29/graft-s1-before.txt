@@ -1,0 +1,17 @@
+Phase 33 step 1 — before change (2026-09-29)
+
+Graft run unavailable: no local `graft` executable, and Docker Desktop's
+desktop-linux engine socket is absent. The plan-time graph is in graft-plan.txt.
+No new graph or callers result is claimed here.
+
+Source inspected before editing:
+- MeetingRecorder.prepare() created POST /recordings, requested keyFor(id),
+  probed encrypted local storage, set selected/prepared, then refreshed the list.
+- MeetingRecorder.begin() called captureInputs after that server work, requested
+  keyFor(selected.id) again, then started capture and installed meter/profile,
+  input-change, and wake-lock handling.
+- MeetingRecorder.recover() called keyFor(session.id) and retained the
+  recording_unavailable error-code branch for local cleanup.
+- captureInputs also serves the five-second test; captureMicrophone also serves
+  microphone reselection. These adapters were not changed.
+- The product route and review-controls lab both render MeetingRecorder.

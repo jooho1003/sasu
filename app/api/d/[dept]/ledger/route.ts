@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { reviewCitationHref, reviewCitationTarget, type PublishedReview } from "@/lib/recording/citation-location";
 
 type DecisionRow = {
   id: string;
@@ -42,6 +43,7 @@ type SourceRow = {
 
 type ItemRow = {
   id: string;
+  source_id: string;
   author: string | null;
   spoken_at: string | null;
   external_ref: string | null;
@@ -62,6 +64,8 @@ type SerializedCitation = {
   occurred_at: string | null;
   source: string;
   href: string;
+  low_confidence?: boolean;
+  boundary_review?: boolean;
 };
 
 type SerializedDecision = {
@@ -233,8 +237,8 @@ export async function GET(
       ? Promise.resolve({ data: [] as ItemRow[], error: null })
       : supabase
           .from("items")
-          .select("id, author, spoken_at, external_ref, content, sources!inner(kind, external_id, title)")
-          .in("id", itemIds),
+          .select("id, source_id, author, spoken_at, external_ref, content, sources!inner(kind, external_id, title)")
+          .in("id", itemIds).is("deleted_at", null).eq("sources.active", true),
     citedDecisionIds.length === 0
       ? Promise.resolve({ data: [] as DecisionRow[], error: null })
       : supabase
@@ -255,6 +259,12 @@ export async function GET(
   const citationItemMap = new Map(
     ((citationItemsResult.data ?? []) as ItemRow[]).map((item) => [item.id, item]),
   );
+  const reviewSourceIds = [...new Set([...citationItemMap.values()].filter((item) => firstRelation(item.sources).external_id?.startsWith("review:")).map((item) => item.source_id))];
+  const reviewResult = reviewSourceIds.length
+    ? await supabase.from("reviewed_materials").select("id,kind,revision,published_revision,published_source_id,original_uploaded,original_deleted_at,deleted_at,sections")
+      .in("published_source_id", reviewSourceIds)
+    : { data: [], error: null };
+  const reviews = new Map(((reviewResult.error ? [] : reviewResult.data) ?? []).map((review) => [review.published_source_id, review as PublishedReview]));
   const citedDecisionMap = new Map(
     ((citedDecisionsResult.data ?? []) as DecisionRow[]).map((decision) => [
       decision.id,
@@ -281,16 +291,20 @@ export async function GET(
   const serializeCitation = (citation: CitationRow): SerializedCitation | null => {
     if (citation.item_id) {
       const item = citationItemMap.get(citation.item_id);
-      if (!item) {
+      if (!item || !citation.quote || !item.content.includes(citation.quote)) {
         return null;
       }
       const source = firstRelation(item.sources);
+      const review = reviews.get(item.source_id);
+      const target = review ? reviewCitationTarget(item.external_ref, review) : null;
       return {
         quote: citation.quote,
         author: item.author ?? "작성자 미상",
         occurred_at: item.spoken_at,
         source: source.title ?? "이름 없는 소스",
-        href: originalHref(item, membership.deptId),
+        href: target ? reviewCitationHref(membership.deptId, target) : originalHref(item, membership.deptId),
+        low_confidence: target?.lowConfidence ?? false,
+        boundary_review: target?.boundaryReview ?? false,
       };
     }
 

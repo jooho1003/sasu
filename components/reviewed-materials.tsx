@@ -22,6 +22,7 @@ export function ReviewedMaterials({
   const router = useRouter();
   const [rows, setRows] = useState<ReviewedMaterial[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [recordingEnabled, setRecordingEnabled] = useState(false);
   const [kind, setKind] = useState<"audio" | "document">("audio");
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
@@ -45,7 +46,9 @@ export function ReviewedMaterials({
       if (!response.ok) throw new Error(data.error);
       setRows(data.reviews);
       setMembers(data.members);
+      setRecordingEnabled(data.recording_enabled === true);
     } catch {
+      setRecordingEnabled(false);
       setError("자료 목록을 불러오지 못했습니다.");
     }
   }, [deptId]);
@@ -200,6 +203,7 @@ export function ReviewedMaterials({
     return (
       <main className="workspace-page">
         <h1>자료 검토</h1>
+        <p><Link href={`/d/${deptId}/reviews/glossary`}>부서 용어집 보기</Link></p>
         <p>
           자료의 원본·초안 검토는 팀장이 진행합니다. 확정된 자료는 문서와
           묻기에서 확인할 수 있습니다.
@@ -219,8 +223,9 @@ export function ReviewedMaterials({
           </p>
         </div>
         <div>
-          <Link className="button button-primary" href={`/d/${deptId}/reviews/record`}>회의 녹음</Link>{" "}
-          <Link className="button button-secondary" href={`/d/${deptId}/documents`}>확정 자료 요약</Link>
+          {recordingEnabled ? <><Link className="button button-primary" href={`/d/${deptId}/reviews/record`}>회의 녹음</Link>{" "}</> : null}
+          <Link className="button button-secondary" href={`/d/${deptId}/documents`}>확정 자료 요약</Link>{" "}
+          <Link className="button button-secondary" href={`/d/${deptId}/reviews/glossary`}>부서 용어집</Link>
         </div>
       </header>
       <section className="panel review-upload" aria-label="자료 업로드">
@@ -417,7 +422,7 @@ export function ReviewedMaterials({
                 <li key={r.id}>
                   <Link href={`/d/${deptId}/reviews/${r.id}`}>
                     <span className="badge badge-neutral">
-                      {r.kind === "audio" ? "음성" : "문서"}
+                      {r.original_layout === "audio_segments" ? "회의 녹음" : r.kind === "audio" ? "음성" : "문서"}
                     </span>
                     <strong>{r.title}</strong>
                     <span>

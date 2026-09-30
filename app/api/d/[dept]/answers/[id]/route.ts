@@ -1,5 +1,6 @@
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { reviewCitationHref, reviewCitationTarget, type PublishedReview } from "@/lib/recording/citation-location";
 
 type AnswerRow = {
   id: string;
@@ -23,6 +24,7 @@ type ItemRow = {
   author: string | null;
   spoken_at: string | null;
   external_ref: string | null;
+  source_id: string;
   sources: { kind: string; external_id: string; title: string | null } | { kind: string; external_id: string; title: string | null }[];
 };
 
@@ -103,8 +105,8 @@ export async function GET(
       ? Promise.resolve({ data: [] as ItemRow[], error: null })
       : supabase
           .from("items")
-          .select("id, content, deleted_at, author, spoken_at, external_ref, sources!inner(kind, external_id, title)")
-          .in("id", itemIds),
+          .select("id, content, deleted_at, author, spoken_at, external_ref, source_id, sources!inner(kind, external_id, title)")
+          .in("id", itemIds).eq("sources.active", true),
     decisionIds.length === 0
       ? Promise.resolve({ data: [] as DecisionRow[], error: null })
       : supabase
@@ -119,12 +121,23 @@ export async function GET(
 
   const items = new Map(((itemsResult.data ?? []) as ItemRow[]).map((item) => [item.id, item]));
   const decisions = new Map(((decisionsResult.data ?? []) as DecisionRow[]).map((decision) => [decision.id, decision]));
+  // reviewed_materials SELECT is lead-only RLS. A member never receives a review ID or audio location.
+  const reviewSourceIds = [...new Set([...items.values()].filter((item) => relation(item.sources).kind === "document").map((item) => item.source_id))];
+  const reviewResult = reviewSourceIds.length
+    ? await supabase.from("reviewed_materials").select("id,kind,revision,published_revision,published_source_id,original_uploaded,original_deleted_at,deleted_at,sections")
+      .in("published_source_id", reviewSourceIds)
+    : { data: [], error: null };
+  const reviews = new Map(((reviewResult.error ? [] : reviewResult.data) ?? []).map((review) => [review.published_source_id, review as PublishedReview]));
   const visibleCitations = citations.flatMap((citation) => {
     if (citation.item_id) {
       const item = items.get(citation.item_id);
       if (!item || item.deleted_at || !citation.quote || !item.content.includes(citation.quote)) return [];
       const source = relation(item.sources);
-      return [{ quote: citation.quote, author: item.author ?? "작성자 미상", source: source.title ?? source.kind, occurred_at: item.spoken_at ?? null, href: itemHref(item, membership.deptId, answer.id) }];
+      const review = reviews.get(item.source_id);
+      const target = review ? reviewCitationTarget(item.external_ref, review) : null;
+      return [{ quote: citation.quote, author: item.author ?? "작성자 미상", source: source.title ?? source.kind, occurred_at: item.spoken_at ?? null,
+        href: target ? reviewCitationHref(membership.deptId, target) : itemHref(item, membership.deptId, answer.id),
+        low_confidence: target?.lowConfidence ?? false, boundary_review: target?.boundaryReview ?? false }];
     }
     if (citation.decision_id) {
       const decision = decisions.get(citation.decision_id);

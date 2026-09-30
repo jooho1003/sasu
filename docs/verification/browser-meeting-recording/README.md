@@ -4,6 +4,22 @@
 - [Step 1: 서버 녹음 세션·구간 원본](step1.md)
 - [Step 2: 녹음 화면·검토 연결](step2.md)
 - [Step 3: 심사위원 메모리 녹음 데모](step3.md)
+- [Step 4-A: 자료 보호·제공사·CSP](step4a.md)
+- [Step 4-B1~B5: 전사 시각·경계·검토·인용 위치](accuracy-step4b5.md)
+- [Step 4-B6: 문서 요약 병합](accuracy-step4b6.md) · [4-B7: 부서 용어집](accuracy-step4b7.md) · [4-B8: 정량 측정 준비](accuracy-step4b8.md) · [실측 대기](accuracy.md)
+- [현재 코드의 격리 로컬 제품 E2E](product-e2e-20260929.md)
 - [Archify: 녹음·서버 검증 흐름도](archify-step2/recording-flow.html) · [실행 검사 요약](archify-step2/width-review/recording-flow.finalize-summary.json)
 
-현재 개발과 운영 배포는 별개다. 지원 여부는 각 step의 실행 기록에 있는 환경·방식에 한해 판단한다. Windows Chrome의 실제 마이크 트랙은 확인했지만, 화면 공유 시스템 소리·macOS·모바일 실기기 결과는 아직 없다. 운영 스위치와 배포 URL은 검증 결과를 반영하기 전까지 변경하지 않는다.
+## 2026-09-29 로컬 판정
+
+최종 `npm run test` 159파일·1,704건, 격리 SQL 280건, `npm run build`, 변경 파일 ESLint·전체 문구 검사(blocking 0), 합성 녹음 Chrome 21건(기존 실시간 장기 1 skip), 검토 화면 Chrome 29건을 통과했다. 전체 `npm run lint` 마지막 실행은 파일 스캔이 수분간 정체돼 중단했고, 변경 파일 ESLint와 전체 문구 검사로 범위를 나눠 확인했다. 두 브라우저 모음을 동시에 실행한 첫 시도에서는 검토 화면 모듈 로딩 전 타임아웃이 발생했으나, 단독 재실행 29/29 통과했다. `0064`는 로컬 Supabase에만 적용했다. `.env`의 원격 DB에 테스트를 쓰지 않도록 격리 QA Supabase에 0063·0064를 적용해 제품 E2E를 실행했고, 현재 코드에서 **9/9 통과**했다. [이전 로컬 제품 E2E](l3-20260929/README.md)는 변경 전 범위의 기록이다.
+
+## 전체 완료 전에 필요한 실제 증거
+
+- V01~V06: Windows/macOS 실제 마이크·Meet/Zoom 탭 또는 시스템 소리·복구/절전/권한·30분 동작. 합성 브라우저 검사를 OS 지원 증명으로 쓰지 않는다.
+- V13: 운영 Groq 키가 ZDR 적용 조직의 키인지 확인하고 DPA, Voyage 계정 옵트아웃을 기록한다.
+- V14: 운영 응답 헤더·Report-Only 하루 관찰·승인 후 CSP 강제 모드 완주를 기록한다.
+- V16·V20: 지시문 포함 합성 문서의 실제 모델 출력 검토와 20분×3모드 원본·용어 30개·회의 5건 라벨로 CER/용어 CER/낮은 신뢰 표시율/precision·recall을 실측한다.
+- 운영 DB migration·배포·스위치 활성화는 별도 검증과 사용자 승인 후 진행한다. 기존 제품 배포 URL의 상태와 이번 변경의 배포 상태를 혼동하지 않는다.
+
+Windows Chrome의 실제 마이크 5초 트랙은 이전에 확인했지만, 위 시나리오를 대체하지 않는다. 구조·흐름 변경의 Graft/Archify 실행 도구는 이번 세션에서 찾지 못했다. 호출 관계는 각 B6·B7 기록에 수동으로 적었으며 이를 도구 결과로 주장하지 않는다.

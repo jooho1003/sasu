@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "확인 필요 전사 구간 검토",
+    "output": "docs/verification/browser-meeting-recording/step4b4-review-attention.html",
+    "viewBox": [900, 560],
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "standard"
+  },
+  "participants": [
+    { "id": "db", "type": "database", "label": "검토 자료 DB" },
+    { "id": "ui", "type": "backend", "label": "검토 화면" },
+    { "id": "reviewer", "type": "external", "label": "검토자" },
+    { "id": "original", "type": "cloud", "label": "원본 재생" }
+  ],
+  "segments": [
+    { "from": 140, "to": 275, "label": "표시" },
+    { "from": 285, "to": 438, "label": "방문 후 확정" }
+  ],
+  "messages": [
+    { "from": "db", "to": "ui", "y": 160, "label": "마스킹 구간·신뢰도·경계 플래그", "variant": "emphasis" },
+    { "from": "ui", "to": "reviewer", "y": 194, "label": "낮은 신뢰·경계 확인 배지", "variant": "return" },
+    { "from": "ui", "to": "reviewer", "y": 228, "label": "방문 전 확정 체크 차단", "variant": "default" },
+    { "from": "reviewer", "to": "ui", "y": 296, "label": "다음 확인 필요 구간", "variant": "emphasis" },
+    { "from": "ui", "to": "reviewer", "y": 330, "label": "검색 해제·구간 입력칸 초점", "variant": "return" },
+    { "from": "reviewer", "to": "original", "y": 364, "label": "해당 시각부터 원본 듣기", "variant": "default" },
+    { "from": "ui", "to": "reviewer", "y": 398, "label": "모두 방문 후 확정 체크 허용", "variant": "emphasis" },
+    { "from": "reviewer", "to": "db", "y": 432, "label": "기존 확정 명령·권한 검사", "variant": "default" }
+  ]
+}

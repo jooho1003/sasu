@@ -1,0 +1,140 @@
+Graft 0.19.0 final snapshot and post-analysis refresh (2026-09-29, local Docker node:22, DO_NOT_TRACK=1).
+Source: current worktree app/components/lib/scripts/review-controls-lab/scripts/recording-lab/tests/review-controls/tests/e2e/tests/recording/tests/reviews-list-route.test.ts/package.json/tsconfig.json, 412 files.
+Build: 2,169 nodes, 5,181 edges, 412 cards. Deep/meaning layer not built.
+Earlier step 0~7 before/after Graft snapshots could not be produced when Docker was unavailable; these final results do not reconstruct those snapshots.
+deep layer: not built (run `graft build --deep` for concept nodes) — wiring graph is the source of truth
+
+graph check: OK — the wiring graph is in sync with the code. (meaning tier 0% complete — 2169 of 2169 node(s) pending: app/(auth)/consent/consent-actions.tsx, app/(auth)/consent/consent-actions.tsx#ConsentActions, app/(auth)/consent/consent-actions.tsx#ConsentActions.consent, app/(auth)/consent/consent-actions.tsx#ConsentActions.later, app/(auth)/consent/consent-actions.tsx#ConsentActionsProps, app/(auth)/consent/page.tsx, app/(auth)/consent/page.tsx#ConsentPage, app/(auth)/consent/page.tsx#ConsentPageProps, … +2161 more. Run `graft build --deep` to summarize them; if a deep build already left these pending, that meaning pass failed — see that build's errors (re-running alone will not clear them))
+### grep review_org_settings|recording_enabled|reviews/record
+[graft] tokens saved ≈ 29,184 (96%) — this output ≈ 1,071 tok vs reading the 12 file(s) it covers whole ≈ 30,255 tok (estimate). At the end of your reply, tell the user the total graft tokens saved this turn — sum each such line across your graft calls — e.g. "🌱 graft saved ~N tokens this turn".
+
+"review_org_settings|recording_enabled|reviews/record" — 33 hits in 13 symbols across 12 files (searched 412 indexed files)
+
+setRecording · function · tests/e2e/recording-product.spec.ts:L156-L159 · 5 in-edges
+  L158: `update public.org_settings set browser_recording_enabled = ${enabled ? "true" : "false"} where org_id = '${org}'`], { stdio: "pipe" });
+
+Page · function · app/(auth)/d/[dept]/reviews/record/page.tsx:L6-L28 · 0 in-edges
+  L11: const member = await requirePageMembership(dept, `/d/${dept}/reviews/record`);
+  L18: const settings = await client.rpc("review_org_settings", { p_dept: member.deptId });
+  L19: recordingEnabled = !settings.error && settings.data?.browser_recording_enabled === true;
+
+POST · function · app/api/admin/review-settings/route.ts:L13-L21 · 0 in-edges
+  L18: const result = await client.rpc("admin_set_review_settings", { p_recording: body.data.browser_recording_enabled, p_download: body.data.allow_original_download }
+
+GET · function · app/api/d/[dept]/reviews/[id]/route.ts:L21-L121 · 0 in-edges
+  L62: client.rpc("review_org_settings", { p_dept: review.dept_id }),
+  L117: member.role === "lead" && !!member.consentedAt && settings.data?.browser_recording_enabled === true,
+
+GET · function · app/api/d/[dept]/reviews/route.ts:L7-L40 · 0 in-edges
+  L31: const settings = await client.rpc("review_org_settings", { p_dept: member.deptId });
+  L32: recordingEnabled = !settings.error && settings.data?.browser_recording_enabled === true;
+  L37: { reviews: result.data, members: members.data ?? [], role: member.role, recording_enabled: recordingEnabled },
+
+ReviewSettingsForm · function · components/admin/review-settings.tsx:L4-L66 · 0 in-edges
+  L5: initial: { browser_recording_enabled: boolean; allow_original_download: boolean };
+  L9: const [recording, setRecording] = useState(initial.browser_recording_enabled);
+  L10: const [savedRecording, setSavedRecording] = useState(initial.browser_recording_enabled);
+  L16: if (!writable || !initial.browser_recording_enabled) return;
+  L30: }, [writable, initial.browser_recording_enabled]);
+  L42: const response = await fetch("/api/admin/review-settings", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ browser_rec
+
+ReviewDetail · function · components/review-detail.tsx:L20-L830 · 0 in-edges
+  L356: {canContinue && !continuation.next ? <Link href={`/d/${deptId}/reviews/record?continues=${id}`}>이 회의 이어서 녹음</Link> : null}
+
+ReviewedMaterials · function · components/reviewed-materials.tsx:L15-L454 · 0 in-edges
+  L49: setRecordingEnabled(data.recording_enabled === true);
+  L225: {recordingEnabled ? <><Link className="button button-primary" href={`/d/${deptId}/reviews/record`}>회의 녹음</Link>{" "}</> : null}
+
+lib/contracts.ts (module level) · 0 in-edges
+  L601: browser_recording_enabled: z.boolean(), allow_original_download: z.boolean(),
+
+scripts/review-controls-lab/main.tsx (module level) · 0 in-edges
+  L10: ? <ReviewSettingsForm initial={{ browser_recording_enabled: query.get("recording") === "1", allow_original_download: false }} writable={query.get("readonly") !=
+
+tests/e2e/recording-product.spec.ts (module level) · 0 in-edges
+  L62: const response = await page.goto(`/d/${dept}/reviews/record`);
+  L154: const current = await service.from("org_settings").select("browser_recording_enabled").eq("org_id", org).single();
+  L181: await page.goto(`/d/${dept}/reviews/record`);
+  L195: await page.goto(`/d/${dept}/reviews/record`);
+  L198: setRecording(current.data!.browser_recording_enabled);
+
+tests/review-controls/access.spec.ts (module level) · 0 in-edges
+  L68: expect(route.request().postDataJSON()).toEqual({ browser_recording_enabled: false, allow_original_download: true });
+  L87: expect(route.request().postDataJSON()).toEqual({ browser_recording_enabled: false, allow_original_download: false });
+
+tests/reviews-list-route.test.ts (module level) · 0 in-edges
+  L47: [{ data: { browser_recording_enabled: true }, error: null }, true],
+  L48: [{ data: { browser_recording_enabled: false }, error: null }, false],
+  L51: ])("설정 %j일 때 recording_enabled=%s이며 목록은 200이다", async (settings, enabled) => {
+  L57: recording_enabled: enabled,
+  L60: expect(serverClient.rpc).toHaveBeenCalledWith("review_org_settings", { p_dept: deptId });
+### grep 입력이 과했습니다|이어진 회의 기록|review-notice
+[graft] tokens saved ≈ 14,753 (98%) — this output ≈ 279 tok vs reading the 4 file(s) it covers whole ≈ 15,032 tok (estimate). At the end of your reply, tell the user the total graft tokens saved this turn — sum each such line across your graft calls — e.g. "🌱 graft saved ~N tokens this turn".
+
+"입력이 과했습니다|이어진 회의 기록|review-notice" — 10 hits in 4 symbols across 4 files (searched 412 indexed files)
+
+GET · function · app/api/d/[dept]/reviews/[id]/route.ts:L21-L121 · 0 in-edges
+  L84: return Response.json({ error: "이어진 회의 기록을 확인하지 못했습니다." }, { status: 500 });
+
+RetentionConsole · function · components/retention-console.tsx:L29-L347 · 0 in-edges
+  L127: <p role="status" className="review-notice">
+  L133: <p className="review-notice">
+
+ReviewDetail · function · components/review-detail.tsx:L20-L830 · 0 in-edges
+  L353: <nav className="review-continuation" aria-label="이어진 회의 기록">
+  L377: <p className="review-notice" role="status">
+  L484: <p className="review-warning">입력이 과했습니다. 원본을 들으며 받아쓴 글을 확인해 주세요.</p> : null}
+  L505: <section className="panel review-notice" aria-label="재추출 검토">
+
+tests/review-controls/recording-segments.spec.ts (module level) · 0 in-edges
+  L149: const warning = page.getByText("입력이 과했습니다. 원본을 들으며 받아쓴 글을 확인해 주세요.");
+  L173: const navigation = page.getByRole("navigation", { name: "이어진 회의 기록" });
+  L176: await expect(page.locator('section[aria-label="이어진 회의 기록"]')).toHaveCount(0);
+### grep <ReviewSettingsForm|review-settings
+[graft] tokens saved ≈ 3,347 (90%) — this output ≈ 376 tok vs reading the 4 file(s) it covers whole ≈ 3,723 tok (estimate). At the end of your reply, tell the user the total graft tokens saved this turn — sum each such line across your graft calls — e.g. "🌱 graft saved ~N tokens this turn".
+
+"<ReviewSettingsForm|review-settings" — 10 hits in 5 symbols across 4 files (searched 412 indexed files)
+
+app/admin/security/page.tsx (module level) · 0 in-edges
+  L3: import { ReviewSettingsForm } from "@/components/admin/review-settings";
+
+AdminSecurityPage · function · app/admin/security/page.tsx:L8-L27 · 0 in-edges
+  L15: {settings ? <ReviewSettingsForm initial={settings} writable={orgAdminWritesEnabled()} /> : <AdminUnavailable />}
+
+ReviewSettingsForm · function · components/admin/review-settings.tsx:L4-L66 · 0 in-edges
+  L20: const response = await fetch("/api/admin/review-settings", { cache: "no-store", signal: controller.signal });
+  L35: const countResponse = await fetch("/api/admin/review-settings", { cache: "no-store" });
+  L42: const response = await fetch("/api/admin/review-settings", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ browser_rec
+
+scripts/review-controls-lab/main.tsx (module level) · 0 in-edges
+  L4: import { ReviewSettingsForm } from "../../components/admin/review-settings";
+  L10: ? <ReviewSettingsForm initial={{ browser_recording_enabled: query.get("recording") === "1", allow_original_download: false }} writable={query.get("readonly") !=
+
+tests/review-controls/access.spec.ts (module level) · 0 in-edges
+  L67: await page.route("**/api/admin/review-settings", async route => {
+  L84: await page.route("**/api/admin/review-settings", route => {
+  L109: await page.route("**/api/admin/review-settings", route => {
+### grep <MeetingRecorder|<RecordingSegmentPlayer|<ReviewedMaterials
+[graft] tokens saved ≈ 8,300 (98%) — this output ≈ 211 tok vs reading the 4 file(s) it covers whole ≈ 8,511 tok (estimate). At the end of your reply, tell the user the total graft tokens saved this turn — sum each such line across your graft calls — e.g. "🌱 graft saved ~N tokens this turn".
+
+"<MeetingRecorder|<RecordingSegmentPlayer|<ReviewedMaterials" — 4 hits in 4 symbols across 4 files (searched 412 indexed files)
+
+Page · function · app/(auth)/d/[dept]/reviews/page.tsx:L3-L6 · 0 in-edges
+  L5: return <ReviewedMaterials deptId={member.deptId} role={member.role}/>;
+
+Page · function · app/(auth)/d/[dept]/reviews/record/page.tsx:L6-L28 · 0 in-edges
+  L26: return <MeetingRecorder deptId={member.deptId} userId={member.userId}
+
+ReviewDetail · function · components/review-detail.tsx:L20-L830 · 0 in-edges
+  L486: <RecordingSegmentPlayer deptId={deptId} reviewId={id} duration={review.duration ?? 0} segments={segments} downloadAllowed={downloadAllowed} seekRequest={segment
+
+scripts/review-controls-lab/main.tsx (module level) · 0 in-edges
+  L12: : view === "recorder" ? <MeetingRecorder deptId="dept" userId="synthetic-user" />
+### callers ReviewedMaterials
+[graft] tokens saved ≈ 4,027 (98%) — this output ≈ 83 tok vs reading the 1 file(s) it covers whole ≈ 4,110 tok (estimate). At the end of your reply, tell the user the total graft tokens saved this turn — sum each such line across your graft calls — e.g. "🌱 graft saved ~N tokens this turn".
+
+ReviewedMaterials · function · components/reviewed-materials.tsx:L15-L454
+  no indexed callers — the graph has no incoming call/reference edges for this symbol as written. Check the name (try the bare symbol, or "Type.method"), or find its uses with graft grep "ReviewedMaterials". Fall back to raw grep -rn only for unindexed files
+
+### Post-analysis refresh: admin off→on preview
+Snapshot `/work/ux33-s8-final3` copied after `ReviewSettingsForm` effect dependency changed from initial setting to saved setting and the regression test was added. Build parsed 412/412 files; graph check OK. Structural totals remain 2,169 nodes and 5,181 edges (no new function/call edge). `graft grep "savedRecording|active_recordings|ReviewSettingsForm"` found 20 hits in 6 symbols across 5 files, including `components/admin/review-settings.tsx:16` (`savedRecording` gate), `:30` (`[writable, savedRecording]` dependency), `:58` (count display), `app/api/admin/review-settings/route.ts:10` (GET response), and `tests/review-controls/access.spec.ts:128` (off→on regression). Graft reported approximately 3,611 tokens saved in this refresh. Earlier step 0~7 individual before/after graphs remain absent.

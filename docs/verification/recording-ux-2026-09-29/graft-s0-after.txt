@@ -1,0 +1,15 @@
+Phase 33 step 0 — implementation-after dependency check (2026-09-29)
+
+Graft skeleton result: unavailable for the same Docker/CLI reason recorded in
+graft-s0-before.txt. This file does not claim a Graft run or graph refresh.
+
+Actual source inspection with PowerShell Select-String:
+- lib/recording/recorder-copy.ts exports RecorderTone, RecorderStage and nine
+  functions: recorderErrorText, stopReasonNotice, sessionStateLabel,
+  recorderStage, missingTestConditions, missingStartConditions,
+  signalDetected, formatExpiry, recorderTabTitle.
+- tests/recording/recorder-copy.test.ts imports all nine functions.
+- No component imports the module yet; phase 33 steps 1–3 will wire it into
+  meeting-recorder.tsx. Existing thrown error codes and recover() branch remain.
+
+The missing Graft skeleton is an unmet tool result, not a successful graph check.

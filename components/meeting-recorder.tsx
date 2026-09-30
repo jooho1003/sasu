@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { RecordingSaveResult, RecordingSegmentState, ReviewRecordingStart } from "@/lib/contracts";
 import { captureInputs, captureMicrophone, stopInputs } from "@/lib/recording/browser/inputs";
 import { startRecording } from "@/lib/recording/browser/capture";
@@ -12,6 +12,7 @@ import {
 } from "@/lib/recording/browser/storage";
 import { prepareRecordingOriginalManifest, streamRecordingOriginals } from "@/lib/recording/original-segments";
 import { RECORDING_RATE } from "@/lib/recording/pcm";
+import { formatExpiry, missingStartConditions, missingTestConditions, recorderErrorText, recorderStage, recorderTabTitle, sessionStateLabel, signalDetected, stopReasonNotice } from "@/lib/recording/recorder-copy";
 import { encodeRecordingLevels, quantizeRecordingLevel } from "@/lib/recording/levels";
 import type { RecordingSnapshot } from "@/lib/recording/session";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
@@ -25,6 +26,10 @@ type Session = {
 type LocalInfo = Awaited<ReturnType<Awaited<ReturnType<typeof openRecordingStore>>["inspect"]>>;
 type Member = { user_id: string; display_name: string; consented_at: string };
 type CaptureControl = Awaited<ReturnType<typeof startRecording>>;
+type RecorderPanel = "form" | "session" | "list";
+const subscribeBrowserReady = () => () => {};
+const browserReadySnapshot = () => true;
+const serverReadySnapshot = () => false;
 
 async function api<T>(url: string, body?: unknown): Promise<T> {
   const response = await fetch(url, body === undefined ? { cache: "no-store" } : {
@@ -38,6 +43,16 @@ async function api<T>(url: string, body?: unknown): Promise<T> {
 function time(samples: number) {
   const seconds = Math.floor(samples / RECORDING_RATE);
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+function rememberLevels(history: number[][], levels: number[]) {
+  levels.forEach((level, index) => {
+    const recent = history[index] ?? [];
+    recent.push(level);
+    if (recent.length > 15) recent.shift();
+    history[index] = recent;
+  });
+  history.length = levels.length;
 }
 
 async function importRecordingKey(encoded: string) {
@@ -67,7 +82,9 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
   const [consent, setConsent] = useState(false);
   const [testAudio, setTestAudio] = useState<string | null>(null);
   const [testLevels, setTestLevels] = useState<number[]>([]);
+  const [testDetected, setTestDetected] = useState<boolean[]>([]);
   const [liveLevels, setLiveLevels] = useState<number[]>([]);
+  const [liveDetected, setLiveDetected] = useState<boolean[]>([]);
   const [inputNotice, setInputNotice] = useState("");
   const [microphoneDisconnected, setMicrophoneDisconnected] = useState(false);
   const [wakeNotice, setWakeNotice] = useState("");
@@ -75,15 +92,26 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
   const [partialAccepted, setPartialAccepted] = useState(false);
   const [snapshot, setSnapshot] = useState<RecordingSnapshot | null>(null);
   const [captureActive, setCaptureActive] = useState(false);
-  const [prepared, setPrepared] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<unknown>(null);
+  const [errorPanel, setErrorPanel] = useState<RecorderPanel>("form");
   const [message, setMessage] = useState("");
+  const [navigationNotice, setNavigationNotice] = useState(false);
+  const [confirmStop, setConfirmStop] = useState(false);
+  const browserReady = useSyncExternalStore(subscribeBrowserReady, browserReadySnapshot, serverReadySnapshot);
+  const interruptionTitleRef = useRef(false);
+  const interruptionReasonRef = useRef<string | null>(null);
+  const errorRef = useRef<HTMLParagraphElement | null>(null);
+  const baseTitleRef = useRef<string | null>(null);
+  const dismissedInterruptionRef = useRef<string | null>(null);
   const keyRef = useRef<CryptoKey | null>(null);
   const controlRef = useRef<CaptureControl | null>(null);
   const loadingRef = useRef(false);
   const testAudioRef = useRef<string | null>(null);
   const meterTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const testLevelHistoryRef = useRef<number[][]>([]);
+  const liveLevelHistoryRef = useRef<number[][]>([]);
   const inputCleanupRef = useRef<(() => void) | null>(null);
   const profileStoreRef = useRef<Awaited<ReturnType<typeof openRecordingStore>> | null>(null);
   const profileWriteRef = useRef<Promise<void>>(Promise.resolve());
@@ -92,6 +120,22 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const wakeLockPendingRef = useRef(false);
   const scope = useCallback((id: string): RecordingScope => ({ ownerUserId: userId, deptId, recordingId: id }), [userId, deptId]);
+
+  useEffect(() => {
+    baseTitleRef.current = document.title;
+    return () => { if (baseTitleRef.current !== null) document.title = baseTitleRef.current; };
+  }, []);
+
+  useEffect(() => { if (error !== null) errorRef.current?.focus(); }, [error, errorPanel]);
+
+  useEffect(() => {
+    if (!confirmStop) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); setConfirmStop(false); }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [confirmStop]);
 
   const refresh = useCallback(async () => {
     if (loadingRef.current) return;
@@ -176,6 +220,8 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
     wakeLockRef.current = null;
     if (wakeLock) void wakeLock.release().catch(() => {});
     setLiveLevels([]);
+    setLiveDetected([]);
+    liveLevelHistoryRef.current = [];
   }
 
   async function flushProfile(id: string, control: CaptureControl, sampleCount: number) {
@@ -207,11 +253,24 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
     finally { store.close(); }
   }, [scope]);
 
-  async function run(task: () => Promise<unknown>) {
-    setBusy(true); setError(""); setMessage("");
+  async function run(panel: RecorderPanel, task: () => Promise<unknown>) {
+    setBusy(true); setError(null); setErrorPanel(panel); setMessage("");
     try { await task(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "녹음 작업을 완료하지 못했습니다."); }
+    catch (cause) { setError(cause); }
     finally { setBusy(false); }
+  }
+
+  function selectMode(next: ReviewRecordingStart["input_method"]) {
+    if (mode === next || busy || starting) return;
+    setMode(next);
+    setHeardTest(false);
+    if (testAudioRef.current) URL.revokeObjectURL(testAudioRef.current);
+    testAudioRef.current = null;
+    setTestAudio(null);
+    setTestLevels([]);
+    setTestDetected([]);
+    testLevelHistoryRef.current = [];
+    setMessage("");
   }
 
   async function keyFor(id: string) {
@@ -223,6 +282,7 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
     if (!consent || !navigator.mediaDevices || !globalThis.MediaRecorder)
       throw new Error("참석자 동의와 브라우저 녹음 지원을 확인해 주세요.");
     // This five-second test stays in memory. Tracks stop before the user hears it.
+    testLevelHistoryRef.current = [];
     const inputs = await captureInputs(mode);
     let context: AudioContext | null = null;
     let destination: MediaStreamAudioDestinationNode | null = null;
@@ -241,11 +301,16 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
         context!.createMediaStreamSource(input).connect(analyser).connect(mix);
         return analyser;
       });
-      meterTimer = setInterval(() => setTestLevels(analysers.map((analyser) => {
-        const values = new Float32Array(analyser.fftSize);
-        analyser.getFloatTimeDomainData(values);
-        return Math.sqrt(values.reduce((sum, value) => sum + value * value, 0) / values.length);
-      })), 100);
+      meterTimer = setInterval(() => {
+        const levels = analysers.map((analyser) => {
+          const values = new Float32Array(analyser.fftSize);
+          analyser.getFloatTimeDomainData(values);
+          return Math.sqrt(values.reduce((sum, value) => sum + value * value, 0) / values.length);
+        });
+        rememberLevels(testLevelHistoryRef.current, levels);
+        setTestLevels(levels);
+        setTestDetected(testLevelHistoryRef.current.map((recent) => signalDetected(recent)));
+      }, 100);
       const chunks: Blob[] = [];
       const activeRecorder = new MediaRecorder(destination.stream);
       recorder = activeRecorder;
@@ -263,10 +328,12 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
       testAudioRef.current = url;
       setTestAudio(url);
       setHeardTest(false);
-      setMessage("5초 테스트를 들어 보고, 두 입력이 들리는지 확인해 주세요.");
+      setMessage(mode === "microphone" ? "5초 테스트를 들어 보고, 내 목소리가 들리는지 확인해 주세요." : "5초 테스트를 들어 보고, 컴퓨터 소리와 내 목소리가 모두 들리는지 확인해 주세요.");
     } finally {
       clearInterval(meterTimer);
       setTestLevels([]);
+      setTestDetected([]);
+      testLevelHistoryRef.current = [];
       if (recorder?.state === "recording") recorder.stop();
       destination?.stream.getTracks().forEach((track) => track.stop());
       stopInputs(inputs);
@@ -274,35 +341,9 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
     }
   }
 
-  async function prepare() {
-    if (!consent || !heardTest || !title.trim() || !globalThis.isSecureContext || !navigator.mediaDevices || !globalThis.AudioWorkletNode || !navigator.locks)
-      throw new Error("동의·제목·보안 연결·녹음 지원 환경을 확인해 주세요.");
-    const id = crypto.randomUUID();
-    const input: ReviewRecordingStart = {
-      id, title: title.trim(), input_method: mode, visibility, participants,
-      consent_confirmed: true, meeting_provider: provider,
-      continues_recording_id: continuesId || null,
-    };
-    const session = await api<Session>(`${base}/recordings`, input);
-    try {
-      const key = await keyFor(id);
-      await probeRecordingStore(scope(id), key);
-      keyRef.current = key;
-      if (testAudioRef.current) URL.revokeObjectURL(testAudioRef.current);
-      testAudioRef.current = null;
-      setTestAudio(null);
-      setSelected({ ...session, ...input, state: "active", started_at: new Date().toISOString(), state_reason: null });
-      setLocal(null); setPrepared(true);
-      setMessage("준비됐습니다. 다음 버튼에서 브라우저의 입력 장치를 선택하세요.");
-      await refresh();
-    } catch (cause) {
-      await api(`${base}/recordings/${id}/discard`, {}).catch(() => {});
-      throw cause;
-    }
-  }
-
   async function recover(session: Session) {
-    setSelected(session); setPrepared(false); setSnapshot(null); setCaptureActive(false); setPartialAccepted(false); setSegments([]);
+    dismissedInterruptionRef.current = null;
+    setSelected(session); setSnapshot(null); setCaptureActive(false); setPartialAccepted(false); setSegments([]);
     try {
       const key = await keyFor(session.id);
       keyRef.current = key;
@@ -319,21 +360,40 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
     }
   }
 
-  async function begin() {
-    if (!selected || !keyRef.current || !prepared || selected.state !== "active") return;
-    // getDisplayMedia needs a fresh user gesture after the server/key/storage preparation.
-    const inputs = await captureInputs(selected.input_method);
+  async function start() {
+    dismissedInterruptionRef.current = null;
+    const missing = missingStartConditions({
+      consent, heardTest, title,
+      supported: !!(navigator.mediaDevices && globalThis.AudioWorkletNode && navigator.locks),
+      secure: globalThis.isSecureContext,
+    });
+    if (missing.length) throw new Error(missing[0]);
+    setStarting(true);
+    let inputs: MediaStream[] = [];
+    let sessionId: string | null = null;
+    let sessionCreated = false;
+    let control: CaptureControl | null = null;
     try {
-      // Source selection may take minutes; recheck consent and the org switch before writing any sample.
-      const freshKey = await keyFor(selected.id);
-      keyRef.current = freshKey;
+      // Capture permission must be requested while the click's user gesture is active.
+      inputs = await captureInputs(mode);
+      const id = crypto.randomUUID();
+      sessionId = id;
+      const input: ReviewRecordingStart = {
+        id, title: title.trim(), input_method: mode, visibility, participants,
+        consent_confirmed: true, meeting_provider: provider,
+        continues_recording_id: continuesId || null,
+      };
+      const session = await api<Session>(`${base}/recordings`, input);
+      sessionCreated = true;
+      const key = await keyFor(id);
+      await probeRecordingStore(scope(id), key);
       let latestSnapshot: RecordingSnapshot = { state: "recording", samples: 0, persistedSamples: 0, reason: null, warning: false };
-      const control = await startRecording(scope(selected.id), inputs, freshKey, (next) => {
+      const activeControl = await startRecording(scope(id), inputs, key, (next) => {
         latestSnapshot = next;
         setSnapshot(next);
         if (next.state === "interrupted" || next.state === "stopped") {
           const activeControl = controlRef.current;
-          if (activeControl) void flushProfile(selected.id, activeControl, next.samples).catch(() =>
+          if (activeControl) void flushProfile(id, activeControl, next.samples).catch(() =>
             setInputNotice("녹음 품질 정보를 보관하지 못했습니다. 확인 저장된 음성은 유지됩니다."));
           controlRef.current = null;
           setCaptureActive(false);
@@ -343,14 +403,21 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
         setMicrophoneDisconnected(true);
         setInputNotice("마이크 연결이 끊겨 녹음을 일시정지했습니다. 마이크를 다시 선택해 주세요.");
       });
-      controlRef.current = control;
-      profileStoreRef.current = await openRecordingStore(freshKey);
+      control = activeControl;
+      controlRef.current = activeControl;
+      profileStoreRef.current = await openRecordingStore(key);
       profileFlushRef.current = null;
       profileWriteRef.current = Promise.resolve();
       microphoneReselectsRef.current = 0;
+      keyRef.current = key;
+      if (testAudioRef.current) URL.revokeObjectURL(testAudioRef.current);
+      testAudioRef.current = null;
+      setTestAudio(null);
+      setSelected({ ...session, ...input, state: "active", started_at: new Date().toISOString(), state_reason: null });
+      setLocal(null);
       setCaptureActive(true);
+      liveLevelHistoryRef.current = [];
       setMicrophoneDisconnected(false);
-      setPrepared(false);
       setInputNotice("");
       const onDeviceChange = () => setInputNotice("입력 장치가 바뀌었습니다. 소리가 계속 들어오는지 확인해 주세요.");
       const onMute = () => setInputNotice("입력 소리가 잠시 끊겼습니다. 공유와 마이크 상태를 확인해 주세요.");
@@ -369,24 +436,42 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
       };
       let lastProfileSecond = 0;
       meterTimerRef.current = setInterval(() => {
-        const levels = control.levels();
+        const levels = activeControl.levels();
+        rememberLevels(liveLevelHistoryRef.current, levels);
         setLiveLevels(levels);
-        const vectors = control.profile();
+        setLiveDetected(liveLevelHistoryRef.current.map((recent) => signalDetected(recent)));
+        const vectors = activeControl.profile();
         const seconds = Math.min(Math.floor(latestSnapshot.samples / RECORDING_RATE), vectors.length);
         if (seconds <= lastProfileSecond || !profileStoreRef.current) return;
         lastProfileSecond = seconds;
         const store = profileStoreRef.current;
         const bytes = vectors.slice(0, seconds).map((vector) => vector.map(quantizeRecordingLevel));
-        const health = { ...control.health(), microphone_reselects: microphoneReselectsRef.current };
-        profileWriteRef.current = profileWriteRef.current.then(() => store.recordProfile(scope(selected.id), bytes, health));
-        void profileWriteRef.current.catch(() => { void control.interrupt("profile_storage_failed"); });
-      }, 250);
-      await requestWakeLock(control);
+        const health = { ...activeControl.health(), microphone_reselects: microphoneReselectsRef.current };
+        profileWriteRef.current = profileWriteRef.current.then(() => store.recordProfile(scope(id), bytes, health));
+        void profileWriteRef.current.catch(() => { void activeControl.interrupt("profile_storage_failed"); });
+      }, 100);
+      await requestWakeLock(activeControl);
       setMessage("녹음 중입니다. 확인 저장된 길이를 보면서 진행해 주세요.");
+      void refresh().catch(() => setInputNotice("녹음 목록을 새로 읽지 못했습니다. 녹음은 계속됩니다."));
     } catch (cause) {
-      if (controlRef.current) await controlRef.current.interrupt("recording_setup_failed");
+      if (control) await control.interrupt("recording_setup_failed").catch(() => {});
       stopInputs(inputs);
+      cleanupCapture();
+      await profileWriteRef.current.catch(() => {});
+      profileStoreRef.current?.close();
+      profileStoreRef.current = null;
+      controlRef.current = null;
+      keyRef.current = null;
+      setCaptureActive(false);
+      setSnapshot(null);
+      setSelected(null);
+      if (sessionCreated && sessionId) {
+        await api(`${base}/recordings/${sessionId}/discard`, {}).catch(() => {});
+        await removeLocalRecording(scope(sessionId)).catch(() => {});
+      }
       throw cause;
+    } finally {
+      setStarting(false);
     }
   }
 
@@ -464,6 +549,33 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
     await refresh();
   }
 
+  function showNewRecordingForm() {
+    if (controlRef.current) return;
+    keyRef.current = null;
+    setSelected(null);
+    setLocal(null);
+    setSegments([]);
+    setSnapshot(null);
+    setCaptureActive(false);
+    setPartialAccepted(false);
+    setConfirmStop(false);
+    setInputNotice("");
+    setWakeNotice("");
+    setError(null);
+    setMessage("");
+    setTitle("");
+    setContinuesId("");
+    setConsent(false);
+    setHeardTest(false);
+    if (testAudioRef.current) URL.revokeObjectURL(testAudioRef.current);
+    testAudioRef.current = null;
+    setTestAudio(null);
+    setTestLevels([]);
+    setTestDetected([]);
+    testLevelHistoryRef.current = [];
+    void refresh().catch(() => { setErrorPanel("list"); setError("녹음 목록을 새로 읽지 못했습니다. 다시 확인해 주세요."); });
+  }
+
   const selectedId = selected?.id;
   const selectedState = selected?.state;
   useEffect(() => {
@@ -481,46 +593,139 @@ export function MeetingRecorder({ deptId, userId, initialContinuesId = null }: {
           const detail = await api<{ segments: RecordingSegmentState[] }>(`${base}/reviews/${id}`);
           if (active) setSegments(detail.segments ?? []);
         }
-      }).catch(() => { if (active) setError("원본 확인 상태를 읽지 못했습니다. 다시 확인해 주세요."); });
+      }).catch(() => { if (active) { setErrorPanel("session"); setError("원본 확인 상태를 읽지 못했습니다. 다시 확인해 주세요."); } });
     }, 3000);
     return () => { active = false; clearInterval(timer); };
   }, [selectedId, selectedState, base, deptId, router, scope]);
 
   const capturing = captureActive && snapshot && ["recording", "paused", "stopping"].includes(snapshot.state);
+  const stage = recorderStage({ selected: !!selected, starting, snapshotState: snapshot?.state ?? null, sessionState: selected?.state ?? null });
+  const currentStep = stage === "setup" ? 1 : stage === "starting" || stage === "recording" || stage === "paused" ? 2 : 3;
+  const testSupported = browserReady && !!(navigator.mediaDevices && globalThis.MediaRecorder);
+  const startSupported = browserReady && !!(navigator.mediaDevices && globalThis.AudioWorkletNode && navigator.locks);
+  const secure = browserReady && window.isSecureContext;
+  const testBlockers = browserReady ? [...missingTestConditions({ consent, supported: testSupported }), ...(busy || starting ? ["현재 작업이 끝날 때까지 기다려 주세요."] : [])] : ["브라우저 기능을 확인하고 있습니다."];
+  const startBlockers = browserReady ? [...missingStartConditions({ consent, heardTest, title, supported: startSupported, secure }), ...(busy || starting ? ["현재 작업이 끝날 때까지 기다려 주세요."] : [])] : ["브라우저 기능을 확인하고 있습니다."];
+  const otherSessions = sessions.filter((session) => session.id !== selected?.id);
+  const recordedSeconds = Math.floor((snapshot?.samples ?? 0) / RECORDING_RATE);
+  const storageDelay = Math.max(0, Math.floor(((snapshot?.samples ?? 0) - (snapshot?.persistedSamples ?? 0)) / RECORDING_RATE));
+  const storageDelayed = !!capturing && storageDelay >= 3;
+  const stopNotice = snapshot?.reason ? stopReasonNotice(snapshot.reason) : null;
+
+  useEffect(() => {
+    if (!capturing) return;
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const onLinkClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      const target = event.target;
+      const link = target instanceof Element ? target.closest<HTMLAnchorElement>("a[href]") : null;
+      if (!link || link.hasAttribute("download") || link.getAttribute("target")) return;
+      if (new URL(link.href, location.href).origin !== location.origin) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setNavigationNotice(true);
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    document.addEventListener("click", onLinkClick, true);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      document.removeEventListener("click", onLinkClick, true);
+      setNavigationNotice(false);
+    };
+  }, [capturing]);
+
+  useEffect(() => {
+    const baseTitle = baseTitleRef.current;
+    if (baseTitle === null) return;
+    if (snapshot?.reason && snapshot.reason !== "duration_limit" && snapshot.state === "interrupted" && dismissedInterruptionRef.current !== snapshot.reason) {
+      document.title = recorderTabTitle("interrupted", recordedSeconds, baseTitle);
+      interruptionTitleRef.current = true;
+      interruptionReasonRef.current = snapshot.reason;
+    } else if (stage === "recording" || stage === "paused") {
+      document.title = recorderTabTitle(stage, recordedSeconds, baseTitle);
+      interruptionTitleRef.current = false;
+    } else if (!interruptionTitleRef.current || dismissedInterruptionRef.current === snapshot?.reason) {
+      document.title = baseTitle;
+    }
+  }, [stage, recordedSeconds, snapshot?.reason, snapshot?.state]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && interruptionTitleRef.current) {
+        dismissedInterruptionRef.current = interruptionReasonRef.current;
+        if (baseTitleRef.current !== null) document.title = baseTitleRef.current;
+        interruptionTitleRef.current = false;
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
+
+  const statusAnnouncement = starting ? "녹음 준비 중" : snapshot?.state === "recording" ? "녹음 중" : snapshot?.state === "paused" ? "녹음을 잠시 멈췄습니다" : snapshot?.state === "interrupted" ? "녹음이 중단됐습니다" : snapshot?.state === "stopped" ? "녹음을 마쳤습니다" : "";
   return <main className="workspace-page review-workspace meeting-recorder">
     <header className="page-heading"><div><Link href={`/d/${deptId}/reviews`}>← 올린 자료 확인</Link><p className="eyebrow">회의 녹음</p><h1>소리를 확인하고 녹음하세요</h1><p>녹음은 먼저 이 기기에 암호화해 저장합니다. 저장 요청 전에는 음성을 서버에 보내지 않습니다.</p></div></header>
-    {error && <p className="review-notice" role="alert">{error}</p>}
-    {message && <p className="review-notice" role="status">{message}</p>}
+    <ol className="recorder-steps" aria-label="녹음 단계">
+      <li aria-current={currentStep === 1 ? "step" : undefined}><span>1</span> 입력 확인</li>
+      <li aria-current={currentStep === 2 ? "step" : undefined}><span>2</span> 녹음</li>
+      <li aria-current={currentStep === 3 ? "step" : undefined}><span>3</span> 저장</li>
+    </ol>
+    {navigationNotice && <p className="recorder-notice is-warning"><strong>주의</strong> 녹음 중에는 다른 화면으로 이동하지 않습니다. 녹음을 끝낸 뒤 이동해 주세요.</p>}
+    {message && <p className="recorder-notice">{message}</p>}
+    <p className="recorder-live-status" role="status">{statusAnnouncement}{storageDelayed ? " · 이 기기 저장이 늦어지고 있습니다" : ""}</p>
     {!selected && <section className="panel" aria-label="새 회의 녹음">
       <h2>새 녹음</h2>
-      <label>회의 제목 <input value={title} maxLength={120} onChange={(event) => setTitle(event.target.value)} /></label>
-      <fieldset><legend>녹음 방식</legend><label><input type="radio" checked={mode === "microphone"} onChange={() => { setMode("microphone"); setHeardTest(false); }} /> 마이크</label><label><input type="radio" checked={mode === "system_and_microphone"} onChange={() => { setMode("system_and_microphone"); setHeardTest(false); }} /> 컴퓨터 소리 + 마이크</label></fieldset>
-      <label>회의 출처 <select value={provider} onChange={(event) => setProvider(event.target.value as typeof provider)}><option value="in_person">대면 회의</option><option value="meet">Google Meet</option><option value="zoom">Zoom</option><option value="other">기타</option></select></label>
-      <label>이어서 녹음 <select value={continuesId} onChange={(event) => setContinuesId(event.target.value)}><option value="">새 회의 기록</option>{recent.map((recording) => <option key={recording.id} value={recording.id}>{recording.title} · {new Date(recording.started_at).toLocaleString("ko-KR")}</option>)}</select></label>
-      <label>확정 후 볼 수 있는 사람 <select value={visibility} onChange={(event) => setVisibility(event.target.value as typeof visibility)}><option value="leads_only">팀장만</option><option value="dept">부서 멤버</option></select></label>
-      <fieldset><legend>동의한 참석자</legend>{members.map((member) => <label key={member.user_id}><input type="checkbox" checked={participants.includes(member.user_id)} disabled={member.user_id === userId} onChange={(event) => setParticipants((current) => event.target.checked ? [...current, member.user_id] : current.filter((id) => id !== member.user_id))} /> {member.display_name}{member.user_id === userId ? " (녹음자)" : ""}</label>)}</fieldset>
-      <label><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /> 참석자 전원 녹음 동의를 확인했고, 이 기기의 임시 보관과 비공개 원본 보관을 확인했습니다.</label>
+      {error !== null && errorPanel === "form" && <p className="recorder-notice is-error" role="alert" tabIndex={-1} ref={errorRef}><strong>오류</strong> {recorderErrorText(error)}</p>}
+      {starting && <p className="recorder-stage-chip">녹음 준비 중</p>}
+      <label>회의 제목 <input value={title} maxLength={120} disabled={starting} onChange={(event) => setTitle(event.target.value)} /></label>
+      <fieldset disabled={starting || busy}><legend>녹음 방식</legend><label><input type="radio" name="recording-mode" checked={mode === "microphone"} onChange={() => selectMode("microphone")} /> 마이크</label><label><input type="radio" name="recording-mode" checked={mode === "system_and_microphone"} onChange={() => selectMode("system_and_microphone")} /> 컴퓨터 소리 + 마이크</label></fieldset>
+      <label>회의 출처 <select value={provider} disabled={starting} onChange={(event) => setProvider(event.target.value as typeof provider)}><option value="in_person">대면 회의</option><option value="meet">Google Meet</option><option value="zoom">Zoom</option><option value="other">기타</option></select></label>
+      <label>이어서 녹음 <select value={continuesId} disabled={starting} onChange={(event) => setContinuesId(event.target.value)}><option value="">새 회의 기록</option>{recent.map((recording) => <option key={recording.id} value={recording.id}>{recording.title} · {new Date(recording.started_at).toLocaleString("ko-KR")}</option>)}</select></label>
+      <label>확정 후 볼 수 있는 사람 <select value={visibility} disabled={starting} onChange={(event) => setVisibility(event.target.value as typeof visibility)}><option value="leads_only">팀장만</option><option value="dept">부서 멤버</option></select></label>
+      <fieldset disabled={starting}><legend>동의한 참석자</legend>{members.map((member) => <label key={member.user_id}><input type="checkbox" checked={participants.includes(member.user_id)} disabled={member.user_id === userId} onChange={(event) => setParticipants((current) => event.target.checked ? [...current, member.user_id] : current.filter((id) => id !== member.user_id))} /> {member.display_name}{member.user_id === userId ? " (녹음자)" : ""}</label>)}</fieldset>
+      <label><input type="checkbox" checked={consent} disabled={starting} onChange={(event) => setConsent(event.target.checked)} /> 참석자 전원 녹음 동의를 확인했고, 이 기기의 임시 보관과 비공개 원본 보관을 확인했습니다.</label>
       <p className="field-help">30분까지 녹음할 수 있습니다. 온라인 회의는 공유 창에서 오디오 공유를 선택하세요. 시스템 소리는 알림 등 다른 앱 소리도 담길 수 있습니다.</p>
-      <button type="button" className="button button-secondary" disabled={busy || !consent} onClick={() => void run(testInput)}>5초 테스트 녹음</button>
-      {testLevels.map((level, index) => <p key={index}>{mode === "microphone" ? "마이크" : index === 0 ? "컴퓨터 소리" : "마이크"} 입력 <meter min={0} max={0.3} value={Math.min(0.3, level)} /> {level < 0.002 ? "소리 확인 필요" : "입력 감지"}</p>)}
-      {testAudio && <><p>입력 테스트 재생</p><audio controls src={testAudio} preload="metadata" /><label><input type="checkbox" checked={heardTest} onChange={(event) => setHeardTest(event.target.checked)} /> 테스트를 듣고 필요한 입력이 모두 들리는지 확인했습니다.</label></>}
-      <button type="button" className="button button-primary" disabled={busy || !consent || !heardTest || !title.trim()} onClick={() => void run(prepare)}>녹음 준비</button>
+      <button type="button" className="button button-secondary" disabled={testBlockers.length > 0} aria-describedby={testBlockers.length ? "recorder-test-blockers" : undefined} onClick={() => void run("form", testInput)}>5초 테스트 녹음</button>
+      {testBlockers.length > 0 && <ul id="recorder-test-blockers" className="recorder-blockers">{testBlockers.map((reason) => <li key={reason}>{reason}</li>)}</ul>}
+      {testLevels.map((level, index) => { const inputName = mode === "microphone" || index === 1 ? "마이크" : "컴퓨터 소리"; return <p key={index}>{inputName} 입력 <meter aria-label={`${inputName} 입력 크기`} min={0} max={0.3} value={Math.min(0.3, level)} /> {testDetected[index] ? "입력 감지" : "소리 확인 필요"}</p>; })}
+      {testAudio && <><p>입력 테스트 재생</p><audio controls src={testAudio} preload="metadata" /><label><input type="checkbox" checked={heardTest} disabled={starting} onChange={(event) => setHeardTest(event.target.checked)} /> 테스트를 듣고 필요한 입력이 모두 들리는지 확인했습니다.</label></>}
+      <button type="button" className="button button-primary" disabled={startBlockers.length > 0} aria-describedby={startBlockers.length ? "recorder-start-blockers" : undefined} onClick={() => void run("form", start)}>녹음 시작</button>
+      {startBlockers.length > 0 && <ul id="recorder-start-blockers" className="recorder-blockers">{startBlockers.map((reason) => <li key={reason}>{reason}</li>)}</ul>}
     </section>}
     {selected && <section className="panel" aria-label="현재 녹음">
-      <h2>{selected.title}</h2><p>서버 상태: {selected.state === "active" ? "녹음 준비·로컬 보관" : selected.state === "saving" ? "서버 저장·검증 중" : selected.state}</p>
-      {snapshot && <p role="status">{snapshot.state === "recording" ? "녹음 중" : snapshot.state === "paused" ? "잠시 멈춤" : snapshot.state === "interrupted" ? "중단됨" : "녹음 종료"} · 녹음 {time(snapshot.samples)} / 30:00 · 이 기기에 확인 저장 {time(snapshot.persistedSamples)}{snapshot.warning ? " · 29분 경고" : ""}</p>}
-      {liveLevels.map((level, index) => <p key={index}>{selected.input_method === "microphone" ? "마이크" : index === 0 ? "컴퓨터 소리" : "마이크"} 입력 <meter min={0} max={0.3} value={Math.min(0.3, level)} /> {level < 0.002 ? "소리 확인 필요" : "입력 감지"}</p>)}
-      {inputNotice && <p role="status">{inputNotice}</p>}
-      {microphoneDisconnected && capturing && <button type="button" className="button button-secondary" disabled={busy} onClick={() => void run(reselectMicrophone)}>마이크 다시 선택</button>}
-      {wakeNotice && <p role="status">{wakeNotice}</p>}
-      {snapshot?.reason && <p role="alert">녹음 중단 사유: {snapshot.reason}. 확인 저장된 구간만 복구합니다.</p>}
-      {prepared && <button className="button button-primary" type="button" disabled={busy} onClick={() => void run(begin)}>입력 장치 선택하고 녹음 시작</button>}
-      {capturing && <><button className="button button-secondary" type="button" disabled={busy || microphoneDisconnected} onClick={() => { if (snapshot.state === "paused") controlRef.current?.resume(); else controlRef.current?.pause(); }}>{snapshot.state === "paused" ? "녹음 다시 시작" : "녹음 잠시 멈추기"}</button><button className="button button-primary" type="button" disabled={busy} onClick={() => void run(stop)}>녹음 종료</button></>}
-      {(snapshot?.state === "interrupted" || snapshot?.state === "stopped") && !local && <button className="button button-secondary" type="button" disabled={busy} onClick={() => keyRef.current && void run(() => inspect(selected.id, keyRef.current!))}>확인 구간 보기</button>}
-      {local && <><p>이 기기의 연속 확인 구간: {time(local.samples)}{local.partial ? ` · 원래 기록 ${time(local.expectedSamples)} 중 일부만 남았습니다.` : ""}{local.interrupted ? " · 중단된 녹음" : ""}</p>{local.partial && <label><input type="checkbox" checked={partialAccepted} onChange={(event) => setPartialAccepted(event.target.checked)} /> 빠진 구간 뒤의 소리는 포함되지 않으며, 표시된 확인 구간만 저장합니다.</label>}<button className="button button-primary" type="button" disabled={busy || !!capturing || local.samples < 1 || (local.partial && !partialAccepted)} onClick={() => void run(upload)}>음성 저장하고 받아쓰기</button></>}
-      {selected.state === "saving" && <><p>원본 확인: {segments.filter((segment) => segment.status === "verified").length}/{segments.length} 구간</p>{segments.some((segment) => segment.status === "failed" || segment.status === "awaiting_upload") && <button type="button" className="button button-secondary" disabled={busy || !local} onClick={() => void run(upload)}>남은 구간 다시 올리기</button>}</>}
-      {!capturing && <button type="button" className="button button-secondary" disabled={busy} onClick={() => void run(() => discard(selected))}>녹음 폐기</button>}
+      <h2>{selected.title}</h2><p>서버 상태: {sessionStateLabel(selected.state)}</p>
+      {error !== null && errorPanel === "session" && <p className="recorder-notice is-error" role="alert" tabIndex={-1} ref={errorRef}><strong>오류</strong> {recorderErrorText(error)}</p>}
+      {snapshot && <div className="recorder-progress">
+        <div className="recorder-stage-row"><span className="recorder-stage-chip">{snapshot.state === "recording" || snapshot.state === "stopping" ? "녹음 중" : snapshot.state === "paused" ? "잠시 멈춤" : snapshot.state === "interrupted" ? "녹음 중단" : "녹음 종료"}</span>{snapshot.warning && <span className="recorder-notice is-warning"><strong>주의</strong> 29분이 지났습니다. 곧 녹음이 끝납니다.</span>}</div>
+        <p className="recorder-timer" role="timer" aria-live="off">{time(snapshot.samples)} <span>/ 30:00</span></p>
+        <p className="recorder-persisted">이 기기에 저장됨 {time(snapshot.persistedSamples)}</p>
+        {storageDelayed && <p className="recorder-notice is-warning"><strong>주의</strong> 이 기기 저장이 {storageDelay}초 늦어지고 있습니다.</p>}
+      </div>}
+      {liveLevels.map((level, index) => { const inputName = selected.input_method === "microphone" || index === 1 ? "마이크" : "컴퓨터 소리"; return <p key={index}>{inputName} 입력 <meter aria-label={`${inputName} 입력 크기`} min={0} max={0.3} value={Math.min(0.3, level)} /> {liveDetected[index] ? "입력 감지" : "소리 확인 필요"}</p>; })}
+      {inputNotice && <p className="recorder-notice is-warning"><strong>주의</strong> {inputNotice}</p>}
+      {microphoneDisconnected && capturing && <button type="button" className="button button-secondary" disabled={busy} onClick={() => void run("session", reselectMicrophone)}>마이크 다시 선택</button>}
+      {wakeNotice && <p className="recorder-notice is-warning"><strong>주의</strong> {wakeNotice}</p>}
+      {stopNotice && <p className={`recorder-notice${stopNotice.tone === "warning" ? " is-warning" : ""}`} role={stopNotice.tone === "warning" ? "alert" : "status"}><strong>{stopNotice.tone === "warning" ? "주의" : "안내"}</strong> {stopNotice.text}</p>}
+      {capturing && <div className="recorder-controls"><button className="button button-primary" type="button" disabled={busy || microphoneDisconnected} onClick={() => { setConfirmStop(false); if (snapshot.state === "paused") controlRef.current?.resume(); else controlRef.current?.pause(); }}>{snapshot.state === "paused" ? "녹음 다시 시작" : "녹음 잠시 멈추기"}</button><button className="button button-secondary" type="button" disabled={busy} onClick={() => setConfirmStop(true)}>녹음 종료</button></div>}
+      {capturing && confirmStop && <div className="recorder-stop-confirm" role="group" aria-label="녹음 종료 확인"><p>녹음을 끝낼까요? 끝내면 이 녹음은 이어서 할 수 없고 저장만 할 수 있습니다.</p><div className="recorder-controls"><button className="button button-secondary" type="button" disabled={busy} onClick={() => { setConfirmStop(false); void run("session", stop); }}>녹음 끝내기</button><button className="button button-primary" type="button" disabled={busy} onClick={() => setConfirmStop(false)}>계속 녹음</button></div></div>}
+      {(snapshot?.state === "interrupted" || snapshot?.state === "stopped") && !local && <button className="button button-secondary" type="button" disabled={busy} onClick={() => keyRef.current && void run("session", () => inspect(selected.id, keyRef.current!))}>확인 구간 보기</button>}
+      {local && <><p>이 기기의 연속 확인 구간: {time(local.samples)}{local.partial ? ` · 원래 기록 ${time(local.expectedSamples)} 중 일부만 남았습니다.` : ""}{local.interrupted ? " · 중단된 녹음" : ""}</p>{local.partial && <label><input type="checkbox" checked={partialAccepted} onChange={(event) => setPartialAccepted(event.target.checked)} /> 빠진 구간 뒤의 소리는 포함되지 않으며, 표시된 확인 구간만 저장합니다.</label>}<button className="button button-primary" type="button" disabled={busy || !!capturing || local.samples < 1 || (local.partial && !partialAccepted)} onClick={() => void run("session", upload)}>음성 저장하고 받아쓰기</button></>}
+      {selected.state === "saving" && <><p>원본 확인: {segments.filter((segment) => segment.status === "verified").length}/{segments.length} 구간</p>{segments.some((segment) => segment.status === "failed" || segment.status === "awaiting_upload") && <button type="button" className="button button-secondary" disabled={busy || !local} onClick={() => void run("session", upload)}>남은 구간 다시 올리기</button>}</>}
+      {!capturing && !starting && <button type="button" className="button button-secondary" disabled={busy} onClick={showNewRecordingForm}>새 녹음 화면으로</button>}
+      {!capturing && <div className="recorder-danger-zone"><p>이 기기의 녹음과 서버 세션을 모두 지웁니다.</p><button type="button" className="button button-secondary recorder-danger-button" disabled={busy} onClick={() => void run("session", () => discard(selected))}>녹음 폐기</button></div>}
     </section>}
-    <section className="panel" aria-label="복구할 녹음"><h2>이어서 저장할 녹음</h2><button type="button" className="button button-secondary" disabled={busy} onClick={() => void run(refresh)}>목록 다시 확인</button>{sessions.length === 0 ? <p>진행 중인 녹음이 없습니다.</p> : <ul>{sessions.map((session) => <li key={session.id}><strong>{session.title}</strong> · {session.state === "active" ? "이 기기의 기록 확인 필요" : "서버 검증 중"} · 만료 {new Date(session.expires_at).toLocaleString("ko-KR")} <button type="button" disabled={busy || !!capturing} onClick={() => void run(() => recover(session))}>녹음 이어서 확인</button> <button type="button" disabled={busy || !!capturing} onClick={() => void run(() => discard(session))}>녹음 폐기</button></li>)}</ul>}</section>
+    <section className="panel" aria-label="복구할 녹음">
+      <h2>이어서 저장할 녹음</h2>
+      {capturing ? <p>녹음이 끝나면 다시 보여 줍니다.</p> : <>
+        {error !== null && errorPanel === "list" && <p className="recorder-notice is-error" role="alert" tabIndex={-1} ref={errorRef}><strong>오류</strong> {recorderErrorText(error)}</p>}
+        <button type="button" className="button button-secondary" disabled={busy} onClick={() => void run("list", refresh)}>목록 다시 확인</button>
+        {otherSessions.length === 0 ? <p>진행 중인 녹음이 없습니다.</p> : <ul className="recorder-recovery-list">{otherSessions.map((session) => <li key={session.id}>
+          <p><strong>{session.title}</strong> · {sessionStateLabel(session.state)} · {formatExpiry(session.expires_at, new Date())}</p>
+          <div className="recorder-list-actions"><button type="button" className="button button-secondary recorder-small-button" disabled={busy} onClick={() => void run("list", () => recover(session))}>확인하고 저장</button><button type="button" className="button button-secondary recorder-small-button recorder-danger-button" disabled={busy} onClick={() => void run("list", () => discard(session))}>녹음 폐기</button></div>
+        </li>)}</ul>}
+      </>}
+    </section>
   </main>;
 }

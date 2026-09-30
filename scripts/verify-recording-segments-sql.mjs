@@ -359,23 +359,38 @@ export async function verifyRecordingSegmentsSql({ db, q, check, asUser }) {
     });
     await rejects(() => segmentAccess(id, 0), "P0002", "original_unavailable");
     const parts = (await q("select id,attempt,part_index from review_parts where review_id=$1 order by part_index", [main.id])).rows;
+    const blockedLease = randomUUID();
+    assert.equal(await asService(async () => value(await q("select claim_review_part($1,$2,$3) value", [parts[1].id, parts[1].attempt, blockedLease]))), null);
+    await q("update review_parts set updated_at=now()-interval '3 minutes' where id=$1", [parts[1].id]);
+    assert.equal(await asService(async () => value(await q("select sweep_review_parts() value"))), 0);
+    assert.equal((await q("select status from review_parts where id=$1", [parts[1].id])).rows[0].status, "queued");
     for (const part of parts) {
       const lease = randomUUID();
       const claimed = await asService(async () => value(await q("select claim_review_part($1,$2,$3) value", [part.id, part.attempt, lease])));
       assert.equal(claimed.original_layout, "audio_segments");
+      if (part.part_index === 0) assert.equal(claimed.previous_last_word_end_in_window, null);
+      else assert.ok(Math.abs(claimed.previous_last_word_end_in_window - 0.3) < 1e-9);
       assert.deepEqual(claimed.manifest, { version: 1, segments: [
         { index: 0, sample_count: 960_000, bytes: 1_920_044, sha256: mainManifest.segments[0].sha256 },
         { index: 1, sample_count: 16_073, bytes: 32_190, sha256: mainManifest.segments[1].sha256 },
       ] });
       assert.deepEqual(claimed.segment_paths, { current: path(main.id, part.part_index, part.part_index === 1 ? 2 : 1), next: part.part_index === 0 ? path(main.id, 1, 2) : null });
-      const section = { id: `part-${part.part_index}-0`, text: "합성 받아쓴 글", original_text: "합성 받아쓴 글", origin: "transcribed", edited: false, location: null, start_seconds: part.part_index * 60, end_seconds: part.part_index * 60 + 1 };
-      assert.equal(await asService(async () => value(await q("select finish_review_part($1,$2,$3::jsonb,null) value", [part.id, lease, JSON.stringify([section])]))), true);
+      const section = { id: `part-${part.part_index}-0`, text: "합성 받아쓴 글", original_text: "합성 받아쓴 글", origin: "transcribed", edited: false, location: null, start_seconds: part.part_index * 60, end_seconds: part.part_index * 60 + 1, confidence: "normal", boundary_review: false };
+      if (part.part_index === 0) {
+        await asService(() => rejects(() => q("select finish_review_recording_part($1,$2,$3::jsonb,null,$4)", [part.id, lease, JSON.stringify([{ ...section, text: "qa@example.com" }]), 60.3]), "22023", "transcription_sections_invalid"));
+        await asService(() => rejects(() => q("select finish_review_recording_part($1,$2,$3::jsonb,null,$4)", [part.id, lease, JSON.stringify([section]), 62]), "22023", "transcription_boundary_invalid"));
+      }
+      const jobsBefore = await count("select count(*)::int n from jobs where kind='process_review' and payload->>'partId'=$1", [parts[1].id]);
+      assert.equal(await asService(async () => value(await q("select finish_review_recording_part($1,$2,$3::jsonb,null,$4) value", [part.id, lease, JSON.stringify([section]), part.part_index === 0 ? 60.3 : 0.8]))), true);
+      assert.equal(await asService(async () => value(await q("select finish_review_recording_part($1,$2,$3::jsonb,null,$4) value", [part.id, lease, JSON.stringify([section]), 0.8]))), false);
+      if (part.part_index === 0) assert.equal(await count("select count(*)::int n from jobs where kind='process_review' and payload->>'partId'=$1", [parts[1].id]), jobsBefore + 1);
     }
     assert.equal((await reviewRow(main.id)).status, "ready");
+    assert.deepEqual((await q("select last_word_end_seconds from review_parts where review_id=$1 order by part_index", [main.id])).rows.map(row => row.last_word_end_seconds), [60.3, 0.8]);
     const eventsBefore = await count("select count(*)::int n from review_access_events where review_id=$1 and action='reextract'", [main.id]);
     await run(ids.lead2, () => q("select review_action($1,1,'reextract')", [main.id]));
-    const requeued = (await q("select status,attempt from review_parts where review_id=$1 order by part_index", [main.id])).rows;
-    assert.deepEqual(requeued, [{ status: "queued", attempt: 2 }, { status: "queued", attempt: 2 }]);
+    const requeued = (await q("select status,attempt,last_word_end_seconds from review_parts where review_id=$1 order by part_index", [main.id])).rows;
+    assert.deepEqual(requeued, [{ status: "queued", attempt: 2, last_word_end_seconds: null }, { status: "queued", attempt: 2, last_word_end_seconds: null }]);
     assert.equal((await reviewRow(main.id)).status, "processing");
     assert.equal(await count("select count(*)::int n from jobs j join review_parts p on p.id::text=j.payload->>'partId' where p.review_id=$1 and j.kind='process_review' and (j.payload->>'attempt')::int=2", [main.id]), 2);
     assert.equal(await count("select count(*)::int n from review_access_events where review_id=$1 and action='reextract'", [main.id]), eventsBefore + 1);
@@ -389,6 +404,33 @@ export async function verifyRecordingSegmentsSql({ db, q, check, asUser }) {
     assert.equal(claimedSingle.original_layout, "single_file");
     assert.equal(claimedSingle.manifest, undefined);
     assert.equal(claimedSingle.object_path, `${ids.dept}/${single}/parts/0.wav`);
+  });
+
+  await check("recording segments: in-flight transcription cannot finish after consent withdrawal or original expiry", async () => {
+    await park();
+    const section = { id: "part-0-0", text: "합성 전사", original_text: "합성 전사", origin: "transcribed", edited: false, location: null, start_seconds: 0, end_seconds: 1 };
+    const withdrawn = await saved(manifestOf(10_000), { participants: [ids.member2] });
+    await upload(ids.lead, path(withdrawn, 0));
+    await finalize(withdrawn);
+    await settle(withdrawn, 0);
+    const withdrawnPart = (await q("select id,attempt from review_parts where review_id=$1", [withdrawn])).rows[0];
+    const withdrawnLease = randomUUID();
+    assert.ok(await asService(async () => value(await q("select claim_review_part($1,$2,$3) value", [withdrawnPart.id, withdrawnPart.attempt, withdrawnLease]))));
+    await q("update members set consented_at=null where user_id=$1 and dept_id=$2", [ids.member2, ids.dept]);
+    assert.equal(await asService(async () => value(await q("select finish_review_recording_part($1,$2,$3::jsonb,null,1) value", [withdrawnPart.id, withdrawnLease, JSON.stringify([section])]))), false);
+    assert.notEqual((await reviewRow(withdrawn)).status, "ready");
+    await q("update members set consented_at=now() where user_id=$1 and dept_id=$2", [ids.member2, ids.dept]);
+
+    const expired = await saved(manifestOf(10_000));
+    await upload(ids.lead, path(expired, 0));
+    await finalize(expired);
+    await settle(expired, 0);
+    const expiredPart = (await q("select id,attempt from review_parts where review_id=$1", [expired])).rows[0];
+    const expiredLease = randomUUID();
+    assert.ok(await asService(async () => value(await q("select claim_review_part($1,$2,$3) value", [expiredPart.id, expiredPart.attempt, expiredLease]))));
+    await q("update reviewed_materials set original_deleted_at=now() where id=$1", [expired]);
+    assert.equal(await asService(async () => value(await q("select finish_review_recording_part($1,$2,$3::jsonb,null,1) value", [expiredPart.id, expiredLease, JSON.stringify([section])]))), false);
+    assert.notEqual((await reviewRow(expired)).status, "ready");
   });
 
   await check("recording segments: segment tickets are per verified segment, single use and share the minute limit", async () => {
@@ -544,7 +586,11 @@ export async function verifyRecordingSegmentsSql({ db, q, check, asUser }) {
       ["public.discard_review_recording(uuid,uuid)", "authenticated"],
       ["public.claim_review_segment(uuid,integer,integer,integer,uuid)", "service_role"],
       ["public.finish_review_segment(uuid,integer,uuid,text)", "service_role"],
+      ["public.claim_review_part(uuid,integer,uuid)", "service_role"],
+      ["public.finish_review_recording_part(uuid,uuid,jsonb,text,double precision)", "service_role"],
+      ["public.sweep_review_parts()", "service_role"],
       ["public.sweep_review_recordings()", "service_role"],
+      ["public.review_action_before_transcription_storage(uuid,integer,text)", null],
       ["public.review_action_before_recordings(uuid,integer,text)", null],
       ["private.json_int(jsonb,bigint,bigint)", null],
       ["private.recording_enabled(uuid)", null],

@@ -1,0 +1,19 @@
+Phase 33 step 1 — after change (2026-09-29)
+
+Graft run unavailable for the same CLI/Docker reason as graft-s1-before.txt.
+Manual search used PowerShell Select-String; no refreshed graph was produced.
+
+Observed relationships:
+- components/meeting-recorder.tsx start() first awaits captureInputs(mode)
+  (line 310), then POST /recordings, keyFor(id) (line 320),
+  probeRecordingStore (line 321), and startRecording (line 323).
+- keyFor still appears in recover() (line 281) and reselectMicrophone()
+  (line 409). The normal start has one key request; the recovery flow requests
+  a second key after reload. No second request remains inside start().
+- The test input still calls captureInputs(mode) (line 227). No adapter or
+  server-route callers were changed.
+- The old prepare()/begin() functions, prepared state, and two buttons are
+  removed. tests/review-controls/meeting-recorder.spec.ts and
+  tests/e2e/recording-product.spec.ts reference the one-click start.
+
+The required Graft before/after result remains missing.

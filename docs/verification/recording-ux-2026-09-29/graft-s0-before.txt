@@ -1,0 +1,19 @@
+Phase 33 step 0 — implementation-before dependency check (2026-09-29)
+
+Graft CLI result: unavailable. `Get-Command graft` found no local executable.
+The existing Docker container could not be queried: Docker CLI reported that
+//./pipe/docker_engine does not exist. No new Graft graph was built.
+
+Existing plan graph: README.md §3, graft-plan.txt (2026-09-29).
+Actual source inspection with PowerShell Select-String:
+- components/meeting-recorder.tsx:510 rendered raw server state.
+- components/meeting-recorder.tsx:516 rendered raw stop reason.
+- lib/recording/browser/inputs.ts:28 throws shared_audio_missing.
+- lib/recording/browser/storage.ts:226 throws storage_space_insufficient.
+- lib/recording/browser/storage.ts:275 rejects recording_other_tab.
+- app/api/d/[dept]/recordings/[id]/key/route.ts returns recording_key_forbidden,
+  recording_unavailable, or recording_key_unavailable; recover() in the component
+  branches on recording_unavailable, so display translation must not change codes.
+
+Scope: a new display-only pure module and its mirror test. No server, SQL,
+capture, or component control-flow dependency changes in step 0.

@@ -1107,6 +1107,31 @@ try {
   await verifyRetroConnectionsSql({ db, q, check, asUser });
   await verifyRecordingSessionsSql({ db, q, check, asUser });
   await verifyRecordingSegmentsSql({ db, q, check, asUser });
+  const glossaryIds = { dept: randomUUID(), lead: randomUUID(), member: randomUUID() };
+  await q("insert into departments(id,org_id,name) values($1,$2,'Glossary QA')", [glossaryIds.dept,ids.org]);
+  await q("insert into auth.users(id) values($1),($2)", [glossaryIds.lead,glossaryIds.member]);
+  await q("insert into members(user_id,dept_id,role,display_name,consented_at) values($1,$3,'lead','Glossary lead',now()),($2,$3,'member','Glossary member',now())", [glossaryIds.lead,glossaryIds.member,glossaryIds.dept]);
+  await check("department glossary: lead edits, member reads, other department sees no terms", async () => {
+    let termId;
+    await asUser(glossaryIds.lead, async () => {
+      termId = (await q("select save_dept_glossary($1,null,'사수',null,'결정 지원') id", [glossaryIds.dept])).rows[0].id;
+      assert.ok(termId);
+    });
+    await asUser(glossaryIds.member, async () => {
+      assert.equal((await q("select term from dept_glossaries where dept_id=$1", [glossaryIds.dept])).rows.length, 1);
+      await denied("select save_dept_glossary($1,null,'위조',null,null)", [glossaryIds.dept]);
+      await denied("insert into dept_glossaries(dept_id,term,created_by) values($1,'위조',$2)", [glossaryIds.dept,glossaryIds.member]);
+    });
+    await asUser(adminIds.leadY, async () => {
+      assert.equal((await q("select term from dept_glossaries where dept_id=$1", [glossaryIds.dept])).rows.length, 0);
+    });
+  });
+  await check("department glossary: duplicate and personal data are rejected before storage", async () => {
+    await asUser(glossaryIds.lead, async () => {
+      await assert.rejects(() => q("select save_dept_glossary($1,null,'사수',null,null)", [glossaryIds.dept]), error => error.code === "23505");
+      await assert.rejects(() => q("select save_dept_glossary($1,null,'qa@example.com',null,null)", [glossaryIds.dept]), error => error.code === "22023");
+    });
+  });
   console.log(JSON.stringify({ passed, failed: 0, matrix: { organizations:4, departments:12, actors:24, items:72, assertions:matrixAssertions }, database: "isolated PGlite", excluded: ["0004_worker_cron.sql (pg_cron/pg_net not available)"] }));
 } finally {
   await db.close();

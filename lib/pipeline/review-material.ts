@@ -8,6 +8,8 @@ import {
   createRecordingTranscriptionPart,
   verifyRecordingOriginal,
 } from "@/lib/recording/original-segments";
+import { projectTranscriptionWindow } from "@/lib/recording/transcription-window";
+import { glossaryPrompt, type GlossaryEntry } from "@/lib/recording/glossary";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 import type { RecordingManifest, ReviewSection } from "@/lib/contracts";
 
@@ -49,9 +51,11 @@ export async function processReviewPart(payload: {
     original_layout?: "single_file" | "audio_segments";
     manifest?: RecordingManifest;
     segment_paths?: { current: string; next: string | null };
+    previous_last_word_end_in_window?: number | null;
   };
   let sections: ReviewSection[] = [];
   let failure: string | null = null;
+  let lastWordEnd: number | null = null;
   try {
     let bytes: Uint8Array;
     if (part.original_layout === "audio_segments") {
@@ -98,22 +102,32 @@ export async function processReviewPart(payload: {
       throw Object.assign(new Error("audio_segment_invalid"), {
         error_code: "audio_segment_invalid",
       });
-    const text =
-      part.kind === "audio"
-        ? (
-            await llm.transcribeAudio(
-              { bytes, filename: "segment.wav", mimeType: "audio/wav" },
-              { deptId: part.dept_id },
-            )
-          ).data.text
-        : await extractDocumentText(part.filename, bytes);
-    sections = sectionsFromText(
-      text,
-      part.kind,
-      `part-${part.part_index}`,
-      part.start_seconds,
-      part.end_seconds,
-    );
+    if (part.kind === "audio") {
+      const recording = part.original_layout === "audio_segments";
+      const terms = await client.from("dept_glossaries")
+        .select("term,reading,note,updated_at")
+        .eq("dept_id", part.dept_id)
+        .order("updated_at", { ascending: false });
+      if (terms.error) throw Object.assign(new Error("glossary_lookup_failed"), { error_code: "glossary_lookup_failed" });
+      const prompt = glossaryPrompt((terms.data ?? []) as GlossaryEntry[]).text;
+      const transcription = await llm.transcribeAudio(
+        { bytes, filename: "segment.wav", mimeType: "audio/wav", includeTimestamps: recording, ...(prompt ? { prompt } : {}) },
+        { deptId: part.dept_id },
+      );
+      if (recording) {
+        const projected = projectTranscriptionWindow(
+          transcription.data,
+          part.part_index,
+          part.previous_last_word_end_in_window ?? null,
+        );
+        sections = projected.sections;
+        lastWordEnd = projected.lastOwnedWordEnd;
+      } else {
+        sections = sectionsFromText(transcription.data.text, "audio", `part-${part.part_index}`, part.start_seconds, part.end_seconds);
+      }
+    } else {
+      sections = sectionsFromText(await extractDocumentText(part.filename, bytes), "document", `part-${part.part_index}`, part.start_seconds, part.end_seconds);
+    }
     if (
       sections.length > 1000 ||
       sections.reduce((n, s) => n + s.text.length, 0) > 1_000_000
@@ -138,15 +152,18 @@ export async function processReviewPart(payload: {
         "llm_budget_exceeded",
   "llm_timeout",
         "rate_limited",
+        "glossary_lookup_failed",
       ].includes(code)
         ? code
         : "extraction_failed";
   }
-  const finish = await client.rpc("finish_review_part", {
+  const recording = part.original_layout === "audio_segments";
+  const finish = await client.rpc(recording ? "finish_review_recording_part" : "finish_review_part", {
     p_part: payload.partId,
     p_lease: lease,
     p_sections: sections,
     p_error: failure,
+    ...(recording ? { p_last_word_end: lastWordEnd } : {}),
   });
   if (finish.error) throw new Error("review_completion_failed");
 }

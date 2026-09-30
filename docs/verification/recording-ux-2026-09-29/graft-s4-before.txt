@@ -1,0 +1,9 @@
+Step 4 implementation-before relationship check (2026-09-29)
+
+Graft unavailable: no local executable/MCP tool; Docker engine pipe is missing. Manual source search only, not a Graft graph.
+
+- `components/review-detail.tsx:487` renders `<RecordingSegmentPlayer>`; it passes `segmentSeek` from transcript actions (around line 584).
+- `components/recording-segment-player.tsx:60` alone builds `original?action=play_original&segment=${index}` for segment-number playback. Download uses `download_original` separately.
+- `onChange` of the range immediately called `playAt(next)` while playing, so each drag input could issue two initial requests (current and next segment).
+- `stop()` closed context/timer but did not abort in-flight fetches. Initial playback decoded at most two segments and fetched later ones near boundaries.
+- `tests/review-controls/recording-segments.spec.ts` tested section seek, download, retry; `access.spec.ts` tested 429 wording.

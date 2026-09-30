@@ -166,8 +166,8 @@
     {
       "dir": "23-browser-meeting-recording",
       "status": "blocked",
-      "verification": "docs/verification/browser-meeting-recording/access-controls-2026-09-18.md",
-      "note": "2026-09-25 step0 후속: PCM 단절·워커 무응답·암호화 저장 사전 검사 구현. 브라우저 15·3분 복구 1·단위 1409·lint/build 통과. 9/24 V18·0058 권한·CSP 로컬 검증 기록 유지. 제공사·운영 CSP 관찰/승인·0058 운영 반영·실제 기기/영속 세션 계약 게이트 대기. step1 이후 순서 유지. 2026-09-25: 녹음 세션 계약 설계 보완(ADR-070). 같은 날 오후 step1-B 기록 마감·step1-C 서버(0060) 구현, 격리 SQL 277·단위 1,592·lint/build·실제 로컬 Storage 18 통과. 운영 DB 0058~0060 적용 승인·step2 화면·실제 기기 게이트 대기.",
+      "verification": "docs/verification/browser-meeting-recording/README.md",
+      "note": "2026-09-29: step0~3·4-A·4-B1~B8의 로컬 구현·검증 기록을 연결했다. 남은 완료 게이트는 실제 기기 V01~V06, 제공사 V13, 운영 CSP V14, 실제 모델 지시문 문서 V16, 정량 실측 V20, 운영 DB/배포 승인이다. 이번 변경은 운영 미반영이다.",
       "followup_verification": "docs/verification/browser-meeting-recording/step1.md",
       "pending_change_production_deployed": false,
       "production_deployed": true,
@@ -198,6 +198,13 @@
       "note": "로컬 SQL 243·화면 12·실DB E2E 1건/질문 5건 통과 기록 유지. 후속 A09 회귀 9/10 보존·마지막 허용 보완 후 모델 10/10 두 번, 전체 단위 1,391·lint/build 통과. 운영 승인 대기.",
       "production_deployed": false,
       "followup_verification": "docs/verification/llm-style-followup-2026-09-23/README.md"
+    },
+    {
+      "dir": "33-recording-ux",
+      "status": "blocked",
+      "verification": "docs/verification/recording-ux-2026-09-29/README.md",
+      "note": "녹음 UI step 0~8 기능 구현·로컬 제품 E2E 9/9, 단위 1664, 합성 UI E2E 47 통과. 계획·최종 Graft check 통과. Plan §4.1의 단계별 전후 Graft 그래프 0~7이 Docker 장애 당시 미생성되어 형식상 완료 게이트 보류. 실제 기기 V01~V06은 범위 밖, 운영 미배포.",
+      "production_deployed": false
     }
   ]
 }

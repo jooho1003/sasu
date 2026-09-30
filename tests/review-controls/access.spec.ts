@@ -103,6 +103,45 @@ test("녹음 스위치를 끌 때 진행 중 건수를 확인하고 취소할 �
   expect(dialogs).toBe(2);
   expect(saves).toBe(1);
 });
+
+test("녹음 설명과 진행 중 건수를 미리 보여 주고 읽기 전용에서는 조회하지 않는다", async ({ page }) => {
+  let requests = 0;
+  await page.route("**/api/admin/review-settings", route => {
+    requests++;
+    return route.fulfill({ json: { active_recordings: 2 } });
+  });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?view=settings&recording=1");
+  await expect(page.getByText("지금 진행 중인 녹음 2건")).toBeVisible();
+  const recording = page.getByRole("checkbox", { name: "웹 회의 녹음 사용" });
+  await expect(recording).toHaveAttribute("aria-describedby", "review-recording-description");
+  await expect(page.locator("#review-recording-description")).toContainText("녹음을 끄면 새 녹음 시작");
+  await expect(page.getByRole("checkbox", { name: "원본 파일 내려받기 허용" })).toHaveAttribute("aria-describedby", "review-download-description");
+  await page.screenshot({ path: "docs/verification/recording-ux-2026-09-29/s7-admin-1440.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ path: "docs/verification/recording-ux-2026-09-29/s8-admin-390.png", fullPage: true });
+  expect(requests).toBe(1);
+  await page.goto("/?view=settings&recording=1&readonly=1");
+  await expect(page.getByText("현재 조직 관리 화면은 읽기 전용입니다.")).toBeVisible();
+  expect(requests).toBe(1);
+});
+test("꺼진 녹음을 켠 뒤 진행 중 건수를 보여 준다", async ({ page }) => {
+  let reads = 0;
+  await page.route("**/api/admin/review-settings", route => {
+    if (route.request().method() === "GET") {
+      reads++;
+      return route.fulfill({ json: { active_recordings: 0 } });
+    }
+    expect(route.request().postDataJSON()).toEqual({ browser_recording_enabled: true, allow_original_download: false });
+    return route.fulfill({ json: { ok: true } });
+  });
+  await page.goto("/?view=settings");
+  expect(reads).toBe(0);
+  await page.getByRole("checkbox", { name: "웹 회의 녹음 사용" }).check();
+  await page.getByRole("button", { name: "원본 보호 설정 저장" }).click();
+  await expect(page.getByText("지금 진행 중인 녹음이 없습니다")).toBeVisible();
+  expect(reads).toBe(1);
+});
 test("원본 보존 기간 선택은 Slack 보존값과 별도 요청", async ({ page }) => {
   let days: number | null = null;
   await page.route("**/api/d/dept/retention", route => route.fulfill({ json: { sources: [], settings: { plan: "paid", expires_at: null, retention_days: 365, review_original_days: days }, risk: { message: "합성 설정" } } }));

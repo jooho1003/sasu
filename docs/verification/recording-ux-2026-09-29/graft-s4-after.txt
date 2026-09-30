@@ -1,0 +1,10 @@
+Step 4 implementation-after relationship check (2026-09-29)
+
+Graft unavailable for the same reason recorded in graft-s4-before.txt. Manual source search only, not a Graft graph.
+
+- `<RecordingSegmentPlayer>` still has one caller in `components/review-detail.tsx:487`; `segmentSeek` remains an immediate play request.
+- `original?action=play_original&segment=${index}` remains only in `components/recording-segment-player.tsx`. No route, storage-list or signed-URL path was added.
+- Range `onChange` updates position only. Pointer release/cancel commits once; keyboard seek keys commit 300ms after the last press.
+- `playAt` passes an AbortController signal to each segment fetch; `stop()` and a later `playAt()` abort prior fetches. AbortError is ignored as a user-visible error.
+- Initial prefetch remains current+next; later segments load near playback boundaries.
+- `tests/review-controls/recording-segments.spec.ts` now covers zero requests while dragging, at most two after release/keyboard debounce, 150-second duration, aria-valuetext, and mobile width.

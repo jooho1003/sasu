@@ -602,8 +602,8 @@
 - 결정 7 — 경계: 전사 호출은 word·segment 타임스탬프를 함께 받는다. 창 i는 시작 시각이 60초 미만인 단어를 갖는다. 창 i+1은 창 i의 마지막 단어가 끝나기 전에 시작한 단어를 버린다. 단어 시각이 없으면 segment 규칙으로 처리하고 해당 경계를 확인 필요로 표시한다. 신뢰도는 단어가 속한 segment 값을 쓴다.
 - 결정 8 — 조직 스위치 off: 새 시작·키·저장·구간 업로드·확인 요청을 모두 막는다. 진행 중인 녹음도 저장할 수 없고 24시간 뒤 만료된다. 관리자 화면은 끄기 전에 진행 중 건수를 알린다.
 - 기각한 대안: ① 시작 때 `reviewed_materials`에 `recording` 상태 행을 둔다 — 운영 중인 자료 검토함의 상태 전이·목록·sweep·RLS 전부에 새 상태가 퍼지고, 버려진 녹음이 다른 부서장의 목록에 남는다. ② 클라이언트 ID만으로 키를 파생한다 — 폐기·만료·철회 뒤 재발급 거부(ADR-057 ③)를 할 수 없다. ③ 저장 때만 키를 발급한다 — 첫 샘플부터 암호화해야 한다(PRD SEC-03). ④ 불일치 때 새 ID로 다시 보낸다(기존 설계) — 로컬 자료를 복호화할 수 없고, 30분 WAV는 파일 가져오기 한도를 넘는다. ⑤ 구간 묶음 전체에 다회용 접근권을 준다 — ADR-058의 단회 소비와 충돌하고, 30분 재생 동안 유효한 권한이 필요하다. ⑥ 전사 창을 저장한다(기존 설계) — 원본과 함께 지워지므로 이득 없이 저장량과 정책만 늘어난다.
-- 영향: 새 migration으로 `review_recordings`·`review_original_segments`와 세션 RPC(`start_review_recording`·`create_review_recording`·`finalize_review_recording`·`discard_review_recording`·`claim_review_segment`·`finish_review_segment`·`sweep_review_recordings`), 구간 접근권(`authorize_review_segment_access`)을 추가한다. `recording_key_context`·`private.review_original_available`·`review_storage_allowed`·`consume_review_access`·`revoke_participant_reviews`는 교체한다. `process_review`·`purge_review_files` 워커에 형식 분기를 넣는다. 0052는 운영에 있으므로 새 migration이 함수 본문을 교체한다. 적용 전에 운영의 `input_method<>'upload'` 행이 0건인지 확인한다.
-- 상태: 설계. 구현은 phase 23 step1(서버)·step2(화면)에서 하고, 운영 반영은 검증과 사용자 승인 뒤에 한다. 상세: [웹 회의 녹음 설계](planning/웹회의_녹음_설계.md) §4~§6·§11.2·§13.
+- 영향: 새 migration으로 `review_recordings`·`review_original_segments`와 세션 RPC(`start_review_recording`·`create_review_recording`·`finalize_review_recording`·`discard_review_recording`·`claim_review_segment`·`finish_review_segment`·`sweep_review_recordings`), 구간 접근권(`authorize_review_segment_access`)을 추가한다. `recording_key_context`·`private.review_original_available`·`review_storage_allowed`·`consume_review_access`는 교체한다. 동의 철회 세션은 `members_revoke_recordings` trigger가, 자료·원본 파기는 기존 `members_revoke_reviews`와 `purge_review_files`가 처리한다. 전사 재예약은 `review_action`과 구간 검증 완료 경로가 처리한다. `process_review`·`purge_review_files` 워커에 형식 분기를 넣는다. 0052는 운영에 있으므로 새 migration이 함수 본문을 교체한다. 적용 전에 운영의 `input_method<>'upload'` 행이 0건인지 확인한다.
+- 상태: phase 23 step1 서버·step2 화면을 로컬 구현·검증했다. 실기기·운영 반영은 검증과 사용자 승인 뒤에 한다. 상세: [웹 회의 녹음 설계](planning/웹회의_녹음_설계.md) §4~§6·§11.2·§13.
 - 사용자 확정(2026-09-28): 결정 5(전사 창을 저장하지 않음)와 결정 8(스위치를 끄면 진행 중 녹음도 저장 불가, 24시간 안에 다시 켜면 복구 가능)을 확정했다. 기존 파일 업로드의 `uploading` 방치 정리는 이 결정의 범위 밖이며, 녹음과 별개인 후속 과제로 둔다. 녹음 migration의 운영 적용은 step2 화면과 실제 기기 게이트를 통과한 뒤 함께 한다. 같은 기간 origin/main이 migration 0055~0057과 ADR-068(ASK)을 먼저 반영해, 이 작업의 migration을 0058~0060으로, 이 ADR을 ADR-070(구 069)으로, CSP ADR을 ADR-069(구 068)로 옮겼다(설계 §5). 세션을 만든 뒤 키나 저장소 사전 검사가 실패하면 클라이언트가 곧바로 폐기한다는 계약을 설계 §4.1·§6에 보탰다(step2 명세와 같음). 기록: `.claude/plans/recording-decisions-2026-09-28.*`.
 
 ## 부록: 재검토되었으나 기각된 안
@@ -670,3 +670,20 @@ HubSpot은 토큰 introspection에서 사용자 단위 앱과 동일 사용자 I
 - 배경: 단독 질문 “그거 어떻게 됐어요?”가 관련 없는 노션 문서를 근거로 고르고, “결국 승인됐나?”가 9/10 승인 기록만 골라 9/15 보류 기록을 놓쳤다. 사용자 선택은 안건이 확인되는 경우 찾은 기록과 불확실성을 함께 표시하는 것이다.
 - 결정: 실제로 조회된 이전 질문이 없으면 지시어만으로 대상을 연결하지 않는다. 근거 선택에는 검색 결과의 시각을 전달하고, 웹·Slack 인용에 날짜 또는 날짜 미상을 보인다. 현재 상태 질문에서 선택한 기록보다 늦은 같은 안건의 검색 기록이 있으면 선택을 재시도하고, 해결되지 않으면 현재 상태를 단정하지 않는다. 검색된 기록만으로 최신성을 증명할 수 없으면 고정 안내 문구에 불확실성을 명시한다.
 - 경계: 추가 검색·권한 조회는 하지 않는다. 기존 SQL `can_see()` 및 채널 범위, 인용 원문 재검증을 유지한다. 검색 상위 8개씩만 비교하므로 전체 기록에 대한 최신성 증명이 아니다. 시각이 없는 자료의 사건 시점을 생성 시각으로 대체하지 않는다.
+
+### ADR-071: 녹음 시작은 한 번의 클릭으로 — 입력 선택 뒤 세션·키·사전 검사 (2026-09-29)
+
+- 배경: 2026-09-29 녹음 화면 UI/UX 검토에서 시작까지 `5초 테스트 녹음` → `녹음 준비` → `입력 장치 선택하고 녹음 시작`을 차례로 눌러야 했다. `녹음 준비`만 누르고 떠나면 세션이 24시간 동안 진행 한도(사용자 3건)를 차지한다. 두 단계로 나눈 이유는 `getDisplayMedia`가 사용자 동작 직후에만 열리는데, 준비 단계가 네트워크 요청 세 번(세션·키·사전 검사) 뒤에 끝나기 때문이다(`meeting-recorder.tsx` `begin()` 주석).
+- 결정: 새 녹음은 `녹음 시작` 한 번으로 시작한다. 클릭 처리 안에서 ① 입력 장치 선택(`getDisplayMedia`·`getUserMedia`, 사용자 동작은 여기서 쓴다) ② 클라이언트 UUID로 서버 세션 생성(`start_review_recording`, ADR-070 결정 1의 검사 그대로) ③ 키 발급 ④ 저장소 사전 검사 ⑤ 캡처 시작 순서로 한다. ②~④ 중 하나라도 실패하면 입력 트랙을 모두 멈춘다. 세션이 만들어진 뒤라면 곧바로 폐기한다(설계 §4.1 계약 유지). 입력 선택을 취소하면 세션을 만들지 않는다.
+- 유지: 불변식 30(ARCHITECTURE §6-5). 샘플은 ②~④가 끝난 뒤에만 IndexedDB에 쓴다. ②~④ 동안 들어온 소리는 저장하지 않고 메모리에도 모으지 않는다. 화면은 이 동안 `녹음 준비 중`을 보여 준다. 키는 입력 선택 뒤에 한 번만 받는다. 선택에 몇 분이 걸려도 동의·스위치 검사가 선택 뒤에 일어나므로, 기존 `begin()`의 "선택 뒤 키 재확인"은 필요 없다. 5초 입력 테스트는 메모리 전용으로 따로 둔다. 그래서 컴퓨터 소리 모드는 공유 창을 테스트 때와 시작 때 한 번씩 고른다.
+- 기각한 대안: ① 5초 테스트의 스트림을 녹음까지 이어 쓴다 — 테스트 뒤에도 마이크·공유가 켜진 채 남고, 시작하지 않을 때 끄는 시점이 모호하다. ② 3단계를 유지한다 — 방치 세션과 클릭 수가 그대로다. ③ 세션을 먼저 만들고 사용자 동작의 유효 시간 안에 `getDisplayMedia`를 부른다 — 네트워크 지연에 따라 성공 여부가 달라져 재현하기 어렵다.
+- 영향: `MeetingRecorder`의 `prepare()`·`begin()`을 하나의 시작 함수로 합친다. `녹음 준비` 버튼과 준비 완료 패널이 없어진다. 테스트: 공유 취소 시 `POST /recordings` 0건, 세션 생성 실패 시 남은 트랙 0개, 키·사전 검사 실패 시 `discard` 1건. 서버·SQL·migration은 바꾸지 않는다.
+- 상태: 사용자 결정(2026-09-29). 구현은 `phases/33-recording-ux` step 1. 운영 반영은 phase 23 녹음 게이트와 함께 한다. 기록: `.claude/plans/recording-ux-2026-09-29.*`.
+
+### ADR-072: 녹음 전사 창은 마지막 단어 끝 시각으로 순서대로 처리한다 (2026-09-29)
+
+- 배경: 4-B1은 Groq word·segment 시각을, 4-B2는 경계 소유 단어 계산을 제공한다. 현재 `finish_review_segment`는 전사 창 전체를 병렬 예약하고, `finish_review_part`는 마지막 완료 순서에서 곧바로 자료를 `ready`로 만든다. 앞 창의 마지막 단어가 60초를 넘겨 끝났는지 다음 창이 알 수 없으므로 그대로 연결하면 경계 중복을 제거할 수 없다.
+- 결정: `audio_segments` 전사에 한해 앞 창이 `done`인 뒤 다음 창을 claim한다. 각 창은 `transcribeAudio(includeTimestamps)`의 원문을 메모리에서만 다루고, 마스킹한 `sections`와 마지막 소유 단어 끝 시각 숫자만 저장한다. 선행 완료 트랜잭션이 다음 창의 job을 다시 예약한다. 대기 중인 후속 창은 2분 sweep 실패 대상으로 세지 않는다. 마지막 창이 끝나면 기존 `finish_review_part`가 인덱스 순서로 한 번 조립하고 `ready`로 바꾼다. 기존 파일 업로드 전사·ASK·회고 음성은 그대로다.
+- 재시도·철회: 지난 attempt/lease, 원본 만료, 동의 철회·폐기 뒤에는 claim·finish가 거절된다. 재추출은 모든 창의 시각 숫자와 sections를 지우고 새 attempt로 다시 예약한다. 선행 창 실패 시 후속 창은 대기하며, 선행 재시도 완료 후 이어진다.
+- 대안: word 배열을 DB에 저장해 마지막에 병합하면 병렬성은 얻지만 쪼개진 이메일 등 마스킹 전 조각 보존 위험이 커진다. 한 job이 30분 전체를 전사하면 워커 2분 lease와 실행 한도를 넘는다. 순서 처리의 지연은 실측 대상으로 남긴다.
+- 상태: phase 23 step4-B3 구현·로컬 검증 대상. 운영 migration·배포는 실제 기기·성능·사용자 승인 게이트 뒤에 한다.

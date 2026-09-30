@@ -6,6 +6,7 @@ import { reviewError } from "@/lib/reviews";
 import { kickWorker } from "@/lib/jobs";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { reviewCitationTarget, type PublishedReview, type ReviewCitationTarget } from "@/lib/recording/citation-location";
 
 function documentErrorMessage(error: string): string {
   if (error === "unsupported_document_format") return ".txt 파일, .md 파일, .csv 파일, .json 파일, .pdf 파일, .docx 파일만 업로드할 수 있습니다.";
@@ -33,6 +34,25 @@ export async function GET(
 
   if (result.error) return Response.json({ error: "문서 목록을 불러오지 못했습니다." }, { status: 500 });
 
+  const summaries = new Map((result.data ?? []).map((row) => [row.source_id, DocumentSummary.safeParse(row.summary).data ?? null]));
+  const citationIds = [...new Set([...summaries.values()].flatMap((summary) => summary?.citations.flatMap((citation) => citation.item_id ? [citation.item_id] : []) ?? []))];
+  const itemResult = citationIds.length
+    ? await supabase.from("items").select("id,source_id,external_ref").eq("dept_id", membership.deptId).is("deleted_at", null).in("id", citationIds)
+    : { data: [], error: null };
+  const reviewSources = [...new Set((itemResult.error ? [] : itemResult.data ?? []).map((item) => item.source_id))];
+  const reviewResult = reviewSources.length
+    ? await supabase.from("reviewed_materials").select("id,kind,revision,published_revision,published_source_id,original_uploaded,original_deleted_at,deleted_at,sections")
+      .in("published_source_id", reviewSources)
+    : { data: [], error: null };
+  // Both reads use the caller's session and RLS. A failed optional location lookup keeps the text citation.
+  const reviews = new Map(((reviewResult.error ? [] : reviewResult.data) ?? []).map((review) => [review.published_source_id, review as PublishedReview]));
+  const targets = new Map<string, { sourceId: string; target: ReviewCitationTarget }>();
+  for (const item of itemResult.error ? [] : itemResult.data ?? []) {
+    const review = reviews.get(item.source_id);
+    const target = review ? reviewCitationTarget(item.external_ref, review) : null;
+    if (target) targets.set(item.id, { sourceId: item.source_id, target });
+  }
+
   return Response.json({
     documents: (result.data ?? []).map((row) => {
       const source = relationValue(row.sources as { title: string | null; visibility: "dept" | "leads_only" } | Array<{ title: string | null; visibility: "dept" | "leads_only" }>);
@@ -43,7 +63,12 @@ export async function GET(
         status: row.status,
         status_reason: row.status_reason,
         // 계약과 다른 저장값은 화면에 넘기지 않는다. 화면은 null을 "근거 없음"으로 표시한다.
-        summary: DocumentSummary.safeParse(row.summary).data ?? null,
+        summary: summaries.get(row.source_id) ?? null,
+        citation_targets: Object.fromEntries((summaries.get(row.source_id)?.citations ?? []).flatMap((citation) => {
+          const entry = citation.item_id ? targets.get(citation.item_id) : null;
+          if (!entry || entry.sourceId !== row.source_id || !citation.item_id) return [];
+          return [[citation.item_id, entry.target]];
+        })),
         extracted_chars: row.extracted_chars,
         chunk_count: row.chunk_count,
         created_at: row.created_at,

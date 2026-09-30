@@ -1,6 +1,6 @@
 # 웹 회의 녹음 — 계획 어댑터
 
-- 날짜: 2026-09-17 · 방식: Plan Plus · 상태: 설계 작성 완료, 구현 미착수
+- 날짜: 2026-09-17 · 방식: Plan Plus · 상태: 설계 작성 완료(2026-09-17) → 구현·로컬 검증(phase 23, 2026-09-29 d52c002) → step4-B1 전사 메타데이터 계약 로컬 검증, 실제 기기·운영 게이트 미완료. 설계 어댑터: [browser-meeting-recording.design.md](../../02-design/features/browser-meeting-recording.design.md)
 - 이 파일에는 독립적인 요구 결정을 두지 않는다. 범위 원천은 [PRD §3-4·§8](../../PRD.md)이며 상세는 [웹 회의 녹음 설계](../../planning/웹회의_녹음_설계.md)다.
 
 ## Executive Summary

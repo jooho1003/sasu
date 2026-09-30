@@ -1,0 +1,8 @@
+Graft 실행 불가: 로컬 graft 명령 없음, 기존 격리 Docker 엔진 소켓 없음(이전 step 확인).
+수동 관계 확인 (변경 후 git grep):
+- ReviewedMaterials 사용: app/(auth)/d/[dept]/reviews/page.tsx
+- review_org_settings 사용: app/api/d/[dept]/reviews/[id]/route.ts, app/api/d/[dept]/reviews/route.ts, app/(auth)/d/[dept]/reviews/record/page.tsx
+- recording_enabled 응답: app/api/d/[dept]/reviews/route.ts → components/reviewed-materials.tsx
+- 서버 상세의 can_continue 및 녹음 RPC 스위치 검사는 변경하지 않음.
+- 요청 경로에 lib/supabase/service import 추가 없음.
+Graft 그래프·callers 결과가 아님.

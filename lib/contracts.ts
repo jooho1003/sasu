@@ -459,7 +459,38 @@ export const ReviewSection = z.object({
   id: z.string().min(1).max(100), text: z.string().max(20_000), original_text: z.string().max(20_000),
   origin: z.enum(["extracted", "transcribed", "user"]), edited: z.boolean(),
   location: z.string().max(200).nullable(), start_seconds: z.number().nonnegative().nullable(), end_seconds: z.number().nonnegative().nullable(),
+  confidence: z.enum(["normal", "low"]).nullable().optional(), boundary_review: z.boolean().optional(),
 });
+
+export const DeptGlossaryInput = z.strictObject({
+  id: z.uuid().nullable(),
+  term: z.string().trim().min(1).max(100),
+  reading: z.string().trim().min(1).max(100).nullable(),
+  note: z.string().trim().min(1).max(300).nullable(),
+});
+
+export const RecordingAccuracyEvidence = z.strictObject({
+  trials: z.array(z.strictObject({
+    mode: z.enum(["microphone", "tab", "system"]),
+    glossary: z.enum(["before", "after"]),
+    os: z.string().min(1),
+    browser: z.string().min(1),
+    file_path: z.string().min(1),
+    file_sha256: z.string().regex(/^[a-f0-9]{64}$/),
+    duration_seconds: z.number().finite().positive(),
+    reference: z.string().min(1),
+    hypothesis: z.string(),
+    terms: z.array(z.strictObject({ reference: z.string().min(1), recognized: z.string() })),
+    sections: z.array(z.strictObject({ error: z.boolean(), flagged: z.boolean() })),
+  })),
+  meetings: z.array(z.strictObject({
+    id: z.string().min(1),
+    labels: z.array(z.string().min(1)),
+    before: z.array(z.string().min(1)),
+    after: z.array(z.string().min(1)),
+  })),
+});
+export type RecordingAccuracyEvidence = z.infer<typeof RecordingAccuracyEvidence>;
 export type ReviewSection = z.infer<typeof ReviewSection>;
 export const ReviewEdit = z.object({
   revision: z.number().int().positive(), title: z.string().trim().min(1).max(120),

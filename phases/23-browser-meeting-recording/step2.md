@@ -5,7 +5,7 @@
 ## 작업
 
 - `/d/[dept]/reviews/record`와 `회의 녹음` 진입, 녹음 방식·참석자 동의(녹음자 자동 포함)·테스트·입력별 미터·일시정지·종료를 구현한다.
-- 시작 순서: 클라이언트 UUID → `POST /recordings`(서버 세션) → `POST /recordings/[id]/key` → 저장소 사전 검사(`prepareRecordingStore`) → 캡처. 한 단계라도 실패하면 녹음을 시작하지 않는다. 사전 검사에 실패하면 세션을 폐기한다. 실제 입력은 이 순서를 거친 세션에서만 IndexedDB에 저장한다.
+- 시작 순서: 클라이언트 UUID → `POST /recordings`(서버 세션) → `POST /recordings/[id]/key` → 저장소 사전 검사(`prepareRecordingStore`) → 캡처. 한 단계라도 실패하면 녹음을 시작하지 않는다. 사전 검사에 실패하면 세션을 폐기한다. 실제 입력은 이 순서를 거친 세션에서만 IndexedDB에 저장한다. (2026-09-29 ADR-071: 이 순서 앞에 입력 선택을 두고 `녹음 시작` 한 번으로 합친다. 구현은 `phases/33-recording-ux` step 1.)
 - 초기 공개 범위는 새 녹음만 부서장 전용. 녹음 중 부서/입력 변경을 잠그고 녹음 종료·로컬 저장·서버 저장 완료 상태를 구분한다.
 - 복구: `GET /recordings`의 서버 세션과 로컬 기록을 맞춰 본다. 세션이 `active`·`saving`이면 키를 다시 받아 복호화한다. 거부(끝 상태·만료)되면 로컬 자료를 지운다. 로컬 자료가 없는 서버 세션에는 폐기 버튼을 준다. 한도 초과 안내에서도 같은 목록을 보여 준다.
 - 저장: `save`(manifest v1) → 발급 경로로 구간 업로드(409 Duplicate는 업로드됨) → `finalize` → 상태 확인. 다시 올릴 구간은 같은 녹음 ID의 새 attempt 경로로 올린다. 세션이 `completed`가 되면 로컬 자료를 지우고 기존 ReviewDetail로 이동한다.
