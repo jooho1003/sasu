@@ -1,0 +1,15 @@
+{
+  "project": "sasu",
+  "phase": "35-sales-agent-design",
+  "design": "docs/02-design/features/sales-agent-design.design.md",
+  "steps": [
+    {
+      "step": 0,
+      "name": "synthetic-case-and-design-verification",
+      "status": "completed",
+      "verification": "docs/verification/sales-agent-design-2026-09-30.md",
+      "summary": "합성 사례·영업 검토 동선 설계, 인용 8개·견적 산술 검증, PDCA 설계 9/9 대조 완료. 구현·시드는 범위 밖."
+    }
+  ],
+  "production_deployed": false
+}
