@@ -65,6 +65,7 @@ export type LlmPurpose =
   | "summarize_meeting"
   | "summarize_document"
   | "run_agent_role"
+  | "sales_quote_review"
   | "trailer_generate"
   | "trailer_score"
   | "transcribe_voice"

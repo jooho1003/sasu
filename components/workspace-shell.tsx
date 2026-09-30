@@ -43,6 +43,7 @@ export function WorkspaceShell({
       ? [{ label: UI_LABELS.reviews, suffix: "/reviews", icon: "file" as const }, { label: "문서", suffix: "/documents", icon: "file" as const }]
       : []),
     { label: UI_LABELS.roles, suffix: "/roles", icon: "people" },
+    ...(!demo ? [{ label: "견적 검토 연습", suffix: "/sales-review", icon: "file" as const }] : []),
     ...(showTrailers
       ? [{ label: "예고편", suffix: "/trailers", icon: "video" as const }]
       : []),

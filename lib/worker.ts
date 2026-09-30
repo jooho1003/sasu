@@ -10,6 +10,7 @@ import { registerSlackAnswerDeliveryHandler } from "@/lib/pipeline/slack-answer-
 import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
 import { registerDocumentSummaryHandler } from "@/lib/pipeline/document-summary";
 import { registerAgentRoleHandler } from "@/lib/pipeline/agent-role";
+import { registerSalesReviewHandler } from "@/lib/pipeline/sales-review";
 import { registerNotionImportHandler, scheduleNotionSync } from "@/lib/pipeline/notion-import";
 import { registerNotionDiscoverHandler } from "@/lib/pipeline/notion-discover";
 import { registerNotionPollHandler, scheduleNotionPolls } from "@/lib/pipeline/notion-poll";
@@ -32,6 +33,7 @@ function registerWorkerHandlers(): void {
   registerMeetingSummaryHandler();
   registerDocumentSummaryHandler();
   registerAgentRoleHandler();
+  registerSalesReviewHandler();
   registerNotionImportHandler();
   registerNotionDiscoverHandler();
   registerNotionPollHandler();

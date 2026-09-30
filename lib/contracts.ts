@@ -126,6 +126,30 @@ export const AgentRoleEvaluation = z.strictObject({
 
 export type AgentRoleEvaluation = z.infer<typeof AgentRoleEvaluation>;
 
+export const SalesReviewFocus = z.enum(["all", "price", "schedule"]);
+export type SalesReviewFocus = z.infer<typeof SalesReviewFocus>;
+export const SalesReviewPriority = z.enum(["price", "schedule", "sso"]);
+export const SalesReviewChoice = z.strictObject({
+  priority: SalesReviewPriority,
+  reply_style: z.enum(["brief", "detailed"]),
+});
+export type SalesReviewChoice = z.infer<typeof SalesReviewChoice>;
+export const SalesReviewSourceId = z.enum(["S1", "S2", "S3", "S4"]);
+export const SalesReviewCitation = z.strictObject({ source_id: SalesReviewSourceId, quote: z.string().min(1) });
+export const SalesReviewLine = z.strictObject({ text: z.string().min(1), citations: z.array(SalesReviewCitation).min(1) });
+export const SalesReviewResult = z.strictObject({
+  case_version: z.literal(1),
+  focus: SalesReviewFocus,
+  priority: SalesReviewPriority,
+  reply_style: SalesReviewChoice.shape.reply_style,
+  total_delta_krw: z.number().int(),
+  comparison: z.array(SalesReviewLine).min(1),
+  policy_flags: z.array(SalesReviewLine).min(1),
+  questions: z.array(SalesReviewLine).min(1),
+  reply_draft: z.array(SalesReviewLine).min(1),
+});
+export type SalesReviewResult = z.infer<typeof SalesReviewResult>;
+
 export const IngestItem = z.strictObject({
   source_id: NonEmptyString,
   external_ref: NullableString,
