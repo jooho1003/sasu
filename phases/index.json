@@ -222,6 +222,22 @@
       "verification": "docs/verification/sales-agent-design-2026-09-30.md",
       "note": "영업팀 고객 요청·견적 변경 검토의 합성 사례와 PDCA plan/design·설계 검증 완료. 기능 구현·DB 시드·운영 반영은 이 phase 범위 밖.",
       "production_deployed": false
+    },
+    {
+      "dir": "36-sales-agent-review",
+      "status": "completed",
+      "verification": "docs/verification/sales-agent-review-2026-09-30.md",
+      "note": "고정 합성 영업 검토의 작업·근거 결과·팀장 내부 확인 구현과 격리 SQL·인증 브라우저 검증 완료. 실제 자료 연결 없음. 2026-09-30 운영 반영.",
+      "production_deployed": true,
+      "deployment": "docs/verification/sales-review-production-2026-09-30.md"
+    },
+    {
+      "dir": "37-sales-review-revision",
+      "status": "completed",
+      "verification": "docs/verification/sales-review-revision-2026-09-30.md",
+      "note": "합성 돌려보내기 사유와 연결 재검토·별도 팀장 확인 구현. 격리 SQL 289·단위 1719·인증 브라우저 2건·게스트 5건 통과. 2026-09-30 운영 반영.",
+      "production_deployed": true,
+      "deployment": "docs/verification/sales-review-production-2026-09-30.md"
     }
   ]
 }

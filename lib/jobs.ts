@@ -15,6 +15,7 @@ export type JobKind =
   | "summarize_meeting"
   | "summarize_document"
   | "run_agent_role"
+  | "run_sales_review"
   | "generate_trailer"
   | "check_trailer_gate"
   | "score_trailer_attempt"
@@ -55,7 +56,7 @@ type OwnerReference = {
 };
 
 type FailureOwnerMapping = {
-  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "notion_roots" | "document_summaries" | "agent_role_results" | "trailers" | "trailer_attempts";
+  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "notion_roots" | "document_summaries" | "agent_role_results" | "sales_review_tasks" | "trailers" | "trailer_attempts";
   references: OwnerReference[];
   write: "update" | "upsert";
   values: (ownerId: string, errorCode: string) => Record<string, unknown>;
@@ -202,6 +203,12 @@ const FAILURE_OWNER_MAPPINGS: Partial<
     references: [{ payloadKey: "resultId", column: "id" }],
     write: "update",
     values: (_resultId, errorCode) => ({ status: "failed", status_reason: errorCode }),
+  },
+  run_sales_review: {
+    table: "sales_review_tasks",
+    references: [{ payloadKey: "taskId", column: "id" }],
+    write: "update",
+    values: (_taskId, errorCode) => ({ status: "failed", status_reason: errorCode, result: null, updated_at: new Date().toISOString() }),
   },
 };
 
@@ -396,6 +403,13 @@ export async function sweepPendingRows(): Promise<void> {
   if (agentRoleResult.error) {
     throw new JobWorkerDatabaseError();
   }
+
+  const salesReviewResult = await client
+    .from("sales_review_tasks")
+    .update({ status: "failed", status_reason: "llm_timeout", result: null, updated_at: new Date().toISOString() })
+    .in("status", ["queued", "processing"])
+    .lt("updated_at", cutoff);
+  if (salesReviewResult.error) throw new JobWorkerDatabaseError();
 
   const cardResult = await client
     .from("decision_requests")

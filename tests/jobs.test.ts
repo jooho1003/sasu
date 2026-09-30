@@ -255,6 +255,12 @@ describe("jobs worker", () => {
       ownerTable: "agent_role_results",
       ownerStatus: { status: "failed", status_reason: "llm_timeout" },
     },
+    {
+      kind: "run_sales_review" as const,
+      payload: { taskId: "task-1" },
+      ownerTable: "sales_review_tasks",
+      ownerStatus: { status: "failed", status_reason: "llm_timeout", result: null },
+    },
   ])(
     "3회 실패한 $kind job은 failed이고 소유 row 상태도 바뀐다",
     async ({ kind, payload, ownerTable, ownerStatus }) => {
@@ -433,6 +439,25 @@ describe("jobs worker", () => {
       "job-sensitive-error",
       expect.any(Function),
     );
+  });
+
+  it("sweep은 2분 넘은 합성 영업 검토 작업을 실패로 정리한다", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-08T12:05:00.000Z"));
+    const fake = createFakeClient([[{ id: "sweep-job", kind: "sweep", payload: {}, attempts: 1 }]]);
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(fake.client);
+
+    await runOnce();
+
+    expect(fake.operations).toContainEqual(expect.objectContaining({
+      table: "sales_review_tasks",
+      method: "update",
+      values: expect.objectContaining({ status: "failed", status_reason: "llm_timeout", result: null }),
+      filters: expect.arrayContaining([
+        { operator: "in", column: "status", value: ["queued", "processing"] },
+        { operator: "lt", column: "updated_at", value: "2026-09-08T12:03:00.000Z" },
+      ]),
+    }));
   });
 
   it("claim은 lane을 SQL RPC에 명시하고 기본값은 realtime이다", async () => {
