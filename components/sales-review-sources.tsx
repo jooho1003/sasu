@@ -6,6 +6,11 @@ type Candidate = { item_id: string; title: string; kind: string; quote: string; 
 type Role = "request" | "old_quote" | "new_quote" | "policy";
 type PreviewSource = Candidate & { href: string };
 type Preview = { sources: Record<Role, PreviewSource> };
+type DifferenceEntry = { source_id: string; quote: string; href: string };
+type Comparison = Preview & { difference: {
+  old_only: DifferenceEntry[]; new_only: DifferenceEntry[];
+  old_only_total: number; new_only_total: number; truncated: boolean;
+} };
 
 const ROLES: { id: Role; label: string }[] = [
   { id: "request", label: "고객 요청" },
@@ -19,8 +24,10 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [selection, setSelection] = useState<Record<Role, string>>(emptySelection);
   const [preview, setPreview] = useState<Preview | null>(null);
+  const [comparison, setComparison] = useState<Comparison["difference"] | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [comparing, setComparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const endpoint = `/api/d/${encodeURIComponent(deptId)}/sales-review/sources`;
 
@@ -47,11 +54,13 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
     if (ids.some((id) => !id) || new Set(ids).size !== 4) {
       setError("서로 다른 원문 4건을 선택해 주세요.");
       setPreview(null);
+      setComparison(null);
       return;
     }
     setBusy(true);
     setError(null);
     setPreview(null);
+    setComparison(null);
     try {
       const response = await fetch(endpoint, {
         method: "POST", headers: { "content-type": "application/json" }, cache: "no-store",
@@ -68,6 +77,29 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
     }
   }
 
+  async function compare() {
+    if (!preview) return;
+    setComparing(true);
+    setError(null);
+    setComparison(null);
+    try {
+      const response = await fetch(`/api/d/${encodeURIComponent(deptId)}/sales-review/compare`, {
+        method: "POST", headers: { "content-type": "application/json" }, cache: "no-store",
+        body: JSON.stringify({ request_item_id: selection.request, old_quote_item_id: selection.old_quote,
+          new_quote_item_id: selection.new_quote, policy_item_id: selection.policy }),
+      });
+      const body = (await response.json()) as Comparison & { error?: string };
+      if (!response.ok || !body.sources || !body.difference) throw new Error(body.error ?? "문구를 비교하지 못했습니다.");
+      setPreview({ sources: body.sources });
+      setComparison(body.difference);
+    } catch (cause) {
+      setPreview(null);
+      setError(cause instanceof Error ? cause.message : "문구를 비교하지 못했습니다.");
+    } finally {
+      setComparing(false);
+    }
+  }
+
   return <section className="panel grid gap-4 p-6" aria-labelledby="real-sales-sources-heading">
     <div className="grid gap-1">
       <p className="m-0 text-sm text-[var(--muted)]">실제 부서 기록 · 팀장 전용</p>
@@ -78,15 +110,15 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
       {!candidates.some((candidate) => candidate.is_principles) ? <p className="m-0 text-sm" role="status">활성 원칙 문서의 원문이 없습니다. 부서 원칙 문서를 연결한 뒤 다시 열어 주세요.</p> : null}
       <div className="grid gap-3 md:grid-cols-2">
         {ROLES.map(({ id, label }) => <label className="grid gap-2 text-sm font-bold" key={id}>{label}
-          <select className="min-w-0 rounded-lg border border-black/15 bg-white px-3 py-2 font-normal" value={selection[id]}
-            onChange={(event) => { setSelection((current) => ({ ...current, [id]: event.target.value })); setPreview(null); }}>
+          <select className="min-w-0 rounded-lg border border-black/15 bg-white px-3 py-2 font-normal" disabled={busy || comparing} value={selection[id]}
+            onChange={(event) => { setSelection((current) => ({ ...current, [id]: event.target.value })); setPreview(null); setComparison(null); }}>
             <option value="">원문 선택</option>
             {candidates.filter((candidate) => id !== "policy" || candidate.is_principles).map((candidate) =>
               <option key={candidate.item_id} value={candidate.item_id}>{candidate.title} · {candidate.quote.slice(0, 45)}</option>)}
           </select>
         </label>)}
       </div>
-      <button className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 font-bold text-[var(--accent)] disabled:opacity-50" disabled={busy}
+      <button className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 font-bold text-[var(--accent)] disabled:opacity-50" disabled={busy || comparing}
         onClick={() => void connect()} type="button">{busy ? "확인 중…" : "원문 나란히 보기"}</button>
     </>}
     {error ? <p className="m-0 rounded-xl bg-[var(--urgent)]/10 p-3" role="alert">{error}</p> : null}
@@ -97,5 +129,25 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
         <a className="mt-3 inline-block text-sm font-bold text-[var(--accent)] underline" href={preview.sources[id].href}>원문 열기</a>
       </article>)}
     </div> : null}
+    {preview ? <button className="w-fit rounded-lg bg-[var(--accent)] px-4 py-2 font-bold text-white disabled:opacity-50"
+      disabled={busy || comparing} onClick={() => void compare()} type="button">{comparing ? "비교 중…" : "견적 문구 차이 보기"}</button> : null}
+    {comparison ? <section className="grid gap-4 rounded-xl border border-black/10 bg-white p-4" aria-label="견적 원문 문구 차이">
+      <div><h3 className="m-0 text-lg">견적 원문 문구 차이</h3><p className="m-0 text-sm text-[var(--muted)]">앞뒤 공백을 제외한 원문 문구의 등장 횟수를 비교했습니다. 금액·일정·계약 조건의 의미는 원문에서 확인해 주세요.</p></div>
+      {comparison.old_only_total === 0 && comparison.new_only_total === 0 ? <p className="m-0">서로 다른 문구를 찾지 못했습니다.</p> : <div className="grid gap-4 lg:grid-cols-2">
+        {([
+          { label: "기존 견적에서 더 많이 나온 문구", rows: comparison.old_only, total: comparison.old_only_total },
+          { label: "변경 견적에서 더 많이 나온 문구", rows: comparison.new_only, total: comparison.new_only_total },
+        ] as const).map(({ label, rows, total }) => <section className="grid content-start gap-2" key={label}>
+          <h4 className="m-0 text-base">{label} · 전체 {total}건</h4>
+          {rows.length === 0 ? <p className="m-0 text-sm">없음</p> : <ul className="m-0 grid list-none gap-2 p-0">
+            {rows.map((row, index) => <li className="rounded-lg border border-black/10 p-3" key={`${row.source_id}-${index}`}>
+              <q className="block whitespace-pre-wrap text-sm">{row.quote}</q>
+              <a className="mt-2 inline-block text-sm font-bold text-[var(--accent)] underline" href={row.href}>원문에서 확인</a>
+            </li>)}
+          </ul>}
+        </section>)}
+      </div>}
+      {comparison.truncated ? <p className="m-0 text-sm" role="status">화면에는 각 쪽의 앞 8건만 표시했습니다. 전체 건수는 위에 표시했습니다.</p> : null}
+    </section> : null}
   </section>;
 }
