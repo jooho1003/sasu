@@ -694,4 +694,4 @@ HubSpot은 토큰 introspection에서 사용자 단위 앱과 동일 사용자 I
 - 결정: `original_layout='single_file'`이고 삭제되지 않았으며 `status='uploading'`, `updated_at`이 24시간 이상 지난 자료만 워커 내부 SQL sweep에서 `failed`, `status_reason='upload_timeout'`으로 바꾼다. 한 번에 100건까지 행 잠금 `skip locked`로 처리한다. 원본·구간·수정본은 자동 삭제하지 않는다. 이미 처리 중이거나 확정된 자료와 `audio_segments` 녹음은 제외한다.
 - 복구: 화면은 이 상태의 이유를 안내한다. 원본과 구간 파일이 이미 있으면 기존 구간 재시도를 사용할 수 있다. 원본이 없으면 자료를 삭제하고 새로 올린다. 동의 철회·원본 보존 만료·직접 삭제는 기존 경로가 우선한다. 사용자 요청 경로에 service role을 추가하지 않는다.
 - 대안: 2분 후 실패는 큰 파일·느린 연결의 정상 업로드를 오판한다. 자동 삭제는 이미 올라온 비공개 원본과 검토 초안을 잃게 한다. 새 상태를 추가하면 기존 목록·RLS·상태 전이가 확장되어 이번 좁은 문제보다 범위가 커진다.
-- 운영: 로컬 migration·권한/경계 테스트 뒤에도 운영 DB 적용과 배포는 사용자 승인 게이트에 둔다. 실행 범위는 phase 34 `review-upload-timeout`이다.
+- 운영: phase 34의 격리 로컬 검증과 사용자 승인 뒤 `0065` 및 분리 배포본을 2026-09-30 운영에 적용했다. [실행 기록](verification/review-upload-timeout-2026-09-30.md)을 따른다.
