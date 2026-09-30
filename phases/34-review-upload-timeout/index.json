@@ -1,0 +1,8 @@
+{
+  "project": "sasu",
+  "phase": "34-review-upload-timeout",
+  "design": "docs/02-design/features/review-upload-timeout.design.md",
+  "steps": [{ "step": 0, "name": "sweep-and-guidance", "status": "completed", "verification": "docs/verification/review-upload-timeout-2026-09-30.md", "note": "로컬 SQL·워커·화면 검증 후 phase 34만 분리한 운영 배포까지 확인." }],
+  "production_deployed": true,
+  "deployment": "docs/verification/review-upload-timeout-2026-09-30.md"
+}
