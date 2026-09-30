@@ -53,10 +53,10 @@ plan에는 별도 성공 기준 표가 없어서 design Context Anchor의 SUCCES
 | V08·V17 접근권 | ✅ | `e2e:review-controls` 13 통과 (구간 재생·61회 제한·내려받기 게이트) + SQL "segment tickets" |
 | V09 권한 우회 | ✅ | SQL "RLS, direct writes, reviewer stop and function privilege matrix" (권한 조합 2,016) |
 | V11 데모 | ✅ (v1.2) | `demo-meeting-recorder.spec.ts` 2 통과 — 60초 메모리 녹음·재생, 로컬 DB의 review_recordings·reviewed_materials·jobs·llm_calls·Storage 증가 0 |
-| V12 회귀 | ✅ (v1.4, 조건부) | 2026-09-30 현재 작업 트리 스냅샷: unit 159 파일 1,704 · 자료 검토(음성·문서) 4/4 · 업로드 경계(문서·VTT) 6/6 · 권한 인지 답변 `grounded-answer-live` 1/1. 낡은 `ask-permission.spec.ts`(9/16 업로드 흐름 변경 뒤 미갱신)는 실패 — 제품 회귀 아님, 테스트 재작성 필요([기록](../verification/browser-meeting-recording/v12-regression-20260930.md)) |
+| V12 회귀 | ✅ (v1.5) | 2026-09-30 현재 작업 트리 스냅샷: unit 159 파일 1,704 · 자료 검토(음성·문서) 4/4 · 업로드 경계(문서·VTT) 6/6 · 권한 인지 답변 `grounded-answer-live` 1/1. v1.4에서 실패한 낡은 `ask-permission.spec.ts`(9/16 업로드 흐름 변경 뒤 미갱신, 제품 회귀 아님)는 v1.5에서 검토함 → 확정 흐름으로 고쳐 원본 트리에서 ASK 권한·권한 인지 답변·업로드 경계 8/8, ASK 반복 2/2 통과([기록](../verification/browser-meeting-recording/v12-regression-20260930.md)) |
 | V13~V20 정확률·보안 | ⏸ | step4-B·운영 게이트 (V14 CSP 강제, V13 제공사 확인은 사람 게이트) |
 
-**Success Rate (이번에 판정 가능한 묶음)**: v1.0 5/7 충족·2/7 부분 → v1.2 6/7 충족·1/7 부분(V12의 ASK·VTT E2E) → v1.4 7/7 충족(V12는 낡은 `ask-permission.spec.ts` 재작성 조건부)
+**Success Rate (이번에 판정 가능한 묶음)**: v1.0 5/7 충족·2/7 부분 → v1.2 6/7 충족·1/7 부분(V12의 ASK·VTT E2E) → v1.4 7/7 충족(V12 조건부) → v1.5 7/7 충족(조건 해소)
 
 ### Decision Record Verification
 
@@ -207,11 +207,11 @@ Critical: 0건.
 
 | # | 문서 | 낡은 서술 | 실제 |
 |---|------|-----------|------|
-| D-1 | ADR-070 "영향", 웹회의_녹음_설계 §9 | `revoke_participant_reviews`·`queue_review_part` 교체 | §4대로 대체 |
-| D-2 | 웹회의_녹음_설계 §5.3 (212행) | 철회 trigger가 `members_revoke_reviews` | 세션은 별도 `members_revoke_recordings` |
-| D-3 | 웹회의_녹음_설계 §5.2 표 | `GET /recordings/[id]`·`?recent=1`·0061·0062 함수 없음 | 구현돼 있음 |
-| D-4 | ARCHITECTURE §6-5 제목, PRD §11 "웹 회의 녹음" 행, CLAUDE.md·AGENTS.md 기술 스택 줄 | "녹음 화면(UI) 미구현" | 녹음 화면 구현됨(d52c002) |
-| D-5 | `phases/23-browser-meeting-recording/index.json` | 모든 step `pending`, phase `blocked` | 실행 기록은 step별 부분 완료 |
+| D-1 | ADR-070 "영향", 웹회의_녹음_설계 §9 | `revoke_participant_reviews`·`queue_review_part` 교체 | §4대로 대체. **해결(`122b88d`)**: 두 문서 모두 `members_revoke_recordings`·`members_revoke_reviews`로 정정 |
+| D-2 | 웹회의_녹음_설계 §5.3 (212행) | 철회 trigger가 `members_revoke_reviews` | 세션은 별도 `members_revoke_recordings`. **해결(`122b88d`)** |
+| D-3 | 웹회의_녹음_설계 §5.2 표 | `GET /recordings/[id]`·`?recent=1`·0061·0062 함수 없음 | 구현돼 있음. **해결(2026-09-30)**: §5.2 표에 `GET /recordings/[id]`·`?recent=1`, 0061 `start_continued_review_recording`·`review_recordings_one_successor`·`review_recording_metadata_stamp`, 0062 `create_review_recording_with_profile` 추가 |
+| D-4 | ARCHITECTURE §6-5 제목, PRD §11 "웹 회의 녹음" 행, CLAUDE.md·AGENTS.md 기술 스택 줄 | "녹음 화면(UI) 미구현" | 녹음 화면 구현됨(d52c002). **해결**: 제목·행을 "로컬 구현·검증, 실기기·운영 게이트 미완료"로 정정(`122b88d`, 기술 스택 줄은 `b5b04d8`) |
+| D-5 | `phases/23-browser-meeting-recording/index.json` | 모든 step `pending`, phase `blocked` | 실행 기록은 step별 부분 완료. **해결(`122b88d`)**: step마다 `progress`·`note`·`verification` 기록 |
 | D-6 | `docs/02-design/features/browser-meeting-recording.design.md` | 분석 도중 step4-B 범위 29줄로 교체되어 대조 목록이 없음 | **해결(2026-09-29)**: step4-B 절은 두고 "구현 대조 목록" 절을 병합 |
 
 ---
@@ -235,12 +235,12 @@ Critical: 0건.
 
 ## 7. 다음 단계
 
-1. G-1: 구현·검증 완료(`659f131`, 브랜치 `fix/capture-lock-20260929`). 병합 완료. 남은 일: phase 23 `index.json`에 step 기록(다른 세션의 미커밋 변경 뒤)
-2. D-1~D-5 문서 정정: 사용자 결정 "다른 세션 작업 뒤" — PRD → ARCHITECTURE → ADR 순서
+1. ~~G-1~~ 구현·검증·병합 완료(`659f131`). phase 23 `index.json` step 0 기록 완료(`122b88d`)
+2. ~~D-1~D-5 문서 정정~~ 완료 — D-1·D-2·D-4·D-5는 `122b88d`, D-3는 2026-09-30(§5)
 3. ~~D-6 design 문서 병합~~ 완료
 4. ~~L3~~ 완료(v1.2, 8 통과)
 5. ~~G-1 반영 뒤 `/pdca analyze` 재실행 → `/pdca report`~~ 보고서 작성(부분 완료, [report](../04-report/features/browser-meeting-recording.report.md))
-6. ~~V12 회귀 E2E~~ 완료(v1.4). 후속: `ask-permission.spec.ts`를 검토함 → 확정 흐름으로 재작성, `upload-boundaries.spec.ts`의 파일럿 시드 이름 고정 제거
+6. ~~V12 회귀 E2E~~ 완료(v1.4). ~~후속: `ask-permission.spec.ts` 재작성, `upload-boundaries.spec.ts`의 파일럿 시드 이름 고정 제거~~ 완료(v1.5)
 
 ---
 
@@ -252,6 +252,7 @@ Critical: 0건.
 | 1.1 | 2026-09-29 | G-1 해결(`659f131`, 미병합) 반영, 일치율 96% | wadelee1005@gmail.com |
 | 1.2 | 2026-09-29 | `659f131` 작업 브랜치 병합, L3 제품·데모 E2E 8 통과, V11 충족 | wadelee1005@gmail.com |
 | 1.4 | 2026-09-30 | V12 회귀 E2E(현재 작업 트리 스냅샷) 반영 → 판정 가능 묶음 7/7. 1.3은 §8 step4-B6~B8 추가 대조 | wadelee1005@gmail.com |
+| 1.5 | 2026-09-30 | 미커밋 작업 커밋(`122b88d`·`a6639ce`), D-1~D-5 해결, V12 조건 해소(낡은 테스트 두 건 수정·8/8) | wadelee1005@gmail.com |
 
 ---
 

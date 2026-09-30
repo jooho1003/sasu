@@ -24,7 +24,7 @@
 │  Design Match Rate: 96% (analysis v1.2)      │
 ├─────────────────────────────────────────────┤
 │  ✅ 충족:     7 / 7 판정 가능 묶음 (v1.1)     │
-│  ⚠️ 조건:     V12 — 낡은 ASK 테스트 재작성    │
+│  ✅ V12:      낡은 ASK 테스트 수정 완료 (v1.2) │
 │  ⏸ 게이트:   V01~V06 실제 기기 · V13~V20      │
 └─────────────────────────────────────────────┘
 ```
@@ -50,10 +50,10 @@ Plan에는 성공 기준 표가 없다. 그래서 design Context Anchor의 SUCCE
 | V08·V17 접근권 | ✅ | `e2e:review-controls` 13 통과, SQL "segment tickets". 구간 재생·61회 제한·내려받기 게이트 |
 | V09 권한 우회 | ✅ | SQL 권한 행렬(조합 2,016) |
 | V11 데모 | ✅ | `demo-meeting-recorder.spec.ts` 2 통과. 로컬 DB·Storage·jobs·llm_calls 증가 0 |
-| V12 회귀 | ✅ (조건부, v1.1) | 2026-09-30 현재 작업 트리 스냅샷에서 unit 1,704 · 자료 검토(음성·문서) 4/4 · 문서·VTT 업로드 경계 6/6 · 권한 인지 답변 1/1. 낡은 `ask-permission.spec.ts`는 재작성 필요([기록](../../verification/browser-meeting-recording/v12-regression-20260930.md)) |
+| V12 회귀 | ✅ (v1.2) | 2026-09-30 현재 작업 트리 스냅샷에서 unit 1,704 · 자료 검토(음성·문서) 4/4 · 문서·VTT 업로드 경계 6/6 · 권한 인지 답변 1/1. 낡은 `ask-permission.spec.ts`는 v1.2에서 검토함 → 확정 흐름으로 고쳐 8/8·반복 2/2 통과([기록](../../verification/browser-meeting-recording/v12-regression-20260930.md)) |
 | V13~V20 정확률·보안 | ⏸ | step4-B는 다른 세션이 진행 중. V13 제공사 확인·V14 CSP 강제는 사람 게이트 |
 
-**Success Rate**: 판정 가능한 7묶음 중 v1.0 6 충족 · 1 부분(86%) → v1.1 7 충족(100%, V12 조건부). 전체 V01~V21 기준으로는 완료 판정을 내리지 않는다.
+**Success Rate**: 판정 가능한 7묶음 중 v1.0 6 충족 · 1 부분(86%) → v1.1 7 충족(100%, V12 조건부) → v1.2 조건 해소. 전체 V01~V21 기준으로는 완료 판정을 내리지 않는다.
 
 ## 1.5 Decision Record Summary
 
@@ -102,12 +102,12 @@ Plan에는 성공 기준 표가 없다. 그래서 design Context Anchor의 SUCCE
 | 항목 | 이유 | 선행 조건 |
 |---|---|---|
 | V01~V06 실제 기기(마이크·Meet/Zoom 탭 소리) | 사람이 판정하는 게이트 | 실제 기기 세션 |
-| `ask-permission.spec.ts` 재작성(검토함 → 확정 흐름), `upload-boundaries.spec.ts`의 파일럿 시드 이름 고정 제거 | V12에서 찾은 기존 테스트 부채(9/16·9/20 변경 뒤 미갱신) | 없음 |
-| `reviewed-materials.spec.ts:184` 문구 수정 커밋 | 원본 트리에 1줄 수정만 해 둠 | 다른 세션 변경과 분리해 커밋 |
-| V13~V20 정확률·보안(step4-B 용어집·병합·정량 평가, CSP 강제, 제공사 확인) | step4-B1~B5는 다른 세션이 로컬에서 검증 중(미커밋) | 그 세션의 커밋 |
-| 운영 DB 0058~0062 적용, 운영 배포 | 사용자 승인 필요(D3=2) | 실제 기기 게이트 |
-| phase 23 `index.json`에 capture-lock 기록 | 다른 세션이 같은 파일을 수정 중(2026-09-29 22:37) | 그 세션의 커밋 |
-| 문서 정정 D-1~D-5(PRD → ARCHITECTURE → ADR 순) | 사용자 결정 "다른 세션 작업 뒤" | 그 세션의 커밋 |
+| ~~`ask-permission.spec.ts` 재작성, `upload-boundaries.spec.ts`의 파일럿 시드 이름 고정 제거~~ | 완료(v1.2) | — |
+| ~~`reviewed-materials.spec.ts:184` 문구 수정 커밋~~ | 완료(`a1410a3`) | — |
+| V13~V20 정확률·보안(CSP 강제, 제공사 확인, 실제 모델 지시문 문서, 정량 실측) | step4-B1~B8 로컬 구현은 `122b88d`로 커밋. V13·V14·V16·V20은 사람·운영 게이트 | 실제 기기·제공사 확인 |
+| 운영 DB 0058~0064 적용, 운영 배포 | 사용자 승인 필요(D3=2) | 실제 기기 게이트 |
+| ~~phase 23 `index.json`에 capture-lock 기록~~ | 완료(`122b88d`) | — |
+| ~~문서 정정 D-1~D-5~~ | 완료(`122b88d`, D-3는 2026-09-30) | — |
 
 ### 4.2 판정 보류 (신뢰도 < 80%)
 
@@ -155,9 +155,9 @@ U-1 관리자 접근 기록의 구간 묶음 표시 · U-2 `reextract` 뒤 `kick
 
 ## 7. Next Steps
 
-1. 다른 세션(step4-B·phase 33) 커밋 뒤: phase 23 `index.json` 기록 → D-1~D-5 정정(PRD → ARCHITECTURE → ADR)
-2. ~~V12 ASK·VTT E2E 실행~~ 완료(v1.1). 낡은 ASK 테스트 재작성은 후속
-3. 실제 기기 V01~V06 → 운영 DB 0058~0062 적용·배포 승인 요청
+1. ~~다른 세션 커밋 뒤 phase 23 `index.json` 기록 → D-1~D-5 정정~~ 완료(v1.2)
+2. ~~V12 ASK·VTT E2E 실행~~ 완료(v1.1). ~~낡은 ASK 테스트 재작성~~ 완료(v1.2)
+3. 실제 기기 V01~V06 → 운영 DB 0058~0064 적용·배포 승인 요청
 4. step4-B 완료 뒤 V13~V20을 반영해 `/pdca analyze browser-meeting-recording` 재실행
 
 ## Version History
@@ -166,3 +166,4 @@ U-1 관리자 접근 기록의 구간 묶음 표시 · U-2 `reextract` 뒤 `kick
 |---|---|---|---|
 | 1.0 | 2026-09-29 | 완료 보고(부분) 작성. analysis v1.2 기준 | wadelee1005@gmail.com |
 | 1.1 | 2026-09-30 | V12 회귀 E2E 반영(analysis v1.4) | wadelee1005@gmail.com |
+| 1.2 | 2026-09-30 | 커밋·문서 정정·V12 조건 해소 반영(analysis v1.5) | wadelee1005@gmail.com |
