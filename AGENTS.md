@@ -8,7 +8,7 @@
 - Next.js (App Router) + Vercel — 대시보드·원장·Q&A·게스트 모드, Route Handler가 슬랙 이벤트 수신
 - Supabase — Postgres + pgvector + RLS + Auth(매직링크). RLS가 곧 "권한 인지 답변"의 물리적 구현
 - Slack Events API + Block Kit (HTTP 모드, 조직당 워크스페이스 1개 OAuth 설치, 봇 토큰은 서버 암호화 저장; ADR-052)
-- 회의 입력은 `.vtt`/`.txt` 전사 업로드와 자료 검토함 음성 업로드(ADR-036·054). 웹 직접 녹음은 ADR-056 부분 구현(`lib/recording/`, 녹음 UI·Meet/Zoom 미구현), Meet·Zoom 공식 자료 수집은 2단계, PC 앱·회의 봇은 후속 · Notion API — 지정 페이지 전체 스냅샷 가져오기 + 5분 자동 갱신·`[다시 가져오기]`(ADR-052)
+- 회의 입력은 `.vtt`/`.txt` 전사 업로드와 자료 검토함 음성 업로드(ADR-036·054). 웹 직접 녹음은 ADR-056 로컬 구현·검증 중(`lib/recording/`, 녹음 UI·세션·구간 원본 구현, 실기기·운영 게이트 대기), Meet·Zoom 공식 자료 수집은 2단계, PC 앱·회의 봇은 후속 · Notion API — 지정 페이지 전체 스냅샷 가져오기 + 5분 자동 갱신·`[다시 가져오기]`(ADR-052)
 - Groq `openai/gpt-oss-120b` (카드·답변·회의 정리, strict json_schema) · Groq `openai/gpt-oss-20b` (분류) · 규칙 휴리스틱 (정량 신호). 두 모델 모두 production + strict structured output이라 인용 스키마를 강제할 수 있다 (ADR-028)
 - 임베딩: Voyage AI `voyage-4-lite` 1024차원 확정. OpenAI `text-embedding-3-small`은 명시적 호환 provider로만 사용한다(ADR-030)
 - 비동기: Postgres `jobs` 테이블 + `/api/jobs/run` 워커 (`after()` 즉시 1회 + 매분 트리거 — Vercel Cron 또는 Supabase `pg_cron`+`pg_net`, D0 확정)
@@ -38,10 +38,12 @@
 
 `docs/PRD.md`의 범위·완료 조건·컷 라인 → `docs/ARCHITECTURE.md`의 구조·불변식 → `docs/ADR.md`의 결정 이유 → `docs/setup-guide.md`·`docs/submission-checklist.md`의 절차
 
-하위 문서가 상위 문서를 암묵적으로 바꾸지 않는다. 구현 중 결정이 바뀌면 PRD §3·§8을 먼저 고치고 ADR을 추가한다. bkit PDCA용 문서는 `docs/01-plan/`·`docs/02-design/`에 있으며 본문은 전부 위 문서를 가리킨다 — 거기에 새 결정을 적지 않는다. `docs/archive/`는 폐기본이라 참조하지 않는다.
+하위 문서가 상위 문서를 암묵적으로 바꾸지 않는다. 구현 중 결정이 바뀌면 PRD §3·§8을 먼저 고치고 ADR을 추가한다. bkit PDCA용 문서는 `docs/01-plan/`·`docs/02-design/`에 있으며 본문은 전부 위 문서를 가리킨다(예외: `/pdca analyze`가 비교할 목록) — 거기에 새 결정을 적지 않는다. `docs/archive/`는 폐기본이라 참조하지 않는다.
 
 ## 개발 프로세스
 - AI 개발 절차는 `docs/AI-DEVELOPMENT.md`를 따른다. Graft로 구현 전후 코드 의존 관계를 확인하고, 구조·실행 흐름이 바뀌는 작업은 Archify로 시각화해 검토한다. 실제 사용한 도구 결과와 검증 기록을 step 요약에 연결하며, 도구 결과가 없으면 누락 범위를 명시한다.
+- CRITICAL: 기능 추가·동작 변경의 설계는 무조건 bkit PDCA로 진행한다. Claude Code는 `/pdca`, Codex는 같은 bkit 플러그인의 `pdca` 스킬을 쓴다. 순서: `/pdca plan <feature>`(요구가 모호하면 `/plan-plus`) → `/pdca design <feature>` → 하네스 step 작성·실행 → `/pdca analyze <feature>`(일치율 90% 미만이면 `/pdca iterate`) → `/pdca report <feature>`. `<feature>`는 phase 디렉토리명에서 번호를 뺀 slug다(`23-browser-meeting-recording` → `browser-meeting-recording`). design 문서 없이 step을 쓰지 않는다.
+- 위 문서 우선순위는 bkit을 써도 그대로다. plan·design에서 나온 범위·결정은 PRD §3·§8·ADR에 먼저 적고, plan/design 문서에는 그 절 매핑과 `/pdca analyze`가 비교할 목록(엔드포인트·화면·모듈·job·테이블)만 둔다. step을 실행하는 세션은 plan/design을 새로 만들지 않고 step에 적힌 design 문서를 읽는다.
 - CRITICAL: `lib/` 아래 새 모듈은 테스트를 먼저 작성하고, 테스트가 통과하는 구현을 작성한다 (TDD — `scripts/hooks/tdd-guard.sh`가 강제). 예외: 라우트 핸들러(`route.ts`)·`app/**/page.tsx` 등 Next.js 프레임워크 파일·`components/`·`lib/supabase/*`·`lib/llm.ts`·`lib/slack/{blocks,post}.ts`·`scripts/`·`phases/`·`.sql`. 이유는 ARCHITECTURE.md §8 (SDK 어댑터·프레젠테이션·배선은 우리 로직이 아니다).
 - 하루 마지막 커밋은 항상 배포 가능 상태. 날짜 기반 기능 프리징·컷은 두지 않는다(ADR-049) — 신기능은 계속 만들되, 운영 반영은 검증(하니스·테스트·E2E·리뷰)과 사용자 승인 뒤에만 한다.
 - 커밋 메시지는 conventional commits (feat:, fix:, docs:, chore:, refactor:).

@@ -16,11 +16,20 @@
 
 ### B. 논의
 
-구현을 위해 구체화하거나 기술적으로 결정해야 할 사항이 있으면 사용자에게 제시하고 논의한다. PRD §10의 `(확인 필요)`·`미정` 항목이 step에 걸리면 먼저 푼다.
+구현을 위해 구체화하거나 기술적으로 결정해야 할 사항이 있으면 사용자에게 제시하고 논의한다. PRD §10의 `(확인 필요)`·`미정` 항목이 step에 걸리면 먼저 푼다. 요구가 모호해 논의가 길어지면 `/plan-plus <feature>`로 의도·대안·YAGNI 검토를 함께 진행한다.
+
+### B-1. bkit 계획·설계
+
+step 초안을 쓰기 전에 bkit PDCA로 기능의 plan/design 문서를 만든다. 생략하지 않는다. `<feature>`는 task 디렉토리명에서 번호를 뺀 slug다(`23-browser-meeting-recording` → `browser-meeting-recording`).
+
+1. `/pdca plan <feature>` → `docs/01-plan/features/<feature>.plan.md`
+2. `/pdca design <feature>` → `docs/02-design/features/<feature>.design.md`
+
+문서 우선순위(CLAUDE.md)는 바뀌지 않는다. B·B-1에서 정해진 범위·결정은 PRD §3·§8·ADR에 먼저 적고, plan/design 문서에는 그 절 매핑과 `/pdca analyze`가 비교할 목록(엔드포인트·화면·모듈·job·테이블)만 둔다. 기존 예: `docs/01-plan/features/browser-meeting-recording.plan.md`, `docs/02-design/features/sasu-mvp.design.md`. 논의로 결정이 바뀌면 design 문서도 같이 갱신한다. design 문서가 없으면 C로 넘어가지 않는다.
 
 ### C. Step 설계
 
-사용자가 구현 계획 작성을 지시하면 여러 step으로 나뉜 초안을 작성해 피드백을 요청한다.
+사용자가 구현 계획 작성을 지시하면 B-1의 design 문서를 기준으로 여러 step으로 나뉜 초안을 작성해 피드백을 요청한다.
 
 설계 원칙:
 
@@ -31,7 +40,7 @@
 5. **AC는 실행 가능한 커맨드** — "~가 동작해야 한다" 같은 추상적 서술이 아닌 `npm run build && npm test` 같은 실제 실행 가능한 검증 커맨드를 포함한다. PRD §11 검증표의 행이 걸리는 step은 그 행의 판정 기준(예: "같은 슬랙 이벤트 2회 전송 → items 1건")을 AC로 옮긴다.
 6. **주의사항은 구체적으로** — "조심해라" 대신 "X를 하지 마라. 이유: Y" 형식으로 적는다.
 7. **네이밍** — step name은 kebab-case slug로, 해당 step의 핵심 모듈/작업을 한두 단어로 표현한다 (예: `schema-v1`, `jobs-worker`, `slack-adapter`, `card-pipeline`).
-8. **주입되는 문서와 주입되지 않는 문서를 구분한다** — execute.py의 가드레일은 AGENTS.md + `docs/` **최상위** `*.md`(PRD·ARCHITECTURE·ADR·setup-guide·submission-checklist)만 주입한다. `docs/01-plan/`·`docs/02-design/`(bkit용 얇은 문서), `docs/proposal/`, `docs/submission/`, `docs/archive/`는 주입되지 않으며 주입할 필요도 없다 — 본문은 전부 최상위 문서에 있다. step이 최상위 문서의 특정 절(예: PRD §6-1 스키마, §6-3 카드 파이프라인 ⑨ 멱등성)에 의존하면 `## 읽어야 할 파일`에 **절 번호까지** 적는다. 절 번호 없이 "PRD 참조"라고 쓰면 에이전트는 900줄을 훑다가 추측한다.
+8. **주입되는 문서와 주입되지 않는 문서를 구분한다** — execute.py의 가드레일은 AGENTS.md + `docs/` **최상위** `*.md`(PRD·ARCHITECTURE·ADR·setup-guide·submission-checklist)만 주입한다. `docs/01-plan/`·`docs/02-design/`(bkit 어댑터), `docs/proposal/`, `docs/submission/`, `docs/archive/`는 주입되지 않는다. 본문은 최상위 문서에 있으므로 주입할 필요는 없지만, 해당 기능의 design 문서는 `/pdca analyze`가 비교할 목록을 담고 있으므로 `## 읽어야 할 파일`에 경로를 적는다. step이 최상위 문서의 특정 절(예: PRD §6-1 스키마, §6-3 카드 파이프라인 ⑨ 멱등성)에 의존하면 `## 읽어야 할 파일`에 **절 번호까지** 적는다. 절 번호 없이 "PRD 참조"라고 쓰면 에이전트는 900줄을 훑다가 추측한다.
 9. **참조 문서의 버전을 적었다면 그 버전이 현행인지 확인한다** — step 파일에 "스키마 v1"처럼 버전을 박아두면 문서가 갱신돼도 step은 갱신되지 않는다. 특히 D2 임베딩 마이그레이션, D3·D6·D9 게이트 판정 후에는 PRD §4·§8-0이 바뀌므로, 이미 completed된 step이 참조하던 절이 바뀌었으면 그 델타를 반영할 후속 step이 필요한지 판단한다. harness에는 이를 감지하는 장치가 없다.
 10. **게이트 판정은 step이 아니라 사람이 한다** — D3 세로 슬라이스·D6 봇·D8 코드 리뷰·D9 컷은 setup-guide §10의 사람 판정이다. step은 판정 재료(배포 URL·실행 기록)를 만들고 `blocked`로 멈춘다. step이 스스로 강등을 결정하지 않는다.
 
@@ -104,6 +113,7 @@
 - `/docs/ARCHITECTURE.md` §2 디렉토리 · §3 패턴 · §6 불변식
 - `/docs/ADR.md`
 - `/docs/PRD.md` §{이 step에 필요한 절 번호}
+- `/docs/02-design/features/{feature}.design.md` (bkit 설계 — 이 step이 구현할 항목)
 - {이전 step에서 생성/수정된 파일 경로}
 
 이전 step에서 만들어진 코드를 꼼꼼히 읽고, 설계 의도를 이해한 뒤 작업하라.
@@ -173,6 +183,14 @@ execute.py가 자동으로 처리하는 것:
 
 - **error 발생 시**: `phases/{task-name}/index.json`에서 해당 step의 `status`를 `"pending"`으로 바꾸고 `error_message`를 삭제한 뒤 재실행한다.
 - **blocked 발생 시**: `blocked_reason`에 적힌 사유를 해결한 뒤(대개 setup-guide의 사람 작업), `status`를 `"pending"`으로 바꾸고 `blocked_reason`을 삭제한 뒤 재실행한다.
+
+### E-1. bkit 확인
+
+task의 step이 모두 `completed`가 되면 `/pdca analyze <feature>`로 design 문서 대비 일치율을 확인한다.
+
+- 90% 미만: 차이가 작으면 `/pdca iterate <feature>`로 고치고, step 단위 구현이 필요하면 후속 step을 추가해 E로 다시 실행한다. 그다음 다시 분석한다.
+- 90% 이상: `/pdca report <feature>`로 완료 보고서를 남긴다.
+- 분석·보고서 경로를 `docs/verification/{task-name}/` 검증 기록에 연결한다. 일치율은 설계 대비 확인이다 — PRD §11 실행 기록을 대신하지 않는다.
 
 ### F. 이 프로젝트의 task 순서 (PRD §9)
 
