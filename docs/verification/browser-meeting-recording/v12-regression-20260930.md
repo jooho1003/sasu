@@ -42,4 +42,26 @@
 
 ## 원본 트리 변경
 
-- `tests/e2e/reviewed-materials.spec.ts:184` 1줄(`누락` → `빠짐`). 다른 세션의 미커밋 변경과 섞이지 않게 따로 커밋해야 한다.
+- `tests/e2e/reviewed-materials.spec.ts:184` 1줄(`누락` → `빠짐`). 다른 세션의 미커밋 변경과 섞이지 않게 따로 커밋해야 한다. → `a1410a3`로 따로 커밋했다.
+
+## 후속 — 낡은 테스트 두 건 정리 (2026-09-30 오후)
+
+위 §판정에서 남긴 테스트 부채를 고치고 **원본 작업 트리**(HEAD `a6639ce` + 이 수정)에서 다시 실행했다. 환경은 위와 같은 로컬 `review-qa`와 Groq·Voyage 실제 호출이다. worktree가 아니라 원본 트리라서 `.env`의 Supabase 값은 `review-qa.mjs`가 로컬 값으로 덮어쓴다(테스트의 `loadEnvFile`은 이미 있는 값을 덮어쓰지 않는다). 로컬 QA DB는 0064까지였으므로 `review-qa.mjs setup`으로 0065를 먼저 적용했다. 운영 DB에는 쓰지 않았다.
+
+| 파일 | 고친 내용 |
+|---|---|
+| `ask-permission.spec.ts` | ① 증거 준비를 현재 흐름으로: `POST /documents` → `review_id` → `ready` 대기 → `publish` → `source_id`. 정리는 `remove_source`와 검토 자료 삭제 ② 답변 본문은 고정 안내 문장이므로(PRD §6-5 5항, phase 32) 본문에 금액이 있는지 대신 lead 인용에 `4,200` 원문이 있는지로 판정. member 쪽 본문·인용·화면에 없어야 한다는 검사는 그대로 ③ 분류 뒤에 예약되는 `embed`와 답변 작업이 `runWorker` 뒤에 생길 수 있어, 대기 폴링이 아직이면 워커를 한 번씩 깨운다(로컬에는 매분 cron 없음) ④ 중복된 로그인 헬퍼를 `support/auth`로 교체 |
+| `upload-boundaries.spec.ts` | VTT 화자를 고정 이름("사수 파일럿 팀원") 대신 그 부서의 동의한 팀원(`role=member`, `consented_at` 있음) 중 이름순 첫 명으로 찾는다. 환경마다 시드 이름이 달라도 같은 경계를 검사한다 |
+
+| 실행 | 결과 |
+|---|---|
+| 1차 (3파일) | 7 통과 · 1 실패 — ASK가 업로드·확정·임베딩까지 통과하고 답변 본문 검사(②의 낡은 기대)에서 실패 |
+| 2차 (ASK만) | 실패 — 업로드 500 `PGRST303 JWT issued at future`. 위 §판정의 로컬 PostgREST 첫 요청 문제와 같다. 서버 로그에서 확인했고, 이후 실행마다 직전에 `/rest/v1/`을 세 번 호출해 깨웠다 |
+| 3차 (ASK만) | 통과 |
+| 4차 (3파일) | 7 통과 · 1 실패 — ASK `embed_status` 90초 대기 초과. jobs 기록상 두 번째 `embed`가 `runWorker` 종료 뒤(16:24:34)에 예약되어 정리 요청의 `after(runOnce)`(16:26:01)까지 처리되지 않았다 → ③으로 수정 |
+| **5차 (3파일)** | **8/8 통과 (1.6분)** — ASK 권한 1 · 권한 인지 답변 `grounded-answer-live` 1 · 업로드 경계 6(VTT 포함) |
+| **6차 (ASK `--repeat-each=2`)** | **2/2 통과 (1.5분)** |
+
+**V12 판정: ✅ 충족** — 조건이던 낡은 `ask-permission.spec.ts`가 현재 흐름에서 통과한다. ESLint·`tsc --noEmit` 통과.
+
+정리 확인: 이번 실행의 합성 검토 자료 5건은 모두 삭제 상태이고, source 5건은 `remove_source` 설계대로 `active=false`·본문과 임베딩 비움(행과 원장 인용은 보존)이다. `grounded-answer-live.spec.ts`는 실행할 때마다 `docs/verification/grounded-answer-selection-2026-09-23/live/`의 9/23 기록(캡처·`result.json`·`llm-telemetry.json`)을 다시 쓴다. 이번 실행분(질문 5건, 답변 3.5~8.6초)은 기록으로 남기지 않고 9/23 파일을 `git checkout`으로 되돌렸다.

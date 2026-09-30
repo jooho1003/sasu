@@ -17,7 +17,6 @@ for (const envFile of [".env", ".env.local"]) {
 const DEPARTMENT_ID = "22222222-2222-4222-8222-222222222222";
 const ORG_ID = "11111111-1111-4111-8111-111111111111";
 const PUBLIC_SOURCE_ID = "33333333-3333-4333-8333-333333333333";
-const CONSENTED_MEMBER_NAME = "사수 파일럿 팀원";
 const NON_MEMBER_SPEAKER = "외부 참석자";
 
 const REQUIRED_ENV = [
@@ -175,20 +174,25 @@ test.describe("업로드 쓰기 경계 (ADR-042)", () => {
 
   test("lead 전사 업로드는 동의한 멤버 발언만 마스킹해 저장한다", async ({ browser }) => {
     const service = serviceClient();
-    const consent = await service
+    // 시드 팀원 이름은 환경마다 다르다(운영 파일럿·로컬 QA). 이 부서의 동의한 팀원을 찾아 화자로 쓴다.
+    const consented = await service
       .from("members")
-      .select("consented_at")
+      .select("display_name")
       .eq("dept_id", DEPARTMENT_ID)
-      .eq("display_name", CONSENTED_MEMBER_NAME)
-      .maybeSingle<{ consented_at: string | null }>();
-    expect(consent.error).toBeNull();
-    expect(consent.data?.consented_at, "시드 팀원이 동의 상태여야 전사 케이스가 성립한다").toBeTruthy();
+      .eq("role", "member")
+      .not("consented_at", "is", null)
+      .order("display_name")
+      .limit(1)
+      .maybeSingle<{ display_name: string }>();
+    expect(consented.error).toBeNull();
+    const consentedName = consented.data?.display_name.trim() ?? "";
+    expect(consentedName, "동의한 팀원이 있어야 전사 케이스가 성립한다").not.toBe("");
 
     const vtt = [
       "WEBVTT",
       "",
       "00:00:01.000 --> 00:00:04.000",
-      `${CONSENTED_MEMBER_NAME}: 합성 회의 발언입니다. 연락은 ${FAKE_EMAIL} 또는 ${FAKE_PHONE}로 주세요.`,
+      `${consentedName}: 합성 회의 발언입니다. 연락은 ${FAKE_EMAIL} 또는 ${FAKE_PHONE}로 주세요.`,
       "",
       "00:00:05.000 --> 00:00:08.000",
       `${NON_MEMBER_SPEAKER}: 멤버가 아닌 사람의 합성 발언 ${runId}`,
