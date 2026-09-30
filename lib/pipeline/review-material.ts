@@ -354,6 +354,8 @@ export async function sweepReviewParts(): Promise<void> {
   if (originals.error) throw new Error("review_original_sweep_failed");
   const recordings = await client.rpc("sweep_review_recordings");
   if (recordings.error) throw new Error("recording_session_sweep_failed");
+  const uploads = await client.rpc("sweep_abandoned_review_uploads");
+  if (uploads.error) throw new Error("review_upload_sweep_failed");
   const result = await client.rpc("sweep_review_parts");
   if (result.error) throw new Error("review_sweep_failed");
 }

@@ -416,6 +416,12 @@ export function ReviewDetail({ deptId, id, citationSection = null }: { deptId: s
           {message}
         </p>
       ) : null}
+      {review.status === "failed" && review.status_reason === "upload_timeout" ? (
+        <div className="panel review-warning" role="alert">
+          <p>파일 업로드가 24시간 안에 끝나지 않았습니다.</p>
+          <p>원본과 구간 파일이 저장됐다면 아래에서 처리를 다시 시도할 수 있습니다. 원본이 없다면 이 자료를 삭제하고 다시 올려 주세요.</p>
+        </div>
+      ) : null}
       <section className="panel review-progress" aria-label="변환 진행">
         <div>
           <h2>{review.kind === "audio" ? "전체 음성 처리" : "문서 읽기"}</h2>

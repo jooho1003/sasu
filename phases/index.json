@@ -205,6 +205,13 @@
       "verification": "docs/verification/recording-ux-2026-09-29/README.md",
       "note": "녹음 UI step 0~8 기능 구현·로컬 제품 E2E 9/9, 단위 1664, 합성 UI E2E 47 통과. 계획·최종 Graft check 통과. Plan §4.1의 단계별 전후 Graft 그래프 0~7이 Docker 장애 당시 미생성되어 형식상 완료 게이트 보류. 실제 기기 V01~V06은 범위 밖, 운영 미배포.",
       "production_deployed": false
+    },
+    {
+      "dir": "34-review-upload-timeout",
+      "status": "blocked",
+      "verification": "docs/verification/review-upload-timeout-2026-09-30.md",
+      "note": "기존 파일 업로드 방치 정리 로컬 구현·검증 완료. 격리 SQL 282·단위 1705·검토 화면 31·빌드 통과. 운영 DB migration 0065·배포는 승인 대기.",
+      "production_deployed": false
     }
   ]
 }

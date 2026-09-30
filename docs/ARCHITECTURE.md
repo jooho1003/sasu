@@ -30,6 +30,8 @@ ADR-058의 원본 접근 강화는 `authorize_review_access` → `private.review
 
 `reviewed_materials`·`review_parts`·`review_revisions`는 검색 소스와 분리된 검토 저장소다. 세션 RPC가 부서장·동의·버전을 검증하며 `can_see()`와 RLS가 읽기/원본 접근을 집행한다. 비공개 `review-materials` 버킷에 원본과 60초+1초 겹침 WAV를 저장하고 `process_review` 작업이 기존 `llm.transcribeAudio()` 또는 문서 추출기로 전문을 처리한다. lease/attempt가 취소·늦은 완료를 차단하고 2분 sweep이 실패를 드러낸다.
 
+기존 `single_file` 업로드가 24시간 동안 `uploading`이면 워커 내부의 service role 전용 SQL sweep이 `failed(upload_timeout)`로 전환한다(ADR-073). 이 sweep은 `audio_segments` 녹음 세션과 원본 Storage 파일을 건드리지 않는다. 화면은 실패 이유를 표시하고, 사용자는 저장된 구간 처리 재시도 또는 자료 삭제 후 새 업로드를 선택한다.
+
 `publish_review`에서만 source/items와 분류·요약 작업을 원자 생성한다. 초안 편집은 저장 버전 충돌을 감지하고 재추출은 별도 후보로 둔다. 재확정/사용 중지는 이전 source와 파생물을 무효화하며 결정 인용은 유지한다. 삭제·참여자 동의 철회/탈퇴는 초안/이력을 지우고 파일 접근을 차단한 뒤 `purge_review_files`를 예약한다.
 
 `retention_settings`·`retention_exports`는 확인 설정과 내보내기 생성 메타데이터만 보관한다. 내보내기는 현재 권한·동의·삭제 상태를 SQL에서 거른 수집본이다. 별도 원문 영구 아카이브는 없다. 운영자 도구는 암호화 덤프와 파일을 격리 DB에 복원해 검증하며 최신 삭제·부서 멤버십/동의를 재적용하고 모든 작업을 정지한다. 실제 운영 서비스 복구/스토리지 재연결·정기 보관은 [운영 절차](setup-reviewed-materials.md)의 별도 단계다. 범용 부서 에이전트 실행은 [공동 설계](planning/부서_에이전트_공동설계.md)를 유지한다.

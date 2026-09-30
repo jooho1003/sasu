@@ -16,6 +16,7 @@ import { verifyReviewedMaterialsSql } from "./verify-reviewed-materials-sql.mjs"
 import { verifyReviewAccessSql } from "./verify-review-access-sql.mjs";
 import { verifyRecordingSessionsSql } from "./verify-recording-sessions-sql.mjs";
 import { verifyRecordingSegmentsSql } from "./verify-recording-segments-sql.mjs";
+import { verifyReviewUploadTimeoutSql } from "./verify-review-upload-timeout-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
 // node scripts/verify-security-sql.mjs <temporary-directory>
@@ -1107,6 +1108,7 @@ try {
   await verifyRetroConnectionsSql({ db, q, check, asUser });
   await verifyRecordingSessionsSql({ db, q, check, asUser });
   await verifyRecordingSegmentsSql({ db, q, check, asUser });
+  await verifyReviewUploadTimeoutSql({ q, check, asUser, ids });
   const glossaryIds = { dept: randomUUID(), lead: randomUUID(), member: randomUUID() };
   await q("insert into departments(id,org_id,name) values($1,$2,'Glossary QA')", [glossaryIds.dept,ids.org]);
   await q("insert into auth.users(id) values($1),($2)", [glossaryIds.lead,glossaryIds.member]);

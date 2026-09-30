@@ -89,7 +89,7 @@ describe("자료 변환 워커", () => {
   });
   it("원본 만료 처리를 구간 정리보다 먼저 하고 실패 시 중단한다", async () => {
     await sweepReviewParts();
-    expect(mock.rpc.mock.calls.map(([name]) => name)).toEqual(["sweep_review_originals", "sweep_review_recordings", "sweep_review_parts"]);
+    expect(mock.rpc.mock.calls.map(([name]) => name)).toEqual(["sweep_review_originals", "sweep_review_recordings", "sweep_abandoned_review_uploads", "sweep_review_parts"]);
     mock.rpc.mockClear();
     mock.rpc.mockResolvedValueOnce({ error: { message: "private raw" }, data: null });
     await expect(sweepReviewParts()).rejects.toThrow("review_original_sweep_failed");
@@ -436,6 +436,14 @@ describe("자료 변환 워커 — audio_segments 창", () => {
     expect(completion.p_error).toBe("file_unavailable");
     expect(JSON.stringify(completion)).not.toContain("private raw");
   });
+  it("방치 업로드 정리가 실패하면 구간 정리를 시작하지 않는다", async () => {
+    mock.rpc.mockResolvedValueOnce({ data: 0, error: null })
+      .mockResolvedValueOnce({ data: 0, error: null })
+      .mockResolvedValueOnce({ data: null, error: { message: "private raw" } });
+    await expect(sweepReviewParts()).rejects.toThrow("review_upload_sweep_failed");
+    expect(mock.rpc.mock.calls.map(([name]) => name)).toEqual(["sweep_review_originals", "sweep_review_recordings", "sweep_abandoned_review_uploads"]);
+  });
+
   it("앞 창 마지막 단어 끝을 받아 겹친 단어 없이 시각·신뢰도를 저장한다", async () => {
     const first = wavSegment(0, FULL_SAMPLES, 5);
     const second = wavSegment(1, FULL_SAMPLES, 7);
