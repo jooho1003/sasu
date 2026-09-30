@@ -208,10 +208,11 @@
     },
     {
       "dir": "34-review-upload-timeout",
-      "status": "blocked",
+      "status": "completed",
       "verification": "docs/verification/review-upload-timeout-2026-09-30.md",
-      "note": "기존 파일 업로드 방치 정리 로컬 구현·검증 완료. 격리 SQL 282·단위 1705·검토 화면 31·빌드 통과. 운영 DB migration 0065·배포는 승인 대기.",
-      "production_deployed": false
+      "note": "격리 SQL 282·단위 1705·검토 화면 31과 phase 34 분리 배포본 검증 완료. 운영 DB 0065 적용, 배포 dpl_3evfKgQbvRurLNKGSsGQgCvBab2r 확인. 실제 24시간 업로드 실측은 없음.",
+      "production_deployed": true,
+      "deployment": "docs/verification/review-upload-timeout-2026-09-30.md"
     }
   ]
 }
