@@ -167,12 +167,12 @@
       "dir": "23-browser-meeting-recording",
       "status": "blocked",
       "verification": "docs/verification/browser-meeting-recording/README.md",
-      "note": "2026-09-29: step0~3·4-A·4-B1~B8의 로컬 구현·검증 기록을 연결했다. 남은 완료 게이트는 실제 기기 V01~V06, 제공사 V13, 운영 CSP V14, 실제 모델 지시문 문서 V16, 정량 실측 V20, 운영 DB/배포 승인이다. 이번 변경은 운영 미반영이다.",
+      "note": "2026-09-30: step0~3·4-A·4-B1~B8을 운영에 반영했다(DB 0058~0064, dpl_Gtzz9Xpa3CC1pjJgqmKY8FegYssj). 조직 녹음 스위치는 꺼져 있다. 남은 완료 게이트는 실제 기기 V01~V06(그 뒤 스위치 켜기), 제공사 V13, CSP 강제 V14, 실제 모델 지시문 문서 V16, 정량 실측 V20이다.",
       "followup_verification": "docs/verification/browser-meeting-recording/step1.md",
-      "pending_change_production_deployed": false,
+      "pending_change_production_deployed": true,
       "production_deployed": true,
-      "deployed_at": "2026-09-20T12:30:00+09:00",
-      "deployment": "docs/verification/production-rollout-2026-09-20.md"
+      "deployed_at": "2026-09-30T17:19:06+09:00",
+      "deployment": "docs/verification/recording-production-2026-09-30/README.md"
     },
     {
       "dir": "24-department-hiring-demo",
@@ -203,8 +203,10 @@
       "dir": "33-recording-ux",
       "status": "blocked",
       "verification": "docs/verification/recording-ux-2026-09-29/README.md",
-      "note": "녹음 UI step 0~8 기능 구현·로컬 제품 E2E 9/9, 단위 1664, 합성 UI E2E 47 통과. 계획·최종 Graft check 통과. Plan §4.1의 단계별 전후 Graft 그래프 0~7이 Docker 장애 당시 미생성되어 형식상 완료 게이트 보류. 실제 기기 V01~V06은 범위 밖, 운영 미배포.",
-      "production_deployed": false
+      "note": "녹음 UI step 0~8 기능 구현·로컬 제품 E2E 9/9, 단위 1664, 합성 UI E2E 47 통과. 계획·최종 Graft check 통과. Plan §4.1의 단계별 전후 Graft 그래프 0~7이 Docker 장애 당시 미생성되어 형식상 완료 게이트 보류. 실제 기기 V01~V06은 범위 밖. 2026-09-30 운영 반영(조직 녹음 스위치 꺼짐).",
+      "production_deployed": true,
+      "deployed_at": "2026-09-30T17:19:06+09:00",
+      "deployment": "docs/verification/recording-production-2026-09-30/README.md"
     },
     {
       "dir": "34-review-upload-timeout",

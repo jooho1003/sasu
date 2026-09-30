@@ -105,7 +105,7 @@ Plan에는 성공 기준 표가 없다. 그래서 design Context Anchor의 SUCCE
 | ~~`ask-permission.spec.ts` 재작성, `upload-boundaries.spec.ts`의 파일럿 시드 이름 고정 제거~~ | 완료(v1.2) | — |
 | ~~`reviewed-materials.spec.ts:184` 문구 수정 커밋~~ | 완료(`a1410a3`) | — |
 | V13~V20 정확률·보안(CSP 강제, 제공사 확인, 실제 모델 지시문 문서, 정량 실측) | step4-B1~B8 로컬 구현은 `122b88d`로 커밋. V13·V14·V16·V20은 사람·운영 게이트 | 실제 기기·제공사 확인 |
-| 운영 DB 0058~0064 적용, 운영 배포 | 사용자 승인 필요(D3=2) | 실제 기기 게이트 |
+| ~~운영 DB 0058~0064 적용, 운영 배포~~ | 완료(2026-09-30, 조직 녹음 스위치 꺼짐, [기록](../../verification/recording-production-2026-09-30/README.md)) | — |
 | ~~phase 23 `index.json`에 capture-lock 기록~~ | 완료(`122b88d`) | — |
 | ~~문서 정정 D-1~D-5~~ | 완료(`122b88d`, D-3는 2026-09-30) | — |
 
@@ -157,7 +157,7 @@ U-1 관리자 접근 기록의 구간 묶음 표시 · U-2 `reextract` 뒤 `kick
 
 1. ~~다른 세션 커밋 뒤 phase 23 `index.json` 기록 → D-1~D-5 정정~~ 완료(v1.2)
 2. ~~V12 ASK·VTT E2E 실행~~ 완료(v1.1). ~~낡은 ASK 테스트 재작성~~ 완료(v1.2)
-3. 실제 기기 V01~V06 → 운영 DB 0058~0064 적용·배포 승인 요청
+3. 실제 기기 V01~V06 → 조직 녹음 스위치 켜기(운영 DB·배포는 2026-09-30 완료)
 4. step4-B 완료 뒤 V13~V20을 반영해 `/pdca analyze browser-meeting-recording` 재실행
 
 ## Version History
@@ -167,3 +167,4 @@ U-1 관리자 접근 기록의 구간 묶음 표시 · U-2 `reextract` 뒤 `kick
 | 1.0 | 2026-09-29 | 완료 보고(부분) 작성. analysis v1.2 기준 | wadelee1005@gmail.com |
 | 1.1 | 2026-09-30 | V12 회귀 E2E 반영(analysis v1.4) | wadelee1005@gmail.com |
 | 1.2 | 2026-09-30 | 커밋·문서 정정·V12 조건 해소 반영(analysis v1.5) | wadelee1005@gmail.com |
+| 1.3 | 2026-09-30 | 운영 반영(DB 0058~0064·코드, 조직 스위치 꺼짐) | wadelee1005@gmail.com |

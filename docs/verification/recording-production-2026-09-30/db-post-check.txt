@@ -1,0 +1,16 @@
+migrations=65 last=0065
+tables=review_recordings:review_recordings:rls=true review_original_segments:review_original_segments:rls=true dept_glossaries:dept_glossaries:rls=true
+functions=start_review_recording:1 create_review_recording:1 finalize_review_recording:1 claim_review_segment:1 finish_review_segment:1 finish_review_recording_part:1 sweep_review_recordings:1 sweep_abandoned_review_uploads:1 authorize_review_segment_access:1 save_dept_glossary:1 start_continued_review_recording:1 create_review_recording_with_profile:1
+grants sweep_review_recordings anon=false authenticated=false service_role=true
+grants 0058 enqueue_decision_embedding anon=false authenticated=false
+rows review_recordings=0 segments=0 glossaries=0
+jobs_since_migration=done:2
+sweep_review_originals=0
+sweep_review_recordings=0
+sweep_abandoned_review_uploads=0
+sweep_review_parts=0
+jobs_since_deploy=notion_poll:done:2
+failed_since_deploy=0
+stuck_queued=0
+last_job_update=17:24:07
+recordings=0
