@@ -1,0 +1,29 @@
+[33m(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.[39m
+[33mThe plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the [1mresolve.tsconfigPaths[22m option. You can remove the plugin and set [1mresolve.tsconfigPaths: true[22m in your Vite config instead.[39m
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/recording/recording-routes.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/recording/recording-routes.test.ts [ tests/recording/recording-routes.test.ts ]
+Error: Cannot find package '@/lib/recording/recording-routes' imported from D:/바이브코딩/sasu/tests/recording/recording-routes.test.ts
+ ❯ tests/recording/recording-routes.test.ts:7:1
+      5| vi.mock("@/lib/supabase/server", () => ({ createServerSupabaseClient: …
+      6|
+      7| import { NO_STORE, recordingAccess, recordingFailure } from "@/lib/rec…
+       | ^
+      8|
+      9| describe("NO_STORE", () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  13:48:56
+   Duration  500ms (worker 99%, environment 1%)
+

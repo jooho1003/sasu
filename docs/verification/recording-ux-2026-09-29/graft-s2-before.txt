@@ -1,0 +1,15 @@
+Step 2 implementation-before relationship check (2026-09-29)
+
+Graft build/grep unavailable: `graft` executable is not installed locally. Docker client exists, but `docker version` cannot connect to //./pipe/docker_engine (pipe missing), so the isolated Graft container could not run. This is a manual source search, not a Graft graph.
+
+Manual Select-String on components/meeting-recorder.tsx before editing:
+- line 505: <Link href={`/d/${deptId}/reviews`}> exits recorder; WorkspaceShell also renders same-origin Next Links in its sidebar.
+- line 506: global `.review-notice` role="alert" for errors.
+- line 507: global `.review-notice` role="status" for messages.
+- line 510: starting role="status".
+- line 526: snapshot role="status" included per-second recorded and persisted times.
+- lines 528,530: input and wake notices role="status".
+- line 531: raw snapshot.reason in role="alert".
+- no beforeunload listener or document.title update.
+
+Read relationships: MeetingRecorder imports recording browser capture/storage, recorder-copy, Next Link and router; pagehide/unmount interrupts capture. `app/globals.css` owns `.meeting-recorder` and global `.review-notice`; `tests/review-controls/meeting-recorder.spec.ts` drives a Vite synthetic page. No server route, database or job dependency changed in this step.

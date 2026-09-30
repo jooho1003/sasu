@@ -1,0 +1,64 @@
+=== grep <MeetingRecorder
+
+"<MeetingRecorder" — 2 hits in 2 symbols across 2 files (searched 388 indexed files)
+
+Page · function · app/(auth)/d/[dept]/reviews/record/page.tsx:L5-L16 · 0 in-edges
+  L14: return <MeetingRecorder deptId={member.deptId} userId={member.userId}
+
+scripts/review-controls-lab/main.tsx (module level) · 0 in-edges
+  L12: : view === "recorder" ? <MeetingRecorder deptId="dept" userId="synthetic-user" />
+=== grep <RecordingSegmentPlayer
+
+"<RecordingSegmentPlayer" — 1 hits in 1 symbols across 1 files (searched 388 indexed files)
+
+ReviewDetail · function · components/review-detail.tsx:L20-L831 · 0 in-edges
+  L487: <RecordingSegmentPlayer deptId={deptId} reviewId={id} duration={review.duration ?? 0} segments={segments} downloadAllowed={downloadAllowed} seekRequest={segment
+=== grep <ReviewSettingsForm
+
+"<ReviewSettingsForm" — 2 hits in 2 symbols across 2 files (searched 388 indexed files)
+
+AdminSecurityPage · function · app/admin/security/page.tsx:L8-L27 · 0 in-edges
+  L15: {settings ? <ReviewSettingsForm initial={settings} writable={orgAdminWritesEnabled()} /> : <AdminUnavailable />}
+
+scripts/review-controls-lab/main.tsx (module level) · 0 in-edges
+  L10: ? <ReviewSettingsForm initial={{ browser_recording_enabled: query.get("recording") === "1", allow_original_download: false }} writable={query.get("readonly") !=
+=== grep reviews/record
+
+"reviews/record" — 4 hits in 4 symbols across 4 files (searched 388 indexed files)
+
+Page · function · app/(auth)/d/[dept]/reviews/record/page.tsx:L5-L16 · 0 in-edges
+  L10: const member = await requirePageMembership(dept, `/d/${dept}/reviews/record`);
+
+ReviewDetail · function · components/review-detail.tsx:L20-L831 · 0 in-edges
+  L357: {canContinue && !continuation.next ? <p><Link href={`/d/${deptId}/reviews/record?continues=${id}`}>이 회의 이어서 녹음</Link></p> : null}
+
+ReviewedMaterials · function · components/reviewed-materials.tsx:L15-L451 · 0 in-edges
+  L222: <Link className="button button-primary" href={`/d/${deptId}/reviews/record`}>회의 녹음</Link>{" "}
+
+tests/e2e/recording-product.spec.ts (module level) · 0 in-edges
+  L57: const response = await page.goto(`/d/${dept}/reviews/record`);
+=== grep recording_other_tab|shared_audio_missing|recording_key_forbidden|recording_unavailable|storage_space_insufficient
+
+"recording_other_tab|shared_audio_missing|recording_key_forbidden|recording_unavailable|storage_space_insufficient" — 11 hits in 6 symbols across 5 files (searched 388 indexed files)
+
+captureInputs · function · lib/recording/browser/inputs.ts:L18-L42 · 3 in-edges
+  L28: if (!display.getAudioTracks().some((track) => track.readyState === "live")) throw new Error("shared_audio_missing");
+
+probeRecordingStore · function · lib/recording/browser/storage.ts:L223-L244 · 2 in-edges
+  L226: throw new Error("storage_space_insufficient");
+
+MeetingRecorder.recover · function · components/meeting-recorder.tsx:L304-L320 · 1 in-edges
+  L317: if (cause instanceof Error && cause.message === "recording_unavailable") await removeLocalRecording(scope(session.id));
+
+acquireCaptureLock · function · lib/recording/browser/storage.ts:L271-L311 · 1 in-edges
+  L275: if (!lock) { reject(new Error("recording_other_tab")); return; }
+
+POST · function · app/api/d/[dept]/recordings/[id]/key/route.ts:L12-L60 · 0 in-edges
+  L19: return denied(403, "recording_key_forbidden");
+  L30: if (result.error.code === "P0002" || message === "recording_unavailable") {
+  L31: return denied(404, "recording_unavailable");
+  L33: return denied(403, "recording_key_forbidden");
+  L42: return denied(403, "recording_key_forbidden");
+
+lib/recording/browser/storage.worker.ts (module level) · 0 in-edges
+  L66: endpoint.postMessage({ type: "error", reason: error instanceof Error && error.message === "storage_space_insufficient"

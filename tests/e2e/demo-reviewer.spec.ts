@@ -1,5 +1,6 @@
 import { expect, test, type BrowserContext } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
 import { loadEnvConfig } from "@next/env";
 
 import {
@@ -22,14 +23,16 @@ async function reviewerAccessToken(context: BrowserContext): Promise<string> {
     .sort((a, b) => a.name.localeCompare(b.name));
   expect(authCookies.length).toBeGreaterThan(0);
   expect(authCookies.every((cookie) => cookie.httpOnly)).toBe(true);
-  const encoded = authCookies.map((cookie) => cookie.value).join("");
-  const json = encoded.startsWith("base64-")
-    ? Buffer.from(encoded.slice("base64-".length), "base64url").toString("utf8")
-    : encoded;
-  const session = JSON.parse(json) as { access_token?: string; user?: { id?: string } };
-  expect(session.user?.id).toBe(DEMO_REVIEWER_ID);
-  expect(session.access_token).toBeTruthy();
-  return session.access_token!;
+  const cookieReader = createServerClient(requiredEnv("NEXT_PUBLIC_SUPABASE_URL"), requiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"), {
+    cookies: { getAll: () => authCookies.map(({ name, value }) => ({ name, value })), setAll: () => {} },
+  });
+  const { data: { user }, error: userError } = await cookieReader.auth.getUser();
+  expect(userError).toBeNull();
+  expect(user?.id).toBe(DEMO_REVIEWER_ID);
+  const { data: { session }, error } = await cookieReader.auth.getSession();
+  expect(error).toBeNull();
+  expect(session?.access_token).toBeTruthy();
+  return session!.access_token;
 }
 
 test("공개 링크가 심사위원 계정으로 연결되고 전체 기능을 연다", async ({ page }) => {
@@ -69,12 +72,17 @@ test("심사 계정의 앱 요청과 직접 DB 변경을 모두 거부한다", a
   await page.goto("/demo");
   await expect(page.getByText("심사위원 데모 계정으로 접속했습니다")).toBeVisible();
 
-  const appWrite = await context.request.post(
-    `/api/d/${DEMO_DEFAULT_DEPT_ID}/questions`,
-    { data: { question: "데모 변경 차단 확인" } },
-  );
-  expect(appWrite.status()).toBe(403);
-  expect(await appWrite.json()).toMatchObject({ code: "demo_read_only" });
+  const appWrite = await page.evaluate(async (dept) => {
+    const response = await fetch(`/api/d/${dept}/questions`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: "데모 변경 차단 확인" }),
+    });
+    return { status: response.status, body: await response.json() };
+  }, DEMO_DEFAULT_DEPT_ID);
+  expect(appWrite.status).toBe(403);
+  expect(appWrite.body).toMatchObject({ code: "demo_read_only" });
 
   const token = await reviewerAccessToken(context);
   const db = createClient(

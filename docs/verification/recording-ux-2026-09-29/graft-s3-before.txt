@@ -1,0 +1,13 @@
+Step 3 implementation-before relationship check (2026-09-29)
+
+Graft build/grep unavailable: no local `graft` executable or MCP tool. `docker version` cannot connect to //./pipe/docker_engine (pipe missing), so the isolated Graft container could not run. The following is a manual source search, not a Graft graph.
+
+Manual Select-String before editing:
+- components/meeting-recorder.tsx:600: two `type="radio"` inputs without a shared name.
+- components/meeting-recorder.tsx:608,621: test/live `<meter>` without accessible labels; instantaneous 0.002 threshold.
+- components/meeting-recorder.tsx:631: open-session `녹음 폐기` directly under other actions.
+- components/meeting-recorder.tsx:633: recovery list `녹음 이어서 확인`, no button class, raw expiry date and current session included.
+- tests/review-controls/meeting-recorder.spec.ts:92-93: two expectations for `녹음 이어서 확인`.
+- tests/e2e/recording-product.spec.ts: no matching label dependency.
+
+`MeetingRecorder` imports recorder-copy but only uses its stage, error, title, state, stop functions. `formatExpiry`, missing-condition functions and `signalDetected` were available from step 0. The browser capture/storage modules and API routes are unchanged in this step.

@@ -1,0 +1,12 @@
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local, .env
+✓ Running next.config.ts took 983ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 75s
+  Running TypeScript ...
+✓ Finished filesystem cache database compaction in 21.5s
+tests/e2e/review-access-live.spec.ts(28,14): error TS2339: Property 'addEventListener' does not exist on type '`${string}-${string}-${string}-${string}-${string}`'.
+tests/e2e/review-access-live.spec.ts(28,58): error TS7006: Parameter 'event' implicitly has an 'any' type.
+Failed to type check.
+

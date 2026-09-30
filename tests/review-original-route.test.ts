@@ -5,6 +5,8 @@ vi.mock("@/lib/supabase/server", () => ({ createServerSupabaseClient: mocks.crea
 import { GET } from "@/app/api/d/[dept]/reviews/[id]/original/route";
 const context = { params: Promise.resolve({ dept: "requested-dept", id: "review" }) };
 const request = (action = "play_original") => new Request(`https://sasu.test/api/d/requested-dept/reviews/review/original?action=${action}`);
+const segmentRequest = (segment: string, action = "play_original") =>
+  new Request(`https://sasu.test/api/d/requested-dept/reviews/review/original?action=${action}&segment=${segment}`);
 describe("원본 API의 세션 접근권 전달", () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -52,5 +54,28 @@ describe("원본 API의 세션 접근권 전달", () => {
     const response = await GET(request(), context);
     expect(response.headers.get("content-length")).toBe("32044");
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(bytes);
+  });
+  it("구간 접근권 요청은 authorize_review_segment_access를 호출하고 접근권 토큰으로 내려받는다", async () => {
+    mocks.rpc.mockResolvedValue({
+      data: { token: "segment-ticket", path: "dept/review/original-segments/3-1.wav", kind: "audio", filename: "3.wav", segment_index: 3, sample_count: 960_000 },
+      error: null,
+    });
+    const response = await GET(segmentRequest("3"), context);
+    expect(response.status).toBe(200);
+    expect(mocks.rpc).toHaveBeenCalledWith("authorize_review_segment_access", { p_dept: "validated-dept", p_review: "review", p_index: 3, p_action: "play_original" });
+    expect(mocks.create).toHaveBeenLastCalledWith({ reviewAccessToken: "segment-ticket" });
+    expect(mocks.download).toHaveBeenCalledWith("dept/review/original-segments/3-1.wav");
+  });
+  it.each(["-1", "30", "1.5", "03", "abc", ""])("잘못된 구간 번호 %s는 RPC 호출 없이 400을 반환한다", async (segment) => {
+    const response = await GET(segmentRequest(segment), context);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "구간 번호를 확인해 주세요." });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(response.headers.get("cache-control")).toContain("no-store");
+  });
+  it("구간 없이 요청하면 기존과 동일하게 authorize_review_access를 호출한다", async () => {
+    const response = await GET(request(), context);
+    expect(response.status).toBe(200);
+    expect(mocks.rpc).toHaveBeenCalledWith("authorize_review_access", { p_dept: "validated-dept", p_review: "review", p_action: "play_original" });
   });
 });

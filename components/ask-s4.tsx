@@ -9,7 +9,9 @@ type Citation = {
   author: string;
   source: string;
   occurred_at: string | null;
-  href: string;
+    href: string;
+    low_confidence?: boolean;
+    boundary_review?: boolean;
 };
 
 const citationDate = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "numeric", day: "numeric" });
@@ -281,6 +283,8 @@ export default function AskS4({ deptId }: { deptId: string }) {
                 <a key={`${citation.href}-${index}`} className="grid gap-1 rounded-xl border border-[var(--accent)]/20 bg-[var(--accent)]/5 p-4 no-underline" href={citation.href}>
                   <span className="text-xs text-[var(--muted)]" data-meta>근거 {index + 1} · {citation.author} · {citationTime(citation.occurred_at)} · {citation.source}</span>
                   <q className="font-normal leading-7 text-[var(--ink)]">{citation.quote}</q>
+                  {citation.low_confidence ? <span className="badge badge-urgent">낮은 신뢰</span> : null}
+                  {citation.boundary_review ? <span className="badge badge-urgent">경계 확인 필요</span> : null}
                   <span className="text-sm font-bold">원문 보기</span>
                 </a>
               ))}

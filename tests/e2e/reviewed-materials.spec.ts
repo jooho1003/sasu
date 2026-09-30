@@ -181,7 +181,7 @@ test("한국어 TTS 전체 전사 → 원본 재생 → 편집·재접속·확�
   await expect(page.getByLabel(`구간 ${count} 텍스트`)).toHaveValue(
     "사용자가 추가한 점검 메모입니다.",
   );
-  await page.getByLabel(/전문과 누락·오류를 확인했습니다/).check();
+  await page.getByLabel(/전문과 빠짐·오류를 확인했습니다/).check();
   await page.getByRole("button", { name: "확인 후 확정", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("확정했습니다");
   const published = await supabase

@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "사수 · 녹음 중단과 확인 구간 복구",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1050,
+      640
+    ]
+  },
+  "participants": [
+    {
+      "id": "capture",
+      "type": "frontend",
+      "label": "녹음 수집",
+      "sublabel": "트랙 · Worklet"
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "저장 워커",
+      "sublabel": "샘플 · 진행 검사"
+    },
+    {
+      "id": "local",
+      "type": "database",
+      "label": "로컬 저장소",
+      "sublabel": "AES-GCM · IndexedDB"
+    },
+    {
+      "id": "recovery",
+      "type": "frontend",
+      "label": "복구 화면",
+      "sublabel": "확인 구간 재생"
+    }
+  ],
+  "messages": [
+    {
+      "id": "initialize",
+      "from": "capture",
+      "to": "worker",
+      "y": 170,
+      "label": "키 · 녹음 범위 전달"
+    },
+    {
+      "id": "probe",
+      "from": "worker",
+      "to": "local",
+      "y": 215,
+      "label": "합성 구간 암호화 저장",
+      "variant": "security"
+    },
+    {
+      "id": "verify",
+      "from": "local",
+      "to": "worker",
+      "y": 260,
+      "label": "읽기 · 복호화 · 삭제 확인",
+      "variant": "return"
+    },
+    {
+      "id": "ready",
+      "from": "worker",
+      "to": "capture",
+      "y": 305,
+      "label": "수집 준비 완료",
+      "variant": "return"
+    },
+    {
+      "id": "pcm",
+      "from": "capture",
+      "to": "worker",
+      "y": 350,
+      "label": "샘플 전달 · 무음도 유효"
+    },
+    {
+      "id": "checkpoint",
+      "from": "worker",
+      "to": "local",
+      "y": 395,
+      "label": "1초 구간 확인 저장",
+      "variant": "security"
+    },
+    {
+      "id": "tail",
+      "from": "worker",
+      "to": "local",
+      "y": 440,
+      "label": "수집 중단 시 마지막 구간",
+      "variant": "security"
+    },
+    {
+      "id": "interrupted",
+      "from": "worker",
+      "to": "capture",
+      "y": 485,
+      "label": "중단 상태 · 트랙 해제",
+      "variant": "return"
+    },
+    {
+      "id": "recover",
+      "from": "local",
+      "to": "recovery",
+      "y": 530,
+      "label": "연속 확인 구간 복호화",
+      "variant": "return"
+    }
+  ]
+}

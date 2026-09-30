@@ -1,0 +1,7 @@
+Graft 실행 불가: 로컬 명령/MCP 도구 없음, Docker 엔진 소켓 없음.
+변경 전 수동 git grep:
+- 이어진 회의 기록 section: components/review-detail.tsx:353-358
+- 입력 과다 role=status/review-notice: components/review-detail.tsx:484-485
+- review-notice 공용 스타일: app/globals.css:110
+- retention-console.tsx도 review-notice 사용. 공용 규칙 변경 금지.
+Graft 그래프 결과가 아님.

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "회의 녹음: 로컬 확인 구간에서 서버 검증까지",
+    "output": "docs/verification/browser-meeting-recording/archify-step2/recording-flow.html",
+    "viewBox": [1085, 696],
+    "column_fit": "spread",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/jooho1003/sasu.git",
+      "revision": "d52c002893675e76855a6e724e9cce9b87b5b799",
+      "link_mode": "local-only"
+    }
+  },
+  "participants": [
+    { "id": "recorder", "type": "external", "label": "녹음자", "sources": [{ "path": "components/meeting-recorder.tsx", "line": 504, "end_line": 526 }] },
+    { "id": "browser", "type": "frontend", "label": "브라우저", "sublabel": "화면·캡처", "sources": [{ "path": "components/meeting-recorder.tsx", "line": 277, "end_line": 349 }, { "path": "components/meeting-recorder.tsx", "line": 418, "end_line": 455 }, { "path": "lib/recording/browser/capture.ts", "line": 10, "end_line": 103 }] },
+    { "id": "local", "type": "database", "label": "암호화 로컬본", "sublabel": "IndexedDB", "sources": [{ "path": "lib/recording/browser/storage.ts", "line": 52, "end_line": 120 }] },
+    { "id": "api", "type": "backend", "label": "녹음 API", "sublabel": "세션 클라이언트", "sources": [{ "path": "app/api/d/[dept]/recordings/route.ts", "line": 25, "end_line": 43 }, { "path": "app/api/d/[dept]/recordings/[id]/save/route.ts", "line": 6, "end_line": 22 }, { "path": "app/api/d/[dept]/recordings/[id]/finalize/route.ts", "line": 6, "end_line": 20 }] },
+    { "id": "supabase", "type": "cloud", "label": "Supabase", "sublabel": "DB·Storage", "sources": [{ "path": "supabase/migrations/0059_review_recording_sessions.sql", "line": 42, "end_line": 114 }, { "path": "supabase/migrations/0060_review_recording_segments.sql", "line": 128, "end_line": 244 }, { "path": "components/meeting-recorder.tsx", "line": 442, "end_line": 451 }] },
+    { "id": "worker", "type": "backend", "label": "검증 작업", "sublabel": "jobs worker", "sources": [{ "path": "lib/pipeline/review-material.ts", "line": 154, "end_line": 220 }, { "path": "lib/pipeline/review-material.ts", "line": 331 }] }
+  ],
+  "segments": [
+    { "from": 150, "to": 270, "label": "동의·세션·입력 준비" },
+    { "from": 272, "to": 375, "label": "브라우저 확인 저장" },
+    { "from": 377, "to": 595, "label": "승인 후 원본 업로드·검증" }
+  ],
+  "messages": [
+    { "id": "consent", "from": "recorder", "to": "browser", "y": 160, "label": "동의·5초 테스트 확인", "variant": "security" },
+    { "id": "start", "from": "browser", "to": "api", "y": 189, "label": "POST 세션 시작", "variant": "emphasis" },
+    { "id": "start-rpc", "from": "api", "to": "supabase", "y": 218, "label": "권한·동의 검사, 세션 생성", "variant": "security" },
+    { "id": "key", "from": "browser", "to": "api", "y": 247, "label": "키 요청·저장소 검사", "variant": "security" },
+    { "id": "checkpoint", "from": "browser", "to": "local", "y": 285, "label": "AES-GCM 확인 구간", "variant": "security" },
+    { "id": "finish", "from": "recorder", "to": "browser", "y": 323, "label": "종료·저장 승인", "variant": "default" },
+    { "id": "recover", "from": "browser", "to": "local", "y": 352, "label": "복호화·manifest 준비", "variant": "default" },
+    { "id": "manifest", "from": "browser", "to": "api", "y": 390, "label": "manifest·프로필 저장", "variant": "emphasis" },
+    { "id": "create", "from": "api", "to": "supabase", "y": 419, "label": "원본 경로·상태 생성", "variant": "security" },
+    { "id": "upload", "from": "browser", "to": "supabase", "y": 448, "label": "비공개 WAV 업로드", "variant": "emphasis" },
+    { "id": "finalize", "from": "browser", "to": "api", "y": 477, "label": "finalize", "variant": "emphasis" },
+    { "id": "queue", "from": "api", "to": "supabase", "y": 506, "label": "검증 작업 예약", "variant": "dashed" },
+    { "id": "verify", "from": "worker", "to": "supabase", "y": 535, "label": "원본 해시 검사·상태 기록", "variant": "dashed" },
+    { "id": "poll", "from": "browser", "to": "api", "y": 564, "label": "완료 상태 확인", "variant": "default" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "저장 경계", "items": ["사용자가 저장을 누르기 전 음성 구간은 로컬 AES-GCM 암호문이다.", "원본 업로드 후 서버 검증 완료를 기다린다."] },
+    { "dot": "amber", "title": "검증 범위", "items": ["이 흐름은 로컬 커밋의 코드와 SQL에 근거한다.", "실기기 시스템 소리와 운영 Cron 동작은 별도 검증 대상이다."] }
+  ]
+}

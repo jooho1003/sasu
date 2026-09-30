@@ -28,6 +28,7 @@ export type JobKind =
   | "notion_poll"
   | "slack_backfill"
   | "process_review"
+  | "verify_review_segment"
   | "purge_review_files"
   | "purge_trailer_invites"
   | "retro_draft"

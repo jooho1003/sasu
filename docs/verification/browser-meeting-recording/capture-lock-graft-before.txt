@@ -1,0 +1,19 @@
+Graft capture-lock before (2026-09-29)
+
+Input: /work/capture-lock-before (361 files)
+Build: 2,005 nodes, 4,742 edges; graft check: OK.
+
+callers acquireCaptureLock
+- startRecording (lib/recording/browser/capture.ts:67)
+- begin (components/meeting-recorder.tsx) through startRecording
+- recording-lab main.ts references the module and start() calls startRecording
+
+callers startRecording
+- begin (components/meeting-recorder.tsx:331)
+- recording-lab main.ts start() (line 100)
+
+callers cleanupLocalRecordings
+- MeetingRecorder (components/meeting-recorder.tsx:114)
+
+graft grep capture_lease_lost
+- startRecording (lib/recording/browser/capture.ts:67, 82); two uses in the lease-loss stop path.

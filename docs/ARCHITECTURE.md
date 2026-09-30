@@ -20,6 +20,10 @@
 
 [AI-DEVELOPMENT.md](AI-DEVELOPMENT.md)에 SDD·스킬·하네스·훅·테스트와 Graft·Archify의 역할을 정리했다. Graft의 코드 관계 탐색과 Archify의 구조·실행 흐름 시각화를 개발 절차에 추가했으며, 제품의 안건 분류·검색·답변 런타임은 아래 구조를 따른다.
 
+### HTML 렌더링과 CSP — ADR-069
+
+`proxy.ts`가 요청별 nonce와 CSP를 요청 헤더에 넣고, 공통 `app/layout.tsx`는 `connection()`으로 요청 시 렌더링을 보장한다. Next.js가 정상 script에 nonce를 붙인다. 공개 페이지의 인증 조회는 추가하지 않는다. 응답은 no-store이며 서버 전용 `SASU_CSP_ENFORCE=true`로 Report-Only에서 강제로 전환한다. 운영 관찰·승인 전에는 기본 Report-Only를 유지하고 두 모드는 같은 프로덕션 빌드에서 별도 검증한다.
+
 ### 자료 검토·원본 보관·기록 보존 — ADR-054
 
 ADR-058의 원본 접근 강화는 `authorize_review_access` → `private.review_access_tickets` → 사용자 세션 Storage GET의 `consume_review_access`로 연결한다. 권한·사용자별 60건/분 제한·append-only 접근 허가 이벤트·60초 접근권은 한 SQL 트랜잭션이고 파일 전달은 별도 요청이다. Storage는 현재 사용자·경로·행위·기한을 다시 확인해 접근권을 한 트랜잭션에만 소비한다. 서명 URL·목록·복사는 차단하고 기존 INSERT-only 업로드와 내부 워커는 유지한다. 조직 관리자는 본문 없이 접근 메타데이터만 확인한다. `sweep_review_originals`는 보존 기한 경과 원본만 접근 차단·파기 예약하고 교정문·리비전·확정 source/items를 유지한다. 상세는 [접근 구조](verification/browser-meeting-recording/access-design.md). 실제 Storage 호환성과 운영 반영은 별도 검증 게이트다.
@@ -32,15 +36,17 @@ ADR-058의 원본 접근 강화는 `authorize_review_access` → `private.review
 
 `retention_settings`·`retention_exports`는 확인 설정과 내보내기 생성 메타데이터만 보관한다. 내보내기는 현재 권한·동의·삭제 상태를 SQL에서 거른 수집본이다. 별도 원문 영구 아카이브는 없다. 운영자 도구는 암호화 덤프와 파일을 격리 DB에 복원해 검증하며 최신 삭제·부서 멤버십/동의를 재적용하고 모든 작업을 정지한다. 실제 운영 서비스 복구/스토리지 재연결·정기 보관은 [운영 절차](setup-reviewed-materials.md)의 별도 단계다. 범용 부서 에이전트 실행은 [공동 설계](planning/부서_에이전트_공동설계.md)를 유지한다.
 
-### 웹 회의 녹음 — ADR-056 설계 (부분 구현: `lib/recording/` 하부 모듈·SEC-02·SEC-04만, 녹음 UI·Meet/Zoom 미구현)
+### 웹 회의 녹음 — ADR-056 설계 (녹음 UI·세션/구간 서버 로컬 구현·검증, 실기기·운영 게이트 미완료, Meet/Zoom 공식 수집 미구현)
 
 상위 범위는 PRD §3-4·§8, 상세 계약은 [웹 회의 녹음 설계](planning/웹회의_녹음_설계.md)다. `getUserMedia` 마이크와 `getDisplayMedia`의 사용자가 허용한 음성을 Web Audio에서 혼합한다. display video 트랙은 권한/종료 감시에만 쓰고 인코딩·저장·전송 경로에 넣지 않는다. AudioWorklet에서 얻은 PCM을 1초 단위로 로컬 복구 저장하고, 서버에는 녹음 종료 후 최대 60초 독립 WAV 원본을 세션·RLS로 업로드한다. `MediaRecorder` 압축 조각을 각각 재생 가능한 구간으로 가정하지 않는다.
 
-`reviewed_materials`에 원본 형식(`single_file` / `audio_segments`)과 입력 경로를 추가하고 `review_original_segments`로 서버가 발급한 경로·순번·길이·해시·검증 상태를 관리한다. 기존 50MiB 단일 파일과 새 64MiB 원본 묶음을 구분한다. finalize는 파일 검증 작업을 예약하며, 워커 검증 완료 전에 전사/확정을 허용하지 않는다. 검증된 원본에서 워커가 기존 60초+1초 `review_parts`를 생성하여 `process_review`와 `publish_review`를 재사용한다. 현재 파일 업로드는 클라이언트가 구간을 잘라 올리지만, 이 형식에서는 `review_storage_allowed`가 클라이언트의 `parts/` 쓰기를 거부한다. 생성은 `create_review`가 아니라 64MiB·30구간 한도를 가진 별도 RPC가 담당한다. 브라우저 전용 AudioWorklet·IndexedDB 어댑터는 `lib/recording/browser/*`로 분리해 §8의 SDK 어댑터 행에 넣고, 순수 리샘플·체크포인트·manifest 로직은 `lib/recording/*`에서 TDD로 만든다. 기존 단일 원본 재생·재추출·삭제 경로도 분기 처리해야 한다.
+`reviewed_materials`에 원본 형식(`single_file` / `audio_segments`)과 입력 경로를 추가하고(0052, 운영 적용), `review_original_segments`로 서버가 발급한 경로·순번·길이·해시·검증 상태를 관리한다. 기존 50MiB 단일 파일과 새 64MiB 원본 묶음을 구분한다. 생성은 `create_review`가 아니라 64MiB·30구간 한도를 가진 별도 RPC가 담당한다. 브라우저 전용 AudioWorklet·IndexedDB 어댑터는 `lib/recording/browser/*`로 분리해 §8의 SDK 어댑터 행에 넣고, 순수 리샘플·체크포인트·manifest 로직은 `lib/recording/*`에서 TDD로 만든다.
+
+녹음 세션(ADR-070, 서버 구현·로컬 검증, 운영 미반영 — 0059·0060): `녹음 시작` 때 `review_recordings` 행을 먼저 만든다. 그 ID를 로컬 체크포인트 키 파생·암호문 인증·Storage 경로·자료 ID에 끝까지 쓴다. `recording_key_context`는 세션이 `active`·`saving`이고 만료(시작 후 24시간) 전일 때만 문맥을 돌려준다. `저장하고 전사하기`는 manifest v1로 `reviewed_materials`(`audio_segments`, `original_path` null)와 구간 행을 한 트랜잭션에 만든다. 구간은 녹음자만 `original-segments/{index}-{attempt}.wav`에 INSERT한다. `finalize` 뒤 `verify_review_segment` 워커가 WAV·바이트·샘플·해시를 확인하고, 불일치는 같은 ID에서 attempt를 올려 다시 받는다. 전 구간 검증 완료는 자료 행을 잠근 뒤 한 번만 전이하며, 이때 전사 창 `review_parts` 행을 예약한다. 전사 창은 워커가 원본 i와 i+1 첫 1초로 메모리에서 만들고, `parts/` 객체는 없다. 원본 가용성(`private.review_original_available`)·Storage 쓰기(`review_storage_allowed`)·접근권 소비(`consume_review_access`)·파기(`purge_review_files`)는 형식별로 분기하며, 기존 `single_file` 경로는 바꾸지 않는다. 구간 재생·내려받기는 구간 번호가 붙은 60초 단회 접근권으로 하나씩 전달한다(ADR-058 규칙 그대로). 불변식은 §6-5에 있다.
 
 ADR-057 강화(설계 §11~§13): 전사는 `verbose_json` segment의 시각·신뢰도를 `sections[]`에 저장하고 `dept_glossaries`를 Whisper `prompt`와 요약 표기 기준에 쓴다. 요약은 chunk 추출 뒤 인용 보존 병합 1회를 더한다(문서 공용 경로). 보안은 `next.config.ts`·`proxy.ts`의 응답 헤더·CSP nonce, 서버가 HKDF로 파생해 세션에만 주는 로컬 체크포인트 AES-GCM 키(서버 무저장), `review_access_events` append-only 접근 기록과 발급 제한을 같은 세션 RPC 트랜잭션에 두는 구조, `org_settings`의 조직별 스위치, `retention_settings.review_original_days` 보존 sweep이다. 권한·기록·제한을 앱이 아니라 SQL에서 집행하는 원칙은 그대로다. 제3자 처리(Voyage 옵트아웃·Groq DPA) 확인은 코드가 아니라 운영 기록이며 녹음 구현보다 먼저다.
 
-Meet·Zoom 계정/OAuth·공식 artifact 수집은 2단계이며 별도 어댑터로 같은 검토 저장소에 연결한다. 현재 운영 코드에 이 구조가 이미 존재하는 것으로 해석하지 않는다. Graft·Archify 결과는 아직 없으며 설계 문서의 Mermaid와 코드 관계 표가 수동 검토 자료다.
+Meet·Zoom 계정/OAuth·공식 artifact 수집은 2단계이며 별도 어댑터로 같은 검토 저장소에 연결한다. 현재 운영 코드에 이 구조가 이미 존재하는 것으로 해석하지 않는다. step0 수집·복구 흐름에는 2026-09-25 Archify 구조도가 있다([recording-capture 기록](verification/recording-capture-2026-09-25/README.md)). 녹음 세션·서버 계약(ADR-070)의 설계 검토 자료는 [설계 검증 기록](verification/recording-session-design-2026-09-25/README.md)이다. 구현 뒤 세션 수명 주기(step1-B)와 구간 저장·검증·접근·파기(step1-C)는 Archify 순서도가 있고, step1-C는 Graft 전후 그래프도 있다([세션 기록](verification/recording-sessions-2026-09-25/README.md) · [구간 기록](verification/recording-segments-2026-09-25/README.md)).
 
 ### 후속 개발 구현 — ADR-052
 
@@ -138,11 +144,11 @@ sasu/
 │   ├── adapters/{slack,transcript,document,voice,upload,review-audio,...}.ts # 입력 검증·파싱
 │   ├── pipeline/                               # job 본체 (classify·card·answer·embed·
 │   │                                           #  meeting/document-summary·notion-*·retro-*·trailer-*)
-│   ├── recording/                              # 브라우저 녹음 세션·PCM (ADR-056)
+│   ├── recording/                              # 녹음 PCM·구간 원본·키·녹음 라우트 공통 함수 (ADR-056·069)
 │   ├── slack/{verify,blocks,post,answer,question,installation,...}.ts
 │   └── supabase/{server,rls-client,service,browser,membership,...}.ts # 클라이언트 팩토리 (§6 불변식 2)
 ├── supabase/
-│   ├── migrations/                 # 스키마 · can_see()/search_as() · RLS 정책 (0001~0051)
+│   ├── migrations/                 # 스키마 · can_see()/search_as() · RLS 정책 (0001~0060)
 │   └── rollback/                   # 되돌림 SQL (*_down.sql)
 ├── scripts/                        # seed-demo.ts · execute.py(Harness) · verify-*.mjs · hooks/ · wording/
 ├── tests/                          # lib/ 미러 · app/api/ · rls/ · e2e/ · evals/ · retro/ · recording/
@@ -336,6 +342,14 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 27. **회고의 개인 활동 연결은 개인 OAuth·개인 키만이다(ADR-064).** `retro_connections`는 본인 행에만 있고 `encrypted_secret`은 어떤 select·RPC 반환에도 실리지 않는다. 조직 토큰으로 구성원 활동을 읽거나 관리자 감사 API(Figma Activity Logs·Google Admin SDK Reports·Zendesk 관리자 export)를 쓰지 않는다. 부서장은 누가 무엇을 연결했는지 보지 못한다. 승인된 원티드·스티비 예외는 부서장이 등록한 집계 연결이며 `department_snapshot`과 `dept_context=true`를 SQL에서 강제한다. 등록·토큰 저장·수집·활동 읽기 때 현재 부서장 자격을 확인한다. 개인 회고 인용은 금지한다. 연결 해제는 토큰과 그 제공자 접두사의 활동을 같은 트랜잭션에서 지운다. restricted scope(Gmail·Drive 전체) 데이터를 서버에 저장하는 커넥터는 만들지 않는다.
 28. **상대방(고객·지원자·참석자)의 개인 식별 정보는 파싱하지 않는다.** 커넥터 변환은 이름·전화번호·이메일 필드를 읽지 않고(테스트로 증명) 회사명·건수·결과·`상대 N`만 남긴다. VoIP 통화 메타데이터(`call_*`)는 법률 자문 통과 전에는 켜지 않는다. 수집 동의(연결 시)와 공개 동의(첫 `dept`/`leads_only` 전환 시, `retro_user_settings.share_consented_at`)는 분리해 기록하며 공개 동의 없이는 `set_retro_visibility`가 넓히지 않는다.
 29. **집계 지표는 활동이 아니라 스냅샷이고, 작성자 없는 부서 문맥 활동은 "내가 했다"의 인용이 될 수 없다.** `metric_snapshot`은 "확인했다·비교했다" 서술만, `dept_context` 활동을 인용한 항목과 마스킹 토큰이 문장에 옮겨진 항목은 `verifyRetroDraft`가 버린다. 부서 프리셋은 라벨·힌트·추천 커넥터만 바꾸고 섹션 키·스키마·검증·화면은 하나다.
+
+### 6-5. 웹 회의 녹음 (ADR-056·057·069) — 서버·녹음 화면 로컬 구현·검증, 실기기·운영 게이트 미완료
+
+30. **녹음 세션이 먼저다.** 실제 입력은 `review_recordings` 세션과 그 세션의 키가 있을 때만 IndexedDB에 저장한다. 세션 ID는 자료 ID이자 HKDF·AAD의 녹음 ID이며 도중에 바꾸지 않는다. 세션은 녹음자 본인만 읽고, 쓰기는 SECURITY DEFINER RPC로만 한다.
+31. **키는 서버 상태가 허락할 때만 나온다.** 세션이 `active`·`saving`이고, 만료 전이고, 조직 스위치가 켜져 있고, 녹음자가 동의한 부서장이고, 참여자 전원이 동의 상태여야 한다. 하나라도 아니면 거부한다. 서버는 키를 저장하지 않고 요청마다 파생한다.
+32. **구간 원본은 한 번 쓰고 바꾸지 않는다.** 녹음자만 발급된 `{index}-{attempt}` 경로에 INSERT한다. UPDATE·upsert와 클라이언트의 전사 창 경로(`parts/`·`windows/{index}`) 쓰기는 없다. 검증을 시작한 구간은 더 받지 않으며, 불일치 객체는 워커만 지운다.
+33. **검증 전에는 전사하지 않는다.** 전사 창은 전 구간이 검증된 자료에서 한 번만 예약되고, 워커가 검증된 원본에서만 만든다. 클라이언트가 보낸 manifest·capture 메타데이터는 권한이나 완료 판정에 쓰지 않는다.
+34. **구간 원본도 ADR-058을 따른다.** 구간 하나에 접근 허가 1건·60초 단회 접근권 1개를 쓰고, 분당 60건 제한을 같이 적용한다. 서명 URL·목록 조회는 없다.
 
 ## 7. 만들지 않는 것 (되살리지 말 것)
 

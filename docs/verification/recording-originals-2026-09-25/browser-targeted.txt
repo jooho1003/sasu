@@ -1,0 +1,136 @@
+
+> sasu@0.1.0 e2e:recording
+> playwright test --config playwright.recording.config.ts tests/recording/original-segments.spec.ts --reporter=line
+
+
+[WebServer] (node:10120) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:19348) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[WebServer] (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+[WebServer]   - ESM syntax in a file loaded as CommonJS (vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+[WebServer] Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+Running 2 tests using 1 worker
+
+[WebServer] 오전 9:43:36 [vite] (client) Pre-transform error: Failed to resolve import "@/lib/contracts" from "lib/recording/original-segments.ts". Does the file exist?
+[WebServer]   Plugin: vite:import-analysis
+[WebServer]   File: D:/바이브코딩/sasu/lib/recording/original-segments.ts:1:60
+[WebServer]   1  |  import { RecordingManifest, RecordingOriginalSegment } from "@/lib/contracts";
+[WebServer]      |                                                               ^
+[WebServer]   2  |  import { AUDIO_PART_SECONDS } from "@/lib/adapters/review-audio";
+[WebServer]   3  |  import { MAX_RECORDING_SAMPLES, pcmWav, RECORDING_RATE } from "./pcm";
+
+
+(node:19204) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/2] tests\recording\original-segments.spec.ts:8:5 › encrypted recovery creates independent WAV originals and a playable verified transcription boundary without uploads
+
+[WebServer] 오전 9:43:48 [vite] Internal server error: Failed to resolve import "@/lib/contracts" from "lib/recording/original-segments.ts". Does the file exist?
+[WebServer]   Plugin: vite:import-analysis
+[WebServer]   File: D:/바이브코딩/sasu/lib/recording/original-segments.ts:1:60
+[WebServer]   1  |  import { RecordingManifest, RecordingOriginalSegment } from "@/lib/contracts";
+[WebServer]      |                                                               ^
+[WebServer]   2  |  import { AUDIO_PART_SECONDS } from "@/lib/adapters/review-audio";
+[WebServer]   3  |  import { MAX_RECORDING_SAMPLES, pcmWav, RECORDING_RATE } from "./pcm";
+[WebServer]       at TransformPluginContext._formatLog (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:31147:39)
+[WebServer]       at TransformPluginContext.error (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:31144:14)
+[WebServer]       at normalizeUrl (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:28083:18)
+[WebServer]       at async file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:28153:30
+[WebServer]       at async Promise.all (index 0)
+[WebServer]       at async TransformPluginContext.transform (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:28119:4)
+[WebServer]       at async EnvironmentPluginContainer.transform (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:30932:14)
+[WebServer]       at async loadAndTransform (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:20671:26)
+[WebServer]       at async viteTransformMiddleware (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:25205:20)
+  1) tests\recording\original-segments.spec.ts:8:5 › encrypted recovery creates independent WAV originals and a playable verified transcription boundary without uploads 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  locator('#status')
+    Expected: "검증 준비 완료"
+    Received: "준비 중"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" locator('#status') with timeout 5000ms
+      - waiting for locator('#status')
+        13 × locator resolved to <pre id="status">준비 중</pre>
+           - unexpected value "준비 중"
+
+
+      10 |   page.on("request", (request) => { if (!["GET", "HEAD"].includes(request.method())) writes.push(request.url()); });
+      11 |   await page.goto("/");
+    > 12 |   await expect(page.locator("#status")).toHaveText("검증 준비 완료");
+         |                                         ^
+      13 |   const audio = await page.evaluate(async () => {
+      14 |     const lab = (window as unknown as { recordingLab: Lab }).recordingLab;
+      15 |     const store = await lab.openRecordingStore(await lab.importRecordingKey(new Uint8Array(32).fill(42)));
+        at D:\바이브코딩\sasu\tests\recording\original-segments.spec.ts:12:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\original-segments-encrypte-fe9f2-on-boundary-without-uploads\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\original-segments-encrypte-fe9f2-on-boundary-without-uploads\error-context.md
+
+
+(node:38244) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[2/2] tests\recording\original-segments.spec.ts:59:5 › a missing encrypted checkpoint cannot be presented as a complete original bundle
+
+[WebServer] 오전 9:44:02 [vite] Internal server error: Failed to resolve import "@/lib/contracts" from "lib/recording/original-segments.ts". Does the file exist?
+[WebServer]   Plugin: vite:import-analysis
+[WebServer]   File: D:/바이브코딩/sasu/lib/recording/original-segments.ts:1:60
+[WebServer]   1  |  import { RecordingManifest, RecordingOriginalSegment } from "@/lib/contracts";
+[WebServer]      |                                                               ^
+[WebServer]   2  |  import { AUDIO_PART_SECONDS } from "@/lib/adapters/review-audio";
+[WebServer]   3  |  import { MAX_RECORDING_SAMPLES, pcmWav, RECORDING_RATE } from "./pcm";
+[WebServer]       at TransformPluginContext._formatLog (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:31147:39)
+[WebServer]       at TransformPluginContext.error (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:31144:14)
+[WebServer]       at normalizeUrl (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:28083:18)
+[WebServer]       at async file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:28153:30
+[WebServer]       at async Promise.all (index 0)
+[WebServer]       at async TransformPluginContext.transform (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:28119:4)
+[WebServer]       at async EnvironmentPluginContainer.transform (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:30932:14)
+[WebServer]       at async loadAndTransform (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:20671:26)
+[WebServer]       at async viteTransformMiddleware (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/node_modules/vite/dist/node/chunks/node.js:25205:20)
+  2) tests\recording\original-segments.spec.ts:59:5 › a missing encrypted checkpoint cannot be presented as a complete original bundle 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  locator('#status')
+    Expected: "검증 준비 완료"
+    Received: "준비 중"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" locator('#status') with timeout 5000ms
+      - waiting for locator('#status')
+        13 × locator resolved to <pre id="status">준비 중</pre>
+           - unexpected value "준비 중"
+
+
+      59 | test("a missing encrypted checkpoint cannot be presented as a complete original bundle", async ({ page }) => {
+      60 |   await page.goto("/");
+    > 61 |   await expect(page.locator("#status")).toHaveText("검증 준비 완료");
+         |                                         ^
+      62 |   await page.evaluate(async () => {
+      63 |     const lab = (window as unknown as { recordingLab: Lab }).recordingLab;
+      64 |     const scope = { ownerUserId: "lab-synthetic-user", deptId: "lab-synthetic-dept", recordingId: "damaged-originals" };
+        at D:\바이브코딩\sasu\tests\recording\original-segments.spec.ts:61:41
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\original-segments-a-missin-b28c0--a-complete-original-bundle\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\original-segments-a-missin-b28c0--a-complete-original-bundle\error-context.md
+
+
+  2 failed
+    tests\recording\original-segments.spec.ts:8:5 › encrypted recovery creates independent WAV originals and a playable verified transcription boundary without uploads 
+    tests\recording\original-segments.spec.ts:59:5 › a missing encrypted checkpoint cannot be presented as a complete original bundle 

@@ -1,0 +1,82 @@
+
+Running 4 tests using 1 worker
+
+
+
+(node:37904) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/4] [chromium] › tests\e2e\security-headers.spec.ts:11:5 › security headers and distinct request nonces cover public pages and error responses
+[2/4] [chromium] › tests\e2e\security-headers.spec.ts:36:5 › public, demo and not-found HTML receive matching nonces with zero normal-flow violations
+  1) [chromium] › tests\e2e\security-headers.spec.ts:36:5 › public, demo and not-found HTML receive matching nonces with zero normal-flow violations 
+
+    Error: /demo/hiring
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "script-src:report",
+    + ]
+
+      52 |     expect(scripts.every(value => value === nonce), path).toBe(true);
+      53 |     const violations = await page.evaluate(() => (window as unknown as { cspViolations: string[] }).cspViolations);
+    > 54 |     expect(violations, path).toEqual([]);
+         |                              ^
+      55 |     observations[path] = { status: response!.status(), scripts: scripts.length, matched: true, violations };
+      56 |   }
+      57 |   await page.goto("/");
+        at D:\바이브코딩\sasu\tests\e2e\security-headers.spec.ts:54:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\security-headers-public-de-7b930-zero-normal-flow-violations-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\security-headers-public-de-7b930-zero-normal-flow-violations-chromium\error-context.md
+
+
+
+(node:48776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[3/4] [chromium] › tests\e2e\security-headers.spec.ts:70:5 › nonce-free inline code is blocked only in enforcement mode
+  2) [chromium] › tests\e2e\security-headers.spec.ts:70:5 › nonce-free inline code is blocked only in enforcement mode 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+    -   "disposition": "report",
+    +   "disposition": "no_event",
+        "executed": true,
+      }
+
+      86 |     return { disposition, executed: Reflect.get(window, "sasuCspProbeExecuted") === true };
+      87 |   });
+    > 88 |   expect(result).toEqual({ disposition: enforcing ? "enforce" : "report", executed: !enforcing });
+         |                  ^
+      89 |   mkdirSync(evidence, { recursive: true });
+      90 |   writeFileSync(`${evidence}/${mode}-injection.json`, JSON.stringify({ ...result, intentionalViolation: true }, null, 2));
+      91 | });
+        at D:\바이브코딩\sasu\tests\e2e\security-headers.spec.ts:88:18
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\security-headers-nonce-fre-f6bc1-ed-only-in-enforcement-mode-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\security-headers-nonce-fre-f6bc1-ed-only-in-enforcement-mode-chromium\error-context.md
+
+
+
+(node:47392) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[4/4] [chromium] › tests\e2e\security-headers.spec.ts:93:5 › Blob audio and a storage worker remain available under CSP
+  2 failed
+    [chromium] › tests\e2e\security-headers.spec.ts:36:5 › public, demo and not-found HTML receive matching nonces with zero normal-flow violations 
+    [chromium] › tests\e2e\security-headers.spec.ts:70:5 › nonce-free inline code is blocked only in enforcement mode 
+  2 passed (10.7s)

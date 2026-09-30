@@ -1,0 +1,240 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/recording/original-segments.test.ts (48 tests | 38 failed) 1657ms
+   ❯ recording original manifest v1 (19)
+     × accepts 30 full originals without changing the existing 50 MiB file-upload limit 10ms
+     × rejects invalid or reordered manifests 0 7ms
+     × rejects invalid or reordered manifests 1 11ms
+     × rejects invalid or reordered manifests 2 1ms
+     × rejects invalid or reordered manifests 3 15ms
+     × rejects invalid or reordered manifests 4 1ms
+     × rejects invalid or reordered manifests 5 0ms
+     × rejects invalid or reordered manifests 6 7ms
+     × rejects invalid or reordered manifests 7 4ms
+     × rejects invalid or reordered manifests 8 5ms
+     × rejects invalid segment metadata 0 1ms
+     × rejects invalid segment metadata 1 8ms
+     × rejects invalid segment metadata 2 7ms
+     × rejects invalid segment metadata 3 0ms
+     × rejects invalid segment metadata 4 0ms
+     × rejects invalid segment metadata 5 0ms
+     × rejects invalid segment metadata 6 0ms
+     × rejects invalid segment metadata 7 0ms
+     × pins exact UTF-8 canonical bytes, independent of object key order 1ms
+   ❯ bounded checkpoint to independent original WAV conversion (11)
+     × splits 61 seconds plus a tail without duplicating boundary samples 84ms
+   ❯ strict original WAV verification and transcription boundaries (18)
+     × rejects a malformed WAV header even with a matching hash (offset 0) 13ms
+     × rejects a malformed WAV header even with a matching hash (offset 8) 9ms
+     × rejects a malformed WAV header even with a matching hash (offset 12) 5ms
+     × rejects a malformed WAV header even with a matching hash (offset 36) 5ms
+     × rejects a malformed WAV header even with a matching hash (offset 4) 4ms
+     × rejects a malformed WAV header even with a matching hash (offset 16) 3ms
+     × rejects a malformed WAV header even with a matching hash (offset 20) 2ms
+     × rejects a malformed WAV header even with a matching hash (offset 22) 1ms
+     × rejects a malformed WAV header even with a matching hash (offset 24) 1ms
+     × rejects a malformed WAV header even with a matching hash (offset 28) 1ms
+     × rejects a malformed WAV header even with a matching hash (offset 32) 20ms
+     × rejects a malformed WAV header even with a matching hash (offset 34) 4ms
+     × rejects a malformed WAV header even with a matching hash (offset 40) 4ms
+     × rejects payload tampering, truncated bytes, and a metadata sample mismatch 7ms
+     × supports byte views with a nonzero buffer offset 13ms
+     × creates 60+1-second transcription parts from verified originals only 99ms
+     × uses a short final boundary without padding silence 27ms
+     × requires the declared next segment and rejects corrupt boundary audio 21ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 38 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > accepts 30 full originals without changing the existing 50 MiB file-upload limit
+TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ tests/recording/original-segments.test.ts:32:30
+     30|   it("accepts 30 full originals without changing the existing 50 MiB f…
+     31|     const manifest = { version: 1, segments: Array.from({ length: 30 }…
+     32|     expect(RecordingManifest.parse(manifest)).toEqual(manifest);
+       |                              ^
+     33|     expect(recordingManifestTotals(manifest)).toEqual({ samples: 28_80…
+     34|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid or reordered manifests 0
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid or reordered manifests 1
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid or reordered manifests 2
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid or reordered manifests 3
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid or reordered manifests 4
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid or reordered manifests 5
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid or reordered manifests 6
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid or reordered manifests 7
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid or reordered manifests 8
+TypeError: Cannot read properties of undefined (reading 'safeParse')
+ ❯ tests/recording/original-segments.test.ts:47:30
+     45|     { version: 1, segments: [descriptor(0)], dept_id: "injected" },
+     46|   ])("rejects invalid or reordered manifests %#", (value) => {
+     47|     expect(RecordingManifest.safeParse(value).success).toBe(false);
+       |                              ^
+     48|     expect(() => canonicalRecordingManifest(value)).toThrow();
+     49|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid segment metadata 0
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid segment metadata 1
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid segment metadata 2
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid segment metadata 3
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid segment metadata 4
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid segment metadata 5
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid segment metadata 6
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > rejects invalid segment metadata 7
+TypeError: Cannot read properties of undefined (reading 'safeParse')
+ ❯ tests/recording/original-segments.test.ts:61:37
+     59|     { ...descriptor(0), bytes: Number.POSITIVE_INFINITY },
+     60|   ])("rejects invalid segment metadata %#", (value) => {
+     61|     expect(RecordingOriginalSegment.safeParse(value).success).toBe(fal…
+       |                                     ^
+     62|   });
+     63|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > recording original manifest v1 > pins exact UTF-8 canonical bytes, independent of object key order
+TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ canonicalRecordingManifest lib/recording/original-segments.ts:18:38
+     16|
+     17| export function canonicalRecordingManifest(input: unknown): string {
+     18|   const manifest = RecordingManifest.parse(input);
+       |                                      ^
+     19|   return "sasu-recording-manifest-v1\n" + manifest.segments.map((segme…
+     20|     `${segment.index}:${segment.sample_count}:${segment.bytes}:${segme…
+ ❯ tests/recording/original-segments.test.ts:68:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > bounded checkpoint to independent original WAV conversion > splits 61 seconds plus a tail without duplicating boundary samples
+AssertionError: promise rejected "TypeError: Cannot read properties of unde…" instead of resolving
+ ❯ tests/recording/original-segments.test.ts:81:107
+     79|     expect(segments.map(({ descriptor }) => [descriptor.index, descrip…
+     80|       .toEqual([[0, 960_000, 1_920_044], [1, 16073, 32190]]);
+     81|     for (const segment of segments) await expect(verifyRecordingOrigin…
+       |                                                                                                           ^
+     82|     const first = new DataView(segments[0].wav.buffer);
+     83|     const last = new DataView(segments[1].wav.buffer);
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ verifyRecordingOriginal lib/recording/original-segments.ts:74:44
+ ❯ tests/recording/original-segments.test.ts:81:50
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 0)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 8)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 12)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 36)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 4)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 16)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 20)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 22)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 24)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 28)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 32)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 34)
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects a malformed WAV header even with a matching hash (offset 40)
+AssertionError: expected [Function] to throw error including 'recording_wav_invalid' but got 'Cannot read properties of undefined (…'
+
+Expected: "recording_wav_invalid"
+Received: "Cannot read properties of undefined (reading 'parse')"
+
+ ❯ tests/recording/original-segments.test.ts:143:77
+    141|     original.wav[offset] = value;
+    142|     original.descriptor.sha256 = createHash("sha256").update(original.…
+    143|     await expect(verifyRecordingOriginal(original.wav, original.descri…
+       |                                                                             ^
+    144|   });
+    145|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > rejects payload tampering, truncated bytes, and a metadata sample mismatch
+AssertionError: expected [Function] to throw error including 'recording_hash_mismatch' but got 'Cannot read properties of undefined (…'
+
+Expected: "recording_hash_mismatch"
+Received: "Cannot read properties of undefined (reading 'parse')"
+
+ ❯ tests/recording/original-segments.test.ts:150:72
+    148|     const changed = original.wav.slice();
+    149|     changed[44] ^= 1;
+    150|     await expect(verifyRecordingOriginal(changed, original.descriptor)…
+       |                                                                        ^
+    151|     await expect(verifyRecordingOriginal(original.wav.subarray(0, -2),…
+    152|     await expect(verifyRecordingOriginal(original.wav, { ...original.d…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > supports byte views with a nonzero buffer offset
+AssertionError: promise rejected "TypeError: Cannot read properties of unde…" instead of resolving
+ ❯ tests/recording/original-segments.test.ts:159:89
+    157|     const padded = new Uint8Array(original.wav.length + 20);
+    158|     padded.set(original.wav, 10);
+    159|     await expect(verifyRecordingOriginal(padded.subarray(10, -10), ori…
+       |                                                                                         ^
+    160|   });
+    161|
+
+Caused by: TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ verifyRecordingOriginal lib/recording/original-segments.ts:74:44
+ ❯ tests/recording/original-segments.test.ts:159:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > creates 60+1-second transcription parts from verified originals only
+TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ createRecordingTranscriptionPart lib/recording/original-segments.ts:93:38
+     91|   input: unknown, index: number, currentWav: Uint8Array, nextWav: Uint…
+     92| ) {
+     93|   const manifest = RecordingManifest.parse(input);
+       |                                      ^
+     94|   const current = manifest.segments[index];
+     95|   const next = manifest.segments[index + 1];
+ ❯ tests/recording/original-segments.test.ts:166:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > uses a short final boundary without padding silence
+TypeError: Cannot read properties of undefined (reading 'parse')
+ ❯ createRecordingTranscriptionPart lib/recording/original-segments.ts:93:38
+     91|   input: unknown, index: number, currentWav: Uint8Array, nextWav: Uint…
+     92| ) {
+     93|   const manifest = RecordingManifest.parse(input);
+       |                                      ^
+     94|   const current = manifest.segments[index];
+     95|   const next = manifest.segments[index + 1];
+ ❯ tests/recording/original-segments.test.ts:182:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/38]⎯
+
+ FAIL  tests/recording/original-segments.test.ts > strict original WAV verification and transcription boundaries > requires the declared next segment and rejects corrupt boundary audio
+AssertionError: expected [Function] to throw error including 'recording_boundary_invalid' but got 'Cannot read properties of undefined (…'
+
+Expected: "recording_boundary_invalid"
+Received: "Cannot read properties of undefined (reading 'parse')"
+
+ ❯ tests/recording/original-segments.test.ts:191:81
+    189|     const next = file(1, 73, -31);
+    190|     const manifest = { version: 1, segments: [first.descriptor, next.d…
+    191|     await expect(createRecordingTranscriptionPart(manifest, 0, first.w…
+       |                                                                                 ^
+    192|     await expect(createRecordingTranscriptionPart(manifest, 1, next.wa…
+    193|     await expect(createRecordingTranscriptionPart(manifest, 2, next.wa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/38]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  38 failed | 10 passed (48)
+   Start at  09:38:39
+   Duration  13.89s (import 69%, tests 17%, transform 10%, worker 4%)
+

@@ -5,6 +5,7 @@ import { labelFrom } from "@/lib/labels";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/icon";
+import { reviewCitationHref, type ReviewCitationTarget } from "@/lib/recording/citation-location";
 
 type SummaryItem = { item_id: string; text: string };
 type Citation = {
@@ -27,6 +28,7 @@ type Document = {
   status: "processing" | "summarized" | "summary_failed";
   status_reason: string | null;
   summary: DocumentSummary | null;
+  citation_targets?: Record<string, ReviewCitationTarget>;
   extracted_chars: number;
   chunk_count: number;
   created_at: string;
@@ -568,15 +570,19 @@ function DocumentDetail({
               {summary.citations.map((citation) => (
                 <Link
                   key={`${citation.item_id}-${citation.decision_id}-${citation.quote}`}
-                  href={
-                    citation.decision_id
+                    href={
+                      citation.item_id && document.citation_targets?.[citation.item_id]
+                        ? reviewCitationHref(deptId, document.citation_targets[citation.item_id])
+                        : citation.decision_id
                       ? `/d/${deptId}/ledger#decision-${citation.decision_id}`
                       : `/d/${deptId}?item=${citation.item_id ?? ""}#item-${citation.item_id ?? ""}`
                   }
                 >
-                  <q>{citation.quote}</q>
-                  <span>
-                    원문 확인 <Icon name="arrow" size={14} />
+                    <q>{citation.quote}</q>
+                    {citation.item_id && document.citation_targets?.[citation.item_id]?.lowConfidence ? <span className="badge badge-urgent">낮은 신뢰</span> : null}
+                    {citation.item_id && document.citation_targets?.[citation.item_id]?.boundaryReview ? <span className="badge badge-urgent">경계 확인 필요</span> : null}
+                    <span>
+                      {citation.item_id && document.citation_targets?.[citation.item_id] ? "녹음 위치 확인" : "원문 확인"} <Icon name="arrow" size={14} />
                   </span>
                 </Link>
               ))}

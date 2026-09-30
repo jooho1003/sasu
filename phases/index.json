@@ -166,8 +166,10 @@
     {
       "dir": "23-browser-meeting-recording",
       "status": "blocked",
-      "verification": "docs/verification/browser-meeting-recording/access-controls-2026-09-18.md",
-      "note": "step4-A·step0 부분 구현. 실제 녹음/복구·자료 보호 게이트 전 step1 이후 순서 유지.",
+      "verification": "docs/verification/browser-meeting-recording/README.md",
+      "note": "2026-09-29: step0~3·4-A·4-B1~B8의 로컬 구현·검증 기록을 연결했다. 남은 완료 게이트는 실제 기기 V01~V06, 제공사 V13, 운영 CSP V14, 실제 모델 지시문 문서 V16, 정량 실측 V20, 운영 DB/배포 승인이다. 이번 변경은 운영 미반영이다.",
+      "followup_verification": "docs/verification/browser-meeting-recording/step1.md",
+      "pending_change_production_deployed": false,
       "production_deployed": true,
       "deployed_at": "2026-09-20T12:30:00+09:00",
       "deployment": "docs/verification/production-rollout-2026-09-20.md"
@@ -198,10 +200,17 @@
       "followup_verification": "docs/verification/llm-style-followup-2026-09-23/README.md"
     },
     {
+      "dir": "33-recording-ux",
+      "status": "blocked",
+      "verification": "docs/verification/recording-ux-2026-09-29/README.md",
+      "note": "녹음 UI step 0~8 기능 구현·로컬 제품 E2E 9/9, 단위 1664, 합성 UI E2E 47 통과. 계획·최종 Graft check 통과. Plan §4.1의 단계별 전후 Graft 그래프 0~7이 Docker 장애 당시 미생성되어 형식상 완료 게이트 보류. 실제 기기 V01~V06은 범위 밖, 운영 미배포.",
+      "production_deployed": false
+    },
+    {
       "dir": "34-review-upload-timeout",
       "status": "completed",
       "verification": "docs/verification/review-upload-timeout-2026-09-30.md",
-      "note": "운영 DB 0065와 분리 배포 dpl_3evfKgQbvRurLNKGSsGQgCvBab2r 확인. 실제 24시간 업로드 실측은 없음.",
+      "note": "격리 SQL 282·단위 1705·검토 화면 31과 phase 34 분리 배포본 검증 완료. 운영 DB 0065 적용, 배포 dpl_3evfKgQbvRurLNKGSsGQgCvBab2r 확인. 실제 24시간 업로드 실측은 없음.",
       "production_deployed": true,
       "deployment": "docs/verification/review-upload-timeout-2026-09-30.md"
     }

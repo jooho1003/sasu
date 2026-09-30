@@ -1,0 +1,51 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+[tsconfig-paths] An error occurred while parsing "D:/바이브코딩/sasu/.vercel/csp-rendering-20260924/archify/website/tsconfig.json". See below for details. To disable this message, set the `ignoreConfigErrors` option to true.
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/proxy.test.ts (10 tests | 5 failed) 23ms
+   ❯ request nonce and session boundaries (10)
+     × enforces the same request policy when explicitly enabled: / 9ms
+     × enforces the same request policy when explicitly enabled: /privacy 1ms
+     × enforces the same request policy when explicitly enabled: /demo/notion 1ms
+     × enforces the same request policy when explicitly enabled: /d/sales/trailers 2ms
+     × keeps enforcement on refreshed sessions and reviewer rejection 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/proxy.test.ts > request nonce and session boundaries > enforces the same request policy when explicitly enabled: /
+ FAIL  tests/proxy.test.ts > request nonce and session boundaries > enforces the same request policy when explicitly enabled: /privacy
+ FAIL  tests/proxy.test.ts > request nonce and session boundaries > enforces the same request policy when explicitly enabled: /demo/notion
+ FAIL  tests/proxy.test.ts > request nonce and session boundaries > enforces the same request policy when explicitly enabled: /d/sales/trailers
+AssertionError: the given combination of arguments (null and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string
+ ❯ tests/proxy.test.ts:22:20
+     20|     const response = await proxy(new NextRequest(`https://sasu.test${p…
+     21|     const policy = response.headers.get("Content-Security-Policy");
+     22|     expect(policy).toContain("nonce-");
+       |                    ^
+     23|     expect(response.headers.get("Content-Security-Policy-Report-Only")…
+     24|     expect(response.headers.get("Cache-Control")).toContain("no-store"…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/proxy.test.ts > request nonce and session boundaries > keeps enforcement on refreshed sessions and reviewer rejection
+AssertionError: the given combination of arguments (null and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string
+ ❯ tests/proxy.test.ts:36:61
+     34|     });
+     35|     const response = await proxy(new NextRequest("https://sasu.test/d/…
+     36|     expect(response.headers.get("Content-Security-Policy")).toContain(…
+       |                                                             ^
+     37|     expect(response.headers.get("set-cookie")).toContain("auth-test=re…
+     38|     expect(response.headers.get("x-middleware-request-content-security…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 5 passed (10)
+   Start at  11:43:00
+   Duration  1.48s (import 74%, transform 23%, tests 2%, worker 1%)
+

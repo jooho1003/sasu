@@ -5,6 +5,7 @@ import CardActions from "@/components/card-actions";
 import { CardReminder } from "@/components/card-reminder";
 import { formatConflictBadge } from "@/lib/conflicts";
 import { label } from "@/lib/labels";
+import { reviewCitationHref, reviewCitationTarget, type PublishedReview } from "@/lib/recording/citation-location";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -35,6 +36,9 @@ type SourceRow = {
 
 type ItemRow = {
   id: string;
+  source_id: string;
+  content: string;
+  deleted_at: string | null;
   author: string | null;
   spoken_at: string | null;
   external_ref: string | null;
@@ -144,8 +148,8 @@ export default async function CardDetailPage({
       ? Promise.resolve({ data: [] as ItemRow[], error: null })
       : supabase
           .from("items")
-          .select("id, author, spoken_at, external_ref, sources!inner(kind, external_id, title)")
-          .in("id", itemIds),
+          .select("id, source_id, content, deleted_at, author, spoken_at, external_ref, sources!inner(kind, external_id, title)")
+          .in("id", itemIds).is("deleted_at", null).eq("sources.active", true),
     decisionIds.length === 0
       ? Promise.resolve({ data: [] as DecisionRow[], error: null })
       : supabase
@@ -159,22 +163,32 @@ export default async function CardDetailPage({
   }
 
   const itemMap = new Map(((itemsResult.data ?? []) as ItemRow[]).map((item) => [item.id, item]));
+  const reviewSourceIds = [...new Set([...itemMap.values()].filter((item) => firstRelation(item.sources).external_id?.startsWith("review:")).map((item) => item.source_id))];
+  const reviewResult = reviewSourceIds.length
+    ? await supabase.from("reviewed_materials").select("id,kind,revision,published_revision,published_source_id,original_uploaded,original_deleted_at,deleted_at,sections")
+      .in("published_source_id", reviewSourceIds)
+    : { data: [], error: null };
+  const reviews = new Map(((reviewResult.error ? [] : reviewResult.data) ?? []).map((review) => [review.published_source_id, review as PublishedReview]));
   const decisionMap = new Map(
     ((decisionsResult.data ?? []) as DecisionRow[]).map((decision) => [decision.id, decision]),
   );
   const visibleCitations = citations.flatMap((citation) => {
     if (citation.item_id) {
       const item = itemMap.get(citation.item_id);
-      if (!item) {
+      if (!item || item.deleted_at || !citation.quote || !item.content.includes(citation.quote)) {
         return [];
       }
       const source = firstRelation(item.sources);
+      const review = reviews.get(item.source_id);
+      const target = review ? reviewCitationTarget(item.external_ref, review) : null;
       return [{
         quote: citation.quote,
         author: item.author ?? "작성자 미상",
         occurredAt: item.spoken_at,
         source: source.title ?? "이름 없는 소스",
-        href: originalHref(item, membership.deptId),
+        href: target ? reviewCitationHref(membership.deptId, target) : originalHref(item, membership.deptId),
+        lowConfidence: target?.lowConfidence ?? false,
+        boundaryReview: target?.boundaryReview ?? false,
       }];
     }
     if (citation.decision_id) {
@@ -188,6 +202,8 @@ export default async function CardDetailPage({
         occurredAt: decision.decided_at,
         source: `결정 기록 #${decision.id.slice(0, 8)}`,
         href: `/d/${membership.deptId}/ledger#decision-${decision.id}`,
+        lowConfidence: false,
+        boundaryReview: false,
       }];
     }
     return [];
@@ -251,7 +267,9 @@ export default async function CardDetailPage({
                     <span className="text-xs text-[var(--muted)]" data-meta>
                       {citation.author} · {formatDate(citation.occurredAt)} · {citation.source}
                     </span>
-                    <q className="font-normal leading-7 text-[var(--ink)]">{citation.quote}</q>
+                      <q className="font-normal leading-7 text-[var(--ink)]">{citation.quote}</q>
+                      {citation.lowConfidence ? <span className="badge badge-urgent">낮은 신뢰</span> : null}
+                      {citation.boundaryReview ? <span className="badge badge-urgent">경계 확인 필요</span> : null}
                   </a>
                 ))}
               </div>

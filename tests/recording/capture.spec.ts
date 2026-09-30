@@ -18,6 +18,10 @@ test("real AudioWorklet/Worker records synthetic input, pauses, recovers and emi
   await expect(page.locator("#status")).toContainText('"state": "recording"');
   await page.getByRole("button", { name: "종료", exact: true }).click();
   await expect(page.locator("#status")).toContainText('"state": "stopped"');
+  const profile = await page.evaluate(() => (window as typeof window & { labProfile: number[][] }).labProfile);
+  expect(profile.length).toBeGreaterThan(0);
+  expect(profile[0]).toHaveLength(2);
+  expect(profile[0].every((value) => value > 0)).toBe(true);
   await page.getByRole("button", { name: "확인 구간 복구", exact: true }).click();
   await expect(page.locator("audio")).toHaveAttribute("src", /^blob:/);
   expect(await page.locator("audio").evaluate(async (audio: HTMLAudioElement) => {
@@ -43,4 +47,20 @@ test("ending a required input interrupts recording and closes all tracks", async
   await expect(page.locator("#status")).toContainText('"reason": "input_ended"');
   await expect(page.locator("#status")).toContainText('"state": "interrupted"');
   expect(await page.evaluate(() => (window as unknown as { labTracks: MediaStreamTrack[] }).labTracks.every((track) => track.readyState === "ended"))).toBe(true);
+});
+
+test("microphone loss pauses capture until a fresh input is selected", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "합성 입력 시작", exact: true }).click();
+  await expect(page.locator("#status")).toContainText('"state": "recording"');
+  await page.getByRole("button", { name: "마이크 분리 시험", exact: true }).click();
+  await expect(page.locator("#status")).toContainText('"state": "paused"');
+  const paused = JSON.parse((await page.locator("#status").textContent())!).samples;
+  await page.waitForTimeout(300);
+  expect(JSON.parse((await page.locator("#status").textContent())!).samples).toBe(paused);
+  await page.getByRole("button", { name: "마이크 다시 선택", exact: true }).click();
+  await expect(page.locator("#status")).toContainText('"state": "recording"');
+  await expect.poll(async () => JSON.parse((await page.locator("#status").textContent())!).samples).toBeGreaterThan(paused);
+  await page.getByRole("button", { name: "종료", exact: true }).click();
+  await expect(page.locator("#status")).toContainText('"state": "stopped"');
 });

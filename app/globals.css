@@ -40,7 +40,48 @@ html { scrollbar-gutter: stable; }
 
 .review-workspace .panel { padding: 24px; }
 .review-workspace fieldset { border: 0; padding: 0; min-width: 0; }
-.review-workspace input:not([type="checkbox"]):not([type="file"]), .review-workspace select, .review-workspace textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); color: var(--ink); font: inherit; }
+.review-workspace input:not([type="checkbox"]):not([type="file"]):not([type="radio"]):not([type="range"]), .review-workspace select, .review-workspace textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface); color: var(--ink); font: inherit; }
+.meeting-recorder .panel { display: grid; gap: 14px; }
+.meeting-recorder .panel > button { justify-self: start; }
+.meeting-recorder .panel > label { display: grid; gap: 6px; }
+.meeting-recorder .panel > label:has(input[type="checkbox"]) { display: flex; align-items: flex-start; gap: 9px; }
+.meeting-recorder fieldset { display: flex; flex-wrap: wrap; gap: 10px 20px; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.meeting-recorder fieldset legend { padding: 0 6px; font-weight: 650; }
+.meeting-recorder fieldset label { display: inline-flex; align-items: center; gap: 8px; }
+.meeting-recorder meter { width: min(220px, 55vw); vertical-align: middle; }
+.meeting-recorder .panel ul { display: grid; gap: 12px; padding-left: 18px; }
+.meeting-recorder .panel li { line-height: 2; }
+.meeting-recorder .recorder-notice { margin: 0; padding: 12px 14px; border: 1px solid #a9cbb6; border-radius: 10px; background: #edf5f0; color: #154634; line-height: 1.6; }
+.meeting-recorder .recorder-notice.is-warning { border-color: #cf9c5a; background: #fff4e5; color: #704008; }
+.meeting-recorder .recorder-notice.is-error { border-color: #c67d7d; background: #fff0f0; color: #842222; }
+.meeting-recorder .recorder-notice strong { margin-right: 6px; }
+.meeting-recorder .recorder-notice:focus { outline: 3px solid currentColor; outline-offset: 2px; }
+.meeting-recorder .recorder-live-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.meeting-recorder .recorder-progress { display: grid; gap: 8px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.meeting-recorder .recorder-stage-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.meeting-recorder .recorder-stage-chip { display: inline-flex; width: fit-content; padding: 5px 10px; border-radius: 999px; background: #dceee2; color: #154634; font-size: 13px; font-weight: 700; }
+.meeting-recorder .recorder-timer { margin: 0; font-size: clamp(36px, 8vw, 58px); font-weight: 750; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.meeting-recorder .recorder-timer span { color: var(--muted); font-size: 0.38em; font-weight: 500; }
+.meeting-recorder .recorder-persisted { margin: 0; color: var(--muted); font-size: 14px; }
+.meeting-recorder .recorder-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.meeting-recorder .recorder-controls > .button:first-child { margin-right: min(3vw, 24px); }
+.meeting-recorder .recorder-stop-confirm { display: grid; gap: 12px; padding: 16px; border: 1px solid #cf9c5a; border-radius: 12px; background: #fff9f0; }
+.meeting-recorder .recorder-stop-confirm p { margin: 0; }
+.meeting-recorder .recorder-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.meeting-recorder .recorder-steps li { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 13px; font-weight: 650; }
+.meeting-recorder .recorder-steps li span { font-variant-numeric: tabular-nums; }
+.meeting-recorder .recorder-steps li[aria-current="step"] { border-color: var(--accent); background: #dceee2; color: #154634; }
+.meeting-recorder .recorder-blockers { margin: -6px 0 2px; padding-left: 22px; color: #704008; font-size: 13px; }
+.meeting-recorder .recorder-blockers li { line-height: 1.5; }
+.meeting-recorder .recorder-recovery-list { list-style: none; padding: 0; margin: 0; }
+.meeting-recorder .recorder-recovery-list li { padding: 12px 0; border-top: 1px solid var(--line); }
+.meeting-recorder .recorder-recovery-list li p { margin: 0 0 10px; overflow-wrap: anywhere; }
+.meeting-recorder .recorder-list-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.meeting-recorder .recorder-small-button { padding: 7px 11px; font-size: 13px; }
+.meeting-recorder .recorder-danger-zone { display: grid; justify-items: start; gap: 10px; margin-top: 16px; padding-top: 20px; border-top: 1px solid var(--line); }
+.meeting-recorder .recorder-danger-zone p { margin: 0; color: var(--muted); font-size: 13px; }
+.meeting-recorder .recorder-danger-button { border-color: #c67d7d; color: #842222; background: #fffafa; }
+.meeting-recorder .recorder-danger-button:hover { background: #fff0f0; }
 .review-workspace textarea { resize: vertical; line-height: 1.8; margin: 12px 0; }
 .review-workspace audio { width: 100%; margin-top: 16px; }
 .review-tabs, .review-actions, .review-list-heading { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
@@ -65,8 +106,13 @@ div.review-consent { display: block; }
 .review-progress li { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; display: flex; gap: 10px; flex-wrap: wrap; }
 .review-progress progress { width: 100%; accent-color: var(--accent); }
 .review-section { margin: 24px 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; }
+.review-section-attention { border-color: #cf9c5a; background: #fffaf3; }
+.review-section-attention:focus-within { outline: 2px solid var(--urgent); outline-offset: 2px; }
 .review-original-text { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; background: var(--bg); padding: 16px; max-height: 440px; overflow-y: auto; }
 .review-notice, .review-confirm { padding: 16px; background: #edf5f0; border-radius: 10px; }
+.review-workspace .review-warning { padding: 12px 14px; border: 1px solid #cf9c5a; border-radius: 10px; background: #fff4e5; color: #704008; line-height: 1.6; }
+.review-workspace .review-continuation { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; padding: 8px 0; }
+.review-workspace .review-continuation a { overflow-wrap: anywhere; }
 .review-confirm { margin-top: 16px; border: 1px solid var(--urgent); }
 @media (max-width: 640px) { .review-form-grid { grid-template-columns: 1fr; } .review-workspace .panel { padding: 16px; } .review-section { padding: 10px; } .review-actions .button { flex: 1 1 auto; } }
 
@@ -303,6 +349,14 @@ div.review-consent { display: block; }
 .demo-review-intro h2 { margin: 2px 0 6px; }
 .demo-review-intro p:not(.eyebrow) { margin: 0; color: var(--muted); line-height: 1.6; }
 .demo-review-intro .button { flex: 0 0 auto; }
+.demo-meeting-recorder { display: grid; gap: 16px; padding: clamp(18px, 4vw, 28px); }
+.demo-meeting-recorder label { display: grid; gap: 7px; font-size: 14px; font-weight: 800; }
+.demo-meeting-recorder select { border: 1px solid rgb(0 0 0 / 13%); border-radius: 10px; background: white; padding: 10px; color: var(--ink); }
+.demo-recorded-audio { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.demo-recorded-audio p { width: 100%; margin: 0; font-weight: 750; }
+.demo-recorded-audio audio,
+.demo-review-editor audio { width: min(100%, 440px); }
+.demo-review-editor blockquote { margin: 0; border-left: 3px solid var(--accent); padding-left: 12px; color: var(--ink); }
 .demo-sample-file-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .demo-sample-file-grid article { display: grid; gap: 10px; border: 1px solid rgb(0 0 0 / 10%); border-radius: 15px; background: white; padding: 15px; }
 .demo-sample-file-grid article[data-selected="true"] { border-color: color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent); }
@@ -3241,7 +3295,6 @@ div.review-consent { display: block; }
 
 .settings-page, .review-workspace { gap: 16px; }
 .settings-page .review-consent, .review-workspace .review-consent { font-size: 15px; }
-.review-warning { border: 1px solid #b45309; background: #fff7ed; color: #78350f; }
 .record-toggle[href] { display: grid; text-decoration: none; color: inherit; }
 
 @media (max-width: 900px) { .admin-shell .admin-demo-notice { display: flex; padding: 4px 12px; font-size: 11px; } }

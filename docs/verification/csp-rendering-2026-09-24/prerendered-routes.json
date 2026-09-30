@@ -1,0 +1,10 @@
+{
+  "staticRoutes": [
+    "/_global-error",
+    "/apple-icon.png",
+    "/icon.svg",
+    "/opengraph-image.png",
+    "/robots.txt",
+    "/sitemap.xml"
+  ]
+}

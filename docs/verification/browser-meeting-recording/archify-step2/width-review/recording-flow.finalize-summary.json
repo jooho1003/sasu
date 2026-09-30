@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "sequence",
+  "quality": "showcase",
+  "specification": {
+    "path": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\candidate.json",
+    "sha256": "59d560a5ab8493bfd6bc5bcdc195c4cd92de8af1170467f8b2f372ab36b6c50b",
+    "bytes": 4726
+  },
+  "artifact": {
+    "path": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\recording-flow.html",
+    "sha256": "068cb1a1cf6e62339c3432c8b70402e7cc9b77b836e4f55db01f002cbd19aa48",
+    "bytes": 760517
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\width-review\\recording-flow.finalize.json",
+    "summaryReceipt": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\width-review\\recording-flow.finalize-summary.json",
+    "browserCheckReceipt": "D:\\바이브코딩\\sasu\\docs\\verification\\browser-meeting-recording\\archify-step2\\width-review\\recording-flow.browser-check.json"
+  },
+  "visualReview": "not-requested",
+  "durationMs": 23992
+}

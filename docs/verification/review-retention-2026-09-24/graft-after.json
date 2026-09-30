@@ -1,0 +1,47 @@
+{
+  "query": "purgeReviewFiles",
+  "matches": [
+    {
+      "symbol": {
+        "id": "lib/pipeline/review-material.ts#purgeReviewFiles",
+        "name": "purgeReviewFiles",
+        "kind": "function",
+        "path": "lib/pipeline/review-material.ts",
+        "span": "L110-L134"
+      },
+      "hits": [
+        {
+          "id": "scripts/verify-review-retention.ts#main",
+          "relation": "calls",
+          "depth": 1,
+          "name": "main",
+          "kind": "function",
+          "path": "scripts/verify-review-retention.ts",
+          "span": "L9-L149"
+        },
+        {
+          "id": "tests/pipeline/review-material.test.ts",
+          "relation": "calls",
+          "depth": 1,
+          "name": "review-material.test.ts",
+          "kind": "file",
+          "path": "tests/pipeline/review-material.test.ts",
+          "span": "L1-L124"
+        },
+        {
+          "id": "scripts/verify-review-retention.ts",
+          "relation": "calls",
+          "depth": 2,
+          "name": "verify-review-retention.ts",
+          "kind": "file",
+          "path": "scripts/verify-review-retention.ts",
+          "span": "L1-L158"
+        }
+      ]
+    }
+  ],
+  "saved": {
+    "files": 3,
+    "baselineChars": 22678
+  }
+}

@@ -2,6 +2,8 @@
 
 상태: 일부 구현·합성 입력 검증. 실제 마이크/Meet/Zoom V01~V06 미충족. [실행 기록](../../docs/verification/browser-meeting-recording/step0.md). 원천은 PRD §3-4·§8, ADR-056, 상세 설계 §3~§4·§10.
 
+2026-09-25 후속: 입력 단절·워커 무응답·암호화 저장 사전 검사와 복구 회귀는 [후속 명세](step0-capture-recovery-20260925.md)와 [실행 기록](../../docs/verification/recording-capture-2026-09-25/README.md)을 따른다. 합성 검증만으로 실제 기기 완료를 표시하지 않는다.
+
 ## 읽을 파일
 
 - `components/ask-s4.tsx`, `components/reviewed-materials.tsx`

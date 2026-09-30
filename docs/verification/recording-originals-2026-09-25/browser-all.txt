@@ -1,0 +1,41 @@
+
+> sasu@0.1.0 e2e:recording
+> playwright test --config playwright.recording.config.ts --reporter=line
+
+
+[WebServer] (node:48056) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:37856) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+[WebServer] (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+[WebServer]   - ESM syntax in a file loaded as CommonJS (vite.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+[WebServer] Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+Running 18 tests using 1 worker
+
+
+(node:22380) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/18] tests\recording\capture-failure.spec.ts:3:5 › a silent worker disconnect stops capture, releases tracks, and recovers committed audio
+[2/18] tests\recording\capture-failure.spec.ts:38:5 › a worker error without a snapshot is shown as interrupted rather than leaving a running timer
+[3/18] tests\recording\capture.spec.ts:3:5 › real AudioWorklet/Worker records synthetic input, pauses, recovers and emits a playable WAV without uploads
+[4/18] tests\recording\capture.spec.ts:38:5 › ending a required input interrupts recording and closes all tracks
+[5/18] tests\recording\endurance.spec.ts:4:5 › 30 minutes of 48kHz samples stream to real IndexedDB with bounded retained heap
+[6/18] tests\recording\original-segments.spec.ts:8:5 › encrypted recovery creates independent WAV originals and a playable verified transcription boundary without uploads
+[7/18] tests\recording\original-segments.spec.ts:59:5 › a missing encrypted checkpoint cannot be presented as a complete original bundle
+[8/18] tests\recording\realtime-recovery.spec.ts:4:5 › three real minutes of synthetic AudioWorklet capture survive a recording-page reload
+[9/18] tests\recording\storage.spec.ts:8:5 › committed PCM survives reload, remains scoped, and detects a corrupted checkpoint
+[10/18] tests\recording\storage.spec.ts:73:5 › out-of-order/duplicate writes fail and expired/other-account drafts are removed
+[11/18] tests\recording\storage.spec.ts:97:5 › two tabs cannot record concurrently; releasing allows a new recording
+[12/18] tests\recording\storage.spec.ts:121:5 › a real IndexedDB transaction abort leaves neither a chunk nor an acknowledged header
+[13/18] tests\recording\worker-recovery.spec.ts:11:5 › input starvation ends the real worker and preserves its final encrypted partial second
+[14/18] tests\recording\worker-recovery.spec.ts:43:5 › an intentional pause longer than the watchdog window resumes without a false interruption
+[15/18] tests\recording\worker-recovery.spec.ts:75:5 › storage preflight round-trips encrypted samples and removes its probe before creating the recording
+[16/18] tests\recording\worker-recovery.spec.ts:102:5 › a quota failure writing encrypted PCM prevents recording creation
+[17/18] tests\recording\worker-recovery.spec.ts:124:5 › a decryption failure prevents ready and leaves no recording header
+[18/18] tests\recording\worker-recovery.spec.ts:143:5 › worker initialization with an unusable encryption key never signals ready
+  1 skipped
+  17 passed (1.2m)

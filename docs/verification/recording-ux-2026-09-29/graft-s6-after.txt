@@ -1,0 +1,7 @@
+Graft 실행 불가: 로컬 명령/MCP 도구 없음, Docker 엔진 소켓 없음.
+변경 후 수동 관계:
+- 이어진 기록은 components/review-detail.tsx의 nav.review-continuation.
+- 입력 과다 문구는 p.review-warning, live region 없음.
+- app/globals.css에는 .review-workspace 범위 스타일만 추가. .review-notice 공용 규칙·retention-console 사용처 유지.
+- tests/review-controls/recording-segments.spec.ts: 경고 조건·nav·390px 검증.
+Graft 그래프 결과가 아님.

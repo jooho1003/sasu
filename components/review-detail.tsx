@@ -9,22 +9,36 @@ import type {
 } from "@/lib/contracts";
 import { audioPlan, encodeMonoWav } from "@/lib/adapters/review-audio";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import { RecordingSegmentPlayer } from "@/components/recording-segment-player";
+import { recordingInputSide, type RecordingLevels } from "@/lib/recording/levels";
 
-type Detail = ReviewedMaterial & { candidate_sections: ReviewSection[] | null };
+type Detail = ReviewedMaterial & { candidate_sections: ReviewSection[] | null; original_layout?: string };
 type History = { revision: number; title: string; created_at: string };
+type OriginalSegment = { index: number; status: string };
 const time = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
-export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
+export function ReviewDetail({ deptId, id, citationSection = null }: { deptId: string; id: string; citationSection?: number | null }) {
   const router = useRouter();
   const endpoint = `/api/d/${deptId}/reviews/${id}`;
   const [review, setReview] = useState<Detail | null>(null);
   const [parts, setParts] = useState<ReviewPart[]>([]);
   const [history, setHistory] = useState<History[]>([]);
+  const [segments, setSegments] = useState<OriginalSegment[]>([]);
+  const [continuation, setContinuation] = useState<{
+    previous: { id: string; title: string } | null;
+    next: { id: string; title: string } | null;
+  }>({ previous: null, next: null });
+  const [canContinue, setCanContinue] = useState(false);
+  const [segmentSeek, setSegmentSeek] = useState<{ seconds: number; serial: number } | null>(null);
   const [title, setTitle] = useState("");
   const [sections, setSections] = useState<ReviewSection[]>([]);
+  const [attentionVisited, setAttentionVisited] = useState<string[]>([]);
+  const [attentionRequest, setAttentionRequest] = useState<{ id: string; serial: number } | null>(null);
   const [dirty, setDirty] = useState(false);
   const dirtyRef = useRef(false);
   const loadSequence = useRef(0);
+  const handledAttentionSerial = useRef(0);
+  const handledCitation = useRef<string | null>(null);
   const [editorRevision, setEditorRevision] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +48,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
   const [downloadAllowed, setDownloadAllowed] = useState(false);
   const [originalExpiresAt, setOriginalExpiresAt] = useState<string | null>(null);
   const [originalExpired, setOriginalExpired] = useState(false);
+  const levelProfile = review?.capture_metadata?.levels as RecordingLevels | undefined;
+  const clippingRatio = review?.capture_metadata?.clipping_ratio;
   const [checked, setChecked] = useState(false);
   const [destructive, setDestructive] = useState<string | null>(null);
   const audio = useRef<HTMLAudioElement>(null);
@@ -42,6 +58,17 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
     review !== null &&
     (["processing", "uploading"].includes(review.status) ||
       parts.some((part) => ["queued", "processing"].includes(part.status)));
+  const attentionSections = sections.filter((section) => section.confidence === "low" || section.boundary_review);
+  const attentionVisitedCount = attentionSections.filter((section) => attentionVisited.includes(section.id)).length;
+  const attentionIncomplete = attentionVisitedCount < attentionSections.length;
+  const visitNextAttention = () => {
+    const pending = attentionSections.find((section) => !attentionVisited.includes(section.id));
+    const current = attentionSections.findIndex((section) => section.id === attentionRequest?.id);
+    const target = pending ?? attentionSections[(current + 1) % attentionSections.length];
+    if (!target) return;
+    setQuery("");
+    setAttentionRequest((previous) => ({ id: target.id, serial: (previous?.serial ?? 0) + 1 }));
+  };
   const markDirty = () => {
     dirtyRef.current = true;
     setDirty(true);
@@ -59,6 +86,9 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       setReview(body.review);
       setParts(body.parts);
       setHistory(body.history);
+      setSegments(body.segments ?? []);
+      setContinuation(body.continuation ?? { previous: null, next: null });
+      setCanContinue(body.can_continue === true);
       setDownloadAllowed(body.original_download_allowed === true);
       setOriginalExpiresAt(body.original_expires_at ?? null);
       setOriginalExpired(!!body.original_expires_at && new Date(body.original_expires_at).getTime() <= Date.now());
@@ -85,6 +115,28 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
     );
     return () => clearTimeout(timer);
   }, [load]);
+  useEffect(() => {
+    if (!attentionRequest || handledAttentionSerial.current === attentionRequest.serial) return;
+    const index = sections.findIndex((section) => section.id === attentionRequest.id);
+    const card = index < 0 ? null : document.getElementById(`review-section-${index}`);
+    card?.scrollIntoView({ block: "center" });
+    card?.querySelector("textarea")?.focus();
+    handledAttentionSerial.current = attentionRequest.serial;
+  }, [attentionRequest, sections, query]);
+  useEffect(() => {
+    if (citationSection === null || citationSection < 0 || citationSection >= sections.length || !review) return;
+    const key = `${id}:${citationSection}`;
+    if (handledCitation.current === key) return;
+    handledCitation.current = key;
+    setQuery("");
+    requestAnimationFrame(() => {
+      const card = document.getElementById(`review-section-${citationSection}`);
+      card?.scrollIntoView({ block: "center" });
+      const play = card?.querySelector<HTMLButtonElement>("button[data-section-play]");
+      if (play && !play.disabled) play.focus({ preventScroll: true });
+      else card?.querySelector("textarea")?.focus({ preventScroll: true });
+    });
+  }, [citationSection, id, review, sections]);
   useEffect(() => {
     if (!processing) return;
     let disposed = false;
@@ -182,6 +234,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       originalRef.current = null;
       setOriginalUrl(null);
     }
+    if (action === "use_extraction") setAttentionVisited([]);
     setChecked(false);
     setDestructive(null);
     // Original deletion/cancellation changes metadata, not the unsaved draft.
@@ -231,7 +284,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
     if (!review) return;
     const storage =
       createBrowserSupabaseClient().storage.from("review-materials");
-    if (review.kind === "audio") {
+    if (review.kind === "audio" && review.original_layout !== "audio_segments") {
       const missing = parts.filter((p) => p.status === "waiting");
       if (missing.length) {
         const original = await fetchOriginal("play_original");
@@ -334,6 +387,13 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                 : "확인 필요"}
         </span>
       </header>
+      {review.original_layout === "audio_segments" && (continuation.previous || continuation.next || canContinue) ? (
+        <nav className="review-continuation" aria-label="이어진 회의 기록">
+          {continuation.previous ? <Link href={`/d/${deptId}/reviews/${continuation.previous.id}`}>← 이전 기록 · {continuation.previous.title}</Link> : null}
+          {continuation.next ? <Link href={`/d/${deptId}/reviews/${continuation.next.id}`}>다음 기록 · {continuation.next.title} →</Link> : null}
+          {canContinue && !continuation.next ? <Link href={`/d/${deptId}/reviews/record?continues=${id}`}>이 회의 이어서 녹음</Link> : null}
+        </nav>
+      ) : null}
       {error ? (
         <div className="panel" role="alert">
           <p>{error}</p>
@@ -447,7 +507,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
       <section className="panel" aria-label="보관 원본">
         <div className="review-list-heading">
           <h2>보관된 원본</h2>
-          {!originalUnavailable && (review.kind === "audio" || downloadAllowed) ? (
+          {!originalUnavailable && review.original_layout !== "audio_segments" && (review.kind === "audio" || downloadAllowed) ? (
             <button
               type="button"
               disabled={busy}
@@ -460,11 +520,15 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             >
               원본 {review.kind === "audio" ? "듣기" : "열기"}
             </button>
-          ) : (
+          ) : originalUnavailable || review.original_layout !== "audio_segments" ? (
             <span>{originalUnavailable ? "원본이 지워졌거나 보관 기한이 지났습니다" : "조직에서 원본 내려받기를 허용하지 않았습니다"}</span>
-          )}
+          ) : null}
         </div>
-        {originalUrl ? (
+        {typeof clippingRatio === "number" && clippingRatio > 0.05 ?
+          <p className="review-warning">입력이 과했습니다. 원본을 들으며 받아쓴 글을 확인해 주세요.</p> : null}
+        {review.original_layout === "audio_segments" && !originalUnavailable ? (
+          <RecordingSegmentPlayer deptId={deptId} reviewId={id} duration={review.duration ?? 0} segments={segments} downloadAllowed={downloadAllowed} seekRequest={segmentSeek} />
+        ) : originalUrl ? (
           review.kind === "audio" ? (
             <audio ref={audio} controls controlsList={downloadAllowed ? undefined : "nodownload"} src={originalUrl} preload="metadata" />
           ) : (
@@ -522,6 +586,14 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
+        {attentionSections.length > 0 ? (
+          <div className="review-warning" aria-live="polite">
+            <p>확인 필요 {attentionVisitedCount}/{attentionSections.length} 구간 확인</p>
+            <button className="button button-secondary" type="button" onClick={visitNextAttention}>
+              다음 확인 필요 구간
+            </button>
+          </div>
+        ) : null}
         <label>
           제목
           <input
@@ -537,9 +609,11 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
         </label>
         {sections.map((s, index) =>
           query && !s.text.includes(query) ? null : (
-            <article className="review-section" key={s.id}>
+            <article className={`review-section${s.confidence === "low" || s.boundary_review ? " review-section-attention" : ""}`} id={`review-section-${index}`} key={s.id}>
               <div className="review-list-heading">
                 <strong>구간 {index + 1}</strong>
+                {s.confidence === "low" ? <span className="badge badge-urgent"><span aria-hidden="true">⚠</span>낮은 신뢰</span> : null}
+                {s.boundary_review ? <span className="badge badge-urgent"><span aria-hidden="true">⚠</span>경계 확인 필요</span> : null}
                 <span className="badge badge-neutral">
                   {s.origin === "user"
                     ? "사용자 추가"
@@ -550,12 +624,20 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                         : "꺼낸 글"}
                 </span>
                 <span>{s.location ?? "위치 정보 없음"}</span>
+                {levelProfile && s.start_seconds !== null && s.end_seconds !== null &&
+                  recordingInputSide(levelProfile, s.start_seconds, s.end_seconds) ?
+                  <span className="badge badge-neutral">{recordingInputSide(levelProfile, s.start_seconds, s.end_seconds)}</span> : null}
                 {s.start_seconds !== null ? (
                   <button
                     className="button button-ghost"
                     type="button"
+                    data-section-play
                     disabled={busy || originalUnavailable}
-                    onClick={() =>
+                    onClick={() => {
+                      if (review.original_layout === "audio_segments") {
+                        setSegmentSeek((current) => ({ seconds: s.start_seconds!, serial: (current?.serial ?? 0) + 1 }));
+                        return;
+                      }
                       void perform(async () => {
                         if (!originalRef.current) await openOriginal();
                         setTimeout(() => {
@@ -568,8 +650,8 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                               );
                           }
                         }, 100);
-                      })
-                    }
+                      });
+                    }}
                   >
                     {time(s.start_seconds)}부터 듣기
                   </button>
@@ -581,6 +663,10 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
                 rows={Math.min(14, Math.max(4, Math.ceil(s.text.length / 70)))}
                 maxLength={20000}
                 disabled={processing || busy}
+                onFocus={() => {
+                  if (s.confidence === "low" || s.boundary_review)
+                    setAttentionVisited((previous) => previous.includes(s.id) ? previous : [...previous, s.id]);
+                }}
                 onChange={(e) => {
                   setSections((old) =>
                     old.map((v) =>
@@ -667,7 +753,7 @@ export function ReviewDetail({ deptId, id }: { deptId: string; id: string }) {
           <input
             type="checkbox"
             checked={checked}
-            disabled={dirty || processing}
+            disabled={dirty || processing || attentionIncomplete}
             onChange={(e) => setChecked(e.target.checked)}
           />
           전문과 빠짐·오류를 확인했습니다. 이 버전을{" "}

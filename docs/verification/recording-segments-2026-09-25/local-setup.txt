@@ -1,0 +1,3 @@
+applied 0056_review_recording_sessions.sql
+applied 0057_review_recording_segments.sql
+local review QA ready; real transcription key present: true

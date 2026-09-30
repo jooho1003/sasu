@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "sequence",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\csp-rendering-2026-09-24\\rendering-flow.json",
+  "output": "D:\\바이브코딩\\sasu\\docs\\verification\\csp-rendering-2026-09-24\\rendering-flow.html",
+  "specification": {
+    "sha256": "e1b7947e4d3abb8b9e9459e11d3f95360f0d194a79b64030c8737f2d68c1fe4f",
+    "bytes": 1862
+  },
+  "artifact": {
+    "sha256": "b07ed15ad2181a4168c88cab21f3299a0a921299fbb73a7e862548b12c798e25",
+    "bytes": 802880
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

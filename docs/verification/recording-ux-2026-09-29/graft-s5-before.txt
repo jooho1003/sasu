@@ -1,0 +1,7 @@
+Graft 실행 불가: 로컬 graft 명령 없음, 기존 격리 Docker 엔진 소켓 없음(이전 step 확인).
+수동 관계 확인 (변경 전 git grep):
+- ReviewedMaterials 사용: app/(auth)/d/[dept]/reviews/page.tsx
+- review_org_settings 사용: app/api/d/[dept]/reviews/[id]/route.ts
+- 녹음 진입: components/reviewed-materials.tsx, components/review-detail.tsx, app/(auth)/d/[dept]/reviews/record/page.tsx
+- app/demo/**에는 ReviewedMaterials 사용처 없음. 데모 목록은 별도 응답을 사용.
+Graft 그래프·callers 결과가 아님.

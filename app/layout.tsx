@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
+import { connection } from "next/server";
 
 import { metadataBase } from "@/lib/site";
 
@@ -45,11 +46,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // CSP nonces belong to one request, including public/demo and not-found HTML.
+  // Unlike force-dynamic, this does not change explicit data-cache policies.
+  await connection();
   return (
     <html lang="ko" className={bodyFont.variable} data-scroll-behavior="smooth">
       <body>{children}</body>

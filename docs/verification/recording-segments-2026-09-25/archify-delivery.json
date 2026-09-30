@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "sequence",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\recording-segments-2026-09-25\\segments-flow.json",
+  "output": "D:\\바이브코딩\\sasu\\docs\\verification\\recording-segments-2026-09-25\\segments-flow.html",
+  "specification": {
+    "sha256": "a4ed2e6f6ad58a9ad4f259bad58501e24f872a3aecb2381042404495c81b573e",
+    "bytes": 2677
+  },
+  "artifact": {
+    "sha256": "34d046d65963f1626dd700825b73551c2eba3963e8fb57e854893d3ed061ba2a",
+    "bytes": 808402
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

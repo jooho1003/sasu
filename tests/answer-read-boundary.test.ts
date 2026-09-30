@@ -37,4 +37,13 @@ describe("저장 답변 재열람 경계", () => {
     const body = await read();
     expect(body.citations[0].occurred_at).toBe("2026-09-15T00:00:00Z");
   });
+  it("RLS로 허용된 녹음만 인용 칩에서 구간으로 이동한다", async () => {
+    const item = { id: "i1", source_id: "source-1", external_ref: "review-section-0", content: "공개 사실", deleted_at: null, sources: { kind: "document", external_id: "doc", title: "회의 기록" } };
+    const review = { id: "review-1", published_source_id: "source-1", kind: "audio", revision: 1, published_revision: 1,
+      original_uploaded: true, original_deleted_at: null, deleted_at: null, sections: [{ text: "공개 사실", start_seconds: 65, confidence: "low", boundary_review: false }] };
+    mocks.from.mockImplementation((table: string) => query(table === "answers" ? answer : table === "citations" ? [{ item_id: "i1", quote: "공개 사실", decision_id: null }] : table === "items" ? [item] : [review]));
+    expect((await read()).citations[0]).toMatchObject({ href: "/d/dept-1/reviews/review-1?section=0", low_confidence: true });
+    mocks.from.mockImplementation((table: string) => query(table === "answers" ? answer : table === "citations" ? [{ item_id: "i1", quote: "공개 사실", decision_id: null }] : table === "items" ? [item] : []));
+    expect((await read()).citations[0].href).toBe("/d/dept-1/evidence/i1?answer=answer-1");
+  });
 });

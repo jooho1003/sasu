@@ -36,6 +36,14 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await page.setViewportSize(viewport);
     const writes: string[] = [];
     const errors: string[] = [];
+    const violations: string[] = [];
+    await page.exposeFunction("observeGuestCsp", (directive: string) => violations.push(directive));
+    await page.addInitScript(() => {
+      document.addEventListener("securitypolicyviolation", event => {
+        const observe = Reflect.get(window, "observeGuestCsp") as (directive: string) => Promise<void>;
+        void observe(`${event.effectiveDirective}:${event.disposition}`);
+      });
+    });
     const appOrigin = new URL(String(testInfo.project.use.baseURL)).origin;
     page.on("request", request => {
       if (
@@ -81,6 +89,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await testInfo.attach(`guest-${viewport.width}`, { path: screenshotPath, contentType: "image/png" });
     expect(writes).toEqual([]);
     expect(errors).toEqual([]);
+    expect(violations).toEqual([]);
   });
 }
 

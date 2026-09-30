@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "녹음 전사 창 순차 처리",
+    "output": "docs/verification/browser-meeting-recording/step4b3-transcription.html",
+    "viewBox": [
+      1008,
+      650
+    ],
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "standard"
+  },
+  "participants": [
+    {
+      "id": "recording",
+      "type": "external",
+      "label": "녹음 원본"
+    },
+    {
+      "id": "jobs",
+      "type": "messagebus",
+      "label": "작업 대기열"
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "전사 워커"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "자료 DB"
+    },
+    {
+      "id": "groq",
+      "type": "cloud",
+      "label": "Groq Whisper"
+    },
+    {
+      "id": "reviewer",
+      "type": "external",
+      "label": "검토자"
+    }
+  ],
+  "segments": [
+    {
+      "from": 145,
+      "to": 265,
+      "label": "선행 창 대기"
+    },
+    {
+      "from": 270,
+      "to": 475,
+      "label": "첫 창 처리와 다음 창 예약"
+    },
+    {
+      "from": 480,
+      "to": 585,
+      "label": "실패·재추출"
+    }
+  ],
+  "messages": [
+    {
+      "from": "jobs",
+      "to": "worker",
+      "y": 160,
+      "label": "뒤 창 job 먼저 도착",
+      "variant": "default"
+    },
+    {
+      "from": "worker",
+      "to": "db",
+      "y": 189,
+      "label": "claim: 앞 창 done?",
+      "variant": "emphasis"
+    },
+    {
+      "from": "db",
+      "to": "worker",
+      "y": 218,
+      "label": "아니오 → claim 없음",
+      "variant": "return"
+    },
+    {
+      "from": "worker",
+      "to": "jobs",
+      "y": 247,
+      "label": "LLM 호출 없이 종료",
+      "variant": "dashed"
+    },
+    {
+      "from": "jobs",
+      "to": "worker",
+      "y": 276,
+      "label": "첫 창 job 도착",
+      "variant": "default"
+    },
+    {
+      "from": "worker",
+      "to": "db",
+      "y": 305,
+      "label": "claim: 동의·원본·lease 확인",
+      "variant": "emphasis"
+    },
+    {
+      "from": "worker",
+      "to": "recording",
+      "y": 334,
+      "label": "현재·다음 원본 읽기",
+      "variant": "default"
+    },
+    {
+      "from": "worker",
+      "to": "groq",
+      "y": 363,
+      "label": "60초 창 + 1초 겹침 전사",
+      "variant": "default"
+    },
+    {
+      "from": "groq",
+      "to": "worker",
+      "y": 392,
+      "label": "단어·구간 시각 (메모리)",
+      "variant": "return"
+    },
+    {
+      "from": "worker",
+      "to": "db",
+      "y": 421,
+      "label": "마스킹 sections + 마지막 단어 끝 숫자",
+      "variant": "emphasis"
+    },
+    {
+      "from": "db",
+      "to": "jobs",
+      "y": 450,
+      "label": "앞 창 완료 후 다음 창 재예약",
+      "variant": "emphasis"
+    },
+    {
+      "from": "jobs",
+      "to": "worker",
+      "y": 479,
+      "label": "다음 창: 이전 끝 시각으로 중복 제거",
+      "variant": "default"
+    },
+    {
+      "from": "db",
+      "to": "jobs",
+      "y": 508,
+      "label": "실패·철회: 다음 창 예약 없음",
+      "variant": "dashed"
+    },
+    {
+      "from": "reviewer",
+      "to": "db",
+      "y": 537,
+      "label": "재추출 승인",
+      "variant": "default"
+    },
+    {
+      "from": "db",
+      "to": "jobs",
+      "y": 566,
+      "label": "경계 시각 초기화 + 처음부터 예약",
+      "variant": "emphasis"
+    }
+  ]
+}

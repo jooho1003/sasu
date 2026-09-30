@@ -1,12 +1,16 @@
 import * as storage from "../../lib/recording/browser/storage";
 import * as checkpointCrypto from "../../lib/recording/checkpoint-crypto";
+import * as originalSegments from "../../lib/recording/original-segments";
 import { startRecording } from "../../lib/recording/browser/capture";
 import { captureInputs, stopInputs } from "../../lib/recording/browser/inputs";
 import { pcmWav } from "../../lib/recording/pcm";
 import { RecordingSession } from "../../lib/recording/session";
 
 // Test harness only: this synthetic identity is never accepted by app/API routes.
-Object.assign(window, { recordingLab: { ...storage, ...checkpointCrypto, RecordingSession } });
+Object.assign(window, { recordingLab: {
+  ...storage, ...checkpointCrypto, ...originalSegments, RecordingSession,
+  createStorageWorker: () => new Worker(new URL("../../lib/recording/browser/storage.worker.ts", import.meta.url), { type: "module" }),
+} });
 document.querySelector("#status")!.textContent = "검증 준비 완료";
 
 const status = document.querySelector("#status")!;
@@ -114,12 +118,36 @@ button("합성 입력 시작", start);
 controls.append(document.createElement("hr"));
 button("일시정지", () => { recorder?.pause(); });
 button("재개", async () => { await recorder?.resume(); });
-button("종료", async () => { await recorder?.stop(); recorder = undefined; });
+button("종료", async () => {
+  const current = recorder;
+  await current?.stop();
+  Object.assign(window, { labProfile: current?.profile() ?? [], labHealth: current?.health() ?? null });
+  recorder = undefined;
+});
 button("입력 종료 시험", () => {
   const track = streams[0]?.getAudioTracks()[0];
   track?.stop();
   // stop() itself does not dispatch ended; simulate the browser's device loss.
   track?.dispatchEvent(new Event("ended"));
+});
+button("마이크 분리 시험", () => {
+  const track = streams[streams.length - 1]?.getAudioTracks()[0];
+  track?.stop();
+  track?.dispatchEvent(new Event("ended"));
+});
+button("마이크 다시 선택", () => {
+  if (!recorder || !synthesizer) throw new Error("녹음 중이 아닙니다.");
+  const oscillator = synthesizer.createOscillator();
+  oscillator.frequency.value = 660;
+  const gain = synthesizer.createGain();
+  gain.gain.value = 0.2;
+  const destination = synthesizer.createMediaStreamDestination();
+  oscillator.connect(gain).connect(destination);
+  oscillator.start();
+  void recorder.replaceMicrophone(destination.stream).then(() => {
+    streams[streams.length - 1] = destination.stream;
+    recorder?.resume();
+  });
 });
 button("확인 구간 복구", async () => {
   if (recorder || starting) throw new Error("먼저 녹음을 종료하세요.");
@@ -140,6 +168,20 @@ button("확인 구간 복구", async () => {
     const download = document.querySelector<HTMLAnchorElement>("#download")!;
     download.href = playbackUrl;
     download.hidden = false;
+  } finally { store.close(); }
+});
+button("원본 구간 검사", async () => {
+  if (recorder || starting || testingInput) throw new Error("먼저 현재 작업을 종료하세요.");
+  const store = await storage.openRecordingStore(await labKey());
+  try {
+    const recovery = await store.inspect(scope());
+    if (!recovery?.samples) throw new Error("검사할 확인 구간이 없습니다.");
+    if (recovery.partial) throw new Error("일부 구간이 손상됐습니다. 부분 기록을 확인한 뒤 다시 준비해야 합니다.");
+    const prepared = await originalSegments.prepareRecordingOriginalManifest(store.read(scope()), recovery.samples);
+    status.textContent = JSON.stringify({
+      stage: "원본 구간 검사 완료", ...originalSegments.recordingManifestTotals(prepared.manifest),
+      ...prepared, interrupted: recovery.interrupted, transmitted: false,
+    }, null, 2);
   } finally { store.close(); }
 });
 button("로컬 원본 폐기", async () => {

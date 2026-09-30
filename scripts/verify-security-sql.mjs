@@ -14,6 +14,9 @@ import { verifyNotionBulkLaneSql } from "./verify-notion-bulk-lane-sql.mjs";
 import { verifyNotionPollSql } from "./verify-notion-poll-sql.mjs";
 import { verifyReviewedMaterialsSql } from "./verify-reviewed-materials-sql.mjs";
 import { verifyReviewAccessSql } from "./verify-review-access-sql.mjs";
+import { verifyRecordingSessionsSql } from "./verify-recording-sessions-sql.mjs";
+import { verifyRecordingSegmentsSql } from "./verify-recording-segments-sql.mjs";
+import { verifyReviewUploadTimeoutSql } from "./verify-review-upload-timeout-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
 // node scripts/verify-security-sql.mjs <temporary-directory>
@@ -142,6 +145,11 @@ try {
   for (const file of migrations.filter(name => name > boundaryMigration && name < orgAdminMigration)) {
     await db.exec(readFileSync(resolve("supabase/migrations", file), "utf8"));
   }
+  // Reproduce the explicit API grants observed on these legacy functions in
+  // production. REVOKE FROM PUBLIC alone does not remove direct role grants.
+  await db.exec(`grant execute on function public.can_see(uuid,uuid,text),
+    public.enqueue_decision_embedding(),public.guard_active_item_source()
+    to anon,authenticated,service_role`);
   // Supabase grants newly created public functions to API roles by default.
   // Reproduce that before 0026 so its explicit four-role REVOKEs are tested.
   await db.exec("alter default privileges in schema public grant all on functions to anon, authenticated, service_role");
@@ -170,6 +178,19 @@ try {
       } finally { await db.exec("rollback"); }
     }
   }
+  await check("visibility helper rejects anonymous execution even with legacy direct grants", async () => {
+    assert.equal((await q("select has_function_privilege('anon','public.can_see(uuid,uuid,text)','execute') allowed")).rows[0].allowed, false);
+    await db.exec("set role anon");
+    try { await denied("select public.can_see($1,$2,'dept')", [ids.lead, ids.dept]); }
+    finally { await db.exec("reset role"); }
+    for (const role of ["authenticated", "service_role"])
+      assert.equal((await q("select has_function_privilege($1,'public.can_see(uuid,uuid,text)','execute') allowed", [role])).rows[0].allowed, true);
+  });
+  await check("internal trigger functions have no direct API execution grants", async () => {
+    for (const name of ["public.enqueue_decision_embedding()", "public.guard_active_item_source()"])
+      for (const role of ["anon", "authenticated", "service_role"])
+        assert.equal((await q("select has_function_privilege($1,$2,'execute') allowed", [role, name])).rows[0].allowed, false, `${role} ${name}`);
+  });
   await check("0017 backfills card and direct decision visibility from their evidence", async () => {
     const rows = await q("select id,visibility from decisions where id in ($1,$2) order by id", [backfillIds.cardDecision,backfillIds.directDecision]);
     assert.equal(rows.rows.length, 2);
@@ -1085,6 +1106,34 @@ try {
   await verifyReviewAccessSql({ db, q, check, asUser });
   await verifyRetroSql({ db, q, check, asUser });
   await verifyRetroConnectionsSql({ db, q, check, asUser });
+  await verifyRecordingSessionsSql({ db, q, check, asUser });
+  await verifyRecordingSegmentsSql({ db, q, check, asUser });
+  await verifyReviewUploadTimeoutSql({ q, check, asUser, ids });
+  const glossaryIds = { dept: randomUUID(), lead: randomUUID(), member: randomUUID() };
+  await q("insert into departments(id,org_id,name) values($1,$2,'Glossary QA')", [glossaryIds.dept,ids.org]);
+  await q("insert into auth.users(id) values($1),($2)", [glossaryIds.lead,glossaryIds.member]);
+  await q("insert into members(user_id,dept_id,role,display_name,consented_at) values($1,$3,'lead','Glossary lead',now()),($2,$3,'member','Glossary member',now())", [glossaryIds.lead,glossaryIds.member,glossaryIds.dept]);
+  await check("department glossary: lead edits, member reads, other department sees no terms", async () => {
+    let termId;
+    await asUser(glossaryIds.lead, async () => {
+      termId = (await q("select save_dept_glossary($1,null,'사수',null,'결정 지원') id", [glossaryIds.dept])).rows[0].id;
+      assert.ok(termId);
+    });
+    await asUser(glossaryIds.member, async () => {
+      assert.equal((await q("select term from dept_glossaries where dept_id=$1", [glossaryIds.dept])).rows.length, 1);
+      await denied("select save_dept_glossary($1,null,'위조',null,null)", [glossaryIds.dept]);
+      await denied("insert into dept_glossaries(dept_id,term,created_by) values($1,'위조',$2)", [glossaryIds.dept,glossaryIds.member]);
+    });
+    await asUser(adminIds.leadY, async () => {
+      assert.equal((await q("select term from dept_glossaries where dept_id=$1", [glossaryIds.dept])).rows.length, 0);
+    });
+  });
+  await check("department glossary: duplicate and personal data are rejected before storage", async () => {
+    await asUser(glossaryIds.lead, async () => {
+      await assert.rejects(() => q("select save_dept_glossary($1,null,'사수',null,null)", [glossaryIds.dept]), error => error.code === "23505");
+      await assert.rejects(() => q("select save_dept_glossary($1,null,'qa@example.com',null,null)", [glossaryIds.dept]), error => error.code === "22023");
+    });
+  });
   console.log(JSON.stringify({ passed, failed: 0, matrix: { organizations:4, departments:12, actors:24, items:72, assertions:matrixAssertions }, database: "isolated PGlite", excluded: ["0004_worker_cron.sql (pg_cron/pg_net not available)"] }));
 } finally {
   await db.close();

@@ -2,12 +2,12 @@
   "project": "sasu",
   "phase": "23-browser-meeting-recording",
   "steps": [
-    { "step": 4, "name": "security-and-accuracy-hardening", "status": "pending", "progress": "partial", "note": "4-A privacy/report-only headers plus access tickets, audit, rate limits, org settings and original retention implemented locally. Docker restored: real local Storage 8 checks and authenticated browser access E2E 1 pass; SQL 173 + matrix 2016 and mocked component browser 8 pass. Latest combined suite 1101 unit tests, lint/build pass. Production verification, real retention purge, provider key linkage/opt-out, CSP enforcement and recording gates remain. See access-controls-2026-09-18.md. 4-B runs after step 2." },
-    { "step": 0, "name": "capture-and-recovery-validation", "status": "pending", "progress": "partial", "note": "Synthetic capture/storage validation only; no real inputs until SEC-06. Hardware V01-V06 remain incomplete." },
-    { "step": 1, "name": "segmented-originals-and-rls", "status": "pending", "progress": "partial", "note": "SEC-06 기반 완료: AES-GCM 로컬 체크포인트, HKDF 키 파생, 세션/RLS 검증용 recording_key_context RPC와 /recordings/[id]/key 라우트 구현. 녹음 세션 생성 시점이 상세 설계에 빠져 실제 영속 녹음 연결은 보류." },
-    { "step": 2, "name": "recording-review-flow", "status": "pending" },
-    { "step": 3, "name": "demo-and-regression", "status": "pending" }
+    { "step": 4, "name": "security-and-accuracy-hardening", "status": "pending", "progress": "local_implementation_complete", "note": "2026-09-29: 4-B1~B5 전사·검토·인용 위치, 4-B6 검증 후 문서 병합, 4-B7 용어집(0064), 4-B8 측정 계산기를 로컬 검증. V13 제공사, V14 운영 CSP, V16 실제 모델 문서, V20 실기기 정량 수치·운영 반영은 대기.", "verification": "docs/verification/browser-meeting-recording/README.md" },
+    { "step": 0, "name": "capture-and-recovery-validation", "status": "pending", "progress": "partial", "note": "2026-09-29: Web Locks·세션/키 선행·암호화 저장·합성 30분·복구를 로컬 검증. 실제 Windows 마이크 5초 트랙만 확인됐으며 V01~V06의 기기별 마이크/시스템 소리·절전/복구 실측은 대기.", "verification": "docs/verification/browser-meeting-recording/README.md" },
+    { "step": 1, "name": "segmented-originals-and-rls", "status": "pending", "progress": "local_implementation_complete", "note": "0059~0063 세션·구간 원본·검증·순차 전사를 로컬 DB/Storage·격리 SQL로 검증. 운영 적용은 실기기 게이트와 사용자 승인 대기.", "verification": "docs/verification/browser-meeting-recording/step1.md" },
+    { "step": 2, "name": "recording-review-flow", "status": "pending", "progress": "local_implementation_complete", "note": "녹음·검토 UI, 입력 프로파일, 이어 녹음, 구간 재생·재시도, 현재 코드의 격리 로컬 제품 E2E 9/9 통과. 실제 시스템 소리/macOS/모바일 검증은 대기.", "verification": "docs/verification/browser-meeting-recording/product-e2e-20260929.md" },
+    { "step": 3, "name": "demo-and-regression", "status": "pending", "progress": "local_implementation_complete", "note": "공유 데모 메모리 녹음·합성 예시·DB 무쓰기와 현재 코드의 격리 로컬 제품/데모 E2E 9/9 통과. 운영 반영은 대기.", "verification": "docs/verification/browser-meeting-recording/product-e2e-20260929.md" }
   ],
   "production_deployed": false,
-  "design": "docs/planning/웹회의_녹음_설계.md"
+  "design": "docs/02-design/features/browser-meeting-recording.design.md"
 }

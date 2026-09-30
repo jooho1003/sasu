@@ -2,8 +2,8 @@
   "browser": "153.0.8010.12",
   "platform": "win32",
   "accelerated": true,
-  "beforeHeap": 1658996,
-  "afterHeap": 1816120,
+  "beforeHeap": 5372940,
+  "afterHeap": 5530316,
   "snapshot": {
     "state": "stopped",
     "samples": 28800000,
@@ -16,8 +16,18 @@
     "chunks": 1800,
     "expectedSamples": 28800000,
     "partial": false,
+    "paused": false,
     "interrupted": false,
-    "createdAt": 1789907429305
+    "createdAt": 1790690437537,
+    "levelVectors": [],
+    "captureHealth": {
+      "clipping_ratio": 0,
+      "checkpoint_delays": 0,
+      "max_pending_samples": 0,
+      "backlog_stops": 0,
+      "max_sample_wall_gap_ms": 0,
+      "microphone_reselects": 0
+    }
   },
   "largestCheckpoint": 32000,
   "warningAt29": true,

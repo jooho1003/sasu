@@ -1,0 +1,23 @@
+PASS 0028 rollback removes assessment only at its migration boundary
+PASS 0027 rollback restores the exact 0026 overview contract
+PASS 0026 manual rollback removes the complete organization admin surface at its migration boundary
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+true !== false
+
+    at file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/scripts/verify-security-sql.mjs:175:12
+    at async check (file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/scripts/verify-security-sql.mjs:74:3)
+    at async file:///D:/%EB%B0%94%EC%9D%B4%EB%B8%8C%EC%BD%94%EB%94%A9/sasu/scripts/verify-security-sql.mjs:174:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: true,
+  expected: false,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.18.0

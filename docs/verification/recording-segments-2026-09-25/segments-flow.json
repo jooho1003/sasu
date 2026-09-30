@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "사수 · 녹음 저장·구간 확인·받아쓰기",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [1050, 560]
+  },
+  "participants": [
+    { "id": "screen", "type": "frontend", "label": "녹음 화면", "sublabel": "동의한 부서장" },
+    { "id": "api", "type": "backend", "label": "세션 API", "sublabel": "사용자 세션" },
+    { "id": "db", "type": "database", "label": "녹음 · 자료 SQL", "sublabel": "권한 · 상태" },
+    { "id": "storage", "type": "cloud", "label": "비공개 저장소", "sublabel": "구간 원본" },
+    { "id": "verifyWorker", "type": "backend", "label": "확인 워커", "sublabel": "서버 전용" },
+    { "id": "transcribeWorker", "type": "backend", "label": "받아쓰기 워커", "sublabel": "서버 전용" }
+  ],
+  "messages": [
+    { "id": "save-request", "from": "screen", "to": "api", "y": 165, "label": "저장 요청 · 구간 목록 전송" },
+    { "id": "validate-consent", "from": "api", "to": "db", "y": 190, "label": "동의 · 스위치 확인 · 목록 지문 다시 계산", "variant": "security" },
+    { "id": "issue-paths", "from": "db", "to": "api", "y": 218, "label": "자료 · 구간 행 · 발급 경로 반환", "variant": "return" },
+    { "id": "upload-segment", "from": "screen", "to": "storage", "y": 246, "label": "발급 경로로 구간 업로드 · 녹음자만", "variant": "security" },
+    { "id": "finalize-request", "from": "screen", "to": "api", "y": 274, "label": "확인 요청" },
+    { "id": "schedule-verify", "from": "api", "to": "db", "y": 299, "label": "구간마다 확인 작업 예약" },
+    { "id": "read-segment", "from": "verifyWorker", "to": "storage", "y": 324, "label": "구간 읽기 · 헤더 · 크기 · 해시 대조" },
+    { "id": "record-result", "from": "verifyWorker", "to": "db", "y": 352, "label": "결과 기록 · 다르면 같은 번호 새 시도", "variant": "dashed" },
+    { "id": "schedule-transcribe", "from": "db", "to": "transcribeWorker", "y": 380, "label": "모든 구간 확인 때 한 번만 받아쓰기 예약", "variant": "security" },
+    { "id": "read-window", "from": "transcribeWorker", "to": "storage", "y": 408, "label": "원본 두 구간 읽기 · 61초 창은 메모리에서" },
+    { "id": "segment-access", "from": "screen", "to": "api", "y": 433, "label": "구간 재생 · 구간마다 1회용 접근권", "variant": "security" },
+    { "id": "purge-on-exit", "from": "db", "to": "storage", "y": 458, "label": "폐기 · 만료 · 철회 시 모든 시도와 늦은 객체 파기", "variant": "dashed" }
+  ]
+}

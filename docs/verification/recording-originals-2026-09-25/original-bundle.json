@@ -1,0 +1,57 @@
+{
+  "browser": "153.0.8010.12",
+  "platform": "win32",
+  "synthetic": true,
+  "networkWrites": 0,
+  "audio": {
+    "duration": 61,
+    "error": null,
+    "bytes": 1952044,
+    "beforeBoundary": 4000,
+    "afterBoundary": -4000,
+    "fingerprint": "2ce6a33aa0d673e5722cdf1a72d0e2792672529e1bd18e86d499cd7430d52ce7",
+    "manifest": {
+      "version": 1,
+      "segments": [
+        {
+          "index": 0,
+          "sample_count": 960000,
+          "bytes": 1920044,
+          "sha256": "7b2362f0ad325243decd901a95ebec9452809c9b3b063445d4beb55c94e0ed5e"
+        },
+        {
+          "index": 1,
+          "sample_count": 16073,
+          "bytes": 32190,
+          "sha256": "d6a35fd9ea1d962668086e2805efa9a030a80575a97cc83e906dc4a11663ae5e"
+        }
+      ]
+    }
+  },
+  "prepared": {
+    "stage": "원본 구간 검사 완료",
+    "samples": 976073,
+    "bytes": 1952234,
+    "durationSeconds": 61.0045625,
+    "manifest": {
+      "version": 1,
+      "segments": [
+        {
+          "index": 0,
+          "sample_count": 960000,
+          "bytes": 1920044,
+          "sha256": "7b2362f0ad325243decd901a95ebec9452809c9b3b063445d4beb55c94e0ed5e"
+        },
+        {
+          "index": 1,
+          "sample_count": 16073,
+          "bytes": 32190,
+          "sha256": "d6a35fd9ea1d962668086e2805efa9a030a80575a97cc83e906dc4a11663ae5e"
+        }
+      ]
+    },
+    "fingerprint": "2ce6a33aa0d673e5722cdf1a72d0e2792672529e1bd18e86d499cd7430d52ce7",
+    "interrupted": false,
+    "transmitted": false
+  }
+}

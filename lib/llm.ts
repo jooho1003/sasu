@@ -457,12 +457,52 @@ export type AudioTranscriptionInput = {
   bytes: Uint8Array;
   filename: string;
   mimeType: string;
+  // Word timestamps add latency; the short ASK path keeps the JSON default.
+  includeTimestamps?: boolean;
+  // The caller owns Groq's 224-token prompt budget (future glossary path).
+  prompt?: string;
 };
+
+export type AudioTranscriptionSegment = {
+  text: string;
+  start: number;
+  end: number;
+  avg_logprob: number | null;
+  no_speech_prob: number | null;
+};
+
+export type AudioTranscriptionWord = { word: string; start: number; end: number };
+
+export type AudioTranscriptionData = {
+  text: string;
+  segments: AudioTranscriptionSegment[];
+  words: AudioTranscriptionWord[];
+};
+
+const transcriptionTime = z.number().finite().nonnegative();
+const transcriptionSegment = z.object({
+  text: z.string(),
+  start: transcriptionTime,
+  end: transcriptionTime,
+  avg_logprob: z.number().finite().nullable().optional(),
+  no_speech_prob: z.number().finite().min(0).max(1).nullable().optional(),
+}).refine((segment) => segment.end >= segment.start);
+const transcriptionWord = z.object({
+  word: z.string(),
+  start: transcriptionTime,
+  end: transcriptionTime,
+}).refine((word) => word.end >= word.start);
+const timestampedTranscription = z.object({
+  segments: z.array(transcriptionSegment),
+  words: z.array(transcriptionWord),
+});
 
 async function transcribeAudio(
   input: AudioTranscriptionInput,
   opts?: LlmOptions,
-): Promise<LlmResult<{ text: string }>> {
+): Promise<LlmResult<AudioTranscriptionData>> {
+  const prompt = input.prompt?.trim();
+  if (prompt) assertPromptIsMasked({ system: "", user: prompt });
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     throw new LlmGatewayError(
@@ -488,7 +528,9 @@ async function transcribeAudio(
           file,
           model: TRANSCRIPTION_MODEL,
           language: "ko",
-          response_format: "json",
+          response_format: input.includeTimestamps ? "verbose_json" : "json",
+          ...(input.includeTimestamps ? { timestamp_granularities: ["word", "segment"] as const } : {}),
+          ...(prompt ? { prompt } : {}),
           temperature: 0,
         });
         break;
@@ -500,15 +542,29 @@ async function transcribeAudio(
       }
     }
 
-    const text = transcription?.text?.trim() ?? "";
+    const text = typeof transcription?.text === "string" ? transcription.text.trim() : "";
     if (!text) {
       throw new LlmGatewayError(
         "음성에서 질문을 확인하지 못했습니다.",
         "voice_transcription_empty",
       );
     }
+    let segments: AudioTranscriptionSegment[] = [];
+    let words: AudioTranscriptionWord[] = [];
+    if (input.includeTimestamps) {
+      const parsed = timestampedTranscription.safeParse(transcription);
+      if (!parsed.success) throw new SchemaInvalidError();
+      segments = parsed.data.segments.map((segment) => ({
+        text: segment.text,
+        start: segment.start,
+        end: segment.end,
+        avg_logprob: segment.avg_logprob ?? null,
+        no_speech_prob: segment.no_speech_prob ?? null,
+      }));
+      words = parsed.data.words;
+    }
     return {
-      data: { text },
+      data: { text, segments, words },
       meta: {
         model: TRANSCRIPTION_MODEL,
         inputTokens: 0,

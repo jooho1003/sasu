@@ -1,0 +1,13 @@
+Step 3 implementation-after relationship check (2026-09-29)
+
+Graft build/grep unavailable for the same reason recorded in graft-s3-before.txt. The following is a manual source search, not a Graft graph.
+
+Manual Select-String after editing:
+- components/meeting-recorder.tsx:679: both radios use `name="recording-mode"`; changing modes clears the prior test result.
+- components/meeting-recorder.tsx:688,702: test/live meters have accessible input names and render 15-sample signal state.
+- components/meeting-recorder.tsx:713: open-session danger zone explains and separates `녹음 폐기`.
+- components/meeting-recorder.tsx:722: recovery row has styled `확인하고 저장` and danger `녹음 폐기`.
+- tests/review-controls/meeting-recorder.spec.ts:97-106: recovery and no-discard return assertions use the new label.
+- tests/e2e/recording-product.spec.ts: no matching label dependency.
+
+Repo-wide `git grep -n -e '녹음 이어서 확인' -e '확인하고 저장' -- ':!docs' ':!phases'` found the new label only in MeetingRecorder and its review-controls tests; no old application/test code reference remained. Changed imports are limited to existing recorder-copy pure functions. No server route, storage, database or job edge changed.

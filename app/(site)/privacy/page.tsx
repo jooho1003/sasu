@@ -12,7 +12,7 @@ const processors = [
 
 export default function PrivacyPage() {
   return (
-    <main className="mx-auto grid w-full max-w-4xl gap-10 px-5 py-16 sm:px-8">
+    <main className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-10 px-5 py-16 sm:px-8">
       <header className="grid gap-4"><p data-meta className="m-0 text-sm text-[var(--urgent)]">법률 검토 전 초안 · 2026-09-19</p><h1 className="m-0 text-4xl sm:text-6xl">개인정보 처리 안내</h1><p className="m-0 max-w-3xl leading-7 text-[var(--muted)]">사수 파일럿에서 어떤 정보를 왜 처리하는지 설명합니다. 실제 도입 전 고객사 정책과 법률 검토 결과에 따라 갱신됩니다.</p></header>
       <aside className="rounded-2xl border border-black/10 bg-surface p-5 leading-7" aria-labelledby="privacy-summary">
         <h2 id="privacy-summary" className="mt-0">쉬운 요약</h2>
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         </ul>
         <p className="mb-0 text-sm text-muted">이 상자는 요약입니다. 항목별 처리·보관·문의 방법은 아래 본문을 따릅니다.</p>
       </aside>
-      <div className="grid gap-8 leading-7">
+      <div className="grid grid-cols-1 gap-8 leading-7">
         <section><h2>1. 처리 목적과 항목</h2><p>서비스 로그인 이메일과 표시 이름, 소속 부서·역할·동의 상태, 동의한 소스의 대화·회의 전사·문서를 처리합니다. 결정 요청, 결정 원장, 권한 인지 답변을 제공하기 위한 범위에서만 사용합니다.</p><p>채용 예고편 지원자에 대해서는 채용 담당자가 입력한 이메일, 지원자가 입력한 결정 선택·이유 서술·단서 선택 기록을 처리합니다. 목적은 채용 과제 참고 자료와 면접 질문 준비이며, AI 점수는 참고 자료로 합격 여부를 자동으로 결정하지 않습니다.</p></section>
         <section><h2>2. 동의와 수집</h2><p>구성원 동의가 채널 연결보다 먼저입니다. 동의하지 않은 구성원의 발언은 저장하지 않으며, 추출·전사 텍스트는 저장 전에 정규식으로 개인정보를 마스킹합니다. 묻기의 짧은 음성 입력은 원본을 보관하지 않습니다. 자료 검토함은 업로더가 참여자 동의와 보관 권한을 확인한 음성·문서 원본을 비공개로 보관하여 다시 듣기·다운로드·재처리를 제공합니다. 원본과 초안은 동의한 해당 부서장만 접근하며 확인·확정 전에는 업무 검색에 사용하지 않습니다.</p><p>자료 검토함의 원본은 삭제할 때까지 보관합니다. 원본만 삭제하거나 전사·이력을 포함한 자료 전체를 삭제할 수 있습니다. 녹음 참여자가 동의를 철회하거나 탈퇴하면 해당 녹음 전체의 접근을 차단하고 원본·전사·검색 근거를 삭제 처리합니다. 사용자가 내려받은 파일과 내보낸 업무 기록의 보관·파기는 해당 담당자가 관리해야 합니다.</p><p>지원자는 링크를 열 때 수집·이용에 동의한 뒤에만 제출할 수 있고 동의하지 않아도 불이익이 없습니다.</p></section>
         <section><h2>3. 보관과 파기</h2><p>파일럿 종료 또는 이용 목적 달성 후 고객사와 합의한 기간 안에 계정·수집 데이터와 파생 기록을 삭제합니다. 법령상 보존 의무가 있는 경우에는 해당 기간 동안 별도로 분리해 보관합니다.</p><p>지원자 제출은 제출 후 90일이 지나면 자동 파기합니다. 지원자는 초대 링크에서 제출을 철회할 수 있고, 채용 담당자도 즉시 삭제할 수 있습니다. (확인 필요: 법률 자문 — 채용절차법 §11의 반환·파기 기간)</p></section>

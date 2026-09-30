@@ -14,7 +14,11 @@ type Header = RecordingScope & {
   chunks: number;
   shortTail: boolean;
   complete: boolean;
+  paused: boolean;
   capturedSamples: number;
+  levelVectors: number[][];
+  captureHealth: { clipping_ratio: number; checkpoint_delays: number; max_pending_samples: number;
+    backlog_stops: number; max_sample_wall_gap_ms: number; microphone_reselects: number };
   noncePrefix: Uint8Array<ArrayBuffer>;
 };
 type StoredCheckpoint = RecordingScope & EncryptedRecordingCheckpoint;
@@ -103,7 +107,9 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
       if (key(scope).some((value) => !value || value.length > 128)) throw new Error("recording_scope_invalid");
       await transaction<void>(db, ["recordings"], "readwrite", (tx) => {
         tx.objectStore("recordings").add({ ...scope, key: key(scope), createdAt, samples: 0, chunks: 0,
-          shortTail: false, complete: false, capturedSamples: 0,
+          shortTail: false, complete: false, paused: false, capturedSamples: 0,
+          levelVectors: [], captureHealth: { clipping_ratio: 0, checkpoint_delays: 0,
+            max_pending_samples: 0, backlog_stops: 0, max_sample_wall_gap_ms: 0, microphone_reselects: 0 },
           noncePrefix: crypto.getRandomValues(new Uint8Array(8)) } satisfies Header);
       });
       if (!(await getHeader(scope))) throw new Error("recording_storage_unavailable");
@@ -146,6 +152,41 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
         };
       });
     },
+    async markPaused(scope: RecordingScope) {
+      await transaction<void>(db, ["recordings"], "readwrite", (tx) => {
+        const headers = tx.objectStore("recordings");
+        const request = headers.get(key(scope));
+        request.onsuccess = () => {
+          const header: Header | undefined = request.result;
+          if (!header) { tx.abort(); return; }
+          headers.put({ ...header, paused: true });
+        };
+      });
+    },
+    async recordProfile(scope: RecordingScope, levels: number[][], health: Header["captureHealth"]) {
+      if (levels.length > 1800 || levels.some((vector) => ![1, 2].includes(vector.length) ||
+        vector.length !== levels[0].length || vector.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) ||
+        !Number.isFinite(health.clipping_ratio) || health.clipping_ratio < 0 || health.clipping_ratio > 1 ||
+        !Number.isInteger(health.checkpoint_delays) || health.checkpoint_delays < 0 || health.checkpoint_delays > 1800 ||
+        !Number.isInteger(health.max_pending_samples) || health.max_pending_samples < 0 || health.max_pending_samples > 1_000_000 ||
+        !Number.isInteger(health.backlog_stops) || health.backlog_stops < 0 || health.backlog_stops > 1 ||
+        !Number.isInteger(health.max_sample_wall_gap_ms) || health.max_sample_wall_gap_ms < 0 ||
+        health.max_sample_wall_gap_ms > 1_800_000 ||
+        !Number.isInteger(health.microphone_reselects) || health.microphone_reselects < 0 || health.microphone_reselects > 100)
+        throw new Error("recording_profile_invalid");
+      await transaction<void>(db, ["recordings"], "readwrite", (tx) => {
+        const headers = tx.objectStore("recordings");
+        const request = headers.get(key(scope));
+        request.onsuccess = () => {
+          const header: Header | undefined = request.result;
+          if (!header) { tx.abort(); return; }
+          const vectors = header.levelVectors ?? [];
+          if (levels.length < vectors.length || (vectors.length && levels.length && vectors[0].length !== levels[0].length))
+            { tx.abort(); return; }
+          headers.put({ ...header, levelVectors: levels.map((vector) => vector.slice()), captureHealth: health });
+        };
+      });
+    },
     async inspect(scope: RecordingScope) {
       const header = await getHeader(scope);
       if (!header) return null;
@@ -155,7 +196,12 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
       for await (const frame of read(scope)) { samples += frame.pcm.length; chunks++; }
       const expectedSamples = Math.max(header.samples, header.capturedSamples);
       return { samples, chunks, expectedSamples, partial: samples !== expectedSamples || chunks !== header.chunks,
-        interrupted: !header.complete, createdAt: header.createdAt };
+        paused: header.paused === true,
+        interrupted: !header.complete, createdAt: header.createdAt,
+        levelVectors: header.levelVectors ?? [], captureHealth: Object.assign({
+          clipping_ratio: 0, checkpoint_delays: 0, max_pending_samples: 0,
+          backlog_stops: 0, max_sample_wall_gap_ms: 0, microphone_reselects: 0,
+        }, header.captureHealth ?? {}) };
     },
     read,
     remove,
@@ -170,47 +216,73 @@ export async function openRecordingStore(recordingKey: CryptoKey) {
   };
 }
 
+/** Exercise the encrypted PCM path before any live samples are accepted.
+ * Only this small synthetic probe is written, then removed. A recording ID
+ * is created only after encryption, commit, read and decryption all succeed.
+ */
+export async function probeRecordingStore(scope: RecordingScope, recordingKey: CryptoKey) {
+  const estimate = await navigator.storage.estimate();
+  if (estimate.quota !== undefined && estimate.usage !== undefined && estimate.quota - estimate.usage < 64 * 1024 * 1024)
+    throw new Error("storage_space_insufficient");
+  const store = await openRecordingStore(recordingKey);
+  const probe = { ...scope, recordingId: `probe-${crypto.randomUUID()}` };
+  try {
+    await store.cleanup(scope.ownerUserId);
+    const pcm = new Int16Array([17, -17, 32767, -32768]);
+    try {
+      await store.create(probe);
+      await store.append(probe, { sequence: 0, pcm });
+      let verified = false;
+      for await (const frame of store.read(probe)) {
+        verified = frame.sequence === 0 && frame.pcm.length === pcm.length &&
+          frame.pcm.every((sample, index) => sample === pcm[index]);
+      }
+      if (!verified) throw new Error("recording_storage_unavailable");
+    } finally { await store.remove(probe); }
+    return;
+  } finally { store.close(); }
+}
+
+export async function prepareRecordingStore(scope: RecordingScope, recordingKey: CryptoKey) {
+  await probeRecordingStore(scope, recordingKey);
+  const store = await openRecordingStore(recordingKey);
+  try {
+    await store.create(scope);
+    return store;
+  } catch (error) { store.close(); throw error; }
+}
+
+export async function removeLocalRecording(scope: RecordingScope) {
+  // Deletion needs no recording secret; a temporary key only opens the store adapter.
+  const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const store = await openRecordingStore(key);
+  try { await store.remove(scope); } finally { store.close(); }
+}
+
+export async function cleanupLocalRecordings(userId: string) {
+  // Best-effort cleanup for the pre-Web Locks lease; never delay recording recovery.
+  try { indexedDB.deleteDatabase("sasu-meeting-capture-lease"); } catch { /* ignored */ }
+  const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const store = await openRecordingStore(key);
+  try { await store.cleanup(userId); } finally { store.close(); }
+}
+
 /** The lock is held by the page, not its worker; closing/crashing releases it.
  * Never steal an old recording. The caller must allocate a new recording ID.
  */
-export function acquireCaptureLock(onLost: () => void = () => {}): Promise<() => void> {
+export function acquireCaptureLock(): Promise<() => void> {
   if (!navigator.locks) return Promise.reject(new Error("recording_lock_unavailable"));
   return new Promise((resolve, reject) => {
     void navigator.locks.request("sasu-meeting-capture", { ifAvailable: true }, async (lock) => {
       if (!lock) { reject(new Error("recording_other_tab")); return; }
-      const leaseId = crypto.randomUUID();
-      const leaseDb = await openDatabase("sasu-meeting-capture-lease", (db) => db.createObjectStore("lease"));
-      const channel = new BroadcastChannel("sasu-meeting-capture");
-      const heartbeat = () => transaction<void>(leaseDb, ["lease"], "readwrite", (tx) => {
-        tx.objectStore("lease").put({ leaseId, expiresAt: Date.now() + 5000 }, "active");
-      });
-      try {
-        await heartbeat();
-        await new Promise<void>((unlock) => {
-          let stopped = false;
-          let previous = Date.now();
-          const release = () => {
-            if (stopped) return;
-            stopped = true;
-            clearInterval(timer);
-            channel.postMessage({ type: "released", leaseId });
-            unlock();
-          };
-          const lose = () => { onLost(); release(); };
-          const timer = setInterval(() => {
-            const now = Date.now();
-            if (now - previous > 5000) { lose(); return; }
-            previous = now;
-            void heartbeat().then(() => { if (!stopped) channel.postMessage({ type: "heartbeat", leaseId }); }, lose);
-          }, 1000);
-          channel.postMessage({ type: "started", leaseId });
-          resolve(release);
+      await new Promise<void>((unlock) => {
+        let released = false;
+        resolve(() => {
+          if (released) return;
+          released = true;
+          unlock();
         });
-      } finally {
-        await transaction<void>(leaseDb, ["lease"], "readwrite", (tx) => tx.objectStore("lease").delete("active")).catch(() => {});
-        leaseDb.close();
-        channel.close();
-      }
+      });
     }).catch(reject);
   });
 }

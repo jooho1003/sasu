@@ -9,7 +9,7 @@ import {
   existsSync,
   mkdirSync,
 } from "node:fs";
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { resolve } from "node:path";
 nextEnv.loadEnvConfig(process.cwd());
 const root = resolve(".vercel/review-qa");
@@ -40,6 +40,11 @@ Object.assign(process.env, {
   SEED_ORG_ADMIN_PASSWORD: credentials.password,
   SEED_MEMBER_EMAIL: "review-member@example.test",
   SEED_MEMBER_PASSWORD: credentials.password,
+  RECORDING_KEY_SECRET: createHash("sha256")
+    .update(`review-qa-recording:${credentials.password}`)
+    .digest("hex"),
+  RECORDING_KEY_VERSION: "1",
+  SASU_TEST_DOCKER_DB_CONTAINER: "supabase_db_review-qa",
   E2E_REVIEW_LIVE: "1",
   SASU_ORG_ADMIN_MODE: "on",
   SASU_RETRO_ENABLED: "true",
@@ -133,7 +138,8 @@ if (command === "refresh-retro-connectors") {
   const client = createClient(info.API_URL, info.SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
   });
-  const users = await client.auth.admin.listUsers();
+  // Local QA can exceed the API's default 50-user page after repeated runs.
+  const users = await client.auth.admin.listUsers({ page: 1, perPage: 1000 });
   if (users.error) throw new Error("local_auth_unavailable");
   const ids = {};
   for (const role of ["lead", "member", "outsider"]) {
@@ -323,6 +329,16 @@ if (command === "refresh-retro-connectors") {
               ? ["node_modules/tsx/dist/cli.mjs", "scripts/audit-showcase-data.ts"]
             : command === "access-test"
               ? ["scripts/verify-review-storage.mjs"]
+            : command === "retention-test"
+              ? ["node_modules/tsx/dist/cli.mjs", "scripts/verify-review-retention.ts"]
+            : command === "recording-storage-test"
+              ? ["node_modules/tsx/dist/cli.mjs", "scripts/verify-recording-storage.ts"]
+            : command === "retention-browser-test"
+              ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/review-retention-live.spec.ts", ...process.argv.slice(3)]
+            : command === "recording-product-test"
+              ? ["node_modules/@playwright/test/cli.js", "test", "--config", "playwright.recording-product.config.ts", ...process.argv.slice(3)]
+            : command === "csp-test"
+              ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/security-headers.spec.ts", ...process.argv.slice(3)]
             : [
                 "node_modules/@playwright/test/cli.js",
                 "test",
