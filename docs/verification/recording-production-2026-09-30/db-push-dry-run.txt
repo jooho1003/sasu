@@ -1,0 +1,12 @@
+DRY RUN: migrations will *not* be pushed to the database.
+Connecting to remote database...
+Skipping migration .gitkeep... (file name must match pattern "<timestamp>_name.sql")
+Would push these migrations:
+ • 0058_private_visibility_functions.sql
+ • 0059_review_recording_sessions.sql
+ • 0060_review_recording_segments.sql
+ • 0061_review_recording_continuation.sql
+ • 0062_review_recording_profile.sql
+ • 0063_review_transcription_windows.sql
+ • 0064_dept_glossaries.sql
+{"upToDate":false,"dryRun":true,"migrations":["0058_private_visibility_functions.sql","0059_review_recording_sessions.sql","0060_review_recording_segments.sql","0061_review_recording_continuation.sql","0062_review_recording_profile.sql","0063_review_transcription_windows.sql","0064_dept_glossaries.sql"],"seeds":[],"roles":[],"message":"Finished supabase db push."}
