@@ -36,7 +36,7 @@ test("가상 영업 검토 생성부터 근거 결과와 팀장 내부 확인까
   await signIn(context, "review-lead@example.test", password);
   await page.goto(`${baseURL}${path}`);
   await expect(page.getByRole("heading", { name: "견적 변경 검토" })).toBeVisible();
-  await expect(page.getByText("가상 사례입니다. 고객에게 발송되지 않으며 실제 가격·계약 승인이 아닙니다.")).toBeVisible();
+  await expect(page.getByText("아래는 가상 사례 연습입니다. 고객에게 발송되지 않으며 실제 가격·계약 승인이 아닙니다.")).toBeVisible();
   await expect(page.locator("#sales-source-S4")).toContainText("영업팀장");
 
   const posted = page.waitForResponse((response) => response.url().endsWith(`${path.replace("/d/", "/api/d/")}`) && response.request().method() === "POST");
