@@ -117,9 +117,11 @@
     {
       "step": 11,
       "name": "desktop-release-verify",
-      "status": "pending",
+      "status": "error",
+      "error_message": "로컬 QA Electron Playwright가 창 핸드셰이크에서 시간 초과했습니다. updater 변경 뒤 full-flow와 기존 smoke를 각각 재실행해 재현했으며, lint·unit·build·dist는 통과했습니다. 기록: docs/verification/desktop-companion-2026-10-02.md",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium"
+      "effort": "medium",
+      "started_at": "2026-10-02T07:14:42+0900"
     }
   ],
   "production_deployed": false,

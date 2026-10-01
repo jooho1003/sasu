@@ -16,6 +16,7 @@ import type { AuthService } from "./auth/supabase";
 import type { OutboxService } from "./outbox-service";
 import type { EncryptedFile } from "./storage/encrypted-file";
 import { logError } from "./logger";
+import type { DesktopUpdater } from "./updater";
 import {
   parseAnswer,
   parseCard,
@@ -84,6 +85,7 @@ type Dependencies = {
   onSettingsChanged?: (settings: SettingsValue) => void;
   onDeviceAuthenticated?: () => void;
   onDeviceLinked?: () => void;
+  updater?: DesktopUpdater;
 };
 
 function register<I, O>(
@@ -185,6 +187,7 @@ export function registerIpc(deps: Dependencies): void {
     deps.onSettingsChanged?.(next);
     return next;
   });
+  register("update:get", noInput, () => Promise.resolve(deps.updater?.getState() ?? { status: "unavailable" }));
   register("app:openWeb", (value) => OpenWebInput.parse(value), async ({ path }) => {
     await shell.openExternal(webTarget(path));
     return { opened: true };

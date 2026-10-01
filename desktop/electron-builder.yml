@@ -8,3 +8,13 @@ asar: true
 win:
   target:
     - nsis
+nsis:
+  perMachine: false
+  oneClick: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+publish:
+  provider: github
+  owner: jooho1003
+  repo: sasu-desktop-releases
+  releaseType: release

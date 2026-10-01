@@ -14,6 +14,7 @@ import { registerPanelShortcut, unregisterPanelShortcut } from "./shortcut";
 import { computePetState, type PetState } from "./core/pet-state";
 import { nextInboxDelay } from "./core/poller";
 import { notify } from "./notify";
+import { DesktopUpdater } from "./updater";
 import { parseCompanionInbox } from "../shared/contracts";
 import type { DesktopSettings } from "../shared/contracts";
 
@@ -25,6 +26,7 @@ let windows: DesktopWindows | null = null;
 let flushTimer: NodeJS.Timeout | null = null;
 let inboxTimer: NodeJS.Timeout | null = null;
 let tray: ReturnType<typeof createTray> | null = null;
+let updater: DesktopUpdater | null = null;
 
 const PositionInput = z.strictObject({ x: z.number().int(), y: z.number().int() });
 const DEFAULT_SETTINGS: DesktopSettings = { seen: [], pet: "green", reduceMotion: false, panelPinned: false };
@@ -65,15 +67,19 @@ async function start(): Promise<void> {
     windows?.panel.webContents.send("signed-out");
   };
   const outbox = new OutboxService(outboxFile, api);
+  updater = new DesktopUpdater();
 
   registerIpc({
     api, auth, outbox, supabase, settingsFile,
     onSettingsChanged: (next) => windows?.setPanelPinned(next.panelPinned),
     onDeviceAuthenticated: () => { deviceLinkPending = true; },
     onDeviceLinked: () => { deviceLinked = true; deviceLinkPending = false; },
+    updater,
   });
   installBrowserGuards();
   windows = await createDesktopWindows();
+  updater.subscribe((state) => windows?.panel.webContents.send("update-status", state));
+  updater.start();
   const savedSettings = await settingsFile.read(DEFAULT_SETTINGS);
   windows.setPanelPinned(savedSettings.panelPinned);
   ipcMain.handle("window:movePet", async (event, value) => {

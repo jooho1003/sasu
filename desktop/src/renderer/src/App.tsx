@@ -45,6 +45,7 @@ export function App() {
   const [notice, setNotice] = useState("");
   const [shortcut, setShortcut] = useState(true);
   const [petState, setPetState] = useState("idle");
+  const [update, setUpdate] = useState<{ status: string; percent?: number }>({ status: "unavailable" });
   const questionFocus = useRef<() => void>(() => undefined);
   const loadInbox = (): void => {
     void window.sasu.inbox
@@ -72,6 +73,10 @@ export function App() {
     return window.sasu.auth.onSignedOut(() => setScreen("email"));
   }, [petWindow]);
   useEffect(() => window.sasu.window.onShortcutStatus(setShortcut), []);
+  useEffect(() => {
+    void window.sasu.update.get().then(setUpdate).catch(() => undefined);
+    return window.sasu.update.onStatus(setUpdate);
+  }, []);
   useEffect(
     () =>
       window.sasu.window.onFocusQuestion(() => {
@@ -184,6 +189,7 @@ export function App() {
             context={context}
             settings={settings}
             shortcut={shortcut}
+            update={update}
             onSettings={setSettings}
           />
         )}

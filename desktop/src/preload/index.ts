@@ -102,6 +102,16 @@ const bridge = {
     set: (input: Partial<DesktopSettings>) =>
       invoke<DesktopSettings>("settings:set", input),
   },
+  update: {
+    get: () => invoke<{ status: string; percent?: number }>("update:get"),
+    onStatus: (callback: (status: { status: string; percent?: number }) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, status: { status: string; percent?: number }): void => callback(status);
+      ipcRenderer.on("update-status", listener);
+      return () => {
+        ipcRenderer.removeListener("update-status", listener);
+      };
+    },
+  },
   app: {
     openWeb: (path: string) =>
       invoke<{ opened: true }>("app:openWeb", { path }),
