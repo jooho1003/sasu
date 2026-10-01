@@ -103,6 +103,13 @@
     },
     {
       "step": 10,
+      "name": "desktop-work",
+      "status": "pending",
+      "codex_model": "gpt-5.6-terra",
+      "effort": "medium"
+    },
+    {
+      "step": 11,
       "name": "desktop-release-verify",
       "status": "pending",
       "codex_model": "gpt-5.6-terra",
