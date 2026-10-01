@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { tsImport } from "tsx/esm/api";
 import { execFileSync } from "node:child_process";
@@ -9,6 +9,7 @@ const refIndex=args.indexOf("--ref"),ref=refIndex>=0?args[refIndex+1]:null;
 if(refIndex>=0&&(!ref||!/^(?:HEAD|[a-f0-9]{7,40})$/.test(ref)))throw new Error("commit_hash_required");
 const findings=[],files=new Set();
 function walk(path,filter=()=>true) {
+  if(!existsSync(path))return;
   if(statSync(path).isDirectory())for(const entry of readdirSync(path))walk(join(path,entry),filter);
   else if(/\.(tsx|ts)$/.test(path)&&!path.includes('.test.')&&filter(path))files.add(path);
 }
@@ -22,7 +23,7 @@ else {
   if(selected.length)for(const path of selected)walk(path);
   else {
     walk("app",p=>p.endsWith('.tsx')||(/[\\/]api[\\/]/.test(p)&&p.endsWith('route.ts')));
-    walk("components");walk("lib/slack");
+    walk("components");walk("lib/slack");walk("desktop/src/renderer",p=>p.endsWith('.tsx'));
     for(const file of ["consent","demo-access","org-admin","trailer-invite","trailer-assessment","labels"])files.add("lib/"+file+".ts");
   }
   const tracked=ref?new Set(execFileSync("git",["ls-tree","-r","--name-only",ref],{encoding:"utf8"}).trim().split("\n")):null;

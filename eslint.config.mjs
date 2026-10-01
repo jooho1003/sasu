@@ -42,5 +42,5 @@ export default defineConfig([
       "no-restricted-imports": "off",
     },
   },
-  globalIgnores([".next/**", ".next-verify/**", ".vercel/**", "out/**", "node_modules/**", "test-results/**"]),
+  globalIgnores([".next/**", ".next-verify/**", ".vercel/**", "out/**", "node_modules/**", "test-results/**", "desktop/**"]),
 ]);

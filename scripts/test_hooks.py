@@ -107,6 +107,32 @@ def test_recording_browser_boundary(repo):
     assert not denied(run_hook(TDD_GUARD, patch_payload("Add File: lib/recording/pcm.ts"), repo))
 
 
+def test_desktop_tdd_boundary(repo):
+    """Electron 배선은 허용하고 core/shared 순수 로직은 테스트를 요구한다."""
+    allowed = (
+        "desktop/src/main/index.ts",
+        "desktop/src/main/windows/pet.ts",
+        "desktop/src/main/auth/otp.ts",
+        "desktop/src/main/api/client.ts",
+        "desktop/src/main/storage/secure.ts",
+        "desktop/src/preload/index.ts",
+        "desktop/src/renderer/App.tsx",
+        "desktop/electron.vite.config.ts",
+    )
+    for path in allowed:
+        assert not denied(run_hook(TDD_GUARD, patch_payload(f"Add File: {path}"), repo))
+
+    for path in ("desktop/src/main/core/poller.ts", "desktop/src/shared/contracts.ts"):
+        assert denied(run_hook(TDD_GUARD, patch_payload(f"Add File: {path}"), repo))
+
+    (repo / "desktop" / "src" / "main" / "core" / "__tests__").mkdir(parents=True)
+    (repo / "desktop" / "src" / "shared" / "__tests__").mkdir(parents=True)
+    (repo / "desktop" / "src" / "main" / "core" / "__tests__" / "poller.test.ts").write_text("")
+    (repo / "desktop" / "src" / "shared" / "__tests__" / "contracts.test.ts").write_text("")
+    assert not denied(run_hook(TDD_GUARD, patch_payload("Add File: desktop/src/main/core/poller.ts"), repo))
+    assert not denied(run_hook(TDD_GUARD, patch_payload("Add File: desktop/src/shared/contracts.ts"), repo))
+
+
 @pytest.mark.parametrize("script", [TDD_GUARD, DANGER_GUARD])
 def test_malformed_payload_fails_closed(repo, script):
     assert run_hook(script, "{malformed", repo).returncode == 2
