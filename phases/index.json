@@ -279,10 +279,11 @@
     },
     {
       "dir": "43-desktop-companion",
-      "status": "pending",
+      "status": "blocked",
       "design": "docs/02-design/features/desktop-companion.design.md",
       "note": "Windows 데스크톱 동반 앱(펫) — 기기 세션 Bearer·/api/companion/*·device_links·공용 lib 추출·Electron. step 7은 phase 41 병합 뒤, step 10은 사람 실측·운영 승인 대기로 blocked 예정. ADR-082, PRD §3-8.",
-      "production_deployed": false
+      "production_deployed": false,
+      "blocked_at": "2026-10-02T08:25:44+0900"
     }
   ]
 }
