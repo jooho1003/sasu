@@ -3,61 +3,12 @@ import { notFound } from "next/navigation";
 
 import CardActions from "@/components/card-actions";
 import { CardReminder } from "@/components/card-reminder";
+import { loadCardView } from "@/lib/card-view";
+import { actorFromMembership } from "@/lib/companion/context";
 import { formatConflictBadge } from "@/lib/conflicts";
 import { label } from "@/lib/labels";
-import { reviewCitationHref, reviewCitationTarget, type PublishedReview } from "@/lib/recording/citation-location";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-
-type CardStatus = "open" | "decided" | "deferred" | "rejected" | "needs_review";
-
-type CardRow = {
-  id: string;
-  title: string;
-  background: string;
-  recommendation: string | null;
-  deadline: string | null;
-  assignee_id: string | null;
-  status: CardStatus;
-  visibility:"dept"|"leads_only";
-};
-
-type CitationRow = {
-  item_id: string | null;
-  decision_id: string | null;
-  quote: string;
-};
-
-type SourceRow = {
-  kind: "slack_channel" | "meeting" | "notion_page" | "document";
-  external_id: string;
-  title: string | null;
-};
-
-type ItemRow = {
-  id: string;
-  source_id: string;
-  content: string;
-  deleted_at: string | null;
-  author: string | null;
-  spoken_at: string | null;
-  external_ref: string | null;
-  sources: SourceRow | SourceRow[];
-};
-
-type DecisionRow = {
-  id: string;
-  decided_by_name: string;
-  decided_at: string | null;
-  outcome: string;
-  rationale: string;
-};
-
-type ConflictRow = {
-  id: string;
-  prior_decision_id: string;
-  explanation: string;
-};
 
 const DATE_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
   dateStyle: "medium",
@@ -65,29 +16,12 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
   timeZone: "Asia/Seoul",
 });
 
-function firstRelation<T>(relation: T | T[]): T {
-  return Array.isArray(relation) ? relation[0] : relation;
-}
-
 function formatDate(value: string | null): string {
   if (!value) {
     return "시각 미상";
   }
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "시각 미상" : DATE_FORMATTER.format(date);
-}
-
-function originalHref(item: ItemRow, deptId: string): string {
-  const source = firstRelation(item.sources);
-  if (source.kind === "slack_channel" && item.external_ref) {
-    return `https://slack.com/archives/${encodeURIComponent(source.external_id)}/p${item.external_ref.replace(/\D/g, "")}`;
-  }
-  if (source.kind === "notion_page") {
-    return source.external_id.startsWith("http")
-      ? source.external_id
-      : `https://www.notion.so/${source.external_id.replace(/-/g, "")}`;
-  }
-  return `/d/${deptId}?item=${encodeURIComponent(item.id)}#item-${item.id}`;
 }
 
 function deadlineHasPassed(deadline: Date): boolean {
@@ -102,112 +36,13 @@ export default async function CardDetailPage({
   const { dept, id } = await params;
   const membership = await requireMembership(dept);
   const supabase = await createServerSupabaseClient();
-  const cardResult = await supabase
-    .from("decision_requests")
-    .select("id, title, background, recommendation, deadline, assignee_id, status, visibility")
-    .eq("id", id)
-    .eq("dept_id", membership.deptId)
-    .maybeSingle<CardRow>();
-
-  if (cardResult.error) {
-    throw new Error("결정 카드를 불러오지 못했습니다.", { cause: cardResult.error });
+  const view = await loadCardView(actorFromMembership(supabase, membership), id);
+  if (!view.ok) {
+    if (view.status === 404) notFound();
+    throw new Error(view.error);
   }
-  if (!cardResult.data) {
-    notFound();
-  }
-
-  const card = cardResult.data;
-  const [citationsResult, conflictsResult] = await Promise.all([
-    supabase
-      .from("citations")
-      .select("item_id, decision_id, quote")
-      .eq("owner_kind", "decision_request")
-      .eq("owner_id", card.id),
-    supabase
-      .from("conflicts")
-      .select("id, prior_decision_id, explanation")
-      .eq("request_id", card.id),
-  ]);
-
-  if (citationsResult.error || conflictsResult.error) {
-    throw new Error("카드 근거를 불러오지 못했습니다.");
-  }
-
-  const citations = (citationsResult.data ?? []) as CitationRow[];
-  const conflicts = (conflictsResult.data ?? []) as ConflictRow[];
-  const itemIds = citations.flatMap((citation) => citation.item_id ? [citation.item_id] : []);
-  const decisionIds = [
-    ...new Set([
-      ...citations.flatMap((citation) => citation.decision_id ? [citation.decision_id] : []),
-      ...conflicts.map((conflict) => conflict.prior_decision_id),
-    ]),
-  ];
-
-  const [itemsResult, decisionsResult] = await Promise.all([
-    itemIds.length === 0
-      ? Promise.resolve({ data: [] as ItemRow[], error: null })
-      : supabase
-          .from("items")
-          .select("id, source_id, content, deleted_at, author, spoken_at, external_ref, sources!inner(kind, external_id, title)")
-          .in("id", itemIds).is("deleted_at", null).eq("sources.active", true),
-    decisionIds.length === 0
-      ? Promise.resolve({ data: [] as DecisionRow[], error: null })
-      : supabase
-          .from("decisions")
-          .select("id, decided_by_name, decided_at, outcome, rationale")
-          .in("id", decisionIds),
-  ]);
-
-  if (itemsResult.error || decisionsResult.error) {
-    throw new Error("근거가 된 원문을 불러오지 못했습니다.");
-  }
-
-  const itemMap = new Map(((itemsResult.data ?? []) as ItemRow[]).map((item) => [item.id, item]));
-  const reviewSourceIds = [...new Set([...itemMap.values()].filter((item) => firstRelation(item.sources).external_id?.startsWith("review:")).map((item) => item.source_id))];
-  const reviewResult = reviewSourceIds.length
-    ? await supabase.from("reviewed_materials").select("id,kind,revision,published_revision,published_source_id,original_uploaded,original_deleted_at,deleted_at,sections")
-      .in("published_source_id", reviewSourceIds)
-    : { data: [], error: null };
-  const reviews = new Map(((reviewResult.error ? [] : reviewResult.data) ?? []).map((review) => [review.published_source_id, review as PublishedReview]));
-  const decisionMap = new Map(
-    ((decisionsResult.data ?? []) as DecisionRow[]).map((decision) => [decision.id, decision]),
-  );
-  const visibleCitations = citations.flatMap((citation) => {
-    if (citation.item_id) {
-      const item = itemMap.get(citation.item_id);
-      if (!item || item.deleted_at || !citation.quote || !item.content.includes(citation.quote)) {
-        return [];
-      }
-      const source = firstRelation(item.sources);
-      const review = reviews.get(item.source_id);
-      const target = review ? reviewCitationTarget(item.external_ref, review) : null;
-      return [{
-        quote: citation.quote,
-        author: item.author ?? "작성자 미상",
-        occurredAt: item.spoken_at,
-        source: source.title ?? "이름 없는 소스",
-        href: target ? reviewCitationHref(membership.deptId, target) : originalHref(item, membership.deptId),
-        lowConfidence: target?.lowConfidence ?? false,
-        boundaryReview: target?.boundaryReview ?? false,
-      }];
-    }
-    if (citation.decision_id) {
-      const decision = decisionMap.get(citation.decision_id);
-      if (!decision) {
-        return [];
-      }
-      return [{
-        quote: citation.quote,
-        author: decision.decided_by_name,
-        occurredAt: decision.decided_at,
-        source: `결정 기록 #${decision.id.slice(0, 8)}`,
-        href: `/d/${membership.deptId}/ledger#decision-${decision.id}`,
-        lowConfidence: false,
-        boundaryReview: false,
-      }];
-    }
-    return [];
-  });
+  const { card, citations: visibleCitations, conflicts, decisions } = view.body;
+  const decisionMap = new Map(decisions.map((decision) => [decision.id, decision]));
 
   const lacksVerifiedEvidence = card.status === "needs_review" || visibleCitations.length === 0;
   const deadline = card.deadline ? new Date(card.deadline) : null;
