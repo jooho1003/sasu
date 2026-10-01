@@ -107,12 +107,9 @@
     {
       "step": 10,
       "name": "desktop-work",
-      "status": "error",
+      "status": "pending",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium",
-      "started_at": "2026-10-02T05:08:29+0900",
-      "error_message": "[3회 시도 후 실패] 로컬 QA에서 팀장 인증·자료 등록·원본 Storage·구간 작업 생성까지는 완료됐지만, upload:review의 구간 작업 202 응답이 network 오류로 반환됐습니다. QA 서버를 올바른 환경으로 재빌드·재기동하고 재시도했으나 같은 응답 단계가 실패해, 규칙의 세 번 수정 한도에 따라 중단했습니다.",
-      "failed_at": "2026-10-02T06:53:39+0900"
+      "effort": "medium"
     },
     {
       "step": 11,

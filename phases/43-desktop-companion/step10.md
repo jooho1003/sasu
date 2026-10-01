@@ -27,6 +27,21 @@ step 9가 남겨 둔 **일 맡기기** 탭의 두 구역을 만든다. 둘 다 l
 3. 상태 요약의 `reviews`·`sales`가 펫 상태(진행 중·완료·실패)에 반영되는지 확인한다(core `computePetState`는 step 8에 있다).
 4. E2E(`desktop/tests/e2e/work.spec.ts`, 로컬 QA): lead 기기로 ① 작은 `.txt` 문서 → 자료 검토함 등록 201 → Storage에 `original` 존재 → 구간 202 ② 2초짜리 합성 WAV 음성 → 구간 업로드·등록 ③ 영업 원문 4건 선택 → 요청 202 → 같은 요청 재전송 멱등 → 상태 표시. member 기기에서는 두 구역이 보이지 않고 IPC를 직접 불러도 403. 결과·스크린샷은 `docs/verification/43-desktop-companion/desktop-work.md`.
 
+## 보완 — 3회 실패의 원인 (2026-10-02 오케스트레이터 재현)
+
+이전 3회 시도의 `upload:review` "network: 서버에 연결하지 못했습니다"는 **네트워크 문제가 아니었다.** 임시 로그로 원래 예외를 확인한 결과:
+
+- 서버 `POST /api/companion/reviews/<id>/parts`는 정상 202를 돌려준다(Electron 밖 Node fetch 재현: 7초 유휴 뒤에도 202).
+- 응답의 `job_id`는 `queue_review_part`가 구간마다 **결정적으로** 만드는 값이라(같은 구간 재요청 시 같은 값) RFC 4122 variant 비트를 따르지 않는다. 예: `42e1b3e2-2daa-710d-e1a5-4ce4ad1f9bb8`.
+- 앱의 응답 파서(`desktop/src/shared/contracts.ts`의 `const Uuid = z.string().uuid()`)가 이를 `ZodError: Invalid UUID`로 거부했고, `desktop/src/main/api/client.ts`의 catch가 파서 오류까지 `network`로 분류했다.
+
+고칠 것:
+1. 서버가 만든 ID(job_id·task_id·answer_id·card id·link_id 등)를 받는 앱 파서와 IPC 입력은 `z.guid()`(8-4-4-4-12 16진 형식만 확인)를 쓴다. `desktop/src/shared/contracts.ts`의 `Uuid`, `desktop/src/main/ipc.ts`의 `IdInput`·`id`·`SalesStatusInput.task_id`·`seen[]`, `desktop/src/main/outbox-service.ts`의 `parentId`가 대상이다. 앱이 `crypto.randomUUID()`로 만드는 ID(review id·request_id)는 그대로 둬도 된다.
+2. `ApiClient`는 `fetch` 실패만 `network`/`timeout`으로 분류하고, 응답 파싱 실패는 `ApiError(status, "invalid_response", "서버 응답을 확인하지 못했습니다.")`로 구분한다. `retryTransient`는 `invalid_response`를 재시도하지 않는다.
+3. 위 두 경우를 core·shared 단위 테스트로 고정한다(비표준 variant의 job_id 통과, 파서 실패가 network가 아님).
+4. E2E를 QA 환경 빌드로 돌린다: 서버는 `node scripts/review-qa.mjs build` 뒤 `start`(일반 `npm run build`의 `.next`는 운영 Supabase 주소라 모든 Bearer가 401이다), 앱은 `SUPABASE_URL`·`SUPABASE_ANON_KEY`(로컬 QA)·`SASU_APP_URL=http://127.0.0.1:3011`을 넣고 빌드한다.
+5. E2E 140~141행처럼 구간 상태를 `queued`로만 기대하면 워커가 먼저 처리했을 때 실패한다. `queued|processing|done|ready` 중 하나와 job 존재로 판정한다.
+
 ## 실행 메모 — 장시간 서버 (2026-10-02 오케스트레이터)
 
 이전 시도에서 Codex 셸 도구로 `node scripts/review-qa.mjs start`(또는 `dev`)를 직접 띄우자 명령이 끝나지 않아 세션이 40분 넘게 멈췄다. 검증 서버는 아래처럼 **분리 프로세스**로 띄우고, 준비를 HTTP로 확인한 뒤 쓰고, 끝나면 **반드시 종료**한다.
