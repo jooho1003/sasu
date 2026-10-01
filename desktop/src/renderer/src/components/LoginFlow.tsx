@@ -100,6 +100,7 @@ export function LoginFlow({
         <button
           className="department"
           key={dept.id}
+          data-dept-id={dept.id}
           onClick={() => void link(dept)}
         >
           {dept.name}

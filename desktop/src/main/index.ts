@@ -91,6 +91,12 @@ async function start(): Promise<void> {
   let inboxDelay = 0;
   const pollInbox = async (): Promise<void> => {
     try {
+      const session = await supabase.auth.getSession();
+      if (!session.data.session) {
+        inboxDelay = nextInboxDelay(inboxDelay, "ok");
+        inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
+        return;
+      }
       const inbox = await api.get("/api/companion/inbox", parseCompanionInbox);
       const settings = await settingsFile.read(DEFAULT_SETTINGS);
       const state = computePetState(inbox, new Set(settings.seen), await outbox.count());

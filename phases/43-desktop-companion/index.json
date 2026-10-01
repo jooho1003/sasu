@@ -97,11 +97,12 @@
     {
       "step": 9,
       "name": "desktop-ui",
-      "status": "error",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
       "started_at": "2026-10-02T03:57:49+0900",
-      "error_message": "로컬 QA Electron E2E가 OTP 코드 확인 단계에서 Supabase auth network 오류로 종료되어, 로그인→답 본문·근거→결정 멱등 실행 기록을 만들지 못함."
+      "summary": "Electron 코드 로그인·부서 선택·펫/5개 탭 UI를 보완하고, 원문 근거가 있는 답 본문·카드 결정 연타 SQL 1건을 로컬 E2E로 확인했다.",
+      "completed_at": "2026-10-02T05:00:00+0900"
     },
     {
       "step": 10,
