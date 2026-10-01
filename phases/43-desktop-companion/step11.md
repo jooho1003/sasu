@@ -28,6 +28,14 @@
    - 운영: `auth.sessions` 삭제 권한 확인, 마이그레이션 적용, 메일 SMTP 전환, 6자리 코드 템플릿.
 6. 1~4가 통과하면 `"status": "blocked"`, `"blocked_reason": "사람 실측·운영 승인 대기: 5분 설치 녹화, 배포 저장소·업데이트 1회, 운영 auth.sessions 권한·0069 적용·SMTP·메일 템플릿 (기록: docs/verification/desktop-companion-YYYY-MM-DD.md)"`로 멈춘다.
 
+## 보완 — 401 session_invalid의 원인 (2026-10-02 오케스트레이터)
+
+로컬 E2E에서 코드 로그인 뒤 `/api/companion/*`가 전부 `401 session_invalid`면, QA 서버가 **운영 Supabase 주소로 빌드된 `.next`**로 떠 있는 것이다. `NEXT_PUBLIC_SUPABASE_URL`은 빌드 때 박히므로 루트 `npm run build`(AC)를 돌리면 `.next`가 운영 주소로 바뀌고, 그 뒤 `review-qa.mjs start`로 띄운 서버는 로컬 토큰을 모두 거부한다(2026-10-02 재현).
+
+- E2E 직전에 항상 `node scripts/review-qa.mjs build` → `start`(분리 프로세스) 순서로 QA 서버를 띄운다. 루트 `npm run build`는 E2E를 모두 끝낸 **뒤에** 실행한다.
+- 앱은 `SUPABASE_URL`·`SUPABASE_ANON_KEY`(로컬 QA)·`SASU_APP_URL=http://127.0.0.1:3011`로 빌드한다.
+- AC 실행 순서: desktop lint·test·build·dist → `review-qa.mjs build`·start → E2E·SQL 검증·L4 실측 → QA 서버 종료 → 루트 lint·build·test·guest-test.
+
 ## 실행 메모 — 장시간 서버 (2026-10-02 오케스트레이터)
 
 이전 시도에서 Codex 셸 도구로 `node scripts/review-qa.mjs start`(또는 `dev`)를 직접 띄우자 명령이 끝나지 않아 세션이 40분 넘게 멈췄다. 검증 서버는 아래처럼 **분리 프로세스**로 띄우고, 준비를 HTTP로 확인한 뒤 쓰고, 끝나면 **반드시 종료**한다.
