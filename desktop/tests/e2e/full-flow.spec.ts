@@ -1,7 +1,7 @@
 import { expect, test, _electron as electron } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { createClient } from "@supabase/supabase-js";
@@ -47,7 +47,7 @@ test.describe("desktop companion full flow", () => {
     const offlineQuestion = "인터넷이 끊긴 전체 흐름 테스트 질문입니다.";
     console.log("full-flow: fixture-start");
     sql(`
-      update device_links set revoked_at=now(), revoked_reason='full_flow_relink' where user_id='${ids.lead}' and revoked_at is null;
+      update device_links set revoked_at=now(), revoked_reason='relink' where user_id='${ids.lead}' and revoked_at is null;
       update members set consented_at=now() where dept_id='${ids.dept}' and user_id='${ids.lead}';
       insert into sources(id,dept_id,kind,external_id,title,visibility,active,is_principles) values ('${source}','${ids.dept}','document','desktop-full-${source}','데스크톱 전체 흐름 자료','dept',true,false);
       insert into items(id,source_id,dept_id,content,author) values ('${item}','${source}','${ids.dept}','${quote}','합성 작성자');
@@ -89,7 +89,7 @@ test.describe("desktop companion full flow", () => {
           });
         }, ids.dept);
         await panel!.reload();
-        await expect(panel!.getByRole("button", { name: "질문" })).toBeVisible();
+        await expect(panel!.getByRole("button", { name: "질문", exact: true })).toBeVisible();
       };
       await login();
       console.log("full-flow: linked");
@@ -101,6 +101,7 @@ test.describe("desktop companion full flow", () => {
       await expect(panel!.getByText(quote)).toBeVisible();
       await panel!.getByRole("button", { name: "결정함" }).click();
       await panel!.getByRole("button", { name: cardTitle }).click();
+      await expect(panel!.getByRole("heading", { name: cardTitle })).toBeVisible();
       await panel!.getByLabel("결과").fill("전체 흐름 카드 결정 결과");
       await panel!.getByLabel("이유").fill("결정 연타가 한 건으로 저장되는지 확인합니다.");
       await panel!.getByRole("button", { name: "결정하기" }).dblclick();
@@ -125,14 +126,26 @@ test.describe("desktop companion full flow", () => {
       console.log("full-flow: app-revoked");
 
       await login();
-      await panel!.getByRole("button", { name: "질문" }).click();
-      await app.evaluate(({ session }) => session.defaultSession.enableNetworkEmulation({ offline: true }));
+      await panel!.getByRole("button", { name: "질문", exact: true }).click();
+      await app.evaluate(({ session }) => {
+        session.defaultSession.webRequest.onBeforeRequest(
+          { urls: ["http://127.0.0.1:3011/api/companion/ask*"] },
+          (_details, callback) => callback({ cancel: true }),
+        );
+        session.defaultSession.enableNetworkEmulation({ offline: true });
+      });
       await panel!.getByPlaceholder("질문을 적어 주세요.").fill(offlineQuestion);
       await panel!.getByRole("button", { name: "질문하기" }).click();
       await expect(panel!.getByText("연결되면 보낼게요.")).toBeVisible();
+      const outboxPath = resolve(userData, "outbox.bin");
+      expect(readFileSync(outboxPath).includes(Buffer.from(offlineQuestion))).toBe(false);
       console.log("full-flow: queued");
-      await app.evaluate(({ session }) => session.defaultSession.enableNetworkEmulation({ offline: false }));
+      await app.evaluate(({ session }) => {
+        session.defaultSession.enableNetworkEmulation({ offline: false });
+        session.defaultSession.webRequest.onBeforeRequest(null);
+      });
       await expect.poll(() => panel!.evaluate(() => window.sasu.inbox.get())).toMatchObject({ outbox_count: 0 });
+      expect(existsSync(outboxPath)).toBe(false);
       console.log("full-flow: flushed");
     } finally {
       await app.evaluate(({ session }) => session.defaultSession.enableNetworkEmulation({ offline: false })).catch(() => undefined);
@@ -146,7 +159,7 @@ test.describe("desktop companion full flow", () => {
         delete from decision_requests where id='${card}';
         delete from items where id='${item}';
         delete from sources where id='${source}';
-        update device_links set revoked_at=now(), revoked_reason='full_flow_cleanup' where user_id='${ids.lead}' and revoked_at is null;
+        update device_links set revoked_at=now(), revoked_reason='signout' where user_id='${ids.lead}' and revoked_at is null;
       `);
     }
   });

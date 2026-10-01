@@ -40,4 +40,17 @@ describe("ApiClient", () => {
     });
     expect(onUnauthorized).not.toHaveBeenCalled();
   });
+
+  it("uses the injected Electron-session fetch implementation", async () => {
+    const sessionFetch = vi.fn(async () => Response.json({ ok: true }));
+    const client = new ApiClient(
+      "http://127.0.0.1:3011",
+      supabase as never,
+      vi.fn(),
+      sessionFetch,
+    );
+
+    await expect(client.get("/api/companion/link", (value) => value)).resolves.toEqual({ ok: true });
+    expect(sessionFetch).toHaveBeenCalledOnce();
+  });
 });

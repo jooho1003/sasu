@@ -62,7 +62,12 @@ async function start(): Promise<void> {
   // overwrite a newly verified session.
   await supabase.auth.getSession();
   let clearUnauthorized = async (): Promise<void> => undefined;
-  const api = new ApiClient(SASU_APP_URL, supabase, () => clearUnauthorized());
+  const api = new ApiClient(
+    SASU_APP_URL,
+    supabase,
+    () => clearUnauthorized(),
+    session.defaultSession.fetch.bind(session.defaultSession),
+  );
   const auth = new AuthService(supabase, api, sessionStorage, [outboxFile, settingsFile]);
   let deviceLinked = false;
   let deviceLinkPending = false;

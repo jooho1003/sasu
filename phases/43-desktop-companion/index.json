@@ -117,11 +117,11 @@
     {
       "step": 11,
       "name": "desktop-release-verify",
-      "status": "error",
+      "status": "blocked",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
       "started_at": "2026-10-02T07:14:42+0900",
-      "error_message": "L3 로컬 Electron 전체 흐름에서 OTP 성공 뒤 link:departments가 session_invalid(401)로 반복 실패. 기록: docs/verification/desktop-companion-2026-10-02.md"
+      "blocked_reason": "사람 실측·운영 승인 대기: 5분 설치 녹화, 배포 저장소·업데이트 1회, 운영 auth.sessions 권한·0069 적용·SMTP·메일 템플릿 (기록: docs/verification/desktop-companion-2026-10-02.md)"
     }
   ],
   "production_deployed": false,

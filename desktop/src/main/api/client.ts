@@ -5,6 +5,10 @@ const REQUEST_TIMEOUT_MS = 15_000;
 
 type Parser<T> = (value: unknown) => T;
 type UnauthorizedHandler = () => Promise<void>;
+type FetchImplementation = (
+  input: string | Request,
+  init?: RequestInit,
+) => Promise<Response>;
 
 export class ApiError extends Error {
   constructor(
@@ -46,6 +50,7 @@ export class ApiClient {
     private readonly baseUrl: string,
     private readonly supabase: SupabaseClient,
     private readonly onUnauthorized: UnauthorizedHandler,
+    private readonly fetchImplementation: FetchImplementation = fetch,
   ) {}
 
   get<T>(path: string, parser: Parser<T>): Promise<T> {
@@ -94,7 +99,7 @@ export class ApiClient {
     headers.set("accept", "application/json");
     let response: Response;
     try {
-      response = await fetch(endpoint(this.baseUrl, path), {
+      response = await this.fetchImplementation(endpoint(this.baseUrl, path).toString(), {
         ...init,
         headers,
         redirect: "error",
