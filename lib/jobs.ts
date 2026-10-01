@@ -16,6 +16,7 @@ export type JobKind =
   | "summarize_document"
   | "run_agent_role"
   | "run_sales_review"
+  | "run_sales_source_review"
   | "generate_trailer"
   | "check_trailer_gate"
   | "score_trailer_attempt"
@@ -56,7 +57,7 @@ type OwnerReference = {
 };
 
 type FailureOwnerMapping = {
-  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "notion_roots" | "document_summaries" | "agent_role_results" | "sales_review_tasks" | "trailers" | "trailer_attempts";
+  table: "classifications" | "decision_requests" | "answers" | "items" | "meetings" | "sources" | "notion_roots" | "document_summaries" | "agent_role_results" | "sales_review_tasks" | "sales_source_reviews" | "trailers" | "trailer_attempts";
   references: OwnerReference[];
   write: "update" | "upsert";
   values: (ownerId: string, errorCode: string) => Record<string, unknown>;
@@ -210,6 +211,10 @@ const FAILURE_OWNER_MAPPINGS: Partial<
     write: "update",
     values: (_taskId, errorCode) => ({ status: "failed", status_reason: errorCode, result: null, updated_at: new Date().toISOString() }),
   },
+  run_sales_source_review: {
+    table:"sales_source_reviews",references:[{payloadKey:"taskId",column:"id"}],write:"update",
+    values:(_id,errorCode)=>({status:"failed",status_reason:errorCode,result:null,updated_at:new Date().toISOString()}),
+  },
 };
 
 const handlers = new Map<JobKind, JobHandler>();
@@ -333,6 +338,11 @@ async function updateFailureOwner(
   }
 
   const values = mapping.values(reference.id, errorCode);
+  if(mapping.table==="sales_source_reviews") {
+    const result=await client.from("sales_source_reviews").update(values).eq(reference.column,reference.id).in("status",["queued","processing"]);
+    if(result.error) throw new JobWorkerDatabaseError();
+    return;
+  }
   if (mapping.table === "trailer_attempts") {
     const result = await client.from("trailer_attempts").update(values).eq(reference.column, reference.id).eq("status", "scoring");
     if (result.error) throw new JobWorkerDatabaseError();
@@ -410,6 +420,11 @@ export async function sweepPendingRows(): Promise<void> {
     .in("status", ["queued", "processing"])
     .lt("updated_at", cutoff);
   if (salesReviewResult.error) throw new JobWorkerDatabaseError();
+
+  const salesSourceResult=await client.from("sales_source_reviews")
+    .update({status:"failed",status_reason:"llm_timeout",result:null,updated_at:new Date().toISOString()})
+    .in("status",["queued","processing"]).lt("updated_at",cutoff);
+  if(salesSourceResult.error) throw new JobWorkerDatabaseError();
 
   const cardResult = await client
     .from("decision_requests")

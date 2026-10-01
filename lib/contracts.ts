@@ -723,3 +723,17 @@ export const ReviewStatus = z.enum(["uploading","processing","ready","failed","c
 export const JobStatus = z.enum(["queued","running","done","failed"]);
 export const NotionRootState = z.enum(["pending","discovering","idle","paused_consent","paused_limit","failed","disabled"]);
 export const AnswerDeliveryState = z.enum(["pending","sent","failed","cancelled"]);
+
+// ADR-080: strict required fields; model output contains indices only.
+export const SalesSourceReviewChoice = z.strictObject({
+  topics: z.array(z.strictObject({
+    topic: z.enum(["price", "schedule", "contract", "approval"]),
+    selections: z.array(z.strictObject({
+      evidence: z.number().int().min(1).max(4),
+      first_paragraph: z.number().int().min(1).max(80),
+      last_paragraph: z.number().int().min(1).max(80),
+    })).max(4),
+  })).max(4),
+});
+export type SalesSourceReviewChoice = z.infer<typeof SalesSourceReviewChoice>;
+export const SalesSourceReviewRequest = SalesReviewSourceSelection.extend({request_id:z.uuid()}).strict();

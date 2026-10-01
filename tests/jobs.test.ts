@@ -261,6 +261,10 @@ describe("jobs worker", () => {
       ownerTable: "sales_review_tasks",
       ownerStatus: { status: "failed", status_reason: "llm_timeout", result: null },
     },
+    {
+      kind:"run_sales_source_review" as const,payload:{taskId:"task-1"},
+      ownerTable:"sales_source_reviews",ownerStatus:{status:"failed",status_reason:"llm_timeout",result:null},
+    },
   ])(
     "3회 실패한 $kind job은 failed이고 소유 row 상태도 바뀐다",
     async ({ kind, payload, ownerTable, ownerStatus }) => {
