@@ -82,6 +82,8 @@ type Dependencies = {
   supabase: SupabaseClient;
   settingsFile: EncryptedFile;
   onSettingsChanged?: (settings: SettingsValue) => void;
+  onDeviceAuthenticated?: () => void;
+  onDeviceLinked?: () => void;
 };
 
 function register<I, O>(
@@ -126,11 +128,19 @@ function webTarget(path: string): string {
 
 export function registerIpc(deps: Dependencies): void {
   register("auth:requestCode", (value) => EmailInput.parse(value), ({ email }) => deps.auth.requestCode(email));
-  register("auth:verifyCode", (value) => VerifyInput.parse(value), ({ email, code }) => deps.auth.verifyCode(email, code));
+  register("auth:verifyCode", (value) => VerifyInput.parse(value), async ({ email, code }) => {
+    const verified = await deps.auth.verifyCode(email, code);
+    deps.onDeviceAuthenticated?.();
+    return verified;
+  });
   register("auth:signOut", noInput, () => deps.auth.signOut());
 
   register("link:departments", noInput, () => deps.api.get("/api/companion/departments", parseCompanionDepartments));
-  register("link:create", (value) => LinkInput.parse(value), (input) => deps.api.postJson("/api/companion/link", { ...input, app_version: app.getVersion() }, parseCompanionLink));
+  register("link:create", (value) => LinkInput.parse(value), async (input) => {
+    const linked = await deps.api.postJson("/api/companion/link", { ...input, app_version: app.getVersion() }, parseCompanionLink);
+    deps.onDeviceLinked?.();
+    return linked;
+  });
   register("link:get", noInput, () => deps.api.get("/api/companion/link", parseCompanionContext));
   register("inbox:get", noInput, async () => {
     const inbox = await deps.api.get("/api/companion/inbox", parseCompanionInbox);

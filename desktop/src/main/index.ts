@@ -58,6 +58,8 @@ async function start(): Promise<void> {
   let clearUnauthorized = async (): Promise<void> => undefined;
   const api = new ApiClient(SASU_APP_URL, supabase, () => clearUnauthorized());
   const auth = new AuthService(supabase, api, sessionStorage, [outboxFile, settingsFile]);
+  let deviceLinked = false;
+  let deviceLinkPending = false;
   clearUnauthorized = async () => {
     await auth.clearLocalState();
     windows?.panel.webContents.send("signed-out");
@@ -67,6 +69,8 @@ async function start(): Promise<void> {
   registerIpc({
     api, auth, outbox, supabase, settingsFile,
     onSettingsChanged: (next) => windows?.setPanelPinned(next.panelPinned),
+    onDeviceAuthenticated: () => { deviceLinkPending = true; },
+    onDeviceLinked: () => { deviceLinked = true; deviceLinkPending = false; },
   });
   installBrowserGuards();
   windows = await createDesktopWindows();
@@ -96,6 +100,20 @@ async function start(): Promise<void> {
         inboxDelay = nextInboxDelay(inboxDelay, "ok");
         inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
         return;
+      }
+      if (!deviceLinked) {
+        if (deviceLinkPending) {
+          inboxDelay = nextInboxDelay(inboxDelay, "ok");
+          inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
+          return;
+        }
+        const context = await api.get("/api/companion/link", () => true).catch(() => false);
+        if (!context) {
+          inboxDelay = nextInboxDelay(inboxDelay, "ok");
+          inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
+          return;
+        }
+        deviceLinked = true;
       }
       const inbox = await api.get("/api/companion/inbox", parseCompanionInbox);
       const settings = await settingsFile.read(DEFAULT_SETTINGS);

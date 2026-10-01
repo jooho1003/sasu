@@ -1,7 +1,7 @@
 // Design Ref: desktop-companion §4 E12-E13 — upload paths match the reviewed-materials web adapter.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { validateAudioPart } from "@sasu/review-audio";
-import type { ApiClient } from "./client";
+import { ApiError, type ApiClient } from "./client";
 import {
   parseCompanionContext,
   parseReviewCreated,
@@ -13,6 +13,15 @@ export type ReviewUploadInput = ReviewUploadRequest;
 export type ReviewUploadProgress =
   | { stage: "original" }
   | { stage: "part"; current: number; total: number };
+
+async function retryTransient<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (cause) {
+    if (!(cause instanceof ApiError) || !["network", "timeout"].includes(cause.code)) throw cause;
+    return operation();
+  }
+}
 
 export async function uploadReview(
   supabase: SupabaseClient,
@@ -37,12 +46,12 @@ export async function uploadReview(
     throw new Error("review_document_parts_invalid");
   }
 
-  const context = await api.get("/api/companion/link", parseCompanionContext);
-  const created = await api.postJson(
+  const context = await retryTransient(() => api.get("/api/companion/link", parseCompanionContext));
+  const created = await retryTransient(() => api.postJson(
     "/api/companion/reviews",
     input.review,
     parseReviewCreated,
-  );
+  ));
   if (created.id !== input.review.id) throw new Error("review_id_mismatch");
 
   const root = `${context.dept.id}/${created.id}`;
@@ -67,11 +76,11 @@ export async function uploadReview(
   const indices = input.review.kind === "audio" ? input.parts.map(({ index }) => index) : [0];
   const jobs: string[] = [];
   for (const index of indices) {
-    const queued = await api.postJson(
+    const queued = await retryTransient(() => api.postJson(
       `/api/companion/reviews/${encodeURIComponent(created.id)}/parts`,
       { index },
       parseReviewPartQueued,
-    );
+    ));
     jobs.push(queued.job_id);
   }
   return { id: created.id, job_ids: jobs };
