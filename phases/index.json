@@ -1,6 +1,13 @@
 {
   "phases": [
     {
+      "dir": "42-sales-source-review-history",
+      "status": "completed",
+      "production_deployed": false,
+      "verification": "docs/verification/sales-source-review-history-2026-10-01.md",
+      "note": "본인 이력·20건 keyset·기존현재근거 재열람·초점/화면이동·읽기0쓰기, local 검증 완료. 모델회귀 최초실패/재실행 성공·미확보 원인 기록. 운영 미반영."
+    },
+    {
       "dir": "41-sales-source-ai-review",
       "status": "completed",
       "verification": "docs/verification/sales-source-ai-review-2026-10-01.md",
