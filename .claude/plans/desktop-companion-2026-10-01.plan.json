@@ -221,8 +221,26 @@
       "output": "desktop/src/renderer/components/Work*·work E2E"
     },
     {
+      "id": "S9c",
+      "title": "desktop-fixes (1차 analyze 84.2% 보완: 펫 클릭·본 항목·429·위치·Minor) — 2026-10-02",
+      "domain": "frontend",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 1,
+      "score": 2,
+      "tier": "balanced",
+      "agent": "codex",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "depends_on": [
+        "S9b"
+      ],
+      "output": "desktop/src/** 보완·E2E 펫 클릭"
+    },
+    {
       "id": "S10",
-      "title": "desktop-release-verify (step 11) (설치 파일·업데이트 설정·L3/L4 로컬 실측)",
+      "title": "desktop-release-verify (step 12) (설치 파일·업데이트 설정·L3/L4 로컬 실측)",
       "domain": "qa",
       "D1": 0,
       "D2": 1,
@@ -234,7 +252,7 @@
       "claude_model": "sonnet",
       "codex_model": "gpt-5.6-terra",
       "depends_on": [
-        "S9b"
+        "S9c"
       ],
       "output": "electron-builder.yml·updater·full-flow E2E·docs/verification/desktop-companion-*.md",
       "note": "끝나면 사람 실측·운영 승인 대기로 blocked"
@@ -285,5 +303,5 @@
     "G5_safety": "PASS",
     "result": "PASS"
   },
-  "powerful_ratio": "7/14"
+  "powerful_ratio": "7/15"
 }

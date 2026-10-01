@@ -1,53 +1,47 @@
-# Step 11: desktop-release-verify
+# Step 11: desktop-fixes
 
 ## 읽어야 할 파일
 
-- `docs/PRD.md` §3-8 DC-12·§8-1 데스크톱 행·§11 "데스크톱 동반 앱" 행(판정 기준 전체)
-- `docs/ARCHITECTURE.md` §6-12 불변식 46~50, §8
-- `docs/ADR.md` ADR-082 결정 9·10
-- `docs/02-design/features/desktop-companion.design.md` §7(S8)·§8(L1~L4)·§11.2(비교 목록 13개)
-- step 0~10의 기록: `docs/verification/43-desktop-companion/*.md`, `phases/43-desktop-companion/index.json` summary
-- `desktop/` 전체, `scripts/verify-companion-{gates,auth,api}.mjs`
+- `docs/03-analysis/desktop-companion.analysis.md` 전체 (이 step이 고칠 차이 목록 — C1·I1·I2·I4·Minor)
+- `docs/PRD.md` §3-8 DC-01~DC-11, §11 "데스크톱 동반 앱" 행
+- `docs/ARCHITECTURE.md` §6-12 불변식 46~50
+- `docs/ADR.md` ADR-082 결정 6·7
+- `docs/02-design/features/desktop-companion.design.md` §5.1·§5.2·§5.3(설정)·§6(429 행)·§7(S5·S7)
+- `desktop/src/main/index.ts`, `desktop/src/main/windows/index.ts`, `desktop/src/main/tray.ts`, `desktop/src/main/notify.ts`, `desktop/src/main/ipc.ts`, `desktop/src/main/outbox-service.ts`, `desktop/src/main/core/{outbox,pet-state,poller}.ts`(+`__tests__`), `desktop/src/preload/index.ts`, `desktop/src/renderer/src/{App.tsx,components/*,pet/PetCanvas.tsx}`, `desktop/tests/e2e/*.spec.ts`
 
 ## 작업
 
-1. 배포 설정(게시는 하지 않는다):
-   - `desktop/electron-builder.yml`: `appId`, `productName: 사수`, Windows `nsis`(사용자별 설치, 바로가기), 산출물 `desktop/release/`, `publish: github`(소유자 `jooho1003`, 저장소 `sasu-desktop-releases`, `releaseType: release`). 스크립트는 `--publish never`만 쓴다.
-   - `desktop/src/main/updater.ts`: 패키지 빌드에서만 켠다. 백그라운드 다운로드 → 종료 시 설치, 설정 탭에 상태 표시. 사전 배포판 받지 않음. 업데이트 로그에도 원문 없음.
-   - `npm --prefix desktop run dist`로 설치 파일을 만든다.
-2. L3 전체 흐름(`desktop/tests/e2e/full-flow.spec.ts`, 로컬 QA): 코드 로그인 → 부서 → 시드 답 열기(인용) → 카드 결정·연타 1건 → **웹 설정에서 이 기기 해제 → 앱이 다음 요청에서 로그인 화면** → 다시 로그인 → 네트워크 끊김(`session.enableNetworkEmulation({offline:true})`)에서 질문 → "연결되면 보낼게요" → 연결 복구 → 전송 → 끊김 보관 파일 삭제.
-3. L4 로컬 실측(PRD §11 행), `docs/verification/desktop-companion-YYYY-MM-DD.md`에 시각·명령·결과로 기록:
-   - 새 담당 카드 시드 시각 → 펫 "확인 필요"·Windows 알림 시각, 차이 60초 이하.
-   - 같은 질문의 웹·앱 인용 가시성 동일(lead·member) — `verify-companion-api.mjs` 결과 인용.
-   - 앱 `userData` 폴더와 앱 로그 전체에서 테스트 질문 문자열 평문 0건(`Select-String`).
-   - 해제 직후 다음 요청 401.
-4. 설계 대비 확인: design §11.2 비교 목록 13개 각각의 파일·명령 근거를 기록에 적는다.
-5. **사람만 할 수 있는 항목**은 실행하지 말고 기록에 "대기"로 적는다:
-   - 깨끗한 Windows 사용자 계정에서 설치 → 로그인 → 첫 답 5분 안(화면 녹화).
-   - 배포 전용 공개 저장소 생성·첫 게시·자동 업데이트 1회 실제 적용.
-   - 운영: `auth.sessions` 삭제 권한 확인, 마이그레이션 적용, 메일 SMTP 전환, 6자리 코드 템플릿.
-6. 1~4가 통과하면 `"status": "blocked"`, `"blocked_reason": "사람 실측·운영 승인 대기: 5분 설치 녹화, 배포 저장소·업데이트 1회, 운영 auth.sessions 권한·0069 적용·SMTP·메일 템플릿 (기록: docs/verification/desktop-companion-YYYY-MM-DD.md)"`로 멈춘다.
+1차 analyze(84.2%)가 찾은 desktop 차이를 고친다. 서버(`app/`·`lib/`·`supabase/`)는 바꾸지 않는다.
 
-## 보완 — 401 session_invalid의 원인 (2026-10-02 오케스트레이터)
+1. **C1 펫 클릭으로 패널 열기**
+   - `ipcMain.on("pet-toggle-panel", …)`을 등록하고, 보낸 창이 펫 창(`event.sender === windows.pet.webContents`)일 때만 `togglePanel()`을 부른다.
+   - 트레이 아이콘을 실제 이미지로 바꾼다(`desktop/resources/tray.ico` 또는 PNG, 16·32px). 빈 이미지(`nativeImage.createEmpty()`)를 쓰지 않는다. electron-builder `extraResources`/`files`에 포함한다.
+   - 처음 실행(로그인 전)에는 패널을 바로 보여 준다.
+2. **I1 "본 항목" 저장과 알림**
+   - 화면에서 카드·답·자료·영업 작업을 열면 그 ID를 `settings:set({ seen })`으로 저장한다(최대 500개, 오래된 것부터 버림).
+   - 본체는 상태 요약마다 **새로 나타난** 카드 ID·완료된 답·실패 항목을 이전 요약과 비교해 알림을 보낸다(상태가 같아도 새 카드면 알림). 알림 문구는 종류별 고정 문구와 건수만(설계 §7 S7): 카드 "결정할 카드가 N건 있어요", 답 "답이 도착했어요", 자료·영업 완료 "맡긴 일이 끝났어요", 실패 "작업이 실패했어요".
+   - core `pet-state`는 `seen`을 반영한다(이미 있으면 테스트만 보강).
+3. **I2 하루 한도(429)는 보관하지 않는다** — design §6·ADR-082 결정 7. `outbox-service.ts`의 `shouldKeep`과 core `outbox.ts`의 `applySendResult`에서 429를 "제거 + 하루 한도 안내"로 바꾼다. 유지 대상은 네트워크 오류·5xx·`timeout`뿐이다. core 테스트를 고친다(이전 step 8 명세의 "429 유지"는 설계와 어긋난 오류였다).
+4. **I4 펫 위치·동작 줄이기**
+   - 펫 창 이동이 끝나면 위치를 설정에 저장하고 시작할 때 복원한다(현재 모니터 밖이면 기본 위치).
+   - 설정 탭에 "움직임 줄이기" 켬/끔을 두고, Windows 설정(`prefers-reduced-motion`) 또는 앱 설정 중 하나라도 켜져 있으면 펫을 정지 그림으로 그린다.
+5. **Minor**
+   - 트레이 "펫 숨기기/보이기" 라벨을 상태에 맞게 갱신한다.
+   - 펫 색을 바꾸면 펫 창에 바로 반영한다.
+   - 설정 탭에 단축키(`Ctrl+Alt+S`)·기기 이름·실제 앱 버전(`app.getVersion()`)을 보여 준다.
+   - 답 대기 폴링에 core `answerPollPlan`(120초 상한)을 쓴다.
+   - 업데이트 확인을 시작 시 1회 + 6시간마다로 한다(패키지 빌드에서만). 설치 빌드에서는 `SASU_DISABLE_UPDATER`를 무시한다(`!app.isPackaged`일 때만 허용).
+   - 모든 IPC 핸들러에 발신 창 검사를 넣는다(펫 창에는 창 이동·패널 토글·설정 읽기만, 나머지는 패널 창만).
+   - 쓰지 않는 `panel-blurred` 구독을 지우거나 실제로 연결한다.
+   - 시작 실패 로그의 `code`에 오류 메시지 대신 고정 코드(`cause.name`)만 쓴다.
+6. **E2E 보강**: smoke에서 펫 창을 클릭한 뒤 `panel.isVisible()`가 true인지 확인한다. 기존 E2E 5건이 모두 통과해야 한다.
+7. 결과는 `docs/verification/43-desktop-companion/desktop-fixes.md`.
 
-로컬 E2E에서 코드 로그인 뒤 `/api/companion/*`가 전부 `401 session_invalid`면, QA 서버가 **운영 Supabase 주소로 빌드된 `.next`**로 떠 있는 것이다. `NEXT_PUBLIC_SUPABASE_URL`은 빌드 때 박히므로 루트 `npm run build`(AC)를 돌리면 `.next`가 운영 주소로 바뀌고, 그 뒤 `review-qa.mjs start`로 띄운 서버는 로컬 토큰을 모두 거부한다(2026-10-02 재현).
+## 실행 메모
 
-- E2E 직전에 항상 `node scripts/review-qa.mjs build` → `start`(분리 프로세스) 순서로 QA 서버를 띄운다. 루트 `npm run build`는 E2E를 모두 끝낸 **뒤에** 실행한다.
-- 앱은 `SUPABASE_URL`·`SUPABASE_ANON_KEY`(로컬 QA)·`SASU_APP_URL=http://127.0.0.1:3011`로 빌드한다.
-- AC 실행 순서: desktop lint·test·build·dist → `review-qa.mjs build`·start → E2E·SQL 검증·L4 실측 → QA 서버 종료 → 루트 lint·build·test·guest-test.
-
-## 실행 메모 — 장시간 서버 (2026-10-02 오케스트레이터)
-
-이전 시도에서 Codex 셸 도구로 `node scripts/review-qa.mjs start`(또는 `dev`)를 직접 띄우자 명령이 끝나지 않아 세션이 40분 넘게 멈췄다. 검증 서버는 아래처럼 **분리 프로세스**로 띄우고, 준비를 HTTP로 확인한 뒤 쓰고, 끝나면 **반드시 종료**한다.
-
-```powershell
-$qa = Start-Process node -ArgumentList "scripts/review-qa.mjs","start" -WorkingDirectory (Get-Location) -WindowStyle Hidden -PassThru -RedirectStandardOutput ".vercel/review-qa/qa-server.out.log" -RedirectStandardError ".vercel/review-qa/qa-server.err.log"
-for ($i=0; $i -lt 90; $i++) { try { if ((Invoke-WebRequest http://127.0.0.1:3011 -UseBasicParsing -TimeoutSec 2).StatusCode) { break } } catch {}; Start-Sleep 2 }
-# ... E2E 실행 ...
-taskkill /PID $qa.Id /T /F
-```
-
-step을 끝내기 전에 이 step에서 띄운 서버·Electron·Playwright 프로세스가 남아 있지 않은지 확인한다. 남은 프로세스는 실행기를 멈추게 한다.
+- 검증 서버는 step 10·12의 "실행 메모 — 장시간 서버"처럼 분리 프로세스로 띄우고 끝나면 끈다.
+- E2E용 서버는 `node scripts/review-qa.mjs build` → `start` 순서로 띄운다(루트 `npm run build`의 `.next`는 운영 Supabase 주소라 401이 난다). 루트 `npm run build`는 E2E 뒤에 실행한다.
+- 앱은 로컬 QA의 `SUPABASE_URL`·`SUPABASE_ANON_KEY`와 `SASU_APP_URL=http://127.0.0.1:3011`로 빌드한다.
 
 ## Acceptance Criteria
 
@@ -55,27 +49,26 @@ step을 끝내기 전에 이 step에서 띄운 서버·Electron·Playwright 프�
 npm --prefix desktop run lint
 npm --prefix desktop test
 npm --prefix desktop run build
-npm --prefix desktop run dist
 npm --prefix desktop run e2e
-node scripts/verify-device-links-sql.mjs
-node scripts/verify-security-sql.mjs
-node scripts/verify-companion-api.mjs
+npm run check:wording
 npm run lint
-npm run build
 npm run test
-node scripts/review-qa.mjs guest-test
+npm run build
 git diff --check
 ```
 
+- 정적 확인(출력 0줄): `git grep -n "nativeImage.createEmpty\|dangerouslySetInnerHTML" -- desktop/src` · `git grep -n "429" -- desktop/src/main/outbox-service.ts`가 보관 조건에 없음.
+- E2E 기록에 "펫 클릭 → 패널 표시"가 실제 출력으로 있어야 완료다.
+
 ## 검증 절차
 
-1. AC 실행.
-2. 기록 문서에 PRD §11 행의 항목별 결과(통과·대기)를 빠짐없이 적는다.
-3. `phases/43-desktop-companion/index.json` step 11을 위 6의 `blocked`로 갱신한다(로컬 검증이 실패하면 `error`).
+1. AC 실행, 펫 클릭 전후·설정 탭 스크린샷을 기록에 연결한다.
+2. 체크리스트: 알림에 내용 없음 · renderer 네트워크·토큰 없음 · IPC 발신 창 검사 · 429 보관 없음.
+3. `phases/43-desktop-companion/index.json` step 11을 갱신한다.
 
 ## 금지사항
 
-- 설치 파일을 게시하거나 GitHub 저장소를 만들지 마라. 이유: 외부 공개 작업이라 운영 반영 승인 뒤에 사람이 한다(ADR-082 결정 9).
-- 운영 DB·운영 Supabase 설정·메일 템플릿을 바꾸지 마라. 이유: 불변식 22·PRD §3-8 운영 반영 전제.
-- 사람 실측 항목을 추정치로 채우지 마라. 이유: PRD §11 — 실행 기록만 완료 근거다.
-- 설치 파일(`desktop/release/`)을 커밋하지 마라. 이유: 큰 바이너리이며 게시 경로가 따로 있다.
+- 서버 코드(`app/`·`lib/`·`supabase/`)를 바꾸지 마라. 이유: 이 step은 앱 보완이며 서버는 analyze에서 일치했다.
+- 알림·트레이에 질문·답·카드 제목을 넣지 마라. 이유: design §7 S7.
+- 하루 한도(429) 질문을 보관하지 마라. 이유: ADR-082 결정 7·design §6.
+- 셸 도구로 서버를 직접 띄우고 기다리지 마라. 이유: 세션이 멈춘다(2026-10-02 실측).
