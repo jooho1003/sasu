@@ -62,7 +62,7 @@
       "effort": "medium",
       "started_at": "2026-10-02T01:17:09+0900",
       "summary": "카드 조회·결정·회의 받아쓴 글 업로드를 ActorContext 공용 lib로 옮기고, 인용·결정 권한·동의 화자·수집 어댑터 경계를 유지한 채 단위·UI 회귀를 통과했다. docs/verification/43-desktop-companion/shared-card-transcript.md 참조.",
-      "completed_at": "2026-10-02T01:43:48+0900"
+      "completed_at": "2026-10-02T01:45:41+0900"
     },
     {
       "step": 6,
