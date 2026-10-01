@@ -32,7 +32,7 @@
       "effort": "xhigh",
       "started_at": "2026-10-01T22:45:59+0900",
       "summary": "Bearer 전용 Supabase·기기 컨텍스트와 E01~E04를 구현하고, TDD 19·전체 1807·SQL 8·로컬 Auth/API 11항목·lint/build/Graft를 통과했다. docs/verification/43-desktop-companion/auth.md 참조. 운영 미반영.",
-      "completed_at": "2026-10-01T23:16:11+0900"
+      "completed_at": "2026-10-01T23:39:42+0900"
     },
     {
       "step": 3,
