@@ -2,8 +2,8 @@
 
 ## 읽어야 할 파일
 
-- `docs/ARCHITECTURE.md` §6 불변식 2·3·9, §6-11 불변식 45~47, §8
-- `docs/ADR.md` ADR-081 결정 3·4·5
+- `docs/ARCHITECTURE.md` §6 불변식 2·3·9, §6-12 불변식 46~48, §8
+- `docs/ADR.md` ADR-082 결정 3·4·5
 - `docs/02-design/features/desktop-companion.design.md` §4(공통·E01~E04)·§4.1·§6·§7(S1·S3·S9)
 - step 1 산출물: `supabase/migrations/00NN_device_links.sql`, `scripts/verify-device-links-sql.mjs`
 - `lib/supabase/server.ts`, `lib/supabase/membership.ts`(반환 모양·redirect 동작), `lib/contracts.ts`
@@ -41,7 +41,7 @@
 
 ## 코드 관계와 구조 확인
 
-Graft로 새 모듈의 import 범위(앱 경로 밖에서 쓰이지 않음)를 확인한다. 결과·누락은 `docs/verification/42-desktop-companion/auth.md`.
+Graft로 새 모듈의 import 범위(앱 경로 밖에서 쓰이지 않음)를 확인한다. 결과·누락은 `docs/verification/43-desktop-companion/auth.md`.
 
 ## Acceptance Criteria
 
@@ -59,12 +59,12 @@ git diff --check
 
 1. 위 AC를 실행하고 `auth.md`에 결과를 남긴다.
 2. 체크리스트: 요청 경로 service role 0(`grep -r "service" app/api/companion lib/companion` 결과 확인) · 로그에 토큰·본문 없음 · 새 `lib/` 모듈의 테스트 존재.
-3. `phases/42-desktop-companion/index.json` step 2를 갱신한다.
+3. `phases/43-desktop-companion/index.json` step 2를 갱신한다.
 
 ## 금지사항
 
-- `createServiceSupabaseClient`·service role key를 `app/api/companion/**`·`lib/companion/**`에서 쓰지 마라. 이유: 불변식 2·45 — 권한 판정은 사용자 JWT의 RLS로만 한다.
-- 기존 `createServerSupabaseClient`·`requireMembership`에 Bearer 분기를 넣지 마라. 이유: 불변식 47 — 웹 경로는 쿠키만 받는다.
+- `createServiceSupabaseClient`·service role key를 `app/api/companion/**`·`lib/companion/**`에서 쓰지 마라. 이유: 불변식 2·46 — 권한 판정은 사용자 JWT의 RLS로만 한다.
+- 기존 `createServerSupabaseClient`·`requireMembership`에 Bearer 분기를 넣지 마라. 이유: 불변식 48 — 웹 경로는 쿠키만 받는다.
 - `proxy.ts` 매처에 `/api/companion`을 넣지 마라. 이유: 쿠키 세션 갱신이 Bearer 경로에 섞인다.
 - 토큰·이메일·요청 본문을 로그에 남기지 마라. 이유: 불변식 9.
 - 기존 테스트를 깨뜨리지 마라.

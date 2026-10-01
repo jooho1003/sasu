@@ -1,7 +1,7 @@
 {
   "slug": "desktop-companion",
   "date": "2026-10-01",
-  "context": "Windows 데스크톱 동반 앱(펫). 사용자 결정: 목적 3개 모두·부서원 전체·Windows·B(독립 화면+기기 토큰)·설계안 C·이메일 6자리 코드·영업 원문 검토(AG-07)·배포 전용 공개 저장소. 원천 PRD §3-8·ADR-081·ARCHITECTURE §6-11. 실행 계약 phases/42-desktop-companion (Codex). 운영 반영은 사람 승인.",
+  "context": "Windows 데스크톱 동반 앱(펫). 사용자 결정: 목적 3개 모두·부서원 전체·Windows·B(독립 화면+기기 토큰)·설계안 C·이메일 6자리 코드·영업 원문 검토(AG-07)·배포 전용 공개 저장소. 원천 PRD §3-8·ADR-082·ARCHITECTURE §6-12. 실행 계약 phases/43-desktop-companion (Codex). 운영 반영은 사람 승인.",
   "nodes": [
     { "id": "D0", "title": "plan-plus·design·PRD/ADR/ARCHITECTURE·step 파일", "domain": "general", "D1": 2, "D2": 2, "D3": 1, "D4": 2, "score": 7, "tier": "powerful", "agent": "main(never_delegate: 아키텍처)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": [], "output": "docs·phases/42 step0~10", "status": "done" },
     { "id": "S0", "title": "setup-gates (루트 설정·TDD 훅·게이트 G1/G2 로컬 실측)", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["D0"], "output": "tsconfig·eslint·check-wording·tdd-guard·verify-companion-gates.mjs·gates.md" },

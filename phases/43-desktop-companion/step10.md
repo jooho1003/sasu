@@ -3,10 +3,10 @@
 ## 읽어야 할 파일
 
 - `docs/PRD.md` §3-8 DC-12·§8-1 데스크톱 행·§11 "데스크톱 동반 앱" 행(판정 기준 전체)
-- `docs/ARCHITECTURE.md` §6-11 불변식 45~49, §8
-- `docs/ADR.md` ADR-081 결정 9·10
+- `docs/ARCHITECTURE.md` §6-12 불변식 46~50, §8
+- `docs/ADR.md` ADR-082 결정 9·10
 - `docs/02-design/features/desktop-companion.design.md` §7(S8)·§8(L1~L4)·§11.2(비교 목록 13개)
-- step 0~9의 기록: `docs/verification/42-desktop-companion/*.md`, `phases/42-desktop-companion/index.json` summary
+- step 0~9의 기록: `docs/verification/43-desktop-companion/*.md`, `phases/43-desktop-companion/index.json` summary
 - `desktop/` 전체, `scripts/verify-companion-{gates,auth,api}.mjs`
 
 ## 작업
@@ -50,11 +50,11 @@ git diff --check
 
 1. AC 실행.
 2. 기록 문서에 PRD §11 행의 항목별 결과(통과·대기)를 빠짐없이 적는다.
-3. `phases/42-desktop-companion/index.json` step 10을 위 6의 `blocked`로 갱신한다(로컬 검증이 실패하면 `error`).
+3. `phases/43-desktop-companion/index.json` step 10을 위 6의 `blocked`로 갱신한다(로컬 검증이 실패하면 `error`).
 
 ## 금지사항
 
-- 설치 파일을 게시하거나 GitHub 저장소를 만들지 마라. 이유: 외부 공개 작업이라 운영 반영 승인 뒤에 사람이 한다(ADR-081 결정 9).
+- 설치 파일을 게시하거나 GitHub 저장소를 만들지 마라. 이유: 외부 공개 작업이라 운영 반영 승인 뒤에 사람이 한다(ADR-082 결정 9).
 - 운영 DB·운영 Supabase 설정·메일 템플릿을 바꾸지 마라. 이유: 불변식 22·PRD §3-8 운영 반영 전제.
 - 사람 실측 항목을 추정치로 채우지 마라. 이유: PRD §11 — 실행 기록만 완료 근거다.
 - 설치 파일(`desktop/release/`)을 커밋하지 마라. 이유: 큰 바이너리이며 게시 경로가 따로 있다.

@@ -3,7 +3,7 @@
 ## 읽어야 할 파일
 
 - `docs/PRD.md` §3-8 DC-10, §3-7(쉬운 말 문구 기준 W1~W7), `docs/wording-guide.md`
-- `docs/ARCHITECTURE.md` §6 불변식 2·10, §6-11 불변식 46
+- `docs/ARCHITECTURE.md` §6 불변식 2·10, §6-12 불변식 47
 - `docs/02-design/features/desktop-companion.design.md` §4(W07·W08)·§5.4(U13)
 - step 1·2 산출물: `supabase/migrations/00NN_device_links.sql`(`revoke_device_link`), `lib/companion/context.ts`
 - `app/(auth)/d/[dept]/settings/page.tsx`, `components/settings-s5.tsx`(멤버 탭 "내 수집 동의" 패널 위치 :710~751 부근)
@@ -25,7 +25,7 @@
 
 ## 코드 관계와 구조 확인
 
-설정 화면 → `/api/devices` → RPC 경로를 실제 파일로 확인한다. 결과·누락은 `docs/verification/42-desktop-companion/web-devices.md`.
+설정 화면 → `/api/devices` → RPC 경로를 실제 파일로 확인한다. 결과·누락은 `docs/verification/43-desktop-companion/web-devices.md`.
 
 ## Acceptance Criteria
 
@@ -43,11 +43,11 @@ git diff --check
 
 1. AC 실행, 1440·390px 스크린샷을 `web-devices.md`에 연결한다.
 2. 체크리스트: 쿠키 세션만 사용 · service role 없음 · 문구 검사 통과 · 데모 쓰기 0.
-3. `phases/42-desktop-companion/index.json` step 3을 갱신한다.
+3. `phases/43-desktop-companion/index.json` step 3을 갱신한다.
 
 ## 금지사항
 
-- `device_links`를 직접 update/delete 하지 마라. 이유: 해제는 `auth.sessions` 삭제와 한 트랜잭션이어야 한다(불변식 46).
+- `device_links`를 직접 update/delete 하지 마라. 이유: 해제는 `auth.sessions` 삭제와 한 트랜잭션이어야 한다(불변식 47).
 - 새 `NEXT_PUBLIC_*` 환경 변수를 만들지 마라. 이유: 클라이언트 노출 값은 CLAUDE.md가 정한 것뿐이다.
 - 다른 설정 탭의 동작을 바꾸지 마라.
 - 기존 테스트를 깨뜨리지 마라.

@@ -3,8 +3,8 @@
 ## 읽어야 할 파일
 
 - `docs/PRD.md` §3-8 DC-03·DC-04·DC-08·DC-11, §4 "데스크톱 앱" 행
-- `docs/ARCHITECTURE.md` §6 불변식 9, §6-11 불변식 45~49, §8(desktop 두 행)
-- `docs/ADR.md` ADR-081 결정 2·3·6·7·10
+- `docs/ARCHITECTURE.md` §6 불변식 9, §6-12 불변식 46~50, §8(desktop 두 행)
+- `docs/ADR.md` ADR-082 결정 2·3·6·7·10
 - `docs/02-design/features/desktop-companion.design.md` §2.3·§5.2·§6·§7(S4~S7·S9)·§9·§10·§11.1
 - step 0 산출물: `scripts/hooks/tdd-guard.sh`(desktop 허용 목록), 루트 `tsconfig.json`·`eslint.config.mjs` 제외 설정
 - step 2·6 산출물: `lib/contracts.ts`의 `Companion*` 스키마, `app/api/companion/**`의 경로 목록과 응답
@@ -39,7 +39,7 @@
    - 로그: ID·길이·오류 코드만 남기는 작은 로거. 질문·답·파일 내용·이메일·토큰을 남기지 않는다.
 5. `desktop/src/preload/index.ts` — `contextBridge.exposeInMainWorld('sasu', {...})`로 위 채널의 타입 있는 함수만 노출한다. `ipcRenderer` 자체를 노출하지 않는다.
 6. 끊김 보관 저장: core `outbox` 규칙 + 암호화 파일. 다시 연결되면 순서대로 `ask:send`.
-7. 결과는 `docs/verification/42-desktop-companion/desktop-core.md`(버전 목록·보안 설정 확인 결과).
+7. 결과는 `docs/verification/43-desktop-companion/desktop-core.md`(버전 목록·보안 설정 확인 결과).
 
 ## Acceptance Criteria
 
@@ -61,12 +61,12 @@ git diff --check
 
 1. AC 실행.
 2. 체크리스트: 토큰이 화면 프로세스로 넘어가지 않는가 · 평문 저장 경로가 없는가 · 로그에 원문이 없는가 · core에 테스트가 있는가.
-3. `phases/42-desktop-companion/index.json` step 8을 갱신한다.
+3. `phases/43-desktop-companion/index.json` step 8을 갱신한다.
 
 ## 금지사항
 
 - service role key·게시 토큰·비밀값을 `desktop/`에 넣지 마라. 이유: 설치 파일은 누구나 풀어볼 수 있다. 공개값 3개만 넣는다.
-- 화면(renderer)에서 fetch·Supabase 클라이언트를 만들지 마라. 이유: 토큰은 본체만 가진다(불변식 49, CSP `connect-src 'none'`).
-- `safeStorage`를 못 쓸 때 평문으로 저장하지 마라. 이유: 불변식 49.
-- 결정·업로드를 끊김 보관에 넣지 마라. 이유: ADR-081 결정 7 — 질문만 보관한다.
+- 화면(renderer)에서 fetch·Supabase 클라이언트를 만들지 마라. 이유: 토큰은 본체만 가진다(불변식 50, CSP `connect-src 'none'`).
+- `safeStorage`를 못 쓸 때 평문으로 저장하지 마라. 이유: 불변식 50.
+- 결정·업로드를 끊김 보관에 넣지 마라. 이유: ADR-082 결정 7 — 질문만 보관한다.
 - 루트 `package.json`에 Electron 의존성을 넣지 마라. 이유: Vercel 빌드에 섞인다.

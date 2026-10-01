@@ -1,6 +1,6 @@
 {
   "project": "sasu",
-  "phase": "42-desktop-companion",
+  "phase": "43-desktop-companion",
   "design": "docs/02-design/features/desktop-companion.design.md",
   "plan": ".claude/plans/desktop-companion-2026-10-01.plan.json",
   "steps": [

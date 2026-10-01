@@ -7,7 +7,7 @@ date: 2026-10-01
 
 # desktop-companion Design
 
-원천: [PRD §3-8 DC-01~12·§4·§8-1·§11](../../PRD.md) → [ARCHITECTURE §6-11 불변식 45~49·§8](../../ARCHITECTURE.md) → [ADR-081](../../ADR.md), [plan](../../01-plan/features/desktop-companion.plan.md). 제품 결정은 원천 문서에만 있다. 이 문서는 구현 계약과 §11 analyze 대조 목록이다.
+원천: [PRD §3-8 DC-01~12·§4·§8-1·§11](../../PRD.md) → [ARCHITECTURE §6-12 불변식 46~50·§8](../../ARCHITECTURE.md) → [ADR-082](../../ADR.md), [plan](../../01-plan/features/desktop-companion.plan.md). 제품 결정은 원천 문서에만 있다. 이 문서는 구현 계약과 §11 analyze 대조 목록이다.
 
 ## Context Anchor
 
@@ -41,7 +41,7 @@ date: 2026-10-01
 
 | 안 | 방식 | 복잡도·위험 | 선택 |
 |---|---|---|---|
-| A 최소 변경 | 웹 경로가 Bearer도 받게 `createServerSupabaseClient` 분기 | 낮음·모든 웹 경로 공격면 확대, 불변식 47 위반 | 제외 |
+| A 최소 변경 | 웹 경로가 Bearer도 받게 `createServerSupabaseClient` 분기 | 낮음·모든 웹 경로 공격면 확대, 불변식 48 위반 | 제외 |
 | B 깔끔한 분리 | 웹 경로 7개 본문 전부 `lib/actions/*`로 이동 | 높음·회귀 범위 큼 | 제외 |
 | **C 실용 균형** | 권한·인용·작업 실행 코드 5곳만 공용 lib로 추출, 입력 검사·응답 변환은 경로별 | 중간·웹은 추출 지점만 변경 | **선택(2026-10-01)** |
 
@@ -295,10 +295,11 @@ desktop/src/shared/contracts.ts
 | module-8 배포 설정·검증 | 12·13 | 7 (+5) |
 
 #### Recommended Session Plan
-phase 42 step 0~10으로 만들었다(2026-10-01): module-0→step 0 `setup-gates`, module-1→step 1 `device-links-schema`, module-2→step 2 `companion-auth`·step 3 `web-devices`, module-3→step 4 `shared-ask-answer`·step 5 `shared-card-transcript`, module-4→step 6 `companion-routes`, module-5→step 7 `companion-sales-review`, module-6→step 8 `desktop-core`, module-7→step 9 `desktop-ui`, module-8→step 10 `desktop-release-verify`. 배정 기록은 `.claude/plans/desktop-companion-2026-10-01.{plan.json,md}`. 모델 배정은 `D:\바이브코딩\CLAUDE.md` 플랜 파이프라인(4축 점수 → 게이트 G1~G5 → plan.json)으로 정한다. 보안·인증 하드 오버라이드라 module-1·2와 최종 리뷰는 powerful, 운영 반영(마이그레이션·메일 템플릿·SMTP·배포 저장소)은 D3=2로 `requires_approval: true`다. Graft·Archify는 이 설계 세션에서 쓰지 않았다 — step 0에서 Bearer 입구와 공용 lib 의존을 Graft로 확인하고, 연결·해제 흐름을 Archify로 그려 검증 기록에 남긴다(없으면 누락 범위를 적는다).
+phase 43 step 0~10으로 만들었다(2026-10-01): module-0→step 0 `setup-gates`, module-1→step 1 `device-links-schema`, module-2→step 2 `companion-auth`·step 3 `web-devices`, module-3→step 4 `shared-ask-answer`·step 5 `shared-card-transcript`, module-4→step 6 `companion-routes`, module-5→step 7 `companion-sales-review`, module-6→step 8 `desktop-core`, module-7→step 9 `desktop-ui`, module-8→step 10 `desktop-release-verify`. 배정 기록은 `.claude/plans/desktop-companion-2026-10-01.{plan.json,md}`. 모델 배정은 `D:\바이브코딩\CLAUDE.md` 플랜 파이프라인(4축 점수 → 게이트 G1~G5 → plan.json)으로 정한다. 보안·인증 하드 오버라이드라 module-1·2와 최종 리뷰는 powerful, 운영 반영(마이그레이션·메일 템플릿·SMTP·배포 저장소)은 D3=2로 `requires_approval: true`다. Graft·Archify는 이 설계 세션에서 쓰지 않았다 — step 0에서 Bearer 입구와 공용 lib 의존을 Graft로 확인하고, 연결·해제 흐름을 Archify로 그려 검증 기록에 남긴다(없으면 누락 범위를 적는다).
 
 ## Version History
 
 | 버전 | 날짜 | 내용 |
 |---|---|---|
+| 1.1 | 2026-10-01 | 동시 작업과 번호 충돌로 ADR-082·phase 43·PRD 1.28·§6-12·불변식 46~50으로 재번호 |
 | 1.0 | 2026-10-01 | 설계안 C·이메일 6자리 코드·영업 원문 검토(AG-07)·배포 전용 공개 저장소 선택 반영 |

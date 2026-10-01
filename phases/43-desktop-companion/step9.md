@@ -3,8 +3,8 @@
 ## 읽어야 할 파일
 
 - `docs/PRD.md` §3-8 DC-01~DC-11, §3-7(쉬운 말 기준), `docs/wording-guide.md`
-- `docs/ARCHITECTURE.md` §3.5(인용 없으면 출력 없음), §6-11 불변식 48·49
-- `docs/ADR.md` ADR-081 결정 6·7·8·10
+- `docs/ARCHITECTURE.md` §3.5(인용 없으면 출력 없음), §6-12 불변식 49·50
+- `docs/ADR.md` ADR-082 결정 6·7·8·10
 - `docs/02-design/features/desktop-companion.design.md` §5(창·상태·탭·U01~U14)·§6·§7(S5·S7)
 - step 8 산출물: `desktop/src/main/**`, `desktop/src/preload/index.ts`(노출 함수 목록), `desktop/src/main/core/pet-state.ts`
 - `components/trailer-office.tsx:10-34`(`drawPerson`), `components/recruitment-trailer.tsx:18`(색 3종)
@@ -30,7 +30,7 @@
      - **설정**: 펫 모양 3종 · 단축키 안내 · 부서·기기 이름 · 로그아웃(`auth:signOut`) · 버전.
    - 모든 문구는 `docs/wording-guide.md` 기준을 따른다(`npm run check:wording`이 renderer를 검사한다).
 3. `desktop/tests/e2e/smoke.spec.ts`(Playwright `_electron`, 로컬 QA 서버 대상): 코드 로그인 → 부서 선택 → 펫 창·패널 열림 → 시드한 답을 기록 탭에서 열어 인용 표시 → 담당 카드 결정 → 결정 버튼 연타해도 서버 `decisions` 1건. 실행 명령을 `desktop/package.json`의 `e2e`로 둔다.
-4. 결과·스크린샷은 `docs/verification/42-desktop-companion/desktop-ui.md`.
+4. 결과·스크린샷은 `docs/verification/43-desktop-companion/desktop-ui.md`.
 
 ## Acceptance Criteria
 
@@ -52,11 +52,11 @@ git diff --check
 
 1. AC 실행, 펫 상태 5종·탭 5개 스크린샷을 기록에 연결한다.
 2. 체크리스트: 인용 없는 문장 렌더 0 · 알림 문구에 내용 없음 · renderer에 네트워크·토큰 없음.
-3. `phases/42-desktop-companion/index.json` step 9를 갱신한다.
+3. `phases/43-desktop-companion/index.json` step 9를 갱신한다.
 
 ## 금지사항
 
 - 답·카드 문장을 인용 없이 보여 주지 마라. 이유: CLAUDE.md CRITICAL — 인용 없는 문장은 렌더하지 않는다.
 - 알림·트레이 툴팁에 질문·답·카드 제목을 넣지 마라. 이유: 잠금 화면·화면 공유로 노출된다(design §7 S7).
 - 음성 질문(마이크)을 만들지 마라. 이유: PRD §3-8 첫 버전 제외.
-- 화면에서 Node·fetch·Supabase를 쓰지 마라. 이유: 불변식 49.
+- 화면에서 Node·fetch·Supabase를 쓰지 마라. 이유: 불변식 50.

@@ -2,8 +2,8 @@
 
 ## 읽어야 할 파일
 
-- `docs/ARCHITECTURE.md` §3.3·§3.5·§4.3, §6 불변식 1·2·5·9·10, §6-11 불변식 47
-- `docs/ADR.md` ADR-081 결정 5, ADR-051·066·067(답 인용 계약)
+- `docs/ARCHITECTURE.md` §3.3·§3.5·§4.3, §6 불변식 1·2·5·9·10, §6-12 불변식 48
+- `docs/ADR.md` ADR-082 결정 5, ADR-051·066·067(답 인용 계약)
 - `docs/02-design/features/desktop-companion.design.md` §2(설계안 C)·§4(W01·W02)·§4.1
 - step 2 산출물: `lib/companion/context.ts`(`ActorContext`, `Result`, `actorFromMembership`, `jsonResult`)
 - `app/api/d/[dept]/ask/route.ts`(전체 80줄), `app/api/d/[dept]/answers/[id]/route.ts`(전체 161줄 — 특히 :63~152 인용 재검사)
@@ -26,7 +26,7 @@
    ```
    기존 :63~152의 조회(`asked_by = ctx.userId`, `dept_id = ctx.deptId`)·인용 재검사(활성 소스·미삭제·quote 포함·결정 인용)·refused 전환을 그대로 옮긴다. `AnswerView` 타입은 지금 응답 본문과 같다.
 4. 두 웹 경로를 얇게 바꾼다: `requireMembership` → `actorFromMembership` → lib 호출 → `jsonResult`. 상태 코드·본문·헤더가 이전과 바이트 단위로 같아야 한다.
-5. 기존 묻기 E2E(`tests/e2e/`에서 ask·answer·grounded를 다루는 spec 중 LLM 없이 도는 것)를 review-qa 경유로 실행한다. 결과는 `docs/verification/42-desktop-companion/shared-ask-answer.md`.
+5. 기존 묻기 E2E(`tests/e2e/`에서 ask·answer·grounded를 다루는 spec 중 LLM 없이 도는 것)를 review-qa 경유로 실행한다. 결과는 `docs/verification/43-desktop-companion/shared-ask-answer.md`.
 
 ## 코드 관계와 구조 확인
 
@@ -49,7 +49,7 @@ git diff --check
 
 1. AC 실행.
 2. 체크리스트: 인용 검증 로직을 바꾸지 않았는가 · `can_see()` 판정을 TS로 복제하지 않았는가 · lib에 `next/navigation`·`next/headers` import가 없는가.
-3. `phases/42-desktop-companion/index.json` step 4를 갱신한다.
+3. `phases/43-desktop-companion/index.json` step 4를 갱신한다.
 
 ## 금지사항
 

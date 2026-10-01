@@ -1,15 +1,15 @@
 ---
 template: plan-plus
-version: 1.1
+version: 1.2
 feature: desktop-companion
 date: 2026-10-01
 ---
 
 # desktop-companion Plan
 
-원천: [PRD §3-8 DC-01~12·§4·§8-1·§11](../../PRD.md) → [ARCHITECTURE §6-11 불변식 45~49](../../ARCHITECTURE.md) → [ADR-081](../../ADR.md). bkit plan-plus 템플릿의 절을 사용하며 새 제품 결정은 원천 문서에만 둔다.
+원천: [PRD §3-8 DC-01~12·§4·§8-1·§11](../../PRD.md) → [ARCHITECTURE §6-12 불변식 46~50](../../ARCHITECTURE.md) → [ADR-082](../../ADR.md). bkit plan-plus 템플릿의 절을 사용하며 새 제품 결정은 원천 문서에만 둔다.
 
-번호 메모: phase 41 작업(ADR-080·마이그레이션 0068·PRD 1.26·ARCHITECTURE §6-10·불변식 44)이 같은 날 다른 브랜치에서 진행 중이라 그다음 번호(ADR-081·phase 42·0069·PRD 1.27·§6-11·45~49)를 썼다. 병합 순서가 바뀌면 재번호한다.
+번호 메모: 같은 날 다른 브랜치에서 phase 41(ADR-080·마이그레이션 0068·PRD 1.26·ARCHITECTURE §6-10·불변식 44)과 phase 42(ADR-081·PRD 1.27·§6-11·불변식 45)가 진행 중이라 그다음 번호(ADR-082·phase 43·0069·PRD 1.28·§6-12·46~50)를 썼다. 병합 순서가 바뀌면 재번호한다.
 
 ## Executive Summary
 
@@ -49,7 +49,7 @@ date: 2026-10-01
 | 안 | 내용 | 결과 |
 |---|---|---|
 | A | 웹 화면(`/companion`)을 띄우는 얇은 셸, 쿠키 세션 그대로 | 추천했으나 사용자가 B 선택 |
-| **B** | 앱이 화면을 직접 그리고 기기 토큰으로 API 호출 | **선택**. 토큰은 자체 불투명 토큰이 아니라 기기 전용 Supabase 세션(ADR-081 결정 3) — 기능별 권한 함수 복제를 피한다 |
+| **B** | 앱이 화면을 직접 그리고 기기 토큰으로 API 호출 | **선택**. 토큰은 자체 불투명 토큰이 아니라 기기 전용 Supabase 세션(ADR-082 결정 3) — 기능별 권한 함수 복제를 피한다 |
 | C | 설치 없는 PWA + 웹 푸시 | 다른 창 위 펫 불가로 제외 |
 
 B 안의 하위 선택: Electron vs Tauri → Electron(이 PC에 Rust·MSVC 없음, TS 단일 언어, DPAPI 내장). 자체 토큰 + service role + `*_as` RPC → 제외.
@@ -72,19 +72,19 @@ B 안의 하위 선택: Electron vs Tauri → Electron(이 PC에 Rust·MSVC 없�
 |---|---|---|
 | FR-01 | DC-01·02 | 투명·항상 위·드래그 펫 창, 상태 4종 모양, 동작 줄이기 설정, 모양 선택 로컬 저장 |
 | FR-02 | DC-03 | 전역 단축키로 질문 입력, 트레이 열기·숨기기·연결 해제·종료 |
-| FR-03 | DC-04·불변식 46 | 이메일 6자리 코드 로그인 → 부서 선택 → `device_links` 생성, 부서는 연결 행에서 결정 |
-| FR-04 | DC-05·불변식 45·47 | `/api/companion/ask`·`answers/[id]`가 기존 `ask_question`·답변 job 사용, 하루 50회 공유 |
+| FR-03 | DC-04·불변식 47 | 이메일 6자리 코드 로그인 → 부서 선택 → `device_links` 생성, 부서는 연결 행에서 결정 |
+| FR-04 | DC-05·불변식 46·48 | `/api/companion/ask`·`answers/[id]`가 기존 `ask_question`·답변 job 사용, 하루 50회 공유 |
 | FR-05 | DC-06 | 본인 질문 기록, 현재 인용 권한 없으면 숨김 |
 | FR-06 | DC-07 | 내 담당 미결정 카드·결정/보류/반려, 기존 결정 경로·RLS·`request_id` 멱등 |
-| FR-07 | DC-08·불변식 48 | 30초 상태 요약, 1분 안 펫 상태·Windows 알림 |
+| FR-07 | DC-08·불변식 49 | 30초 상태 요약, 1분 안 펫 상태·Windows 알림 |
 | FR-08 | DC-09 | 회의 기록(lead, 4MB)·자료 검토함 문서·음성 3단계 업로드, lead의 영업 원문 검토(AG-07) 요청·진행 표시(phase 41 병합 뒤) |
 | FR-09 | DC-10 | 웹 연결 기기 목록·해제, 해제 뒤 다음 요청 401 |
-| FR-10 | DC-11·불변식 49 | 질문만 암호화 보관(20건·24시간), 재연결 전송 후 삭제 |
+| FR-10 | DC-11·불변식 50 | 질문만 암호화 보관(20건·24시간), 재연결 전송 후 삭제 |
 | FR-11 | DC-12 | 자동 업데이트와 무결성 확인 |
-| NFR-01 | 불변식 2·45 | `/api/companion/*` 요청 경로 service role 0(수집 어댑터 insert 예외만) |
-| NFR-02 | 불변식 9·49 | 서버·앱 로그·로컬 파일에 질문 원문 평문 0 |
-| NFR-03 | 불변식 47 | 기존 웹 경로는 Bearer를 받지 않음 |
-| NFR-04 | 불변식 10·46 | 데모 부서·데모 계정은 기기 연결 불가(design §3.2) |
+| NFR-01 | 불변식 2·46 | `/api/companion/*` 요청 경로 service role 0(수집 어댑터 insert 예외만) |
+| NFR-02 | 불변식 9·50 | 서버·앱 로그·로컬 파일에 질문 원문 평문 0 |
+| NFR-03 | 불변식 48 | 기존 웹 경로는 Bearer를 받지 않음 |
+| NFR-04 | 불변식 10·47 | 데모 부서·데모 계정은 기기 연결 불가(design §3.2) |
 
 ## 6. Success Criteria
 
@@ -102,7 +102,7 @@ B 안의 하위 선택: Electron vs Tauri → Electron(이 PC에 Rust·MSVC 없�
 
 | 위험 | 대응 |
 |---|---|
-| Supabase 세션 폐기 수단 불확실 — `auth.sessions` 삭제 권한이 없을 수 있고 access token은 최대 1시간 유효 | 사수 API는 매 요청 `device_links`로 즉시 차단(불변식 46). 리프레시 무효화 방법(SECURITY DEFINER 삭제 가능 여부·admin signOut)은 design에서 로컬·운영 실측. 직접 PostgREST 접근은 본인 RLS 권한 이상을 얻지 못함을 명시 |
+| Supabase 세션 폐기 수단 불확실 — `auth.sessions` 삭제 권한이 없을 수 있고 access token은 최대 1시간 유효 | 사수 API는 매 요청 `device_links`로 즉시 차단(불변식 47). 리프레시 무효화 방법(SECURITY DEFINER 삭제 가능 여부·admin signOut)은 design에서 로컬·운영 실측. 직접 PostgREST 접근은 본인 RLS 권한 이상을 얻지 못함을 명시 |
 | 이메일 6자리 코드 — 운영 이메일 템플릿에 코드가 없음, 기본 SMTP 발송 제한 | design에서 운영 Auth 설정(SMTP·템플릿) 확인. 템플릿 변경은 운영 반영이므로 사용자 승인 뒤 |
 | 서명 없는 설치 파일 — SmartScreen 경고로 5분 기준 위협 | 설치 안내 화면에 "추가 정보 → 실행" 단계 표시, 5분 실측에 포함. 서명 인증서는 §8-1 후속 |
 | 업로드 크기 — Vercel 함수 본문 4.5MB 한도 | design에서 웹 업로드가 쓰는 저장소 직접 업로드 경로를 재사용 |
@@ -114,7 +114,7 @@ B 안의 하위 선택: Electron vs Tauri → Electron(이 PC에 Rust·MSVC 없�
 
 - 새로 생김: `desktop/`(Electron 앱), `lib/companion/{auth,inbox}.ts`(TDD), `app/api/companion/*`, 마이그레이션 0069(`device_links`·연결/해제 RPC), 웹 설정의 연결 기기 화면, 보안 하니스 항목.
 - 바뀌지 않음: 기존 웹 경로·쿠키 세션·`can_see()`·RLS 정책·`lib/pipeline/answer.ts`·결정 원장 계약·슬랙 경로·게스트 경로.
-- 문서: PRD 1.27(§3-8·§4·§8-1·§11), ADR-081, ARCHITECTURE 불변식 2·§6-11, CLAUDE.md·AGENTS.md 기술 스택·아키텍처 규칙 줄.
+- 문서: PRD 1.28(§3-8·§4·§8-1·§11), ADR-082, ARCHITECTURE 불변식 2·§6-12, CLAUDE.md·AGENTS.md 기술 스택·아키텍처 규칙 줄.
 - Graft·Archify: 이 계획 단계에서는 실행하지 않았다(설계 단계에서 Bearer 입구와 기존 lib 함수 의존을 Graft로 확인하고, 연결·해제 흐름을 Archify로 시각화한다).
 
 ## 9. Brainstorming Log
@@ -127,8 +127,8 @@ B 안의 하위 선택: Electron vs Tauri → Electron(이 PC에 Rust·MSVC 없�
 | Phase 3 | 위 YAGNI 표 |
 | Phase 4 | 전체 구조(Electron·기기 Supabase 세션·`/api/companion/*`·30초 폴링) 승인 → 구성 요소 승인 → 데이터 흐름(연결·질문·알림/결정·해제·끊김) 승인 |
 | 문서화 중 보정 | 영업 검토는 기존 계약이 확정 원문 선택 방식이라 자유 텍스트를 받지 않는다 |
-| design 선택 | 설계안 C(권한·인용·작업 실행 코드만 공용 lib) · 이메일 6자리 코드 · 영업은 실제 원문 검토(AG-07) · 배포 전용 공개 GitHub 저장소(ADR-081 결정 5·8·9·10) |
+| design 선택 | 설계안 C(권한·인용·작업 실행 코드만 공용 lib) · 이메일 6자리 코드 · 영업은 실제 원문 검토(AG-07) · 배포 전용 공개 GitHub 저장소(ADR-082 결정 5·8·9·10) |
 
 ## 10. Rollout
 
-설계(`/pdca design desktop-companion`) → phase 42 step 작성·모델 배정 플랜 → 로컬 구현·검증 → `/pdca analyze`. 운영 반영(마이그레이션 0069·Auth 이메일 템플릿·설치 파일 배포)은 PRD §8의 별도 사용자 승인 뒤.
+설계(`/pdca design desktop-companion`) → phase 43 step 작성·모델 배정 플랜 → 로컬 구현·검증 → `/pdca analyze`. 운영 반영(마이그레이션 0069·Auth 이메일 템플릿·설치 파일 배포)은 PRD §8의 별도 사용자 승인 뒤.

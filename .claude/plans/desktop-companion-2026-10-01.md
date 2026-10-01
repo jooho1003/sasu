@@ -1,6 +1,6 @@
 # 데스크톱 동반 앱(펫) — 2026-10-01
 
-사용자 결정(10/1): GPT dots·ChatGPT 펫 벤치마킹, 목적 3개(바로 질문·결정 놓치지 않기·일 맡기기) 모두, 부서원 전체, Windows 먼저, B(독립 화면+기기 토큰), 설계안 C, 이메일 6자리 코드, 영업 원문 검토(AG-07), 배포 전용 공개 GitHub 저장소. 원천 PRD §3-8·ADR-081·ARCHITECTURE §6-11, 설계 `docs/02-design/features/desktop-companion.design.md`, 실행 `phases/42-desktop-companion`.
+사용자 결정(10/1): GPT dots·ChatGPT 펫 벤치마킹, 목적 3개(바로 질문·결정 놓치지 않기·일 맡기기) 모두, 부서원 전체, Windows 먼저, B(독립 화면+기기 토큰), 설계안 C, 이메일 6자리 코드, 영업 원문 검토(AG-07), 배포 전용 공개 GitHub 저장소. 원천 PRD §3-8·ADR-082·ARCHITECTURE §6-12, 설계 `docs/02-design/features/desktop-companion.design.md`, 실행 `phases/43-desktop-companion`.
 
 | id | 내용 | domain | D1/D2/D3/D4 | tier | 실행 |
 |---|---|---|---|---|---|
@@ -29,6 +29,6 @@
 결과: **PASS**
 
 ## 실행 메모
-- 실행 전 이 브랜치(`docs/desktop-companion-plan-20261001`)를 커밋해야 한다. 문서(PRD 1.27·ADR-081·§6-11)가 가드레일로 주입된다.
-- phase 41(ADR-080·0068·PRD 1.26)이 다른 브랜치에서 진행 중이다. 병합 순서에 따라 PRD 버전 줄·`phases/index.json`·ADR 끝부분이 충돌할 수 있다. 번호는 병합 때 재확인한다.
+- 실행 전 이 브랜치(`docs/desktop-companion-plan-20261001`)를 커밋해야 한다. 문서(PRD 1.28·ADR-082·§6-12)가 가드레일로 주입된다.
+- phase 41(ADR-080·0068·PRD 1.26)·phase 42(ADR-081·PRD 1.27)이 다른 브랜치에서 진행 중이다. 병합 순서에 따라 PRD 버전 줄·`phases/index.json`·ADR 끝부분이 충돌할 수 있다. 번호는 병합 때 재확인한다.
 - 로컬 QA는 기존 `node scripts/review-qa.mjs` 환경(본 작업 트리의 `.vercel/review-qa`)을 쓴다.

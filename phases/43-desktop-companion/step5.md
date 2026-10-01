@@ -2,8 +2,8 @@
 
 ## 읽어야 할 파일
 
-- `docs/ARCHITECTURE.md` §3.1·§3.5·§4.2·§4.4, §6 불변식 3·4·7·8·13·14·16, §6-11 불변식 47
-- `docs/ADR.md` ADR-081 결정 5·8
+- `docs/ARCHITECTURE.md` §3.1·§3.5·§4.2·§4.4, §6 불변식 3·4·7·8·13·14·16, §6-12 불변식 48
+- `docs/ADR.md` ADR-082 결정 5·8
 - `docs/02-design/features/desktop-companion.design.md` §4(W03~W05)·§4.1
 - step 2·4 산출물: `lib/companion/context.ts`, `lib/ask-start.ts`(옮기는 방식의 예)
 - `app/(auth)/d/[dept]/cards/[id]/page.tsx`(근거·충돌·자료 검토 조회와 인용 포함 필터 :100~210 부근)
@@ -33,7 +33,7 @@ step 4와 같이 웹 동작을 바꾸지 않고 코드 위치만 옮긴다.
    ```
    lead 전용 · 10MB · `.vtt/.txt` · `is_demo_department` · **동의한 화자 발언만 저장** · 마스킹 · `insertUploadedItems`(수집 어댑터, 불변식 16) · job 등록 순서를 그대로 옮긴다.
 5. 세 웹 진입점(페이지 1, 경로 2)을 얇게 바꾼다. 응답·리다이렉트·화면 결과가 이전과 같아야 한다.
-6. 결과는 `docs/verification/42-desktop-companion/shared-card-transcript.md`.
+6. 결과는 `docs/verification/43-desktop-companion/shared-card-transcript.md`.
 
 ## 코드 관계와 구조 확인
 
@@ -57,7 +57,7 @@ git diff --check
 
 1. AC 실행.
 2. 체크리스트: 미동의 발언 미저장 · service role은 `insertUploadedItems` 안에만 · 인용 없는 문장 렌더 없음 · 결정 append-only.
-3. `phases/42-desktop-companion/index.json` step 5를 갱신한다.
+3. `phases/43-desktop-companion/index.json` step 5를 갱신한다.
 
 ## 금지사항
 
