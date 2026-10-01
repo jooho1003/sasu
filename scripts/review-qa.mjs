@@ -305,6 +305,8 @@ if (command === "refresh-retro-connectors") {
   const args =
     command === "dev"
       ? ["node_modules/next/dist/bin/next", "dev", "-p", "3011", ...process.argv.slice(3)]
+      : command === "source-ai-model"
+        ? ["node_modules/tsx/dist/cli.mjs","scripts/sample-sales-source-review.ts"]
       : command === "build"
         ? ["node_modules/next/dist/bin/next", "build", ...process.argv.slice(3)]
         : command === "start"

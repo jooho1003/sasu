@@ -3,7 +3,14 @@
   "phase": "40-sales-review-condition-checklist",
   "design": "docs/02-design/features/sales-review-condition-checklist.design.md",
   "steps": [
-    { "step": 0, "name": "source-condition-checklist", "status": "completed", "verification": "docs/verification/sales-review-condition-checklist-2026-10-01.md", "summary": "현재 세션/RLS 네 원문에서 가격·일정·계약·승인 관련 전체 줄과 고정 질문·정확 인용·링크를 표시. 단위 1748·신규 인증 E2E 2·기존 회귀 9·lint·Webpack build 통과, PDCA 12/12. 실제 고객 의미 검증·운영 미반영." }
+    {
+      "step": 0,
+      "name": "source-condition-checklist",
+      "status": "completed",
+      "verification": "docs/verification/sales-review-condition-checklist-2026-10-01.md",
+      "summary": "현재 세션/RLS 네 원문에서 가격·일정·계약·승인 관련 전체 줄과 고정 질문·정확 인용·링크를 표시. 단위 1748·신규 인증 E2E 2·기존 회귀 9·lint·Webpack build 통과, PDCA 12/12. 실제 고객 의미 검증·운영 미반영."
+    }
   ],
-  "production_deployed": false
+  "production_deployed": true,
+  "deployment": "docs/verification/sales-source-tools-production-2026-10-01.md"
 }

@@ -1,0 +1,18 @@
+{
+  "environment": "isolated-local-synthetic",
+  "task_status": "ready",
+  "checks": [
+    "202_and_poll",
+    "exact_complete_quotes",
+    "indices_only_storage",
+    "evidence_link",
+    "390px",
+    "member_403",
+    "content_change_404",
+    "focus_clears",
+    "selection_clears",
+    "demotion_403_clears"
+  ],
+  "synthetic_tasks_before": 15,
+  "synthetic_tasks_after": 15
+}
