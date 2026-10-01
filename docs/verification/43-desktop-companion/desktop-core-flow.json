@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "사수 데스크톱 코어 보안 경계",
+    "subtitle": "화면은 IPC만 사용하고 토큰·네트워크·암호화 보관은 Electron 본체가 소유합니다",
+    "output": "desktop-core-flow.html",
+    "locale": "ko",
+    "quality_profile": "showcase",
+    "visual_preset": "blueprint",
+    "viewBox": [1240, 700]
+  },
+  "components": [
+    { "id": "renderer", "type": "frontend", "label": "화면 프로세스", "sublabel": "React · 네트워크 차단", "pos": [30, 300], "size": [145, 66] },
+    { "id": "preload", "type": "security", "label": "프리로드 다리", "sublabel": "이름 있는 함수만 공개", "pos": [275, 300], "size": [150, 66], "tag": "contextBridge" },
+    { "id": "ipc", "type": "backend", "label": "IPC 허용 목록", "sublabel": "Zod 입력 검사", "pos": [525, 300], "size": [145, 66] },
+    { "id": "api", "type": "backend", "label": "앱 API 클라이언트", "sublabel": "Bearer · 15초 제한", "pos": [800, 195], "size": [165, 66] },
+    { "id": "auth", "type": "security", "label": "로그인 어댑터", "sublabel": "OTP · 자동 갱신", "pos": [800, 300], "size": [165, 66] },
+    { "id": "upload", "type": "backend", "label": "자료 업로드", "sublabel": "검토 자료 경로 규칙", "pos": [800, 405], "size": [165, 66] },
+    { "id": "encrypted", "type": "database", "label": "암호화 파일", "sublabel": "safeStorage 필수", "pos": [525, 80], "size": [145, 66], "tag": "평문 대체 없음" },
+    { "id": "outbox", "type": "database", "label": "끊김 질문 보관", "sublabel": "20건 · 24시간", "pos": [525, 530], "size": [145, 66], "tag": "질문만" },
+    { "id": "sasu", "type": "cloud", "label": "사수 웹 API", "sublabel": "/api/companion/*", "pos": [1050, 195], "size": [165, 66] },
+    { "id": "supabase", "type": "external", "label": "Supabase", "sublabel": "Auth · 비공개 Storage", "pos": [1050, 352], "size": [165, 66] }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "격리된 화면 · sandbox + connect-src none", "wraps": ["renderer", "preload"] },
+    { "kind": "region", "label": "Electron 본체 · 토큰과 네트워크 소유", "wraps": ["ipc", "api", "auth", "upload", "encrypted", "outbox"] }
+  ],
+  "connections": [
+    { "id": "renderer-preload", "from": "renderer", "to": "preload", "label": "window.sasu", "variant": "security" },
+    { "id": "preload-ipc", "from": "preload", "to": "ipc", "label": "허용 채널", "variant": "security" },
+    { "id": "ipc-api", "from": "ipc", "to": "api", "label": "질문·받은 일", "fromSide": "right", "toSide": "left" },
+    { "id": "ipc-auth", "from": "ipc", "to": "auth", "label": "로그인·연결", "labelDy": 30 },
+    { "id": "ipc-upload", "from": "ipc", "to": "upload", "label": "받아쓴 글·자료", "fromSide": "right", "toSide": "left" },
+    { "id": "auth-encrypted", "from": "auth", "to": "encrypted", "label": "암호화 세션", "variant": "security", "fromSide": "top", "toSide": "right" },
+    { "id": "api-encrypted", "from": "api", "to": "encrypted", "label": "현재 토큰", "variant": "security", "fromSide": "left", "toSide": "right" },
+    { "id": "ipc-outbox", "from": "ipc", "to": "outbox", "label": "오프라인 질문", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "api-sasu", "from": "api", "to": "sasu", "label": "HTTPS + Bearer", "variant": "emphasis" },
+    { "id": "auth-supabase", "from": "auth", "to": "supabase", "label": "OTP 세션", "variant": "security", "fromSide": "right", "toSide": "left" },
+    { "id": "upload-supabase", "from": "upload", "to": "supabase", "label": "기기 세션 업로드", "fromSide": "right", "toSide": "left" }
+  ],
+  "cards": [
+    { "dot": "rose", "title": "화면 경계", "items": ["fetch와 Supabase 클라이언트를 두지 않음", "탐색·새 창·권한 요청을 모두 거부"] },
+    { "dot": "emerald", "title": "로컬 보관", "items": ["safeStorage를 쓸 수 없으면 저장 거부", "결정과 업로드는 끊김 보관하지 않음"] },
+    { "dot": "cyan", "title": "서버 경계", "items": ["사용자 JWT Bearer만 사용", "401은 세션과 끊김 질문을 지우고 signed-out 알림"] }
+  ]
+}

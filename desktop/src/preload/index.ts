@@ -1,0 +1,68 @@
+// Design Ref: desktop-companion §2·§7 S5 — named IPC functions are the renderer's complete capability set.
+import { contextBridge, ipcRenderer } from "electron";
+import type {
+  CompanionContextResponse,
+  CompanionDepartmentsResponse,
+  CompanionInbox,
+  CompanionLinkResponse,
+  SalesReviewSourceSelection,
+} from "@sasu/contracts";
+import type {
+  Answer,
+  AskStart,
+  Card,
+  CardDecision,
+  DesktopSettings,
+  Questions,
+  ReviewUploadRequest,
+  SalesSources,
+  SalesStatus,
+  TranscriptResult,
+} from "../shared/contracts";
+
+const invoke = <T>(channel: string, input?: unknown): Promise<T> =>
+  ipcRenderer.invoke(channel, input) as Promise<T>;
+
+const bridge = {
+  auth: {
+    requestCode: (email: string) => invoke<{ sent: true }>("auth:requestCode", { email }),
+    verifyCode: (email: string, code: string) => invoke<{ authenticated: true }>("auth:verifyCode", { email, code }),
+    signOut: () => invoke<void>("auth:signOut"),
+    onSignedOut: (callback: () => void) => {
+      const listener = (): void => callback();
+      ipcRenderer.on("signed-out", listener);
+      return () => ipcRenderer.removeListener("signed-out", listener);
+    },
+  },
+  link: {
+    departments: () => invoke<CompanionDepartmentsResponse>("link:departments"),
+    create: (input: { dept_id: string; device_name: string }) => invoke<CompanionLinkResponse>("link:create", input),
+    get: () => invoke<CompanionContextResponse>("link:get"),
+  },
+  inbox: { get: () => invoke<{ inbox: CompanionInbox; outbox_count: number }>("inbox:get") },
+  ask: { send: (question: string, parent_id: string | null = null) => invoke<AskStart | { queued: true; outbox_id: string }>("ask:send", { question, parent_id }) },
+  answer: { get: (id: string) => invoke<Answer>("answer:get", { id }) },
+  questions: { list: (cursor: { before: string; before_id: string } | null = null) => invoke<Questions>("questions:list", { cursor }) },
+  card: {
+    get: (id: string) => invoke<Card>("card:get", { id }),
+    decide: (input: { id: string; status: "decided" | "deferred" | "rejected" | "open"; outcome: string; rationale: string }) => invoke<CardDecision>("card:decide", input),
+  },
+  upload: {
+    transcript: (input: { name: string; title: string; visibility: "dept" | "leads_only"; bytes: Uint8Array }) => invoke<TranscriptResult>("upload:transcript", input),
+    review: (input: ReviewUploadRequest) => invoke<{ id: string; job_ids: string[] }>("upload:review", input),
+  },
+  sales: {
+    sources: () => invoke<SalesSources>("sales:sources"),
+    start: (input: SalesReviewSourceSelection & { request_id: string }) => invoke<{ task_id: string }>("sales:start", input),
+    status: (task_id: string) => invoke<SalesStatus>("sales:status", { task_id }),
+  },
+  settings: {
+    get: () => invoke<DesktopSettings>("settings:get"),
+    set: (input: Partial<DesktopSettings>) => invoke<DesktopSettings>("settings:set", input),
+  },
+  app: { openWeb: (path: string) => invoke<{ opened: true }>("app:openWeb", { path }) },
+};
+
+contextBridge.exposeInMainWorld("sasu", bridge);
+
+export type SasuBridge = typeof bridge;

@@ -1,0 +1,10 @@
+appId: team.sasu.companion
+productName: 사수
+directories:
+  output: release
+files:
+  - out/**
+asar: true
+win:
+  target:
+    - nsis
