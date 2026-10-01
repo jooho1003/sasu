@@ -1,6 +1,13 @@
 {
   "phases": [
     {
+      "dir": "40-sales-review-condition-checklist",
+      "status": "completed",
+      "verification": "docs/verification/sales-review-condition-checklist-2026-10-01.md",
+      "note": "네 현재 원문의 주제별 전체 줄·확인 질문·정확 인용·링크 구현과 격리 검증 완료. 키워드 탐색이며 의미 판정·LLM·저장·운영 반영 없음.",
+      "production_deployed": false
+    },
+    {
       "dir": "22-review-state-recovery",
       "status": "completed",
       "verification": "docs/verification/reviewed-materials-production-2026-09-17.md",

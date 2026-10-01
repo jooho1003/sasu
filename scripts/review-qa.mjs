@@ -306,7 +306,7 @@ if (command === "refresh-retro-connectors") {
     command === "dev"
       ? ["node_modules/next/dist/bin/next", "dev", "-p", "3011", ...process.argv.slice(3)]
       : command === "build"
-        ? ["node_modules/next/dist/bin/next", "build"]
+        ? ["node_modules/next/dist/bin/next", "build", ...process.argv.slice(3)]
         : command === "start"
           ? ["node_modules/next/dist/bin/next", "start", "-p", "3011"]
           : command === "seed-demo"
@@ -345,6 +345,8 @@ if (command === "refresh-retro-connectors") {
               ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/sales-review-sources-local.spec.ts", ...process.argv.slice(3)]
             : command === "sales-review-compare-test"
               ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/sales-review-literal-comparison-local.spec.ts", ...process.argv.slice(3)]
+            : command === "sales-review-checklist-test"
+              ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/sales-review-condition-checklist-local.spec.ts", ...process.argv.slice(3)]
             : command === "csp-test"
               ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/security-headers.spec.ts", ...process.argv.slice(3)]
             : [

@@ -1,0 +1,30 @@
+{
+  "environment": "isolated-local-synthetic",
+  "tables": [
+    "jobs",
+    "llm_calls",
+    "sales_review_tasks",
+    "sales_review_actions"
+  ],
+  "before": [
+    534,
+    293,
+    12,
+    10
+  ],
+  "after": [
+    534,
+    293,
+    12,
+    10
+  ],
+  "checks": [
+    "citations_and_links",
+    "repeat_total_and_shown_limit",
+    "selection_change_clears",
+    "cross_department_404",
+    "member_403",
+    "inactive_source_404_and_clears",
+    "revoked_lead_403_and_clears"
+  ]
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { SalesReviewConditionChecklist } from "@/lib/sales-review-condition-checklist";
 
 type Candidate = { item_id: string; title: string; kind: string; quote: string; is_principles: boolean };
 type Role = "request" | "old_quote" | "new_quote" | "policy";
@@ -28,6 +29,8 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [comparing, setComparing] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [checklist, setChecklist] = useState<SalesReviewConditionChecklist["topics"] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const endpoint = `/api/d/${encodeURIComponent(deptId)}/sales-review/sources`;
 
@@ -55,12 +58,14 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
       setError("서로 다른 원문 4건을 선택해 주세요.");
       setPreview(null);
       setComparison(null);
+      setChecklist(null);
       return;
     }
     setBusy(true);
     setError(null);
     setPreview(null);
     setComparison(null);
+    setChecklist(null);
     try {
       const response = await fetch(endpoint, {
         method: "POST", headers: { "content-type": "application/json" }, cache: "no-store",
@@ -82,6 +87,7 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
     setComparing(true);
     setError(null);
     setComparison(null);
+    setChecklist(null);
     try {
       const response = await fetch(`/api/d/${encodeURIComponent(deptId)}/sales-review/compare`, {
         method: "POST", headers: { "content-type": "application/json" }, cache: "no-store",
@@ -100,6 +106,30 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
     }
   }
 
+  async function checkConditions() {
+    if (!preview) return;
+    setChecking(true);
+    setError(null);
+    setChecklist(null);
+    setComparison(null);
+    try {
+      const response = await fetch(`/api/d/${encodeURIComponent(deptId)}/sales-review/checklist`, {
+        method: "POST", headers: { "content-type": "application/json" }, cache: "no-store",
+        body: JSON.stringify({ request_item_id: selection.request, old_quote_item_id: selection.old_quote,
+          new_quote_item_id: selection.new_quote, policy_item_id: selection.policy }),
+      });
+      const body = (await response.json()) as SalesReviewConditionChecklist & { error?: string };
+      if (!response.ok || !body.sources || !body.topics) throw new Error(body.error ?? "조건 확인 질문을 준비하지 못했습니다.");
+      setPreview({ sources: body.sources });
+      setChecklist(body.topics);
+    } catch (cause) {
+      setPreview(null);
+      setError(cause instanceof Error ? cause.message : "조건 확인 질문을 준비하지 못했습니다.");
+    } finally {
+      setChecking(false);
+    }
+  }
+
   return <section className="panel grid gap-4 p-6" aria-labelledby="real-sales-sources-heading">
     <div className="grid gap-1">
       <p className="m-0 text-sm text-[var(--muted)]">실제 부서 기록 · 팀장 전용</p>
@@ -110,15 +140,15 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
       {!candidates.some((candidate) => candidate.is_principles) ? <p className="m-0 text-sm" role="status">활성 원칙 문서의 원문이 없습니다. 부서 원칙 문서를 연결한 뒤 다시 열어 주세요.</p> : null}
       <div className="grid gap-3 md:grid-cols-2">
         {ROLES.map(({ id, label }) => <label className="grid gap-2 text-sm font-bold" key={id}>{label}
-          <select className="min-w-0 rounded-lg border border-black/15 bg-white px-3 py-2 font-normal" disabled={busy || comparing} value={selection[id]}
-            onChange={(event) => { setSelection((current) => ({ ...current, [id]: event.target.value })); setPreview(null); setComparison(null); }}>
+          <select className="min-w-0 rounded-lg border border-black/15 bg-white px-3 py-2 font-normal" disabled={busy || comparing || checking} value={selection[id]}
+            onChange={(event) => { setSelection((current) => ({ ...current, [id]: event.target.value })); setPreview(null); setComparison(null); setChecklist(null); }}>
             <option value="">원문 선택</option>
             {candidates.filter((candidate) => id !== "policy" || candidate.is_principles).map((candidate) =>
               <option key={candidate.item_id} value={candidate.item_id}>{candidate.title} · {candidate.quote.slice(0, 45)}</option>)}
           </select>
         </label>)}
       </div>
-      <button className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 font-bold text-[var(--accent)] disabled:opacity-50" disabled={busy || comparing}
+      <button className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 font-bold text-[var(--accent)] disabled:opacity-50" disabled={busy || comparing || checking}
         onClick={() => void connect()} type="button">{busy ? "확인 중…" : "원문 나란히 보기"}</button>
     </>}
     {error ? <p className="m-0 rounded-xl bg-[var(--urgent)]/10 p-3" role="alert">{error}</p> : null}
@@ -130,7 +160,28 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
       </article>)}
     </div> : null}
     {preview ? <button className="w-fit rounded-lg bg-[var(--accent)] px-4 py-2 font-bold text-white disabled:opacity-50"
-      disabled={busy || comparing} onClick={() => void compare()} type="button">{comparing ? "비교 중…" : "견적 문구 차이 보기"}</button> : null}
+      disabled={busy || comparing || checking} onClick={() => void compare()} type="button">{comparing ? "비교 중…" : "견적 문구 차이 보기"}</button> : null}
+    {preview ? <button className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 font-bold text-[var(--accent)] disabled:opacity-50"
+      disabled={busy || comparing || checking} onClick={() => void checkConditions()} type="button">{checking ? "조건 찾는 중…" : "조건 확인 질문 보기"}</button> : null}
+    {checking ? <p className="m-0 text-sm" role="status">현재 원문에서 확인할 조건을 찾고 있습니다.</p> : null}
+    {checklist ? <section className="grid gap-4 rounded-xl border border-black/10 bg-white p-4" aria-label="영업 조건 확인 질문">
+      <div><h3 className="m-0 text-lg">영업 조건 확인 질문</h3>
+        <p className="m-0 text-sm leading-6 text-[var(--muted)]">정해진 관련 단어가 있는 원문 줄을 모았습니다. 질문은 검토를 돕는 안내입니다. 조건의 의미와 충족 여부는 원문에서 확인해 주세요.</p></div>
+      {checklist.map(topic => <article className="grid gap-3 rounded-xl border border-black/10 p-4" key={topic.id} aria-label={`${topic.label} 조건 확인`}>
+        <h4 className="m-0 text-base">{topic.label}</h4>
+        {topic.question ? <p className="m-0 font-bold">{topic.question}</p> : <p className="m-0 text-sm">정해진 관련 단어를 찾지 못했습니다. 원문을 직접 확인해 주세요.</p>}
+        {ROLES.filter(({ id }) => topic.matches[id] > 0).map(({ id, label }) => <section className="grid gap-2" key={id}>
+          <h5 className="m-0 text-sm">{label} · 관련 줄 전체 {topic.matches[id]}건</h5>
+          <ul className="m-0 grid list-none gap-2 p-0">
+            {topic.evidence.filter(entry => entry.role === id).map((entry, index) => <li className="rounded-lg bg-black/5 p-3" key={`${entry.source_id}-${index}`}>
+              <blockquote className="m-0 whitespace-pre-wrap break-words text-sm leading-6">{entry.quote}</blockquote>
+              <a className="mt-2 inline-block text-sm font-bold text-[var(--accent)] underline" href={entry.href}>원문에서 확인</a>
+            </li>)}
+          </ul>
+        </section>)}
+        {topic.truncated ? <p className="m-0 text-sm" role="status">자료별 앞 3개 관련 줄만 표시했습니다. 전체 건수는 각 자료 위에 표시했습니다.</p> : null}
+      </article>)}
+    </section> : null}
     {comparison ? <section className="grid gap-4 rounded-xl border border-black/10 bg-white p-4" aria-label="견적 원문 문구 차이">
       <div><h3 className="m-0 text-lg">견적 원문 문구 차이</h3><p className="m-0 text-sm text-[var(--muted)]">앞뒤 공백을 제외한 원문 문구의 등장 횟수를 비교했습니다. 금액·일정·계약 조건의 의미는 원문에서 확인해 주세요.</p></div>
       {comparison.old_only_total === 0 && comparison.new_only_total === 0 ? <p className="m-0">서로 다른 문구를 찾지 못했습니다.</p> : <div className="grid gap-4 lg:grid-cols-2">
