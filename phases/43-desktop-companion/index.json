@@ -92,7 +92,7 @@
       "effort": "xhigh",
       "started_at": "2026-10-02T02:44:22+0900",
       "summary": "분리 Electron 패키지와 main/preload/core, safeStorage 세션·질문 보관, Bearer API·자료 업로드·허용 IPC를 구현했다. 단위 20·전체 1,834·실제 로컬 Electron OTP→연결→inbox·Graft·Archify·lint/build를 통과했다. docs/verification/43-desktop-companion/desktop-core.md 참조.",
-      "completed_at": "2026-10-02T03:29:52+0900"
+      "completed_at": "2026-10-02T03:38:28+0900"
     },
     {
       "step": 9,
