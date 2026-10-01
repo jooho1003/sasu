@@ -283,7 +283,7 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 ## 6. 불변식 — 어기면 구조가 무너지는 것
 
 1. 가시성 판정은 `can_see()` 하나. RLS 정책과 `search_as()` 모두 이것을 호출한다. USING + WITH CHECK.
-2. 사용자 요청 경로에서 service role 금지. 웹은 세션 클라이언트, 슬랙 경유는 `search_as(user_id)`.
+2. 사용자 요청 경로에서 service role 금지. 웹은 세션 클라이언트, 슬랙 경유는 `search_as(user_id)`, 데스크톱 앱 경유는 기기 세션 Bearer 클라이언트(§6-12, ADR-082).
 3. `dept_id`·`decided_by`·`asked_by`는 본문이 아니라 세션·멤버십에서.
 4. 카드 visibility = 인용 소스 중 가장 좁은 것. `leads_only` 카드는 lead에게만 DM. 병합은 visibility를 좁히지 않는다.
 5. 채널 답변은 member 권한, DM·웹은 질문자 권한. "N건 제외"는 어디에도 표시하지 않는다.
@@ -380,6 +380,14 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 
 45. **이력도 현재 원문의 권한을 따른다.** 목록은 세션 클라이언트로 `sales_source_reviews`의 본인·부서·기존 RLS를 조회한다. 응답에는 작업 ID·시각·상태만 포함하며 20건씩 `(created_at desc,id desc)` 커서를 사용한다. 재열람은 AG-07 상세 API로 현재 인용을 재구성한다. 목록 새로고침/포커스 때 이전 목록과 상세를 먼저 제거하고 조회한다. 별도 저장·모델 호출·권한 복제는 없다.
 
+### 6-12. Windows 데스크톱 동반 앱 (ADR-082, PRD §3-8) — 설계
+
+46. **데스크톱 요청은 기기 세션의 사용자 JWT로만 DB에 닿는다.** `/api/companion/*`는 `Authorization: Bearer`의 Supabase access token으로 anon key 클라이언트를 만들고 `getUser()`로 검증한다. RLS·`can_see()`·기존 RPC가 웹과 같은 판정을 한다. 이 경로에서 service role로 읽거나 권한을 판정하지 않는다. 예외는 웹과 같은 수집 어댑터 insert(불변식 16)뿐이며 그 전에 같은 Bearer 클라이언트로 권한을 검증한다.
+47. **연결 확인은 매 요청이다.** JWT의 세션 ID가 `device_links`의 해제되지 않은 행이고, 그 행의 부서에 현재 멤버십이 있어야 한다. 부서는 요청 본문이 아니라 이 행에서 정한다(불변식 3). 실패는 리다이렉트가 아니라 JSON 401/403이다. `device_links`는 본인 행만 읽고, 쓰기는 연결·확인·해제 RPC로만 한다. 해제는 연결 행과 그 `auth.sessions` 행을 같은 트랜잭션에서 처리한다. 데모 부서·데모 계정은 연결할 수 없다.
+48. **Bearer는 `/api/companion/*`에서만 받는다.** 기존 웹 경로는 쿠키 세션만 받는다. companion 경로는 허용 목록의 동작만 열고, 권한·인용·작업 실행이 걸린 코드(질문 접수·답 인용 재검사·카드 근거 조회·카드 결정·회의 기록 수집·영업 원문 검토 요청)는 웹과 같은 공용 lib 함수 하나만 부른다. 이 코드의 두 번째 구현을 만들지 않는다. 입력 검사·응답 변환만 경로별로 둔다.
+49. **앱은 새 실시간 채널을 만들지 않는다.** 상태 요약 30초·답변 2초 폴링만 쓴다(§7 SSE 행 유지). 펫 상태는 서버가 아니라 앱이 상태 요약과 로컬 읽음 기록으로 계산한다.
+50. **앱 안의 원문은 잠깐, 암호화해서만 둔다.** 토큰과 보내지 못한 질문(최대 20건·24시간)은 OS 암호화(DPAPI)로만 저장하고, 보낸 뒤 지운다. 앱 로그는 ID·길이·에러 코드만 남긴다(불변식 9). 렌더러에는 Node 기능을 열지 않고 preload의 좁은 함수만 노출한다.
+
 ## 7. 만들지 않는 것 (되살리지 말 것)
 
 | 항목 | 대신 | 근거 |
@@ -407,6 +415,8 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 | `supabase/migrations` RLS · `can_see()` · `search_as()` | member 세션으로 `leads_only` select 0건·insert 거부, lead는 보임, anon은 `is_demo`만, 퍼블릭 채널 질문은 member 권한 | `tests/rls/*.test.ts` — 서로 다른 JWT 3개(anon·member·lead)로 같은 쿼리 실행 | 대상 아님 (SQL) — 단 D8 사람이 직접 읽는다 |
 | `app/api/**/route.ts` · `lib/supabase/*` · `lib/slack/{blocks,post}.ts` · `lib/llm.ts` · `lib/recording/browser/*`(ADR-056, AudioWorklet·IndexedDB·MediaStream 어댑터) | SDK 어댑터·배선·프레젠테이션. 순수 녹음 로직은 `lib/recording/*.ts`에서 TDD | E2E로 간접 검증 | **비대상** |
 | `components/` · `app/**`의 TSX(page·layout·보조 클라이언트 컴포넌트) · Next.js 프록시·메타데이터 파일(`proxy.ts`·`app/robots.ts`·`app/sitemap.ts`·아이콘·OG 이미지) | 표현 | Playwright | 비대상 |
+| `desktop/src/main/core/*` · `desktop/src/shared/*`(ADR-082) | 펫 상태 계산, 폴링 간격·백오프, 끊김 보관 규칙(20건·24시간·순서), 앱 응답 계약 파싱 | Vitest(`desktop/vitest.config.ts`). 파일 옆 `__tests__/` | **대상** |
+| `desktop/src/main/{index,windows,tray,shortcut,notify,updater,ipc,auth,api}` · `desktop/src/preload/*` · `desktop/src/renderer/**` | Electron·Supabase SDK 어댑터·창 배선·화면 | Playwright `_electron` 실행과 PRD §11 실측 | 비대상 |
 | E2E `tests/e2e/` | ① 게스트 `/demo` 시크릿 창 완주 + 우리 팀 실데이터 문자열 grep 0건 + LLM 호출 0 ② D3 세로 슬라이스: 슬랙 메시지 → 분류 → 카드 → 웹 결정 → 원장 5분 ③ 같은 질문 lead/member 답 차이 ④ 결정 버튼 연타 → decisions 1건 | Playwright, 배포 URL 대상 | 비대상 |
 
 `tdd-guard.sh`의 허용 목록은 이 표를 그대로 옮긴 것이다. 표를 바꾸면 훅도 바꾼다. **완료는 이 테스트가 실제로 실행된 기록으로 판정한다** (PRD §11). Codex의 "완료했습니다"는 신호가 아니다.
