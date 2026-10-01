@@ -118,10 +118,10 @@
       "step": 11,
       "name": "desktop-release-verify",
       "status": "error",
-      "error_message": "로컬 QA Electron Playwright가 창 핸드셰이크에서 시간 초과했습니다. updater 변경 뒤 full-flow와 기존 smoke를 각각 재실행해 재현했으며, lint·unit·build·dist는 통과했습니다. 기록: docs/verification/desktop-companion-2026-10-02.md",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-02T07:14:42+0900"
+      "started_at": "2026-10-02T07:14:42+0900",
+      "error_message": "L3 로컬 Electron 전체 흐름에서 OTP 성공 뒤 link:departments가 session_invalid(401)로 반복 실패. 기록: docs/verification/desktop-companion-2026-10-02.md"
     }
   ],
   "production_deployed": false,

@@ -80,7 +80,10 @@ export class ApiClient {
     const session = await this.supabase.auth.getSession();
     const token = session.data.session?.access_token;
     if (session.error || !token) {
-      await this.onUnauthorized();
+      // The initial login screen probes the device link while intentionally
+      // signed out. Clearing storage for that normal state can race a new OTP
+      // session and erase it. A server-side 401 after a bearer request is the
+      // authoritative revocation signal and is handled below.
       throw new ApiError(401, "session_invalid", "기기 로그인이 만료되었습니다.");
     }
 

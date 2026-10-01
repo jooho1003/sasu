@@ -71,13 +71,24 @@ test.describe("desktop companion full flow", () => {
       const panel = app.windows().find((page) => page.url().includes("#panel"));
       expect(panel).toBeTruthy();
       const login = async (): Promise<void> => {
+        await expect(panel!.getByRole("heading", { name: "사수 시작하기" })).toBeVisible();
+        // The lean local QA stack has no Mailpit. Generate a one-time code
+        // through the local Auth admin API, then exercise the app's normal
+        // preload/IPC code-verification capability without reading mail.
         const otp = await admin.auth.admin.generateLink({ type: "magiclink", email: "review-lead@example.test" });
         expect(otp.error).toBeNull();
-        await panel!.getByLabel("이메일").fill("review-lead@example.test");
-        await panel!.getByRole("button", { name: "코드 받기" }).click();
-        await panel!.getByLabel("6자리 코드").fill(otp.data.properties.email_otp!);
-        await panel!.getByRole("button", { name: "로그인하기" }).click();
-        await panel!.locator(`[data-dept-id="${ids.dept}"]`).click();
+        await panel!.evaluate(async ({ email, code }) => {
+          await window.sasu.auth.verifyCode(email, code);
+        }, { email: "review-lead@example.test", code: otp.data.properties.email_otp! });
+        const departments = await panel!.evaluate(async () => window.sasu.link.departments());
+        expect(departments.departments.some((dept) => dept.id === ids.dept && dept.consented)).toBeTruthy();
+        await panel!.evaluate(async (deptId) => {
+          await window.sasu.link.create({
+            dept_id: deptId,
+            device_name: "데스크톱 앱",
+          });
+        }, ids.dept);
+        await panel!.reload();
         await expect(panel!.getByRole("button", { name: "질문" })).toBeVisible();
       };
       await login();

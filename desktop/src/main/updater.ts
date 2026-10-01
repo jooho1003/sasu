@@ -1,7 +1,11 @@
 // Design Ref: desktop-companion §5.3·§7 S8 — packaged builds only check the dedicated release repository.
 import { app } from "electron";
-import { autoUpdater } from "electron-updater";
+import updaterPackage from "electron-updater";
 import { logError, logInfo } from "./logger";
+
+// electron-updater is CommonJS. Use its default export so Electron's ESM main
+// bundle can load the packaged app on Windows.
+const { autoUpdater } = updaterPackage;
 
 export type UpdateState =
   | { status: "unavailable" }

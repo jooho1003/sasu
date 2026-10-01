@@ -57,12 +57,19 @@ async function start(): Promise<void> {
 
   const sessionStorage = new EncryptedKeyValueStorage(sessionFile);
   const supabase = createDesktopSupabase(sessionStorage);
+  // Supabase restores the async encrypted storage lazily. Complete that
+  // restoration before exposing OTP login, otherwise a late empty restore can
+  // overwrite a newly verified session.
+  await supabase.auth.getSession();
   let clearUnauthorized = async (): Promise<void> => undefined;
   const api = new ApiClient(SASU_APP_URL, supabase, () => clearUnauthorized());
   const auth = new AuthService(supabase, api, sessionStorage, [outboxFile, settingsFile]);
   let deviceLinked = false;
   let deviceLinkPending = false;
   clearUnauthorized = async () => {
+    // A request started before OTP verification may complete after the new
+    // session exists. It must not clear that session while linking is pending.
+    if (deviceLinkPending) return;
     await auth.clearLocalState();
     windows?.panel.webContents.send("signed-out");
   };
@@ -72,7 +79,9 @@ async function start(): Promise<void> {
   registerIpc({
     api, auth, outbox, supabase, settingsFile,
     onSettingsChanged: (next) => windows?.setPanelPinned(next.panelPinned),
+    onDeviceAuthenticating: () => { deviceLinkPending = true; },
     onDeviceAuthenticated: () => { deviceLinkPending = true; },
+    onDeviceAuthenticationFailed: () => { deviceLinkPending = false; },
     onDeviceLinked: () => { deviceLinked = true; deviceLinkPending = false; },
     updater,
   });

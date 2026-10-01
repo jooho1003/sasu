@@ -83,7 +83,9 @@ type Dependencies = {
   supabase: SupabaseClient;
   settingsFile: EncryptedFile;
   onSettingsChanged?: (settings: SettingsValue) => void;
+  onDeviceAuthenticating?: () => void;
   onDeviceAuthenticated?: () => void;
+  onDeviceAuthenticationFailed?: () => void;
   onDeviceLinked?: () => void;
   updater?: DesktopUpdater;
 };
@@ -131,9 +133,18 @@ function webTarget(path: string): string {
 export function registerIpc(deps: Dependencies): void {
   register("auth:requestCode", (value) => EmailInput.parse(value), ({ email }) => deps.auth.requestCode(email));
   register("auth:verifyCode", (value) => VerifyInput.parse(value), async ({ email, code }) => {
-    const verified = await deps.auth.verifyCode(email, code);
-    deps.onDeviceAuthenticated?.();
-    return verified;
+    // A freshly verified session exists before a device link does. Hold the
+    // inbox poller during that interval so it cannot mistake the missing link
+    // for a revoked device and erase the new session.
+    deps.onDeviceAuthenticating?.();
+    try {
+      const verified = await deps.auth.verifyCode(email, code);
+      deps.onDeviceAuthenticated?.();
+      return verified;
+    } catch (cause) {
+      deps.onDeviceAuthenticationFailed?.();
+      throw cause;
+    }
   });
   register("auth:signOut", noInput, () => deps.auth.signOut());
 

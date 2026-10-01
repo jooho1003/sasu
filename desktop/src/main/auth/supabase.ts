@@ -50,6 +50,22 @@ export class AuthService {
       logError("auth_verify_code_failed", { code: result.error?.code ?? "no_session" });
       throw new Error("로그인 코드를 확인하지 못했습니다.");
     }
+    // Persist the returned OTP session before IPC yields back to the renderer.
+    // This is explicit because the encrypted asynchronous storage adapter must
+    // never leave the following authenticated API request without a token.
+    const persisted = await this.supabase.auth.setSession({
+      access_token: result.data.session.access_token,
+      refresh_token: result.data.session.refresh_token,
+    });
+    if (persisted.error || !persisted.data.session) {
+      logError("auth_session_persist_failed", { code: persisted.error?.code ?? "no_session" });
+      throw new Error("로그인 정보를 저장하지 못했습니다.");
+    }
+    const retained = await this.supabase.auth.getSession();
+    if (retained.error || !retained.data.session) {
+      logError("auth_session_missing_after_persist", { code: retained.error?.code ?? "no_session" });
+      throw new Error("로그인 정보를 저장하지 못했습니다.");
+    }
     return { authenticated: true };
   }
 

@@ -24,4 +24,20 @@ describe("ApiClient", () => {
       code: "invalid_response",
     });
   });
+
+  it("does not clear storage while the signed-out login screen checks device state", async () => {
+    const onUnauthorized = vi.fn();
+    const signedOut = {
+      auth: {
+        getSession: vi.fn(async () => ({ data: { session: null }, error: null })),
+      },
+    };
+    const client = new ApiClient("http://127.0.0.1:3011", signedOut as never, onUnauthorized);
+
+    await expect(client.get("/api/companion/link", () => undefined)).rejects.toMatchObject({
+      status: 401,
+      code: "session_invalid",
+    });
+    expect(onUnauthorized).not.toHaveBeenCalled();
+  });
 });
