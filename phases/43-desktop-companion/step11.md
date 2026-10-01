@@ -28,6 +28,19 @@
    - 운영: `auth.sessions` 삭제 권한 확인, 마이그레이션 적용, 메일 SMTP 전환, 6자리 코드 템플릿.
 6. 1~4가 통과하면 `"status": "blocked"`, `"blocked_reason": "사람 실측·운영 승인 대기: 5분 설치 녹화, 배포 저장소·업데이트 1회, 운영 auth.sessions 권한·0069 적용·SMTP·메일 템플릿 (기록: docs/verification/desktop-companion-YYYY-MM-DD.md)"`로 멈춘다.
 
+## 실행 메모 — 장시간 서버 (2026-10-02 오케스트레이터)
+
+이전 시도에서 Codex 셸 도구로 `node scripts/review-qa.mjs start`(또는 `dev`)를 직접 띄우자 명령이 끝나지 않아 세션이 40분 넘게 멈췄다. 검증 서버는 아래처럼 **분리 프로세스**로 띄우고, 준비를 HTTP로 확인한 뒤 쓰고, 끝나면 **반드시 종료**한다.
+
+```powershell
+$qa = Start-Process node -ArgumentList "scripts/review-qa.mjs","start" -WorkingDirectory (Get-Location) -WindowStyle Hidden -PassThru -RedirectStandardOutput ".vercel/review-qa/qa-server.out.log" -RedirectStandardError ".vercel/review-qa/qa-server.err.log"
+for ($i=0; $i -lt 90; $i++) { try { if ((Invoke-WebRequest http://127.0.0.1:3011 -UseBasicParsing -TimeoutSec 2).StatusCode) { break } } catch {}; Start-Sleep 2 }
+# ... E2E 실행 ...
+taskkill /PID $qa.Id /T /F
+```
+
+step을 끝내기 전에 이 step에서 띄운 서버·Electron·Playwright 프로세스가 남아 있지 않은지 확인한다. 남은 프로세스는 실행기를 멈추게 한다.
+
 ## Acceptance Criteria
 
 ```powershell

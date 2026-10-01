@@ -27,6 +27,19 @@ step 9가 남겨 둔 **일 맡기기** 탭의 두 구역을 만든다. 둘 다 l
 3. 상태 요약의 `reviews`·`sales`가 펫 상태(진행 중·완료·실패)에 반영되는지 확인한다(core `computePetState`는 step 8에 있다).
 4. E2E(`desktop/tests/e2e/work.spec.ts`, 로컬 QA): lead 기기로 ① 작은 `.txt` 문서 → 자료 검토함 등록 201 → Storage에 `original` 존재 → 구간 202 ② 2초짜리 합성 WAV 음성 → 구간 업로드·등록 ③ 영업 원문 4건 선택 → 요청 202 → 같은 요청 재전송 멱등 → 상태 표시. member 기기에서는 두 구역이 보이지 않고 IPC를 직접 불러도 403. 결과·스크린샷은 `docs/verification/43-desktop-companion/desktop-work.md`.
 
+## 실행 메모 — 장시간 서버 (2026-10-02 오케스트레이터)
+
+이전 시도에서 Codex 셸 도구로 `node scripts/review-qa.mjs start`(또는 `dev`)를 직접 띄우자 명령이 끝나지 않아 세션이 40분 넘게 멈췄다. 검증 서버는 아래처럼 **분리 프로세스**로 띄우고, 준비를 HTTP로 확인한 뒤 쓰고, 끝나면 **반드시 종료**한다.
+
+```powershell
+$qa = Start-Process node -ArgumentList "scripts/review-qa.mjs","start" -WorkingDirectory (Get-Location) -WindowStyle Hidden -PassThru -RedirectStandardOutput ".vercel/review-qa/qa-server.out.log" -RedirectStandardError ".vercel/review-qa/qa-server.err.log"
+for ($i=0; $i -lt 90; $i++) { try { if ((Invoke-WebRequest http://127.0.0.1:3011 -UseBasicParsing -TimeoutSec 2).StatusCode) { break } } catch {}; Start-Sleep 2 }
+# ... E2E 실행 ...
+taskkill /PID $qa.Id /T /F
+```
+
+step을 끝내기 전에 이 step에서 띄운 서버·Electron·Playwright 프로세스가 남아 있지 않은지 확인한다. 남은 프로세스는 실행기를 멈추게 한다.
+
 ## Acceptance Criteria
 
 ```powershell
