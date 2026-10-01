@@ -762,6 +762,56 @@ export const JobStatus = z.enum(["queued","running","done","failed"]);
 export const NotionRootState = z.enum(["pending","discovering","idle","paused_consent","paused_limit","failed","disabled"]);
 export const AnswerDeliveryState = z.enum(["pending","sent","failed","cancelled"]);
 
+export const CompanionInboxCard = z.strictObject({
+  id: z.uuid(),
+  title: z.string().min(1),
+  deadline: z.iso.datetime({ offset: true }).nullable(),
+  status: z.enum(["open", "needs_review"]),
+});
+export const CompanionInboxAnswer = z.strictObject({
+  id: z.uuid(),
+  status: AnswerStatus,
+  created_at: z.iso.datetime({ offset: true }),
+});
+export const CompanionInboxReview = z.strictObject({
+  id: z.uuid(),
+  kind: z.enum(["audio", "document"]),
+  title: z.string().min(1),
+  status: ReviewStatus,
+});
+export const CompanionInboxSales = z.strictObject({
+  id: z.uuid(),
+  status: z.enum(["queued", "processing", "ready", "refused", "failed"]),
+});
+export const CompanionInbox = z.strictObject({
+  server_time: z.iso.datetime({ offset: true }),
+  cards: z.array(CompanionInboxCard),
+  answers: z.array(CompanionInboxAnswer),
+  reviews: z.array(CompanionInboxReview),
+  sales: z.array(CompanionInboxSales),
+});
+export type CompanionInbox = z.infer<typeof CompanionInbox>;
+
+export const CompanionTranscriptMeta = z.strictObject({
+  title: z.string().trim().min(1).max(120),
+  visibility: z.enum(["dept", "leads_only"]),
+});
+export type CompanionTranscriptMeta = z.infer<
+  typeof CompanionTranscriptMeta
+>;
+
+export const CompanionReviewPartInput = z.strictObject({
+  index: z.number().int().min(0).max(29),
+});
+export type CompanionReviewPartInput = z.infer<
+  typeof CompanionReviewPartInput
+>;
+
+export const CompanionQuestionCursor = z.strictObject({
+  before: z.iso.datetime({ offset: true }),
+  before_id: z.uuid(),
+});
+
 // ADR-080: strict required fields; model output contains indices only.
 export const SalesSourceReviewChoice = z.strictObject({
   topics: z.array(z.strictObject({

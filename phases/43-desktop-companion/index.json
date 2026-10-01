@@ -67,9 +67,12 @@
     {
       "step": 6,
       "name": "companion-routes",
-      "status": "pending",
+      "status": "completed",
       "codex_model": "gpt-5.6-sol",
-      "effort": "xhigh"
+      "effort": "xhigh",
+      "started_at": "2026-10-02T01:45:43+0900",
+      "summary": "E05~E13 앱 경로와 내용 없는 받은 일 정규화를 공용 ActorContext·사용자 JWT로 구현하고, 웹/앱 답 일치·결정 멱등·업로드·해제 후 401·LLM 0회를 로컬 QA로 확인했다. docs/verification/43-desktop-companion/companion-routes.md 참조.",
+      "completed_at": "2026-10-02T02:15:23+0900"
     },
     {
       "step": 7,
