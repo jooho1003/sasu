@@ -1,0 +1,9 @@
+{
+  "project": "sasu",
+  "phase": "38-sales-review-source-connection",
+  "design": "docs/02-design/features/sales-review-source-connection.design.md",
+  "steps": [
+    { "step": 0, "name": "read-only-real-source-connection", "status": "completed", "verification": "docs/verification/sales-review-source-connection-2026-09-30.md", "summary": "기존 부서 원문 4건을 팀장이 현재 RLS로 읽고 직접 링크로 대조. 대상 단위 7·인증 브라우저 1·합성 1·게스트 5건 통과. 운영 미반영." }
+  ],
+  "production_deployed": false
+}

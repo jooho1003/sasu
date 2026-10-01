@@ -1,0 +1,9 @@
+{
+  "project": "sasu",
+  "phase": "39-sales-review-literal-comparison",
+  "design": "docs/02-design/features/sales-review-literal-comparison.design.md",
+  "steps": [
+    { "step": 0, "name": "real-quote-literal-diff", "status": "completed", "verification": "docs/verification/sales-review-literal-comparison-2026-09-30.md", "summary": "기존·변경 견적 문구를 현재 RLS로 재조회해 정확한 인용·원문 링크와 함께 비교. 단위 7·인증 브라우저 1·원문/합성 회귀 각 1·게스트 5건 통과. 운영 미반영." }
+  ],
+  "production_deployed": false
+}

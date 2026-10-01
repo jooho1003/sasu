@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { SalesReviewFocus, SalesReviewRejectReason, SalesReviewResult } from "@/lib/contracts";
+import SalesReviewSources from "@/components/sales-review-sources";
 
 type SourceId = "S1" | "S2" | "S3" | "S4";
 type Task = {
@@ -131,7 +132,8 @@ export default function SalesReview({ deptId, role, consented, sources, titles }
 
   return <main className="workspace-page grid gap-6">
     <header className="grid gap-2"><p className="m-0 text-sm font-bold text-[var(--accent)]">사수 · 영업 검토 연습</p><h1 className="m-0 text-3xl">견적 변경 검토</h1><p className="m-0 text-[var(--muted)]">고객 요청과 견적 초안의 차이를 근거와 함께 살펴봅니다.</p></header>
-    <p className="m-0 rounded-xl border border-[var(--urgent)]/30 bg-[var(--urgent)]/10 p-4 font-bold">가상 사례입니다. 고객에게 발송되지 않으며 실제 가격·계약 승인이 아닙니다.</p>
+    {role === "lead" && consented ? <SalesReviewSources deptId={deptId} /> : null}
+    <p className="m-0 rounded-xl border border-[var(--urgent)]/30 bg-[var(--urgent)]/10 p-4 font-bold">아래는 가상 사례 연습입니다. 고객에게 발송되지 않으며 실제 가격·계약 승인이 아닙니다.</p>
     {!consented ? <p className="panel p-5">동의 후 이용할 수 있습니다.</p> : null}
     {error ? <p className="rounded-xl bg-[var(--urgent)]/10 p-4" role="alert">{error}</p> : null}
     <section className="panel grid gap-4 p-6"><div><p className="m-0 text-sm text-[var(--muted)]">가상 입력</p><h2 className="m-0 text-2xl">이번에 볼 자료</h2></div><div className="grid gap-3 lg:grid-cols-2">{(Object.keys(sources) as SourceId[]).map((id) => <article className="rounded-xl border border-black/10 bg-white p-4" id={`sales-source-${id}`} key={id}><h3 className="mt-0 text-base">{id} · {titles[id]}</h3><p className="m-0 whitespace-pre-wrap text-sm leading-6">{sources[id]}</p></article>)}</div></section>

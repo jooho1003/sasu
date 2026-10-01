@@ -152,6 +152,14 @@ export const SalesReviewResult = z.strictObject({
 });
 export type SalesReviewResult = z.infer<typeof SalesReviewResult>;
 
+export const SalesReviewSourceSelection = z.strictObject({
+  request_item_id: z.uuid(),
+  old_quote_item_id: z.uuid(),
+  new_quote_item_id: z.uuid(),
+  policy_item_id: z.uuid(),
+});
+export type SalesReviewSourceSelection = z.infer<typeof SalesReviewSourceSelection>;
+
 export const IngestItem = z.strictObject({
   source_id: NonEmptyString,
   external_ref: NullableString,

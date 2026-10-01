@@ -22,6 +22,8 @@
 4. `vercel promote dpl_9tE1VwC7FQc4Wp7D9PriCT9LX5xt --yes` 뒤 `vercel inspect https://sasu-alpha.vercel.app`에서 같은 배포 ID·Ready를 확인했다. 공개 `/`·`/privacy`·`/demo/features` 200, 무서명 `POST /api/jobs/run`·`/api/slack/events` 401.
 5. 운영 URL의 `npm run e2e -- tests/e2e/guest.spec.ts`: 1440px·390px 완주, 부서 격리·서명 거절, 읽기 전후 AI/DB 무증가 포함 5/5 통과.
 
+PR #19를 `main`에 병합한 뒤 Git 연동 배포 `dpl_AQRMrHZFi7kifBQv1bK1XEu4k2BZ`가 생성됐다. `vercel inspect https://sasu-alpha.vercel.app`에서 이 배포가 `Ready`이며 운영 도메인을 가리키는 것을 확인했다.
+
 실제 인증 사용자로 운영 영업 검토를 생성하거나 lead 확인을 누르는 검사는 실행하지 않았다. 해당 동선의 로컬 인증 브라우저 2건과 격리 SQL 289건은 [phase 37 검증](sales-review-revision-2026-09-30.md)에 있다. 배포 후 실제 영업 자료는 아직 읽지 않는다.
 
 코드 롤백은 이전 배포 `dpl_7XgHNdiibSh4fMefZsXMr5BGUGTL`을 승격해 수행한다. 0066·0067은 테이블·RPC를 추가하고 기존 영업 검토가 없던 DB를 확장했다. 자동 down migration은 없으며 스키마 백업을 보관한다.

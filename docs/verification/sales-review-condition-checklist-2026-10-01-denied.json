@@ -1,0 +1,15 @@
+{
+  "environment": "isolated-local-synthetic",
+  "results": [
+    {
+      "scenario": "demo_lead",
+      "status": 403,
+      "cache_control": "private, no-store, max-age=0"
+    },
+    {
+      "scenario": "unconsented_lead",
+      "status": 403,
+      "cache_control": "private, no-store, max-age=0"
+    }
+  ]
+}
