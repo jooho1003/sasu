@@ -1,11 +1,26 @@
 {
   "phases": [
     {
+      "dir": "42-sales-source-review-history",
+      "status": "completed",
+      "production_deployed": false,
+      "verification": "docs/verification/sales-source-review-history-2026-10-01.md",
+      "note": "본인 이력·20건 keyset·기존현재근거 재열람·초점/화면이동·읽기0쓰기, local 검증 완료. 모델회귀 최초실패/재실행 성공·미확보 원인 기록. 운영 미반영."
+    },
+    {
+      "dir": "41-sales-source-ai-review",
+      "status": "completed",
+      "verification": "docs/verification/sales-source-ai-review-2026-10-01.md",
+      "note": "현재 네 원문 AI 문단 선택·고정 질문·정확 인용·원문 링크, SQL 현재권한/hash·본인RLS·비동기/fencing·2분watchdog 구현. unit1775·SQL308+matrix2016·신규E2E2/회귀11·실제합성Groq3·lint/build 통과. 실고객 적합성·운영 미반영.",
+      "production_deployed": false
+    },
+    {
       "dir": "40-sales-review-condition-checklist",
       "status": "completed",
       "verification": "docs/verification/sales-review-condition-checklist-2026-10-01.md",
-      "note": "네 현재 원문의 주제별 전체 줄·확인 질문·정확 인용·링크 구현과 격리 검증 완료. 키워드 탐색이며 의미 판정·LLM·저장·운영 반영 없음.",
-      "production_deployed": false
+      "note": "네 현재 원문의 주제별 전체 줄·확인 질문·정확 인용·링크 구현과 격리 검증 완료. 키워드 탐색이며 의미 판정·LLM·저장 없음. 2026-10-01 운영 반영, 운영 guest E2E 5/5.",
+      "production_deployed": true,
+      "deployment": "docs/verification/sales-source-tools-production-2026-10-01.md"
     },
     {
       "dir": "22-review-state-recovery",
@@ -250,15 +265,17 @@
       "dir": "38-sales-review-source-connection",
       "status": "completed",
       "verification": "docs/verification/sales-review-source-connection-2026-09-30.md",
-      "note": "팀장이 기존 부서 원문 4건을 현재 세션/RLS로 읽기 전용 연결·대조. 합성 QA로 인증 브라우저·권한 회수·게스트 회귀 통과. 실제 고객 문서 검증·생성형 해석·운영 반영 없음.",
-      "production_deployed": false
+      "note": "팀장이 기존 부서 원문 4건을 현재 세션/RLS로 읽기 전용 연결·대조. 합성 QA로 인증 브라우저·권한 회수·게스트 회귀 통과. 실제 고객 문서 검증·생성형 해석 없음. 2026-10-01 운영 반영, 운영 guest E2E 5/5.",
+      "production_deployed": true,
+      "deployment": "docs/verification/sales-source-tools-production-2026-10-01.md"
     },
     {
       "dir": "39-sales-review-literal-comparison",
       "status": "completed",
       "verification": "docs/verification/sales-review-literal-comparison-2026-09-30.md",
-      "note": "팀장이 현재 세션/RLS의 기존·변경 견적 원문 문구 차이를 정확한 인용·원문 링크로 대조. 격리 인증 브라우저와 게스트·합성 회귀 통과. 실제 고객 문서 의미 해석·운영 반영 없음.",
-      "production_deployed": false
+      "note": "팀장이 현재 세션/RLS의 기존·변경 견적 원문 문구 차이를 정확한 인용·원문 링크로 대조. 격리 인증 브라우저와 게스트·합성 회귀 통과. 실제 고객 문서 의미 해석 없음. 2026-10-01 운영 반영, 운영 guest E2E 5/5.",
+      "production_deployed": true,
+      "deployment": "docs/verification/sales-source-tools-production-2026-10-01.md"
     },
     {
       "dir": "43-desktop-companion",

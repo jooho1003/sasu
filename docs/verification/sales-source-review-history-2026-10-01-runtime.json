@@ -1,0 +1,42 @@
+{
+  "environment": "isolated-local-synthetic",
+  "checks": [
+    "same_time_keyset_20_plus_2",
+    "owner_department_guard",
+    "five_statuses",
+    "revisit_reopen",
+    "exact_quote_link",
+    "read_only_no_post",
+    "focus_clears",
+    "390px",
+    "content_change_hides_list_detail",
+    "inactive_deleted_unprincipled_hides",
+    "current_consent_role_revocation",
+    "no_excluded_count"
+  ],
+  "counts_before": {
+    "sales_source_reviews": 24,
+    "sales_review_tasks": 21,
+    "jobs": 555,
+    "llm_calls": 310
+  },
+  "counts_after": {
+    "sales_source_reviews": 24,
+    "sales_review_tasks": 21,
+    "jobs": 555,
+    "llm_calls": 310
+  },
+  "revoked_read_before": {
+    "sales_source_reviews": 24,
+    "sales_review_tasks": 21,
+    "jobs": 558,
+    "llm_calls": 310
+  },
+  "revoked_read_after": {
+    "sales_source_reviews": 24,
+    "sales_review_tasks": 21,
+    "jobs": 558,
+    "llm_calls": 310
+  },
+  "note": "Source fixture mutations may enqueue existing classify jobs; read-only count windows exclude fixture setup/mutations."
+}

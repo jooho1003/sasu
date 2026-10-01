@@ -11,6 +11,7 @@ import { registerMeetingSummaryHandler } from "@/lib/pipeline/meeting-summary";
 import { registerDocumentSummaryHandler } from "@/lib/pipeline/document-summary";
 import { registerAgentRoleHandler } from "@/lib/pipeline/agent-role";
 import { registerSalesReviewHandler } from "@/lib/pipeline/sales-review";
+import { registerSalesSourceReviewHandler } from "@/lib/pipeline/sales-source-review";
 import { registerNotionImportHandler, scheduleNotionSync } from "@/lib/pipeline/notion-import";
 import { registerNotionDiscoverHandler } from "@/lib/pipeline/notion-discover";
 import { registerNotionPollHandler, scheduleNotionPolls } from "@/lib/pipeline/notion-poll";
@@ -34,6 +35,7 @@ function registerWorkerHandlers(): void {
   registerDocumentSummaryHandler();
   registerAgentRoleHandler();
   registerSalesReviewHandler();
+  registerSalesSourceReviewHandler();
   registerNotionImportHandler();
   registerNotionDiscoverHandler();
   registerNotionPollHandler();

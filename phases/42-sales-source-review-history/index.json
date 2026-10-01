@@ -1,0 +1,30 @@
+{
+  "project": "sasu",
+  "phase": "42-sales-source-review-history",
+  "steps": [
+    {
+      "step": 0,
+      "name": "history-api",
+      "status": "completed",
+      "summary": "세션/RLS 본인 목록·strict keyset·메타데이터 API와 선행 테스트"
+    },
+    {
+      "step": 1,
+      "name": "history-reopen",
+      "status": "completed",
+      "summary": "현재 상세 읽기 모드·이력 UI·취소/초점/30초/2분·권한 변화 숨김"
+    },
+    {
+      "step": 2,
+      "name": "verify-history",
+      "status": "completed",
+      "summary": "unit1788·SQL308+2016·신규E2E3·기존13각최종pass·독립PDCA100%"
+    }
+  ],
+  "production_deployed": false,
+  "verification": "docs/verification/sales-source-review-history-2026-10-01.md",
+  "plan": "docs/01-plan/features/sales-source-review-history.plan.md",
+  "design": "docs/02-design/features/sales-source-review-history.design.md",
+  "analysis": "docs/03-analysis/sales-source-review-history.analysis.md",
+  "report": "docs/04-report/features/sales-source-review-history.report.md"
+}

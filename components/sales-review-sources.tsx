@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SalesSourceAiReview from "@/components/sales-source-ai-review";
 import type { SalesReviewConditionChecklist } from "@/lib/sales-review-condition-checklist";
 
 type Candidate = { item_id: string; title: string; kind: string; quote: string; is_principles: boolean };
@@ -30,6 +31,8 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
   const [busy, setBusy] = useState(false);
   const [comparing, setComparing] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [aiBusy,setAiBusy]=useState(false);
+  const [aiEpoch,setAiEpoch]=useState(0);
   const [checklist, setChecklist] = useState<SalesReviewConditionChecklist["topics"] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const endpoint = `/api/d/${encodeURIComponent(deptId)}/sales-review/sources`;
@@ -85,6 +88,7 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
   async function compare() {
     if (!preview) return;
     setComparing(true);
+    setAiEpoch(epoch=>epoch+1);
     setError(null);
     setComparison(null);
     setChecklist(null);
@@ -109,6 +113,7 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
   async function checkConditions() {
     if (!preview) return;
     setChecking(true);
+    setAiEpoch(epoch=>epoch+1);
     setError(null);
     setChecklist(null);
     setComparison(null);
@@ -134,13 +139,13 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
     <div className="grid gap-1">
       <p className="m-0 text-sm text-[var(--muted)]">실제 부서 기록 · 팀장 전용</p>
       <h2 className="m-0 text-2xl" id="real-sales-sources-heading">검토할 원문 연결</h2>
-      <p className="m-0 text-sm leading-6 text-[var(--muted)]">현재 볼 수 있는 원문을 역할별로 고릅니다. 선택은 저장되지 않으며 금액·일정을 자동으로 해석하지 않습니다.</p>
+        <p className="m-0 text-sm leading-6 text-[var(--muted)]">현재 볼 수 있는 원문을 역할별로 고릅니다. 원문을 대조하거나 사수가 고른 근거를 확인할 수 있습니다.</p>
     </div>
     {loading ? <p role="status">원문을 불러오는 중입니다.</p> : candidates.length === 0 ? <p>연결할 원문이 없습니다. <a className="underline" href={`/d/${encodeURIComponent(deptId)}/documents`}>부서 자료 보기</a></p> : <>
       {!candidates.some((candidate) => candidate.is_principles) ? <p className="m-0 text-sm" role="status">활성 원칙 문서의 원문이 없습니다. 부서 원칙 문서를 연결한 뒤 다시 열어 주세요.</p> : null}
       <div className="grid gap-3 md:grid-cols-2">
         {ROLES.map(({ id, label }) => <label className="grid gap-2 text-sm font-bold" key={id}>{label}
-          <select className="min-w-0 rounded-lg border border-black/15 bg-white px-3 py-2 font-normal" disabled={busy || comparing || checking} value={selection[id]}
+          <select className="min-w-0 rounded-lg border border-black/15 bg-white px-3 py-2 font-normal" disabled={busy || comparing || checking || aiBusy} value={selection[id]}
             onChange={(event) => { setSelection((current) => ({ ...current, [id]: event.target.value })); setPreview(null); setComparison(null); setChecklist(null); }}>
             <option value="">원문 선택</option>
             {candidates.filter((candidate) => id !== "policy" || candidate.is_principles).map((candidate) =>
@@ -148,7 +153,7 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
           </select>
         </label>)}
       </div>
-      <button className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 font-bold text-[var(--accent)] disabled:opacity-50" disabled={busy || comparing || checking}
+      <button className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 font-bold text-[var(--accent)] disabled:opacity-50" disabled={busy || comparing || checking || aiBusy}
         onClick={() => void connect()} type="button">{busy ? "확인 중…" : "원문 나란히 보기"}</button>
     </>}
     {error ? <p className="m-0 rounded-xl bg-[var(--urgent)]/10 p-3" role="alert">{error}</p> : null}
@@ -160,9 +165,11 @@ export default function SalesReviewSources({ deptId }: { deptId: string }) {
       </article>)}
     </div> : null}
     {preview ? <button className="w-fit rounded-lg bg-[var(--accent)] px-4 py-2 font-bold text-white disabled:opacity-50"
-      disabled={busy || comparing || checking} onClick={() => void compare()} type="button">{comparing ? "비교 중…" : "견적 문구 차이 보기"}</button> : null}
+      disabled={busy || comparing || checking || aiBusy} onClick={() => void compare()} type="button">{comparing ? "비교 중…" : "견적 문구 차이 보기"}</button> : null}
     {preview ? <button className="w-fit rounded-lg border border-[var(--accent)] px-4 py-2 font-bold text-[var(--accent)] disabled:opacity-50"
-      disabled={busy || comparing || checking} onClick={() => void checkConditions()} type="button">{checking ? "조건 찾는 중…" : "조건 확인 질문 보기"}</button> : null}
+      disabled={busy || comparing || checking || aiBusy} onClick={() => void checkConditions()} type="button">{checking ? "조건 찾는 중…" : "조건 확인 질문 보기"}</button> : null}
+    {preview && !comparing && !checking?<SalesSourceAiReview key={aiEpoch} deptId={deptId} selection={selection} onBusy={setAiBusy}
+      onUnavailable={()=>{setPreview(null);setChecklist(null);setComparison(null);setError("현재 확인할 수 없는 원문입니다. 다시 선택해 주세요.");}}/>:null}
     {checking ? <p className="m-0 text-sm" role="status">현재 원문에서 확인할 조건을 찾고 있습니다.</p> : null}
     {checklist ? <section className="grid gap-4 rounded-xl border border-black/10 bg-white p-4" aria-label="영업 조건 확인 질문">
       <div><h3 className="m-0 text-lg">영업 조건 확인 질문</h3>
