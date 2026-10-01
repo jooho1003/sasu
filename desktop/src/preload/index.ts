@@ -61,6 +61,30 @@ const bridge = {
     set: (input: Partial<DesktopSettings>) => invoke<DesktopSettings>("settings:set", input),
   },
   app: { openWeb: (path: string) => invoke<{ opened: true }>("app:openWeb", { path }) },
+  window: {
+    togglePanel: () => ipcRenderer.send("pet-toggle-panel"),
+    onPanelBlurred: (callback: () => void) => {
+      const listener = (): void => callback();
+      ipcRenderer.on("panel-blurred", listener);
+      return () => ipcRenderer.removeListener("panel-blurred", listener);
+    },
+    onShortcutStatus: (callback: (registered: boolean) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, registered: boolean): void => callback(registered);
+      ipcRenderer.on("shortcut-status", listener);
+      return () => ipcRenderer.removeListener("shortcut-status", listener);
+    },
+    onFocusQuestion: (callback: () => void) => {
+      const listener = (): void => callback();
+      ipcRenderer.on("focus-question", listener);
+      return () => ipcRenderer.removeListener("focus-question", listener);
+    },
+    onPetState: (callback: (state: string) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, state: string): void => callback(state);
+      ipcRenderer.on("pet-state", listener);
+      return () => ipcRenderer.removeListener("pet-state", listener);
+    },
+    movePet: (position: { x: number; y: number }) => invoke<void>("window:movePet", position),
+  },
 };
 
 contextBridge.exposeInMainWorld("sasu", bridge);

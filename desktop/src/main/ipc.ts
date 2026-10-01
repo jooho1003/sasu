@@ -80,6 +80,7 @@ type Dependencies = {
   outbox: OutboxService;
   supabase: SupabaseClient;
   settingsFile: EncryptedFile;
+  onSettingsChanged?: (settings: SettingsValue) => void;
 };
 
 function register<I, O>(
@@ -164,6 +165,7 @@ export function registerIpc(deps: Dependencies): void {
     const current = Settings.parse(await deps.settingsFile.read(DEFAULT_SETTINGS));
     const next = Settings.parse({ ...current, ...patch });
     await deps.settingsFile.write(next);
+    deps.onSettingsChanged?.(next);
     return next;
   });
   register("app:openWeb", (value) => OpenWebInput.parse(value), async ({ path }) => {

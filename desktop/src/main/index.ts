@@ -1,45 +1,33 @@
 // Design Ref: desktop-companion §2·§7 — hardened Electron main owns every token, network, and OS capability.
+import { app, ipcMain, session } from "electron";
+import { z } from "zod";
 import { join } from "node:path";
-import { app, BrowserWindow, session } from "electron";
 import { ApiClient } from "./api/client";
 import { AuthService, createDesktopSupabase } from "./auth/supabase";
 import { registerIpc } from "./ipc";
 import { logError, logInfo } from "./logger";
 import { OutboxService } from "./outbox-service";
 import { EncryptedFile, EncryptedKeyValueStorage } from "./storage/encrypted-file";
+import { createDesktopWindows, type DesktopWindows } from "./windows";
+import { createTray } from "./tray";
+import { registerPanelShortcut, unregisterPanelShortcut } from "./shortcut";
+import { computePetState, type PetState } from "./core/pet-state";
+import { nextInboxDelay } from "./core/poller";
+import { notify } from "./notify";
+import { parseCompanionInbox } from "../shared/contracts";
+import type { DesktopSettings } from "../shared/contracts";
 
 const CSP = "default-src 'self'; connect-src 'none'; img-src 'self' data:; script-src 'self'; style-src 'self'";
 const APP_USER_MODEL_ID = "team.sasu.companion";
 const OUTBOX_FLUSH_MS = 30_000;
 
-let mainWindow: BrowserWindow | null = null;
+let windows: DesktopWindows | null = null;
 let flushTimer: NodeJS.Timeout | null = null;
+let inboxTimer: NodeJS.Timeout | null = null;
+let tray: ReturnType<typeof createTray> | null = null;
 
-function createWindow(): BrowserWindow {
-  const window = new BrowserWindow({
-    width: 380,
-    height: 560,
-    minWidth: 320,
-    minHeight: 480,
-    show: false,
-    webPreferences: {
-      preload: join(__dirname, "../preload/index.js"),
-      contextIsolation: true,
-      sandbox: true,
-      nodeIntegration: false,
-      webSecurity: true,
-    },
-  });
-  window.webContents.on("will-navigate", (event) => event.preventDefault());
-  window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-  window.once("ready-to-show", () => window.show());
-  if (process.env.ELECTRON_RENDERER_URL) {
-    void window.loadURL(process.env.ELECTRON_RENDERER_URL);
-  } else {
-    void window.loadFile(join(__dirname, "../renderer/index.html"));
-  }
-  return window;
-}
+const PositionInput = z.strictObject({ x: z.number().int(), y: z.number().int() });
+const DEFAULT_SETTINGS: DesktopSettings = { seen: [], pet: "green", reduceMotion: false, panelPinned: false };
 
 function installBrowserGuards(): void {
   const currentSession = session.defaultSession;
@@ -72,18 +60,55 @@ async function start(): Promise<void> {
   const auth = new AuthService(supabase, api, sessionStorage, [outboxFile, settingsFile]);
   clearUnauthorized = async () => {
     await auth.clearLocalState();
-    mainWindow?.webContents.send("signed-out");
+    windows?.panel.webContents.send("signed-out");
   };
   const outbox = new OutboxService(outboxFile, api);
 
-  registerIpc({ api, auth, outbox, supabase, settingsFile });
+  registerIpc({
+    api, auth, outbox, supabase, settingsFile,
+    onSettingsChanged: (next) => windows?.setPanelPinned(next.panelPinned),
+  });
   installBrowserGuards();
-  mainWindow = createWindow();
+  windows = await createDesktopWindows();
+  const savedSettings = await settingsFile.read(DEFAULT_SETTINGS);
+  windows.setPanelPinned(savedSettings.panelPinned);
+  ipcMain.handle("window:movePet", async (event, value) => {
+    if (event.sender !== windows?.pet.webContents) throw new Error("window_forbidden");
+    const position = PositionInput.parse(value);
+    windows.movePet(position.x, position.y);
+    const bounds = windows.pet.getBounds();
+    return { x: bounds.x, y: bounds.y };
+  });
+  const shortcutRegistered = registerPanelShortcut(() => windows?.focusQuestion());
+  windows.panel.webContents.send("shortcut-status", shortcutRegistered);
+  tray = createTray(windows, () => void auth.signOut());
   flushTimer = setInterval(() => {
     void outbox.flush().catch((cause: unknown) => {
       logError("outbox_flush_failed", { code: cause instanceof Error ? cause.name : "unknown" });
     });
   }, OUTBOX_FLUSH_MS);
+  let lastState: PetState | null = null;
+  let inboxDelay = 0;
+  const pollInbox = async (): Promise<void> => {
+    try {
+      const inbox = await api.get("/api/companion/inbox", parseCompanionInbox);
+      const settings = await settingsFile.read(DEFAULT_SETTINGS);
+      const state = computePetState(inbox, new Set(settings.seen), await outbox.count());
+      windows?.pet.webContents.send("pet-state", state);
+      if (state !== lastState) {
+        if (state === "complete") notify("answer", 0, () => windows?.focusQuestion());
+        if (state === "needs_attention") notify("cards", inbox.cards.length, () => windows?.togglePanel());
+        if (state === "failed") notify("failed", 0, () => windows?.togglePanel());
+      }
+      lastState = state;
+      inboxDelay = nextInboxDelay(inboxDelay, "ok");
+    } catch (cause) {
+      inboxDelay = nextInboxDelay(inboxDelay, "error");
+      logError("inbox_poll_failed", { code: cause instanceof Error ? cause.name : "unknown" });
+    }
+    inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
+  };
+  void pollInbox();
   logInfo("app_ready");
 }
 
@@ -92,10 +117,7 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.setAppUserModelId(APP_USER_MODEL_ID);
   app.on("second-instance", () => {
-    if (!mainWindow) return;
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.show();
-    mainWindow.focus();
+    windows?.togglePanel();
   });
   app.whenReady().then(start).catch((cause: unknown) => {
     logError("app_start_failed", { code: cause instanceof Error ? cause.message : "unknown" });
@@ -103,7 +125,11 @@ if (!app.requestSingleInstanceLock()) {
   });
 }
 
-app.on("window-all-closed", () => app.quit());
+process.on("sasu-quit", () => app.quit());
+app.on("window-all-closed", () => undefined);
 app.on("before-quit", () => {
   if (flushTimer) clearInterval(flushTimer);
+  if (inboxTimer) clearTimeout(inboxTimer);
+  tray?.destroy();
+  unregisterPanelShortcut();
 });

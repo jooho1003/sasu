@@ -10,6 +10,7 @@
     "postinstall": "node node_modules/electron/install.js",
     "lint": "tsc --noEmit && eslint src electron.vite.config.ts vitest.config.ts",
     "test": "vitest run",
+    "e2e": "node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts",
     "dist": "electron-builder --win --publish never"
   },
   "dependencies": {
