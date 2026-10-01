@@ -7,9 +7,11 @@
     {
       "step": 0,
       "name": "setup-gates",
-      "status": "pending",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium"
+      "effort": "medium",
+      "started_at": "2026-10-01T22:22:57+0900",
+      "summary": "루트 desktop 경계와 TDD 훅을 확인하고, 로컬 QA에서 G1 세션 삭제 권한·G2 OTP 세션 무효화를 PASS로 재검증했다."
     },
     {
       "step": 1,

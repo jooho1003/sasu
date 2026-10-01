@@ -19,14 +19,12 @@ node scripts/verify-companion-gates.mjs
 
 ## G2 — 6자리 코드 로그인과 세션 무효화
 
-**FAIL.** 관리자 전용 `generateLink()`에서 받은 `email_otp`로 anon `verifyOtp()` 로그인은 성공했고 access token의 `session_id`는 `auth.sessions.id`와 일치했다. 그러나 해당 행을 삭제한 뒤 anon 클라이언트의 `getUser(token)`은 설계가 요구한 `session_not_found` 오류를 반환하지 않았다. 관찰값은 `error.code = null`, `data.user = null`이었다.
-
-`shouldCreateUser: false` 미가입 이메일 거부 검사는 G2의 세션 무효화 조건이 실패한 즉시 중단 규칙에 따라 실행하지 않았다.
+**PASS.** 관리자 전용 `generateLink()`에서 받은 `email_otp`로 anon `verifyOtp()` 로그인은 성공했고 access token의 `session_id`는 `auth.sessions.id`와 일치했다. 세션 행 삭제 뒤 SDK `getUser(token)`은 `AuthSessionMissingError`와 사용자 없음으로 끝났고, 원 Auth API는 `403 session_not_found`, refresh token은 거부됐다. `signInWithOtp({ shouldCreateUser: false })`도 미가입 이메일을 거부했다.
 
 ## 판정
 
-Step 0은 **blocked**다. `auth.sessions` 행 삭제만으로 다음 요청에서 설계 계약의 401/session_not_found를 보장하는지 확인되지 않았다. 설계 §7 S2의 대안인 “해제된 연결의 다음 요청에서 admin signOut” 채택 여부는 사용자 결정이 필요하다.
+Step 0은 **completed**다. G1·G2 모두 설계 §7 S2의 로컬 게이트를 통과했다. 이후 step 1에서 `device_links`와 해제 RPC를 만들 때 이 세션 삭제 계약을 사용한다. 운영 권한 확인과 운영 DB 적용은 이 기록의 범위 밖이다.
 
 ## 코드 관계·구조 확인
 
-Graft와 Archify는 실행하지 않았다. G2가 실패하면 다른 해결책을 선택하지 않고 즉시 중단하라는 step 지시를 따랐다. 따라서 기기 연결 → 요청 → 해제 흐름의 도구 산출물은 이 step에 없다.
+Graft와 Archify 실행 파일은 이 환경에 없었다. 실제 파일 관계와 수동 Mermaid 대조는 [code-context.md](code-context.md)에 기록했다. Graft 그래프의 최신성 검사와 Archify 렌더·레이아웃 검사는 수행하지 못했다.
