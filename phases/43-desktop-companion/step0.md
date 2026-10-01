@@ -26,7 +26,7 @@
 3. 게이트 G2 — 6자리 코드 로그인과 세션 ID(ADR-082 결정 3·10). 로컬 QA에서:
    - 동의한 테스트 사용자로 `auth.admin.generateLink({type:'magiclink', email})`의 `properties.email_otp`를 받아, anon 클라이언트 `verifyOtp({email, token, type:'email'})`로 세션을 만든다. 이 관리자 호출은 **검증 스크립트 전용**이다.
    - access token payload에 `session_id`가 있고 `auth.sessions.id`와 같은지 확인한다.
-   - anon key + `Authorization: Bearer` 클라이언트의 `getUser(token)`이 성공한 뒤, 그 `auth.sessions` 행을 지우면 `session_not_found`로 실패하는지 확인한다.
+   - anon key + `Authorization: Bearer` 클라이언트의 `getUser(token)`이 성공한 뒤, 그 `auth.sessions` 행을 지우면 (1) `getUser`가 사용자 없이 오류를 내고(supabase-js는 서버의 `session_not_found`를 `AuthSessionMissingError`·코드 없음으로 바꾼다 — 코드 이름으로 판정하지 않는다), (2) `GET /auth/v1/user` 원응답이 403 `session_not_found`이고, (3) 그 세션의 refresh token이 거부되는지 확인한다. `scripts/verify-companion-gates.mjs`는 2026-10-01에 이 기준으로 고쳐졌고 로컬에서 G1·G2 PASS를 냈다.
    - `signInWithOtp({shouldCreateUser:false})`로 미가입 이메일이 거부되는지 확인한다.
    - 위를 `scripts/verify-companion-gates.mjs`로 남긴다(로컬 URL이 아니면 즉시 종료 — `review-qa.mjs`의 `local_supabase_required` 방식).
 4. 결과를 `docs/verification/43-desktop-companion/gates.md`에 쓴다: 실행 명령·출력 요약·G1/G2 판정(PASS/FAIL).

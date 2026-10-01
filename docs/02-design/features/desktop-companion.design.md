@@ -208,7 +208,7 @@ U01 펫 창 속성 · U02 상태 5종 모양·우선순위 · U03 동작 줄이�
 | ID | 위협 | 대응 | 검증 |
 |---|---|---|---|
 | S1 | 웹 경로로 Bearer 우회 | Bearer 처리는 `lib/companion/device-context.ts`에만, `app/api/companion/**` 외 import 금지(ESLint `no-restricted-imports`) | 린트 + 기존 웹 경로에 Bearer만 보내면 401/리다이렉트 |
-| S2 | 해제 후 계속 사용 | `companion_context` 매 요청 + `revoke_device_link`가 `auth.sessions` 삭제. **step 0 게이트 G1**: 로컬과 운영에서 `has_table_privilege('postgres','auth.sessions','DELETE')`와 함수 소유자 확인(읽기 전용 조회). 거부되면 구현을 멈추고 대안(서버가 해제된 연결의 다음 요청에서 admin `signOut(jwt,'local')`)을 사용자에게 올린다 | 하니스 + 실측 401 |
+| S2 | 해제 후 계속 사용 | `companion_context` 매 요청 + `revoke_device_link`가 `auth.sessions` 삭제. 삭제 뒤 Auth 원응답 403 `session_not_found`, supabase-js `getUser()`는 사용자 없이 `AuthSessionMissingError`(코드 없음)이므로 판정은 "사용자 없음 + 오류"로 한다. 리프레시 거부도 확인(2026-10-01 로컬 G1·G2 PASS). **step 0 게이트 G1**: 로컬과 운영에서 `has_table_privilege('postgres','auth.sessions','DELETE')`와 함수 소유자 확인(읽기 전용 조회). 거부되면 구현을 멈추고 대안(서버가 해제된 연결의 다음 요청에서 admin `signOut(jwt,'local')`)을 사용자에게 올린다 | 하니스 + 실측 401 |
 | S3 | 다른 부서·다른 사람 데이터 | 부서는 `device_links`에서만, 대상 조회는 RLS + 공용 lib의 부서 일치 검사 | E2E·하니스 교차 부서 403/404 |
 | S4 | 토큰 탈취 | `safeStorage`(DPAPI, Windows 사용자 계정 단위)로만 저장, 화면에 전달 안 함, 로그 마스킹. 같은 계정 악성코드는 막지 못함을 명시 | 로컬 파일 평문 검사 |
 | S5 | 화면 스크립트 주입 | `contextIsolation`·`sandbox`·`nodeIntegration:false`, CSP `default-src 'self'; connect-src 'none'; img-src 'self' data:`, `dangerouslySetInnerHTML` 금지, 외부 이동 차단·`setWindowOpenHandler` deny, 외부 링크는 앱 출처 https만 `shell.openExternal` | 정적 검사 + 실행 확인 |

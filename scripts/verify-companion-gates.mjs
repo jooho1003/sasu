@@ -91,20 +91,37 @@ rollback;
 `);
 if (!deletedInRollback.endsWith("t")) throw new Error("security_definer_delete_failed");
 
+const refreshToken = login.data.session.refresh_token;
 const beforeDelete = await anon.auth.getUser(token);
 if (beforeDelete.error) throw new Error("token_invalid_before_delete");
 const deleted = q(`delete from auth.sessions where id='${sessionId}' and user_id='${ids.lead}' returning id;`);
 if (deleted !== sessionId) throw new Error("session_delete_failed");
+// supabase-js maps the server's session_not_found to AuthSessionMissingError (no code),
+// so the contract is "no user + error", and the raw Auth response is recorded separately.
 const afterDelete = await anon.auth.getUser(token);
-if (!afterDelete.error || afterDelete.error.code !== "session_not_found") {
+const rawUser = await fetch(`${status.API_URL}/auth/v1/user`, {
+  headers: { apikey: status.ANON_KEY, Authorization: `Bearer ${token}` },
+});
+const rawBody = await rawUser.json().catch(() => ({}));
+const fresh = createClient(status.API_URL, status.ANON_KEY, { auth: { persistSession: false } });
+const refreshed = await fresh.auth.refreshSession({ refresh_token: refreshToken });
+const g2 = {
+  otpLogin: true,
+  sessionIdMatches: true,
+  sessionAbsentAfterDelete: q(`select not exists(select 1 from auth.sessions where id='${sessionId}');`) === "t",
+  getUserError: afterDelete.error?.name ?? null,
+  getUserReturnedUser: Boolean(afterDelete.data.user),
+  rawAuthStatus: rawUser.status,
+  rawAuthErrorCode: rawBody.error_code ?? rawBody.code ?? null,
+  refreshRejected: Boolean(refreshed.error) && !refreshed.data.session,
+};
+const revoked = Boolean(afterDelete.error) && !g2.getUserReturnedUser && !rawUser.ok && g2.refreshRejected;
+if (!revoked) {
   console.log(JSON.stringify({
-    G2: {
-      status: "FAIL",
-      deletedSessionGetUserErrorCode: afterDelete.error?.code ?? null,
-      deletedSessionReturnedUser: Boolean(afterDelete.data.user),
-    },
+    G1: { status: "PASS", authSessionsOwner: owner, postgresDeletePrivilege: true, securityDefinerRollbackDelete: true },
+    G2: { status: "FAIL", ...g2 },
   }));
-  throw new Error("session_not_found_not_enforced");
+  throw new Error("deleted_session_still_usable");
 }
 
 const unknown = `companion-missing-${Date.now()}@example.test`;
@@ -114,5 +131,5 @@ if (!missing.error) throw new Error("should_create_user_false_not_enforced");
 console.log(JSON.stringify({
   localUrl: status.API_URL,
   G1: { status: "PASS", authSessionsOwner: owner, postgresDeletePrivilege: true, securityDefinerRollbackDelete: true },
-  G2: { status: "PASS", otpLogin: true, sessionIdMatches: true, deletedSessionRejected: true, missingUserRejected: true },
+  G2: { status: "PASS", ...g2, missingUserRejected: true },
 }));
