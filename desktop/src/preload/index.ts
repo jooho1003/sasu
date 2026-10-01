@@ -13,6 +13,7 @@ import type {
   Card,
   CardDecision,
   DesktopSettings,
+  CompanionMembers,
   Questions,
   ReviewUploadRequest,
   SalesSources,
@@ -78,7 +79,17 @@ const bridge = {
     }) => invoke<TranscriptResult>("upload:transcript", input),
     review: (input: ReviewUploadRequest) =>
       invoke<{ id: string; job_ids: string[] }>("upload:review", input),
+    onReviewProgress: (
+      callback: (progress: { stage: "original" | "part"; current?: number; total?: number }) => void,
+    ) => {
+      const listener = (_event: Electron.IpcRendererEvent, progress: { stage: "original" | "part"; current?: number; total?: number }): void => callback(progress);
+      ipcRenderer.on("review-upload-progress", listener);
+      return () => {
+        ipcRenderer.removeListener("review-upload-progress", listener);
+      };
+    },
   },
+  members: { list: () => invoke<CompanionMembers>("members:list") },
   sales: {
     sources: () => invoke<SalesSources>("sales:sources"),
     start: (input: SalesReviewSourceSelection & { request_id: string }) =>

@@ -23,6 +23,7 @@ import {
   parseCompanionContext,
   parseCompanionDepartments,
   parseCompanionInbox,
+  parseCompanionMembers,
   parseCompanionLink,
   parseQuestions,
   parseSalesSources,
@@ -86,11 +87,11 @@ type Dependencies = {
 function register<I, O>(
   channel: string,
   parse: (value: unknown) => I,
-  handler: (input: I) => Promise<O>,
+  handler: (input: I, event: Electron.IpcMainInvokeEvent) => Promise<O>,
 ): void {
-  ipcMain.handle(channel, async (_event, raw: unknown) => {
+  ipcMain.handle(channel, async (event, raw: unknown) => {
     try {
-      return await handler(parse(raw));
+      return await handler(parse(raw), event);
     } catch (cause) {
       const code = cause instanceof ApiError ? cause.code : cause instanceof z.ZodError ? "invalid_input" : cause instanceof Error ? cause.message : "unknown";
       logError("ipc_failed", { code });
@@ -154,7 +155,13 @@ export function registerIpc(deps: Dependencies): void {
     form.set("visibility", visibility);
     return deps.api.postForm("/api/companion/transcripts", form, parseTranscriptResult);
   });
-  register("upload:review", parseReviewInput, (input) => uploadReview(deps.supabase, deps.api, input));
+  register("members:list", noInput, () => deps.api.get("/api/companion/members", parseCompanionMembers));
+  register("upload:review", parseReviewInput, (input, event) => uploadReview(
+    deps.supabase,
+    deps.api,
+    input,
+    (progress) => event.sender.send("review-upload-progress", progress),
+  ));
 
   register("sales:sources", noInput, () => deps.api.get("/api/companion/sales-review/sources", parseSalesSources));
   register("sales:start", (value) => SalesSourceReviewRequest.parse(value), (input) => deps.api.postJson("/api/companion/sales-review", input, parseSalesStart));

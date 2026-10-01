@@ -173,7 +173,11 @@ export function App() {
           />
         )}
         {tab === "work" && (
-          <WorkTab lead={context?.role === "lead"} onNotice={setNotice} />
+          <WorkTab
+            lead={context?.role === "lead"}
+            deptId={context?.dept.id ?? ""}
+            onNotice={setNotice}
+          />
         )}
         {tab === "settings" && (
           <SettingsTab

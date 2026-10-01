@@ -10,11 +10,15 @@ import {
 import type { ReviewUploadRequest } from "../../shared/contracts";
 
 export type ReviewUploadInput = ReviewUploadRequest;
+export type ReviewUploadProgress =
+  | { stage: "original" }
+  | { stage: "part"; current: number; total: number };
 
 export async function uploadReview(
   supabase: SupabaseClient,
   api: ApiClient,
   input: ReviewUploadInput,
+  onProgress: (progress: ReviewUploadProgress) => void = () => undefined,
 ): Promise<{ id: string; job_ids: string[] }> {
   if (input.original.byteLength !== input.review.size) {
     throw new Error("review_original_size_invalid");
@@ -43,13 +47,15 @@ export async function uploadReview(
 
   const root = `${context.dept.id}/${created.id}`;
   const bucket = supabase.storage.from("review-materials");
+  onProgress({ stage: "original" });
   const original = await bucket.upload(`${root}/original`, input.original, {
     contentType: input.contentType || "application/octet-stream",
     upsert: false,
   });
   if (original.error) throw new Error("review_original_upload_failed");
 
-  for (const part of input.parts) {
+  for (const [offset, part] of input.parts.entries()) {
+    onProgress({ stage: "part", current: offset + 1, total: input.parts.length });
     const uploaded = await bucket.upload(
       `${root}/parts/${part.index}.wav`,
       part.bytes,

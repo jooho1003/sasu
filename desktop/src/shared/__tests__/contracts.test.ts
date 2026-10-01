@@ -14,6 +14,7 @@ import {
   parseCompanionDepartments,
   parseCompanionInbox,
   parseCompanionLink,
+  parseCompanionMembers,
 } from "../contracts";
 
 const deptId = "11111111-1111-4111-8111-111111111111";
@@ -36,6 +37,17 @@ describe("companion response parsers", () => {
       }).display_name,
     ).toBe("합성 팀장");
     expect(parseCompanionInbox({ server_time: "2026-10-02T00:00:00+09:00", cards: [], answers: [], reviews: [], sales: [] }).cards).toEqual([]);
+    expect(
+      parseCompanionMembers({
+        members: [
+          {
+            user_id: deptId,
+            display_name: "합성 팀원",
+            consented_at: "2026-10-02T00:00:00+09:00",
+          },
+        ],
+      }).members,
+    ).toHaveLength(1);
   });
 
   it("rejects fields that are not in the strict server contract", () => {
@@ -47,6 +59,13 @@ describe("companion response parsers", () => {
         reviews: [],
         sales: [],
         access_token: "must-not-cross-ipc",
+      }),
+    ).toThrow();
+    expect(() =>
+      parseCompanionMembers({
+        members: [
+          { user_id: deptId, display_name: "팀원", consented_at: null },
+        ],
       }),
     ).toThrow();
   });

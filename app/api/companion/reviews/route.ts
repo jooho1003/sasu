@@ -51,6 +51,18 @@ export async function POST(request: Request) {
       ),
     );
   }
+  if (
+    input.data.kind === "audio" &&
+    (input.data.size > 50 * 1024 * 1024 || input.data.duration === null || input.data.duration > 30 * 60)
+  ) {
+    return jsonResult(
+      failed(
+        400,
+        "invalid_input",
+        "음성은 50메가바이트와 30분 이하만 올릴 수 있습니다.",
+      ),
+    );
+  }
 
   const created = await device.ctx.client.rpc("create_review", {
     p_dept: device.ctx.deptId,

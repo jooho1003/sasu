@@ -107,6 +107,14 @@ const TranscriptResponse = z.strictObject({
 });
 const ReviewCreatedResponse = z.strictObject({ id: Uuid });
 const ReviewPartResponse = z.strictObject({ job_id: Uuid });
+const CompanionMember = z.strictObject({
+  user_id: Uuid,
+  display_name: z.string().min(1).max(120),
+  consented_at: DateTime,
+});
+const CompanionMembersResponse = z.strictObject({
+  members: z.array(CompanionMember),
+});
 const SalesSourceCandidate = z.strictObject({
   item_id: Uuid,
   title: z.string().min(1),
@@ -131,6 +139,7 @@ export type CardDecision = z.infer<typeof CardDecisionResponse>;
 export type TranscriptResult = z.infer<typeof TranscriptResponse>;
 export type SalesSources = z.infer<typeof SalesSourcesResponse>;
 export type SalesStatus = z.infer<typeof SalesStatusResponse>;
+export type CompanionMembers = z.infer<typeof CompanionMembersResponse>;
 export type ReviewUploadRequest = {
   review: {
     id: string;
@@ -170,6 +179,10 @@ export function parseCompanionContext(value: unknown): CompanionContext {
 
 export function parseCompanionInbox(value: unknown): CompanionInboxData {
   return CompanionInbox.parse(value);
+}
+
+export function parseCompanionMembers(value: unknown): CompanionMembers {
+  return CompanionMembersResponse.parse(value);
 }
 
 export function parseAskStart(value: unknown): AskStart {

@@ -155,3 +155,20 @@ button:not(.row):not(.pin):hover {
 .petCanvas {
   display: block;
 }
+.workSection {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #dfe4e1;
+  border-radius: 10px;
+  background: #fff;
+}
+.workSection h2 { margin: 0; font-size: 17px; }
+.workSection label, .workSection fieldset { display: grid; gap: 6px; }
+.workSection fieldset label { display: flex; align-items: center; gap: 7px; }
+.workSection input[type="checkbox"] { width: auto; }
+.workChoices { display: flex; gap: 8px; }
+.dropzone { min-height: 88px; padding: 12px; border: 1px dashed #9bb9ac; border-radius: 8px; cursor: pointer; }
+.dropzone span { color: #68716c; font-size: 13px; }
+.dropzone input { padding: 0; border: 0; }
+.linkButton { justify-self: start; padding: 0; background: transparent; color: #17614a; text-decoration: underline; }
