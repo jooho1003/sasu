@@ -22,7 +22,7 @@
       "effort": "xhigh",
       "started_at": "2026-10-01T22:30:51+0900",
       "summary": "0069 device_links·본인 SELECT RLS·연결/컨텍스트/해제 RPC 3개+비공개 세션 함수·rollback 구현. 신규 SQL 8·전체 SQL 316/권한 조합 2016·실제 로컬 Auth 해제/refresh 거부·lint/build·단위1788 통과. docs/verification/43-desktop-companion/schema.md 참조. 운영 미반영.",
-      "completed_at": "2026-10-01T22:44:00+0900"
+      "completed_at": "2026-10-01T22:45:58+0900"
     },
     {
       "step": 2,
