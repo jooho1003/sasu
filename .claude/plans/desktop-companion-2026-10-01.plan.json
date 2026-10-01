@@ -1,0 +1,30 @@
+{
+  "slug": "desktop-companion",
+  "date": "2026-10-01",
+  "context": "Windows 데스크톱 동반 앱(펫). 사용자 결정: 목적 3개 모두·부서원 전체·Windows·B(독립 화면+기기 토큰)·설계안 C·이메일 6자리 코드·영업 원문 검토(AG-07)·배포 전용 공개 저장소. 원천 PRD §3-8·ADR-081·ARCHITECTURE §6-11. 실행 계약 phases/42-desktop-companion (Codex). 운영 반영은 사람 승인.",
+  "nodes": [
+    { "id": "D0", "title": "plan-plus·design·PRD/ADR/ARCHITECTURE·step 파일", "domain": "general", "D1": 2, "D2": 2, "D3": 1, "D4": 2, "score": 7, "tier": "powerful", "agent": "main(never_delegate: 아키텍처)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": [], "output": "docs·phases/42 step0~10", "status": "done" },
+    { "id": "S0", "title": "setup-gates (루트 설정·TDD 훅·게이트 G1/G2 로컬 실측)", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["D0"], "output": "tsconfig·eslint·check-wording·tdd-guard·verify-companion-gates.mjs·gates.md" },
+    { "id": "S1", "title": "device-links-schema (표·RLS·RPC 4·auth.sessions 삭제·하니스)", "domain": "security", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "powerful", "agent": "codex", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["S0"], "output": "0069_device_links.sql·rollback·verify-device-links-sql.mjs" },
+    { "id": "S2", "title": "companion-auth (Bearer 클라이언트·기기 컨텍스트·연결 경로)", "domain": "security", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "powerful", "agent": "codex", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["S1"], "output": "lib/supabase/bearer.ts·lib/companion/{context,device-context}.ts·E01~E04" },
+    { "id": "S3", "title": "web-devices (연결 기기 목록·해제 화면)", "domain": "frontend", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S2"], "output": "app/api/devices·components/settings-devices.tsx" },
+    { "id": "S4", "title": "shared-ask-answer (질문 접수·답 인용 재검사 lib 추출)", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S2"], "output": "lib/{ask-start,answer-view}.ts·웹 경로 2곳" },
+    { "id": "S5", "title": "shared-card-transcript (카드 근거·결정·전사 lib 추출)", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S4"], "output": "lib/{card-view,card-decide,transcript-upload}.ts·웹 진입점 3곳" },
+    { "id": "S6", "title": "companion-routes (E05~E13·inbox)", "domain": "security", "D1": 0, "D2": 2, "D3": 1, "D4": 1, "score": 4, "tier": "powerful", "agent": "codex", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["S5"], "output": "app/api/companion/**·lib/companion/inbox.ts·verify-companion-api.mjs" },
+    { "id": "S7", "title": "companion-sales-review (E14~E16·W06, phase 41 병합 뒤)", "domain": "general", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S6", "phase-41-merged"], "output": "lib/sales-source-review-start.ts·app/api/companion/sales-review/**", "note": "선행 조건 미충족이면 blocked" },
+    { "id": "S8", "title": "desktop-core (Electron 본체·토큰 저장·IPC·core TDD)", "domain": "security", "D1": 1, "D2": 1, "D3": 1, "D4": 1, "score": 4, "tier": "powerful", "agent": "codex", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["S6"], "output": "desktop/ 패키지·main·preload·core" },
+    { "id": "S9", "title": "desktop-ui (펫 창·패널 탭 5·트레이·단축키·알림)", "domain": "frontend", "D1": 1, "D2": 1, "D3": 0, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S8"], "output": "desktop/src/renderer·windows·smoke E2E" },
+    { "id": "S10", "title": "desktop-release-verify (설치 파일·업데이트 설정·L3/L4 로컬 실측)", "domain": "qa", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "codex", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": ["S9"], "output": "electron-builder.yml·updater·full-flow E2E·docs/verification/desktop-companion-*.md", "note": "끝나면 사람 실측·운영 승인 대기로 blocked" },
+    { "id": "R1", "title": "최종 리뷰 + /pdca analyze·report", "domain": "review", "D1": 1, "D2": 2, "D3": 1, "D4": 2, "score": 6, "tier": "powerful", "agent": "main(never_delegate: 최종 리뷰)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["S10"], "output": "docs/03-analysis·04-report" },
+    { "id": "O1", "title": "운영 반영 (운영 auth.sessions 권한 확인·0069 적용·SMTP·메일 템플릿·배포 저장소·첫 게시·5분 설치 녹화)", "domain": "security", "D1": 1, "D2": 2, "D3": 2, "D4": 2, "score": 7, "tier": "powerful", "agent": "main + 사용자", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R1"], "output": "운영 반영 기록", "requires_approval": true }
+  ],
+  "gates": {
+    "G1_completeness": "PASS",
+    "G2_override": "PASS",
+    "G3_clamp": "PASS",
+    "G4_cost": "PASS (근거 기록)",
+    "G5_safety": "PASS",
+    "result": "PASS"
+  },
+  "powerful_ratio": "7/13"
+}

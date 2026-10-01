@@ -8,7 +8,7 @@
 - Next.js (App Router) + Vercel — 대시보드·원장·Q&A·게스트 모드, Route Handler가 슬랙 이벤트 수신
 - Supabase — Postgres + pgvector + RLS + Auth(매직링크). RLS가 곧 "권한 인지 답변"의 물리적 구현
 - Slack Events API + Block Kit (HTTP 모드, 조직당 워크스페이스 1개 OAuth 설치, 봇 토큰은 서버 암호화 저장; ADR-052)
-- 회의 입력은 `.vtt`/`.txt` 전사 업로드와 자료 검토함 음성 업로드(ADR-036·054). 웹 직접 녹음은 ADR-056 운영 반영(2026-09-30, `lib/recording/`, 조직 녹음 스위치 기본 꺼짐, 실기기 게이트 대기), Meet·Zoom 공식 자료 수집은 2단계, PC 앱·회의 봇은 후속 · Notion API — 지정 페이지 전체 스냅샷 가져오기 + 5분 자동 갱신·`[다시 가져오기]`(ADR-052)
+- 회의 입력은 `.vtt`/`.txt` 전사 업로드와 자료 검토함 음성 업로드(ADR-036·054). 웹 직접 녹음은 ADR-056 운영 반영(2026-09-30, `lib/recording/`, 조직 녹음 스위치 기본 꺼짐, 실기기 게이트 대기), Meet·Zoom 공식 자료 수집은 2단계, 회의 수집용 PC 앱·회의 봇은 후속 · 질문·결정·일 맡기기용 Windows 데스크톱 앱(Electron, `desktop/`)은 PRD §3-8·ADR-081 설계 · Notion API — 지정 페이지 전체 스냅샷 가져오기 + 5분 자동 갱신·`[다시 가져오기]`(ADR-052)
 - Groq `openai/gpt-oss-120b` (카드·답변·회의 정리, strict json_schema) · Groq `openai/gpt-oss-20b` (분류) · 규칙 휴리스틱 (정량 신호). 두 모델 모두 production + strict structured output이라 인용 스키마를 강제할 수 있다 (ADR-028)
 - 임베딩: Voyage AI `voyage-4-lite` 1024차원 확정. OpenAI `text-embedding-3-small`은 명시적 호환 provider로만 사용한다(ADR-030)
 - 비동기: Postgres `jobs` 테이블 + `/api/jobs/run` 워커 (`after()` 즉시 1회 + 매분 트리거 — Vercel Cron 또는 Supabase `pg_cron`+`pg_net`, D0 확정)
@@ -17,7 +17,7 @@
 
 ## 아키텍처 규칙
 - CRITICAL: 가시성 판정은 SQL 함수 `can_see()` 하나다. RLS 정책도 `search_as()`도 이것을 호출한다. 판정 로직을 애플리케이션 코드에 복제하지 마라 — 두 곳에 있으면 반드시 어긋난다.
-- CRITICAL: 사용자 요청 경로(대시보드·카드·원장·묻기·슬랙 Q&A)에서 service role 클라이언트를 쓰지 마라. 웹은 세션 클라이언트, 슬랙 경유는 `search_as(user_id, …)`. service role은 수집 어댑터 insert·게스트 시드·워커 내부에서만. OAuth callback의 검증된 설치 credential 저장은 수집 어댑터에 포함된다(ADR-052); 대시보드/설정 읽기는 세션을 유지한다.
+- CRITICAL: 사용자 요청 경로(대시보드·카드·원장·묻기·슬랙 Q&A)에서 service role 클라이언트를 쓰지 마라. 웹은 세션 클라이언트, 슬랙 경유는 `search_as(user_id, …)`, 데스크톱 앱 경유는 기기 세션 Bearer 클라이언트(`/api/companion/*`만, ARCHITECTURE §6-11). service role은 수집 어댑터 insert·게스트 시드·워커 내부에서만. OAuth callback의 검증된 설치 credential 저장은 수집 어댑터에 포함된다(ADR-052); 대시보드/설정 읽기는 세션을 유지한다.
 - CRITICAL: `dept_id`·`decided_by`·`asked_by`는 요청 본문이 아니라 세션·멤버십에서 결정한다. URL의 `[dept]`는 멤버십 검증 후에만 유효. 버튼을 숨기는 것은 권한이 아니다 — 서버·RLS(USING + WITH CHECK)에서 집행한다.
 - CRITICAL: 텍스트 LLM 호출은 `lib/llm.ts`의 `llm.structured(purpose, schema, prompt)` 하나로만 한다. 음성 전사는 같은 파일의 `llm.transcribeAudio()`만 사용하며, 다른 곳에서 Groq SDK를 직접 부르지 마라. 재시도·거절 처리·`llm_calls` 기록·마스킹 확인이 거기에 있다. strict json_schema는 모든 필드가 required + `additionalProperties: false`여야 하므로, null이 정상인 필드는 optional이 아니라 nullable union으로 정의한다 (ADR-028, ADR-032).
 - CRITICAL: 인용 없는 문장은 렌더하지 않는다. 카드·답변의 `citations[]`는 `quote`가 원문에 문자열로 포함되는지 검증하고, 0개면 답변은 `refused`, 카드는 `needs_review`(DM 안 보냄).

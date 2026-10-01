@@ -259,6 +259,13 @@
       "verification": "docs/verification/sales-review-literal-comparison-2026-09-30.md",
       "note": "팀장이 현재 세션/RLS의 기존·변경 견적 원문 문구 차이를 정확한 인용·원문 링크로 대조. 격리 인증 브라우저와 게스트·합성 회귀 통과. 실제 고객 문서 의미 해석·운영 반영 없음.",
       "production_deployed": false
+    },
+    {
+      "dir": "42-desktop-companion",
+      "status": "pending",
+      "design": "docs/02-design/features/desktop-companion.design.md",
+      "note": "Windows 데스크톱 동반 앱(펫) — 기기 세션 Bearer·/api/companion/*·device_links·공용 lib 추출·Electron. step 7은 phase 41 병합 뒤, step 10은 사람 실측·운영 승인 대기로 blocked 예정. ADR-081, PRD §3-8.",
+      "production_deployed": false
     }
   ]
 }
