@@ -1,9 +1,6 @@
 import { SalesReviewSourceSelection } from "@/lib/contracts";
-import {
-  buildSalesReviewSourcePreview,
-  salesReviewSourceCandidates,
-  type SalesReviewSourceRow,
-} from "@/lib/sales-review-sources";
+import { actorFromMembership } from "@/lib/companion/context";
+import { buildSalesReviewSourcePreview, loadSalesSourceCandidates, type SalesReviewSourceRow } from "@/lib/sales-review-sources";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -23,18 +20,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ dep
   const { dept } = await params;
   const current = await context(dept);
   if (!current) return Response.json({ error: "동의한 팀장만 원문을 연결할 수 있습니다." }, { status: 403, headers: privateHeaders });
-  const recent = current.client.from("items").select(select)
-    .eq("dept_id", current.membership.deptId).is("deleted_at", null)
-    .eq("sources.active", true).order("created_at", { ascending: false }).limit(100);
-  const principles = current.client.from("items").select(select)
-    .eq("dept_id", current.membership.deptId).is("deleted_at", null)
-    .eq("sources.active", true).eq("sources.is_principles", true)
-    .order("created_at", { ascending: false }).limit(50);
-  const [recentRead, principleRead] = await Promise.all([recent, principles]);
-  if (recentRead.error || principleRead.error) return Response.json({ error: "원문 목록을 불러오지 못했습니다." }, { status: 500, headers: privateHeaders });
-  const rows = new Map<string, SalesReviewSourceRow>();
-  for (const row of [...(recentRead.data ?? []), ...(principleRead.data ?? [])] as SalesReviewSourceRow[]) rows.set(row.id, row);
-  return Response.json({ candidates: salesReviewSourceCandidates([...rows.values()], current.membership.deptId) }, { headers: privateHeaders });
+  const result = await loadSalesSourceCandidates(actorFromMembership(current.client, current.membership));
+  if (!result.ok) return Response.json({ error: result.error }, { status: result.status, headers: privateHeaders });
+  return Response.json(result.body, { headers: privateHeaders });
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ dept: string }> }) {

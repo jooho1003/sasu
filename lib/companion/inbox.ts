@@ -31,10 +31,17 @@ type ReviewRow = {
   created_at: string;
 };
 
+type SalesRow = {
+  id: string;
+  status: "queued" | "processing" | "ready" | "refused" | "failed";
+  created_at: string;
+};
+
 export type InboxRows = {
   answers: AnswerRow[];
   cards: CardRow[];
   reviews: ReviewRow[];
+  sales: SalesRow[];
 };
 
 type InboxContext = ActorContext & { linkId: string };
@@ -63,7 +70,9 @@ export function buildInbox(rows: InboxRows, now: Date): CompanionInbox {
         (row) => row.status !== "deleted" && recent(row.created_at, cutoff),
       )
       .map(({ id, kind, title, status }) => ({ id, kind, title, status })),
-    sales: [],
+    sales: (rows.sales ?? [])
+      .filter((row) => recent(row.created_at, cutoff))
+      .map(({ id, status }) => ({ id, status })),
   });
 }
 
@@ -116,20 +125,28 @@ export async function loadInbox(
           .order("created_at", { ascending: false })
           .order("id", { ascending: false })
       : Promise.resolve({ data: [] as ReviewRow[], error: null });
+  const salesPromise = ctx.role === "lead"
+    ? ctx.client.from("sales_source_reviews").select("id, status, created_at")
+      .eq("dept_id", ctx.deptId).eq("requested_by", ctx.userId).gte("created_at", cutoff)
+      .order("created_at", { ascending: false }).order("id", { ascending: false })
+    : Promise.resolve({ data: [] as SalesRow[], error: null });
 
   try {
-    const [answers, cards, reviews] = await Promise.all([
+    const [answers, cards, reviews, sales] = await Promise.all([
       answersPromise,
       cardsPromise,
       reviewsPromise,
+      salesPromise,
     ]);
     if (
       answers.error ||
       cards.error ||
       reviews.error ||
+      sales.error ||
       !Array.isArray(answers.data) ||
       !Array.isArray(cards.data) ||
       !Array.isArray(reviews.data)
+      || !Array.isArray(sales.data)
     ) {
       return failed();
     }
@@ -142,6 +159,7 @@ export async function loadInbox(
           answers: answers.data as AnswerRow[],
           cards: cards.data as CardRow[],
           reviews: reviews.data as ReviewRow[],
+          sales: sales.data as SalesRow[],
         },
         now,
       ),

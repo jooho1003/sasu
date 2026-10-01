@@ -180,6 +180,16 @@ describe("loadInbox", () => {
           ],
           error: null,
         },
+        sales_source_reviews: {
+          data: [
+            {
+              id: "77777777-7777-4777-8777-777777777777",
+              status: "processing",
+              created_at: "2026-10-02T10:30:00.000Z",
+            },
+          ],
+          error: null,
+        },
       },
       calls,
     );
@@ -200,7 +210,7 @@ describe("loadInbox", () => {
         cards: [{ id: CARD_ID, status: "needs_review" }],
         answers: [{ id: ANSWER_ID, status: "pending" }],
         reviews: [{ id: REVIEW_ID, status: "ready" }],
-        sales: [],
+        sales: [{ id: "77777777-7777-4777-8777-777777777777", status: "processing" }],
       },
     });
     expect(calls.answers).toContainEqual(["eq", "asked_by", USER_ID]);

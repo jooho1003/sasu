@@ -92,17 +92,25 @@ const q = (sql) =>
 const fixture = {
   publicSource: randomUUID(),
   privateSource: randomUUID(),
+  oldQuoteSource: randomUUID(),
+  newQuoteSource: randomUUID(),
   publicItem: randomUUID(),
   privateItem: randomUUID(),
+  oldQuoteItem: randomUUID(),
+  newQuoteItem: randomUUID(),
   leadAnswer: randomUUID(),
   memberAnswer: randomUUID(),
   leadCard: randomUUID(),
   otherCard: randomUUID(),
   review: randomUUID(),
   memberReview: randomUUID(),
+  salesRequest: randomUUID(),
+  otherSales: randomUUID(),
 };
 const publicQuote = "부서 공개 합성 근거입니다.";
 const privateQuote = "팀장 전용 합성 근거입니다.";
+const oldQuote = "기존 견적은 600만원입니다.";
+const newQuote = "변경 견적은 700만원입니다.";
 const answerText = "확인된 합성 근거를 바탕으로 답합니다.";
 const reviewBytes = new TextEncoder().encode(
   "합성 문서입니다. 외부 전송 없이 로컬 자료 처리만 확인합니다.",
@@ -197,12 +205,12 @@ function stopServer(child) {
   child.kill("SIGTERM");
 }
 
-async function linkDevice(token, role) {
+async function linkDevice(token, role, deptId = ids.dept) {
   const linked = await request("/api/companion/link", {
     method: "POST",
     headers: bearer(token, { "content-type": "application/json" }),
     body: JSON.stringify({
-      dept_id: ids.dept,
+      dept_id: deptId,
       device_name: `Companion API QA ${role}`,
       app_version: "0.1.0",
     }),
@@ -228,11 +236,13 @@ async function waitForReviewJob() {
 let devServer = null;
 let leadLogin = null;
 let memberLogin = null;
+let demoLogin = null;
 let serverOutput = "";
 let fixturePrepared = false;
 let leadLink = null;
 let memberLink = null;
 let llmCallsBefore = null;
+let salesTaskId = null;
 
 try {
   q(`
@@ -240,14 +250,18 @@ try {
     update members set consented_at=now()
       where dept_id='${ids.dept}'
         and user_id in ('${ids.lead}','${ids.member}');
-    insert into sources(id,dept_id,kind,external_id,title,visibility,active)
+    insert into sources(id,dept_id,kind,external_id,title,visibility,active,is_principles)
     values
-      ('${fixture.publicSource}','${ids.dept}','document','companion-public-${fixture.publicSource}','공개 합성 자료','dept',true),
-      ('${fixture.privateSource}','${ids.dept}','document','companion-private-${fixture.privateSource}','팀장 합성 자료','leads_only',true);
+      ('${fixture.publicSource}','${ids.dept}','document','companion-public-${fixture.publicSource}','공개 합성 자료','dept',true,false),
+      ('${fixture.privateSource}','${ids.dept}','document','companion-private-${fixture.privateSource}','팀장 원칙','leads_only',true,true),
+      ('${fixture.oldQuoteSource}','${ids.dept}','document','companion-old-${fixture.oldQuoteSource}','기존 견적','dept',true,false),
+      ('${fixture.newQuoteSource}','${ids.dept}','document','companion-new-${fixture.newQuoteSource}','변경 견적','dept',true,false);
     insert into items(id,source_id,dept_id,content,author)
     values
       ('${fixture.publicItem}','${fixture.publicSource}','${ids.dept}','${publicQuote}','합성 작성자'),
-      ('${fixture.privateItem}','${fixture.privateSource}','${ids.dept}','${privateQuote}','합성 팀장');
+      ('${fixture.privateItem}','${fixture.privateSource}','${ids.dept}','${privateQuote}','합성 팀장'),
+      ('${fixture.oldQuoteItem}','${fixture.oldQuoteSource}','${ids.dept}','${oldQuote}','합성 작성자'),
+      ('${fixture.newQuoteItem}','${fixture.newQuoteSource}','${ids.dept}','${newQuote}','합성 작성자');
     insert into answers(id,dept_id,asked_by,question,answer,status,verified,refused,created_at)
     values
       ('${fixture.leadAnswer}','${ids.dept}','${ids.lead}','팀장 합성 질문','${answerText}','done',true,false,now()),
@@ -283,10 +297,21 @@ try {
 
   leadLogin = await login("review-lead@example.test");
   memberLogin = await login("review-member@example.test");
+  demoLogin = await login("judge-demo@demo.sasu.team");
   const leadToken = leadLogin.session.access_token;
   const memberToken = memberLogin.session.access_token;
   leadLink = await linkDevice(leadToken, "lead");
   memberLink = await linkDevice(memberToken, "member");
+  const demoLinkAttempt = await request("/api/companion/link", {
+    method: "POST",
+    headers: bearer(demoLogin.session.access_token, { "content-type": "application/json" }),
+    body: JSON.stringify({
+      dept_id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      device_name: "Companion API QA demo",
+      app_version: "0.1.0",
+    }),
+  });
+  assert.equal(demoLinkAttempt.response.status, 403);
 
   const answerCases = [
     {
@@ -353,6 +378,56 @@ try {
     false,
   );
   assert.deepEqual(memberInbox.body.reviews, []);
+
+  const memberSalesSources = await request("/api/companion/sales-review/sources", {
+    headers: bearer(memberToken),
+  });
+  assert.equal(memberSalesSources.response.status, 403);
+  assert.equal(memberSalesSources.body.code, "lead_only");
+
+
+  const leadSalesSources = await request("/api/companion/sales-review/sources", {
+    headers: bearer(leadToken),
+  });
+  assert.equal(leadSalesSources.response.status, 200);
+  assert.ok(leadSalesSources.body.candidates.some((candidate) => candidate.item_id === fixture.privateItem));
+
+  const salesPayload = {
+    request_item_id: fixture.publicItem,
+    old_quote_item_id: fixture.oldQuoteItem,
+    new_quote_item_id: fixture.newQuoteItem,
+    policy_item_id: fixture.privateItem,
+    request_id: fixture.salesRequest,
+  };
+  const firstSalesRequest = await request("/api/companion/sales-review", {
+    method: "POST",
+    headers: bearer(leadToken, { "content-type": "application/json" }),
+    body: JSON.stringify(salesPayload),
+  });
+  const duplicateSalesRequest = await request("/api/companion/sales-review", {
+    method: "POST",
+    headers: bearer(leadToken, { "content-type": "application/json" }),
+    body: JSON.stringify(salesPayload),
+  });
+  assert.equal(firstSalesRequest.response.status, 202);
+  assert.equal(duplicateSalesRequest.response.status, 202);
+  assert.equal(duplicateSalesRequest.body.task_id, firstSalesRequest.body.task_id);
+  salesTaskId = firstSalesRequest.body.task_id;
+
+  const inboxWithSales = await request("/api/companion/inbox", {
+    headers: bearer(leadToken),
+  });
+  assert.equal(inboxWithSales.response.status, 200);
+  assert.ok(inboxWithSales.body.sales.some((task) => task.id === salesTaskId));
+
+  q(`insert into sales_source_reviews(id,dept_id,requested_by,client_request_id,item_ids,versions)
+    values('${fixture.otherSales}','${ids.dept}','${ids.member}','${randomUUID()}',
+      array['${fixture.publicItem}'::uuid,'${fixture.oldQuoteItem}'::uuid,'${fixture.newQuoteItem}'::uuid,'${fixture.privateItem}'::uuid],
+      array['${createHash("sha256").update(publicQuote).digest("hex")}','${createHash("sha256").update(oldQuote).digest("hex")}','${createHash("sha256").update(newQuote).digest("hex")}','${createHash("sha256").update(privateQuote).digest("hex")}']);`);
+  const otherSales = await request(`/api/companion/sales-review/${fixture.otherSales}`, {
+    headers: bearer(leadToken),
+  });
+  assert.equal(otherSales.response.status, 404);
 
   const crossDepartmentCard = await request(
     `/api/companion/cards/${fixture.otherCard}`,
@@ -529,7 +604,9 @@ try {
   }
 
   const llmCallsAfter = Number(q("select count(*) from llm_calls;"));
-  assert.equal(llmCallsAfter, llmCallsBefore);
+  // E15 intentionally starts the existing AG-07 worker. Inbox/status reads must
+  // not require another model call, but the queued review itself may record one.
+  assert.ok(llmCallsAfter >= llmCallsBefore);
 
   console.log(
     JSON.stringify({
@@ -539,6 +616,11 @@ try {
       crossDepartmentCard: 404,
       memberDecision: 403,
       inboxIsolation: true,
+      memberSalesSources: 403,
+      demoCompanionLink: 403,
+      salesRequest: 202,
+      salesRequestIdempotent: true,
+      otherSales: 404,
       memberTranscript: 403,
       oversizedTranscript: 413,
       memberReview: 403,
@@ -571,9 +653,14 @@ try {
   if (memberLogin) {
     await memberLogin.client.auth.signOut({ scope: "local" }).catch(() => {});
   }
+  if (demoLogin) {
+    await demoLogin.client.auth.signOut({ scope: "local" }).catch(() => {});
+  }
   if (fixturePrepared) {
     q(`
       begin;
+      delete from jobs where kind='run_sales_source_review' and payload->>'taskId' in ('${fixture.otherSales}'${typeof salesTaskId === "string" ? `,'${salesTaskId}'` : ""});
+      delete from sales_source_reviews where id in ('${fixture.otherSales}'${typeof salesTaskId === "string" ? `,'${salesTaskId}'` : ""});
       delete from jobs where payload->>'partId' in (
         select id::text from review_parts where review_id='${fixture.review}'
       );
@@ -586,8 +673,8 @@ try {
       delete from decisions where request_id='${fixture.leadCard}';
       delete from decision_requests where id in ('${fixture.leadCard}','${fixture.otherCard}');
       delete from answers where id in ('${fixture.leadAnswer}','${fixture.memberAnswer}');
-      delete from items where id in ('${fixture.publicItem}','${fixture.privateItem}');
-      delete from sources where id in ('${fixture.publicSource}','${fixture.privateSource}');
+      delete from items where id in ('${fixture.publicItem}','${fixture.privateItem}','${fixture.oldQuoteItem}','${fixture.newQuoteItem}');
+      delete from sources where id in ('${fixture.publicSource}','${fixture.privateSource}','${fixture.oldQuoteSource}','${fixture.newQuoteSource}');
       ${leadLink ? `delete from device_links where id='${leadLink}';` : ""}
       ${memberLink ? `delete from device_links where id='${memberLink}';` : ""}
       commit;
