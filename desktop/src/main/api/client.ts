@@ -86,27 +86,41 @@ export class ApiClient {
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const headers = new Headers(init.headers);
+    headers.set("authorization", `Bearer ${token}`);
+    headers.set("accept", "application/json");
+    let response: Response;
     try {
-      const headers = new Headers(init.headers);
-      headers.set("authorization", `Bearer ${token}`);
-      headers.set("accept", "application/json");
-      const response = await fetch(endpoint(this.baseUrl, path), {
+      response = await fetch(endpoint(this.baseUrl, path), {
         ...init,
         headers,
         redirect: "error",
         signal: controller.signal,
       });
-      if (!response.ok) {
-        const payload = await errorPayload(response);
-        if (response.status === 401) await this.onUnauthorized();
-        throw new ApiError(response.status, payload.code, payload.error);
-      }
-      if (response.status === 204) return parser(null);
-      return parser(await response.json());
     } catch (cause) {
+      clearTimeout(timeout);
       if (cause instanceof ApiError) throw cause;
       const code = cause instanceof Error && cause.name === "AbortError" ? "timeout" : "network";
       throw new ApiError(null, code, "서버에 연결하지 못했습니다.", { cause });
+    }
+
+    if (!response.ok) {
+      const payload = await errorPayload(response);
+      if (response.status === 401) await this.onUnauthorized();
+      clearTimeout(timeout);
+      throw new ApiError(response.status, payload.code, payload.error);
+    }
+
+    try {
+      return parser(response.status === 204 ? null : await response.json());
+    } catch (cause) {
+      if (cause instanceof ApiError) throw cause;
+      throw new ApiError(
+        response.status,
+        "invalid_response",
+        "서버 응답을 확인하지 못했습니다.",
+        { cause },
+      );
     } finally {
       clearTimeout(timeout);
     }

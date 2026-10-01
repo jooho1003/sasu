@@ -35,10 +35,10 @@ import {
 const EmailInput = z.strictObject({ email: z.email().max(320) });
 const VerifyInput = EmailInput.extend({ code: z.string().trim().regex(/^\d{6,8}$/u) }).strict();
 const LinkInput = CompanionLinkInput.omit({ app_version: true });
-const IdInput = z.strictObject({ id: z.uuid() });
+const IdInput = z.strictObject({ id: z.guid() });
 const QuestionsInput = z.strictObject({ cursor: CompanionQuestionCursor.nullable().optional() });
 const DecideInput = z.strictObject({
-  id: z.uuid(),
+  id: z.guid(),
   status: z.enum(["decided", "deferred", "rejected", "open"]),
   outcome: z.string().max(300),
   rationale: z.string().max(1_000),
@@ -57,11 +57,11 @@ const ReviewUploadEnvelope = z.strictObject({
     bytes: z.instanceof(Uint8Array),
   })).max(30),
 });
-const SalesStatusInput = z.strictObject({ task_id: z.uuid() });
+const SalesStatusInput = z.strictObject({ task_id: z.guid() });
 const OpenWebInput = z.strictObject({ path: z.string().startsWith("/").max(2_000) });
 
 const Settings = z.strictObject({
-  seen: z.array(z.uuid()).max(500),
+  seen: z.array(z.guid()).max(500),
   pet: z.enum(["green", "blue", "purple"]),
   reduceMotion: z.boolean(),
   panelPinned: z.boolean(),

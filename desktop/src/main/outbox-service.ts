@@ -17,7 +17,7 @@ const OutboxFile = z.array(
   z.strictObject({
     id: z.string().min(1).max(100),
     question: z.string().trim().min(5).max(1_000),
-    parentId: z.string().uuid().nullable(),
+    parentId: z.guid().nullable(),
     createdAt: z.number().int().nonnegative(),
   }),
 ).max(20);

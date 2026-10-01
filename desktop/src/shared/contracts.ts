@@ -11,7 +11,9 @@ import {
 } from "@sasu/contracts";
 import { z } from "zod";
 
-const Uuid = z.string().uuid();
+// Server jobs use deterministic IDs that keep the UUID-shaped layout but do
+// not always use an RFC 4122 variant. They are still opaque IDs to the app.
+const Uuid = z.guid();
 const DateTime = z.iso.datetime({ offset: true });
 
 const AskStartResponse = z.strictObject({

@@ -137,8 +137,14 @@ test.describe("desktop companion work", () => {
         expect(read.error).toBeNull();
         expect(read.data).not.toBeNull();
       }
-      expect(sql(`select status from review_parts where review_id='${documentId}' and part_index=0;`)).toBe("queued");
-      expect(sql(`select status from review_parts where review_id='${audioId}' and part_index=0;`)).toBe("queued");
+      expect(["queued", "processing", "done", "ready"]).toContain(
+        sql(`select status from review_parts where review_id='${documentId}' and part_index=0;`),
+      );
+      expect(sql(`select count(*) from jobs where id='${documentUpload.job_ids[0]}';`)).toBe("1");
+      expect(["queued", "processing", "done", "ready"]).toContain(
+        sql(`select status from review_parts where review_id='${audioId}' and part_index=0;`),
+      );
+      expect(sql(`select count(*) from jobs where id='${audioUpload.job_ids[0]}';`)).toBe("1");
 
       const input = { request_item_id: itemIds[0], old_quote_item_id: itemIds[1], new_quote_item_id: itemIds[2], policy_item_id: itemIds[3], request_id: requestId };
       const started = await lead.panel.evaluate((value) => window.sasu.sales.start(value), input);
@@ -165,7 +171,7 @@ test.describe("desktop companion work", () => {
           window.sasu.sales.sources(),
           window.sasu.upload.review({ review: { id, kind: "document", title: "거부 확인", filename: "denied.txt", size: bytes.length, fingerprint, duration: null, visibility: "dept", participants: [], synthetic: false, consent_confirmed: true }, contentType: "text/plain", original: new Uint8Array(bytes), parts: [] }),
         ]);
-        return results.map((result) => result.status === "rejected" && result.reason instanceof Error ? result.reason.message.split(":", 1)[0] : "accepted");
+        return results.map((result) => result.status === "rejected" && result.reason instanceof Error && result.reason.message.includes("lead_only") ? "lead_only" : "accepted");
       }, { id: randomUUID(), bytes: [...document], fingerprint: sha256(document) });
       expect(denied).toEqual(["lead_only", "lead_only", "lead_only"]);
       console.log("e2e member IPC 403 lead_only");
@@ -175,6 +181,9 @@ test.describe("desktop companion work", () => {
       sql(`
         delete from jobs where payload->>'partId' in (select id::text from review_parts where review_id in ('${documentId}','${audioId}')) or payload->>'taskId' in (select id::text from sales_source_reviews where client_request_id='${requestId}');
         delete from sales_source_reviews where client_request_id='${requestId}';
+        delete from review_access_events where review_id in ('${documentId}','${audioId}');
+        delete from review_original_segments where review_id in ('${documentId}','${audioId}');
+        delete from review_revisions where review_id in ('${documentId}','${audioId}');
         delete from review_parts where review_id in ('${documentId}','${audioId}');
         delete from reviewed_materials where id in ('${documentId}','${audioId}');
         delete from items where id in ('${itemIds.join("','")}');

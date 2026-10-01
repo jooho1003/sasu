@@ -96,6 +96,12 @@ describe("companion response parsers", () => {
     expect(parseSalesStatus({ status: "ready", web_path: `/d/${deptId}/sales-review?task_id=${taskId}` }).status).toBe("ready");
   });
 
+  it("accepts server-issued GUIDs whose variant is not RFC 4122", () => {
+    const serverJobId = "42e1b3e2-2daa-710d-e1a5-4ce4ad1f9bb8";
+
+    expect(parseReviewPartQueued({ job_id: serverJobId }).job_id).toBe(serverJobId);
+  });
+
   it("parses a card response with only verified display fields", () => {
     const cardId = "88888888-8888-4888-8888-888888888888";
     expect(

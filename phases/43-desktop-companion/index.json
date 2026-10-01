@@ -107,9 +107,12 @@
     {
       "step": 10,
       "name": "desktop-work",
-      "status": "pending",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium"
+      "effort": "medium",
+      "started_at": "2026-10-02T06:57:37+0900",
+      "summary": "팀장용 자료 올리기·영업 원문 검토와 팀원 IPC 거부를 로컬 QA Electron E2E로 확인하고, 비표준 variant 서버 작업 ID·응답 파싱 오류 경계를 보완했다.",
+      "completed_at": "2026-10-02T07:08:00+0900"
     },
     {
       "step": 11,
