@@ -30,14 +30,39 @@ export function actorFromMembership(
   };
 }
 
-export function jsonResult<T>(result: Result<T>): Response {
+type JsonResultOptions = {
+  cacheControl?: boolean;
+  legacy?: "ask" | "answer";
+};
+
+export function jsonResult<T>(
+  result: Result<T>,
+  options: JsonResultOptions = {},
+): Response {
   const init = {
     status: result.status,
-    headers: { "Cache-Control": "private, no-store" },
+    ...(options.cacheControl === false
+      ? {}
+      : { headers: { "Cache-Control": "private, no-store" } }),
   };
+
+  if (result.ok && options.legacy === "ask") {
+    return Response.json({ ok: true, ...result.body }, init);
+  }
 
   if (result.ok) {
     return Response.json(result.body, init);
+  }
+
+  if (options.legacy === "ask" && result.code === "ask_daily_limit") {
+    return Response.json(
+      { error: "ask_daily_limit", message: result.error },
+      init,
+    );
+  }
+
+  if (options.legacy === "ask" || options.legacy === "answer") {
+    return Response.json({ error: result.error }, init);
   }
 
   return Response.json(
