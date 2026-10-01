@@ -1,31 +1,190 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CompanionInbox } from "@sasu/contracts";
-import type { Answer, Card, DesktopSettings } from "../../shared/contracts";
+import type {
+  Answer,
+  Card,
+  DesktopSettings,
+  Questions,
+} from "../../shared/contracts";
+import { AskTab } from "./components/AskTab";
+import { CardsTab } from "./components/CardsTab";
+import { HistoryTab } from "./components/HistoryTab";
+import { LoginFlow } from "./components/LoginFlow";
+import { SettingsTab } from "./components/SettingsTab";
+import { WorkTab } from "./components/WorkTab";
+import { PetCanvas } from "./pet/PetCanvas";
 import "./app.css";
 
 type Tab = "ask" | "cards" | "history" | "work" | "settings";
 type Screen = "loading" | "email" | "code" | "department" | "panel";
-type PetTone = DesktopSettings["pet"];
-const TABS: readonly { id: Tab; label: string }[] = [{ id: "ask", label: "질문" }, { id: "cards", label: "결정함" }, { id: "history", label: "기록" }, { id: "work", label: "일 맡기기" }, { id: "settings", label: "설정" }];
-const errorMessage = (cause: unknown): string => cause instanceof Error ? cause.message.split(":").slice(1).join(":") || cause.message : "요청을 처리하지 못했습니다.";
-
-function PetCanvas({ tone, state }: { tone: PetTone; state: string }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => { const canvas = ref.current; const context = canvas?.getContext("2d"); if (!canvas || !context) return; const color = tone === "green" ? "#17614a" : tone === "blue" ? "#356c9a" : "#76589b"; context.clearRect(0, 0, 128, 128); context.fillStyle = color; context.beginPath(); context.arc(64, 40, 23, 0, Math.PI * 2); context.fill(); context.fillRect(43, 63, 42, 42); context.fillStyle = "#fff"; context.beginPath(); context.arc(56, 37, 3, 0, Math.PI * 2); context.arc(72, 37, 3, 0, Math.PI * 2); context.fill(); context.fillStyle = "#202522"; context.font = "bold 22px sans-serif"; const mark = state === "needs_attention" ? "!" : state === "failed" ? "×" : state === "complete" ? "✓" : state === "working" ? "…" : ""; if (mark) context.fillText(mark, 95, 27); }, [tone, state]);
-  return <canvas className="petCanvas" ref={ref} width="128" height="128" aria-label="사수 펫" />;
-}
-
-function Evidence({ answer }: { answer: Answer }) { if (!answer.citations.length) return null; return <section className="evidence" aria-label="근거가 된 원문">{answer.citations.map((citation, index) => <article key={`${citation.href}-${index}`}><q>{citation.quote}</q><small>{citation.source} · {citation.author}</small><button onClick={() => void window.sasu.app.openWeb(citation.href)}>웹에서 원문 보기</button></article>)}</section>; }
-
-function CardView({ card, onBack }: { card: Card; onBack: () => void }) { const [outcome, setOutcome] = useState(""); const [rationale, setRationale] = useState(""); const [notice, setNotice] = useState(""); const [busy, setBusy] = useState(false); if (!card.citations.length) return <p className="notice">근거를 확인하지 못해 내용을 보여 주지 않습니다.</p>; const answer = { id: card.card.id, status: "done" as const, answer: null, refused: false, citations: card.citations.map((entry) => ({ quote: entry.quote, author: entry.author, source: entry.source, occurred_at: entry.occurredAt, href: entry.href })) }; async function decide(status: "decided" | "deferred" | "rejected") { if (busy) return; setBusy(true); try { const result = await window.sasu.card.decide({ id: card.card.id, status, outcome, rationale }); setNotice(result.message ?? "처리했습니다."); } catch (cause) { setNotice(errorMessage(cause)); } finally { setBusy(false); } } return <section className="detail"><button onClick={onBack}>목록으로</button><h2>{card.card.title}</h2><p>{card.card.background}</p>{card.card.recommendation ? <p className="recommend">추천 · {card.card.recommendation}</p> : null}<Evidence answer={answer} />{card.conflicts.length ? <p className="notice">이전 결정과 함께 확인할 내용이 있습니다.</p> : null}{card.card.status === "open" ? <form className="decision" onSubmit={(event) => { event.preventDefault(); void decide("decided"); }}><label>결과<input value={outcome} onChange={(event) => setOutcome(event.target.value)} maxLength={300} required /></label><label>이유<textarea value={rationale} onChange={(event) => setRationale(event.target.value)} maxLength={1000} required /></label><div><button disabled={busy} type="submit">결정하기</button><button disabled={busy} type="button" onClick={() => void decide("deferred")}>미루기</button><button disabled={busy} type="button" onClick={() => void decide("rejected")}>돌려보내기</button></div></form> : <p className="notice">이미 처리한 카드입니다.</p>}{notice ? <p className="notice">{notice}</p> : null}</section>; }
-
-function WorkTab({ lead, setNotice }: { lead: boolean; setNotice: (value: string) => void }) { const input = useRef<HTMLInputElement>(null); if (!lead) return <><h1>일 맡기기</h1><p>이 메뉴는 팀장만 사용할 수 있습니다.</p></>; async function upload() { const file = input.current?.files?.[0]; if (!file) return; if ((file.name.endsWith(".vtt") || file.name.endsWith(".txt")) && file.size > 4 * 1024 * 1024) { setNotice("파일이 커서 올린 자료에서 처리해 주세요."); return; } if (file.name.endsWith(".vtt") || file.name.endsWith(".txt")) { await window.sasu.upload.transcript({ name: file.name, title: file.name, visibility: "dept", bytes: new Uint8Array(await file.arrayBuffer()) }); setNotice("회의 기록을 받았습니다."); return; } setNotice("문서와 음성 파일은 웹의 올린 자료에서 처리해 주세요."); } return <><h1>일 맡기기</h1><p>회의 기록 파일을 올리면 글로 정리합니다.</p><input ref={input} type="file" accept=".vtt,.txt,.pdf,.docx,.md,.csv,.json,audio/*" /><button onClick={() => void upload()}>파일 올리기</button><p className="notice">영업 원문 검토는 웹에서 결과를 확인합니다.</p></>; }
+const tabs: readonly { id: Tab; label: string }[] = [
+  { id: "ask", label: "질문" },
+  { id: "cards", label: "결정함" },
+  { id: "history", label: "기록" },
+  { id: "work", label: "일 맡기기" },
+  { id: "settings", label: "설정" },
+];
+export const message = (cause: unknown): string =>
+  cause instanceof Error
+    ? cause.message.split(":").slice(1).join(":") || cause.message
+    : "요청을 처리하지 못했습니다. 잠시 뒤 다시 해 주세요.";
 
 export function App() {
-  const [screen, setScreen] = useState<Screen>(location.hash === "#pet" ? "panel" : "loading"); const [email, setEmail] = useState(""); const [code, setCode] = useState(""); const [tab, setTab] = useState<Tab>("ask"); const [departments, setDepartments] = useState<Awaited<ReturnType<typeof window.sasu.link.departments>>["departments"]>([]); const [context, setContext] = useState<Awaited<ReturnType<typeof window.sasu.link.get>> | null>(null); const [inbox, setInbox] = useState<CompanionInbox | null>(null); const [settings, setSettings] = useState<DesktopSettings | null>(null); const [question, setQuestion] = useState(""); const [answer, setAnswer] = useState<Answer | null>(null); const [card, setCard] = useState<Card | null>(null); const [history, setHistory] = useState<Answer[]>([]); const [notice, setNotice] = useState(""); const [shortcut, setShortcut] = useState(true); const [petState, setPetState] = useState("idle"); const questionRef = useRef<HTMLTextAreaElement>(null); const pet = settings?.pet ?? "green"; const computedState = useMemo(() => inbox?.cards.length ? "needs_attention" : inbox?.answers.some((entry) => entry.status === "pending") ? "working" : inbox?.answers.some((entry) => entry.status === "failed") ? "failed" : inbox?.answers.some((entry) => entry.status === "done") ? "complete" : "idle", [inbox]); const state = location.hash === "#pet" ? petState : computedState;
-  useEffect(() => { if (location.hash === "#pet") { void window.sasu.settings.get().then(setSettings).catch(() => undefined); const unsubscribe = window.sasu.window.onPetState(setPetState); return () => { unsubscribe(); }; } void (async () => { try { setContext(await window.sasu.link.get()); setSettings(await window.sasu.settings.get()); setScreen("panel"); } catch { setScreen("email"); } })(); const unsubscribe = window.sasu.auth.onSignedOut(() => setScreen("email")); return () => { unsubscribe(); }; }, []); useEffect(() => { const unsubscribe = window.sasu.window.onShortcutStatus(setShortcut); return () => { unsubscribe(); }; }, []); useEffect(() => { const unsubscribe = window.sasu.window.onFocusQuestion(() => { setTab("ask"); window.setTimeout(() => questionRef.current?.focus(), 0); }); return () => { unsubscribe(); }; }, []); useEffect(() => { if (screen !== "panel" || location.hash === "#pet") return; const load = () => void window.sasu.inbox.get().then(({ inbox: next }) => setInbox(next)).catch(() => undefined); load(); const timer = window.setInterval(load, 30_000); return () => clearInterval(timer); }, [screen]);
-  if (location.hash === "#pet") { let start: { x: number; y: number } | null = null; return <button className="petButton" onPointerDown={(event) => { start = { x: event.screenX, y: event.screenY }; }} onPointerUp={(event) => { if (!start) return; const moved = Math.abs(event.screenX - start.x) + Math.abs(event.screenY - start.y); if (moved < 4) window.sasu.window.togglePanel(); else void window.sasu.window.movePet({ x: event.screenX - 64, y: event.screenY - 64 }); start = null; }}><PetCanvas tone={pet} state={state} /></button>; }
-  async function requestCode() { try { await window.sasu.auth.requestCode(email); setScreen("code"); setNotice("로그인 코드를 보냈습니다."); } catch (cause) { setNotice(errorMessage(cause)); } } async function verifyCode() { try { await window.sasu.auth.verifyCode(email, code); const result = await window.sasu.link.departments(); setDepartments(result.departments); setScreen("department"); } catch (cause) { setNotice(errorMessage(cause)); } } async function link(dept: { id: string; consented: boolean }) { if (!dept.consented) { setNotice("웹에서 먼저 동의해 주세요."); void window.sasu.app.openWeb(`/consent?next=/d/${dept.id}`); return; } try { await window.sasu.link.create({ dept_id: dept.id, device_name: "데스크톱 앱" }); setContext(await window.sasu.link.get()); setSettings(await window.sasu.settings.get()); setScreen("panel"); } catch (cause) { setNotice(errorMessage(cause)); } } async function sendQuestion() { if (question.trim().length < 5) { setNotice("질문을 5자 이상 적어 주세요."); return; } try { const result = await window.sasu.ask.send(question.trim()); setQuestion(""); if ("queued" in result) { setNotice("연결되면 보낼게요."); return; } const poll = async (): Promise<void> => { const next = await window.sasu.answer.get(result.answer_id); setAnswer(next); if (next.status === "pending") window.setTimeout(() => void poll(), 2_000); }; void poll(); } catch (cause) { setNotice(errorMessage(cause)); } }
-  if (screen === "loading") return <main className="shell">불러오는 중…</main>; if (screen === "email") return <main className="shell auth"><h1>사수 시작하기</h1><p>이메일로 받은 코드로 로그인합니다.</p><label>이메일<input value={email} type="email" onChange={(event) => setEmail(event.target.value)} /></label><button onClick={() => void requestCode()}>코드 받기</button>{notice ? <p className="notice">{notice}</p> : null}</main>; if (screen === "code") return <main className="shell auth"><h1>코드 확인</h1><label>6자리 코드<input value={code} inputMode="numeric" maxLength={6} onChange={(event) => setCode(event.target.value)} /></label><button onClick={() => void verifyCode()}>로그인하기</button>{notice ? <p className="notice">{notice}</p> : null}</main>; if (screen === "department") return <main className="shell auth"><h1>부서 고르기</h1>{departments.map((dept) => <button className="department" key={dept.id} onClick={() => void link(dept)}>{dept.name}{!dept.consented ? " · 웹에서 동의 필요" : ""}</button>)}{notice ? <p className="notice">{notice}</p> : null}</main>;
-  return <main className="shell"><header><strong>사수</strong><span>{context?.dept.name}</span><button className="pin" onClick={() => void window.sasu.settings.set({ panelPinned: !(settings?.panelPinned ?? false) }).then(setSettings)}>{settings?.panelPinned ? "고정 풀기" : "고정하기"}</button></header><nav>{TABS.map((item) => <button key={item.id} className={tab === item.id ? "active" : ""} onClick={() => { setTab(item.id); setCard(null); }}>{item.label}</button>)}</nav><section className="content">{tab === "ask" && <><h1>무엇이 궁금한가요?</h1><textarea ref={questionRef} value={question} maxLength={1000} onChange={(event) => setQuestion(event.target.value)} placeholder="질문을 적어 주세요." /><button onClick={() => void sendQuestion()}>질문하기</button>{answer?.status === "pending" ? <p>답을 찾는 중입니다.</p> : answer?.status === "refused" ? <p className="notice">근거가 부족해 답하지 못했습니다.</p> : answer?.status === "failed" ? <p className="notice">답을 만들지 못했습니다. 잠시 뒤 다시 시도해 주세요.</p> : answer && answer.citations.length > 0 ? <Evidence answer={answer} /> : null}</>}{tab === "cards" && (card ? <CardView card={card} onBack={() => setCard(null)} /> : <><h1>결정할 카드</h1>{(inbox?.cards ?? []).map((entry) => <button className="row" key={entry.id} onClick={() => void window.sasu.card.get(entry.id).then(setCard).catch((cause) => setNotice(errorMessage(cause)))}>{entry.title}<small>{entry.deadline ?? "마감 미정"}</small></button>)}{!inbox?.cards.length ? <p>지금 결정할 카드가 없습니다.</p> : null}</>)}{tab === "history" && <><h1>지난 질문</h1><button onClick={() => void window.sasu.questions.list().then((result) => Promise.all(result.questions.map((entry) => window.sasu.answer.get(entry.id))).then(setHistory)).catch((cause) => setNotice(errorMessage(cause)))}>기록 불러오기</button>{history.filter((entry) => entry.citations.length > 0).map((entry) => <button className="row" key={entry.id} onClick={() => { setAnswer(entry); setTab("ask"); }}>근거가 있는 답 보기</button>)}</>}{tab === "work" && <WorkTab lead={context?.role === "lead"} setNotice={setNotice} />}{tab === "settings" && <><h1>설정</h1><p>연결한 부서 · {context?.dept.name}</p><label>펫 모양<select value={pet} onChange={(event) => void window.sasu.settings.set({ pet: event.target.value as PetTone }).then(setSettings)}><option value="green">초록</option><option value="blue">파랑</option><option value="purple">보라</option></select></label><p>{shortcut ? "바로가기 키로 질문을 바로 열 수 있습니다." : "바로가기 키를 등록하지 못했습니다."}</p><button onClick={() => void window.sasu.auth.signOut()}>로그아웃하기</button></>}{notice ? <p className="notice">{notice}</p> : null}</section></main>;
+  const petWindow = location.hash === "#pet";
+  const [screen, setScreen] = useState<Screen>(petWindow ? "panel" : "loading");
+  const [tab, setTab] = useState<Tab>("ask");
+  const [context, setContext] = useState<Awaited<
+    ReturnType<typeof window.sasu.link.get>
+  > | null>(null);
+  const [settings, setSettings] = useState<DesktopSettings | null>(null);
+  const [inbox, setInbox] = useState<CompanionInbox | null>(null);
+  const [answer, setAnswer] = useState<Answer | null>(null);
+  const [card, setCard] = useState<Card | null>(null);
+  const [history, setHistory] = useState<Questions["questions"]>([]);
+  const [nextHistory, setNextHistory] = useState<Questions["next"]>(null);
+  const [notice, setNotice] = useState("");
+  const [shortcut, setShortcut] = useState(true);
+  const [petState, setPetState] = useState("idle");
+  const questionFocus = useRef<() => void>(() => undefined);
+  const loadInbox = (): void => {
+    void window.sasu.inbox
+      .get()
+      .then(({ inbox: next }) => setInbox(next))
+      .catch(() => undefined);
+  };
+  useEffect(() => {
+    if (petWindow) {
+      void window.sasu.settings
+        .get()
+        .then(setSettings)
+        .catch(() => undefined);
+      return window.sasu.window.onPetState(setPetState);
+    }
+    void (async () => {
+      try {
+        setContext(await window.sasu.link.get());
+        setSettings(await window.sasu.settings.get());
+        setScreen("panel");
+      } catch {
+        setScreen("email");
+      }
+    })();
+    return window.sasu.auth.onSignedOut(() => setScreen("email"));
+  }, [petWindow]);
+  useEffect(() => window.sasu.window.onShortcutStatus(setShortcut), []);
+  useEffect(
+    () =>
+      window.sasu.window.onFocusQuestion(() => {
+        setTab("ask");
+        window.setTimeout(() => questionFocus.current(), 0);
+      }),
+    [],
+  );
+  useEffect(() => {
+    if (screen !== "panel" || petWindow) return;
+    loadInbox();
+    const timer = window.setInterval(loadInbox, 30_000);
+    return () => window.clearInterval(timer);
+  }, [screen, petWindow]);
+  if (petWindow)
+    return (
+      <PetCanvas
+        tone={settings?.pet ?? "green"}
+        state={petState}
+        onToggle={() => window.sasu.window.togglePanel()}
+        onMove={(position) => void window.sasu.window.movePet(position)}
+      />
+    );
+  if (screen !== "panel")
+    return (
+      <LoginFlow
+        screen={screen}
+        notice={notice}
+        onNotice={setNotice}
+        onScreen={setScreen}
+        onLinked={async () => {
+          setContext(await window.sasu.link.get());
+          setSettings(await window.sasu.settings.get());
+        }}
+      />
+    );
+  return (
+    <main className="shell">
+      <header>
+        <strong>사수</strong>
+        <span>{context?.dept.name}</span>
+        <button
+          className="pin"
+          onClick={() =>
+            void window.sasu.settings
+              .set({ panelPinned: !(settings?.panelPinned ?? false) })
+              .then(setSettings)
+          }
+        >
+          {settings?.panelPinned ? "고정 풀기" : "고정하기"}
+        </button>
+      </header>
+      <nav>
+        {tabs.map((item) => (
+          <button
+            key={item.id}
+            className={tab === item.id ? "active" : ""}
+            onClick={() => {
+              setTab(item.id);
+              setCard(null);
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </nav>
+      <section className="content">
+        {tab === "ask" && (
+          <AskTab
+            answer={answer}
+            onAnswer={setAnswer}
+            onNotice={setNotice}
+            registerFocus={(focus) => {
+              questionFocus.current = focus;
+            }}
+          />
+        )}
+        {tab === "cards" && (
+          <CardsTab
+            card={card}
+            inbox={inbox}
+            role={context?.role ?? "member"}
+            onCard={setCard}
+            onNotice={setNotice}
+            onChanged={loadInbox}
+          />
+        )}
+        {tab === "history" && (
+          <HistoryTab
+            entries={history}
+            next={nextHistory}
+            onEntries={setHistory}
+            onNext={setNextHistory}
+            onOpen={(entry) => {
+              setAnswer(entry);
+              setTab("ask");
+            }}
+            onNotice={setNotice}
+          />
+        )}
+        {tab === "work" && (
+          <WorkTab lead={context?.role === "lead"} onNotice={setNotice} />
+        )}
+        {tab === "settings" && (
+          <SettingsTab
+            context={context}
+            settings={settings}
+            shortcut={shortcut}
+            onSettings={setSettings}
+          />
+        )}
+        {notice ? <p className="notice">{notice}</p> : null}
+      </section>
+    </main>
+  );
 }

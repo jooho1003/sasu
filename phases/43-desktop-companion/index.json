@@ -97,9 +97,11 @@
     {
       "step": 9,
       "name": "desktop-ui",
-      "status": "pending",
+      "status": "error",
       "codex_model": "gpt-5.6-terra",
-      "effort": "medium"
+      "effort": "medium",
+      "started_at": "2026-10-02T03:57:49+0900",
+      "error_message": "로컬 QA Electron E2E가 OTP 코드 확인 단계에서 Supabase auth network 오류로 종료되어, 로그인→답 본문·근거→결정 멱등 실행 기록을 만들지 못함."
     },
     {
       "step": 10,

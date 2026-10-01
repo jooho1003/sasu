@@ -25,65 +25,114 @@ const invoke = <T>(channel: string, input?: unknown): Promise<T> =>
 
 const bridge = {
   auth: {
-    requestCode: (email: string) => invoke<{ sent: true }>("auth:requestCode", { email }),
-    verifyCode: (email: string, code: string) => invoke<{ authenticated: true }>("auth:verifyCode", { email, code }),
+    requestCode: (email: string) =>
+      invoke<{ sent: true }>("auth:requestCode", { email }),
+    verifyCode: (email: string, code: string) =>
+      invoke<{ authenticated: true }>("auth:verifyCode", { email, code }),
     signOut: () => invoke<void>("auth:signOut"),
     onSignedOut: (callback: () => void) => {
       const listener = (): void => callback();
       ipcRenderer.on("signed-out", listener);
-      return () => ipcRenderer.removeListener("signed-out", listener);
+      return () => {
+        ipcRenderer.removeListener("signed-out", listener);
+      };
     },
   },
   link: {
     departments: () => invoke<CompanionDepartmentsResponse>("link:departments"),
-    create: (input: { dept_id: string; device_name: string }) => invoke<CompanionLinkResponse>("link:create", input),
+    create: (input: { dept_id: string; device_name: string }) =>
+      invoke<CompanionLinkResponse>("link:create", input),
     get: () => invoke<CompanionContextResponse>("link:get"),
   },
-  inbox: { get: () => invoke<{ inbox: CompanionInbox; outbox_count: number }>("inbox:get") },
-  ask: { send: (question: string, parent_id: string | null = null) => invoke<AskStart | { queued: true; outbox_id: string }>("ask:send", { question, parent_id }) },
+  inbox: {
+    get: () =>
+      invoke<{ inbox: CompanionInbox; outbox_count: number }>("inbox:get"),
+  },
+  ask: {
+    send: (question: string, parent_id: string | null = null) =>
+      invoke<AskStart | { queued: true; outbox_id: string }>("ask:send", {
+        question,
+        parent_id,
+      }),
+  },
   answer: { get: (id: string) => invoke<Answer>("answer:get", { id }) },
-  questions: { list: (cursor: { before: string; before_id: string } | null = null) => invoke<Questions>("questions:list", { cursor }) },
+  questions: {
+    list: (cursor: { before: string; before_id: string } | null = null) =>
+      invoke<Questions>("questions:list", { cursor }),
+  },
   card: {
     get: (id: string) => invoke<Card>("card:get", { id }),
-    decide: (input: { id: string; status: "decided" | "deferred" | "rejected" | "open"; outcome: string; rationale: string }) => invoke<CardDecision>("card:decide", input),
+    decide: (input: {
+      id: string;
+      status: "decided" | "deferred" | "rejected" | "open";
+      outcome: string;
+      rationale: string;
+    }) => invoke<CardDecision>("card:decide", input),
   },
   upload: {
-    transcript: (input: { name: string; title: string; visibility: "dept" | "leads_only"; bytes: Uint8Array }) => invoke<TranscriptResult>("upload:transcript", input),
-    review: (input: ReviewUploadRequest) => invoke<{ id: string; job_ids: string[] }>("upload:review", input),
+    transcript: (input: {
+      name: string;
+      title: string;
+      visibility: "dept" | "leads_only";
+      bytes: Uint8Array;
+    }) => invoke<TranscriptResult>("upload:transcript", input),
+    review: (input: ReviewUploadRequest) =>
+      invoke<{ id: string; job_ids: string[] }>("upload:review", input),
   },
   sales: {
     sources: () => invoke<SalesSources>("sales:sources"),
-    start: (input: SalesReviewSourceSelection & { request_id: string }) => invoke<{ task_id: string }>("sales:start", input),
-    status: (task_id: string) => invoke<SalesStatus>("sales:status", { task_id }),
+    start: (input: SalesReviewSourceSelection & { request_id: string }) =>
+      invoke<{ task_id: string }>("sales:start", input),
+    status: (task_id: string) =>
+      invoke<SalesStatus>("sales:status", { task_id }),
   },
   settings: {
     get: () => invoke<DesktopSettings>("settings:get"),
-    set: (input: Partial<DesktopSettings>) => invoke<DesktopSettings>("settings:set", input),
+    set: (input: Partial<DesktopSettings>) =>
+      invoke<DesktopSettings>("settings:set", input),
   },
-  app: { openWeb: (path: string) => invoke<{ opened: true }>("app:openWeb", { path }) },
+  app: {
+    openWeb: (path: string) =>
+      invoke<{ opened: true }>("app:openWeb", { path }),
+  },
   window: {
     togglePanel: () => ipcRenderer.send("pet-toggle-panel"),
     onPanelBlurred: (callback: () => void) => {
       const listener = (): void => callback();
       ipcRenderer.on("panel-blurred", listener);
-      return () => ipcRenderer.removeListener("panel-blurred", listener);
+      return () => {
+        ipcRenderer.removeListener("panel-blurred", listener);
+      };
     },
     onShortcutStatus: (callback: (registered: boolean) => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, registered: boolean): void => callback(registered);
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        registered: boolean,
+      ): void => callback(registered);
       ipcRenderer.on("shortcut-status", listener);
-      return () => ipcRenderer.removeListener("shortcut-status", listener);
+      return () => {
+        ipcRenderer.removeListener("shortcut-status", listener);
+      };
     },
     onFocusQuestion: (callback: () => void) => {
       const listener = (): void => callback();
       ipcRenderer.on("focus-question", listener);
-      return () => ipcRenderer.removeListener("focus-question", listener);
+      return () => {
+        ipcRenderer.removeListener("focus-question", listener);
+      };
     },
     onPetState: (callback: (state: string) => void) => {
-      const listener = (_event: Electron.IpcRendererEvent, state: string): void => callback(state);
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        state: string,
+      ): void => callback(state);
       ipcRenderer.on("pet-state", listener);
-      return () => ipcRenderer.removeListener("pet-state", listener);
+      return () => {
+        ipcRenderer.removeListener("pet-state", listener);
+      };
     },
-    movePet: (position: { x: number; y: number }) => invoke<void>("window:movePet", position),
+    movePet: (position: { x: number; y: number }) =>
+      invoke<void>("window:movePet", position),
   },
 };
 

@@ -19,8 +19,8 @@
 | `npm --prefix desktop run lint` | PASS |
 | `npm --prefix desktop test` | PASS — 4 files, 20 tests |
 | QA 환경 변수로 `npm --prefix desktop run build` | PASS |
-| `SASU_DESKTOP_E2E=1 npm --prefix desktop run e2e` | PASS — Playwright `_electron`이 펫·패널 두 창과 패널 제목을 확인 |
+| `SASU_DESKTOP_E2E=1 npm --prefix desktop run e2e` | 실패 — OTP 코드 확인에서 `network:서버에 연결하지 못했습니다.`. 코드 로그인 뒤 답 본문·근거와 카드 연타 저장을 아직 확인하지 못함 |
 | `git grep -n "dangerouslySetInnerHTML\|fetch(\|createClient(" -- desktop/src/renderer` | PASS — 출력 0줄 |
 | `npm run check:wording` | PASS — renderer 차단 위반 0건 (기존 프로젝트 경고는 별도) |
 
-E2E의 OTP·부서 연결·시드 답변·카드 연타 저장은 Step 8의 로컬 Electron/API 실행 기록과 Step 10의 릴리스 검증에서 이어서 실제 실행한다. 이번 단계에서는 창과 renderer 경계 및 합성 QA 창 기동을 검증했다.
+E2E의 OTP·부서 연결·시드 답변·카드 연타 저장은 아직 통과하지 않았다. 이번 단계에서는 창과 renderer 경계 및 합성 QA 창 기동만 확인했으며, phase index의 Step 9는 `error`로 남긴다.
