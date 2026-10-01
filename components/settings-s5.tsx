@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminAction } from "@/components/admin/actions";
 import { LeadInvites } from "@/components/admin/lead-invites";
 import { NotionSourceList } from "@/components/notion-source-list";
+import { SettingsDevices } from "@/components/settings-devices";
 
 type SettingsMember = {
   user_id: string;
@@ -72,9 +73,11 @@ async function readResponse<T>(response: Response): Promise<T> {
 export default function SettingsS5({
   deptId,
   memberAdminEnabled = false,
+  isDemo = false,
 }: {
   deptId: string;
   memberAdminEnabled?: boolean;
+  isDemo?: boolean;
 }) {
   const [data, setData] = useState<SettingsPayload | null>(null);
   const [section, setSection] = useState<"members" | "connections" | "imports">(
@@ -749,6 +752,7 @@ export default function SettingsS5({
             </p>
           ) : null}
         </section>
+        <SettingsDevices isDemo={isDemo} />
 
         <section className="settings-panel panel">
           <div>

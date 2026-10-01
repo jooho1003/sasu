@@ -349,6 +349,8 @@ if (command === "refresh-retro-connectors") {
               ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/sales-review-literal-comparison-local.spec.ts", ...process.argv.slice(3)]
             : command === "sales-review-checklist-test"
               ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/sales-review-condition-checklist-local.spec.ts", ...process.argv.slice(3)]
+              : command === "settings-devices-test"
+                ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/settings-devices-local.spec.ts", ...process.argv.slice(3)]
             : command === "csp-test"
               ? ["node_modules/@playwright/test/cli.js", "test", "tests/e2e/security-headers.spec.ts", ...process.argv.slice(3)]
             : [
