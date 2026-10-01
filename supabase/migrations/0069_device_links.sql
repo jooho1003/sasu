@@ -40,8 +40,9 @@ begin
     raise exception using errcode = '42501', message = 'device_link_forbidden';
   end if;
   -- Serialize the per-user limit, including concurrent links from different sessions.
-  perform 1 from auth.users where id = v_user for update;
-  if not found or not exists (
+  -- A transaction-scoped advisory lock avoids locking auth.users (Supabase-owned, used by Auth).
+  perform pg_advisory_xact_lock(hashtextextended('device_link:' || v_user::text, 0));
+  if not exists (
     select 1 from auth.sessions where id = v_session and user_id = v_user
   ) then
     raise exception using errcode = '42501', message = 'device_link_forbidden';
