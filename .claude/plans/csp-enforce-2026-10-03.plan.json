@@ -1,0 +1,187 @@
+{
+  "slug": "csp-enforce",
+  "date": "2026-10-03",
+  "request": "V14 CSP 강제 전환 검증 \"지금 해줘\"(2026-10-03, 심사 기간 뒤로 미루자는 추천 대신 지금 진행)",
+  "approved_decisions": {
+    "1": "강제 전환 전에 로컬 강제 모드 검증과 운영 Report-Only 관찰을 먼저 한다. 운영 스위치(SASU_CSP_ENFORCE=true)와 병합은 결과를 보여 준 뒤 사용자 확인을 받는다",
+    "2": "강제 모드에서 깨지는 Slack 설치 폼은 form-action에 Slack 주소를 더해 고친다. POST·origin·state 검사를 그대로 두기 위해 GET 링크로 바꾸지 않는다"
+  },
+  "facts_found": [
+    "정책: lib/security-headers.ts:24-38. proxy.ts:10-12가 SASU_CSP_ENFORCE===\"true\"일 때만 강제 헤더로 바꾼다. report-uri가 없어 운영 위반은 모인 적이 없다",
+    "Slack 설치는 <form method=post action=/api/slack/oauth/start> → 303 https://slack.com/oauth/v2/authorize. Chromium 재현: 강제 모드에서 form-action 'self'가 전송을 막고(이동 없음), Report-Only에서는 이동하며 위반만 남김",
+    "다른 폼은 /auth/signout(같은 출처로 303)뿐이다. 회고 커넥터 OAuth는 링크 이동이라 form-action 대상이 아니다",
+    "영업 검토·기기 설정·용어집 화면은 같은 출처 fetch만 쓰고 blob·Worker·외부 요청이 없다. 녹음은 AudioWorklet·Worker·blob 오디오·Storage 업로드를 쓴다",
+    "CSP 위반 감지가 있는 spec은 security-headers·guest·review-access-live·recording-product 4개뿐이고, recording-product는 녹음 화면 위반을 실제로 검사하지 않는다. 영업·기기 spec에는 감지가 없다",
+    "로컬 QA는 review-qa Supabase(54321)와 SASU_VERIFY_BUILD=1 → .next-verify 빌드를 쓴다. 메인 작업 폴더는 다른 세션이 데스크톱·문서를 수정 중이라 별도 worktree(node_modules·.vercel/review-qa 정션)에서 한다",
+    "Docker 엔진은 10/2 13:55 KST에 멈췄고 10/3 00:07에 Docker Desktop을 다시 시작해 복구했다. QA에 안 쓰는 전체 로컬 Supabase(sasu) 11개 컨테이너는 메모리 때문에 정지했다"
+  ],
+  "nodes": [
+    {
+      "id": "C1",
+      "title": "form-action에 https://slack.com https://*.slack.com 추가(테스트 먼저), ADR-069·ARCHITECTURE 한 줄 보완",
+      "domain": "security",
+      "D1": 0,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 3,
+      "tier": "powerful",
+      "clamp": "security floor powerful",
+      "agent": "main",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [],
+      "output": "tests/security-headers.test.ts·lib/security-headers.ts·docs/ADR.md·docs/ARCHITECTURE.md",
+      "status": "done",
+      "result": "테스트 먼저 실패 확인 → form-action 수정 → security-headers·proxy 17/17. 재현: 강제 모드에서 slack.com까지 이동, 콘솔 CSP 0"
+    },
+    {
+      "id": "C2",
+      "title": "로컬 강제 모드 빌드·서버(.next-verify, SASU_CSP_ENFORCE=true, :3011)",
+      "domain": "qa",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 0,
+      "score": 1,
+      "tier": "balanced",
+      "clamp": "qa floor balanced",
+      "agent": "main",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "note": "Docker·메모리·백그라운드 서버 조정이 얽혀 메인이 직접 실행",
+      "depends_on": [
+        "C1"
+      ],
+      "output": ".next-verify, 서버 로그",
+      "status": "done",
+      "result": "Turbopack은 worktree node_modules 정션을 거부해 webpack 빌드. :3011 강제 헤더만, form-action에 Slack 포함"
+    },
+    {
+      "id": "C3",
+      "title": "CSP 화면 순회 spec(lead·member·조직 관리자, 로그인 화면 전체, securitypolicyviolation·콘솔 수집)",
+      "domain": "qa",
+      "D1": 1,
+      "D2": 0,
+      "D3": 1,
+      "D4": 1,
+      "score": 3,
+      "tier": "balanced",
+      "agent": "general-purpose",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-luna",
+      "depends_on": [],
+      "output": "tests/e2e/csp-routes-local.spec.ts",
+      "status": "done",
+      "result": "sonnet이 tests/e2e/csp-routes-local.spec.ts 작성(tsc·eslint 통과), main 검토 후 채택. review-qa.mjs에 csp-routes-test 명령 추가"
+    },
+    {
+      "id": "C4",
+      "title": "강제 모드 실행: csp-test·guest-test·access-browser-test·sales 4종(LLM 없음)·settings-devices-test·화면 순회, 덮어쓴 기존 증거 파일 복원",
+      "domain": "qa",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 1,
+      "score": 2,
+      "tier": "balanced",
+      "agent": "main",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "note": "C2 서버를 쓰는 실행이라 메인이 직접",
+      "depends_on": [
+        "C2",
+        "C3"
+      ],
+      "output": "docs/verification/csp-enforce-2026-10-03/",
+      "status": "done",
+      "result": "csp 4/4·guest 5/5·access 1/1·영업 4+1+2·기기 1/1·화면 순회 35개 위반 0·녹음 최종 2/2. 덮어쓴 추적 증거 22개 복원"
+    },
+    {
+      "id": "C5",
+      "title": "운영 Report-Only 관찰: guest.spec·security-headers.spec을 운영 주소로(읽기 전용, LLM 0·쓰기 0)",
+      "domain": "qa",
+      "D1": 0,
+      "D2": 0,
+      "D3": 0,
+      "D4": 0,
+      "score": 0,
+      "tier": "balanced",
+      "clamp": "qa floor balanced",
+      "agent": "main",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-luna",
+      "depends_on": [],
+      "output": "docs/verification/csp-enforce-2026-10-03/production-report-only*",
+      "status": "done",
+      "result": "운영 security-headers 4/4·게스트 390 통과(위반 0). 게스트 1440은 첫 결정 기록 화면 5초 초과 2회 → 직접 재측정 1.9~2.9초, 3차 통과(CSP 무관)"
+    },
+    {
+      "id": "R1",
+      "title": "최종 리뷰: 정책 diff·실행 결과·남은 위험",
+      "domain": "review",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 2,
+      "score": 3,
+      "tier": "powerful",
+      "override": "최종 리뷰 / 머지 승인",
+      "agent": "main",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [
+        "C4",
+        "C5"
+      ],
+      "status": "in_progress"
+    },
+    {
+      "id": "O1",
+      "title": "PR(수정·spec·로컬 기록) → Preview → 병합(운영은 아직 Report-Only)",
+      "domain": "general",
+      "D1": 0,
+      "D2": 1,
+      "D3": 2,
+      "D4": 1,
+      "score": 4,
+      "tier": "powerful",
+      "override": "최종 리뷰 / 머지 승인",
+      "agent": "main",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "requires_approval": true,
+      "depends_on": [
+        "R1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "O2",
+      "title": "운영 env SASU_CSP_ENFORCE=true → 재배포 → 운영 확인(헤더·공개·게스트·데모 녹음) → 기록 PR. 문제 시 직전 배포로 즉시 되돌림",
+      "domain": "security",
+      "D1": 0,
+      "D2": 2,
+      "D3": 2,
+      "D4": 1,
+      "score": 5,
+      "tier": "powerful",
+      "agent": "main",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "requires_approval": true,
+      "depends_on": [
+        "O1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gate": {
+    "G1": "PASS",
+    "G2": "PASS (보안 C1·O2, 최종 리뷰 R1, 머지 O1 → powerful)",
+    "G3": "PASS (security floor로 C1 승격, qa 노드 balanced 이상)",
+    "G4": "PASS (powerful 4/8=50%: C1 security floor, R1·O1 하드 오버라이드, O2 security+배포 — 강등 불가)",
+    "G5": "PASS (D3=2인 O1·O2에 requires_approval. 실행 직전 결과와 함께 사용자 확인)",
+    "result": "PASS"
+  }
+}

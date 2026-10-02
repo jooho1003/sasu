@@ -1,0 +1,65 @@
+
+Running 2 tests using 1 worker
+
+[1/2] tests\e2e\recording-product.spec.ts:19:5 › authenticated production build records and saves synthetic audio through real local services
+  1) tests\e2e\recording-product.spec.ts:19:5 › authenticated production build records and saves synthetic audio through real local services 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 20000ms exceeded while waiting on the predicate
+
+      77 |   await page.getByRole("button", { name: "녹음 시작", exact: true }).click();
+      78 |   await expect(page.getByRole("button", { name: "녹음 종료" })).toBeVisible();
+    > 79 |   await expect.poll(async () => (await page.getByText(/이 기기에 저장됨/).textContent())?.includes("0:08"), { timeout: 20_000 }).toBe(true);
+         |                                                                                                                           ^
+      80 |   await page.getByRole("button", { name: "녹음 종료" }).click();
+      81 |   await page.getByRole("button", { name: "녹음 끝내기" }).click();
+      82 |   await expect(page.getByRole("button", { name: "음성 저장하고 받아쓰기" })).toBeVisible();
+        at D:\바이브코딩\sasu-csp-enforce-20261003\tests\e2e\recording-product.spec.ts:79:123
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\recording-product-authenti-c3b06-through-real-local-services\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\recording-product-authenti-c3b06-through-real-local-services\error-context.md
+
+
+[2/2] tests\e2e\recording-product.spec.ts:145:5 › local organization switch controls the recording entry while recorded materials keep their badge
+  2) tests\e2e\recording-product.spec.ts:145:5 › local organization switch controls the recording entry while recorded materials keep their badge 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('.review-list .badge').filter({ hasText: '회의 녹음' }).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('.review-list .badge').filter({ hasText: '회의 녹음' }).first() with timeout 5000ms
+      - waiting for locator('.review-list .badge').filter({ hasText: '회의 녹음' }).first()
+
+
+      177 |     await offResponse;
+      178 |     await expect(page.getByRole("link", { name: "회의 녹음", exact: true })).toHaveCount(0);
+    > 179 |     await expect(page.locator(".review-list .badge").filter({ hasText: "회의 녹음" }).first()).toBeVisible();
+          |                                                                                            ^
+      180 |     await page.screenshot({ path: "docs/verification/recording-ux-2026-09-29/s8-entry-off-1440.png", fullPage: true });
+      181 |     await page.setViewportSize({ width: 390, height: 844 });
+      182 |     await page.screenshot({ path: "docs/verification/recording-ux-2026-09-29/s8-entry-off-390.png", fullPage: true });
+        at D:\바이브코딩\sasu-csp-enforce-20261003\tests\e2e\recording-product.spec.ts:179:92
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\recording-product-local-or-1f7ae--materials-keep-their-badge\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\recording-product-local-or-1f7ae--materials-keep-their-badge\error-context.md
+
+
+  2 failed
+    tests\e2e\recording-product.spec.ts:19:5 › authenticated production build records and saves synthetic audio through real local services 
+    tests\e2e\recording-product.spec.ts:145:5 › local organization switch controls the recording entry while recorded materials keep their badge 
+exit=1

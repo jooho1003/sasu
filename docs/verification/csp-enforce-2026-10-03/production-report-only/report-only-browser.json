@@ -1,0 +1,48 @@
+{
+  "observations": {
+    "/": {
+      "status": 200,
+      "scripts": 13,
+      "matched": true,
+      "violations": []
+    },
+    "/privacy": {
+      "status": 200,
+      "scripts": 12,
+      "matched": true,
+      "violations": []
+    },
+    "/login": {
+      "status": 200,
+      "scripts": 13,
+      "matched": true,
+      "violations": []
+    },
+    "/demo/hiring": {
+      "status": 200,
+      "scripts": 15,
+      "matched": true,
+      "violations": []
+    },
+    "/demo/notion": {
+      "status": 200,
+      "scripts": 14,
+      "matched": true,
+      "violations": []
+    },
+    "/no-membership": {
+      "status": 200,
+      "scripts": 12,
+      "matched": true,
+      "violations": []
+    },
+    "/csp-page-that-does-not-exist": {
+      "status": 404,
+      "scripts": 12,
+      "matched": true,
+      "violations": []
+    }
+  },
+  "navigationViolations": [],
+  "pageErrors": []
+}

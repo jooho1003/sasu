@@ -33,7 +33,8 @@ export function contentSecurityPolicy(nonce: string, supabaseUrl: string | undef
     "font-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'",
+    // The Slack install form posts to our origin, which redirects (303) to Slack OAuth; Chrome checks form-action on that redirect.
+    "form-action 'self' https://slack.com https://*.slack.com",
     "frame-ancestors 'none'",
   ].join("; ") + ";";
 }

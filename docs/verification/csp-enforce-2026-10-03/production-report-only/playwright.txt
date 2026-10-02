@@ -1,0 +1,46 @@
+
+Running 9 tests using 1 worker
+
+[1/9] [chromium] › tests\e2e\guest.spec.ts:11:5 › 영업 충돌과 부서 비교 답변의 근거가 의미상 일치한다
+[2/9] [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px
+  1) [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px ───────────────────────
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('heading', { level: 1 })
+    Expected substring: "결정 기록"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByRole('heading', { level: 1 }) with timeout 5000ms
+      - waiting for getByRole('heading', { level: 1 })
+
+
+      67 |       await page.getByRole("link", { name: "결정 기록", exact: true }).click();
+      68 |       await page.waitForURL(/\/ledger$/u, { waitUntil: "commit" });
+    > 69 |       await expect(page.getByRole("heading", { level: 1 })).toContainText("결정 기록");
+         |                                                             ^
+      70 |       await page.getByRole("link", { name: "묻기", exact: true }).click();
+      71 |       await page.waitForURL(/\/ask$/u, { waitUntil: "commit" });
+      72 |       await expect(page.getByRole("heading", { level: 1 })).toContainText("묻기");
+        at D:\바이브코딩\sasu-csp-enforce-20261003\tests\e2e\guest.spec.ts:69:61
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\guest-게스트-대시보드·카드·원장·묻기-완주-1440px-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\guest-게스트-대시보드·카드·원장·묻기-완주-1440px-chromium\error-context.md
+
+
+[3/9] [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 390px
+[4/9] [chromium] › tests\e2e\guest.spec.ts:96:5 › 게스트는 실제 부서에 접근하지 못하고 잘못된 서명은 거부된다
+[5/9] [chromium] › tests\e2e\guest.spec.ts:108:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다
+[6/9] [chromium] › tests\e2e\security-headers.spec.ts:11:5 › security headers and distinct request nonces cover public pages and error responses
+[7/9] [chromium] › tests\e2e\security-headers.spec.ts:36:5 › public, demo and not-found HTML receive matching nonces with zero normal-flow violations
+[8/9] [chromium] › tests\e2e\security-headers.spec.ts:78:5 › nonce-free inline code is blocked only in enforcement mode
+[9/9] [chromium] › tests\e2e\security-headers.spec.ts:102:5 › Blob audio and a storage worker remain available under CSP
+  1 failed
+    [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px ────────────────────────
+  8 passed (2.3m)
+exit=1

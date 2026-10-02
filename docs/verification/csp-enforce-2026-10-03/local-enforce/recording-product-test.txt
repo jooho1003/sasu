@@ -1,0 +1,70 @@
+
+Running 9 tests using 1 worker
+
+[1/9] tests\e2e\demo-meeting-recorder.spec.ts:22:5 › 심사위원은 로컬 녹음을 재생·내려받고 합성 전사와 분리해 본다
+[2/9] tests\e2e\demo-meeting-recorder.spec.ts:86:5 › 마이크 거절 뒤에도 준비된 합성 회의를 끝까지 체험한다
+[3/9] tests\e2e\demo-reviewer.spec.ts:38:5 › 공개 링크가 심사위원 계정으로 연결되고 전체 기능을 연다
+[4/9] tests\e2e\demo-reviewer.spec.ts:51:5 › 각 기능 화면이 데이터를 불러온 뒤에도 오류 화면으로 바뀌지 않는다
+[WebServer] ⨯ Error: The destination stream closed early.
+[WebServer]     at ignore-listed frames {
+[WebServer]   digest: '431663185'
+[WebServer] }
+
+[5/9] tests\e2e\demo-reviewer.spec.ts:71:5 › 심사 계정의 앱 요청과 직접 DB 변경을 모두 거부한다
+[6/9] tests\e2e\demo-reviewer.spec.ts:104:5 › 390px에서도 기능 지도와 추천 시작점이 잘리지 않는다
+[7/9] tests\e2e\demo-reviewer.spec.ts:114:5 › 결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 체험한다
+[8/9] tests\e2e\recording-product.spec.ts:19:5 › authenticated production build records and saves synthetic audio through real local services
+  1) tests\e2e\recording-product.spec.ts:19:5 › authenticated production build records and saves synthetic audio through real local services 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByLabel('회의 제목')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByLabel('회의 제목') with timeout 5000ms
+      - waiting for getByLabel('회의 제목')
+
+
+      64 |   const policy = response?.headers()[process.env.SASU_CSP_ENFORCE === "true" ? "content-security-policy" : "content-security-policy-report-only"];
+      65 |   expect(policy).toContain("worker-src 'self' blob:");
+    > 66 |   await expect(page.getByLabel("회의 제목")).toBeVisible();
+         |                                          ^
+      67 |   await page.setViewportSize({ width: 390, height: 844 });
+      68 |   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+      69 |   await page.getByLabel("회의 제목").focus();
+        at D:\바이브코딩\sasu-csp-enforce-20261003\tests\e2e\recording-product.spec.ts:66:42
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\recording-product-authenti-c3b06-through-real-local-services\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\recording-product-authenti-c3b06-through-real-local-services\error-context.md
+
+
+[9/9] tests\e2e\recording-product.spec.ts:145:5 › local organization switch controls the recording entry while recorded materials keep their badge
+  2) tests\e2e\recording-product.spec.ts:145:5 › local organization switch controls the recording entry while recorded materials keep their badge 
+
+    Error: expect(received).toBeNull()
+
+    Received: {"code": "PGRST116", "details": "The result contains 0 rows", "hint": null, "message": "Cannot coerce the result to a single JSON object"}
+
+      153 |   });
+      154 |   const current = await service.from("org_settings").select("browser_recording_enabled").eq("org_id", org).single();
+    > 155 |   expect(current.error).toBeNull();
+          |                         ^
+      156 |   const dbContainer = process.env.SASU_TEST_DOCKER_DB_CONTAINER ?? "supabase_db_sasu";
+      157 |   expect(["supabase_db_sasu", "supabase_db_review-qa"]).toContain(dbContainer);
+      158 |   const setRecording = (enabled: boolean) => {
+        at D:\바이브코딩\sasu-csp-enforce-20261003\tests\e2e\recording-product.spec.ts:155:25
+
+    Error Context: test-results\recording-product-local-or-1f7ae--materials-keep-their-badge\error-context.md
+
+
+  2 failed
+    tests\e2e\recording-product.spec.ts:19:5 › authenticated production build records and saves synthetic audio through real local services 
+    tests\e2e\recording-product.spec.ts:145:5 › local organization switch controls the recording entry while recorded materials keep their badge 
+  7 passed (52.1s)
+exit=1
