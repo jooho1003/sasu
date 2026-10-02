@@ -130,6 +130,7 @@ grant all on public.device_links to service_role;
 | E14 | `GET /api/companion/sales-review/sources` | — | lead·동의·비데모 확인 → 웹과 같은 조회 + `salesReviewSourceCandidates` | 200 `{candidates}` |
 | E15 | `POST /api/companion/sales-review` | `SalesSourceReviewRequest` | phase 41 웹 경로에서 추출한 공용 함수 `startSalesSourceReview` | 202 `{task_id}` |
 | E16 | `GET /api/companion/sales-review/[taskId]` | — | 본인 작업 상태만(결과 본문은 웹에서) | 200 `{status, web_path}` |
+| E17 | `GET /api/companion/members` | — | lead만, 같은 부서 `members`의 `user_id·display_name·consented_at`(RLS) — 자료 검토함 음성 참여자 선택용(step 10에서 추가) | 200 `{members}` |
 
 웹 쪽 변경:
 | # | 대상 | 변경 |
@@ -195,20 +196,23 @@ U01 펫 창 속성 · U02 상태 5종 모양·우선순위 · U03 동작 줄이�
 | HTTP | code | 언제 | 앱 동작 |
 |---|---|---|---|
 | 401 | `no_token`·`session_invalid`·`device_revoked` | 토큰 없음/만료 복구 실패/`session_not_found`/연결 없음 | 토큰 삭제 → 로그인 화면 |
-| 403 | `forbidden`·`consent_required`·`lead_only`·`demo` | RLS·RPC `42501`, 미동의, lead 전용 | 문장 안내, 펫 상태 변경 없음 |
-| 404 | `not_found` | 다른 부서·안 보이는 대상 | "찾을 수 없어요" |
-| 409 | `already_decided` 등 | 웹과 같은 매핑 | 목록 새로 고침 |
+| 403 | `forbidden`·`consent_required`·`lead_only`·`demo`·`card_action_forbidden`·`reopen_forbidden`·`ask_parent_forbidden` | RLS·RPC `42501`, 미동의, lead 전용, 담당 아님 | 문장 안내, 펫 상태 변경 없음 |
+| 404 | `not_found`·`card_not_found`·`answer_not_found` | 다른 부서·안 보이는 대상 | "찾을 수 없어요" |
+| 409 | `card_changed`·`invalid_transition`·`no_consented_speaker`·`review_conflict` | 웹과 같은 매핑(중복 결정은 200 `duplicate:true`) | 목록 새로 고침 |
 | 413 | `too_large` | 회의 기록 4MB 초과 | 자료 검토함 안내 |
-| 422/400 | `invalid_input` | Zod 실패 | 입력 칸 안내 |
+| 422/400 | `invalid_input`·`source_too_large`(422, E15)·`invalid_status`·`decision_fields_required`·`invalid_file_size`·`transcript_read_failed`·`no_speech` | 입력 검사 실패 | 입력 칸 안내 |
 | 429 | `ask_daily_limit`·`device_link_limit`·`sales_daily_limit` | 한도 | 끊김 보관 안 함, 안내 |
-| 5xx·네트워크 | — | 서버·연결 오류 | 질문만 끊김 보관, 상태 확인 백오프 30→60→120→300초 |
+| 5xx·네트워크 | `*_failed` / 앱 `network`·`timeout` | 서버·연결 오류 | 질문만 끊김 보관, 상태 확인 백오프 30→60→120→300초 |
+| (앱) | `invalid_response` | 서버 응답이 앱 계약과 다름 | 보관·재시도 없이 오류 안내 |
+
+2026-10-02 갱신: 오류 코드는 웹과 공유하는 lib(`lib/card-decide.ts` 등)의 코드를 그대로 쓴다(웹 응답을 바꾸지 않기 위해). 위 표는 실제 코드 목록이다. 서버가 만든 ID는 RFC 4122 variant를 따르지 않을 수 있어 앱은 `z.guid()`로 받는다(step 10).
 
 ## 7. Security Considerations
 
 | ID | 위협 | 대응 | 검증 |
 |---|---|---|---|
 | S1 | 웹 경로로 Bearer 우회 | Bearer 처리는 `lib/companion/device-context.ts`에만, `app/api/companion/**` 외 import 금지(ESLint `no-restricted-imports`) | 린트 + 기존 웹 경로에 Bearer만 보내면 401/리다이렉트 |
-| S2 | 해제 후 계속 사용 | `companion_context` 매 요청 + `revoke_device_link`가 `auth.sessions` 삭제. **step 0 게이트 G1**: 로컬과 운영에서 `has_table_privilege('postgres','auth.sessions','DELETE')`와 함수 소유자 확인(읽기 전용 조회). 거부되면 구현을 멈추고 대안(서버가 해제된 연결의 다음 요청에서 admin `signOut(jwt,'local')`)을 사용자에게 올린다 | 하니스 + 실측 401 |
+| S2 | 해제 후 계속 사용 | `companion_context` 매 요청 + `revoke_device_link`가 `auth.sessions` 삭제. 삭제 뒤 Auth 원응답 403 `session_not_found`, supabase-js `getUser()`는 사용자 없이 `AuthSessionMissingError`(코드 없음)이므로 판정은 "사용자 없음 + 오류"로 한다. 리프레시 거부도 확인(2026-10-01 로컬 G1·G2 PASS). **step 0 게이트 G1**: 로컬과 운영에서 `has_table_privilege('postgres','auth.sessions','DELETE')`와 함수 소유자 확인(읽기 전용 조회). 거부되면 구현을 멈추고 대안(서버가 해제된 연결의 다음 요청에서 admin `signOut(jwt,'local')`)을 사용자에게 올린다 | 하니스 + 실측 401 |
 | S3 | 다른 부서·다른 사람 데이터 | 부서는 `device_links`에서만, 대상 조회는 RLS + 공용 lib의 부서 일치 검사 | E2E·하니스 교차 부서 403/404 |
 | S4 | 토큰 탈취 | `safeStorage`(DPAPI, Windows 사용자 계정 단위)로만 저장, 화면에 전달 안 함, 로그 마스킹. 같은 계정 악성코드는 막지 못함을 명시 | 로컬 파일 평문 검사 |
 | S5 | 화면 스크립트 주입 | `contextIsolation`·`sandbox`·`nodeIntegration:false`, CSP `default-src 'self'; connect-src 'none'; img-src 'self' data:`, `dangerouslySetInnerHTML` 금지, 외부 이동 차단·`setWindowOpenHandler` deny, 외부 링크는 앱 출처 https만 `shell.openExternal` | 정적 검사 + 실행 확인 |
@@ -295,11 +299,12 @@ desktop/src/shared/contracts.ts
 | module-8 배포 설정·검증 | 12·13 | 7 (+5) |
 
 #### Recommended Session Plan
-phase 43 step 0~10으로 만들었다(2026-10-01): module-0→step 0 `setup-gates`, module-1→step 1 `device-links-schema`, module-2→step 2 `companion-auth`·step 3 `web-devices`, module-3→step 4 `shared-ask-answer`·step 5 `shared-card-transcript`, module-4→step 6 `companion-routes`, module-5→step 7 `companion-sales-review`, module-6→step 8 `desktop-core`, module-7→step 9 `desktop-ui`, module-8→step 10 `desktop-release-verify`. 배정 기록은 `.claude/plans/desktop-companion-2026-10-01.{plan.json,md}`. 모델 배정은 `D:\바이브코딩\CLAUDE.md` 플랜 파이프라인(4축 점수 → 게이트 G1~G5 → plan.json)으로 정한다. 보안·인증 하드 오버라이드라 module-1·2와 최종 리뷰는 powerful, 운영 반영(마이그레이션·메일 템플릿·SMTP·배포 저장소)은 D3=2로 `requires_approval: true`다. Graft·Archify는 이 설계 세션에서 쓰지 않았다 — step 0에서 Bearer 입구와 공용 lib 의존을 Graft로 확인하고, 연결·해제 흐름을 Archify로 그려 검증 기록에 남긴다(없으면 누락 범위를 적는다).
+phase 43 step 0~10으로 만들었다(2026-10-01): module-0→step 0 `setup-gates`, module-1→step 1 `device-links-schema`, module-2→step 2 `companion-auth`·step 3 `web-devices`, module-3→step 4 `shared-ask-answer`·step 5 `shared-card-transcript`, module-4→step 6 `companion-routes`, module-5→step 7 `companion-sales-review`, module-6→step 8 `desktop-core`, module-7→step 9 `desktop-ui`·step 10 `desktop-work`(2026-10-02 step 9 리뷰 뒤 일 맡기기 분리), module-8→step 11 `desktop-fixes`(1차 analyze 84.2% 보완)·step 12 `desktop-release-verify`. 배정 기록은 `.claude/plans/desktop-companion-2026-10-01.{plan.json,md}`. 모델 배정은 `D:\바이브코딩\CLAUDE.md` 플랜 파이프라인(4축 점수 → 게이트 G1~G5 → plan.json)으로 정한다. 보안·인증 하드 오버라이드라 module-1·2와 최종 리뷰는 powerful, 운영 반영(마이그레이션·메일 템플릿·SMTP·배포 저장소)은 D3=2로 `requires_approval: true`다. Graft·Archify는 이 설계 세션에서 쓰지 않았다 — step 0에서 Bearer 입구와 공용 lib 의존을 Graft로 확인하고, 연결·해제 흐름을 Archify로 그려 검증 기록에 남긴다(없으면 누락 범위를 적는다).
 
 ## Version History
 
 | 버전 | 날짜 | 내용 |
 |---|---|---|
 | 1.1 | 2026-10-01 | 동시 작업과 번호 충돌로 ADR-082·phase 43·PRD 1.28·§6-12·불변식 46~50으로 재번호 |
+| 1.2 | 2026-10-02 | 1차 analyze(84.2%) 반영: §6 오류 코드 실제화, E17 추가, step 11 `desktop-fixes`·step 12 출시 검증 |
 | 1.0 | 2026-10-01 | 설계안 C·이메일 6자리 코드·영업 원문 검토(AG-07)·배포 전용 공개 저장소 선택 반영 |

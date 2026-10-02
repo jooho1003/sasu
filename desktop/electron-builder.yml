@@ -1,0 +1,23 @@
+appId: team.sasu.companion
+productName: 사수
+directories:
+  output: release
+files:
+  - out/**
+extraResources:
+  - from: resources/tray.png
+    to: tray.png
+asar: true
+win:
+  target:
+    - nsis
+nsis:
+  perMachine: false
+  oneClick: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+publish:
+  provider: github
+  owner: jooho1003
+  repo: sasu-desktop-releases
+  releaseType: release

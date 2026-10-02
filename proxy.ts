@@ -28,7 +28,7 @@ export async function proxy(request: NextRequest) {
   }
   let response = protect(NextResponse.next({ request }));
   // Public pages, collectors and worker endpoints do not refresh user sessions.
-  const needsSession = /^(?:\/(?:login|consent|no-membership)$|\/(?:auth|d|admin|invite)(?:\/|$)|\/api\/(?:d|cards|admin|invites)(?:\/|$)|\/demo\/access$)/u.test(request.nextUrl.pathname);
+  const needsSession = /^(?:\/(?:login|consent|no-membership)$|\/(?:auth|d|admin|invite)(?:\/|$)|\/api\/(?:d|cards|admin|invites|devices)(?:\/|$)|\/demo\/access$)/u.test(request.nextUrl.pathname);
   if (!needsSession) return response;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

@@ -26,11 +26,23 @@
      - **질문**: 5~1000자 입력 → `ask:send` → 2초 간격 `answer:get`. 답은 인용이 1개 이상일 때만 보여 주고 인용마다 따옴표 문장과 출처 이름, "웹에서 원문 보기". refused·failed·하루 한도는 웹과 같은 안내. 전송 실패 시 "연결되면 보낼게요"(끊김 보관).
      - **결정함**: inbox 카드 목록 → `card:get` 화면(배경·추천·근거·충돌, 인용 없는 문장 렌더 금지) → 결정/보류/반려(+결과·이유) → `card:decide`. 보내는 동안 버튼 잠금.
      - **기록**: `questions:list` 20개씩, 누르면 `answer:get`.
-     - **일 맡기기**: lead만 보이는 끌어다 놓기 영역 — `.vtt/.txt` → 회의 기록(4MB 넘으면 자료 검토함 안내), 문서·음성 → 자료 검토함(공개 범위·참여자·`consent_confirmed` 확인 입력은 웹과 같은 규칙; 음성은 `@sasu/review-audio`의 `audioPlan`·`encodeMonoWav`로 화면에서 나눈 뒤 바이트를 IPC로 본체에 전달). lead의 "영업 원문 검토": `sales:sources` 역할별 목록에서 서로 다른 4건 선택 → `sales:start` → 상태 → "웹에서 결과 보기". phase 41이 없어 `sales:*`가 404면 이 구역을 숨긴다.
+     - **일 맡기기**: 이 step에서는 탭 골격과 회의 기록(`.vtt/.txt`, lead만, 4MB 넘으면 자료 검토함 안내)만 둔다. 자료 검토함(문서·음성)과 영업 원문 검토는 **step 10 `desktop-work`**에서 만든다.
      - **설정**: 펫 모양 3종 · 단축키 안내 · 부서·기기 이름 · 로그아웃(`auth:signOut`) · 버전.
    - 모든 문구는 `docs/wording-guide.md` 기준을 따른다(`npm run check:wording`이 renderer를 검사한다).
 3. `desktop/tests/e2e/smoke.spec.ts`(Playwright `_electron`, 로컬 QA 서버 대상): 코드 로그인 → 부서 선택 → 펫 창·패널 열림 → 시드한 답을 기록 탭에서 열어 인용 표시 → 담당 카드 결정 → 결정 버튼 연타해도 서버 `decisions` 1건. 실행 명령을 `desktop/package.json`의 `e2e`로 둔다.
 4. 결과·스크린샷은 `docs/verification/43-desktop-companion/desktop-ui.md`.
+
+## 보완 — 1차 결과 리뷰 (2026-10-02, 오케스트레이터)
+
+1차 실행(커밋 `18b4165`)은 completed로 보고했지만 아래가 빠져 있어 이 step을 다시 연다. 이미 있는 코드(`desktop/src/**`)를 읽고 고쳐라. 다시 처음부터 만들 필요는 없다.
+
+1. **답 본문이 렌더되지 않는다.** 질문 탭과 기록에서 `answer.answer`(본문)를 인용 목록과 함께 보여 준다. 인용이 0개면 본문도 보이지 않는다(거절 안내만).
+2. **화면이 `App.tsx` 31줄 한 파일에 몰려 있다.** `desktop/src/renderer/src/components/`에 `PetCanvas`·`LoginFlow`·`AskTab`·`CardsTab`·`CardView`·`HistoryTab`·`WorkTab`·`SettingsTab`·`Evidence`로 나누고, 한 줄에 여러 문장을 몰아 쓰지 않는다(일반 포맷).
+3. **펫이 원 하나뿐이다.** `components/trailer-office.tsx:10-34`의 `drawPerson()`을 이식해 사람 모양 캐릭터로 그리고, 색 3종(`components/recruitment-trailer.tsx:18`)을 쓴다. 상태 5종(design §5.2)을 모양으로 구분하고 "진행 중"은 걷는 동작, `prefers-reduced-motion`이면 정지 그림 + 점 3개로 한다.
+4. **lead의 `needs_review` 카드가 "이미 처리한 카드"로 막힌다.** lead에게는 `open`과 `needs_review` 모두 결정 폼을 보여 준다(서버가 최종 판정).
+5. **기록 탭에 무엇을 물었는지 보이지 않는다.** `questions:list`가 돌려주는 질문 문장(본인 질문)과 날짜를 목록에 보여 주고, 누르면 답을 연다. 20개씩 "더 보기"(`next` 커서).
+6. **E2E가 창 두 개만 확인한다.** 위 작업 3의 흐름을 그대로 구현한다: 로컬 QA에서 코드 로그인(step 0의 `generateLink` 방식으로 코드 획득) → 부서 선택 → 시드한 답을 기록에서 열어 본문·인용 표시 → 담당 카드 결정 → 결정 버튼 연타 뒤 서버 `decisions` 1건(SQL로 확인). 펫 상태 5종·탭 5개 스크린샷을 남긴다.
+7. 이 step은 자료 검토함·영업 원문 검토를 만들지 않는다(step 10).
 
 ## Acceptance Criteria
 
@@ -47,6 +59,7 @@ git diff --check
 ```
 
 - 정적 확인(출력 0줄): `git grep -n "dangerouslySetInnerHTML\|fetch(\|createClient(" -- desktop/src/renderer`
+- E2E 기록에 코드 로그인·답 본문과 인용·결정 연타 뒤 `decisions` 1건의 실제 출력이 있어야 완료다. 창 표시만 확인했으면 완료로 처리하지 않는다.
 
 ## 검증 절차
 

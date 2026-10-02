@@ -19,6 +19,7 @@ import { verifyRecordingSegmentsSql } from "./verify-recording-segments-sql.mjs"
 import { verifyReviewUploadTimeoutSql } from "./verify-review-upload-timeout-sql.mjs";
 import { verifySalesReviewSql } from "./verify-sales-review-sql.mjs";
 import { verifySalesSourceReviewSql } from "./verify-sales-source-review-sql.mjs";
+import { verifyDeviceLinksSql } from "./verify-device-links-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
 // node scripts/verify-security-sql.mjs <temporary-directory>
@@ -26,10 +27,11 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { verifyTrailerSql } from "./verify-trailer-sql.mjs";
 
-const require = createRequire(resolve(process.argv[2] ?? ".", "package.json"));
+const require = createRequire(resolve(process.argv[2] ?? resolve(tmpdir(), "sasu-pglite-phase36"), "package.json"));
 const { PGlite } = require("@electric-sql/pglite");
 const { pgcrypto } = require("@electric-sql/pglite/contrib/pgcrypto");
 const { vector } = require("@electric-sql/pglite-pgvector");
@@ -104,6 +106,7 @@ try {
     create role anon; create role authenticated; create role service_role bypassrls;
     create schema auth;
     create table auth.users(id uuid primary key, email text);
+    create table auth.sessions(id uuid primary key, user_id uuid);
     create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
     create function auth.role() returns text language sql stable as $$ select current_setting('request.jwt.claim.role', true) $$;
     create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb) $$;
@@ -291,6 +294,11 @@ try {
       DELETE: ["document_summaries", "sources"],
     };
     const tables = (await q("select tablename from pg_tables where schemaname='public' order by tablename")).rows;
+    for (const role of ["authenticated", "anon"]) {
+      for (const command of ["INSERT", "UPDATE", "DELETE"]) {
+        assert.equal((await q("select has_table_privilege($1,'public.device_links',$2) allowed", [role,command])).rows[0].allowed,false);
+      }
+    }
     assert.ok(tables.length >= 18);
     for (const role of ["authenticated", "anon"]) {
       for (const command of ["INSERT", "UPDATE", "DELETE"]) {
@@ -832,11 +840,13 @@ try {
   });
   await check("organization admin functions have exact execution grants", async () => {
     const privateFunctions = [
+      "private.current_session_id()",
       "private.is_org_admin(uuid,uuid)", "private._admin_overview(uuid)",
       "private._admin_members(uuid)", "private._admin_sources(uuid)",
       "private._admin_answer_stats(uuid,date,date)",
     ];
     const authenticatedFunctions = [
+      "public.link_device(uuid,text,text)", "public.companion_context()", "public.revoke_device_link(uuid)",
       "public.admin_org_id()", "public.admin_overview()", "public.admin_members()",
       "public.admin_sources()", "public.admin_answer_stats(date,date)",
       "public.admin_invites()", "public.admin_events_list(integer)",
@@ -1113,6 +1123,7 @@ try {
   await verifyReviewUploadTimeoutSql({ q, check, asUser, ids });
   await verifySalesReviewSql({ q, check, asUser, denied, ids });
   await verifySalesSourceReviewSql({q,check,asUser,denied,ids});
+  await verifyDeviceLinksSql({q,check});
   const glossaryIds = { dept: randomUUID(), lead: randomUUID(), member: randomUUID() };
   await q("insert into departments(id,org_id,name) values($1,$2,'Glossary QA')", [glossaryIds.dept,ids.org]);
   await q("insert into auth.users(id) values($1),($2)", [glossaryIds.lead,glossaryIds.member]);

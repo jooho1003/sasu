@@ -12,7 +12,7 @@ import {
 
 export { sanitizeInternalPath } from "@/lib/auth-redirect";
 
-type Membership = {
+export type Membership = {
   userId: string;
   deptId: string;
   role: "lead" | "member";

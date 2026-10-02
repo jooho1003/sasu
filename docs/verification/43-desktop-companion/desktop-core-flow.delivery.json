@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "cb308866-adba-4e2b-a484-b716b6735aea",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\43-desktop-companion\\desktop-core-flow.json",
+  "output": "D:\\바이브코딩\\sasu\\docs\\verification\\43-desktop-companion\\desktop-core-flow.html",
+  "specification": {
+    "sha256": "02b9b9d4e5a9f4e5533e20beb1826879fc6bfdab9e48f22b0d376aa3479f1c04",
+    "bytes": 4281
+  },
+  "artifact": {
+    "sha256": "5b608c95eb20bcbccbc9e7d84b9a42a8193485ed9d5ec5fc44533b5647083009",
+    "bytes": 769107
+  }
+}

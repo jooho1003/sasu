@@ -279,10 +279,14 @@
     },
     {
       "dir": "43-desktop-companion",
-      "status": "pending",
+      "status": "blocked",
       "design": "docs/02-design/features/desktop-companion.design.md",
-      "note": "Windows 데스크톱 동반 앱(펫) — 기기 세션 Bearer·/api/companion/*·device_links·공용 lib 추출·Electron. step 7은 phase 41 병합 뒤, step 10은 사람 실측·운영 승인 대기로 blocked 예정. ADR-082, PRD §3-8.",
-      "production_deployed": false
+      "note": "Windows 데스크톱 동반 앱(펫) — step 0~11 완료, step 12는 사람 실측(5분 설치 녹화·업데이트 1회)·운영 승인(0069·auth.sessions 권한·SMTP·메일 템플릿·배포 저장소) 대기. analyze 1차 84.2% → 2차 93.6%. ADR-082, PRD §3-8. 운영 미반영·게시 없음.",
+      "production_deployed": false,
+      "blocked_at": "2026-10-02T09:55:30+0900",
+      "verification": "docs/verification/desktop-companion-2026-10-02.md",
+      "analysis": "docs/03-analysis/desktop-companion.analysis.md",
+      "report": "docs/04-report/features/desktop-companion.report.md"
     }
   ]
 }

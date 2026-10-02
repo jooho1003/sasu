@@ -116,6 +116,15 @@ needs_test() {
       ;;
   esac
 
+  # Electron 앱의 SDK·창·IPC·프레젠테이션 계층도 ARCHITECTURE §8에 따라
+  # TDD 비대상이다. 단 desktop/src/main/core 및 desktop/src/shared는 순수
+  # 로직이므로 아래 일반 규칙으로 계속 테스트를 요구한다.
+  case "$FILE_PATH" in
+    */desktop/src/main/index.ts|*/desktop/src/main/ipc.ts|*/desktop/src/main/tray.ts|*/desktop/src/main/shortcut.ts|*/desktop/src/main/notify.ts|*/desktop/src/main/updater.ts|*/desktop/src/main/windows/*|*/desktop/src/main/auth/*|*/desktop/src/main/api/*|*/desktop/src/main/storage/*|*/desktop/src/preload/*|*/desktop/src/renderer/*|*/desktop/electron.vite.config.ts|*/desktop/vitest.config.ts)
+      return 0
+      ;;
+  esac
+
   # lib/ 또는 소스 파일이면 테스트 파일 존재 여부 확인
   case "$FILE_PATH" in
     *.ts|*.tsx|*.js|*.jsx) ;;
