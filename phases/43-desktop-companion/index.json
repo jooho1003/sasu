@@ -132,7 +132,8 @@
       "effort": "medium",
       "started_at": "2026-10-02T09:03:28+0900",
       "summary": "NSIS 설치 파일과 로컬 QA L3·L4를 재검증했다. 새 카드 2건의 펫·알림은 각각 약 29.6초 안에 갱신됐고, 해제 401·인용 가시성·암호화 보관 파일 삭제를 확인했다. docs/verification/desktop-companion-2026-10-02.md 참조.",
-      "blocked_reason": "사람 실측·운영 승인 대기: 5분 설치 녹화, 배포 저장소·업데이트 1회, 운영 auth.sessions 권한·0069 적용·SMTP·메일 템플릿 (기록: docs/verification/desktop-companion-2026-10-02.md)"
+      "blocked_reason": "사람 실측·운영 승인 대기: 5분 설치 녹화, 배포 저장소·업데이트 1회, 운영 auth.sessions 권한·0069 적용·SMTP·메일 템플릿 (기록: docs/verification/desktop-companion-2026-10-02.md)",
+      "blocked_at": "2026-10-02T09:55:30+0900"
     }
   ],
   "production_deployed": false,
