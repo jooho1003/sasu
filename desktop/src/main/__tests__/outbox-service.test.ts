@@ -40,6 +40,29 @@ const saved = { id: "saved", ...question, parentId: null, createdAt: Date.now() 
 const accepted = { answer_id: "answer", job_id: "job", truncated: false };
 
 describe("OutboxService.send", () => {
+  it("preserves the follow-up parent across offline storage and reconnect", async () => {
+    const store = storedFile();
+    const postJson = vi.fn().mockRejectedValueOnce(new ApiError(null, "network", "offline")).mockResolvedValue(accepted);
+    const service = new OutboxService(store.file, { postJson } as unknown as ApiClient);
+    const input = { ...question, parent_id: "11111111-1111-4111-8111-111111111111" };
+    await expect(service.send(input)).resolves.toMatchObject({ queued: true });
+    expect(store.state()).toMatchObject([{ parentId: input.parent_id }]);
+    await service.flush();
+    expect(postJson).toHaveBeenLastCalledWith("/api/companion/ask", input, expect.any(Function));
+    expect(store.state()).toEqual([]);
+  });
+
+  it("does not queue or retry a forbidden follow-up as a standalone question", async () => {
+    const store = storedFile();
+    const error = new ApiError(403, "ask_parent_forbidden", "forbidden");
+    const postJson = vi.fn().mockRejectedValue(error);
+    const service = new OutboxService(store.file, { postJson } as unknown as ApiClient);
+    await expect(service.send({ ...question, parent_id: "11111111-1111-4111-8111-111111111111" })).rejects.toBe(error);
+    await service.flush();
+    expect(postJson).toHaveBeenCalledTimes(1);
+    expect(store.state()).toEqual([]);
+  });
+
   it("maps only the daily ask limit (429) to the daily-limit notice", async () => {
     const service = new OutboxService(emptyFile(), failingApi(new ApiError(429, "ask_daily_limit", "limit")));
     await expect(service.send(question)).rejects.toThrow(/^daily_limit:/);

@@ -1,0 +1,102 @@
+
+> sasu@0.1.0 lint
+> eslint . && node scripts/check-wording.mjs
+
+
+D:\바이브코딩\sasu\tests\e2e\settings-devices-local.spec.ts
+  75:49  warning  'body' is defined but never used  @typescript-eslint/no-unused-vars
+  79:49  warning  'body' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+
+app/(auth)/consent/consent-actions.tsx:77 [button_noun] 동의합니다 → 하는 일을 적으세요
+app/(auth)/consent/consent-actions.tsx:85 [button_noun] 나중에 → 하는 일을 적으세요
+app/(site)/privacy/page.tsx:29 [length] 서비스 로그인 이메일과 표시 이름, 소속 부서·역할·동의 상태, 동의한  → 문장을 나누세요
+app/(site)/privacy/page.tsx:29 [length] 채용 예고편 지원자에 대해서는 채용 담당자가 입력한 이메일, 지원자가 입 → 문장을 나누세요
+app/(site)/privacy/page.tsx:30 [length] 구성원 동의가 채널 연결보다 먼저입니다. 동의하지 않은 구성원의 발언은  → 문장을 나누세요
+app/(site)/privacy/page.tsx:30 [length] 자료 검토함의 원본은 삭제할 때까지 보관합니다. 원본만 삭제하거나 전사· → 문장을 나누세요
+app/admin/layout.tsx:27 [button_noun] 로그아웃 → 하는 일을 적으세요
+app/demo/d/[dept]/roles/page.tsx:66 [english] AI → 한글로 풀어 쓰세요 (예외: ADR-038 고정 안내 문구를 유지합니다.)
+app/layout.tsx:23 [length] 슬랙과 회의에 묻힌 결정 요청을 담당자에게 보내고, 내려진 결정을 근거와 → 문장을 나누세요
+components/admin/actions.tsx:200 [button_noun] 복사 → 하는 일을 적으세요
+components/admin/notion-installation.tsx:143 [button_noun] 연결 → 하는 일을 적으세요
+components/admin/shell.tsx:91 [button_noun] 로그아웃 → 하는 일을 적으세요
+components/agent-roles.tsx:141 [button_noun] 개 → 하는 일을 적으세요
+components/agent-roles.tsx:143 [button_noun] 삭제 → 하는 일을 적으세요
+components/agent-roles.tsx:145 [english] AI → 한글로 풀어 쓰세요 (예외: ADR-038 고정 안내 문구를 유지합니다.)
+components/demo-questions.tsx:76 [button_noun] 이전 → 하는 일을 적으세요
+components/demo-questions.tsx:84 [button_noun] 다음 → 하는 일을 적으세요
+components/demo-safe-actions.tsx:11 [banned] 영업 리드: 외주사 B가 기존 계약보다 12% 오른 견적을 보냈습니다.  → 영업 팀장 (예외: 합성 음성에 실제로 발화된 예시 원문과 일치해야 합니다.)
+components/demo-safe-actions.tsx:11 [banned] 영업 리드: 외주사 B가 기존 계약보다 12% 오른 견적을 보냈습니다.  → 영업 팀장 (예외: 합성 음성에 실제로 발화된 예시 원문과 일치해야 합니다.)
+components/demo-safe-actions.tsx:34 [banned] 연간 계약 금액이 10% 이상 오르면 자동 연장하지 않습니다. 동일 범위 → 결정 기록 (예외: 내려받는 예시 파일의 원문이므로 바꾸지 않습니다.)
+components/demo-safe-actions.tsx:34 [length] 연간 계약 금액이 10% 이상 오르면 자동 연장하지 않습니다. 동일 범위 → 문장을 나누세요 (예외: 내려받는 예시 파일의 원문이므로 바꾸지 않습니다.)
+components/demo-safe-actions.tsx:52 [banned] 영업 사수의 결정 안건은 외주사 B 계약 갱신 여부입니다. 기존 견적 대 → 새로 고침 (예외: 내려받는 예시 파일의 원문이므로 바꾸지 않습니다.)
+components/demo-safe-actions.tsx:52 [length] 영업 사수의 결정 안건은 외주사 B 계약 갱신 여부입니다. 기존 견적 대 → 문장을 나누세요 (예외: 내려받는 예시 파일의 원문이므로 바꾸지 않습니다.)
+components/demo-safe-actions.tsx:61 [banned] 외주사 B의 12% 인상 견적 수용 여부를 오늘 17시까지 결정해야 합니 → 받아들이기 (예외: 내려받는 예시 파일의 원문이므로 바꾸지 않습니다.)
+components/demo-safe-actions.tsx:115 [button_noun] 외주사 → 하는 일을 적으세요
+components/demo-safe-actions.tsx:243 [button_noun] 선택됨 → 하는 일을 적으세요
+components/demo-safe-actions.tsx:266 [button_noun] 처음부터 → 하는 일을 적으세요
+components/demo-settings.tsx:18 [button_noun] 팀장만 → 하는 일을 적으세요
+components/demo-trailer-invites.tsx:18 [button_noun] 복사 → 하는 일을 적으세요
+components/demo-trailer-invites.tsx:36 [button_noun] 계속 → 하는 일을 적으세요
+components/document-assistant.tsx:371 [button_noun] 새로고침 → 하는 일을 적으세요
+components/document-assistant.tsx:455 [button_noun] 팀장만 → 하는 일을 적으세요
+components/hiring-demo.tsx:53 [button_noun] 수정 → 하는 일을 적으세요
+components/hiring-demo.tsx:53 [button_noun] 완료 → 하는 일을 적으세요
+components/notion-source-list.tsx:284 [button_noun] 제외 → 하는 일을 적으세요
+components/notion-source-list.tsx:300 [button_noun] 팀장만으로 → 하는 일을 적으세요
+components/retro-detail.tsx:71 [button_noun] 확정 → 하는 일을 적으세요
+components/retro-detail.tsx:71 [button_noun] 편집 → 하는 일을 적으세요
+components/retro-detail.tsx:71 [button_noun] 삭제 → 하는 일을 적으세요
+components/review-detail.tsx:521 [button_noun] 원본 → 하는 일을 적으세요
+components/review-detail.tsx:694 [button_noun] 구간 → 하는 일을 적으세요
+components/review-detail.tsx:694 [button_noun] 삭제 → 하는 일을 적으세요
+components/reviewed-materials.tsx:326 [english] TTS → 한글로 풀어 쓰세요 (예외: 사용자 확정 §0-6의 합성 음성(TTS) 표기를 유지합니다.)
+components/reviewed-materials.tsx:410 [button_noun] 새로고침 → 하는 일을 적으세요
+components/sales-review.tsx:143 [button_noun] 실패 → 하는 일을 적으세요
+components/settings-devices.tsx:65 [style_mix] 연결된 기기가 없어요. → 합니다·하세요로 끝내세요
+components/settings-devices.tsx:76 [button_noun] 해제 → 하는 일을 적으세요
+components/settings-s5.tsx:819 [button_noun] 저장 → 하는 일을 적으세요
+components/settings-s5.tsx:969 [button_noun] 제거 → 하는 일을 적으세요
+components/slack-questions.tsx:33 [button_noun] 새로고침 → 하는 일을 적으세요
+components/trailers/forms.tsx:35 [button_noun] 생성 → 하는 일을 적으세요
+components/trailers/forms.tsx:75 [button_noun] 복사 → 하는 일을 적으세요
+components/trailers/forms.tsx:77 [button_noun] 삭제 → 하는 일을 적으세요
+components/trailers/invites.tsx:19 [button_noun] 복사 → 하는 일을 적으세요
+desktop/src/renderer/src/components/SettingsTab.tsx:54 [english] Ctrl → 한글로 풀어 쓰세요 (예외: 키보드에 적힌 키 이름을 그대로 안내합니다.)
+desktop/src/renderer/src/components/SettingsTab.tsx:54 [english] Alt → 한글로 풀어 쓰세요 (예외: 키보드에 적힌 키 이름을 그대로 안내합니다.)
+lib/consent.ts:20 [length] 사수는 우리 부서의 슬랙 대화, 회의 전사, 노션 원칙 문서를 읽고 "지 → 문장을 나누세요
+lib/consent.ts:35 [length] 결정이 필요한 안건 분류, 결정 카드 작성, 결정 원장 기록, 권한 범위 → 문장을 나누세요
+lib/consent.ts:50 [length] 같은 부서 구성원만 봅니다. 부서장 전용으로 지정된 소스(예: 경영회의  → 문장을 나누세요
+lib/consent.ts:57 [length] Groq, Inc.(미국) — 텍스트 분류·생성, 음성 전사. 모델 학습 → 문장을 나누세요
+lib/consent.ts:58 [length] Voyage AI(미국) — 검색용 벡터 계산. 2026-09-13부터  → 문장을 나누세요
+lib/consent.ts:59 [length] Supabase(데이터베이스, 리전 [확인 대기]), Vercel(웹 호 → 문장을 나누세요
+lib/trailer-assessment.ts:69 [banned] ${AGENT_ROLE_SYSTEM_GUARD} 이번 응답은 예고편 제출 → .json 파일 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [banned] ${AGENT_ROLE_SYSTEM_GUARD} 이번 응답은 예고편 제출 → .json 파일 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [banned] ${AGENT_ROLE_SYSTEM_GUARD} 이번 응답은 예고편 제출 → 원문 근거 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [banned] ${AGENT_ROLE_SYSTEM_GUARD} 이번 응답은 예고편 제출 → 원문 근거 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] rationale → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] JSON → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] kind → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] TrailerScoreDraft → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] citations → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] summary → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] reason → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] event → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] events → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] seq → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] fact → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] basis → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] score → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] null → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] evidence → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] quote → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] ref → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [length] ${AGENT_ROLE_SYSTEM_GUARD} 이번 응답은 예고편 제출 → 문장을 나누세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+banned: 9
+english: 22
+template: 0
+length: 14
+style_mix: 1
+button_noun: 38
+scanned: 265; blocking: 0; warnings: 84

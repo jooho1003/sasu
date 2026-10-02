@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "지난 질문에 이어 묻기",
+    "subtitle": "현재 권한으로 다시 열고 기존 질문 경로로 연결합니다",
+    "output": "desktop-question-followup.html",
+    "visual_preset": "blueprint",
+    "viewBox": [
+      1200,
+      620
+    ]
+  },
+  "components": [
+    {
+      "id": "history",
+      "type": "frontend",
+      "label": "지난 질문",
+      "sublabel": "진입마다 본인 이력 조회",
+      "pos": [
+        35,
+        110
+      ],
+      "size": [
+        180,
+        70
+      ]
+    },
+    {
+      "id": "answer",
+      "type": "security",
+      "label": "답 다시 열기",
+      "sublabel": "현재 인용 권한 검사",
+      "pos": [
+        290,
+        110
+      ],
+      "size": [
+        180,
+        70
+      ]
+    },
+    {
+      "id": "parent",
+      "type": "frontend",
+      "label": "이어 묻기 선택",
+      "sublabel": "부모 표시·초안 보존",
+      "pos": [
+        545,
+        110
+      ],
+      "size": [
+        180,
+        70
+      ]
+    },
+    {
+      "id": "ipc",
+      "type": "backend",
+      "label": "기존 IPC·발송 대기",
+      "sublabel": "부모 ID·OS 암호화",
+      "pos": [
+        800,
+        110
+      ],
+      "size": [
+        180,
+        70
+      ]
+    },
+    {
+      "id": "sql",
+      "type": "database",
+      "label": "기존 ask_question",
+      "sublabel": "본인·부서·권한·한도",
+      "pos": [
+        800,
+        370
+      ],
+      "size": [
+        180,
+        70
+      ]
+    },
+    {
+      "id": "result",
+      "type": "frontend",
+      "label": "답 또는 거절",
+      "sublabel": "인용 렌더·시간 제한",
+      "pos": [
+        545,
+        370
+      ],
+      "size": [
+        180,
+        70
+      ]
+    },
+    {
+      "id": "cleanup",
+      "type": "security",
+      "label": "탭 이탈·세션 종료",
+      "sublabel": "늦은 콜백 폐기",
+      "pos": [
+        35,
+        370
+      ],
+      "size": [
+        180,
+        70
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "h-a",
+      "from": "history",
+      "to": "answer",
+      "label": "선택",
+      "labelAt": [
+        252,
+        95
+      ]
+    },
+    {
+      "id": "a-p",
+      "from": "answer",
+      "to": "parent",
+      "label": "명시적 연결",
+      "labelAt": [
+        507,
+        95
+      ]
+    },
+    {
+      "id": "p-i",
+      "from": "parent",
+      "to": "ipc",
+      "label": "question·parent_id",
+      "labelAt": [
+        763,
+        95
+      ]
+    },
+    {
+      "id": "i-s",
+      "from": "ipc",
+      "to": "sql",
+      "label": "Bearer API",
+      "labelAt": [
+        1000,
+        265
+      ]
+    },
+    {
+      "id": "s-r",
+      "from": "sql",
+      "to": "result",
+      "label": "작업·답 폴링",
+      "labelAt": [
+        763,
+        455
+      ]
+    },
+    {
+      "id": "c-h",
+      "from": "cleanup",
+      "to": "history",
+      "label": "요청 세대 무효화",
+      "variant": "security",
+      "labelAt": [
+        150,
+        280
+      ]
+    }
+  ]
+}

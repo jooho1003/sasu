@@ -1,0 +1,23 @@
+{
+  "project": "sasu",
+  "phase": "44-desktop-question-followup",
+  "design": "docs/02-design/features/desktop-question-followup.design.md",
+  "plan": "docs/01-plan/features/desktop-question-followup.plan.md",
+  "production_deployed": false,
+  "steps": [
+    {
+      "step": 0,
+      "name": "history-followup-ui",
+      "status": "completed",
+      "completed_at": "2026-10-03T00:22:45.1050432+09:00",
+      "verification": "docs/verification/44-desktop-question-followup/verification.md"
+    },
+    {
+      "step": 1,
+      "name": "verification-report",
+      "status": "completed",
+      "completed_at": "2026-10-03T00:22:45.1135234+09:00",
+      "verification": "docs/verification/44-desktop-question-followup/verification.md"
+    }
+  ]
+}

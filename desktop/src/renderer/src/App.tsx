@@ -4,7 +4,6 @@ import type {
   Answer,
   Card,
   DesktopSettings,
-  Questions,
 } from "../../shared/contracts";
 import { AskTab } from "./components/AskTab";
 import { CardsTab } from "./components/CardsTab";
@@ -50,9 +49,8 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
   const [settings, setSettings] = useState<DesktopSettings | null>(null);
   const [inbox, setInbox] = useState<CompanionInbox | null>(null);
   const [answer, setAnswer] = useState<Answer | null>(null);
+  const [answerQuestion, setAnswerQuestion] = useState("");
   const [card, setCard] = useState<Card | null>(null);
-  const [history, setHistory] = useState<Questions["questions"]>([]);
-  const [nextHistory, setNextHistory] = useState<Questions["next"]>(null);
   const [notice, setNotice] = useState("");
   const [shortcut, setShortcut] = useState(true);
   const [petState, setPetState] = useState("idle");
@@ -172,9 +170,11 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
         {tab === "ask" && (
           <AskTab
             answer={answer}
+            answerQuestion={answerQuestion}
+            onQuestion={setAnswerQuestion}
             onAnswer={(next) => {
               setAnswer(next);
-              if (next.status !== "pending") void rememberSeen(next.id);
+              if (next && next.status !== "pending") void rememberSeen(next.id);
             }}
             onNotice={setNotice}
             registerFocus={(focus) => {
@@ -195,12 +195,9 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
         )}
         {tab === "history" && (
           <HistoryTab
-            entries={history}
-            next={nextHistory}
-            onEntries={setHistory}
-            onNext={setNextHistory}
-            onOpen={(entry) => {
+            onOpen={(entry, question) => {
               setAnswer(entry);
+              setAnswerQuestion(question);
               void rememberSeen(entry.id);
               setTab("ask");
             }}
