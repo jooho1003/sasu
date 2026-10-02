@@ -3,16 +3,20 @@
     {
       "dir": "42-sales-source-review-history",
       "status": "completed",
-      "production_deployed": false,
+      "production_deployed": true,
+      "deployed_at": "2026-10-02T20:33:00+09:00",
+      "deployment": "docs/verification/desktop-companion-production-2026-10-02.md",
       "verification": "docs/verification/sales-source-review-history-2026-10-01.md",
-      "note": "본인 이력·20건 keyset·기존현재근거 재열람·초점/화면이동·읽기0쓰기, local 검증 완료. 모델회귀 최초실패/재실행 성공·미확보 원인 기록. 운영 미반영."
+      "note": "본인 이력·20건 keyset·기존현재근거 재열람·초점/화면이동·읽기0쓰기, local 검증 완료. 모델회귀 최초실패/재실행 성공·미확보 원인 기록. 2026-10-01 PR #24 자동 운영 배포, 2026-10-02 20:33 0068 운영 적용으로 동작. 로그인 lead의 운영 흐름 확인은 사람 대기."
     },
     {
       "dir": "41-sales-source-ai-review",
       "status": "completed",
       "verification": "docs/verification/sales-source-ai-review-2026-10-01.md",
-      "note": "현재 네 원문 AI 문단 선택·고정 질문·정확 인용·원문 링크, SQL 현재권한/hash·본인RLS·비동기/fencing·2분watchdog 구현. unit1775·SQL308+matrix2016·신규E2E2/회귀11·실제합성Groq3·lint/build 통과. 실고객 적합성·운영 미반영.",
-      "production_deployed": false
+      "note": "현재 네 원문 AI 문단 선택·고정 질문·정확 인용·원문 링크, SQL 현재권한/hash·본인RLS·비동기/fencing·2분watchdog 구현. unit1775·SQL308+matrix2016·신규E2E2/회귀11·실제합성Groq3·lint/build 통과. 2026-10-01 PR #24 자동 운영 배포, 2026-10-02 20:33 0068 운영 적용으로 동작. 실고객 적합성·로그인 lead의 운영 흐름 확인은 사람 대기.",
+      "production_deployed": true,
+      "deployed_at": "2026-10-02T20:33:00+09:00",
+      "deployment": "docs/verification/desktop-companion-production-2026-10-02.md"
     },
     {
       "dir": "40-sales-review-condition-checklist",
@@ -112,7 +116,7 @@
     {
       "dir": "14-slack-answer-citations",
       "status": "blocked",
-      "note": "14: step 0 구현 완료(커밋 377a5f0), step 1 실제 Slack 캡처·운영 반영 대기",
+      "note": "14: step 0 구현 완료(커밋 377a5f0), 9/16·9/20 운영 반영. step 1의 배포·운영 E2E·서명 없는 요청 401 확인은 수행됨. 남은 것은 사람: 실제 @사수 질문·Slack 화면 캡처·제출 이미지 교체 판단·Slack 앱 이벤트 구독 확인",
       "production_deployed": true,
       "deployed_at": "2026-09-20T12:30:00+09:00",
       "deployment": "docs/verification/production-rollout-2026-09-20.md"
@@ -160,7 +164,7 @@
       "dir": "27-daily-retro",
       "status": "blocked",
       "verification": "docs/verification/daily-retro-2026-09-19/live-results.json",
-      "note": "phase 27 steps 0-6 구현·QA 완료. step 7은 9/20 제출 이후 운영 승인 대기",
+      "note": "phase 27 steps 0-6 구현·QA 완료. 2026-09-20 운영 반영(0046·0047 적용, SASU_RETRO_ENABLED=true). step 7 남음: 검증 README·원시 로그 보강, 이 PC 수집기 dry-run 실측(개인 활동 기록이라 사용자 동의 필요), 로그인 사용자의 운영 회고 생성 확인(사람)",
       "production_deployed": true,
       "deployed_at": "2026-09-20T12:30:00+09:00",
       "deployment": "docs/verification/production-rollout-2026-09-20.md"
@@ -178,12 +182,13 @@
       "dir": "31-plain-language",
       "status": "blocked",
       "verification": "docs/verification/plain-language-audit-2026-09-19/README.md",
-      "note": "step9 카드·요약 문체 80% 두 번으로 목표 충족. ASK 회귀 보완 후 10/10 두 번, lint/build·단위 1,391검사 통과. 사람 읽기·쇼케이스 판단·신규 변경 운영 반영 대기.",
+      "note": "step9 카드·요약 문체 80% 두 번으로 목표 충족. ASK 회귀 보완 후 10/10 두 번, lint/build·단위 1,391검사 통과. step 8·9 변경은 2026-09-23 운영 반영, 쇼케이스는 /demo로 선택(release-completion-2026-09-23). 남은 것은 사람: 독립 비개발자 5분 읽기 검수·동의 문구 법률 확인·제출 스크린샷 교체 판단.",
       "production_deployed": true,
       "deployed_at": "2026-09-20T12:30:00+09:00",
       "deployment": "docs/verification/production-rollout-2026-09-20.md",
       "followup_verification": "docs/verification/llm-style-followup-2026-09-23/README.md",
-      "pending_change_production_deployed": false
+      "pending_change_production_deployed": true,
+      "pending_change_deployment": "docs/verification/release-completion-2026-09-23/README.md"
     },
     {
       "dir": "23-browser-meeting-recording",
@@ -217,8 +222,10 @@
       "dir": "32-grounded-answer",
       "status": "blocked",
       "verification": "docs/verification/grounded-answer-selection-2026-09-23/README.md",
-      "note": "로컬 SQL 243·화면 12·실DB E2E 1건/질문 5건 통과 기록 유지. 후속 A09 회귀 9/10 보존·마지막 허용 보완 후 모델 10/10 두 번, 전체 단위 1,391·lint/build 통과. 운영 승인 대기.",
-      "production_deployed": false,
+      "note": "로컬 SQL 243·화면 12·실DB E2E 1건/질문 5건 통과 기록 유지. 후속 A09 회귀 9/10 보존·마지막 허용 보완 후 모델 10/10 두 번, 전체 단위 1,391·lint/build 통과. 2026-09-23 운영 반영(0053·0054, PR #1·#2, 운영 웹 ASK·원문 강조 확인). 남은 것은 사람: Slack DM·채널 신규 질문→발송 확인(시험 대상·Slack 매핑 필요).",
+      "production_deployed": true,
+      "deployed_at": "2026-09-23T16:12:00+09:00",
+      "deployment": "docs/verification/release-completion-2026-09-23/README.md",
       "followup_verification": "docs/verification/llm-style-followup-2026-09-23/README.md"
     },
     {

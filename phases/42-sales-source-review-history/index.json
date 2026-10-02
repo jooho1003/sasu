@@ -21,7 +21,8 @@
       "summary": "unit1788·SQL308+2016·신규E2E3·기존13각최종pass·독립PDCA100%"
     }
   ],
-  "production_deployed": false,
+  "production_deployed": true,
+  "deployment": "docs/verification/desktop-companion-production-2026-10-02.md",
   "verification": "docs/verification/sales-source-review-history-2026-10-01.md",
   "plan": "docs/01-plan/features/sales-source-review-history.plan.md",
   "design": "docs/02-design/features/sales-source-review-history.design.md",

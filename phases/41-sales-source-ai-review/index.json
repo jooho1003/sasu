@@ -11,5 +11,6 @@
       "summary": "현재 원문 SQL 권한/hash와 AI 문단 선택·인용 질문, 단위1775·SQL308·E2E13·모델3·lint/build 검증 완료. 운영 미반영."
     }
   ],
-  "production_deployed": false
+  "production_deployed": true,
+  "deployment": "docs/verification/desktop-companion-production-2026-10-02.md"
 }

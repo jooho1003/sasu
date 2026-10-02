@@ -1,0 +1,140 @@
+{
+  "slug": "status-sync",
+  "date": "2026-10-02",
+  "request": "\"blocked 된거 중 사람이 꼭 필요한거 빼고는 다 된거지? 운영반영 해줘.\"",
+  "approved_decisions": {
+    "1": "운영 반영 요청(2026-10-02). 조사 결과 운영에 새로 보낼 코드·DB·스위치 변경이 없으므로, 이미 운영에 나간 phase의 낡은 상태 기록만 고친다. 문서만 바뀌는 PR이며 main 병합으로 운영 재배포가 1회 일어난다",
+    "2": "V14 CSP 강제 전환(SASU_CSP_ENFORCE)은 이 플랜에 넣지 않는다. 9/30 이후 추가된 로그인 화면의 CSP 검증 기록이 없고 심사 기간(~10/5) 중이라 사용자 결정을 따로 받는다"
+  },
+  "facts_found": [
+    "운영 DB: db push --dry-run 결과 Remote database is up to date(0001~0069 적용)",
+    "운영 웹: main 최신 51d8cc6이 Production 배포 success. 열린 PR·미병합 원격 브랜치 없음",
+    "워커: pg_cron 2개 매분 succeeded, 최근 HTTP 200(1건 null), 9/30 이후 failed는 10/1 notion_poll 1건(notion_api_failed)",
+    "phase 32: 0053·0054와 PR #1·#2가 2026-09-23 운영 반영(dpl_2KmDkF49HAxHXpki58VPG2sz611c). 상위 index만 '운영 승인 대기'·false로 남음",
+    "phase 31: step 8·9 변경이 9/23 배포에 포함, 쇼케이스는 /demo로 선택. 상위 index만 '신규 변경 운영 반영 대기'로 남음",
+    "phase 27: 9/20 0037~0051 적용과 SASU_RETRO_ENABLED=true(production-rollout-2026-09-20.md). setup-guide §15는 '운영 기본 false'로 남음",
+    "phase 14: step 1의 배포·E2E·서명 없는 요청 401은 9/16·9/20 수행. 남은 것은 실제 Slack 질문·화면 캡처(사람)",
+    "phase 41·42: PR #24가 10/1 자동 운영 배포, 0068은 10/2 20:33 적용(desktop-companion-production-2026-10-02.md). 문서는 '운영 미반영'으로 남음",
+    "phase 23·33: 9/30 운영 반영(조직 녹음 스위치 꺼짐). phase 23 README·recording-ux 보고서는 '미반영'으로 남음",
+    ".env.example의 CSP 설명이 ADR-068(ASK)을 가리킴. CSP 결정은 ADR-069"
+  ],
+  "nodes": [
+    {
+      "id": "S1",
+      "title": "고칠 문구와 근거 확정(정확한 기존·새 문자열 명세)",
+      "domain": "general",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 1,
+      "score": 2,
+      "tier": "balanced",
+      "agent": "main",
+      "claude_model": "sonnet",
+      "codex_model": "gpt-5.6-terra",
+      "depends_on": [],
+      "output": "worker 지시문(파일별 old→new)",
+      "note": "조사 맥락(에이전트 2건·운영 읽기 검사)을 가진 메인이 직접 작성",
+      "status": "done"
+    },
+    {
+      "id": "S2",
+      "title": "상태 문서 10개 파일 수정 적용",
+      "domain": "mechanical",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 0,
+      "score": 1,
+      "tier": "fast",
+      "agent": "worker",
+      "claude_model": "haiku",
+      "codex_model": "gpt-5.6-luna",
+      "depends_on": [
+        "S1"
+      ],
+      "output": "phases/index.json·phases/14·41·42 index.json·phases/23 README·docs/04-report 3개·docs/setup-guide.md·.env.example",
+      "status": "done",
+      "result": "worker(haiku) 10개 파일 적용, JSON 4개 파싱 ok"
+    },
+    {
+      "id": "S3",
+      "title": "검사: JSON 파싱·git diff --check·문구 검사(check-wording)",
+      "domain": "mechanical",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 0,
+      "score": 1,
+      "tier": "fast",
+      "agent": "worker",
+      "claude_model": "haiku",
+      "codex_model": "gpt-5.6-luna",
+      "depends_on": [
+        "S2"
+      ],
+      "output": "검사 출력",
+      "status": "done",
+      "result": "diff --check exit 0, 링크 대상 5개 존재. check-wording은 .ts/.tsx만 검사해 해당 없음"
+    },
+    {
+      "id": "R1",
+      "title": "최종 리뷰: diff 직접 검토·근거 대조",
+      "domain": "review",
+      "D1": 0,
+      "D2": 1,
+      "D3": 0,
+      "D4": 2,
+      "score": 3,
+      "tier": "powerful",
+      "override": "최종 리뷰 / 머지 승인",
+      "agent": "main",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [
+        "S3"
+      ],
+      "output": "리뷰 결과",
+      "status": "done",
+      "result": "main이 diff 전체를 운영 기록과 대조, 수정 없음"
+    },
+    {
+      "id": "O1",
+      "title": "커밋·PR·Preview Ready 확인·병합(운영 재배포)·배포 후 점검",
+      "domain": "general",
+      "D1": 0,
+      "D2": 1,
+      "D3": 2,
+      "D4": 1,
+      "score": 4,
+      "tier": "powerful",
+      "override": "최종 리뷰 / 머지 승인",
+      "agent": "main",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [
+        "R1"
+      ],
+      "requires_approval": true,
+      "approval": "사용자 \"운영반영 해줘\"(2026-10-02). 범위는 문서만 바뀌는 재배포",
+      "output": "PR 번호·병합 커밋·운영 배포 ID·점검 결과",
+      "status": "in_progress",
+      "result": "이 PR 병합이 O1 실행이다. 결과는 PR 본문과 운영 배포 기록에 남긴다"
+    }
+  ],
+  "deferred": [
+    {
+      "id": "V14",
+      "title": "CSP 강제 전환(Production env SASU_CSP_ENFORCE=true + 재배포)",
+      "reason": "사용자 결정 대기. report-uri가 없어 실제 위반이 모이지 않았고, 영업 검토·기기 설정 화면은 어느 모드에서도 CSP 검증 기록이 없음. 심사 기간 ~10/5"
+    }
+  ],
+  "gate": {
+    "G1": "PASS",
+    "G2": "PASS (R1·O1 최종 리뷰·머지 승인 → powerful·메인)",
+    "G3": "PASS (mechanical 노드 fast, review floor balanced 이상)",
+    "G4": "PASS (powerful 2/5=40%, 둘 다 하드 오버라이드라 강등 불가)",
+    "G5": "PASS (D3=2인 O1에 requires_approval·승인 근거 부착)",
+    "result": "PASS"
+  }
+}
