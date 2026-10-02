@@ -8,6 +8,7 @@ import { registerIpc } from "./ipc";
 import { logError, logInfo } from "./logger";
 import { OutboxService } from "./outbox-service";
 import { EncryptedFile, EncryptedKeyValueStorage } from "./storage/encrypted-file";
+import { SettingsService } from "./settings-service";
 import { createDesktopWindows, type DesktopWindows } from "./windows";
 import { createTray } from "./tray";
 import { registerPanelShortcut, unregisterPanelShortcut } from "./shortcut";
@@ -16,8 +17,7 @@ import { nextInboxDelay } from "./core/poller";
 import { inboxNotificationCounts } from "./core/inbox-notifications";
 import { notify } from "./notify";
 import { DesktopUpdater } from "./updater";
-import { parseCompanionInbox } from "../shared/contracts";
-import type { DesktopSettings } from "../shared/contracts";
+import { DEFAULT_DESKTOP_SETTINGS, parseCompanionInbox } from "../shared/contracts";
 
 const CSP = "default-src 'self'; connect-src 'none'; img-src 'self' data:; script-src 'self'; style-src 'self'";
 const APP_USER_MODEL_ID = "team.sasu.companion";
@@ -30,7 +30,6 @@ let tray: ReturnType<typeof createTray> | null = null;
 let updater: DesktopUpdater | null = null;
 
 const PositionInput = z.strictObject({ x: z.number().int(), y: z.number().int() });
-const DEFAULT_SETTINGS: DesktopSettings = { seen: [], pet: "green", reduceMotion: false, panelPinned: false, petPosition: null };
 
 function installBrowserGuards(): void {
   const currentSession = session.defaultSession;
@@ -55,6 +54,7 @@ async function start(): Promise<void> {
   sessionFile.assertAvailable();
   outboxFile.assertAvailable();
   settingsFile.assertAvailable();
+  const settings = new SettingsService(settingsFile);
 
   const sessionStorage = new EncryptedKeyValueStorage(sessionFile);
   const supabase = createDesktopSupabase(sessionStorage);
@@ -69,34 +69,50 @@ async function start(): Promise<void> {
     () => clearUnauthorized(),
     session.defaultSession.fetch.bind(session.defaultSession),
   );
-  const auth = new AuthService(supabase, api, sessionStorage, [outboxFile, settingsFile]);
+  const outbox = new OutboxService(outboxFile, api);
   let deviceLinked = false;
   let deviceLinkPending = false;
-  clearUnauthorized = async () => {
-    // A request started before OTP verification may complete after the new
-    // session exists. It must not clear that session while linking is pending.
-    if (deviceLinkPending) return;
-    await auth.clearLocalState();
+  let sessionGeneration = 0;
+  let previousInbox: ReturnType<typeof parseCompanionInbox> | null = null;
+  const auth = new AuthService(supabase, api, sessionStorage, [outbox, settings], () => {
+    sessionGeneration += 1;
+    api.invalidateSession();
+    outbox.invalidate();
+    deviceLinked = false;
+    deviceLinkPending = false;
+    previousInbox = null;
+    windows?.setPanelPinned(false);
+    windows?.pet.webContents.send("pet-state", "idle");
+    windows?.pet.webContents.send("pet-settings", DEFAULT_DESKTOP_SETTINGS);
     windows?.panel.webContents.send("signed-out");
+  });
+  clearUnauthorized = async () => {
+    // ApiClient discards old generations. A current 401 is authoritative even
+    // while the freshly verified user is choosing or linking a department.
+    await auth.clearLocalState();
   };
-  const outbox = new OutboxService(outboxFile, api);
   updater = new DesktopUpdater();
 
   registerIpc({
-    api, auth, outbox, supabase, settingsFile,
+    api, auth, outbox, supabase, settings,
     getWindows: () => windows,
+    getSessionGeneration: () => sessionGeneration,
     onSettingsChanged: (next) => {
       windows?.setPanelPinned(next.panelPinned);
       windows?.pet.webContents.send("pet-settings", next);
     },
-    onDeviceAuthenticating: () => { deviceLinkPending = true; },
-    onDeviceAuthenticated: () => { deviceLinkPending = true; },
+    onDeviceAuthenticating: () => {
+      sessionGeneration += 1;
+      api.invalidateSession();
+      deviceLinkPending = true;
+    },
+    onDeviceAuthenticated: () => { api.resumeSession(); deviceLinkPending = true; },
     onDeviceAuthenticationFailed: () => { deviceLinkPending = false; },
     onDeviceLinked: () => { deviceLinked = true; deviceLinkPending = false; },
     updater,
   });
   installBrowserGuards();
-  const savedSettings = await settingsFile.read(DEFAULT_SETTINGS);
+  const savedSettings = await settings.get();
   windows = await createDesktopWindows(savedSettings.petPosition);
   updater.subscribe((state) => windows?.panel.webContents.send("update-status", state));
   updater.start();
@@ -107,8 +123,7 @@ async function start(): Promise<void> {
     const position = PositionInput.parse(value);
     windows.movePet(position.x, position.y);
     const bounds = windows.pet.getBounds();
-    const settings = await settingsFile.read(DEFAULT_SETTINGS);
-    await settingsFile.write({ ...settings, petPosition: { x: bounds.x, y: bounds.y } });
+    await settings.set({ petPosition: { x: bounds.x, y: bounds.y } });
     return { x: bounds.x, y: bounds.y };
   });
   ipcMain.on("pet-toggle-panel", (event) => {
@@ -119,39 +134,41 @@ async function start(): Promise<void> {
   const trayIconPath = app.isPackaged
     ? join(process.resourcesPath, "tray.png")
     : join(__dirname, "../../resources/tray.png");
-  tray = createTray(windows, () => void auth.signOut(), trayIconPath);
+  tray = createTray(windows, () => {
+    void auth.signOut().catch(() => logError("tray_sign_out_failed", { code: "local_clear_failed" }));
+  }, trayIconPath);
   flushTimer = setInterval(() => {
     void outbox.flush().catch((cause: unknown) => {
       logError("outbox_flush_failed", { code: cause instanceof Error ? cause.name : "unknown" });
     });
   }, OUTBOX_FLUSH_MS);
-  let previousInbox: ReturnType<typeof parseCompanionInbox> | null = null;
   let inboxDelay = 0;
   const pollInbox = async (): Promise<void> => {
+    const generation = sessionGeneration;
     try {
       const session = await supabase.auth.getSession();
+      if (generation !== sessionGeneration) return;
       if (!session.data.session) {
         inboxDelay = nextInboxDelay(inboxDelay, "ok");
-        inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
         return;
       }
       if (!deviceLinked) {
         if (deviceLinkPending) {
           inboxDelay = nextInboxDelay(inboxDelay, "ok");
-          inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
           return;
         }
         const context = await api.get("/api/companion/link", () => true).catch(() => false);
         if (!context) {
           inboxDelay = nextInboxDelay(inboxDelay, "ok");
-          inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
           return;
         }
+        if (generation !== sessionGeneration) return;
         deviceLinked = true;
       }
       const inbox = await api.get("/api/companion/inbox", parseCompanionInbox);
-      const settings = await settingsFile.read(DEFAULT_SETTINGS);
-      const state = computePetState(inbox, new Set(settings.seen), await outbox.count());
+      const currentSettings = await settings.get();
+      const state = computePetState(inbox, new Set(currentSettings.seen), await outbox.count());
+      if (generation !== sessionGeneration) return;
       windows?.pet.webContents.send("pet-state", state);
       const changes = inboxNotificationCounts(previousInbox, inbox);
       if (changes.cards) {
@@ -166,8 +183,9 @@ async function start(): Promise<void> {
     } catch (cause) {
       inboxDelay = nextInboxDelay(inboxDelay, "error");
       logError("inbox_poll_failed", { code: cause instanceof Error ? cause.name : "unknown" });
+    } finally {
+      inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
     }
-    inboxTimer = setTimeout(() => void pollInbox(), inboxDelay);
   };
   void pollInbox();
   logInfo("app_ready");

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "94470782-ecef-4231-864e-421b2d3800ca",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\43-desktop-companion\\desktop-session-flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-session-flow.html",
+  "specification": {
+    "sha256": "320662c6473651075422d2890ad4af27d723f84b06b13d02b332df19d1352060",
+    "bytes": 2005
+  },
+  "artifact": {
+    "sha256": "f03614c8c29497c660e5a04716585e5f10e3b3c743b32ca4d5b4d125a1eb55bf",
+    "bytes": 755762
+  }
+}

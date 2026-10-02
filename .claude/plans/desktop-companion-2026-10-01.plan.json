@@ -293,15 +293,55 @@
       ],
       "output": "운영 반영 기록",
       "requires_approval": true
+    },
+    {
+      "id": "S13",
+      "title": "desktop-followup (step13 G2~G4 검수 이월 보완)",
+      "domain": "security",
+      "D1": 0,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 3,
+      "tier": "powerful",
+      "agent": "main(현재 Codex 세션 직접 수행)",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [
+        "S9c"
+      ],
+      "output": "SettingsService·폴링·hostname·TDD·Electron·후속 분석/보고",
+      "status": "done",
+      "note": "security floor: 본체 암호화 상태·IPC 입력 경계 변경. 기존 설계 §11.4와 step13을 재사용. 모델 값은 향후 하네스 재실행 배정이며 이번에는 실행 중인 Codex 모델을 변경하지 않았다."
+    },
+    {
+      "id": "S14",
+      "title": "desktop-session-outbox (step14 기존 세션 종료·FIFO 회귀)",
+      "domain": "security",
+      "D1": 1,
+      "D2": 1,
+      "D3": 1,
+      "D4": 1,
+      "score": 4,
+      "tier": "powerful",
+      "agent": "main(현재 Codex 세션 직접 수행)",
+      "claude_model": "opus",
+      "codex_model": "gpt-5.6-sol",
+      "depends_on": [
+        "S13"
+      ],
+      "output": "Auth/API 세션 무효화·Outbox 직렬화·renderer 초기화·검증",
+      "status": "done",
+      "note": "security floor. 기존 설계 §11.5. 모델 값은 향후 하네스 배정이며 실행 중 모델은 변경하지 않는다."
     }
   ],
   "gates": {
     "G1_completeness": "PASS",
     "G2_override": "PASS",
     "G3_clamp": "PASS",
-    "G4_cost": "PASS (근거 기록)",
+    "G4_cost": "PASS (기존 하드 오버라이드와 S13/S14 본체 저장·인증 security floor, actual nodes 9/18)",
     "G5_safety": "PASS",
     "result": "PASS"
   },
-  "powerful_ratio": "7/15"
+  "powerful_ratio": "9/18"
 }

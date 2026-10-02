@@ -53,4 +53,32 @@ describe("ApiClient", () => {
     await expect(client.get("/api/companion/link", (value) => value)).resolves.toEqual({ ok: true });
     expect(sessionFetch).toHaveBeenCalledOnce();
   });
+
+  it.each([200, 401])("discards an old HTTP %i response after a new session starts", async (status) => {
+    let complete!: (response: Response) => void;
+    const fetchRequest = vi.fn<(input: string | Request, init?: RequestInit) => Promise<Response>>(() => new Promise<Response>((resolve) => { complete = resolve; }));
+    const unauthorized = vi.fn();
+    const client = new ApiClient("http://127.0.0.1:3011", supabase as never, unauthorized, fetchRequest);
+    const result = client.get("/api/companion/link", (value) => value);
+    const rejected = expect(result).rejects.toMatchObject({ code: "session_changed" });
+    await vi.waitFor(() => expect(fetchRequest).toHaveBeenCalledOnce());
+    const signal = fetchRequest.mock.calls[0]![1]!.signal!;
+    client.invalidateSession();
+    expect(signal.aborted).toBe(true);
+    client.resumeSession();
+    complete(Response.json(status === 200 ? { ok: true } : { code: "session_invalid", error: "old" }, { status }));
+    await rejected;
+    expect(unauthorized).not.toHaveBeenCalled();
+  });
+
+  it("blocks requests during clearing even if getSession still returns an old token", async () => {
+    const fetchRequest = vi.fn();
+    const client = new ApiClient("http://127.0.0.1:3011", supabase as never, vi.fn(), fetchRequest);
+    client.invalidateSession();
+    await expect(client.get("/api/companion/link", () => undefined)).rejects.toMatchObject({ code: "session_changed" });
+    expect(fetchRequest).not.toHaveBeenCalled();
+    client.resumeSession();
+    fetchRequest.mockResolvedValue(Response.json({ ok: true }));
+    await expect(client.get("/api/companion/link", (value) => value)).resolves.toEqual({ ok: true });
+  });
 });

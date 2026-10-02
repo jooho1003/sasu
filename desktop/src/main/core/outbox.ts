@@ -32,10 +32,8 @@ export function nextToSend(
   now: number,
 ): OutboxItem | null {
   return (
-    purgeExpired(items, now).toSorted((left, right) => {
-      const byTime = left.createdAt - right.createdAt;
-      return byTime === 0 ? left.id.localeCompare(right.id) : byTime;
-    })[0] ?? null
+    // Stable sorting preserves insertion order when timestamps share a millisecond.
+    purgeExpired(items, now).toSorted((left, right) => left.createdAt - right.createdAt)[0] ?? null
   );
 }
 

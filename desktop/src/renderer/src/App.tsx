@@ -13,6 +13,7 @@ import { LoginFlow } from "./components/LoginFlow";
 import { SettingsTab } from "./components/SettingsTab";
 import { WorkTab } from "./components/WorkTab";
 import { PetCanvas } from "./pet/PetCanvas";
+import { message } from "../../shared/messages";
 import "./app.css";
 
 type Tab = "ask" | "cards" | "history" | "work" | "settings";
@@ -24,14 +25,24 @@ const tabs: readonly { id: Tab; label: string }[] = [
   { id: "work", label: "일 맡기기" },
   { id: "settings", label: "설정" },
 ];
-export const message = (cause: unknown): string =>
-  cause instanceof Error
-    ? cause.message.split(":").slice(1).join(":") || cause.message
-    : "요청을 처리하지 못했습니다. 잠시 뒤 다시 해 주세요.";
+export { message } from "../../shared/messages";
 
 export function App() {
+  const [session, setSession] = useState({ key: 0, signedOut: false });
+  useEffect(() => window.sasu.auth.onSignedOut(() => {
+    setSession((current) => ({ key: current.key + 1, signedOut: true }));
+  }), []);
+  return <SessionApp key={session.key} signedOut={session.signedOut} />;
+}
+
+function SessionApp({ signedOut }: { signedOut: boolean }) {
   const petWindow = location.hash === "#pet";
-  const [screen, setScreen] = useState<Screen>(petWindow ? "panel" : "loading");
+  const [screen, setScreen] = useState<Screen>(petWindow ? "panel" : signedOut ? "email" : "loading");
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => { active.current = false; };
+  }, []);
   const [tab, setTab] = useState<Tab>("ask");
   const [context, setContext] = useState<Awaited<
     ReturnType<typeof window.sasu.link.get>
@@ -54,10 +65,12 @@ export function App() {
       .catch(() => undefined);
   };
   const rememberSeen = async (id: string): Promise<void> => {
-    const current = settings ?? await window.sasu.settings.get();
-    const seen = [...current.seen.filter((value) => value !== id), id].slice(-500);
-    const next = await window.sasu.settings.set({ seen });
-    setSettings(next);
+    if (!active.current) return;
+    try {
+      setSettings(await window.sasu.settings.markSeen(id));
+    } catch (cause) {
+      setNotice(message(cause));
+    }
   };
   useEffect(() => {
     if (petWindow) {
@@ -72,6 +85,7 @@ export function App() {
         removeSettings();
       };
     }
+    if (signedOut) return;
     void (async () => {
       try {
         setContext(await window.sasu.link.get());
@@ -81,8 +95,7 @@ export function App() {
         setScreen("email");
       }
     })();
-    return window.sasu.auth.onSignedOut(() => setScreen("email"));
-  }, [petWindow]);
+  }, [petWindow, signedOut]);
   useEffect(() => window.sasu.window.onShortcutStatus(setShortcut), []);
   useEffect(() => {
     void window.sasu.update.get().then(setUpdate).catch(() => undefined);
@@ -161,7 +174,7 @@ export function App() {
             answer={answer}
             onAnswer={(next) => {
               setAnswer(next);
-              void rememberSeen(next.id);
+              if (next.status !== "pending") void rememberSeen(next.id);
             }}
             onNotice={setNotice}
             registerFocus={(focus) => {

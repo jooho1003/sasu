@@ -195,7 +195,6 @@ test.describe("desktop companion smoke", () => {
             await window.sasu.auth.verifyCode(email, code);
             await window.sasu.link.create({
               dept_id: deptId,
-              device_name: "데스크톱 앱",
             });
           },
           {

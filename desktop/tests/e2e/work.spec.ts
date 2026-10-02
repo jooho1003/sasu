@@ -69,7 +69,7 @@ async function linkedDevice(local: Record<string, string>, email: string, deptId
   expect(generated.error).toBeNull();
   await panel!.evaluate(async ({ address, code, linkedDept }) => {
     await window.sasu.auth.verifyCode(address, code);
-    await window.sasu.link.create({ dept_id: linkedDept, device_name: "데스크톱 작업 QA" });
+    await window.sasu.link.create({ dept_id: linkedDept });
   }, { address: email, code: generated.data.properties.email_otp!, linkedDept: deptId });
   await panel!.reload();
   return { app, panel: panel!, userData };

@@ -20,6 +20,7 @@
 | S10 | desktop-release-verify (step 12) | qa | 0/1/1/1=3 | balanced | codex terra/medium → blocked(사람 실측) |
 | R1 | 최종 리뷰·`/pdca analyze`·report | review | 1/2/1/2=6 | powerful | main (최종 리뷰, 위임 금지) |
 | O1 | 운영 반영 | security | 1/2/2/2=7 | powerful | main + 사용자 승인 |
+| S13 | desktop-followup (step 13, G2~G4 이월 보완) | security | 0/1/1/1=3 | powerful(floor) | 현재 Codex 주 세션 직접 수행. 향후 하네스는 sol/xhigh |
 
 ## 게이트
 - G1 완전성: PASS — 13개 노드 모두 domain·4축·tier·agent·모델·의존·산출물.
@@ -30,7 +31,15 @@
 
 결과: **PASS**
 
+### Step 13 후속 계약 기록 (2026-10-02)
+
+기존 승인 설계 §11.4와 step 13의 보완을 실행했다. G1 필드 완전성 PASS, G2/G3 암호화 상태·IPC security floor PASS, G4 powerful 8/17(47.1%, plan.json 실계수) — 기존 7개 오버라이드에 S13의 저장/IPC 경계 근거 추가로 PASS, G5 로컬 편집/테스트만 수행하고 O1 승인 게이트 유지로 PASS. 최종 리뷰는 주 세션이 수행했다. `codex_model`은 하네스 재실행 배정 값이며 이번 실행에서 현재 세션 모델을 바꾸거나 별도 `codex exec`를 호출하지 않았다.
+
+결과: desktop 단위56·합성 Electron3·PGlite8·root1834·lint/build 통과. Graft 미확보·Archify 자동검사 결과와 실패/재시도는 `docs/verification/43-desktop-companion/followup.md`에 있다. step 12 및 O1은 계속 대기다.
+
 ## 실행 메모
 - 실행 전 이 브랜치(`docs/desktop-companion-plan-20261001`)를 커밋해야 한다. 문서(PRD 1.28·ADR-082·§6-12)가 가드레일로 주입된다.
 - phase 41(ADR-080·0068·PRD 1.26)·phase 42(ADR-081·PRD 1.27)이 다른 브랜치에서 진행 중이다. 병합 순서에 따라 PRD 버전 줄·`phases/index.json`·ADR 끝부분이 충돌할 수 있다. 번호는 병합 때 재확인한다.
 - 로컬 QA는 기존 `node scripts/review-qa.mjs` 환경(본 작업 트리의 `.vercel/review-qa`)을 쓴다.
+
+Step14: S14(1/1/1/1=4, security floor powerful), S13 뒤 기존 설계 세션 종료·FIFO 회귀를 현재 세션에서 수행. 실제 nodes 기준 powerful 9/18(50%). 운영 반영 없음.

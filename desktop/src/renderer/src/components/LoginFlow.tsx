@@ -50,7 +50,6 @@ export function LoginFlow({
     try {
       await window.sasu.link.create({
         dept_id: dept.id,
-        device_name: "데스크톱 앱",
       });
       await onLinked();
       onScreen("panel");

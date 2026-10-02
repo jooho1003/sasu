@@ -110,7 +110,6 @@ test.describe("desktop companion full flow", () => {
         await panel!.evaluate(async (deptId) => {
           await window.sasu.link.create({
             dept_id: deptId,
-            device_name: "데스크톱 앱",
           });
         }, ids.dept);
         await panel!.reload();

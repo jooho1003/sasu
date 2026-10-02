@@ -7,13 +7,13 @@ date: 2026-10-02
 
 # desktop-companion Completion Report
 
-> **Status**: Complete — phase 43 개발·격리 로컬 검증 완료, 사람·운영 미반영
+> **Status**: Partial — phase 43 개발·격리 로컬 검증 및 step 13·14 보완 완료, 사람·운영 게이트 대기
 >
 > **Project**: 사수 (SASU) · **Version**: 0.1.0 · **Author**: Codex
 >
 > **Completion Date**: 2026-10-02 · **PDCA Cycle**: phase 43 · **Design Match Rate**: 93.6%
 
-원천: [PRD §3-8 DC-01~12·§4·§8-1·§11](../../PRD.md) → [ARCHITECTURE §6-12](../../ARCHITECTURE.md) → [ADR-082](../../ADR.md) → [설계](../../02-design/features/desktop-companion.design.md) → [실행 기록](../../verification/desktop-companion-2026-10-02.md). 12개 step 완료·step 12는 사람·운영 게이트로 blocked.
+원천: [PRD §3-8 DC-01~12·§4·§8-1·§11](../../PRD.md) → [ARCHITECTURE §6-12](../../ARCHITECTURE.md) → [ADR-082](../../ADR.md) → [설계](../../02-design/features/desktop-companion.design.md) → [실행 기록](../../verification/desktop-companion-2026-10-02.md). step 0~11·13·14 완료·step 12는 사람·운영 게이트로 blocked.
 
 ## Executive Summary
 
@@ -53,7 +53,7 @@ date: 2026-10-02
 | SC8 | 자동 업데이트 1회 실제 적용 | ❌ 미충족 | 배포 저장소·사용자 승인·운영 대기 |
 | SC9 | TDD·하니스·lint/build/test·analyze ≥ 90% | ✅ 충족 | desktop 단위 32·루트 1,834·SQL 8/8·권한 2,016·analyze 93.6% |
 
-**Success Rate: 7/9 (78%)** — 2개 미충족은 사람·운영 게이트. 이월 G2~G4 (답 폴링 오류 처리·기기 이름·"본 항목" 원자성)는 중요도 낮음.
+**Success Rate: 7/9 (78%)** — 2개 미충족은 사람·운영 게이트. 이월 G2~G4는 step 13에서 해결했다(아래 §9).
 
 ## 1.5 Decision Record Summary
 
@@ -242,8 +242,36 @@ design §6 실제 오류 코드(공용 웹 lib 코드)로 갱신, E17 엔드포�
 
 ---
 
+## 9. Step 13 후속 보완 (2026-10-02)
+
+[후속 실행 기록](../../verification/43-desktop-companion/followup.md), design §11.4, analysis §7.
+
+| Perspective | Content |
+|---|---|
+| Problem | 답을 기다리는 동안 열람한 카드가 읽음 기록에서 사라지고, 폴링 실패 안내가 없으며 기기 이름이 모두 같았다. |
+| Solution | 본체의 직렬 설정 저장·항목 ID 추가, 취소 가능한 오류/120초 폴링, 본체 hostname 연결을 구현했다. |
+| Function/UX Effect | 탭 이동·재진입에서도 중단 안내가 남고 내부 오류 코드는 숨긴다. 데스크톱 단위 56건·실제 Electron 합성 3건·PGlite 8건이 통과했다. |
+| Core Value | 기존 권한·인용·서버 계약을 유지하면서 읽음 기록과 오류 안내를 보완했다. 원문은 새로 저장하지 않는다. |
+
+G2~G4 **3/3 해결**. 양쪽 lint/build·root 단위 1,834 통과. Archify deliver·4개 viewport 자동 브라우저 검사 통과. Graft 전후 그래프와 실제 Supabase 전체 E2E는 환경 장애로 이번에 미확보다. 전체 마지막 분석 점수 93.6%·계획 7/9는 유지하며, 운영/설치/업데이트 완료를 의미하지 않는다. 코드·검증 산출물만 준비했고 새 설치 게시·운영 반영은 수행하지 않았다.
+
+## 10. Step 14 세션·보관 보완 (2026-10-02)
+
+[실행 기록](../../verification/43-desktop-companion/session-outbox.md), design §11.5, analysis §8.
+
+| Perspective | Content |
+|---|---|
+| Problem | 로그아웃 뒤 이전 답·기록이 남고, 동시 보관 전송이 중복되거나 질문을 덮어쓸 수 있었다. |
+| Solution | 공통 세션 종료·API/OTP 세대·renderer 재마운트와 작업/파일 큐를 구현했다. 동일 시각 FIFO와 늦은 설정, 삭제 실패를 함께 보완했다. |
+| Function/UX Effect | 로그아웃/401 뒤 다른 사용자가 로그인해도 이전 답·기록·설정이 보이지 않는다. 보관 전송과 삭제가 교착하지 않는다. desktop 76건·합성 Electron 7건 통과. |
+| Core Value | 기존 권한·인용 계약 안에서 이전 세션의 상태·보관 질문이 새 세션으로 넘어가는 경로를 차단했다. |
+
+제한 범위 **4/4 해결**. root 1,834건·양쪽 lint/build·Archify 검사를 통과했다. Graft 전후 그래프·실제 DB 전체 E2E·OS 트레이 클릭은 이번에 미확보다. 트레이는 콜백 단위 검증으로만 표시했다. 전체 마지막 일치율93.6%·계획7/9, 사람/운영 게이트와 미배포 상태는 유지한다.
+
 ## Version History
 
 | 버전 | 날짜 | 내용 | Author |
 |---|---|---|---|
+| 1.2 | 2026-10-02 | step14 세션/질문 보관 4/4·desktop76·합성 Electron7·root1834. 기존 운영 게이트 유지 | Codex |
+| 1.1 | 2026-10-02 | step 13 G2~G4 3/3 보완·desktop56·합성 Electron3·PGlite8. 전체 93.6%·7/9·사람/운영 게이트 유지 | Codex |
 | 1.0 | 2026-10-02 | 1차 analyze 84.2% 보완 후 2차 93.6% · step 0~11 완료 · step 12 사람·운영 게이트 · SC 7/9 충족 기록 | Claude(오케스트레이터) — report-generator 초안을 검토·수정 |

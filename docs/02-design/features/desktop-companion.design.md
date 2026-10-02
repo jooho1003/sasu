@@ -301,10 +301,37 @@ desktop/src/shared/contracts.ts
 #### Recommended Session Plan
 phase 43 step 0~10으로 만들었다(2026-10-01): module-0→step 0 `setup-gates`, module-1→step 1 `device-links-schema`, module-2→step 2 `companion-auth`·step 3 `web-devices`, module-3→step 4 `shared-ask-answer`·step 5 `shared-card-transcript`, module-4→step 6 `companion-routes`, module-5→step 7 `companion-sales-review`, module-6→step 8 `desktop-core`, module-7→step 9 `desktop-ui`·step 10 `desktop-work`(2026-10-02 step 9 리뷰 뒤 일 맡기기 분리), module-8→step 11 `desktop-fixes`(1차 analyze 84.2% 보완)·step 12 `desktop-release-verify`. 배정 기록은 `.claude/plans/desktop-companion-2026-10-01.{plan.json,md}`. 모델 배정은 `D:\바이브코딩\CLAUDE.md` 플랜 파이프라인(4축 점수 → 게이트 G1~G5 → plan.json)으로 정한다. 보안·인증 하드 오버라이드라 module-1·2와 최종 리뷰는 powerful, 운영 반영(마이그레이션·메일 템플릿·SMTP·배포 저장소)은 D3=2로 `requires_approval: true`다. Graft·Archify는 이 설계 세션에서 쓰지 않았다 — step 0에서 Bearer 입구와 공용 lib 의존을 Graft로 확인하고, 연결·해제 흐름을 Archify로 그려 검증 기록에 남긴다(없으면 누락 범위를 적는다).
 
+### 11.4 검수 이월 보완 (2026-10-02, step 13)
+
+2차 analysis §6 G2~G4를 기존 DC-04·05·08·10 범위에서 보완한다. 제품 범위·서버 계약·운영 게이트는 원천 문서 그대로다.
+
+| 차이 | 구현 대조 목록 | 실행 검증 |
+|---|---|---|
+| G2 열람 기록 덮어쓰기 | 본체 `SettingsService`의 직렬 저장 큐. `settings:markSeen({id})`만 읽음 ID를 추가하고 중복 제거·최근 500건을 유지한다. `settings:set`에는 `seen`을 받지 않는다. 설정·펫 위치·로그아웃 삭제도 같은 큐를 사용한다. renderer는 완료 답·카드·작업 열람 시 ID만 보낸다 | 동시 두 ID 추가와 설정/위치 변경, 저장 실패 후 복구, 삭제 순서 TDD + 실제 Electron IPC |
+| G3 답 폴링 오류 | core `startAnswerPolling`이 조회 거절을 안내하고 종료한다. 2초·120초 계약 유지. 새 질문과 화면 종료에서 타이머·늦은 응답을 취소한다 | 첫/후속 조회 실패, 완료·120초 종료, 취소·늦은 응답 TDD + Electron 오류 안내·화면 이동 |
+| G4 기기 이름 고정 | `link:create`는 renderer의 부서 ID를 검사하고 본체 `hostname()`으로 기존 E02 `device_name`을 채운다(60자 이내). 설정 `app:info`도 같은 이름 사용 | 실제 IPC의 E02 전송값과 `app:info` 일치, 입력·발신 창 검사 |
+
+기록 경로: `docs/verification/43-desktop-companion/followup.md`. Graft·Archify 실행 불가 시 코드 관계와 누락 범위를 명시한다. 사람 실측·운영 승인 대기로 step 12와 전체 phase의 blocked 상태는 유지한다.
+
+### 11.5 세션 종료·질문 보관 회귀 보완 (2026-10-02, step 14)
+
+기존 PRD DC-04·10·11, 본 문서 §6·§7의 세션 삭제·오프라인 FIFO·재시도 제한을 다음 목록으로 검증한다. 서버 API·제품 범위는 변경하지 않는다.
+
+| 항목 | 구현 대조 목록 | 실행 검증 |
+|---|---|---|
+| 세션 종료 | 설정·트레이 로그아웃과 서버 401 모두 본체의 같은 종료 콜백을 사용한다. 연결 플래그·알림 기준·펫·패널 상태를 초기화하고 renderer를 새로 마운트한다. 늦은 설정 완료는 초기화를 되돌리지 않는다. 파일 삭제 실패 시 새 로그인을 허용하기 전에 삭제를 재확인한다 | Electron 설정/401 종료와 재로그인, 트레이 콜백 단위, 늦은 설정·삭제 실패 TDD |
+| 늦은 응답 | API의 세션 세대와 요청 취소로 종료 전 요청의 성공·401을 폐기한다. 로그인 완료 후 새 세대를 연다. 본체 받은 일 조회도 세대가 바뀌면 알림·펫에 반영하지 않는다 | 취소를 무시하는 fetch의 늦은 성공/401, 새 세션 보존 TDD |
+| 질문 보관 | send·flush·count를 직렬 처리하고 암호화 파일 쓰기/삭제를 별도 직렬 처리한다. 동일 시각에도 삽입 순서를 유지한다. 종료 시 이전 작업을 무효화하고 파일을 삭제한다. 401 종료 콜백 안의 삭제가 flush를 기다려 교착하지 않는다 | 동시 flush 1회 전송, 동시 오프라인 질문 보존·동률 FIFO, 전송 중 삭제·늦은 응답·401 종료 TDD |
+| 재시도 제한 | network·timeout·5xx만 보관한다. invalid_response·기타 4xx는 보관·재시도 없이 기존 오류 계약을 유지한다 | 직접 전송과 보관 질문의 invalid_response 회귀 |
+
+기록: `docs/verification/43-desktop-companion/session-outbox.md`. step 12의 사람 실측·운영 승인 게이트는 유지한다.
+
 ## Version History
 
 | 버전 | 날짜 | 내용 |
 |---|---|---|
+| 1.4 | 2026-10-02 | 기존 세션 종료·질문 보관 계약의 step 14 회귀 비교 목록 추가 |
+| 1.3 | 2026-10-02 | 기존 검수 G2~G4의 step 13 구현·검증 대조 목록 추가 |
 | 1.1 | 2026-10-01 | 동시 작업과 번호 충돌로 ADR-082·phase 43·PRD 1.28·§6-12·불변식 46~50으로 재번호 |
 | 1.2 | 2026-10-02 | 1차 analyze(84.2%) 반영: §6 오류 코드 실제화, E17 추가, step 11 `desktop-fixes`·step 12 출시 검증 |
 | 1.0 | 2026-10-01 | 설계안 C·이메일 6자리 코드·영업 원문 검토(AG-07)·배포 전용 공개 저장소 선택 반영 |
