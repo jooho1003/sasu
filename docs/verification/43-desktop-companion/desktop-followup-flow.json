@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "데스크톱 열람 기록 저장",
+    "subtitle": "모든 설정 변경과 삭제는 앱 본체의 같은 큐를 통과합니다",
+    "output": "desktop-followup-flow.html",
+    "visual_preset": "blueprint",
+    "viewBox": [1200, 620]
+  },
+  "components": [
+    { "id": "renderer", "type": "frontend", "label": "답·카드·작업 화면", "sublabel": "읽은 항목 ID만 전달", "pos": [35, 270], "size": [170, 70] },
+    { "id": "preload", "type": "security", "label": "프리로드", "sublabel": "settings.markSeen", "pos": [265, 270], "size": [170, 70] },
+    { "id": "ipc", "type": "backend", "label": "IPC 입력 검사", "sublabel": "발신 창·ID 검증", "pos": [495, 270], "size": [170, 70] },
+    { "id": "queue", "type": "backend", "label": "설정 저장 큐", "sublabel": "읽기 → 변경 → 쓰기", "pos": [735, 270], "size": [170, 70] },
+    { "id": "file", "type": "database", "label": "암호화 파일", "sublabel": "최근 500개 ID", "pos": [975, 270], "size": [170, 70] },
+    { "id": "move", "type": "backend", "label": "펫 위치 변경", "sublabel": "최신 설정에 위치 추가", "pos": [735, 95], "size": [170, 70] },
+    { "id": "logout", "type": "security", "label": "로그아웃", "sublabel": "대기 중 쓰기 뒤 삭제", "pos": [735, 445], "size": [170, 70] }
+  ],
+  "connections": [
+    { "id": "view-preload", "from": "renderer", "to": "preload", "label": "항목 ID" },
+    { "id": "preload-ipc", "from": "preload", "to": "ipc", "label": "허용 채널", "variant": "security" },
+    { "id": "ipc-queue", "from": "ipc", "to": "queue", "label": "항목 추가", "variant": "emphasis" },
+    { "id": "queue-file", "from": "queue", "to": "file", "label": "순서대로 저장" },
+    { "id": "move-queue", "from": "move", "to": "queue", "label": "위치 설정", "labelAt": [865, 217], "fromSide": "bottom", "toSide": "top" },
+    { "id": "logout-queue", "from": "logout", "to": "queue", "label": "파일 삭제", "fromSide": "top", "toSide": "bottom", "variant": "security" }
+  ]
+}

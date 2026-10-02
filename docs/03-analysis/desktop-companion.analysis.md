@@ -101,3 +101,34 @@ date: 2026-10-02
 | G4 | Minor | 연결 기기 이름이 "데스크톱 앱"으로 고정(웹 목록에서 구분 어려움), 설정은 `hostname()` 표시 | 이월 — 연결 시 `hostname()` 사용 |
 
 Plan §6 Success Criteria (2차): 웹·앱 인용 일치 ✅ · 권한 경계 ✅ · 알림 1분 ✅(로컬 실측) · 결정 1건 ✅ · 해제 401 ✅ · 끊김 보관·평문 0 ✅ · 5분 설치 녹화 ❌(사람) · 업데이트 1회 ❌(사람·운영) · analyze ≥ 90% ✅ — **7/9 충족, 남은 2개는 사람·운영 게이트.**
+
+## 7. Step 13 후속 분석 (2026-10-02)
+
+비교 범위는 design §11.4 G2~G4다. [실행 기록](../verification/43-desktop-companion/followup.md). 기존 PRD 범위·원천 결정·서버 API·권한 판정과 일치한다.
+
+| 차이 | 구조·기능·계약 | 실행 | 판정 |
+|---|---|---|---|
+| G2 | SettingsService 단일 큐, 읽음 ID 추가 IPC, 위치·삭제 공유, renderer 전체 목록 교체 거부 | 동시 저장·재시작 파일·암호화·발신 창 검증 | 해결 |
+| G3 | 조회 오류 안내/종료, 2초·독립 120초 deadline, 새 질문/화면 종료 취소, 늦은 결과 무시, 재진입 중단 표시 | 단위 오류·timeout·취소 + Electron 안내·이동·재진입 | 해결 |
+| G4 | 본체 hostname 60자, 부서 ID 전용 IPC, 서버 E02 그대로 | 실제 Electron E02 HTTP 수신 본문과 app:info 일치 | 해결 |
+
+이번 비교 목록 **3/3(100%)**. scoped Structural/Functional/Contract/Runtime 100이며 skill 가중식도 100이다. 전체 기능 마지막 정적 점수 **93.6%**, Plan SC **7/9**는 별도 지표로 유지한다. 전 기능에 대한 새 3차 점수로 표시하지 않는다.
+
+실행: desktop 단위 **56**, Electron 합성 **3**, PGlite 기기 연결 **8**, root 단위 **1,834**, 양쪽 lint·build 통과. gap-detector가 찾은 재진입 진행 표시와 실제 hostname 검증 누락을 수정한 뒤 재대조에서 추가 결함이 없었다. 최종 판정은 주 세션의 코드·실행 결과 검토다. Graft 새 그래프와 실제 Supabase 기반 전체 E2E는 Docker/네이티브 장애로 미확보다. Archify deliver·자동 브라우저 검사 통과.
+
+사람 설치·업데이트·운영 승인 게이트가 남아 있어 전체 phase의 blocked 상태는 유지한다.
+
+## 8. Step 14 세션·보관 후속 분석 (2026-10-02)
+
+비교 범위는 design §11.5다. [실행 기록](../verification/43-desktop-companion/session-outbox.md). 기존 PRD DC-04·10·11과 설계 §6·7을 구현하며 서버/RLS·인용·운영 설정을 바꾸지 않았다.
+
+| 항목 | 구조·기능·계약 | 실행 | 판정 |
+|---|---|---|---|
+| 세션 종료 | 설정/트레이/현재 401의 공통 종료, renderer 재마운트, 연결·펫·핀·알림 기준 초기화. 늦은 설정 반영 차단. 삭제 실패 재확인 후 로그인 | Electron 설정/401→다른 JWT 사용자 재로그인·이전 답/기록/설정 없음, Auth/트레이/설정 단위 | 해결 |
+| 늦은 응답 | API 세대+abort, 이전 성공/401/본문 폐기, OTP 늦은 완료 삭제, 연결 대기 현재 401 처리 | API·OTP TDD + Electron 부서 연결 대기 401 | 해결 |
+| 질문 보관 | 작업 큐/파일 큐 분리·종료 무효화·동률 FIFO·401 삭제 교착 방지 | 동시 flush/오프라인 send·삭제 중 응답·파일 오류 단위, 실제 Electron 2건 암호화 보관/종료 삭제 | 해결 |
+| 재시도 제한 | network/timeout/5xx만 보관, invalid_response/4xx 재시도 없음 | 직접/보관 invalid_response TDD + Electron POST 1회/보관 0건 | 해결 |
+
+목록 **4/4 해결**. 이 제한 범위의 Structural/Functional/Contract/Runtime 각 100%, 가중식 100%다. Runtime은 위 단위·합성 HTTP Electron 사례에 한정하며 실제 운영 DB·SMTP·OS 트레이 클릭·설치·게시 업데이트를 포함하지 않는다. 전체 기능 마지막 정적 **93.6%**·계획 **7/9**는 유지한다.
+
+desktop 단위 **76/76**, 합성 Electron **7/7**, root **1,834/1,834**, 양쪽 lint/build, diff check 통과. gap-detector가 지적한 OTP/현재 401·동률 FIFO·늦은 설정 차이를 TDD와 실행 검증으로 보완한 뒤 재대조에서 추가 차이가 없었다. Archify 9/9·4 viewport 자동 검사 통과. Graft 전후 그래프와 실제 DB 전체 E2E는 이번에 미확보이며 기록에서 범위를 명시한다. 주 세션이 최종 코드·실행 기록을 판정했다. step14 완료, step12·전체 phase blocked 유지.

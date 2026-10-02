@@ -10,9 +10,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-01T22:22:57+0900",
+      "started_at": "2026-10-01T22:22:57+09:00",
       "summary": "루트 desktop 경계와 TDD 훅을 확인하고, 로컬 QA에서 G1 세션 삭제 권한·G2 OTP 세션 무효화를 PASS로 재검증했다.",
-      "completed_at": "2026-10-01T22:30:49+0900"
+      "completed_at": "2026-10-01T22:30:49+09:00"
     },
     {
       "step": 1,
@@ -20,9 +20,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-sol",
       "effort": "xhigh",
-      "started_at": "2026-10-01T22:30:51+0900",
+      "started_at": "2026-10-01T22:30:51+09:00",
       "summary": "0069 device_links·본인 SELECT RLS·연결/컨텍스트/해제 RPC 3개+비공개 세션 함수·rollback 구현. 신규 SQL 8·전체 SQL 316/권한 조합 2016·실제 로컬 Auth 해제/refresh 거부·lint/build·단위1788 통과. docs/verification/43-desktop-companion/schema.md 참조. 운영 미반영.",
-      "completed_at": "2026-10-01T22:45:58+0900"
+      "completed_at": "2026-10-01T22:45:58+09:00"
     },
     {
       "step": 2,
@@ -30,9 +30,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-sol",
       "effort": "xhigh",
-      "started_at": "2026-10-01T22:45:59+0900",
+      "started_at": "2026-10-01T22:45:59+09:00",
       "summary": "Bearer 전용 Supabase·기기 컨텍스트와 E01~E04를 구현하고, TDD 19·전체 1807·SQL 8·로컬 Auth/API 11항목·lint/build/Graft를 통과했다. docs/verification/43-desktop-companion/auth.md 참조. 운영 미반영.",
-      "completed_at": "2026-10-01T23:39:42+0900"
+      "completed_at": "2026-10-01T23:39:42+09:00"
     },
     {
       "step": 3,
@@ -40,9 +40,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-01T23:40:07+0900",
+      "started_at": "2026-10-01T23:40:07+09:00",
       "summary": "쿠키 세션 기반 기기 목록·RPC 해제 API와 설정 패널, 로컬 QA 및 게스트 회귀 검증을 추가했다.",
-      "completed_at": "2026-10-02T00:00:07+0900"
+      "completed_at": "2026-10-02T00:00:07+09:00"
     },
     {
       "step": 4,
@@ -50,9 +50,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-02T00:00:08+0900",
+      "started_at": "2026-10-02T00:00:08+09:00",
       "summary": "웹 ASK 시작·답변 인용 재검사를 공용 lib로 옮기고 기존 웹 응답 계약과 비LLM 브라우저 흐름을 확인했다. docs/verification/43-desktop-companion/shared-ask-answer.md 참조.",
-      "completed_at": "2026-10-02T00:21:53+0900"
+      "completed_at": "2026-10-02T00:21:53+09:00"
     },
     {
       "step": 5,
@@ -60,9 +60,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-02T01:17:09+0900",
+      "started_at": "2026-10-02T01:17:09+09:00",
       "summary": "카드 조회·결정·회의 받아쓴 글 업로드를 ActorContext 공용 lib로 옮기고, 인용·결정 권한·동의 화자·수집 어댑터 경계를 유지한 채 단위·UI 회귀를 통과했다. docs/verification/43-desktop-companion/shared-card-transcript.md 참조.",
-      "completed_at": "2026-10-02T01:45:41+0900"
+      "completed_at": "2026-10-02T01:45:41+09:00"
     },
     {
       "step": 6,
@@ -70,9 +70,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-sol",
       "effort": "xhigh",
-      "started_at": "2026-10-02T01:45:43+0900",
+      "started_at": "2026-10-02T01:45:43+09:00",
       "summary": "E05~E13 앱 경로와 내용 없는 받은 일 정규화를 공용 ActorContext·사용자 JWT로 구현하고, 웹/앱 답 일치·결정 멱등·업로드·해제 후 401·LLM 0회를 로컬 QA로 확인했다. docs/verification/43-desktop-companion/companion-routes.md 참조.",
-      "completed_at": "2026-10-02T02:19:52+0900"
+      "completed_at": "2026-10-02T02:19:52+09:00"
     },
     {
       "step": 7,
@@ -80,9 +80,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-02T02:19:54+0900",
+      "started_at": "2026-10-02T02:19:54+09:00",
       "summary": "AG-07 원문 후보·검토 시작·본인 상태를 ActorContext 공용 경계로 옮기고 E14~E16·받은 일 sales를 연결했다. 단위 30·전체 1,834·로컬 API·phase 41 E2E를 통과했다. docs/verification/43-desktop-companion/sales-review.md 참조.",
-      "completed_at": "2026-10-02T02:44:20+0900"
+      "completed_at": "2026-10-02T02:44:20+09:00"
     },
     {
       "step": 8,
@@ -90,9 +90,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-sol",
       "effort": "xhigh",
-      "started_at": "2026-10-02T02:44:22+0900",
+      "started_at": "2026-10-02T02:44:22+09:00",
       "summary": "분리 Electron 패키지와 main/preload/core, safeStorage 세션·질문 보관, Bearer API·자료 업로드·허용 IPC를 구현했다. 단위 20·전체 1,834·실제 로컬 Electron OTP→연결→inbox·Graft·Archify·lint/build를 통과했다. docs/verification/43-desktop-companion/desktop-core.md 참조.",
-      "completed_at": "2026-10-02T03:38:28+0900"
+      "completed_at": "2026-10-02T03:38:28+09:00"
     },
     {
       "step": 9,
@@ -100,9 +100,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-02T03:57:49+0900",
+      "started_at": "2026-10-02T03:57:49+09:00",
       "summary": "Electron 코드 로그인·부서 선택·펫/5개 탭 UI를 보완하고, 원문 근거가 있는 답 본문·카드 결정 연타 SQL 1건을 로컬 E2E로 확인했다.",
-      "completed_at": "2026-10-02T05:08:28+0900"
+      "completed_at": "2026-10-02T05:08:28+09:00"
     },
     {
       "step": 10,
@@ -110,9 +110,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-02T06:57:37+0900",
+      "started_at": "2026-10-02T06:57:37+09:00",
       "summary": "팀장용 자료 올리기·영업 원문 검토와 팀원 IPC 거부를 로컬 QA Electron E2E로 확인하고, 비표준 variant 서버 작업 ID·응답 파싱 오류 경계를 보완했다.",
-      "completed_at": "2026-10-02T07:14:41+0900"
+      "completed_at": "2026-10-02T07:14:41+09:00"
     },
     {
       "step": 11,
@@ -120,9 +120,9 @@
       "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-02T08:33:10+0900",
+      "started_at": "2026-10-02T08:33:10+09:00",
       "summary": "펫 클릭 패널·실제 트레이 아이콘·읽음/알림·429 제거·위치/움직임 설정·IPC 창 경계를 보완하고 데스크톱 E2E 5건과 루트 검증을 통과했다. docs/verification/43-desktop-companion/desktop-fixes.md 참조.",
-      "completed_at": "2026-10-02T09:03:27+0900"
+      "completed_at": "2026-10-02T09:03:27+09:00"
     },
     {
       "step": 12,
@@ -130,12 +130,28 @@
       "status": "blocked",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "started_at": "2026-10-02T09:03:28+0900",
+      "started_at": "2026-10-02T09:03:28+09:00",
       "summary": "NSIS 설치 파일과 로컬 QA L3·L4를 재검증했다. 새 카드 2건의 펫·알림은 각각 약 29.6초 안에 갱신됐고, 해제 401·인용 가시성·암호화 보관 파일 삭제를 확인했다. docs/verification/desktop-companion-2026-10-02.md 참조.",
-      "blocked_reason": "사람 실측·운영 승인 대기: 5분 설치 녹화, 배포 저장소·업데이트 1회, 운영 auth.sessions 권한·0069 적용·SMTP·메일 템플릿 (기록: docs/verification/desktop-companion-2026-10-02.md)",
-      "blocked_at": "2026-10-02T09:55:30+0900"
+      "blocked_reason": "사람 실측·운영 승인 대기: 5분 설치 녹화, 배포 저장소·업데이트 1회, SMTP·메일 템플릿. 운영 auth.sessions 권한 확인·0069 적용은 2026-10-02 완료(docs/verification/desktop-companion-production-2026-10-02.md). (기록: docs/verification/desktop-companion-2026-10-02.md)",
+      "blocked_at": "2026-10-02T09:55:30+09:00"
+    },
+    {
+      "step": 13,
+      "name": "desktop-followup",
+      "status": "completed",
+      "design": "docs/02-design/features/desktop-companion.design.md",
+      "summary": "G2 읽음/설정/위치/삭제 직렬 저장, G3 오류·120초·취소·재진입 안내, G4 hostname을 보완했다. desktop 단위56·합성 Electron3·PGlite8·root1834·양쪽 lint/build 통과. Archify 자동검사 통과, Graft와 실제 DB 전체 E2E 미확보. docs/verification/43-desktop-companion/followup.md 참조. step12 사람·운영 게이트 유지.",
+      "completed_at": "2026-10-02T11:53:00.532Z"
+    },
+    {
+      "step": 14,
+      "name": "desktop-session-outbox",
+      "status": "completed",
+      "design": "docs/02-design/features/desktop-companion.design.md",
+      "summary": "공통 세션 종료·API/OTP 세대·renderer 재마운트·늦은 설정 차단, Outbox 작업/파일 큐·동률 FIFO·invalid_response 재시도 금지를 보완했다. desktop76·합성 Electron7·root1834·양쪽 lint/build·Archify 통과. Graft/실제DB E2E 미확보. docs/verification/43-desktop-companion/session-outbox.md 참조. 운영 게이트 유지.",
+      "completed_at": "2026-10-02T12:28:15.1872103Z"
     }
   ],
   "production_deployed": false,
-  "created_at": "2026-10-01T22:13:36+0900"
+  "created_at": "2026-10-01T22:13:36+09:00"
 }

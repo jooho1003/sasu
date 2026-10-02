@@ -160,12 +160,17 @@ export type ReviewUploadRequest = {
   original: Uint8Array;
   parts: { index: number; seconds: number; bytes: Uint8Array }[];
 };
-export type DesktopSettings = {
-  seen: string[];
-  pet: "green" | "blue" | "purple";
-  reduceMotion: boolean;
-  panelPinned: boolean;
-  petPosition: { x: number; y: number } | null;
+export const DesktopSettingsSchema = z.strictObject({
+  seen: z.array(Uuid).max(500),
+  pet: z.enum(["green", "blue", "purple"]),
+  reduceMotion: z.boolean(),
+  panelPinned: z.boolean(),
+  petPosition: z.strictObject({ x: z.number().int(), y: z.number().int() }).nullable(),
+});
+export const DesktopSettingsPatch = DesktopSettingsSchema.omit({ seen: true }).partial().strict();
+export type DesktopSettings = z.infer<typeof DesktopSettingsSchema>;
+export const DEFAULT_DESKTOP_SETTINGS: DesktopSettings = {
+  seen: [], pet: "green", reduceMotion: false, panelPinned: false, petPosition: null,
 };
 
 export function parseCompanionDepartments(value: unknown): CompanionDepartments {

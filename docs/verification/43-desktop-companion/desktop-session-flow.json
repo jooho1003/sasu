@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "데스크톱 세션 종료",
+    "subtitle": "이전 세대의 응답과 보관 작업을 폐기한 뒤 새 로그인을 시작합니다",
+    "output": "desktop-session-flow.html",
+    "visual_preset": "blueprint",
+    "viewBox": [1200, 620]
+  },
+  "components": [
+    { "id": "logout", "type": "frontend", "label": "설정·트레이", "sublabel": "로그아웃 요청", "pos": [35, 110], "size": [180, 70] },
+    { "id": "unauth", "type": "security", "label": "현재 요청 401", "sublabel": "이전 세대는 폐기", "pos": [35, 370], "size": [180, 70] },
+    { "id": "auth", "type": "security", "label": "공통 세션 종료", "sublabel": "AuthService", "pos": [290, 240], "size": [180, 70] },
+    { "id": "cancel", "type": "backend", "label": "API·보관 작업 취소", "sublabel": "세대 변경·요청 중단", "pos": [545, 110], "size": [180, 70] },
+    { "id": "disk", "type": "database", "label": "암호화 파일 삭제", "sublabel": "쓰기 완료 뒤 삭제", "pos": [800, 110], "size": [180, 70] },
+    { "id": "ui", "type": "frontend", "label": "화면·펫 초기화", "sublabel": "이전 답·기록 제거", "pos": [545, 370], "size": [180, 70] },
+    { "id": "login", "type": "security", "label": "새 로그인", "sublabel": "삭제 완료 뒤 새 세대", "pos": [800, 370], "size": [180, 70] }
+  ],
+  "connections": [
+    { "id": "logout-auth", "from": "logout", "to": "auth", "label": "기기 해제", "variant": "security" },
+    { "id": "unauth-auth", "from": "unauth", "to": "auth", "label": "로그인 만료", "variant": "security" },
+    { "id": "auth-cancel", "from": "auth", "to": "cancel", "label": "늦은 응답 폐기" },
+    { "id": "cancel-disk", "from": "cancel", "to": "disk", "label": "삭제 큐" },
+    { "id": "auth-ui", "from": "auth", "to": "ui", "label": "종료 이벤트" },
+    { "id": "ui-login", "from": "ui", "to": "login", "label": "코드 로그인" }
+  ]
+}

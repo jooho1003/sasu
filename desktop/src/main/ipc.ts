@@ -16,10 +16,11 @@ import { ApiError, type ApiClient } from "./api/client";
 import { uploadReview, type ReviewUploadInput } from "./api/storage-upload";
 import type { AuthService } from "./auth/supabase";
 import type { OutboxService } from "./outbox-service";
-import type { EncryptedFile } from "./storage/encrypted-file";
+import type { SettingsService } from "./settings-service";
 import { logError } from "./logger";
 import type { DesktopUpdater } from "./updater";
 import {
+  DesktopSettingsPatch,
   parseAnswer,
   parseCard,
   parseCardDecision,
@@ -37,7 +38,7 @@ import {
 
 const EmailInput = z.strictObject({ email: z.email().max(320) });
 const VerifyInput = EmailInput.extend({ code: z.string().trim().regex(/^\d{6,8}$/u) }).strict();
-const LinkInput = CompanionLinkInput.omit({ app_version: true });
+const LinkInput = CompanionLinkInput.pick({ dept_id: true });
 const IdInput = z.strictObject({ id: z.guid() });
 const QuestionsInput = z.strictObject({ cursor: CompanionQuestionCursor.nullable().optional() });
 const DecideInput = z.strictObject({
@@ -63,29 +64,15 @@ const ReviewUploadEnvelope = z.strictObject({
 const SalesStatusInput = z.strictObject({ task_id: z.guid() });
 const OpenWebInput = z.strictObject({ path: z.string().startsWith("/").max(2_000) });
 
-const Settings = z.strictObject({
-  seen: z.array(z.guid()).max(500),
-  pet: z.enum(["green", "blue", "purple"]),
-  reduceMotion: z.boolean(),
-  panelPinned: z.boolean(),
-  petPosition: z.strictObject({ x: z.number().int(), y: z.number().int() }).nullable(),
-});
-const SettingsPatch = Settings.partial().strict();
-type SettingsValue = z.infer<typeof Settings>;
-const DEFAULT_SETTINGS: SettingsValue = {
-  seen: [],
-  pet: "green",
-  reduceMotion: false,
-  panelPinned: false,
-  petPosition: null,
-};
+type SettingsValue = Awaited<ReturnType<SettingsService["get"]>>;
+const deviceName = (): string => hostname().trim().slice(0, 60) || "데스크톱 앱";
 
 type Dependencies = {
   api: ApiClient;
   auth: AuthService;
   outbox: OutboxService;
   supabase: SupabaseClient;
-  settingsFile: EncryptedFile;
+  settings: SettingsService;
   onSettingsChanged?: (settings: SettingsValue) => void;
   onDeviceAuthenticating?: () => void;
   onDeviceAuthenticated?: () => void;
@@ -93,6 +80,7 @@ type Dependencies = {
   onDeviceLinked?: () => void;
   updater?: DesktopUpdater;
   getWindows: () => DesktopWindows | null;
+  getSessionGeneration?: () => number;
 };
 
 function register<I, O>(
@@ -169,7 +157,7 @@ export function registerIpc(deps: Dependencies): void {
 
   panel("link:departments", noInput, () => deps.api.get("/api/companion/departments", parseCompanionDepartments));
   panel("link:create", (value) => LinkInput.parse(value), async (input) => {
-    const linked = await deps.api.postJson("/api/companion/link", { ...input, app_version: app.getVersion() }, parseCompanionLink);
+    const linked = await deps.api.postJson("/api/companion/link", { ...input, device_name: deviceName(), app_version: app.getVersion() }, parseCompanionLink);
     deps.onDeviceLinked?.();
     return linked;
   });
@@ -209,11 +197,14 @@ export function registerIpc(deps: Dependencies): void {
   panel("sales:start", (value) => SalesSourceReviewRequest.parse(value), (input) => deps.api.postJson("/api/companion/sales-review", input, parseSalesStart));
   panel("sales:status", (value) => SalesStatusInput.parse(value), ({ task_id }) => deps.api.get(`/api/companion/sales-review/${encodeURIComponent(task_id)}`, parseSalesStatus));
 
-  register("settings:get", noInput, async () => Settings.parse(await deps.settingsFile.read(DEFAULT_SETTINGS)), isPanelOrPetForSettings);
-  panel("settings:set", (value) => SettingsPatch.parse(value), async (patch) => {
-    const current = Settings.parse(await deps.settingsFile.read(DEFAULT_SETTINGS));
-    const next = Settings.parse({ ...current, ...patch });
-    await deps.settingsFile.write(next);
+  register("settings:get", noInput, () => deps.settings.get(), isPanelOrPetForSettings);
+  panel("settings:markSeen", (value) => IdInput.parse(value), ({ id }) => deps.settings.markSeen(id));
+  panel("settings:set", (value) => DesktopSettingsPatch.parse(value), async (patch) => {
+    const generation = deps.getSessionGeneration?.();
+    const next = await deps.settings.set(patch);
+    if (generation !== deps.getSessionGeneration?.()) {
+      throw new ApiError(401, "session_changed", "기기 로그인이 변경되었습니다.");
+    }
     deps.onSettingsChanged?.(next);
     return next;
   });
@@ -222,5 +213,5 @@ export function registerIpc(deps: Dependencies): void {
     await shell.openExternal(webTarget(path));
     return { opened: true };
   });
-  panel("app:info", noInput, async () => ({ version: app.getVersion(), device_name: hostname() }));
+  panel("app:info", noInput, async () => ({ version: app.getVersion(), device_name: deviceName() }));
 }

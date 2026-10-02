@@ -41,7 +41,7 @@ const bridge = {
   },
   link: {
     departments: () => invoke<CompanionDepartmentsResponse>("link:departments"),
-    create: (input: { dept_id: string; device_name: string }) =>
+    create: (input: { dept_id: string }) =>
       invoke<CompanionLinkResponse>("link:create", input),
     get: () => invoke<CompanionContextResponse>("link:get"),
   },
@@ -99,8 +99,9 @@ const bridge = {
   },
   settings: {
     get: () => invoke<DesktopSettings>("settings:get"),
-    set: (input: Partial<DesktopSettings>) =>
+    set: (input: Partial<Omit<DesktopSettings, "seen">>) =>
       invoke<DesktopSettings>("settings:set", input),
+    markSeen: (id: string) => invoke<DesktopSettings>("settings:markSeen", { id }),
   },
   update: {
     get: () => invoke<{ status: string; percent?: number }>("update:get"),

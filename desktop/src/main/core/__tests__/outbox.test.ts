@@ -46,6 +46,11 @@ describe("outbox", () => {
     expect(nextToSend(items, now)?.id).toBe("question-1");
   });
 
+  it("preserves insertion order for equal timestamps instead of sorting random IDs", () => {
+    const items = [item(9), item(1)];
+    expect(nextToSend(items, now)?.id).toBe("question-9");
+  });
+
   it("removes success and non-rate-limit 4xx results", () => {
     const items = [item(1)];
     expect(applySendResult(items, "question-1", { status: 202 })).toEqual([]);
