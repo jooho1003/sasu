@@ -1,0 +1,14 @@
+
+Running 9 tests using 1 worker
+
+[1/9] [chromium] › tests\e2e\guest.spec.ts:11:5 › 영업 충돌과 부서 비교 답변의 근거가 의미상 일치한다
+[2/9] [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px
+[3/9] [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 390px
+[4/9] [chromium] › tests\e2e\guest.spec.ts:96:5 › 게스트는 실제 부서에 접근하지 못하고 잘못된 서명은 거부된다
+[5/9] [chromium] › tests\e2e\guest.spec.ts:108:5 › 게스트 열람 전후 AI 호출·DB 행 수가 증가하지 않는다
+[6/9] [chromium] › tests\e2e\security-headers.spec.ts:11:5 › security headers and distinct request nonces cover public pages and error responses
+[7/9] [chromium] › tests\e2e\security-headers.spec.ts:36:5 › public, demo and not-found HTML receive matching nonces with zero normal-flow violations
+[8/9] [chromium] › tests\e2e\security-headers.spec.ts:78:5 › nonce-free inline code is blocked only in enforcement mode
+[9/9] [chromium] › tests\e2e\security-headers.spec.ts:102:5 › Blob audio and a storage worker remain available under CSP
+  9 passed (2.6m)
+exit=0

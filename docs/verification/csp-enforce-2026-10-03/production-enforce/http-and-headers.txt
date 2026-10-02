@@ -1,0 +1,31 @@
+# checked 2026-10-02T15:58:57Z against https://sasu-alpha.vercel.app (dpl_2BC6owyD6srKmCv8Ad5nWxiDAwmr)
+/         HTTP/2 200  enforce=1 report-only=0
+/privacy  HTTP/2 200  enforce=1 report-only=0
+/demo     HTTP/2 307  enforce=1 report-only=0
+/login    HTTP/2 200  enforce=1 report-only=0
+content-security-policy: default-src 'self'; script-src 'self' 'nonce-<per-request>' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';
+
+OK   GET / -> 200 (expected 200)
+OK   GET /privacy -> 200 (expected 200)
+OK   GET /demo/features -> 200 (expected 200)
+OK   POST /api/jobs/run -> 401 (expected 401)
+OK   POST /api/slack/events -> 401 (expected 401)
+OK   GET /api/companion/departments -> 401 (expected 401)
+OK   GET /api/companion/inbox -> 401 (expected 401)
+OK   GET /api/devices -> 401 (expected 401)
+OK   anon GET rest/v1/device_links -> 401 (expected 401/403)
+OK   anon GET rest/v1/sales_source_reviews -> 401 (expected 401/403)
+OK   anon RPC link_device -> 401 (expected 401/403/404)
+OK   anon RPC companion_context -> 401 (expected 401/403/404)
+OK   anon RPC revoke_device_link -> 401 (expected 401/403/404)
+ALL OK
+
+# worker (pg_cron -> /api/jobs/run) after deploy
+2026-10-02T15:57:13.733305Z 200
+2026-10-02T15:57:00.100892Z 200
+2026-10-02T15:56:05.646443Z 200
+2026-10-02T15:56:00.07269Z 200
+2026-10-02T15:55:00.088809Z 200
+2026-10-02T15:55:00.088809Z 200
+2026-10-02T15:54:00.118336Z 200
+2026-10-02T15:54:00.118336Z 200

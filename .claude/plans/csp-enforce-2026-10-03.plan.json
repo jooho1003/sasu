@@ -134,7 +134,8 @@
         "C4",
         "C5"
       ],
-      "status": "in_progress"
+      "status": "done",
+      "result": "정책 diff·실행 결과 검토, lint 오류 0·문구 차단 0·unit 183/1834 통과"
     },
     {
       "id": "O1",
@@ -154,7 +155,8 @@
       "depends_on": [
         "R1"
       ],
-      "status": "pending"
+      "status": "done",
+      "result": "사용자 승인('지금 병합하고 강제 전환') → PR #31 병합 593b9b3, 운영 dpl_12RWS9QPy5FtiKySYYQmJdnh9FH7(Report-Only, form-action 수정 반영)"
     },
     {
       "id": "O2",
@@ -173,7 +175,8 @@
       "depends_on": [
         "O1"
       ],
-      "status": "pending"
+      "status": "done",
+      "result": "env SASU_CSP_ENFORCE=true(Production, config) → redeploy dpl_2BC6owyD6srKmCv8Ad5nWxiDAwmr. 강제 헤더만, http 13/13, security-headers 4/4, guest 5/5, 데모 녹음 2/2·데모 화면 3/3(기능 지도 12≠13은 9/20부터의 환경 차이), 워커 200. 기록 PR이 마지막 단계"
     }
   ],
   "gate": {

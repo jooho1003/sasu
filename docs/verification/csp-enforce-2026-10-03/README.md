@@ -1,6 +1,6 @@
 # CSP 강제 전환 검증 — 2026-10-03
 
-V14(phase 23 · ADR-069)의 강제 전환 전에 사전 검증을 했다. 사용자가 "지금 해줘"라고 요청해, 심사 기간(~10/5)이 끝나기를 기다리지 않고 진행했다. 플랜은 `.claude/plans/csp-enforce-2026-10-03.*`에 있다. 이 문서는 로컬 강제 모드 검증과 운영 Report-Only 관찰 결과를 담는다. 운영 스위치를 실제로 켠 기록은 이 문서에 없다.
+V14(phase 23 · ADR-069)의 강제 전환 전에 사전 검증을 했다. 사용자가 "지금 해줘"라고 요청해, 심사 기간(~10/5)이 끝나기를 기다리지 않고 진행했다. 플랜은 `.claude/plans/csp-enforce-2026-10-03.*`에 있다. 이 문서는 로컬 강제 모드 검증, 운영 Report-Only 관찰, 그리고 사용자 승인 뒤의 **운영 강제 전환(2026-10-03 00:50 KST)** 결과를 담는다.
 
 ## 강제하면 깨지던 것: Slack 설치 폼
 
@@ -81,13 +81,32 @@ Chromium(Playwright 번들)으로 같은 구조를 재현했다. 재현 페이�
 - 실제 Slack OAuth 전체 흐름은 운영 관리자가 다시 연결할 때 확인해야 한다.
 - 실제 기기 녹음(V01~V06)은 여전히 사람이 확인할 일이다. 운영의 조직 녹음 스위치는 계속 꺼져 있다.
 
-## 운영 전환 절차 (승인 뒤)
+## 운영 강제 전환 (2026-10-03, 사용자 승인)
 
-1. 이 브랜치 PR을 병합한다. 정책 수정이 운영에 들어가지만 운영은 여전히 Report-Only다.
-2. Vercel Production env에 `SASU_CSP_ENFORCE=true`를 추가하고 재배포한다.
-3. 운영에서 확인한다.
-   - 강제 헤더만 나가는지
-   - `security-headers`·`guest` E2E
-   - 공개·데모 페이지
-   - 심사위원 데모 녹음
-4. 문제가 있으면 직전 배포로 즉시 되돌리거나, env를 지우고 재배포한다.
+사용자가 "지금 병합하고 강제 전환"을 골랐다.
+
+| 순서 | 실행 | 결과 |
+|---|---|---|
+| 1 | PR #31 병합 `593b9b3` | 운영 `dpl_12RWS9QPy5FtiKySYYQmJdnh9FH7`. 아직 Report-Only이고 수정된 `form-action`이 들어간 상태. **되돌림 대상** |
+| 2 | Vercel CLI 59.25.4 `env add SASU_CSP_ENFORCE production --value true --no-sensitive` | Production env 추가 |
+| 3 | `vercel redeploy <1의 배포> --target production` | 운영 `dpl_2BC6owyD6srKmCv8Ad5nWxiDAwmr` Ready(2분), `sasu-alpha.vercel.app` 연결 |
+
+**운영 확인** (강제 모드, [헤더·HTTP·워커](production-enforce/http-and-headers.txt))
+
+| 검사 | 결과 | 기록 |
+|---|---|---|
+| 응답 헤더 | `/`·`/privacy`·`/demo`·`/login` 모두 `Content-Security-Policy`만 있음(Report-Only 0). `form-action 'self' https://slack.com https://*.slack.com` | [http-and-headers](production-enforce/http-and-headers.txt) |
+| 공개 페이지 200·인증 없는 요청 차단 | 13/13 | 같은 기록 |
+| 보안 헤더·공개/데모 페이지 위반·nonce·주입 차단·blob | 4/4. 주입한 nonce 없는 script는 강제 모드에서 차단됐다 | [playwright](production-enforce/playwright.txt), [enforce-browser](production-enforce/enforce-browser.json) |
+| 게스트 1440·390 완주(위반 0)·실제 부서 차단·LLM/DB 증가 0 | 5/5 | 같은 기록 |
+| 심사위원 데모 녹음·재생·내려받기, 마이크 거절 후 합성 회의 | 2/2 | [demo-playwright](production-enforce/demo-playwright.txt) |
+| 데모 기능 화면 전체·390px·브라우저 안 체험 | 3/3 | 같은 기록 |
+| 데모 기능 지도 개수 | 기대 12, 실제 13으로 실패. 9/20 기록과 같은 환경 차이다(운영은 회고가 켜져 있어 카드가 1개 더 많다). CSP와 무관 | 같은 기록 |
+| 워커 | 배포 뒤 pg_cron → `/api/jobs/run` 매분 HTTP 200 | [http-and-headers](production-enforce/http-and-headers.txt) |
+
+데모 spec은 로컬 전용 설정(:3200 고정)이라, 운영 주소를 가리키는 임시 설정으로 실행했다. 쓰기를 시도하는 "심사 계정 쓰기 거부" 테스트는 운영에 쓰기 요청을 보내므로 제외했다.
+
+**되돌리는 방법**
+- 직전 Report-Only 배포 `dpl_12RWS9QPy5FtiKySYYQmJdnh9FH7`로 즉시 되돌린다(Vercel Instant Rollback).
+- 또는 Production env `SASU_CSP_ENFORCE`를 지우고 재배포한다.
+- 운영 env를 그대로 두면 이후 main 배포도 강제 모드를 유지한다.
