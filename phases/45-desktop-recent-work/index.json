@@ -1,0 +1,23 @@
+{
+  "project": "sasu",
+  "phase": "45-desktop-recent-work",
+  "design": "docs/02-design/features/desktop-recent-work.design.md",
+  "plan": "docs/01-plan/features/desktop-recent-work.plan.md",
+  "production_deployed": false,
+  "steps": [
+    {
+      "step": 0,
+      "name": "recent-work-ui",
+      "status": "completed",
+      "completed_at": "2026-10-03T01:27:40.7930807+09:00",
+      "verification": "docs/verification/45-desktop-recent-work/verification.md"
+    },
+    {
+      "step": 1,
+      "name": "verification-report",
+      "status": "completed",
+      "completed_at": "2026-10-03T01:27:40.8025806+09:00",
+      "verification": "docs/verification/45-desktop-recent-work/verification.md"
+    }
+  ]
+}

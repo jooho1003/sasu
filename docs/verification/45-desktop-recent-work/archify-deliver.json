@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "c8099791-1efe-4322-a8c7-9f08c4ecf347",
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\.vercel\\desktop-recent-work\\docs\\verification\\45-desktop-recent-work\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-recent-work\\.vercel\\desktop-recent-work.html",
+  "specification": {
+    "sha256": "fdd2d08bdfaad38131b6a4d24817374aba3218fc2c9c736c36e87a6c38c10318",
+    "bytes": 2031
+  },
+  "artifact": {
+    "sha256": "53857497883b2a60deb8148cd79729b10378ef8a007e909762e38d62289c6f5b",
+    "bytes": 754759
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "standard",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-01T18:23:03.876Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

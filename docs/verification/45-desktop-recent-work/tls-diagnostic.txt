@@ -1,0 +1,62 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep 최근 작업은 한국어
+
+
+Running 1 test using 1 worker
+
+(node:14892) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:30780) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 371ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 18ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-3Jr112DW.js   694.63 kB
+✓ built in 794ms
+fixture transport {
+  error: 'Error: net::ERR_CERT_AUTHORITY_INVALID',
+  certificate: { hostname: '127.0.0.1', fingerprint: undefined }
+}
+  x  1 tests\e2e\followup.spec.ts:239:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 (1.1s)
+
+
+  1) tests\e2e\followup.spec.ts:239:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 ───
+
+    Error: page.evaluate: Error: Error invoking remote method 'link:create': Error: network:서버에 연결하지 못했습니다.
+
+      218 |
+      219 |   async function login(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    > 220 |     await panel.evaluate(async (id) => {
+          |                 ^
+      221 |       await window.sasu.auth.verifyCode("synthetic@example.test", "123456");
+      222 |       await window.sasu.link.create({ dept_id: id });
+      223 |     }, deptId);
+        at login (D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:220:17)
+        at D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:249:34
+
+    Error Context: test-results\followup-desktop-followup--cc845--목록을-다시-열고-성공-후에만-읽음으로-기록한다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--cc845--목록을-다시-열고-성공-후에만-읽음으로-기록한다\error-context.md
+
+  1 failed
+    tests\e2e\followup.spec.ts:239:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 ────
