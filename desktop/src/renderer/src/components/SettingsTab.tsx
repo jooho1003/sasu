@@ -51,7 +51,7 @@ export function SettingsTab({
       </label>
       <p>
         {shortcut
-          ? "Ctrl+Alt+S를 눌러 질문을 바로 열 수 있습니다."
+          ? "Ctrl+Alt+S를 눌러 질문을 바로 열 수 있습니다." // wording-ok: 키보드에 적힌 키 이름을 그대로 안내합니다.
           : "바로가기 키를 등록하지 못했습니다."}
       </p>
       <p>기기 이름 · {info?.device_name ?? "확인 중"}</p>
