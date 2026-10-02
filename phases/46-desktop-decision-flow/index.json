@@ -1,0 +1,14 @@
+{
+  "project": "sasu", "phase": "46-desktop-decision-flow",
+  "plan": "docs/01-plan/features/desktop-decision-flow.plan.md",
+  "design": "docs/02-design/features/desktop-decision-flow.design.md",
+  "status": "completed",
+  "verification": "docs/verification/46-desktop-decision-flow/verification.md",
+  "analysis": "docs/03-analysis/desktop-decision-flow.analysis.md",
+  "report": "docs/04-report/features/desktop-decision-flow.report.md",
+  "production_deployed": false,
+  "steps": [
+    { "step": 0, "name": "decision-flow-ui", "status": "completed" },
+    { "step": 1, "name": "verification-report", "status": "completed" }
+  ]
+}

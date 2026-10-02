@@ -318,6 +318,16 @@
       "report": "docs/04-report/features/desktop-recent-work.report.md",
       "production_deployed": false,
       "note": "최근 24시간 본인 자료·영업 작업 목록/현재 권한 재열람 구현. Electron18·desktop78·root1834·SQL316/권한2016·webpack build 통과, 기본 Turbopack은 junction 환경 실패. 독립 정적8/8·대상 일치율100%. 운영 미반영, 메일 연결 보류."
+    },
+    {
+      "dir": "46-desktop-decision-flow",
+      "status": "completed",
+      "design": "docs/02-design/features/desktop-decision-flow.design.md",
+      "verification": "docs/verification/46-desktop-decision-flow/verification.md",
+      "analysis": "docs/03-analysis/desktop-decision-flow.analysis.md",
+      "report": "docs/04-report/features/desktop-decision-flow.report.md",
+      "production_deployed": false,
+      "note": "결정함 로딩·오류 재시도·현재 상세·처리 성공 복귀/새 조회·실패 초안 보존 구현. Electron 25·desktop 78·root 1,834·SQL 316/권한 2,016·webpack build 통과. 독립 정적 8/8·성공 조건 5/5. 기본 Turbopack junction/Graft native 오류와 수동 대조 범위 기록. 운영 0.1.1 유지, 메일 연결 보류."
     }
   ]
 }

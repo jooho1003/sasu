@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "결정함 조회와 처리 회복", "subtitle": "현재 근거로 결정하고 성공 뒤 새 목록을 읽습니다", "output": "desktop-decision-flow.html", "visual_preset": "blueprint", "viewBox": [1200,620] },
+  "components": [
+    { "id": "inbox", "type": "frontend", "label": "결정함 목록", "sublabel": "로딩·오류·수동 갱신", "pos": [35,110], "size": [180,70] },
+    { "id": "detail", "type": "security", "label": "기존 E09 상세", "sublabel": "현재 인용·연타 잠금", "pos": [290,110], "size": [180,70] },
+    { "id": "action", "type": "backend", "label": "기존 E10 처리", "sublabel": "실패는 초안 보존", "pos": [545,110], "size": [180,70] },
+    { "id": "sql", "type": "database", "label": "기존 원장·RLS", "sublabel": "담당자·팀장·멱등", "pos": [800,110], "size": [180,70] },
+    { "id": "return", "type": "frontend", "label": "성공 뒤 목록 복귀", "sublabel": "이미 처리된 응답 포함", "pos": [800,370], "size": [180,70] },
+    { "id": "fresh", "type": "backend", "label": "새 E05 조회", "sublabel": "선행 응답 폐기 후 조회", "pos": [545,370], "size": [180,70] },
+    { "id": "cleanup", "type": "security", "label": "복귀·탭·세션 종료", "sublabel": "늦은 UI 콜백 폐기", "pos": [35,370], "size": [180,70] }
+  ],
+  "connections": [
+    { "id": "i-d", "from": "inbox", "to": "detail", "label": "선택", "labelAt": [252,95] },
+    { "id": "d-a", "from": "detail", "to": "action", "label": "명시적 행동", "labelAt": [507,95] },
+    { "id": "a-s", "from": "action", "to": "sql", "label": "세션·권한", "labelAt": [763,95] },
+    { "id": "s-r", "from": "sql", "to": "return", "label": "성공", "labelAt": [1000,265] },
+    { "id": "r-f", "from": "return", "to": "fresh", "label": "현재 목록", "labelAt": [763,455] },
+    { "id": "c-i", "from": "cleanup", "to": "inbox", "label": "세대·nav key 초기화", "variant": "security", "labelAt": [150,280] }
+  ]
+}

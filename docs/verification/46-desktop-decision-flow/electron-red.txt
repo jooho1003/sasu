@@ -1,0 +1,67 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep 결정함은 목록
+
+
+Running 1 test using 1 worker
+
+(node:15796) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:32348) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 7.08s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 661ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-3Jr112DW.js   694.63 kB
+✓ built in 8.06s
+  x  1 tests\e2e\followup.spec.ts:277:3 › desktop followup › 결정함은 목록 로딩·오류를 빈 상태와 구분하고 상태와 재시도를 표시한다 (20.9s)
+
+
+  1) tests\e2e\followup.spec.ts:277:3 › desktop followup › 결정함은 목록 로딩·오류를 빈 상태와 구분하고 상태와 재시도를 표시한다 ─
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('카드를 불러오는 중입니다.')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('카드를 불러오는 중입니다.') with timeout 5000ms
+      - waiting for getByText('카드를 불러오는 중입니다.')
+
+
+      281 |       await login(panel);
+      282 |       await panel.getByRole("button", { name: "결정함", exact: true }).click();
+    > 283 |       await expect(panel.getByText("카드를 불러오는 중입니다.")).toBeVisible();
+          |                                                       ^
+      284 |       await expect(panel.getByText("지금 결정할 카드가 없습니다.")).toHaveCount(0);
+      285 |       await expect.poll(() => !!releaseInbox).toBe(true);
+      286 |       inboxMode = "error"; releaseInbox!();
+        at D:\바이브코딩\sasu\.vercel\desktop-decision-flow\desktop\tests\e2e\followup.spec.ts:283:55
+
+    Error Context: test-results\followup-desktop-followup--384d1-류를-빈-상태와-구분하고-상태와-재시도를-표시한다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--384d1-류를-빈-상태와-구분하고-상태와-재시도를-표시한다\error-context.md
+
+  1 failed
+    tests\e2e\followup.spec.ts:277:3 › desktop followup › 결정함은 목록 로딩·오류를 빈 상태와 구분하고 상태와 재시도를 표시한다 ──

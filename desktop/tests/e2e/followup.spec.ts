@@ -2,6 +2,7 @@ import { expect, test, _electron as electron } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { createServer, type Server } from "node:https";
@@ -42,12 +43,23 @@ test.describe("desktop followup", () => {
   let workReviews: { id: string; kind: string; title: string; status: string }[] = [];
   let workSales: { id: string; status: string }[] = [];
   let inboxRequests = 0;
+  const cardId = randomUUID();
+  let decisionCards: { id: string; title: string; deadline: string | null; status: string }[] = [];
+  let cardMode = "normal";
+  let cardStatus = "open";
+  let cardRequests = 0;
+  let releaseCard: (() => void) | null = null;
+  let decideMode = "normal";
+  let releaseDecision: (() => void) | null = null;
+  let decisionBodies: { status: string; outcome: string; rationale: string }[] = [];
   test.beforeEach(() => {
     askMode = "accepted"; revoked = false; askRequests = 0; previousQuestion = ""; currentUserId = userId;
     askBodies = []; historyMode = "normal"; historyRequests = 0; answerMode = "normal";
     releaseHistory = null; releaseAnswer = null;
     contextRole = "member"; inboxMode = "normal"; salesMode = "normal";
     workReviews = []; workSales = []; releaseInbox = null; releaseSales = null; salesRequests = 0; inboxRequests = 0;
+    decisionCards = []; cardMode = "normal"; cardStatus = "open"; cardRequests = 0;
+    releaseCard = null; decideMode = "normal"; releaseDecision = null; decisionBodies = [];
   });
   test.beforeAll(async () => {
     // A test-only CA preserves production's HTTPS-only link gate.
@@ -89,6 +101,7 @@ test.describe("desktop followup", () => {
         response.end(JSON.stringify({ link_id: linkId, dept: { id: deptId, name: "합성 부서" }, role: contextRole, display_name: "합성 팀원" }));
       } else if (path === "/api/companion/inbox") {
         inboxRequests += 1;
+        const capturedCards = structuredClone(decisionCards);
         if (inboxMode === "delayed") await new Promise<void>((resolve) => { releaseInbox = resolve; });
         if (revoked) {
           response.statusCode = 401;
@@ -96,7 +109,30 @@ test.describe("desktop followup", () => {
         } else if (inboxMode === "error") {
           response.statusCode = 503;
           response.end(JSON.stringify({ code: "inbox_failed", error: "최근 작업을 불러오지 못했습니다." }));
-        } else response.end(JSON.stringify({ server_time: new Date().toISOString(), cards: [], answers: [], reviews: contextRole === "lead" ? workReviews : [], sales: contextRole === "lead" ? workSales : [] }));
+        } else response.end(JSON.stringify({ server_time: new Date().toISOString(), cards: capturedCards, answers: [], reviews: contextRole === "lead" ? workReviews : [], sales: contextRole === "lead" ? workSales : [] }));
+      } else if (path === `/api/companion/cards/${cardId}`) {
+        cardRequests += 1;
+        if (cardMode === "delayed") await new Promise<void>((resolve) => { releaseCard = resolve; });
+        if (cardMode === "forbidden") {
+          response.statusCode = 403;
+          response.end(JSON.stringify({ code: "card_forbidden", error: "이 카드를 확인할 수 없습니다." }));
+        } else response.end(JSON.stringify({
+          card: { id: cardId, dept_id: deptId, title: "합성 승인 카드", background: "합성 요청의 승인 조건을 확인합니다.", recommendation: "합성 원칙의 승인을 확인하세요.", deadline: null, assignee_id: userId, status: cardStatus, visibility: "dept" },
+          citations: cardMode === "noCitations" ? [] : [{ quote: "예외는 팀장 승인 후 진행한다.", author: "합성 작성자", occurredAt: null, source: "합성 부서 원칙", href: `/d/${deptId}/ledger`, lowConfidence: false, boundaryReview: false }],
+          conflicts: [], decisions: [],
+        }));
+      } else if (path === `/api/companion/cards/${cardId}/decide`) {
+        const body = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+        decisionBodies.push(body);
+        if (decideMode.startsWith("delayed")) await new Promise<void>((resolve) => { releaseDecision = resolve; });
+        if (["conflict", "forbidden", "offline", "delayedError"].includes(decideMode)) {
+          response.statusCode = decideMode === "forbidden" ? 403 : decideMode === "conflict" ? 409 : 503;
+          response.end(JSON.stringify({ code: "decision_failed", error: "합성 결정을 처리하지 못했습니다. 다시 확인해 주세요." }));
+        } else {
+          cardStatus = decideMode === "duplicate" ? "decided" : body.status;
+          decisionCards = [];
+          response.end(JSON.stringify({ ok: true, duplicate: decideMode === "duplicate", status: cardStatus, message: decideMode === "duplicate" ? "이미 합성 팀장이 결정했습니다." : "합성 카드 처리를 마쳤습니다." }));
+        }
       } else if (path === "/api/companion/sales-review/sources") {
         response.end(JSON.stringify({ candidates: [] }));
       } else if (path === `/api/companion/sales-review/${salesId}`) {
@@ -174,10 +210,16 @@ test.describe("desktop followup", () => {
     if (fixtureServer) await new Promise<void>((resolve, reject) => fixtureServer.close((cause) => cause ? reject(cause) : resolve()));
     if (tlsDirectory) {
       if (!tlsDirectory.startsWith(resolve(tmpdir(), "sasu-desktop-tls-"))) throw new Error("unsafe_tls_path");
-      rmSync(tlsDirectory, { recursive: true, force: true });
+      rmSync(tlsDirectory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
+  async function removeUserData(userData: string): Promise<void> {
+    const absolute = resolve(userData);
+    if (!absolute.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
+    // Windows may retain Chromium handles briefly after Electron exits.
+    await rm(absolute, { recursive: true, force: true, maxRetries: 20, retryDelay: 100 });
+  }
   async function launch() {
     const userData = mkdtempSync(resolve(tmpdir(), "sasu-desktop-followup-"));
     const app = await electron.launch({
@@ -205,7 +247,7 @@ test.describe("desktop followup", () => {
     } catch (cause) {
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
       throw cause;
     }
   }
@@ -229,6 +271,244 @@ test.describe("desktop followup", () => {
     }, fail);
   }
   const webEvents = (app: Awaited<ReturnType<typeof launch>>["app"]) => app.evaluate(() => Reflect.get(globalThis, "recentWorkOpened") as string[]);
+
+  function seedDecisionCard() {
+    decisionCards = [{ id: cardId, title: "합성 승인 카드", deadline: null, status: "open" }];
+    cardStatus = "open";
+  }
+  async function openDecisionCard(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    await panel.getByRole("button", { name: "결정함", exact: true }).click();
+    await panel.getByRole("button", { name: /합성 승인 카드/ }).click();
+    await expect(panel.getByRole("heading", { name: "합성 승인 카드" })).toBeVisible();
+  }
+
+  test("결정함은 목록 로딩·오류를 빈 상태와 구분하고 상태와 재시도를 표시한다", async () => {
+    contextRole = "lead"; inboxMode = "delayed";
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel);
+      await panel.getByRole("button", { name: "결정함", exact: true }).click();
+      await expect(panel.getByText("카드를 불러오는 중입니다.")).toBeVisible();
+      await expect(panel.getByText("지금 결정할 카드가 없습니다.")).toHaveCount(0);
+      await expect.poll(() => !!releaseInbox).toBe(true);
+      inboxMode = "error"; releaseInbox!();
+      await expect(panel.getByRole("alert")).toContainText("최근 작업을 불러오지 못했습니다.");
+      await expect(panel.getByText("지금 결정할 카드가 없습니다.")).toHaveCount(0);
+      inboxMode = "normal";
+      await panel.getByRole("button", { name: "카드 새로고침" }).click();
+      await expect(panel.getByText("지금 결정할 카드가 없습니다.")).toBeVisible();
+      seedDecisionCard(); decisionCards.push({ id: randomUUID(), title: "합성 검토 카드", deadline: "2026-10-05T00:00:00Z", status: "needs_review" });
+      await panel.getByRole("button", { name: "카드 새로고침" }).click();
+      await expect(panel.getByText("결정 대기", { exact: true })).toBeVisible();
+      await expect(panel.getByText("검토 필요", { exact: true })).toBeVisible();
+      await expect(panel.getByText("마감 미정")).toBeVisible();
+      await expect(panel.getByText("2026-10-05T00:00:00Z")).toBeVisible();
+      const shots = resolve(process.cwd(), "../docs/verification/46-desktop-decision-flow/screenshots");
+      mkdirSync(shots, { recursive: true }); await panel.screenshot({ path: resolve(shots, "decision-list.png") });
+    } finally {
+      releaseInbox?.(); await app.close();
+      if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
+      await removeUserData(userData);
+    }
+  });
+
+  test("결정함 상세 연타는 한 번이며 현재 근거 없는 카드와 권한 실패는 읽지 않는다", async () => {
+    seedDecisionCard(); cardMode = "delayed";
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel); await panel.getByRole("button", { name: "결정함", exact: true }).click();
+      await panel.getByRole("button", { name: /합성 승인 카드/ }).evaluate((node) => { (node as HTMLButtonElement).click(); (node as HTMLButtonElement).click(); });
+      await expect.poll(() => !!releaseCard).toBe(true);
+      expect(cardRequests).toBe(1);
+      await expect(panel.getByText("카드 내용을 불러오는 중입니다.")).toBeVisible();
+      cardMode = "noCitations"; releaseCard!();
+      await expect(panel.getByText("근거를 확인하지 못해 내용을 보여 주지 않습니다.")).toBeVisible();
+      await expect(panel.getByRole("heading", { name: "합성 승인 카드" })).toHaveCount(0);
+      await expect(panel.getByRole("button", { name: "결정하기", exact: true })).toHaveCount(0);
+      expect(await panel.evaluate(async () => (await window.sasu.settings.get()).seen)).not.toContain(cardId);
+      await panel.getByRole("button", { name: "목록으로 돌아가기" }).click();
+      cardMode = "forbidden";
+      await panel.getByRole("button", { name: /합성 승인 카드/ }).click();
+      await expect(panel.getByText("이 카드를 확인할 수 없습니다.")).toBeVisible();
+      cardMode = "normal";
+      await panel.getByRole("button", { name: /합성 승인 카드/ }).click();
+      await expect.poll(() => panel.evaluate(async () => (await window.sasu.settings.get()).seen)).toContain(cardId);
+      await panel.getByRole("button", { name: "목록으로 돌아가기" }).click();
+      cardStatus = "decided";
+      await panel.getByRole("button", { name: /합성 승인 카드/ }).click();
+      await expect(panel.getByText("이미 처리한 카드입니다.")).toBeVisible();
+      await expect(panel.getByRole("button", { name: "결정하기", exact: true })).toHaveCount(0);
+      expect(decisionBodies).toEqual([]);
+    } finally {
+      releaseCard?.(); await app.close();
+      if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
+      await removeUserData(userData);
+    }
+  });
+
+  test("결정함 결정·보류·반려·이미 결정된 응답은 목록 복귀와 현재 갱신으로 끝난다", async () => {
+    seedDecisionCard();
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel);
+      for (const [status, label] of [["decided", "결정하기"], ["deferred", "미루기"], ["rejected", "돌려보내기"], ["decided", "결정하기"]]) {
+        seedDecisionCard(); decideMode = decisionBodies.length === 3 ? "duplicate" : "normal";
+        await panel.getByRole("button", { name: "결정함", exact: true }).click();
+        await panel.getByRole("button", { name: "카드 새로고침" }).click();
+        await openDecisionCard(panel);
+        await panel.getByRole("textbox", { name: "결과", exact: true }).fill("합성 승인 결과");
+        await panel.getByRole("textbox", { name: "이유", exact: true }).fill("합성 원칙 확인");
+        const refreshed = inboxRequests;
+        await panel.getByRole("button", { name: label, exact: true }).click();
+        await expect(panel.getByRole("heading", { name: "결정할 카드" })).toBeVisible();
+        await expect(panel.getByText("지금 결정할 카드가 없습니다.")).toBeVisible();
+        expect(inboxRequests).toBeGreaterThan(refreshed);
+        expect(decisionBodies.at(-1)).toEqual({ status, outcome: "합성 승인 결과", rationale: "합성 원칙 확인" });
+      }
+      await expect(panel.getByText("이미 합성 팀장이 결정했습니다.")).toBeVisible();
+      expect(decisionBodies.length).toBe(4);
+    } finally {
+      await app.close();
+      if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
+      await removeUserData(userData);
+    }
+  });
+
+  test("결정함 처리 실패는 초안을 유지하고 연타와 자동 재전송을 막는다", async () => {
+    seedDecisionCard(); decideMode = "delayedError";
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel); await openDecisionCard(panel);
+      await panel.getByRole("textbox", { name: "결과", exact: true }).fill("보존할 합성 결과");
+      await panel.getByRole("textbox", { name: "이유", exact: true }).fill("보존할 합성 이유");
+      await panel.locator("form.decision").evaluate((node) => { node.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); node.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); });
+      await expect.poll(() => !!releaseDecision).toBe(true);
+      expect(decisionBodies.length).toBe(1);
+      await expect(panel.getByRole("button", { name: "결정하기", exact: true })).toBeDisabled();
+      releaseDecision!();
+      await expect(panel.getByText(/합성 결정을 처리하지 못했습니다/)).toBeVisible();
+      for (const mode of ["forbidden", "conflict", "offline"]) {
+        decideMode = mode;
+        await panel.getByRole("button", { name: "결정하기", exact: true }).click();
+        await expect(panel.getByRole("button", { name: "결정하기", exact: true })).toBeEnabled();
+        await expect(panel.getByRole("textbox", { name: "결과", exact: true })).toHaveValue("보존할 합성 결과");
+        await expect(panel.getByRole("textbox", { name: "이유", exact: true })).toHaveValue("보존할 합성 이유");
+      }
+      expect(decisionBodies.length).toBe(4);
+      decideMode = "normal"; inboxMode = "error";
+      await panel.getByRole("button", { name: "결정하기", exact: true }).click();
+      await expect(panel.getByRole("heading", { name: "결정할 카드" })).toBeVisible();
+      await expect(panel.getByRole("alert")).toBeVisible();
+      expect(decisionBodies.length).toBe(5);
+    } finally {
+      releaseDecision?.(); await app.close();
+      if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
+      await removeUserData(userData);
+    }
+  });
+
+  test("결정함 늦은 상세와 처리 응답은 탭 이탈·목록 복귀·로그아웃 뒤 화면을 바꾸지 않는다", async () => {
+    seedDecisionCard(); cardMode = "delayed";
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel);
+      await panel.getByRole("button", { name: "결정함", exact: true }).click();
+      await panel.getByRole("button", { name: /합성 승인 카드/ }).click();
+      await expect.poll(() => !!releaseCard).toBe(true);
+      await panel.getByRole("button", { name: "질문", exact: true }).click();
+      cardMode = "normal"; releaseCard!();
+      await panel.evaluate(async (id) => window.sasu.card.get(id), cardId);
+      await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible();
+      expect(await panel.evaluate(async () => (await window.sasu.settings.get()).seen)).not.toContain(cardId);
+      for (const departure of ["back", "tab", "logout"]) {
+        seedDecisionCard(); decideMode = departure === "tab" ? "delayed" : "delayedError"; releaseDecision = null;
+        await panel.getByRole("button", { name: "결정함", exact: true }).click();
+        await panel.getByRole("button", { name: "카드 새로고침" }).click();
+        await openDecisionCard(panel);
+        await panel.getByRole("button", { name: "미루기", exact: true }).click();
+        await expect.poll(() => !!releaseDecision).toBe(true);
+        if (departure === "back") await panel.getByRole("button", { name: "목록으로 돌아가기" }).click();
+        else await panel.getByRole("button", { name: "설정", exact: true }).click();
+        if (departure === "logout") await panel.getByRole("button", { name: "로그아웃하기" }).click();
+        const refreshed = inboxRequests;
+        releaseDecision!();
+        await panel.evaluate(async (id) => window.sasu.card.get(id).catch(() => null), cardId);
+        await expect(panel.getByText(/합성 결정을 처리하지 못했습니다/)).toHaveCount(0);
+        expect(inboxRequests).toBe(refreshed);
+      }
+      await expect(panel.getByRole("heading", { name: "사수 시작하기" })).toBeVisible();
+    } finally {
+      releaseCard?.(); releaseDecision?.(); await app.close();
+      if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
+      await removeUserData(userData);
+    }
+  });
+
+  test("결정함 늦은 읽음 오류와 로그아웃 뒤 상세 응답은 다음 화면에 남지 않는다", async () => {
+    seedDecisionCard();
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel);
+      await app.evaluate(({ ipcMain }) => {
+        ipcMain.removeHandler("settings:markSeen");
+        ipcMain.handle("settings:markSeen", async () => {
+          await new Promise<void>((resolve) => Reflect.set(globalThis, "releaseCardSeen", resolve));
+          throw new Error("합성 카드 읽음 저장 실패");
+        });
+      });
+      await openDecisionCard(panel);
+      await expect.poll(() => app.evaluate(() => !!Reflect.get(globalThis, "releaseCardSeen"))).toBe(true);
+      await panel.getByRole("button", { name: "목록으로 돌아가기" }).click();
+      await app.evaluate(() => (Reflect.get(globalThis, "releaseCardSeen") as () => void)());
+      await panel.evaluate(async () => { await window.sasu.app.info(); await window.sasu.app.info(); });
+      await expect(panel.getByText(/합성 카드 읽음 저장 실패/)).toHaveCount(0);
+      await app.evaluate(() => Reflect.set(globalThis, "releaseCardSeen", null));
+      await openDecisionCard(panel);
+      await expect.poll(() => app.evaluate(() => !!Reflect.get(globalThis, "releaseCardSeen"))).toBe(true);
+      await panel.getByRole("button", { name: "결정함", exact: true }).click();
+      await app.evaluate(() => (Reflect.get(globalThis, "releaseCardSeen") as () => void)());
+      await panel.evaluate(async () => { await window.sasu.app.info(); await window.sasu.app.info(); });
+      await expect(panel.getByText(/합성 카드 읽음 저장 실패/)).toHaveCount(0);
+      cardMode = "delayed";
+      await panel.getByRole("button", { name: /합성 승인 카드/ }).click();
+      await expect.poll(() => !!releaseCard).toBe(true);
+      await panel.getByRole("button", { name: "설정", exact: true }).click();
+      await panel.getByRole("button", { name: "로그아웃하기" }).click();
+      cardMode = "normal"; releaseCard!();
+      await panel.evaluate(async (id) => window.sasu.card.get(id).catch(() => null), cardId);
+      await expect(panel.getByRole("heading", { name: "사수 시작하기" })).toBeVisible();
+      expect(await panel.evaluate(async () => (await window.sasu.settings.get()).seen)).not.toContain(cardId);
+    } finally {
+      releaseCard?.(); await app.close();
+      if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
+      await removeUserData(userData);
+    }
+  });
+
+  test("결정함 처리 뒤 갱신은 처리 전 자동 조회의 늦은 스냅샷을 다시 쓰지 않는다", async () => {
+    seedDecisionCard();
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel); await panel.clock.install(); await panel.reload();
+      await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible();
+      await openDecisionCard(panel); inboxMode = "delayed";
+      await panel.clock.runFor(30_000);
+      await expect.poll(() => !!releaseInbox).toBe(true);
+      const before = inboxRequests;
+      await panel.getByRole("button", { name: "미루기", exact: true }).click();
+      await expect(panel.getByRole("heading", { name: "결정할 카드" })).toBeVisible();
+      await expect(panel.getByText("카드를 불러오는 중입니다.")).toBeVisible();
+      inboxMode = "normal"; releaseInbox!();
+      await expect(panel.getByText("지금 결정할 카드가 없습니다.")).toBeVisible();
+      expect(inboxRequests).toBe(before + 1);
+      await expect(panel.getByRole("button", { name: /합성 승인 카드/ })).toHaveCount(0);
+      expect(decisionBodies.length).toBe(1);
+    } finally {
+      releaseInbox?.(); await app.close();
+      if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
+      await removeUserData(userData);
+    }
+  });
 
   test("최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다", async () => {
     contextRole = "lead";
@@ -264,7 +544,7 @@ test.describe("desktop followup", () => {
     } finally {
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -298,7 +578,7 @@ test.describe("desktop followup", () => {
     } finally {
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -325,7 +605,7 @@ test.describe("desktop followup", () => {
       releaseSales?.();
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -357,7 +637,7 @@ test.describe("desktop followup", () => {
       releaseInbox?.();
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -390,7 +670,7 @@ test.describe("desktop followup", () => {
     } finally {
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -415,7 +695,7 @@ test.describe("desktop followup", () => {
       releaseInbox?.();
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -458,7 +738,7 @@ test.describe("desktop followup", () => {
     } finally {
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -487,7 +767,7 @@ test.describe("desktop followup", () => {
     } finally {
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -509,7 +789,7 @@ test.describe("desktop followup", () => {
     } finally {
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -541,7 +821,7 @@ test.describe("desktop followup", () => {
     } finally {
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -568,7 +848,7 @@ test.describe("desktop followup", () => {
       releaseHistory?.(); releaseAnswer?.();
       await app.close();
       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -619,7 +899,7 @@ test.describe("desktop followup", () => {
         expect(await panel.evaluate(async () => window.sasu.settings.get())).toMatchObject({ seen: [], pet: "green", panelPinned: false });
       } finally {
         await app.close();
-        rmSync(userData, { recursive: true, force: true });
+        await removeUserData(userData);
       }
     });
   }
@@ -636,7 +916,7 @@ test.describe("desktop followup", () => {
       expect((await panel.evaluate(async () => window.sasu.settings.get())).seen).toEqual([]);
     } finally {
       await app.close();
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -669,7 +949,7 @@ test.describe("desktop followup", () => {
       expect(askRequests - previousRequests).toBe(1);
     } finally {
       await app.close();
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -698,7 +978,7 @@ test.describe("desktop followup", () => {
       expect((await panel.evaluate(async () => window.sasu.settings.get())).seen).toEqual(ids);
     } finally {
       await app.close();
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -760,7 +1040,7 @@ test.describe("desktop followup", () => {
       await expect.poll(async () => (await panel.evaluate(async () => window.sasu.settings.get())).seen).toEqual([readId, answerId]);
     } finally {
       await app.close();
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 
@@ -777,7 +1057,7 @@ test.describe("desktop followup", () => {
       expect(info.device_name).not.toBe("데스크톱 앱");
     } finally {
       await app.close();
-      rmSync(userData, { recursive: true, force: true });
+      await removeUserData(userData);
     }
   });
 });

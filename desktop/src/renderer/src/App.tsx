@@ -55,6 +55,7 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [answerQuestion, setAnswerQuestion] = useState("");
   const [card, setCard] = useState<Card | null>(null);
+  const [cardKey, setCardKey] = useState(0);
   const [notice, setNotice] = useState("");
   const [shortcut, setShortcut] = useState(true);
   const [petState, setPetState] = useState("idle");
@@ -85,6 +86,15 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
     inboxRequest.current = request;
     return request;
   }, []);
+  // Design Ref: desktop-decision-flow §2 — mutation refresh must start after any pre-mutation read.
+  const refreshAfterDecision = async (): Promise<CompanionInbox | null> => {
+    const pending = inboxRequest.current;
+    if (pending) {
+      inboxGeneration.current += 1;
+      await pending;
+    }
+    return active.current ? loadInbox() : null;
+  };
   const rememberSeen = async (id: string, stillCurrent: () => boolean = () => true): Promise<void> => {
     if (!active.current || !stillCurrent()) return;
     try {
@@ -184,6 +194,7 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
             onClick={() => {
               setTab(item.id);
               setCard(null);
+              if (item.id === "cards") setCardKey((key) => key + 1);
             }}
           >
             {item.label}
@@ -208,13 +219,17 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
         )}
         {tab === "cards" && (
           <CardsTab
+            key={cardKey}
             card={card}
             inbox={inbox}
+            loading={inboxLoading}
+            error={inboxError}
             role={context?.role ?? "member"}
             onCard={setCard}
             onSeen={rememberSeen}
             onNotice={setNotice}
             onChanged={loadInbox}
+            onProcessed={refreshAfterDecision}
           />
         )}
         {tab === "history" && (
