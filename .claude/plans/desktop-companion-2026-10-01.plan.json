@@ -294,7 +294,8 @@
       "output": "운영 반영 기록",
       "requires_approval": true,
       "status": "partial",
-      "note": "2026-10-02: 운영 auth.sessions 권한 확인·0068/0069 적용·웹 배포 완료(PR #25, docs/verification/desktop-companion-production-2026-10-02.md). 남음: SMTP·메일 템플릿·배포 저장소·첫 게시·5분 설치 녹화."
+      "note": "운영 웹·DB와 공개 Windows 0.1.1 게시 완료. 현재 PC NSIS 설치 16.94초, 운영 테스트 코드 인증/부서 연결/질문 거절, 공개 0.1.0→0.1.1 업데이트·세션 복원·로그아웃 파일 삭제 확인. SC8 충족, 계획8/9·정적93.6%. 신규 Windows 5분 녹화·실제 메일 수신·도메인/Resend SMTP는 대기. docs/verification/43-desktop-companion/production-install.md",
+      "approval_record": "2026-10-02 사용자 요청: 운영 배포하고 설치도 해서 확인해봐. 추가로 Resend 선택·6자리 코드 변경 승인."
     },
     {
       "id": "S13",
