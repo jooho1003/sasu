@@ -11,8 +11,10 @@
     {
       "step": 1,
       "name": "production-slack-capture",
-      "status": "pending",
-      "summary": "ADR-049에 따른 운영 승인 확인 후 스냅샷 배포·실제 @사수 질문 검증·제출용 합성 Slack 캡처 진행."
+      "status": "blocked",
+      "summary": "ADR-049에 따른 운영 승인 확인 후 스냅샷 배포·실제 @사수 질문 검증·제출용 합성 Slack 캡처 진행.",
+      "blocked_reason": "사람 작업 대기: QA 채널에서 실제 @사수 질문 1회, Slack 화면에서 답변·인용·링크 확인과 캡처, 제출 이미지 교체 판단, Slack 앱 이벤트 구독(app_mention·message.im) 확인. 배포·운영 E2E·서명 없는 요청 401은 9/16·9/20에 수행(docs/verification/slack-completion-2026-09-16.md, docs/verification/production-rollout-2026-09-20.md).",
+      "blocked_at": "2026-10-02T23:25:00+09:00"
     }
   ]
 }

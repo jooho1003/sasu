@@ -114,6 +114,8 @@ AG-08 기능 범위의 중요한 미해결 설계 차이는 없다. 실제 고�
 
 phase 41·42는 운영 미반영이다. 적용 시 0068과 phase 41 worker/UI부터 함께 검토·검증하는 별도 단계가 필요하다.
 
+> 2026-10-02 갱신: phase 41·42는 PR #24 병합(10/1 22:12 KST)으로 자동 운영 배포됐고, 0068은 10/2 20:33 KST에 적용됐다. 경위는 [운영 기록](../../verification/desktop-companion-production-2026-10-02.md)에 있다. 로그인 lead의 운영 흐름은 아직 확인하지 않았다.
+
 ### 4.2 Cancelled/On Hold Items
 
 Graft·Archify MCP/CLI 미노출로 실제 그래프·렌더 산출물이 없다. import/호출 추적과 설계 Mermaid로 확인한 범위만 기록했다. SQL WASM은 pg_cron/pg_net 미지원으로 기존 0004를 제외했으며 cron 운영 검증을 수행한 것으로 계산하지 않는다. Python 하네스 실행기는 실행하지 않고 주 세션에서 step 순서로 직접 구현·검증했다.

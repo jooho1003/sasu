@@ -255,7 +255,7 @@ D12(9/19)에 영상·스크린샷·제출서를 만들고 **제출** 버튼까�
 
 ## 15. 개발 회고 수집과 검토 (ADR-063)
 
-2026-09-19 확정한 1단계는 파일 업로드 방식이다. 운영 환경의 `SASU_RETRO_ENABLED`는 기본 `false`이며, 9/20 제출 이후 승인된 점검 창에서 0046·0047·0048까지 적용하고 검증한 앱과 워커를 함께 반영한다. 적용 전 백업과 배포 ID를 기록한다. 공개 링크·노션 쓰기·개인 토큰 전송은 이 단계에 없다.
+2026-09-19 확정한 1단계는 파일 업로드 방식이다. `SASU_RETRO_ENABLED`의 기본값은 `false`다. 운영에는 2026-09-20에 0046·0047·0048을 적용하고 `SASU_RETRO_ENABLED=true`로 켰다([운영 반영 기록](verification/production-rollout-2026-09-20.md)). 다른 환경에 켤 때도 적용 전 백업과 배포 ID를 기록한다. 공개 링크·노션 쓰기·개인 토큰 전송은 이 단계에 없다.
 
 1. 로컬 리포에서 `npm ci` 후 `npm run retro:collect -- --dry-run`을 실행한다. 설정이 없으면 `config_required` 안내만 나오며 파일은 만들지 않는다. `npm run retro:collect`를 한 번 실행하면 사용자 홈의 `.sasu/retro.json` 설정 틀을 만든다.
 2. 설정의 `repos`에 본인 리포 절대 경로, `author_emails`에 본인 Git 작성자 이메일을 넣는다. 이메일 목록이 비어 있으면 Git 수집은 0건이다. `claude.enabled`, `codex.enabled`, `memory.enabled`는 각각 끌 수 있다. `tz` 기본은 `Asia/Seoul`이다.

@@ -1,6 +1,6 @@
 # Phase 23 — 웹 직접 회의 녹음
 
-상태: **step4-A·step0~3·step4-B1~B8 로컬 구현·검증 진행 / 실기기·제공사·정량 실측·운영 게이트 미충족 / 이번 변경 운영 미반영**. 로컬 완료와 전체 완료의 차이는 [검증 연결](../../docs/verification/browser-meeting-recording/README.md)에 기록한다.
+상태: **step4-A·step0~3·step4-B1~B8 로컬 구현·검증 진행 / 실기기·제공사·정량 실측·운영 게이트 미충족 / 2026-09-30 운영 반영(DB 0058~0064, 조직 녹음 스위치 꺼짐 — [운영 기록](../../docs/verification/recording-production-2026-09-30/README.md))**. 로컬 완료와 전체 완료의 차이는 [검증 연결](../../docs/verification/browser-meeting-recording/README.md)에 기록한다.
 
 2026-09-29 step4-B6~B8: 문서 요약의 검증 후 병합 1회, 부서 용어집(0064·화면·Whisper/요약 연결), 정량 측정 계산기와 실측 입력 검사를 구현했다. 격리 SQL 280건·로컬 DB 0064 적용·단위 회귀·녹음 브라우저 21건(기존 장기 1 skip)·검토 화면 29건·격리 제품/데모 E2E 9건을 확인했다. V20 실측값은 없다. [병합](../../docs/verification/browser-meeting-recording/accuracy-step4b6.md) · [용어집](../../docs/verification/browser-meeting-recording/accuracy-step4b7.md) · [측정 준비](../../docs/verification/browser-meeting-recording/accuracy-step4b8.md) · [제품 E2E](../../docs/verification/browser-meeting-recording/product-e2e-20260929.md).
 
