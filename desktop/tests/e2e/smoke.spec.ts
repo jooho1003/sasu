@@ -9,6 +9,14 @@ import { createClient } from "@supabase/supabase-js";
 const enabled = process.env.SASU_DESKTOP_E2E === "1";
 const repoRoot = resolve(process.cwd(), "..");
 
+async function desktopWindows(app: Awaited<ReturnType<typeof electron.launch>>) {
+  await expect.poll(() => app.windows().filter((page) => page.url().includes("#")).length).toBe(2);
+  return {
+    pet: app.windows().find((page) => page.url().includes("#pet"))!,
+    panel: app.windows().find((page) => page.url().includes("#panel"))!,
+  };
+}
+
 function status(): Record<string, string> {
   const command = process.platform === "win32" ? "cmd.exe" : "npx";
   const args =
@@ -100,8 +108,28 @@ test.describe("desktop companion smoke", () => {
         resolve(process.cwd(), "node_modules/electron/dist/electron.exe"),
     });
     try {
-      const pet = app.windows().find((page) => page.url().includes("#pet"));
-      expect(pet).toBeTruthy();
+      const { pet, panel } = await desktopWindows(app);
+      await app.evaluate(({ BrowserWindow }) => {
+        BrowserWindow.getAllWindows().find(
+          (window) => window.getBounds().width === 380,
+        )?.hide();
+      });
+      await expect.poll(() => app.evaluate(({ BrowserWindow }) =>
+        !BrowserWindow.getAllWindows().some(
+          (window) => window.getBounds().width === 380 && window.isVisible(),
+        ),
+      )).toBe(true);
+      await pet.waitForTimeout(250);
+      await pet!.getByRole("button", { name: "사수 펫" }).click();
+      await expect.poll(() => app.evaluate(({ BrowserWindow }) =>
+        BrowserWindow.getAllWindows().some(
+          (window) => window.getBounds().width === 380 && window.isVisible(),
+        ),
+      )).toBe(true);
+      console.log("e2e pet click -> panel visible");
+      await panel.screenshot({
+        path: resolve(screenshotDir, "desktop-pet-panel-visible.png"),
+      });
       for (const state of [
         "idle",
         "working",
@@ -155,10 +183,7 @@ test.describe("desktop companion smoke", () => {
           resolve(process.cwd(), "node_modules/electron/dist/electron.exe"),
       });
       try {
-        const pet = app.windows().find((page) => page.url().includes("#pet"));
-        const panel = app.windows().find((page) => page.url().includes("#panel"));
-        expect(pet).toBeTruthy();
-        expect(panel).toBeTruthy();
+        const { pet, panel } = await desktopWindows(app);
         await pet!.getByRole("button", { name: "사수 펫" }).click();
         const generated = await admin.auth.admin.generateLink({
           type: "magiclink",
@@ -191,6 +216,11 @@ test.describe("desktop companion smoke", () => {
         await expect(
           panel!.getByRole("heading", { name: heading }),
         ).toBeVisible();
+        if (label === "설정") {
+          await panel!.screenshot({
+            path: resolve(repoRoot, "docs/verification/43-desktop-companion/screenshots/desktop-settings.png"),
+          });
+        }
         console.log(`e2e tab ${file}`);
       } finally {
         await app.close();

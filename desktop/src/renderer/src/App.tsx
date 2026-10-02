@@ -53,13 +53,24 @@ export function App() {
       .then(({ inbox: next }) => setInbox(next))
       .catch(() => undefined);
   };
+  const rememberSeen = async (id: string): Promise<void> => {
+    const current = settings ?? await window.sasu.settings.get();
+    const seen = [...current.seen.filter((value) => value !== id), id].slice(-500);
+    const next = await window.sasu.settings.set({ seen });
+    setSettings(next);
+  };
   useEffect(() => {
     if (petWindow) {
       void window.sasu.settings
         .get()
         .then(setSettings)
         .catch(() => undefined);
-      return window.sasu.window.onPetState(setPetState);
+      const removeState = window.sasu.window.onPetState(setPetState);
+      const removeSettings = window.sasu.window.onPetSettings(setSettings);
+      return () => {
+        removeState();
+        removeSettings();
+      };
     }
     void (async () => {
       try {
@@ -96,6 +107,7 @@ export function App() {
       <PetCanvas
         tone={settings?.pet ?? "green"}
         state={petState}
+        reduceMotion={settings?.reduceMotion ?? false}
         onToggle={() => window.sasu.window.togglePanel()}
         onMove={(position) => void window.sasu.window.movePet(position)}
       />
@@ -147,7 +159,10 @@ export function App() {
         {tab === "ask" && (
           <AskTab
             answer={answer}
-            onAnswer={setAnswer}
+            onAnswer={(next) => {
+              setAnswer(next);
+              void rememberSeen(next.id);
+            }}
             onNotice={setNotice}
             registerFocus={(focus) => {
               questionFocus.current = focus;
@@ -160,6 +175,7 @@ export function App() {
             inbox={inbox}
             role={context?.role ?? "member"}
             onCard={setCard}
+            onSeen={rememberSeen}
             onNotice={setNotice}
             onChanged={loadInbox}
           />
@@ -172,6 +188,7 @@ export function App() {
             onNext={setNextHistory}
             onOpen={(entry) => {
               setAnswer(entry);
+              void rememberSeen(entry.id);
               setTab("ask");
             }}
             onNotice={setNotice}
@@ -182,6 +199,7 @@ export function App() {
             lead={context?.role === "lead"}
             deptId={context?.dept.id ?? ""}
             onNotice={setNotice}
+            onSeen={rememberSeen}
           />
         )}
         {tab === "settings" && (

@@ -56,21 +56,24 @@ function drawPerson(
 export function PetCanvas({
   tone,
   state,
+  reduceMotion,
   onToggle,
   onMove,
 }: {
   tone: DesktopSettings["pet"];
   state: string;
+  reduceMotion: boolean;
   onToggle: () => void;
   onMove: (position: { x: number; y: number }) => void;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const point = useRef<{ x: number; y: number } | null>(null);
+  const handledClick = useRef(false);
   useEffect(() => {
     const target = canvas.current;
     const context = target?.getContext("2d");
     if (!context) return;
-    const reduced = window.matchMedia(
+    const reduced = reduceMotion || window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
     let frame = 0;
@@ -88,7 +91,7 @@ export function PetCanvas({
     };
     draw();
     return () => window.cancelAnimationFrame(id);
-  }, [tone, state]);
+  }, [tone, state, reduceMotion]);
   return (
     <button
       className="petButton"
@@ -101,9 +104,16 @@ export function PetCanvas({
         if (!start) return;
         const moved =
           Math.abs(event.screenX - start.x) + Math.abs(event.screenY - start.y);
-        if (moved < 4) onToggle();
+        if (moved < 4) {
+          handledClick.current = true;
+          onToggle();
+        }
         else onMove({ x: event.screenX - 64, y: event.screenY - 64 });
         point.current = null;
+      }}
+      onClick={() => {
+        if (!handledClick.current) onToggle();
+        handledClick.current = false;
       }}
     >
       <canvas className="petCanvas" ref={canvas} width="128" height="128" />

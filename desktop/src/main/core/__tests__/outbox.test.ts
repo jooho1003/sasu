@@ -52,10 +52,10 @@ describe("outbox", () => {
     expect(applySendResult(items, "question-1", { status: 400 })).toEqual([]);
   });
 
-  it("keeps network, 5xx, and 429 results", () => {
+  it("keeps network and 5xx results but drops a daily-limit response", () => {
     const items = [item(1)];
     expect(applySendResult(items, "question-1", { status: null })).toEqual(items);
     expect(applySendResult(items, "question-1", { status: 503 })).toEqual(items);
-    expect(applySendResult(items, "question-1", { status: 429 })).toEqual(items);
+    expect(applySendResult(items, "question-1", { status: 429 })).toEqual([]);
   });
 });

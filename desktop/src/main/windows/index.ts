@@ -52,8 +52,17 @@ async function load(window: BrowserWindow, view: "pet" | "panel"): Promise<void>
   else await window.loadFile(join(__dirname, "../renderer/index.html"), { hash: view });
 }
 
-export async function createDesktopWindows(): Promise<DesktopWindows> {
-  const position = petPosition();
+function restoredPetPosition(position: { x: number; y: number } | null | undefined): { x: number; y: number } {
+  if (!position) return petPosition();
+  const valid = screen.getAllDisplays().some(({ workArea }) =>
+    position.x >= workArea.x && position.x <= workArea.x + workArea.width - 128 &&
+    position.y >= workArea.y && position.y <= workArea.y + workArea.height - 128,
+  );
+  return valid ? position : petPosition();
+}
+
+export async function createDesktopWindows(savedPosition?: { x: number; y: number } | null): Promise<DesktopWindows> {
+  const position = restoredPetPosition(savedPosition);
   const pet = new BrowserWindow({
     ...panelOptions,
     width: 128, height: 128, minWidth: 128, minHeight: 128, maxWidth: 128, maxHeight: 128,
@@ -66,22 +75,24 @@ export async function createDesktopWindows(): Promise<DesktopWindows> {
     window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   });
   let panelPinned = false;
+  let panelOpening = false;
   panel.on("blur", () => {
-    if (!panelPinned) panel.hide();
+    if (!panelPinned && !panelOpening) panel.hide();
   });
   pet.on("move", () => clampPet(pet));
   await Promise.all([load(pet, "pet"), load(panel, "panel")]);
   pet.showInactive();
 
   const togglePanel = (): void => {
-    if (panel.isVisible()) { panel.hide(); return; }
+    if (panel.isVisible() && panel.isFocused()) { panel.hide(); return; }
     const bounds = pet.getBounds();
     const area = screen.getDisplayMatching(bounds).workArea;
     const x = Math.min(Math.max(bounds.x - 252, area.x), area.x + area.width - 380);
     const y = Math.min(Math.max(bounds.y - 432, area.y), area.y + area.height - 560);
     panel.setPosition(x, y);
-    panel.show();
-    panel.focus();
+    panelOpening = true;
+    panel.showInactive();
+    setTimeout(() => { panelOpening = false; }, 200);
     panel.webContents.send("panel-opened");
   };
   return {

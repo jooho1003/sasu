@@ -115,16 +115,10 @@ const bridge = {
   app: {
     openWeb: (path: string) =>
       invoke<{ opened: true }>("app:openWeb", { path }),
+    info: () => invoke<{ version: string; device_name: string }>("app:info"),
   },
   window: {
     togglePanel: () => ipcRenderer.send("pet-toggle-panel"),
-    onPanelBlurred: (callback: () => void) => {
-      const listener = (): void => callback();
-      ipcRenderer.on("panel-blurred", listener);
-      return () => {
-        ipcRenderer.removeListener("panel-blurred", listener);
-      };
-    },
     onShortcutStatus: (callback: (registered: boolean) => void) => {
       const listener = (
         _event: Electron.IpcRendererEvent,
@@ -150,6 +144,16 @@ const bridge = {
       ipcRenderer.on("pet-state", listener);
       return () => {
         ipcRenderer.removeListener("pet-state", listener);
+      };
+    },
+    onPetSettings: (callback: (settings: DesktopSettings) => void) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        settings: DesktopSettings,
+      ): void => callback(settings);
+      ipcRenderer.on("pet-settings", listener);
+      return () => {
+        ipcRenderer.removeListener("pet-settings", listener);
       };
     },
     movePet: (position: { x: number; y: number }) =>

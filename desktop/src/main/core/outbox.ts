@@ -47,6 +47,6 @@ export function applySendResult(
   const removable =
     result.status !== null &&
     ((result.status >= 200 && result.status < 300) ||
-      (result.status >= 400 && result.status < 500 && result.status !== 429));
+      (result.status >= 400 && result.status < 500));
   return removable ? items.filter((item) => item.id !== id) : items;
 }

@@ -1,5 +1,7 @@
 // Design Ref: desktop-companion §4·§7 — the renderer receives named, validated capabilities only.
 import { app, ipcMain, shell } from "electron";
+import { hostname } from "node:os";
+import type { DesktopWindows } from "./windows";
 import {
   AskQuestionInput,
   CompanionLinkInput,
@@ -66,6 +68,7 @@ const Settings = z.strictObject({
   pet: z.enum(["green", "blue", "purple"]),
   reduceMotion: z.boolean(),
   panelPinned: z.boolean(),
+  petPosition: z.strictObject({ x: z.number().int(), y: z.number().int() }).nullable(),
 });
 const SettingsPatch = Settings.partial().strict();
 type SettingsValue = z.infer<typeof Settings>;
@@ -74,6 +77,7 @@ const DEFAULT_SETTINGS: SettingsValue = {
   pet: "green",
   reduceMotion: false,
   panelPinned: false,
+  petPosition: null,
 };
 
 type Dependencies = {
@@ -88,15 +92,18 @@ type Dependencies = {
   onDeviceAuthenticationFailed?: () => void;
   onDeviceLinked?: () => void;
   updater?: DesktopUpdater;
+  getWindows: () => DesktopWindows | null;
 };
 
 function register<I, O>(
   channel: string,
   parse: (value: unknown) => I,
   handler: (input: I, event: Electron.IpcMainInvokeEvent) => Promise<O>,
+  canInvoke: (event: Electron.IpcMainInvokeEvent) => boolean,
 ): void {
   ipcMain.handle(channel, async (event, raw: unknown) => {
     try {
+      if (!canInvoke(event)) throw new Error("window_forbidden");
       return await handler(parse(raw), event);
     } catch (cause) {
       const code = cause instanceof ApiError ? cause.code : cause instanceof z.ZodError ? "invalid_input" : cause instanceof Error ? cause.message : "unknown";
@@ -131,8 +138,20 @@ function webTarget(path: string): string {
 }
 
 export function registerIpc(deps: Dependencies): void {
-  register("auth:requestCode", (value) => EmailInput.parse(value), ({ email }) => deps.auth.requestCode(email));
-  register("auth:verifyCode", (value) => VerifyInput.parse(value), async ({ email, code }) => {
+  const isPanel = (event: Electron.IpcMainInvokeEvent): boolean =>
+    event.sender === deps.getWindows()?.panel.webContents;
+  const isPanelOrPetForSettings = (event: Electron.IpcMainInvokeEvent): boolean => {
+    const windows = deps.getWindows();
+    return event.sender === windows?.panel.webContents || event.sender === windows?.pet.webContents;
+  };
+  const panel = <I, O>(
+    channel: string,
+    parse: (value: unknown) => I,
+    handler: (input: I, event: Electron.IpcMainInvokeEvent) => Promise<O>,
+  ): void => register(channel, parse, handler, isPanel);
+
+  panel("auth:requestCode", (value) => EmailInput.parse(value), ({ email }) => deps.auth.requestCode(email));
+  panel("auth:verifyCode", (value) => VerifyInput.parse(value), async ({ email, code }) => {
     // A freshly verified session exists before a device link does. Hold the
     // inbox poller during that interval so it cannot mistake the missing link
     // for a revoked device and erase the new session.
@@ -146,31 +165,31 @@ export function registerIpc(deps: Dependencies): void {
       throw cause;
     }
   });
-  register("auth:signOut", noInput, () => deps.auth.signOut());
+  panel("auth:signOut", noInput, () => deps.auth.signOut());
 
-  register("link:departments", noInput, () => deps.api.get("/api/companion/departments", parseCompanionDepartments));
-  register("link:create", (value) => LinkInput.parse(value), async (input) => {
+  panel("link:departments", noInput, () => deps.api.get("/api/companion/departments", parseCompanionDepartments));
+  panel("link:create", (value) => LinkInput.parse(value), async (input) => {
     const linked = await deps.api.postJson("/api/companion/link", { ...input, app_version: app.getVersion() }, parseCompanionLink);
     deps.onDeviceLinked?.();
     return linked;
   });
-  register("link:get", noInput, () => deps.api.get("/api/companion/link", parseCompanionContext));
-  register("inbox:get", noInput, async () => {
+  panel("link:get", noInput, () => deps.api.get("/api/companion/link", parseCompanionContext));
+  panel("inbox:get", noInput, async () => {
     const inbox = await deps.api.get("/api/companion/inbox", parseCompanionInbox);
     await deps.outbox.flush();
     return { inbox, outbox_count: await deps.outbox.count() };
   });
 
-  register("ask:send", (value) => AskQuestionInput.parse(value), (input) => deps.outbox.send(input));
-  register("answer:get", (value) => IdInput.parse(value), ({ id }) => deps.api.get(`/api/companion/answers/${encodeURIComponent(id)}`, parseAnswer));
-  register("questions:list", (value) => QuestionsInput.parse(value ?? {}), ({ cursor }) => {
+  panel("ask:send", (value) => AskQuestionInput.parse(value), (input) => deps.outbox.send(input));
+  panel("answer:get", (value) => IdInput.parse(value), ({ id }) => deps.api.get(`/api/companion/answers/${encodeURIComponent(id)}`, parseAnswer));
+  panel("questions:list", (value) => QuestionsInput.parse(value ?? {}), ({ cursor }) => {
     const query = cursor ? `?before=${encodeURIComponent(cursor.before)}&before_id=${encodeURIComponent(cursor.before_id)}` : "";
     return deps.api.get(`/api/companion/questions${query}`, parseQuestions);
   });
-  register("card:get", (value) => IdInput.parse(value), ({ id }) => deps.api.get(`/api/companion/cards/${encodeURIComponent(id)}`, parseCard));
-  register("card:decide", (value) => DecideInput.parse(value), ({ id, ...body }) => deps.api.postJson(`/api/companion/cards/${encodeURIComponent(id)}/decide`, body, parseCardDecision));
+  panel("card:get", (value) => IdInput.parse(value), ({ id }) => deps.api.get(`/api/companion/cards/${encodeURIComponent(id)}`, parseCard));
+  panel("card:decide", (value) => DecideInput.parse(value), ({ id, ...body }) => deps.api.postJson(`/api/companion/cards/${encodeURIComponent(id)}/decide`, body, parseCardDecision));
 
-  register("upload:transcript", (value) => TranscriptInput.parse(value), async ({ name, title, visibility, bytes }) => {
+  panel("upload:transcript", (value) => TranscriptInput.parse(value), async ({ name, title, visibility, bytes }) => {
     const form = new FormData();
     const contentType = name.toLowerCase().endsWith(".vtt") ? "text/vtt" : "text/plain";
     form.set("file", new File([bytes], name, { type: contentType }));
@@ -178,29 +197,30 @@ export function registerIpc(deps: Dependencies): void {
     form.set("visibility", visibility);
     return deps.api.postForm("/api/companion/transcripts", form, parseTranscriptResult);
   });
-  register("members:list", noInput, () => deps.api.get("/api/companion/members", parseCompanionMembers));
-  register("upload:review", parseReviewInput, (input, event) => uploadReview(
+  panel("members:list", noInput, () => deps.api.get("/api/companion/members", parseCompanionMembers));
+  panel("upload:review", parseReviewInput, (input, event) => uploadReview(
     deps.supabase,
     deps.api,
     input,
     (progress) => event.sender.send("review-upload-progress", progress),
   ));
 
-  register("sales:sources", noInput, () => deps.api.get("/api/companion/sales-review/sources", parseSalesSources));
-  register("sales:start", (value) => SalesSourceReviewRequest.parse(value), (input) => deps.api.postJson("/api/companion/sales-review", input, parseSalesStart));
-  register("sales:status", (value) => SalesStatusInput.parse(value), ({ task_id }) => deps.api.get(`/api/companion/sales-review/${encodeURIComponent(task_id)}`, parseSalesStatus));
+  panel("sales:sources", noInput, () => deps.api.get("/api/companion/sales-review/sources", parseSalesSources));
+  panel("sales:start", (value) => SalesSourceReviewRequest.parse(value), (input) => deps.api.postJson("/api/companion/sales-review", input, parseSalesStart));
+  panel("sales:status", (value) => SalesStatusInput.parse(value), ({ task_id }) => deps.api.get(`/api/companion/sales-review/${encodeURIComponent(task_id)}`, parseSalesStatus));
 
-  register("settings:get", noInput, async () => Settings.parse(await deps.settingsFile.read(DEFAULT_SETTINGS)));
-  register("settings:set", (value) => SettingsPatch.parse(value), async (patch) => {
+  register("settings:get", noInput, async () => Settings.parse(await deps.settingsFile.read(DEFAULT_SETTINGS)), isPanelOrPetForSettings);
+  panel("settings:set", (value) => SettingsPatch.parse(value), async (patch) => {
     const current = Settings.parse(await deps.settingsFile.read(DEFAULT_SETTINGS));
     const next = Settings.parse({ ...current, ...patch });
     await deps.settingsFile.write(next);
     deps.onSettingsChanged?.(next);
     return next;
   });
-  register("update:get", noInput, () => Promise.resolve(deps.updater?.getState() ?? { status: "unavailable" }));
-  register("app:openWeb", (value) => OpenWebInput.parse(value), async ({ path }) => {
+  panel("update:get", noInput, () => Promise.resolve(deps.updater?.getState() ?? { status: "unavailable" }));
+  panel("app:openWeb", (value) => OpenWebInput.parse(value), async ({ path }) => {
     await shell.openExternal(webTarget(path));
     return { opened: true };
   });
+  panel("app:info", noInput, async () => ({ version: app.getVersion(), device_name: hostname() }));
 }

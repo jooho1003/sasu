@@ -6,6 +6,7 @@ import { logError, logInfo } from "./logger";
 // electron-updater is CommonJS. Use its default export so Electron's ESM main
 // bundle can load the packaged app on Windows.
 const { autoUpdater } = updaterPackage;
+const UPDATE_CHECK_MS = 6 * 60 * 60 * 1_000;
 
 export type UpdateState =
   | { status: "unavailable" }
@@ -20,6 +21,7 @@ type Listener = (state: UpdateState) => void;
 export class DesktopUpdater {
   #state: UpdateState = { status: "unavailable" };
   #listeners = new Set<Listener>();
+  #timer: NodeJS.Timeout | null = null;
 
   getState = (): UpdateState => this.#state;
   subscribe(listener: Listener): () => void {
@@ -31,7 +33,8 @@ export class DesktopUpdater {
     for (const listener of this.#listeners) listener(state);
   }
   start(): void {
-    if (!app.isPackaged || process.env.SASU_DISABLE_UPDATER) return;
+    if (!app.isPackaged && process.env.SASU_DISABLE_UPDATER) return;
+    if (!app.isPackaged) return;
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.on("checking-for-update", () => this.#set({ status: "checking" }));
@@ -42,10 +45,16 @@ export class DesktopUpdater {
       logError("update_failed", { code: cause instanceof Error ? cause.name : "unknown" });
       this.#set({ status: "failed" });
     });
-    void autoUpdater.checkForUpdates().catch((cause: unknown) => {
+    const check = (): void => void autoUpdater.checkForUpdates().catch((cause: unknown) => {
       logError("update_check_failed", { code: cause instanceof Error ? cause.name : "unknown" });
       this.#set({ status: "failed" });
     });
+    check();
+    this.#timer = setInterval(check, UPDATE_CHECK_MS);
     logInfo("update_check_started");
+  }
+  stop(): void {
+    if (this.#timer) clearInterval(this.#timer);
+    this.#timer = null;
   }
 }

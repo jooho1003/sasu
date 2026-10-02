@@ -165,6 +165,7 @@ export type DesktopSettings = {
   pet: "green" | "blue" | "purple";
   reduceMotion: boolean;
   panelPinned: boolean;
+  petPosition: { x: number; y: number } | null;
 };
 
 export function parseCompanionDepartments(value: unknown): CompanionDepartments {

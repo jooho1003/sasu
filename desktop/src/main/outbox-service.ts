@@ -44,7 +44,13 @@ export class OutboxService {
       await this.flush();
       return response;
     } catch (cause) {
-      if (!(cause instanceof ApiError) || !this.shouldKeep(cause)) throw cause;
+      if (!(cause instanceof ApiError)) throw cause;
+      if (!this.shouldKeep(cause)) {
+        if (cause.status !== null && cause.status >= 400 && cause.status < 500) {
+          throw new Error("daily_limit:오늘 질문 한도를 모두 사용했습니다.", { cause });
+        }
+        throw cause;
+      }
       return this.queue(await this.read(), input, cause);
     }
   }
@@ -84,7 +90,7 @@ export class OutboxService {
   }
 
   private shouldKeep(error: ApiError): boolean {
-    return error.status === null || error.status === 429 || error.status >= 500;
+    return error.status === null || error.status >= 500;
   }
 
   private async read(): Promise<OutboxItem[]> {

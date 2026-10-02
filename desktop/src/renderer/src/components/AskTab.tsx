@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Answer } from "../../../shared/contracts";
 import { message } from "../App";
 import { Evidence } from "./Evidence";
+import { answerPollPlan } from "../../../main/core/poller";
 export function AskTab({
   answer,
   onAnswer,
@@ -30,11 +31,17 @@ export function AskTab({
         onNotice("연결되면 보낼게요.");
         return;
       }
+      const startedAt = Date.now();
       const poll = async (): Promise<void> => {
         const next = await window.sasu.answer.get(result.answer_id);
         onAnswer(next);
-        if (next.status === "pending")
-          window.setTimeout(() => void poll(), 2_000);
+        if (next.status !== "pending") return;
+        const plan = answerPollPlan(startedAt, Date.now());
+        if (plan.next === null) {
+          onNotice("답을 기다리는 시간이 지났습니다. 잠시 뒤 기록에서 다시 확인하세요.");
+          return;
+        }
+        window.setTimeout(() => void poll(), plan.next);
       };
       void poll();
     } catch (cause) {

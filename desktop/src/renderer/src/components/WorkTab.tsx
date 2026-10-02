@@ -4,10 +4,12 @@ export function WorkTab({
   lead,
   deptId,
   onNotice,
+  onSeen,
 }: {
   lead: boolean;
   deptId: string;
   onNotice: (value: string) => void;
+  onSeen: (id: string) => Promise<void>;
 }) {
   if (!lead)
     return (
@@ -19,8 +21,8 @@ export function WorkTab({
   return (
     <>
       <h1>일 맡기기</h1>
-      <WorkReviewUpload deptId={deptId} onNotice={onNotice} />
-      <WorkSalesReview onNotice={onNotice} />
+      <WorkReviewUpload deptId={deptId} onNotice={onNotice} onSeen={onSeen} />
+      <WorkSalesReview onNotice={onNotice} onSeen={onSeen} />
     </>
   );
 }

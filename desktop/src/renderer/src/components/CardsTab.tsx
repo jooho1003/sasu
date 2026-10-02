@@ -7,6 +7,7 @@ export function CardsTab({
   inbox,
   role,
   onCard,
+  onSeen,
   onNotice,
   onChanged,
 }: {
@@ -14,6 +15,7 @@ export function CardsTab({
   inbox: CompanionInbox | null;
   role: "lead" | "member";
   onCard: (card: Card | null) => void;
+  onSeen: (id: string) => Promise<void>;
   onNotice: (value: string) => void;
   onChanged: () => void;
 }) {
@@ -37,7 +39,10 @@ export function CardsTab({
           onClick={() =>
             void window.sasu.card
               .get(entry.id)
-              .then(onCard)
+              .then((next) => {
+                onCard(next);
+                return onSeen(entry.id);
+              })
               .catch((cause) => onNotice(message(cause)))
           }
         >
