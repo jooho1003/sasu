@@ -36,8 +36,17 @@ test.describe("desktop followup", () => {
   let inboxMode = "normal";
   let releaseInbox: (() => void) | null = null;
   let salesMode = "normal";
+  let salesState = "ready";
   let releaseSales: (() => void) | null = null;
   let salesRequests = 0;
+  let sourceMode = "normal";
+  let sourceRequests = 0;
+  let releaseSources: (() => void) | null = null;
+  let startMode = "normal";
+  let releaseStart: (() => void) | null = null;
+  let startBodies: Record<string, string>[] = [];
+  const sourceIds = Array.from({ length: 5 }, () => randomUUID());
+  let sourceCandidates: { item_id: string; title: string; kind: string; quote: string; is_principles: boolean }[] = [];
   const reviewId = randomUUID();
   const salesId = randomUUID();
   let workReviews: { id: string; kind: string; title: string; status: string }[] = [];
@@ -56,10 +65,12 @@ test.describe("desktop followup", () => {
     askMode = "accepted"; revoked = false; askRequests = 0; previousQuestion = ""; currentUserId = userId;
     askBodies = []; historyMode = "normal"; historyRequests = 0; answerMode = "normal";
     releaseHistory = null; releaseAnswer = null;
-    contextRole = "member"; inboxMode = "normal"; salesMode = "normal";
+    contextRole = "member"; inboxMode = "normal"; salesMode = "normal"; salesState = "ready";
     workReviews = []; workSales = []; releaseInbox = null; releaseSales = null; salesRequests = 0; inboxRequests = 0;
     decisionCards = []; cardMode = "normal"; cardStatus = "open"; cardRequests = 0;
     releaseCard = null; decideMode = "normal"; releaseDecision = null; decisionBodies = [];
+    sourceMode = "normal"; sourceRequests = 0; releaseSources = null;
+    startMode = "normal"; releaseStart = null; startBodies = []; sourceCandidates = [];
   });
   test.beforeAll(async () => {
     // A test-only CA preserves production's HTTPS-only link gate.
@@ -134,14 +145,33 @@ test.describe("desktop followup", () => {
           response.end(JSON.stringify({ ok: true, duplicate: decideMode === "duplicate", status: cardStatus, message: decideMode === "duplicate" ? "이미 합성 팀장이 결정했습니다." : "합성 카드 처리를 마쳤습니다." }));
         }
       } else if (path === "/api/companion/sales-review/sources") {
-        response.end(JSON.stringify({ candidates: [] }));
+        sourceRequests += 1;
+        const delayedLead = sourceMode === "delayedLead";
+        if (sourceMode.startsWith("delayed")) await new Promise<void>((resolve) => { releaseSources = resolve; });
+        const sourceCode = delayedLead ? "lead_only" : sourceMode;
+        if (sourceCode === "network") { response.destroy(); return; }
+        if (sourceCode !== "normal" && sourceCode !== "delayed") {
+          response.statusCode = sourceCode === "error" ? 503 : 403;
+          response.end(JSON.stringify({ code: sourceCode, error: "합성 자료 목록을 불러오지 못했습니다." }));
+        } else response.end(JSON.stringify({ candidates: sourceCandidates }));
+      } else if (path === "/api/companion/sales-review" && request.method === "POST") {
+        startBodies.push(JSON.parse(Buffer.concat(chunks).toString("utf8")));
+        if (startMode === "network") { response.destroy(); return; }
+        if (startMode.startsWith("delayed")) await new Promise<void>((resolve) => { releaseStart = resolve; });
+        if (!["normal", "delayed"].includes(startMode)) {
+          response.statusCode = startMode === "source_unavailable" ? 404 : startMode === "error" || startMode === "delayedError" ? 503 : 403;
+          response.end(JSON.stringify({ code: startMode, error: "합성 검토 시작을 처리하지 못했습니다." }));
+        } else { response.statusCode = 202; response.end(JSON.stringify({ task_id: salesId })); }
       } else if (path === `/api/companion/sales-review/${salesId}`) {
         salesRequests += 1;
-        if (salesMode === "delayed") await new Promise<void>((resolve) => { releaseSales = resolve; });
-        if (salesMode === "forbidden") {
-          response.statusCode = 403;
-          response.end(JSON.stringify({ code: "lead_only", error: "팀장만 사용할 수 있습니다." }));
-        } else response.end(JSON.stringify({ status: "ready", web_path: `/d/${deptId}/sales-review?task_id=${salesId}` }));
+        const capturedMode = salesMode;
+        const capturedState = salesState;
+        if (capturedMode.startsWith("delayed")) await new Promise<void>((resolve) => { releaseSales = resolve; });
+        if (capturedMode === "network") { response.destroy(); return; }
+        if (["forbidden", "error", "not_found", "delayedError"].includes(capturedMode)) {
+          response.statusCode = capturedMode === "not_found" ? 404 : capturedMode === "forbidden" ? 403 : 503;
+          response.end(JSON.stringify({ code: capturedMode === "forbidden" ? "lead_only" : capturedMode, error: capturedMode === "forbidden" ? "팀장만 사용할 수 있습니다." : "합성 검토 상태를 확인하지 못했습니다." }));
+        } else response.end(JSON.stringify({ status: capturedState, web_path: `/d/${deptId}/sales-review?task_id=${salesId}` }));
       } else if (path === "/api/companion/ask") {
         askRequests += 1;
         askBodies.push(JSON.parse(Buffer.concat(chunks).toString("utf8")));
@@ -194,7 +224,8 @@ test.describe("desktop followup", () => {
     const address = fixtureServer.address();
     if (!address || typeof address === "string") throw new Error("fixture_address_missing");
     fixtureOrigin = `https://127.0.0.1:${address.port}`;
-    execFileSync("cmd.exe", ["/d", "/s", "/c", "npm run build"], {
+    const developmentReact = process.env.SASU_DESKTOP_REACT_MODE === "development";
+    execFileSync(developmentReact ? process.execPath : "cmd.exe", developmentReact ? ["tests/e2e/build-development-react.mjs"] : ["/d", "/s", "/c", "npm run build"], {
       cwd: process.cwd(),
       env: {
         ...process.env,
@@ -253,6 +284,18 @@ test.describe("desktop followup", () => {
   }
 
   async function login(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    if (process.env.SASU_DESKTOP_REACT_MODE === "development") {
+      await panel.addInitScript(() => {
+        Reflect.set(window, "strictReactBundleType", null);
+        Reflect.set(window, "__REACT_DEVTOOLS_GLOBAL_HOOK__", {
+          supportsFiber: true,
+          inject: (renderer: { bundleType: number }) => { Reflect.set(window, "strictReactBundleType", renderer.bundleType); return 1; },
+          onCommitFiberRoot: (_id: number, root: unknown) => { Reflect.set(window, "strictReactRoot", root); },
+          onCommitFiberUnmount: () => undefined,
+          checkDCE: () => undefined,
+        });
+      });
+    }
     await panel.evaluate(async (id) => {
       await window.sasu.auth.verifyCode("synthetic@example.test", "123456");
       await window.sasu.link.create({ dept_id: id });
@@ -275,6 +318,352 @@ test.describe("desktop followup", () => {
   function seedDecisionCard() {
     decisionCards = [{ id: cardId, title: "합성 승인 카드", deadline: null, status: "open" }];
     cardStatus = "open";
+  }
+  function seedSalesSources() {
+    sourceCandidates = sourceIds.map((item_id, index) => ({ item_id, title: `합성 원문 ${index + 1}`, kind: "document", quote: "합성 인용은 선택창에서 답으로 보여주지 않습니다.", is_principles: index === 3 }));
+  }
+  async function selectSalesSources(panel: Awaited<ReturnType<typeof launch>>["panel"], first = sourceIds[0]) {
+    for (const [label, id] of [["고객 요청", first], ["기존 견적", sourceIds[1]], ["변경 견적", sourceIds[2]], ["원칙", sourceIds[3]]]) {
+      await panel.getByRole("combobox", { name: label, exact: true }).selectOption(id);
+    }
+  }
+
+  test("sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다", async () => {
+    contextRole = "lead"; sourceMode = "delayed";
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel); await panel.getByRole("button", { name: "일 맡기기", exact: true }).click();
+      if (process.env.SASU_DESKTOP_REACT_MODE === "development") {
+        const replay = await panel.evaluate(() => {
+          type Hook = { memoizedState: unknown; next: Hook | null };
+          type Fiber = { type?: { name?: string }; mode: number; memoizedState: Hook | null; child: Fiber | null; sibling: Fiber | null };
+          const root = Reflect.get(window, "strictReactRoot") as { current: Fiber };
+          const find = (fiber: Fiber | null): Fiber | null => !fiber ? null : fiber.type?.name === "WorkSalesReview" ? fiber : find(fiber.child) ?? find(fiber.sibling);
+          const sales = find(root.current);
+          let cleanupGeneration: number | null = null;
+          for (let hook = sales?.memoizedState; hook; hook = hook.next) {
+            const value = hook.memoizedState as { current?: unknown } | null;
+            if (value && typeof value.current === "number") cleanupGeneration = value.current;
+          }
+          return { bundleType: Reflect.get(window, "strictReactBundleType"), strictEffects: !!sales && (sales.mode & 16) !== 0, cleanupGeneration };
+        });
+        // DevTools observes the actual development renderer and cleanup of its mounted StrictMode subtree.
+        expect(replay).toEqual({ bundleType: 1, strictEffects: true, cleanupGeneration: 1 });
+        console.log("strictmode_actual_replay", replay);
+      }
+      await expect(panel.getByText("자료를 불러오는 중입니다.")).toBeVisible();
+      await expect(panel.getByText("선택할 원문이 없습니다.")).toHaveCount(0);
+      await panel.getByRole("button", { name: "자료 다시 불러오기" }).evaluate((node) => { (node as HTMLButtonElement).click(); (node as HTMLButtonElement).click(); });
+      await expect.poll(() => !!releaseSources).toBe(true); expect(sourceRequests).toBe(1);
+      sourceMode = "error"; releaseSources!();
+      await expect(panel.getByRole("alert")).toContainText("합성 자료 목록을 불러오지 못했습니다.");
+      await expect(panel.getByRole("combobox", { name: "고객 요청", exact: true })).toHaveCount(0);
+      sourceMode = "normal"; await panel.getByRole("button", { name: "자료 다시 불러오기" }).click();
+      await expect(panel.getByText("선택할 원문이 없습니다.")).toBeVisible();
+      seedSalesSources(); await panel.getByRole("button", { name: "자료 다시 불러오기" }).click();
+      await selectSalesSources(panel);
+      await expect(panel.getByRole("combobox", { name: "원칙", exact: true }).locator("option")).toHaveCount(2);
+      const salesSection = panel.locator('section[aria-labelledby="sales-review-title"]');
+      await salesSection.scrollIntoViewIfNeeded();
+      expect(await panel.evaluate(() => window.innerWidth)).toBe(380);
+      expect(await panel.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+      const screenshots = resolve(process.cwd(), "../docs/verification/47-desktop-sales-flow/screenshots");
+      mkdirSync(screenshots, { recursive: true });
+      await panel.screenshot({ path: resolve(screenshots, "sales-form.png") });
+      await salesSection.screenshot({ path: resolve(screenshots, "sales-form-section.png") });
+      await expect(panel.getByText("합성 인용은 선택창에서 답으로 보여주지 않습니다.")).toHaveCount(0);
+      await panel.getByRole("combobox", { name: "고객 요청", exact: true }).selectOption(sourceIds[1]);
+      await panel.getByRole("button", { name: "검토 시작하기", exact: true }).click();
+      await expect(panel.getByText("서로 다른 현재 원문 4건을 골라 주세요.")).toBeVisible(); expect(startBodies).toEqual([]);
+      await selectSalesSources(panel);
+      await panel.getByRole("combobox", { name: "원칙", exact: true }).evaluate((node, value) => {
+        const select = node as HTMLSelectElement;
+        select.add(new Option("합성 비원칙 후보", value)); select.value = value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      }, sourceIds[4]);
+      await expect(panel.getByRole("button", { name: "검토 시작하기", exact: true })).toBeDisabled();
+      await panel.getByRole("button", { name: "검토 시작하기", exact: true }).evaluate((node) => { (node as HTMLButtonElement).click(); });
+      expect(startBodies).toEqual([]);
+      await selectSalesSources(panel); sourceCandidates = sourceCandidates.filter((row) => row.item_id !== sourceIds[0]);
+      await panel.getByRole("button", { name: "자료 다시 불러오기" }).click();
+      await expect(panel.getByRole("button", { name: "검토 시작하기", exact: true })).toBeDisabled();
+      expect(startBodies).toEqual([]);
+      for (const [code, text] of [["lead_only", "팀장만 사용할 수 있습니다."], ["consent_required", "동의한 팀장만 사용할 수 있습니다."], ["demo", "로그인 없이 보는 부서에서는 사용할 수 없습니다."], ["forbidden", "합성 자료 목록을 불러오지 못했습니다."], ["network", "서버에 연결하지 못했습니다."]]) {
+        sourceMode = code; await panel.getByRole("button", { name: "자료 다시 불러오기" }).click();
+        await expect(panel.getByRole("alert")).toContainText(text);
+      }
+    } finally { releaseSources?.(); await app.close(); await removeUserData(userData); }
+  });
+
+  test("sales start 연타 잠금과 선택별 동일 ID 수동 재시도·새 선택·접수 뒤 중복 금지", async () => {
+    contextRole = "lead"; seedSalesSources(); startMode = "delayedError";
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel); await panel.getByRole("button", { name: "일 맡기기", exact: true }).click();
+      await selectSalesSources(panel);
+      await panel.getByRole("button", { name: "검토 시작하기", exact: true }).evaluate((node) => { (node as HTMLButtonElement).click(); (node as HTMLButtonElement).click(); });
+      await expect.poll(() => !!releaseStart).toBe(true); expect(startBodies.length).toBe(1);
+      await expect(panel.getByText("검토를 시작하는 중입니다.")).toBeVisible();
+      await expect(panel.getByRole("combobox", { name: "고객 요청", exact: true })).toBeDisabled();
+      await expect(panel.getByRole("button", { name: "자료 다시 불러오기" })).toBeDisabled();
+      releaseStart!(); await expect(panel.getByText("합성 검토 시작을 처리하지 못했습니다.")).toBeVisible();
+      await expect(panel.getByRole("combobox", { name: "고객 요청", exact: true })).toHaveValue(sourceIds[0]);
+      await panel.waitForTimeout(250); expect(startBodies.length).toBe(1);
+      for (const code of ["error", "lead_only", "consent_required", "demo", "forbidden", "network"]) {
+        await panel.getByRole("combobox", { name: "고객 요청", exact: true }).selectOption(sourceIds[0]);
+        startMode = code; await panel.getByRole("button", { name: "검토 시작하기", exact: true }).click();
+        await expect.poll(() => startBodies.length).toBeGreaterThan(1);
+        await expect(panel.getByRole("button", { name: "검토 시작하기", exact: true })).toBeEnabled();
+        expect(startBodies.at(-1)?.request_id).toBe(startBodies[0].request_id);
+      }
+      startMode = "normal"; await selectSalesSources(panel, sourceIds[4]);
+      await panel.getByRole("button", { name: "검토 시작하기", exact: true }).click();
+      await expect(panel.getByText("검토를 준비하고 있습니다.")).toBeVisible();
+      expect(startBodies.at(-1)?.request_id).not.toBe(startBodies[0].request_id);
+      expect(Object.keys(startBodies.at(-1)!).sort()).toEqual(["new_quote_item_id", "old_quote_item_id", "policy_item_id", "request_id", "request_item_id"]);
+      const requests = startBodies.length;
+      await panel.getByRole("button", { name: "검토 시작하기", exact: true }).evaluate((node) => { (node as HTMLButtonElement).click(); });
+      await expect(panel.getByRole("combobox", { name: "고객 요청", exact: true })).toBeDisabled();
+      expect(startBodies.length).toBe(requests);
+    } finally { releaseStart?.(); await app.close(); await removeUserData(userData); }
+  });
+
+  test("sales start source_unavailable은 후보를 숨기고 수동 재검사 뒤 같은 선택을 보존한다", async () => {
+    contextRole = "lead"; seedSalesSources(); startMode = "source_unavailable";
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel); await panel.getByRole("button", { name: "일 맡기기", exact: true }).click(); await selectSalesSources(panel);
+      await panel.getByRole("button", { name: "검토 시작하기", exact: true }).click();
+      await expect(panel.getByRole("combobox", { name: "고객 요청", exact: true })).toHaveCount(0);
+      await expect(panel.getByRole("alert")).toContainText("합성 검토 시작을 처리하지 못했습니다.");
+      startMode = "normal"; await panel.getByRole("button", { name: "자료 다시 불러오기" }).click();
+      await expect(panel.getByRole("combobox", { name: "고객 요청", exact: true })).toHaveValue(sourceIds[0]);
+      await panel.getByRole("button", { name: "검토 시작하기", exact: true }).click();
+      await expect(panel.getByText("검토를 준비하고 있습니다.")).toBeVisible();
+      expect(startBodies[1].request_id).toBe(startBodies[0].request_id);
+    } finally { await app.close(); await removeUserData(userData); }
+  });
+
+  for (const exit of ["other", "same", "logout"] as const) {
+    test(`sales start 자료·시작 늦은 응답은 ${exit} 이탈 뒤 안내·task를 바꾸지 않는다`, async () => {
+      contextRole = "lead"; seedSalesSources(); sourceMode = "delayedLead";
+      const { app, panel, userData } = await launch();
+      const leave = async () => {
+        if (exit === "logout") await panel.evaluate(() => window.sasu.auth.signOut());
+        else await panel.getByRole("button", { name: exit === "same" ? "일 맡기기" : "질문", exact: true }).click();
+      };
+      try {
+        await login(panel); await panel.getByRole("button", { name: "일 맡기기", exact: true }).click();
+        await expect.poll(() => !!releaseSources).toBe(true);
+        const oldReleaseSources = releaseSources!;
+        sourceMode = "normal"; await leave(); oldReleaseSources();
+        await panel.waitForTimeout(150);
+        await expect(panel.locator(".notice")).toHaveCount(0);
+        sourceMode = "normal";
+        if (exit === "logout") await login(panel);
+        await panel.getByRole("button", { name: "일 맡기기", exact: true }).click(); await selectSalesSources(panel);
+        startMode = "delayedError";
+        await panel.getByRole("button", { name: "검토 시작하기", exact: true }).click();
+        await expect.poll(() => !!releaseStart).toBe(true);
+        await leave(); releaseStart!(); await panel.waitForTimeout(150);
+        await expect(panel.locator(".notice")).toHaveCount(0);
+        await expect(panel.getByText("검토를 준비하고 있습니다.")).toHaveCount(0);
+        expect(salesRequests).toBe(0);
+        if (exit === "logout") {
+          await expect(panel.getByRole("heading", { name: "사수 시작하기" })).toBeVisible();
+          await login(panel);
+        }
+        {
+          await panel.getByRole("button", { name: "일 맡기기", exact: true }).click(); await selectSalesSources(panel);
+          startMode = "delayed"; releaseStart = null;
+          await panel.getByRole("button", { name: "검토 시작하기", exact: true }).click();
+          await expect.poll(() => !!releaseStart).toBe(true); await leave(); releaseStart!(); await panel.waitForTimeout(150);
+          await expect(panel.getByText("검토를 준비하고 있습니다.")).toHaveCount(0); expect(salesRequests).toBe(0);
+        }
+      } finally { releaseSources?.(); releaseStart?.(); await app.close(); await removeUserData(userData); }
+    });
+  }
+  async function startSalesTask(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    await panel.getByRole("button", { name: "일 맡기기", exact: true }).click();
+    await selectSalesSources(panel);
+    await panel.getByRole("button", { name: "검토 시작하기", exact: true }).click();
+    await expect(panel.getByText("검토를 준비하고 있습니다.")).toBeVisible();
+  }
+  async function salesClock(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    await login(panel);
+    await panel.clock.install();
+    await panel.reload();
+    await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible();
+    await panel.clock.pauseAt(new Date(Date.now() + 1_000));
+  }
+  async function readySalesTask(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    salesMode = "normal"; salesState = "ready";
+    await startSalesTask(panel); await panel.clock.runFor(5_000);
+    await expect(panel.getByText("검토가 끝났습니다.")).toBeVisible();
+  }
+  test("sales status 5초 단일 조회와 한국어 5상태·terminal 새 검토 ID", async () => {
+    contextRole = "lead"; seedSalesSources(); salesMode = "delayed"; salesState = "processing";
+    const { app, panel, userData } = await launch();
+    try {
+      await salesClock(panel); await startSalesTask(panel);
+      await expect(panel.getByRole("button", { name: "새 검토", exact: true })).toHaveCount(0);
+      await panel.getByLabel("검토할 파일", { exact: true }).setInputFiles({ name: "synthetic.exe", mimeType: "application/octet-stream", buffer: Buffer.from("synthetic") });
+      await panel.getByRole("checkbox", { name: "참여자 동의 확인", exact: true }).check();
+      await panel.getByRole("button", { name: "자료 올리기", exact: true }).click();
+      await expect(panel.locator(".notice")).toContainText("파일만 올릴 수 있습니다.");
+      await panel.clock.runFor(4_999); expect(salesRequests).toBe(0);
+      await panel.clock.runFor(1); await expect.poll(() => !!releaseSales).toBe(true);
+      await expect(panel.locator(".notice")).toContainText("파일만 올릴 수 있습니다.");
+      await panel.clock.runFor(10_000); expect(salesRequests).toBe(1);
+      releaseSales!(); salesMode = "normal";
+      await expect(panel.getByText("원문을 검토하고 있습니다.")).toBeVisible();
+      await expect(panel.locator(".notice")).toContainText("파일만 올릴 수 있습니다.");
+      await expect(panel.getByRole("button", { name: "새 검토", exact: true })).toHaveCount(0);
+      for (const [state, text] of [["ready", "검토가 끝났습니다."], ["refused", "검토 근거를 확인하지 못했습니다."], ["failed", "검토를 끝내지 못했습니다."]]) {
+        salesState = state; await panel.clock.runFor(5_000);
+        await expect(panel.getByText(text, { exact: true })).toBeVisible();
+        const terminalRequests = salesRequests; await panel.clock.runFor(10_000); expect(salesRequests).toBe(terminalRequests);
+        const oldAttempt = startBodies.at(-1)!.request_id;
+        await panel.getByRole("button", { name: "새 검토", exact: true }).click();
+        await expect(panel.getByText(text, { exact: true })).toHaveCount(0);
+        await expect(panel.getByRole("combobox", { name: "고객 요청", exact: true })).toHaveValue(sourceIds[0]);
+        await expect(panel.getByRole("button", { name: "검토 시작하기", exact: true })).toBeEnabled();
+        await panel.getByRole("button", { name: "검토 시작하기", exact: true }).click();
+        await expect(panel.getByText("검토를 준비하고 있습니다.")).toBeVisible();
+        expect(startBodies.at(-1)!.request_id).not.toBe(oldAttempt);
+      }
+      expect(new Set(startBodies.map((body) => body.request_id)).size).toBe(4);
+    } finally { releaseSales?.(); await app.close(); await removeUserData(userData); }
+  });
+  test("sales status 오류는 폴링을 멈추고 수동 재확인·재개·not_found 회복을 제공한다", async () => {
+    contextRole = "lead"; seedSalesSources(); salesMode = "error";
+    const { app, panel, userData } = await launch();
+    try {
+      await salesClock(panel); await startSalesTask(panel); await panel.clock.runFor(5_000);
+      await expect(panel.getByRole("alert")).toContainText("합성 검토 상태를 확인하지 못했습니다.");
+      await expect(panel.getByText("검토를 준비하고 있습니다.")).toHaveCount(0);
+      const stoppedRequests = salesRequests; await panel.clock.runFor(15_000); expect(salesRequests).toBe(stoppedRequests);
+      for (const mode of ["not_found", "forbidden", "network"]) {
+        salesMode = mode; await panel.getByRole("button", { name: "상태 다시 확인", exact: true }).click();
+        await expect(panel.getByRole("alert")).toContainText(mode === "forbidden" ? "팀장만 사용할 수 있습니다." : mode === "network" ? "서버에 연결하지 못했습니다." : "합성 검토 상태를 확인하지 못했습니다.");
+        await expect(panel.getByRole("heading", { name: "영업 원문 검토", exact: true })).toBeVisible();
+        await expect(panel.getByRole("button", { name: "웹에서 결과 보기", exact: true })).toHaveCount(0);
+      }
+      salesMode = "delayed"; salesState = "queued"; releaseSales = null;
+      await panel.getByRole("button", { name: "상태 다시 확인", exact: true }).evaluate((node) => { (node as HTMLButtonElement).click(); (node as HTMLButtonElement).click(); });
+      await expect.poll(() => !!releaseSales).toBe(true);
+      const retryRequests = salesRequests; await panel.clock.runFor(10_000); expect(salesRequests).toBe(retryRequests);
+      releaseSales!(); salesMode = "normal"; await expect(panel.getByText("검토를 준비하고 있습니다.")).toBeVisible();
+      salesState = "processing"; await panel.clock.runFor(5_000); await expect(panel.getByText("원문을 검토하고 있습니다.")).toBeVisible();
+      salesMode = "not_found"; await panel.clock.runFor(5_000); await expect(panel.getByRole("alert")).toBeVisible();
+      salesMode = "normal"; salesState = "ready"; await panel.getByRole("button", { name: "상태 다시 확인", exact: true }).click();
+      await expect(panel.getByText("검토가 끝났습니다.")).toBeVisible(); expect(startBodies.length).toBe(1);
+    } finally { releaseSales?.(); await app.close(); await removeUserData(userData); }
+  });
+  test("sales status 현재 ready만 열고 조회·웹 실패는 미읽음이며 연타는 1회다", async () => {
+    contextRole = "lead"; seedSalesSources();
+    const { app, panel, userData } = await launch();
+    try {
+      await salesClock(panel); await trackWeb(app); await readySalesTask(panel);
+      const salesSection = panel.locator('section[aria-labelledby="sales-review-title"]');
+      await salesSection.scrollIntoViewIfNeeded();
+      expect(await panel.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+      const screenshots = resolve(process.cwd(), "../docs/verification/47-desktop-sales-flow/screenshots");
+      mkdirSync(screenshots, { recursive: true });
+      await panel.screenshot({ path: resolve(screenshots, "sales-ready.png") });
+      await salesSection.screenshot({ path: resolve(screenshots, "sales-ready-section.png") });
+      salesState = "processing";
+      await panel.getByRole("button", { name: "웹에서 결과 보기", exact: true }).click();
+      await expect(panel.getByText("원문을 검토하고 있습니다.")).toBeVisible();
+      expect(await webEvents(app)).toEqual([]); expect((await panel.evaluate(() => window.sasu.settings.get())).seen).not.toContain(salesId);
+      salesState = "ready"; await panel.clock.runFor(5_000); await expect(panel.getByText("검토가 끝났습니다.")).toBeVisible();
+      salesMode = "not_found"; await panel.getByRole("button", { name: "웹에서 결과 보기", exact: true }).click();
+      await expect(panel.getByRole("alert")).toBeVisible(); await expect(panel.getByText("검토가 끝났습니다.")).toHaveCount(0);
+      await expect(panel.getByRole("button", { name: "웹에서 결과 보기", exact: true })).toHaveCount(0);
+      expect(await webEvents(app)).toEqual([]); expect((await panel.evaluate(() => window.sasu.settings.get())).seen).not.toContain(salesId);
+      salesMode = "normal"; await panel.getByRole("button", { name: "상태 다시 확인", exact: true }).click();
+      await expect(panel.getByText("검토가 끝났습니다.")).toBeVisible(); await trackWeb(app, true);
+      await panel.getByRole("button", { name: "웹에서 결과 보기", exact: true }).click();
+      await expect(panel.getByRole("alert")).toContainText("합성 웹 열기 실패");
+      expect((await panel.evaluate(() => window.sasu.settings.get())).seen).not.toContain(salesId);
+      await panel.getByRole("button", { name: "상태 다시 확인", exact: true }).click();
+      await expect(panel.getByText("검토가 끝났습니다.")).toBeVisible(); await trackWeb(app);
+      await app.evaluate(({ shell }) => {
+        Reflect.set(globalThis, "salesOpenPending", false);
+        shell.openExternal = async (url: string) => {
+          Reflect.set(globalThis, "salesOpenPending", true);
+          await new Promise<void>((resolve) => Reflect.set(globalThis, "salesOpenRelease", resolve));
+          (Reflect.get(globalThis, "recentWorkOpened") as string[]).push(url);
+        };
+      });
+      salesMode = "delayed"; releaseSales = null; const beforeOpen = salesRequests;
+      await panel.getByRole("button", { name: "웹에서 결과 보기", exact: true }).evaluate((node) => { (node as HTMLButtonElement).click(); (node as HTMLButtonElement).click(); });
+      await expect.poll(() => !!releaseSales).toBe(true); expect(salesRequests).toBe(beforeOpen + 1);
+      await expect(panel.getByRole("button", { name: "새 검토", exact: true })).toBeDisabled();
+      await panel.clock.runFor(10_000); expect(salesRequests).toBe(beforeOpen + 1);
+      expect(await webEvents(app)).toEqual([]); expect((await panel.evaluate(() => window.sasu.settings.get())).seen).not.toContain(salesId);
+      releaseSales!(); await expect.poll(() => app.evaluate(() => Reflect.get(globalThis, "salesOpenPending"))).toBe(true);
+      expect((await panel.evaluate(() => window.sasu.settings.get())).seen).not.toContain(salesId);
+      await panel.getByRole("button", { name: "새 검토", exact: true }).evaluate((node) => { (node as HTMLButtonElement).click(); });
+      await expect(panel.getByRole("button", { name: "검토 시작하기", exact: true })).toBeDisabled();
+      await app.evaluate(() => (Reflect.get(globalThis, "salesOpenRelease") as () => void)());
+      await expect.poll(() => webEvents(app)).toEqual([`${fixtureOrigin}/d/${deptId}/sales-review?task_id=${salesId}`]);
+      await expect.poll(async () => (await panel.evaluate(() => window.sasu.settings.get())).seen).toContain(salesId);
+    } finally { releaseSales?.(); await app.close(); await removeUserData(userData); }
+  });
+  for (const exit of ["other", "same", "logout"] as const) {
+    test(`sales status 조회·웹 열기·읽음 늦은 응답은 ${exit} 이탈 뒤 반영하지 않는다`, async () => {
+      contextRole = "lead"; seedSalesSources();
+      const { app, panel, userData } = await launch();
+      const leave = async () => {
+        if (exit === "logout") await panel.evaluate(() => window.sasu.auth.signOut());
+        else await panel.getByRole("button", { name: exit === "same" ? "일 맡기기" : "질문", exact: true }).click();
+      };
+      const returnToWork = async () => { if (exit === "logout") await login(panel); };
+      try {
+        await salesClock(panel); await trackWeb(app);
+        for (const [open, mode] of [[false, "delayed"], [false, "delayedError"], [true, "delayed"], [true, "delayedError"]] as const) {
+          await returnToWork();
+          if (open) await readySalesTask(panel); else await startSalesTask(panel);
+          salesMode = mode; releaseSales = null;
+          if (open) await panel.getByRole("button", { name: "웹에서 결과 보기", exact: true }).click();
+          else await panel.clock.runFor(5_000);
+          await expect.poll(() => !!releaseSales).toBe(true); await leave(); releaseSales!(); salesMode = "normal";
+          await panel.waitForTimeout(150);
+          await expect(panel.locator(".notice")).toHaveCount(0);
+          await expect(panel.getByText("검토가 끝났습니다.")).toHaveCount(0);
+          expect(await webEvents(app)).toEqual([]);
+          expect((await panel.evaluate(() => window.sasu.settings.get())).seen).not.toContain(salesId);
+        }
+        await returnToWork(); await readySalesTask(panel);
+        await app.evaluate(({ shell }) => {
+          Reflect.set(globalThis, "salesOpenPending", false);
+          shell.openExternal = async () => { Reflect.set(globalThis, "salesOpenPending", true); await new Promise<void>((resolve) => Reflect.set(globalThis, "salesOpenRelease", resolve)); };
+        });
+        await panel.getByRole("button", { name: "웹에서 결과 보기", exact: true }).click();
+        await expect.poll(() => app.evaluate(() => Reflect.get(globalThis, "salesOpenPending"))).toBe(true);
+        await expect(panel.getByRole("button", { name: "새 검토", exact: true })).toBeDisabled();
+        await leave(); await app.evaluate(() => (Reflect.get(globalThis, "salesOpenRelease") as () => void)());
+        await panel.waitForTimeout(150); await expect(panel.locator(".notice")).toHaveCount(0);
+        expect((await panel.evaluate(() => window.sasu.settings.get())).seen).not.toContain(salesId);
+        await returnToWork(); await readySalesTask(panel); await trackWeb(app);
+        await app.evaluate(({ ipcMain }) => {
+          Reflect.set(globalThis, "salesSeenPending", false);
+          ipcMain.removeHandler("settings:markSeen");
+          ipcMain.handle("settings:markSeen", async () => {
+            Reflect.set(globalThis, "salesSeenPending", true);
+            await new Promise<void>((resolve) => Reflect.set(globalThis, "salesSeenRelease", resolve));
+            throw new Error("합성 늦은 영업 읽음 오류");
+          });
+        });
+        await panel.getByRole("button", { name: "웹에서 결과 보기", exact: true }).click();
+        await expect.poll(() => app.evaluate(() => Reflect.get(globalThis, "salesSeenPending"))).toBe(true);
+        expect(await webEvents(app)).toHaveLength(1);
+        await leave(); await app.evaluate(() => (Reflect.get(globalThis, "salesSeenRelease") as () => void)());
+        await panel.waitForTimeout(150); await expect(panel.locator(".notice")).toHaveCount(0);
+        await expect(panel.getByText("합성 늦은 영업 읽음 오류")).toHaveCount(0);
+      } finally { releaseSales?.(); await app.close(); await removeUserData(userData); }
+    });
   }
   async function openDecisionCard(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
     await panel.getByRole("button", { name: "결정함", exact: true }).click();

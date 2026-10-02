@@ -1,0 +1,67 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep sales start 자료 조회
+
+
+Running 1 test using 1 worker
+
+(node:6000) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:4884) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 929ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 44ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-BO0xEHAl.js   697.53 kB
+✓ built in 1.35s
+  x  1 tests\e2e\followup.spec.ts:312:3 › desktop followup › sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다 (13.5s)
+
+
+  1) tests\e2e\followup.spec.ts:312:3 › desktop followup › sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('자료를 불러오는 중입니다.')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('자료를 불러오는 중입니다.') with timeout 5000ms
+      - waiting for getByText('자료를 불러오는 중입니다.')
+
+
+      315 |     try {
+      316 |       await login(panel); await panel.getByRole("button", { name: "일 맡기기", exact: true }).click();
+    > 317 |       await expect(panel.getByText("자료를 불러오는 중입니다.")).toBeVisible();
+          |                                                       ^
+      318 |       await expect(panel.getByText("선택할 원문이 없습니다.")).toHaveCount(0);
+      319 |       await panel.getByRole("button", { name: "자료 다시 불러오기" }).evaluate((node) => { (node as HTMLButtonElement).click(); (node as HTMLButtonElement).click(); });
+      320 |       await expect.poll(() => !!releaseSources).toBe(true); expect(sourceRequests).toBe(1);
+        at D:\바이브코딩\sasu\.vercel\desktop-sales-flow\desktop\tests\e2e\followup.spec.ts:317:55
+
+    Error Context: test-results\followup-desktop-followup--dfdd5-동-재조회와-현재-distinct-원칙을-구분한다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--dfdd5-동-재조회와-현재-distinct-원칙을-구분한다\error-context.md
+
+  1 failed
+    tests\e2e\followup.spec.ts:312:3 › desktop followup › sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다

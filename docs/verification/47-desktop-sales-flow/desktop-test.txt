@@ -1,0 +1,17 @@
+
+> sasu-desktop@0.1.1 test
+> vitest run
+
+
+ RUN  v5.0.3 D:/바이브코딩/sasu/.vercel/desktop-sales-flow/desktop
+
+
+ Test Files  12 passed (12)
+      Tests  78 passed (78)
+   Start at  03:11:28
+   Duration  11.81s (worker 85%, import 7%, transform 6%, tests 2%)
+
+    Isolate  12 workers spawned · ~1.79s startup each (spawn + environment, per file)
+             at least ~1.28s faster with isolate: false — reuses workers across files instead of one per file
+
+tool_exit=0

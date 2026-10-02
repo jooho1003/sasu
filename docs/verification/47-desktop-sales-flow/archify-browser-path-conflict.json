@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "browser-check",
+  "evidenceKind": "automated-browser",
+  "status": "fail",
+  "visualReview": "not-requested",
+  "provenance": "current",
+  "deliveryReceiptId": "653cf0d8-dbb1-4518-a6fe-55336bb613b3",
+  "artifact": {
+    "path": "D:\\바이브코딩\\sasu\\.vercel\\desktop-sales-flow\\.vercel\\desktop-sales-flow.html",
+    "sha256": "b6f353e60d6d239456c19eef7100545c127eb83b62432d704e30958894a87a7e",
+    "bytes": 762534
+  },
+  "state": {
+    "detail": "read",
+    "motion": "still"
+  },
+  "chrome": {
+    "status": "not-checked",
+    "executable": null
+  },
+  "diagnostics": [
+    {
+      "code": "viewer/evidence-path-conflict",
+      "severity": "error",
+      "message": "browser-check will not replace the existing unowned evidence path \"D:\\바이브코딩\\sasu\\.vercel\\desktop-sales-flow\\.vercel\\desktop-sales-flow-archify\\desktop-sales-flow.browser-check.json\".",
+      "subject": {
+        "artifact": "D:\\바이브코딩\\sasu\\.vercel\\desktop-sales-flow\\.vercel\\desktop-sales-flow.html",
+        "evidencePath": "D:\\바이브코딩\\sasu\\.vercel\\desktop-sales-flow\\.vercel\\desktop-sales-flow-archify\\desktop-sales-flow.browser-check.json"
+      },
+      "evidence": {
+        "reason": {
+          "code": "ownership-artifact-mismatch"
+        }
+      },
+      "supportedFixes": [
+        "move the conflicting file aside, or choose a separate --out-dir, then rerun browser-check"
+      ]
+    }
+  ],
+  "containment": {
+    "status": "fail",
+    "policy": "fit-or-reader-declared-readable-vertical-scroll",
+    "viewports": []
+  },
+  "themeStates": {
+    "status": "fail",
+    "viewports": []
+  },
+  "readability": {
+    "status": "fail",
+    "minimumProjectedNodeTextPx": 6,
+    "viewports": []
+  },
+  "viewerChrome": {
+    "status": "fail",
+    "viewports": []
+  },
+  "captures": {
+    "status": "not-requested",
+    "screenshots": [],
+    "contactSheet": null
+  },
+  "sidecars": {
+    "directory": "D:\\바이브코딩\\sasu\\.vercel\\desktop-sales-flow\\.vercel\\desktop-sales-flow-archify",
+    "receipt": "desktop-sales-flow.browser-check.json",
+    "files": []
+  },
+  "error": "browser-check will not replace the existing unowned evidence path \"D:\\바이브코딩\\sasu\\.vercel\\desktop-sales-flow\\.vercel\\desktop-sales-flow-archify\\desktop-sales-flow.browser-check.json\"."
+}

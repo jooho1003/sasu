@@ -1,0 +1,43 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep sales start
+
+
+Running 6 tests using 1 worker
+
+(node:12360) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:37768) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 370ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 15ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-CNXyiqpS.js   703.17 kB
+✓ built in 717ms
+  ok 1 tests\e2e\followup.spec.ts:318:3 › desktop followup › sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다 (2.1s)
+  ok 2 tests\e2e\followup.spec.ts:359:3 › desktop followup › sales start 연타 잠금과 선택별 동일 ID 수동 재시도·새 선택·접수 뒤 중복 금지 (2.5s)
+  ok 3 tests\e2e\followup.spec.ts:392:3 › desktop followup › sales start source_unavailable은 후보를 숨기고 수동 재검사 뒤 같은 선택을 보존한다 (1.6s)
+  ok 4 tests\e2e\followup.spec.ts:409:5 › desktop followup › sales start 자료·시작 늦은 응답은 other 이탈 뒤 안내·task를 바꾸지 않는다 (2.5s)
+  ok 5 tests\e2e\followup.spec.ts:409:5 › desktop followup › sales start 자료·시작 늦은 응답은 same 이탈 뒤 안내·task를 바꾸지 않는다 (2.6s)
+  ok 6 tests\e2e\followup.spec.ts:409:5 › desktop followup › sales start 자료·시작 늦은 응답은 logout 이탈 뒤 안내·task를 바꾸지 않는다 (2.4s)
+
+  6 passed (16.7s)

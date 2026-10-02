@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "영업 원문 검토의 시작과 회복",
+    "subtitle": "현재 자료를 선택하고 현재 완료 결과만 웹으로 엽니다",
+    "output": "desktop-sales-flow.html",
+    "visual_preset": "blueprint",
+    "viewBox": [
+      1200,
+      850
+    ]
+  },
+  "components": [
+    {
+      "id": "sources",
+      "type": "frontend",
+      "label": "E14 원문 4건·원칙",
+      "sublabel": "Strict 단일 읽기·수동 재조회",
+      "pos": [
+        28,
+        100
+      ],
+      "size": [
+        152,
+        75
+      ]
+    },
+    {
+      "id": "start",
+      "type": "backend",
+      "label": "E15 검토 시작",
+      "sublabel": "연타 잠금·선택별 ID",
+      "pos": [
+        252,
+        100
+      ],
+      "size": [
+        152,
+        75
+      ]
+    },
+    {
+      "id": "sql",
+      "type": "database",
+      "label": "기존 작업·RLS",
+      "sublabel": "본인·원문·멱등 검사",
+      "pos": [
+        476,
+        100
+      ],
+      "size": [
+        152,
+        75
+      ]
+    },
+    {
+      "id": "status",
+      "type": "backend",
+      "label": "E16 상태 확인",
+      "sublabel": "5초 단일 조회·한국어",
+      "pos": [
+        700,
+        100
+      ],
+      "size": [
+        152,
+        75
+      ]
+    },
+    {
+      "id": "retry",
+      "type": "frontend",
+      "label": "오류 수동 재확인",
+      "sublabel": "자동 조회 정지·ID 보존",
+      "pos": [
+        700,
+        385
+      ],
+      "size": [
+        152,
+        75
+      ]
+    },
+    {
+      "id": "fresh",
+      "type": "security",
+      "label": "현재 ready 재검사",
+      "sublabel": "현재 E16 성공만 열기",
+      "pos": [
+        924,
+        385
+      ],
+      "size": [
+        152,
+        75
+      ]
+    },
+    {
+      "id": "open",
+      "type": "frontend",
+      "label": "기존 웹 열기",
+      "sublabel": "성공 뒤 읽음 기록",
+      "pos": [
+        924,
+        670
+      ],
+      "size": [
+        152,
+        75
+      ]
+    },
+    {
+      "id": "new",
+      "type": "frontend",
+      "label": "terminal 새 검토",
+      "sublabel": "명시 초기화·새 요청 ID",
+      "pos": [
+        252,
+        385
+      ],
+      "size": [
+        152,
+        75
+      ]
+    },
+    {
+      "id": "cleanup",
+      "type": "security",
+      "label": "탭·세션 종료",
+      "sublabel": "늦은 콜백·후속 행동 폐기",
+      "pos": [
+        28,
+        670
+      ],
+      "size": [
+        176,
+        75
+      ]
+    },
+    {
+      "id": "start-retry",
+      "type": "frontend",
+      "label": "자료·시작 오류",
+      "sublabel": "선택·ID 보존·수동 재시도",
+      "pos": [476, 670],
+      "size": [180, 75]
+    }
+  ],
+  "connections": [
+    {
+      "id": "s-st",
+      "from": "sources",
+      "to": "start",
+      "label": "명시 시작",
+      "labelAt": [
+        216,
+        82
+      ]
+    },
+    {
+      "id": "st-sql",
+      "from": "start",
+      "to": "sql",
+      "label": "접수",
+      "labelAt": [
+        440,
+        82
+      ]
+    },
+    {
+      "id": "sql-status",
+      "from": "sql",
+      "to": "status",
+      "label": "queued·processing",
+      "labelAt": [
+        664,
+        82
+      ]
+    },
+    {
+      "id": "status-retry",
+      "from": "status",
+      "to": "retry",
+      "label": "오류",
+      "labelAt": [
+        792,
+        282
+      ]
+    },
+    {
+      "id": "retry-status",
+      "from": "retry",
+      "to": "status",
+      "label": "사람의 재조회",
+      "variant": "security",
+      "labelAt": [
+        672,
+        285
+      ]
+    },
+    {
+      "id": "status-fresh",
+      "from": "status",
+      "to": "fresh",
+      "label": "결과 보기",
+      "labelAt": [
+        936,
+        245
+      ]
+    },
+    {
+      "id": "fresh-open",
+      "from": "fresh",
+      "to": "open",
+      "label": "현재 ready",
+      "labelAt": [
+        1024,
+        565
+      ]
+    },
+    {
+      "id": "status-new",
+      "from": "status",
+      "to": "new",
+      "label": "ready·refused·failed",
+      "labelAt": [
+        520,
+        292
+      ]
+    },
+    {
+      "id": "new-sources",
+      "from": "new",
+      "to": "sources",
+      "label": "사람의 새 시도",
+      "labelAt": [
+        176,
+        292
+      ]
+    },
+    {
+      "id": "cleanup-sources",
+      "from": "cleanup",
+      "to": "sources",
+      "label": "nav key·세대 종료",
+      "variant": "security",
+      "labelAt": [
+        72,
+        430
+      ]
+    },
+    {
+      "id": "start-error",
+      "from": "start",
+      "to": "start-retry",
+      "label": "오류·자동 POST 없음",
+      "labelAt": [460, 545]
+    },
+    {
+      "id": "manual-start-retry",
+      "from": "start-retry",
+      "to": "sources",
+      "label": "사람의 자료 재검사·동일 선택 retry",
+      "variant": "security",
+      "labelAt": [260, 585]
+    }
+  ]
+}

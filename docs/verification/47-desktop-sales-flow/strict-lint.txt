@@ -1,0 +1,3 @@
+
+> sasu-desktop@0.1.1 lint
+> tsc --noEmit && eslint src electron.vite.config.ts vitest.config.ts

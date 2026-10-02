@@ -56,6 +56,7 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
   const [answerQuestion, setAnswerQuestion] = useState("");
   const [card, setCard] = useState<Card | null>(null);
   const [cardKey, setCardKey] = useState(0);
+  const [workKey, setWorkKey] = useState(0);
   const [notice, setNotice] = useState("");
   const [shortcut, setShortcut] = useState(true);
   const [petState, setPetState] = useState("idle");
@@ -195,6 +196,7 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
               setTab(item.id);
               setCard(null);
               if (item.id === "cards") setCardKey((key) => key + 1);
+              if (item.id === "work") setWorkKey((key) => key + 1);
             }}
           >
             {item.label}
@@ -245,6 +247,7 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
         )}
         {tab === "work" && (
           <WorkTab
+            key={workKey}
             lead={context?.role === "lead"}
             deptId={context?.dept.id ?? ""}
             onNotice={setNotice}

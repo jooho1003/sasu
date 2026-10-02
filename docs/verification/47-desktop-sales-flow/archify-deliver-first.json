@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "123ed203-0f3a-4f40-bf9f-0c982d7240b6",
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\.vercel\\desktop-sales-flow\\docs\\verification\\47-desktop-sales-flow\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-sales-flow\\.vercel\\desktop-sales-flow.html",
+  "specification": {
+    "sha256": "108e72715fc828d757b68e109274fd9240ef2233139f80ec813ac819eda8f523",
+    "bytes": 2899
+  },
+  "artifact": {
+    "sha256": "bf6b49563d033c8f909f039b494d0f7e1dc871af0c0ff078b4ddbe8f67d1ec46",
+    "bytes": 762275
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "standard",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 1,
+    "compositionIssues": [
+      {
+        "severity": "warning",
+        "code": "composition/desktop-readability",
+        "owner": {
+          "kind": "edge",
+          "id": "s-st",
+          "from": "sources",
+          "to": "start"
+        },
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "availableDiagramWidth": 930,
+        "budgetBasis": "legacy-930",
+        "readerContract": "declared-wide-v1",
+        "requestedTargetPx": null,
+        "requestedTargetMet": null,
+        "budgetLimit": "legacy",
+        "viewBoxWidth": 1500,
+        "scale": 0.62,
+        "text": "명시 시작",
+        "detail": "edge",
+        "sourceFontPx": 8,
+        "projectedFontPx": 4.96,
+        "minimumProjectedFontPx": 6
+      }
+    ]
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-01T18:23:03.876Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}
