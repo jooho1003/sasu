@@ -1,0 +1,24 @@
+{
+  "started": "2026-10-02T13:59:45.579Z",
+  "states": [
+    {
+      "at": "2026-10-02T13:59:55.427Z",
+      "status": "ready"
+    }
+  ],
+  "before": {
+    "version": "0.1.0",
+    "device_name": "DESKTOP-LMKC6N5"
+  },
+  "downloaded": true,
+  "quitAt": "2026-10-02T13:59:55.670Z",
+  "after": {
+    "version": "0.1.1",
+    "device_name": "DESKTOP-LMKC6N5"
+  },
+  "sessionRestored": true,
+  "latestVersionConfirmed": true,
+  "loggedOut": true,
+  "localFilesRemoved": true,
+  "completed": "2026-10-02T14:00:21.399Z"
+}

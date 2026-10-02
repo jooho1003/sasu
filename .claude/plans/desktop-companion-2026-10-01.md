@@ -45,3 +45,7 @@
 Step14: S14(1/1/1/1=4, security floor powerful), S13 뒤 기존 설계 세션 종료·FIFO 회귀를 현재 세션에서 수행. 실제 nodes 기준 powerful 9/18(50%). 운영 반영 없음.
 
 O1 진행(2026-10-02, 사용자 승인): 운영 `auth.sessions` 권한 확인·0068/0069 적용·웹 배포 완료(PR #25, `docs/verification/desktop-companion-production-2026-10-02.md`). SMTP·메일 템플릿·배포 저장소·첫 게시·5분 설치 녹화가 남아 O1은 partial이다.
+
+### 2026-10-02 운영 설치 확인
+
+사용자 운영 반영·설치 승인으로 O1을 진행했다. 웹/DB·6자리 OTP/템플릿·공개 저장소/0.1.1 게시·현재 PC 설치·실제 업데이트·로그아웃 파일 삭제를 확인했다. SC8 충족, 계획8/9. O1 partial/step12 blocked는 신규 Windows 5분 녹화·실제 메일 수신·도메인/Resend SMTP 때문에 유지한다. [실행 기록](../../docs/verification/43-desktop-companion/production-install.md).

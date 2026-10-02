@@ -54,3 +54,7 @@
 - 원격: 병합된 브랜치 7개를 삭제했다. `docs/desktop-companion-plan-20261001`(2d1666a), `docs/sales-agent-design-review-20260930`(a5ddc8d), `feat/sales-review-conditions-20261001`(8e6078b), `feat/sales-review-real-sources-20260930`(3086497), `feat/sales-review-revision-20260930`(8bd3a68), `feat/sales-review-text-diff-20260930`(9dffd22), `feat/sales-source-review-history-20261001`(9c38894).
 - 로컬: 병합된 브랜치 10개를 삭제하고 worktree 3개를 제거했다. phase34 worktree의 `node_modules`는 원래 트리를 가리키는 정션이라 링크만 먼저 끊었다. 그 worktree의 `.vercel/phase34-schema-before.sql`은 원래 트리 `.vercel/phase34-schema-before-20260930.sql`로 옮겼고 SHA-256이 일치한다.
 - `feat-43-desktop-companion`은 다른 세션이 쓰는 중이라 남겼다.
+
+## 후속 Windows 설치 반영
+
+위 기록 이후 step13·14가 PR #27로 병합·운영 배포됐고, 공개 Windows 0.1.1 게시·현재 PC 설치·자동 업데이트·6자리 코드/메일 템플릿 반영을 확인했다. [후속 실행 기록](43-desktop-companion/production-install.md)을 따른다. 신규 Windows 5분 녹화·실제 메일 수신·도메인/Resend SMTP는 남아 있다.

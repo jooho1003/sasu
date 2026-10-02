@@ -132,3 +132,9 @@ Plan §6 Success Criteria (2차): 웹·앱 인용 일치 ✅ · 권한 경계 �
 목록 **4/4 해결**. 이 제한 범위의 Structural/Functional/Contract/Runtime 각 100%, 가중식 100%다. Runtime은 위 단위·합성 HTTP Electron 사례에 한정하며 실제 운영 DB·SMTP·OS 트레이 클릭·설치·게시 업데이트를 포함하지 않는다. 전체 기능 마지막 정적 **93.6%**·계획 **7/9**는 유지한다.
 
 desktop 단위 **76/76**, 합성 Electron **7/7**, root **1,834/1,834**, 양쪽 lint/build, diff check 통과. gap-detector가 지적한 OTP/현재 401·동률 FIFO·늦은 설정 차이를 TDD와 실행 검증으로 보완한 뒤 재대조에서 추가 차이가 없었다. Archify 9/9·4 viewport 자동 검사 통과. Graft 전후 그래프와 실제 DB 전체 E2E는 이번에 미확보이며 기록에서 범위를 명시한다. 주 세션이 최종 코드·실행 기록을 판정했다. step14 완료, step12·전체 phase blocked 유지.
+
+## 9. 운영 설치·업데이트 확인 (2026-10-02)
+
+[운영 설치 기록](../verification/43-desktop-companion/production-install.md)에 실제 공개 설치 파일과 현재 PC 실행·DB 확인을 연결했다. 운영 guest 5/5, 패키지 safeStorage·정상 IPC, 6자리 테스트 코드 인증·부서 연결·inbox·새 질문의 근거 없음 거절을 확인했다. 이메일 수신은 시험하지 않았다.
+
+SC8은 공개 0.1.0→0.1.1 업데이트 다운로드·종료 시 설치·새 버전 실행·세션 복원·정상 로그아웃과 로컬 파일 삭제로 충족했다. **Plan SC 8/9**. SC7 신규 Windows 설치·메일 수신·5분 전체 녹화와 발신 도메인/Resend SMTP 연결은 남아 있다. 마지막 전체 정적 점수 93.6%를 유지하며 전 기능 재분석의 새 점수로 계산하지 않는다. phase/step12 blocked 유지, 운영 웹·DB·설치 파일은 게시됨.

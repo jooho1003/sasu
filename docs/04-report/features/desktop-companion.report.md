@@ -7,9 +7,9 @@ date: 2026-10-02
 
 # desktop-companion Completion Report
 
-> **Status**: Partial — phase 43 개발·격리 로컬 검증 및 step 13·14 보완 완료. 웹 API·DB(0069)는 2026-10-02 운영 반영, 설치 파일 게시·사람 실측·SMTP·메일 템플릿 대기
+> **Status**: Partial — 운영 웹·DB·Windows 0.1.1 설치판 게시·현재 PC 설치/업데이트 확인. Plan SC 8/9, 신규 Windows 5분 녹화·도메인/Resend SMTP 대기
 >
-> **Project**: 사수 (SASU) · **Version**: 0.1.0 · **Author**: Codex
+> **Project**: 사수 (SASU) · **Version**: 0.1.1 · **Author**: Codex
 >
 > **Completion Date**: 2026-10-02 · **PDCA Cycle**: phase 43 · **Design Match Rate**: 93.6%
 
@@ -268,10 +268,17 @@ G2~G4 **3/3 해결**. 양쪽 lint/build·root 단위 1,834 통과. Archify deliv
 
 제한 범위 **4/4 해결**. root 1,834건·양쪽 lint/build·Archify 검사를 통과했다. Graft 전후 그래프·실제 DB 전체 E2E·OS 트레이 클릭은 이번에 미확보다. 트레이는 콜백 단위 검증으로만 표시했다. 전체 마지막 일치율93.6%·계획7/9, 사람/운영 게이트와 미배포 상태는 유지한다.
 
+## 11. 운영 설치·업데이트 (2026-10-02)
+
+[실행 기록](../../verification/43-desktop-companion/production-install.md). 사용자 요청으로 운영 반영·공개 설치 파일 게시·현재 PC 설치를 진행했다. 6자리 OTP·코드 메일 템플릿을 반영하고, 운영 테스트 계정의 기기 연결·질문 거절·암호화 세션을 확인했다. 공개 업데이트로 0.1.0→0.1.1 적용·세션 복원·로그아웃 파일 삭제가 통과했다. 운영 guest 5/5, 최초 설치 16.94초. 코드 서명은 아직 없다.
+
+SC8 충족으로 **8/9**, 전체 정적 93.6% 유지. SC7 신규 Windows 계정 설치·실제 이메일 수신·5분 화면 녹화와 Resend SMTP는 도메인 등록/DNS 인증 뒤 확인한다. 전체 phase/step12는 계속 blocked이며 `production_deployed=true`는 웹·DB·설치 파일 게시를 뜻한다.
+
 ## Version History
 
 | 버전 | 날짜 | 내용 | Author |
 |---|---|---|---|
+| 1.4 | 2026-10-02 | 운영 0.1.1 게시·현재 PC 설치·실제 업데이트/로그아웃 확인. SC8 충족, SC7·도메인/SMTP 대기 | Codex |
 | 1.3 | 2026-10-02 | 웹 API·DB 운영 반영(PR #25)·0069 적용·auth.sessions 권한 확인 반영. 설치 파일 게시·사람 실측·SMTP·메일 템플릿 대기 유지 | Claude(오케스트레이터) |
 | 1.2 | 2026-10-02 | step14 세션/질문 보관 4/4·desktop76·합성 Electron7·root1834. 기존 운영 게이트 유지 | Codex |
 | 1.1 | 2026-10-02 | step 13 G2~G4 3/3 보완·desktop56·합성 Electron3·PGlite8. 전체 93.6%·7/9·사람/운영 게이트 유지 | Codex |
