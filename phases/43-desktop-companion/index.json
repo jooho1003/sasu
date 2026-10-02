@@ -122,7 +122,7 @@
       "effort": "medium",
       "started_at": "2026-10-02T08:33:10+0900",
       "summary": "펫 클릭 패널·실제 트레이 아이콘·읽음/알림·429 제거·위치/움직임 설정·IPC 창 경계를 보완하고 데스크톱 E2E 5건과 루트 검증을 통과했다. docs/verification/43-desktop-companion/desktop-fixes.md 참조.",
-      "completed_at": "2026-10-02T09:01:07+0900"
+      "completed_at": "2026-10-02T09:03:27+0900"
     },
     {
       "step": 12,
