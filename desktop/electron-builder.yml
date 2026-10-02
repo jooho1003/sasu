@@ -1,5 +1,6 @@
 appId: team.sasu.companion
 productName: 사수
+artifactName: sasu-desktop-setup-${version}.${ext}
 directories:
   output: release
 files:

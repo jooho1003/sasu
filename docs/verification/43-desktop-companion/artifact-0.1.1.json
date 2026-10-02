@@ -1,0 +1,12 @@
+{
+  "version": "0.1.1",
+  "bytes": 114135507,
+  "sha256": "5db825645d0e8877423b02f364c3543e83b1576558a3cb78f1df9e6a4e081664",
+  "sha512": "Oa9w1CiFYToJ2XB1EHLl8P4yWoIoOlxrskLw59rIgk5kaxF0o7mijU/HtcjByr8XPkln6r6sv9L74+WL2elRfQ==",
+  "productionUrl": true,
+  "publicKeyOnly": true,
+  "privateFiles": 0,
+  "secretMatches": 0,
+  "dependenciesPresent": true,
+  "feed": "jooho1003/sasu-desktop-releases"
+}
