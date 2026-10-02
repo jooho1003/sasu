@@ -22,7 +22,7 @@
 
 ### HTML 렌더링과 CSP — ADR-069
 
-`proxy.ts`가 요청별 nonce와 CSP를 요청 헤더에 넣고, 공통 `app/layout.tsx`는 `connection()`으로 요청 시 렌더링을 보장한다. Next.js가 정상 script에 nonce를 붙인다. 공개 페이지의 인증 조회는 추가하지 않는다. 응답은 no-store이며 서버 전용 `SASU_CSP_ENFORCE=true`로 Report-Only에서 강제로 전환한다. 운영 관찰·승인 전에는 기본 Report-Only를 유지하고 두 모드는 같은 프로덕션 빌드에서 별도 검증한다. `form-action`은 같은 출처와 Slack OAuth 주소(`https://slack.com`, `https://*.slack.com`)만 허용한다. Slack 설치 폼의 303 리다이렉트 때문이다(ADR-069 보완).
+`proxy.ts`가 요청별 nonce와 CSP를 요청 헤더에 넣고, 공통 `app/layout.tsx`는 `connection()`으로 요청 시 렌더링을 보장한다. Next.js가 정상 script에 nonce를 붙인다. 공개 페이지의 인증 조회는 추가하지 않는다. 응답은 no-store이며 서버 전용 `SASU_CSP_ENFORCE=true`로 Report-Only에서 강제로 전환한다. 운영 관찰·승인 전에는 기본 Report-Only를 유지하고 두 모드는 같은 프로덕션 빌드에서 별도 검증한다. `form-action`은 같은 출처와 Slack OAuth 주소(`https://slack.com`, `https://*.slack.com`)만 허용한다. Slack 설치 폼의 303 리다이렉트 때문이다(ADR-069 보완). 운영은 2026-10-03부터 강제 모드다.
 
 ### 자료 검토·원본 보관·기록 보존 — ADR-054
 

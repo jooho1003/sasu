@@ -194,7 +194,7 @@
       "dir": "23-browser-meeting-recording",
       "status": "blocked",
       "verification": "docs/verification/browser-meeting-recording/README.md",
-      "note": "2026-09-30: step0~3·4-A·4-B1~B8을 운영에 반영했다(DB 0058~0064, dpl_Gtzz9Xpa3CC1pjJgqmKY8FegYssj). 조직 녹음 스위치는 꺼져 있다. 남은 완료 게이트는 실제 기기 V01~V06(그 뒤 스위치 켜기), 제공사 V13, CSP 강제 V14, 실제 모델 지시문 문서 V16, 정량 실측 V20이다.",
+      "note": "2026-09-30: step0~3·4-A·4-B1~B8을 운영에 반영했다(DB 0058~0064, dpl_Gtzz9Xpa3CC1pjJgqmKY8FegYssj). 조직 녹음 스위치는 꺼져 있다. 남은 완료 게이트는 실제 기기 V01~V06(그 뒤 스위치 켜기), 제공사 V13, 실제 모델 지시문 문서 V16, 정량 실측 V20이다. V14 CSP 강제는 2026-10-03 운영 반영(docs/verification/csp-enforce-2026-10-03/README.md).",
       "followup_verification": "docs/verification/browser-meeting-recording/step1.md",
       "pending_change_production_deployed": true,
       "production_deployed": true,

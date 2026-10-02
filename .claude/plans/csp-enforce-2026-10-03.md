@@ -30,9 +30,9 @@
 | C3 | CSP 화면 순회 spec | qa | 1/0/1/1=3 | balanced | general-purpose·sonnet | 완료 |
 | C4 | 강제 모드 E2E 실행·증거 복원 | qa | 0/1/0/1=2 | balanced | main | 완료 |
 | C5 | 운영 Report-Only 관찰(읽기 전용) | qa | 0/0/0/0=0→floor | balanced | main | 완료 |
-| R1 | 최종 리뷰 | review | 0/1/0/2=3→오버라이드 | powerful | main | 진행 |
-| O1 | PR·Preview·병합(운영은 아직 Report-Only) | general | 0/1/2/1=4→오버라이드 | powerful | main, 승인 필요 | 대기 |
-| O2 | 운영 env 강제 → 재배포 → 운영 확인 → 기록 PR, 문제 시 즉시 되돌림 | security | 0/2/2/1=5 | powerful | main, 승인 필요 | 대기 |
+| R1 | 최종 리뷰 | review | 0/1/0/2=3→오버라이드 | powerful | main | 완료 |
+| O1 | PR·Preview·병합(운영은 아직 Report-Only) | general | 0/1/2/1=4→오버라이드 | powerful | main, 승인 필요 | 완료(PR #31) |
+| O2 | 운영 env 강제 → 재배포 → 운영 확인 → 기록 PR, 문제 시 즉시 되돌림 | security | 0/2/2/1=5 | powerful | main, 승인 필요 | 완료(운영 강제) |
 
 ## 게이트
 

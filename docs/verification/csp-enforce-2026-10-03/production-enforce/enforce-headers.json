@@ -1,0 +1,110 @@
+{
+  "/": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-pu7oJ2Llw4HhLPeaFNds/Q==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/privacy": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-JCYjmlRPFAVGdnXXAzz1lw==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/login": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-TxmYzb8kyWzGBc47M2I5XQ==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/demo/hiring": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-WuGdgGmyGeyBpY4fwQjbeg==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/demo/notion": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-S8dSRKpIZ+1EvFdA/4xLiw==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/no-membership": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-w4+w6zcd+56zXAfcLe6w1g==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/csp-page-that-does-not-exist": {
+    "status": 404,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-gDcanXWGXWOzDx6NMbvpUw==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/api/jobs/run": {
+    "status": 405,
+    "headers": {
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-Df5A5SuBtbeS/iBPowtuZg==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/d/test/trailers": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-4X/UIJiz1nown3H6WsKVzA==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  }
+}

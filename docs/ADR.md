@@ -590,6 +590,7 @@
 - 트레이드오프: 정적 HTML/CDN 캐시의 이점을 포기하고 요청별 서버 렌더링 비용이 생긴다. 게스트 데이터 조회의 권한 경계와 정적 JS·폰트·이미지 캐시는 유지한다. `unsafe-inline`로 script 정책을 완화하거나 고정 nonce를 재사용하는 대안은 채택하지 않는다. 기존 style 속성 허용은 유지한다.
 - 근거: `node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md`, `03-api-reference/04-functions/connection.md`. 실행 기록: `docs/verification/csp-rendering-2026-09-24/`.
 - 보완(2026-10-03): 조직 관리자의 Slack 설치는 우리 주소로 폼을 보낸 뒤 303으로 `https://slack.com/oauth/v2/authorize`에 이동한다. Chromium은 이 리다이렉트에도 `form-action`을 적용하므로 `'self'`만으로 강제하면 설치가 막힌다. `form-action`에 `https://slack.com https://*.slack.com`만 더한다. POST·origin·단회 state 검사(ADR-052)를 유지하려고 GET 링크로 바꾸지 않는다. 실행 기록: `docs/verification/csp-enforce-2026-10-03/`.
+- 운영 강제(2026-10-03): 사용자 승인으로 운영 Production env에 `SASU_CSP_ENFORCE=true`를 넣고 재배포했다(`dpl_2BC6owyD6srKmCv8Ad5nWxiDAwmr`). 되돌림 대상은 직전 Report-Only 배포 `dpl_12RWS9QPy5FtiKySYYQmJdnh9FH7`이다. `report-uri`가 없어 실제 사용자 위반은 아직 모으지 않는다.
 
 ### ADR-070: 녹음 세션은 녹음 시작 때 만들고, 구간 원본은 같은 ID로 검증·전달한다 (9/25)
 
