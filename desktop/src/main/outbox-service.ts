@@ -46,7 +46,8 @@ export class OutboxService {
     } catch (cause) {
       if (!(cause instanceof ApiError)) throw cause;
       if (!this.shouldKeep(cause)) {
-        if (cause.status !== null && cause.status >= 400 && cause.status < 500) {
+        // Design Ref: desktop-companion §6 — only the daily ask limit gets this notice; other 4xx keep the server message.
+        if (cause.status === 429) {
           throw new Error("daily_limit:오늘 질문 한도를 모두 사용했습니다.", { cause });
         }
         throw cause;

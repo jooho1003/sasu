@@ -200,7 +200,7 @@ U01 펫 창 속성 · U02 상태 5종 모양·우선순위 · U03 동작 줄이�
 | 404 | `not_found`·`card_not_found`·`answer_not_found` | 다른 부서·안 보이는 대상 | "찾을 수 없어요" |
 | 409 | `card_changed`·`invalid_transition`·`no_consented_speaker`·`review_conflict` | 웹과 같은 매핑(중복 결정은 200 `duplicate:true`) | 목록 새로 고침 |
 | 413 | `too_large` | 회의 기록 4MB 초과 | 자료 검토함 안내 |
-| 422/400 | `invalid_input`·`invalid_status`·`decision_fields_required`·`invalid_file_size`·`transcript_read_failed`·`no_speech` | 입력 검사 실패 | 입력 칸 안내 |
+| 422/400 | `invalid_input`·`source_too_large`(422, E15)·`invalid_status`·`decision_fields_required`·`invalid_file_size`·`transcript_read_failed`·`no_speech` | 입력 검사 실패 | 입력 칸 안내 |
 | 429 | `ask_daily_limit`·`device_link_limit`·`sales_daily_limit` | 한도 | 끊김 보관 안 함, 안내 |
 | 5xx·네트워크 | `*_failed` / 앱 `network`·`timeout` | 서버·연결 오류 | 질문만 끊김 보관, 상태 확인 백오프 30→60→120→300초 |
 | (앱) | `invalid_response` | 서버 응답이 앱 계약과 다름 | 보관·재시도 없이 오류 안내 |
