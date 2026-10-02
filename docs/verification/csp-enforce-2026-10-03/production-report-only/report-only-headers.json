@@ -1,0 +1,110 @@
+{
+  "/": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-JChytz2+/DnAGmkpmAZn6g==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/privacy": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-A6ILGn/ogGWsHqByxq9JgQ==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/login": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-mbTuI8tNx6rxIWPlcY4D0w==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/demo/hiring": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-CiX34lxMD8b+u4UYvaE1rQ==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/demo/notion": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-osA2SZHlsJ2Pv744QT+OBA==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/no-membership": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-h2hmWIDQav0z6mpLBUUJzA==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/csp-page-that-does-not-exist": {
+    "status": 404,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-G6ybMo2riHM1pYFlFjU0tw==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/api/jobs/run": {
+    "status": 405,
+    "headers": {
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-Jh+8/ZxttpwCBT2wbCGAXw==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
+  "/d/test/trailers": {
+    "status": 200,
+    "headers": {
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy-report-only": "default-src 'self'; script-src 'self' 'nonce-QtcsXK9PNNLU1s6AGoxH7g==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://fzpnidoyhejrmhymggpp.supabase.co wss://fzpnidoyhejrmhymggpp.supabase.co; media-src 'self' blob: https://fzpnidoyhejrmhymggpp.supabase.co; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  }
+}

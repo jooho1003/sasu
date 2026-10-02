@@ -1,0 +1,110 @@
+{
+  "/": {
+    "status": 200,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-3J5RRAWL4HqFpF81TLaz7Q==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; media-src 'self' blob: http://127.0.0.1:54321; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';"
+    }
+  },
+  "/privacy": {
+    "status": 200,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-g/s0n3DZKSro+z5/Gz98SQ==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; media-src 'self' blob: http://127.0.0.1:54321; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';"
+    }
+  },
+  "/login": {
+    "status": 200,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-WNoEgygXUgXk44ZE03PKHA==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; media-src 'self' blob: http://127.0.0.1:54321; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';"
+    }
+  },
+  "/demo/hiring": {
+    "status": 200,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-bjQeq3vaRKbNfslvz7Aj8g==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; media-src 'self' blob: http://127.0.0.1:54321; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';"
+    }
+  },
+  "/demo/notion": {
+    "status": 200,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-R5aIznw00vMnrG3rSl48BA==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; media-src 'self' blob: http://127.0.0.1:54321; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';"
+    }
+  },
+  "/no-membership": {
+    "status": 200,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-I/nrsRCU3xx1R8GAbBLkhA==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; media-src 'self' blob: http://127.0.0.1:54321; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';"
+    }
+  },
+  "/csp-page-that-does-not-exist": {
+    "status": 404,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-LP8NKeqwgCh9h8QgphtSEA==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; media-src 'self' blob: http://127.0.0.1:54321; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';"
+    }
+  },
+  "/api/jobs/run": {
+    "status": 405,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-J/7ZYYnDjdTcfPmLCOgKzg==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; media-src 'self' blob: http://127.0.0.1:54321; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';"
+    }
+  },
+  "/d/test/trailers": {
+    "status": 404,
+    "headers": {
+      "strict-transport-security": "max-age=63072000; includeSubDomains",
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "microphone=(self), display-capture=(self), camera=(), geolocation=()",
+      "cache-control": "private, no-store, max-age=0",
+      "content-security-policy": "default-src 'self'; script-src 'self' 'nonce-N279r1zraD3BMf+EqRFRuQ==' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:54321 ws://127.0.0.1:54321; media-src 'self' blob: http://127.0.0.1:54321; worker-src 'self' blob:; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://slack.com https://*.slack.com; frame-ancestors 'none';"
+    }
+  }
+}

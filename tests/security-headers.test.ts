@@ -16,6 +16,7 @@ describe("security response headers", () => {
     expect(policy).toContain("script-src 'self' 'nonce-YWJjMTIz' 'strict-dynamic';");
     expect(policy).toContain("media-src 'self' blob: https://project.supabase.co;");
     expect(policy).toContain("worker-src 'self' blob:;");
+    expect(policy).toContain("form-action 'self' https://slack.com https://*.slack.com;");
     expect(policy).not.toContain("unsafe-eval");
     expect(policy).not.toContain("path?");
   });

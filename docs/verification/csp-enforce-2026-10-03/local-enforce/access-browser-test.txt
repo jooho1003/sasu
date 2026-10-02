@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+[1/1] [chromium] › tests\e2e\review-access-live.spec.ts:17:5 › 실제 세션·원본 API·Storage 재생과 조직 내려받기 스위치
+  1 passed (7.6s)
+exit=0

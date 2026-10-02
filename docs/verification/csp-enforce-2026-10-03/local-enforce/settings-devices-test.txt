@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+[1/1] [chromium] › tests\e2e\settings-devices-local.spec.ts:44:5 › 내 기기만 보고 한 기기를 해제할 수 있다
+  1 passed (3.3s)
+exit=0

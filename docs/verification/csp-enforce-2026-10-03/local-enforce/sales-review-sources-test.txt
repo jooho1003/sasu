@@ -1,0 +1,9 @@
+
+Running 4 tests using 1 worker
+
+[1/4] [chromium] › tests\e2e\sales-review-sources-local.spec.ts:29:5 › 부서장이 현재 원문 네 건을 연결하고 삭제 뒤 재조회가 거절된다
+[2/4] [chromium] › tests\e2e\sales-source-review-history-local.spec.ts:17:5 › 본인 이력 20건·동일시각 더 보기·재접속 재열람·현재 원문과 권한·무쓰기
+[3/4] [chromium] › tests\e2e\sales-source-review-history-local.spec.ts:114:5 › 이력 조회 실패·시간초과·늦은 응답과 상세 재열람 시간초과에서 표시·잠금 회복
+[4/4] [chromium] › tests\e2e\sales-source-review-history-local.spec.ts:151:5 › 취소한 상세의 늦은 권한 오류가 새로 연 검토를 지우지 않는다
+  4 passed (22.9s)
+exit=0

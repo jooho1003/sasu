@@ -1,0 +1,376 @@
+{
+  "mode": "enforce",
+  "checkedAt": "2026-10-02T15:40:44.722Z",
+  "results": [
+    {
+      "role": "lead",
+      "route": "/d/:dept",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "tabs:6/6"
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/ask",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/ask",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/ledger",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/ledger",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/documents",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/documents",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/roles",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/roles",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/reviews",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/reviews",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/reviews/glossary",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/reviews/glossary",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/reviews/record",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/reviews/record",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "recording_switch_on"
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/retention",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/retention",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/settings",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/settings",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "tabs:3/3"
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/sales-review",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/sales-review",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/retros",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/retros",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/consent",
+      "status": 200,
+      "finalPath": "/consent",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/admin",
+      "status": 200,
+      "finalPath": "/admin",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/admin/members",
+      "status": 200,
+      "finalPath": "/admin/members",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "tabs:2/2"
+    },
+    {
+      "role": "lead",
+      "route": "/admin/sources",
+      "status": 200,
+      "finalPath": "/admin/sources",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/admin/security",
+      "status": 200,
+      "finalPath": "/admin/security",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/admin/audit",
+      "status": 200,
+      "finalPath": "/admin/audit",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "tabs:2/2"
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/cards/:id",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/cards/607bc312-4128-4128-bdc4-aec694d7f076",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/reviews/:id",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/reviews/0572a15e-2201-4fa2-be3f-77cf2d819482",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/evidence/:id",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/evidence/5363d138-2013-4b82-a2b5-48b4f3591697",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept?item=:id",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/retros/:id",
+      "status": null,
+      "finalPath": null,
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "no_seed"
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/trailers",
+      "status": 404,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/trailers",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "http_404"
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/trailers/new",
+      "status": 404,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/trailers/new",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "http_404"
+    },
+    {
+      "role": "lead",
+      "route": "/d/:dept/trailers/:id",
+      "status": null,
+      "finalPath": null,
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "no_seed"
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "tabs:6/6"
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/ask",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/ask",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/ledger",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/ledger",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/documents",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/documents",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/roles",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/roles",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/reviews",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/reviews",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/reviews/glossary",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/reviews/glossary",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/retention",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/retention",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/settings",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/settings",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": "tabs:2/2"
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/sales-review",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/sales-review",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    },
+    {
+      "role": "member",
+      "route": "/d/:dept/retros",
+      "status": 200,
+      "finalPath": "/d/22222222-2222-4222-8222-222222222222/retros",
+      "violations": [],
+      "consoleCsp": [],
+      "pageErrors": [],
+      "note": ""
+    }
+  ]
+}

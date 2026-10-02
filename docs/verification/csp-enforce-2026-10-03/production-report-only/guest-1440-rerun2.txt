@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+[1/1] [chromium] › tests\e2e\guest.spec.ts:33:7 › 게스트 대시보드·카드·원장·묻기 완주 1440px
+  1 passed (41.1s)
+exit=0
