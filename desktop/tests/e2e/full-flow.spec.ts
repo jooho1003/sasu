@@ -1,7 +1,7 @@
 import { expect, test, _electron as electron } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { createClient } from "@supabase/supabase-js";
@@ -26,11 +26,32 @@ function build(local: Record<string, string>): void {
   });
 }
 
+function plaintextFiles(root: string, value: string): string[] {
+  const needle = Buffer.from(value, "utf8");
+  const found: string[] = [];
+  const visit = (path: string): void => {
+    for (const entry of readdirSync(path)) {
+      const target = resolve(path, entry);
+      const stats = statSync(target);
+      if (stats.isDirectory()) visit(target);
+      else if (stats.isFile()) {
+        try {
+          if (readFileSync(target).includes(needle)) found.push(target);
+        } catch (cause) {
+          if (!(cause instanceof Error) || !("code" in cause) || cause.code !== "EBUSY") throw cause;
+        }
+      }
+    }
+  };
+  visit(root);
+  return found;
+}
+
 test.describe("desktop companion full flow", () => {
   test.skip(!enabled, "로컬 QA 서버와 합성 계정이 필요합니다.");
 
   test("코드 로그인부터 근거·결정·웹 해제·끊김 질문 재전송까지", async ({ browser }) => {
-    test.setTimeout(120_000);
+    test.setTimeout(180_000);
     const local = localStatus();
     build(local);
     console.log("full-flow: built");
@@ -45,6 +66,8 @@ test.describe("desktop companion full flow", () => {
     const question = `데스크톱 전체 흐름 질문 ${answer.slice(0, 8)}`;
     const cardTitle = `데스크톱 전체 흐름 카드 ${card.slice(0, 8)}`;
     const offlineQuestion = "인터넷이 끊긴 전체 흐름 테스트 질문입니다.";
+    const alertCardOne = randomUUID();
+    const alertCardTwo = randomUUID();
     console.log("full-flow: fixture-start");
     sql(`
       update device_links set revoked_at=now(), revoked_reason='relink' where user_id='${ids.lead}' and revoked_at is null;
@@ -69,7 +92,9 @@ test.describe("desktop companion full flow", () => {
     let web: Awaited<ReturnType<typeof browser.newPage>> | null = null;
     try {
       const panel = app.windows().find((page) => page.url().includes("#panel"));
+      const pet = app.windows().find((page) => page.url().includes("#pet"));
       expect(panel).toBeTruthy();
+      expect(pet).toBeTruthy();
       const login = async (): Promise<void> => {
         await expect(panel!.getByRole("heading", { name: "사수 시작하기" })).toBeVisible();
         // The lean local QA stack has no Mailpit. Generate a one-time code
@@ -93,6 +118,80 @@ test.describe("desktop companion full flow", () => {
       };
       await login();
       console.log("full-flow: linked");
+
+      await pet!.evaluate(() => {
+        const target = window as typeof window & {
+          __sasuPetEvents?: Array<{ state: string; at: number }>;
+        };
+        target.__sasuPetEvents = [];
+        window.sasu.window.onPetState((state) => target.__sasuPetEvents?.push({ state, at: Date.now() }));
+      });
+      await pet!.evaluate(() => {
+        const target = window as typeof window & {
+          __sasuNotificationTimes?: number[];
+        };
+        target.__sasuNotificationTimes = [];
+        window.sasu.window.onE2ENotification((at) => target.__sasuNotificationTimes?.push(at));
+      });
+      // The first inbox response is the notification comparison baseline.
+      // Observe that response before adding a card so both measurements
+      // exercise a genuine change, rather than app startup.
+      await expect.poll(
+        () => pet!.evaluate(() => (window as typeof window & {
+          __sasuPetEvents?: Array<{ state: string; at: number }>;
+        }).__sasuPetEvents?.length ?? 0),
+        { timeout: 60_000, intervals: [250, 500, 1_000, 2_000] },
+      ).toBeGreaterThan(0);
+      await pet!.evaluate(() => {
+        (window as typeof window & {
+          __sasuPetEvents?: Array<{ state: string; at: number }>;
+        }).__sasuPetEvents = [];
+      });
+      await pet!.evaluate(() => {
+        (window as typeof window & {
+          __sasuNotificationTimes?: number[];
+        }).__sasuNotificationTimes = [];
+      });
+      const insertAlertCard = (id: string, ordinal: number): void => {
+        sql(`
+          insert into decision_requests(id,dept_id,title,background,assignee_id,visibility,status,deadline)
+          values ('${id}','${ids.dept}','알림 실측 카드 ${ordinal}','새 담당 카드 알림 실측','${ids.lead}','dept','open',now()+interval '1 day');
+          insert into citations(owner_kind,owner_id,item_id,quote,ordinal)
+          values ('decision_request','${id}','${item}','${quote}',1);
+        `);
+      };
+      const assertCardAlert = async (id: string, ordinal: number): Promise<{ petMs: number; notificationMs: number }> => {
+        const started = Date.now();
+        insertAlertCard(id, ordinal);
+        await expect.poll(
+          () => pet!.evaluate((after) => (window as typeof window & {
+            __sasuPetEvents?: Array<{ state: string; at: number }>;
+          }).__sasuPetEvents?.find((event) => event.state === "needs_attention" && event.at >= after) ?? null, started),
+          { timeout: 60_000, intervals: [250, 500, 1_000, 2_000] },
+        ).not.toBeNull();
+        const petEvent = await pet!.evaluate((after) => (window as typeof window & {
+          __sasuPetEvents?: Array<{ state: string; at: number }>;
+        }).__sasuPetEvents?.find((event) => event.state === "needs_attention" && event.at >= after) ?? null, started);
+        await expect.poll(
+          () => pet!.evaluate((after) => (window as typeof window & {
+            __sasuNotificationTimes?: number[];
+          }).__sasuNotificationTimes?.find((at) => at >= after) ?? null, started),
+          { timeout: 60_000, intervals: [250, 500, 1_000, 2_000] },
+        ).not.toBeNull();
+        const notificationAt = await pet!.evaluate((after) => (window as typeof window & {
+          __sasuNotificationTimes?: number[];
+        }).__sasuNotificationTimes?.find((at) => at >= after) ?? null, started);
+        const petMs = Number((petEvent as { at: number } | null)?.at) - started;
+        const notificationMs = Number(notificationAt) - started;
+        expect(petMs).toBeLessThanOrEqual(60_000);
+        expect(notificationMs).toBeLessThanOrEqual(60_000);
+        console.log(`full-flow: alert-${ordinal} pet=${petMs}ms notification=${notificationMs}ms`);
+        return { petMs, notificationMs };
+      };
+      const firstAlert = await assertCardAlert(alertCardOne, 1);
+      const secondAlert = await assertCardAlert(alertCardTwo, 2);
+      expect(secondAlert.notificationMs).toBeLessThanOrEqual(60_000);
+      expect(firstAlert.petMs).toBeLessThanOrEqual(60_000);
 
       await panel!.getByRole("button", { name: "기록" }).click();
       await panel!.getByRole("button", { name: "기록 불러오기" }).click();
@@ -139,6 +238,7 @@ test.describe("desktop companion full flow", () => {
       await expect(panel!.getByText("연결되면 보낼게요.")).toBeVisible();
       const outboxPath = resolve(userData, "outbox.bin");
       expect(readFileSync(outboxPath).includes(Buffer.from(offlineQuestion))).toBe(false);
+      expect(plaintextFiles(userData, offlineQuestion)).toEqual([]);
       console.log("full-flow: queued");
       await app.evaluate(({ session }) => {
         session.defaultSession.enableNetworkEmulation({ offline: false });
@@ -153,10 +253,11 @@ test.describe("desktop companion full flow", () => {
       await app.close();
       rmSync(userData, { recursive: true, force: true });
       sql(`
-        delete from citations where owner_id in ('${answer}', '${card}');
+        delete from citations where owner_id in ('${answer}', '${card}', '${alertCardOne}', '${alertCardTwo}');
         delete from answers where id='${answer}';
         delete from decisions where request_id='${card}';
         delete from decision_requests where id='${card}';
+        delete from decision_requests where id in ('${alertCardOne}', '${alertCardTwo}');
         delete from items where id='${item}';
         delete from sources where id='${source}';
         update device_links set revoked_at=now(), revoked_reason='signout' where user_id='${ids.lead}' and revoked_at is null;

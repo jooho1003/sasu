@@ -158,6 +158,11 @@ const bridge = {
     },
     movePet: (position: { x: number; y: number }) =>
       invoke<void>("window:movePet", position),
+    onE2ENotification: (callback: (at: number) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, at: number): void => callback(at);
+      ipcRenderer.on("desktop-e2e-notification", listener);
+      return () => ipcRenderer.removeListener("desktop-e2e-notification", listener);
+    },
   },
 };
 

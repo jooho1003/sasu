@@ -1,5 +1,6 @@
 // Design Ref: desktop-companion §7 S7 — notifications expose status and counts only.
 import { Notification } from "electron";
+import { logInfo } from "./logger";
 
 export function notify(kind: "answer" | "cards" | "work" | "failed", count = 0, onClick?: () => void): void {
   const body = kind === "answer"
@@ -12,4 +13,5 @@ export function notify(kind: "answer" | "cards" | "work" | "failed", count = 0, 
   const notification = new Notification({ title: "사수", body });
   if (onClick) notification.on("click", onClick);
   notification.show();
+  logInfo("notification_shown", { code: kind });
 }

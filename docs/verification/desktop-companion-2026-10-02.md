@@ -5,10 +5,10 @@
 ## 통과한 로컬 검증
 
 - `npm --prefix desktop run lint` — 통과.
-- `npm --prefix desktop test` — 5 파일, 24 테스트 통과.
+- `npm --prefix desktop test` — 6 파일, 27 테스트 통과.
 - `npm --prefix desktop run build` — 통과.
-- `npm --prefix desktop run dist` — `--publish never`로 Windows NSIS 설치 산출을 시도했으며 공개 게시 없음.
-- `npm --prefix desktop run e2e` — 5개 Electron E2E 통과. 코드 로그인·부서 연결·원문 근거·결정 연타 1건·웹 해제 뒤 다음 요청 로그인 화면·세션 오프라인 질문 보관·연결 복구 전송을 확인했다.
+- `npm --prefix desktop run dist` — `--publish never`로 Windows NSIS 설치 파일 `desktop/release/사수 Setup 0.1.0.exe`(114,125,224 bytes)를 생성했다. `latest.yml` SHA-512(base64)는 `KrUuGShgkaGmUq6UXaBuk829+u6ACrD5JwqYO3S7GGRvIBJHzaRHSKGRIQYF65B/r8WWbA55qX4KOjXbBt7Zjw==`와 일치했다. 공개 게시 없음.
+- `npm --prefix desktop run e2e -- tests/e2e/full-flow.spec.ts` — 코드 로그인·부서 연결·원문 근거·결정 연타 1건·웹 해제 뒤 다음 요청 로그인 화면·세션 오프라인 질문 보관·연결 복구 전송을 통과했다.
 - `node scripts/verify-device-links-sql.mjs` — 8/8 통과.
 - `node scripts/verify-security-sql.mjs` — 316개 검증, 권한 조합 2,016건 통과.
 - `node scripts/verify-companion-api.mjs` — 답변 근거 일치 2건, member의 leads_only 인용 0건, 해제 경로 9개, 결정 1건, 실패 0건.
@@ -16,7 +16,7 @@
 ## L3·L4 실행 결과
 
 - L3: Playwright `_electron` 전체 흐름에서 해제 직후 다음 앱 요청은 `session_invalid`으로 로그인 화면으로 전환됐다. 카드 결정은 같은 `request_id`에 1건만 저장됐다.
-- L4(로컬): 새 담당 카드의 펫 상태는 `needs_attention` 경로(`desktop/src/main/index.ts`)와 내용 없는 Windows 알림(`desktop/src/main/notify.ts`)을 사용한다. 전송 대기 질문은 `outbox.bin`에만 암호화 저장되고, E2E에서 질문 평문 바이트가 없는 것과 전송 뒤 파일 삭제를 확인한다.
+- L4(로컬): SQL로 새 담당 카드 두 건을 넣어 실측했다. 첫 카드 T0→펫 T1 29,607ms, T0→알림 T2 29,616ms; 둘째 카드 T1 29,483ms, T2 29,483ms로 모두 60초 이하였다. E2E는 펫 클릭으로 패널이 열림도 검증한다. 전송 대기 질문은 `outbox.bin`에만 암호화 저장되고, 앱 userData 전체의 평문 검사와 E2E stdout/stderr 로그의 `Select-String` 검사에서 테스트 질문 0건, 전송 뒤 파일 삭제를 확인했다.
 - 웹/앱 인용 가시성: `verify-companion-api.mjs`의 `answerParity: 2`, `memberLeadsOnlyCitations: 0` 결과를 사용했다.
 
 ## 설계 §11.2 대조

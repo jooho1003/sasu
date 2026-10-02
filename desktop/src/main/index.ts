@@ -154,7 +154,10 @@ async function start(): Promise<void> {
       const state = computePetState(inbox, new Set(settings.seen), await outbox.count());
       windows?.pet.webContents.send("pet-state", state);
       const changes = inboxNotificationCounts(previousInbox, inbox);
-      if (changes.cards) notify("cards", changes.cards, () => windows?.togglePanel());
+      if (changes.cards) {
+        notify("cards", changes.cards, () => windows?.togglePanel());
+        if (process.env.SASU_DESKTOP_E2E === "1") windows?.pet.webContents.send("desktop-e2e-notification", Date.now());
+      }
       if (changes.answers) notify("answer", 0, () => windows?.focusQuestion());
       if (changes.work) notify("work", 0, () => windows?.togglePanel());
       if (changes.failed) notify("failed", 0, () => windows?.togglePanel());
