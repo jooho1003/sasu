@@ -292,7 +292,9 @@
         "R1"
       ],
       "output": "운영 반영 기록",
-      "requires_approval": true
+      "requires_approval": true,
+      "status": "partial",
+      "note": "2026-10-02: 운영 auth.sessions 권한 확인·0068/0069 적용·웹 배포 완료(PR #25, docs/verification/desktop-companion-production-2026-10-02.md). 남음: SMTP·메일 템플릿·배포 저장소·첫 게시·5분 설치 녹화."
     },
     {
       "id": "S13",

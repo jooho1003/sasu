@@ -281,14 +281,15 @@
       "dir": "43-desktop-companion",
       "status": "blocked",
       "design": "docs/02-design/features/desktop-companion.design.md",
-      "note": "Windows 데스크톱 동반 앱 — step0~11·13·14 완료. step14 세션/보관 4/4, desktop76·합성 Electron7·root1834·lint/build·Archify 통과. 전체 마지막93.6%·계획7/9 유지. step12 사람 설치/업데이트 실측·운영 승인 대기. 운영 미반영·게시 없음.",
+      "note": "Windows 데스크톱 동반 앱 — step0~11·13·14 완료. step14 세션/보관 4/4, desktop76·합성 Electron7·root1834·lint/build·Archify 통과. 전체 마지막93.6%·계획7/9 유지. 웹 API·DB(0069)는 2026-10-02 운영 반영(PR #25, auth.sessions 권한 확인). 설치 파일은 미게시라 production_deployed=false. step12 사람 설치/업데이트 실측·SMTP·메일 템플릿·배포 저장소 대기.",
       "production_deployed": false,
       "blocked_at": "2026-10-02T09:55:30+09:00",
       "verification": "docs/verification/desktop-companion-2026-10-02.md",
       "analysis": "docs/03-analysis/desktop-companion.analysis.md",
       "report": "docs/04-report/features/desktop-companion.report.md",
       "followup_verification": "docs/verification/43-desktop-companion/followup.md",
-      "session_verification": "docs/verification/43-desktop-companion/session-outbox.md"
+      "session_verification": "docs/verification/43-desktop-companion/session-outbox.md",
+      "production_record": "docs/verification/desktop-companion-production-2026-10-02.md"
     }
   ]
 }

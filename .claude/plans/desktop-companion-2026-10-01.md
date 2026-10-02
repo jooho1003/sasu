@@ -43,3 +43,5 @@
 - 로컬 QA는 기존 `node scripts/review-qa.mjs` 환경(본 작업 트리의 `.vercel/review-qa`)을 쓴다.
 
 Step14: S14(1/1/1/1=4, security floor powerful), S13 뒤 기존 설계 세션 종료·FIFO 회귀를 현재 세션에서 수행. 실제 nodes 기준 powerful 9/18(50%). 운영 반영 없음.
+
+O1 진행(2026-10-02, 사용자 승인): 운영 `auth.sessions` 권한 확인·0068/0069 적용·웹 배포 완료(PR #25, `docs/verification/desktop-companion-production-2026-10-02.md`). SMTP·메일 템플릿·배포 저장소·첫 게시·5분 설치 녹화가 남아 O1은 partial이다.

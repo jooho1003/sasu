@@ -7,7 +7,7 @@ date: 2026-10-02
 
 # desktop-companion Completion Report
 
-> **Status**: Partial — phase 43 개발·격리 로컬 검증 및 step 13·14 보완 완료, 사람·운영 게이트 대기
+> **Status**: Partial — phase 43 개발·격리 로컬 검증 및 step 13·14 보완 완료. 웹 API·DB(0069)는 2026-10-02 운영 반영, 설치 파일 게시·사람 실측·SMTP·메일 템플릿 대기
 >
 > **Project**: 사수 (SASU) · **Version**: 0.1.0 · **Author**: Codex
 >
@@ -28,7 +28,7 @@ date: 2026-10-02
 
 ### 1.2 Results Summary
 
-설계 일치율 **93.6%** (1차 84.2% → step 11 보완), 계획 성공 조건 **7/9 충족**. 전체 단위 **1,834건**, SQL **8/8 신규 + 316/2,016 권한**, E2E **5건 통과**. 설치 파일 114,125,224바이트 생성·SHA-512 기록. 알림 실측 **29,607ms·29,483ms** (60초 이내 만족). 배포 미반영.
+설계 일치율 **93.6%** (1차 84.2% → step 11 보완), 계획 성공 조건 **7/9 충족**. 전체 단위 **1,834건**, SQL **8/8 신규 + 316/2,016 권한**, E2E **5건 통과**. 설치 파일 114,125,224바이트 생성·SHA-512 기록. 알림 실측 **29,607ms·29,483ms** (60초 이내 만족). 웹 API·DB는 2026-10-02 운영 반영([기록](../../verification/desktop-companion-production-2026-10-02.md)), 설치 파일은 미게시.
 
 ### 1.3 Value Delivered
 
@@ -132,10 +132,10 @@ SC7·SC8 미충족:
 ### 4.2 운영 게이트 (Operations Gates)
 
 배포 전제:
-1. **마이그레이션 0069 적용**: `supabase db push` (로컬 QA에서 임시 롤백함, 운영 DB 영구 적용 필요)
+1. **마이그레이션 0069 적용**: 완료 — 2026-10-02 20:33 KST 운영 DB 적용([운영 반영 기록](../../verification/desktop-companion-production-2026-10-02.md))
 2. **SMTP 전환**: 기본 발송 제한 해제(현재 2통 후 429)
 3. **6자리 코드 메일 템플릿**: Supabase Auth `Magic Link` 템플릿 개조 또는 새 항목(`type='email_confirmaiton'`은 이메일만)
-4. **`auth.sessions` DELETE 권한**: step 0 G1에서 로컬 확인됨(운영 실측 필요)
+4. **`auth.sessions` DELETE 권한**: 완료 — 2026-10-02 운영에서 `postgres`의 SELECT·DELETE 권한 확인
 5. **배포 저장소 생성·첫 게시**: GitHub 공개·토큰·`npm run dist --publish` 명령 또는 수동 업로드
 
 ### 4.3 Carried Over (이월)
@@ -221,8 +221,8 @@ design §6 실제 오류 코드(공용 웹 lib 코드)로 갱신, E17 엔드포�
 
 1. 사용자 승인: SC7(5분 녹화)·SC8(업데이트 실측)에 필요한 테스트 방식 확인.
 2. 운영 인프라:
-   - `auth.sessions DELETE` 권한 부여(DBA 확인)
-   - migration 0069 적용
+   - ~~`auth.sessions DELETE` 권한 부여(DBA 확인)~~ 2026-10-02 운영 확인 완료
+   - ~~migration 0069 적용~~ 2026-10-02 완료
    - SMTP 전환(발송 한도 해제)
    - 이메일 템플릿 (6자리 코드)
 3. 배포:
@@ -232,7 +232,7 @@ design §6 실제 오류 코드(공용 웹 lib 코드)로 갱신, E17 엔드포�
 
 ### 8.2 Next PDCA Cycle
 
-1. **Phase 41·42 병합 후 운영 완전 반영**: 마이그레이션 0069·SMTP·메일·배포가 모두 적용된 운영 환경에서 재검증(SC7·SC8).
+1. **운영 완전 반영 뒤 재검증**: phase 41·42와 0069는 2026-10-02 운영 반영 완료. SMTP·메일 템플릿·배포 저장소까지 적용된 운영 환경에서 SC7·SC8을 재검증한다.
 2. **실제 사용자 피드백**: 부서원 전체 5인 이상의 1주일 사용 기록 수집. 펫 상태·알림·기기 해제 체험.
 3. **모바일·macOS**: 현재 phase는 Windows만. 다음은 PWA(macOS/iOS) 또는 Tauri(macOS) 검토.
 4. **성능·보안 심화**:
@@ -272,6 +272,7 @@ G2~G4 **3/3 해결**. 양쪽 lint/build·root 단위 1,834 통과. Archify deliv
 
 | 버전 | 날짜 | 내용 | Author |
 |---|---|---|---|
+| 1.3 | 2026-10-02 | 웹 API·DB 운영 반영(PR #25)·0069 적용·auth.sessions 권한 확인 반영. 설치 파일 게시·사람 실측·SMTP·메일 템플릿 대기 유지 | Claude(오케스트레이터) |
 | 1.2 | 2026-10-02 | step14 세션/질문 보관 4/4·desktop76·합성 Electron7·root1834. 기존 운영 게이트 유지 | Codex |
 | 1.1 | 2026-10-02 | step 13 G2~G4 3/3 보완·desktop56·합성 Electron3·PGlite8. 전체 93.6%·7/9·사람/운영 게이트 유지 | Codex |
 | 1.0 | 2026-10-02 | 1차 analyze 84.2% 보완 후 2차 93.6% · step 0~11 완료 · step 12 사람·운영 게이트 · SC 7/9 충족 기록 | Claude(오케스트레이터) — report-generator 초안을 검토·수정 |
