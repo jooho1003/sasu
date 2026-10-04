@@ -1,0 +1,156 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep 결정함
+
+
+Running 5 tests using 1 worker
+
+(node:20076) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:11444) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 376ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 20ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-CSHJbbau.js   697.10 kB
+✓ built in 905ms
+  x  1 tests\e2e\followup.spec.ts:277:3 › desktop followup › 결정함은 목록 로딩·오류를 빈 상태와 구분하고 상태와 재시도를 표시한다 (6.7s)
+(node:12440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:18800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 507ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 25ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-CSHJbbau.js   697.10 kB
+✓ built in 1.03s
+  ok 2 tests\e2e\followup.spec.ts:307:3 › desktop followup › 결정함 상세 연타는 한 번이며 현재 근거 없는 카드와 권한 실패는 읽지 않는다 (2.0s)
+  ok 3 tests\e2e\followup.spec.ts:335:3 › desktop followup › 결정함 결정·보류·반려·이미 결정된 응답은 목록 복귀와 현재 갱신으로 끝난다 (2.7s)
+  x  4 tests\e2e\followup.spec.ts:363:3 › desktop followup › 결정함 처리 실패는 초안을 유지하고 연타와 자동 재전송을 막는다 (6.8s)
+(node:27084) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:3512) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 373ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 20ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-CSHJbbau.js   697.10 kB
+✓ built in 1.08s
+  ok 5 tests\e2e\followup.spec.ts:396:3 › desktop followup › 결정함 늦은 상세와 처리 응답은 탭 이탈·목록 복귀·로그아웃 뒤 화면을 바꾸지 않는다 (2.4s)
+
+
+  1) tests\e2e\followup.spec.ts:277:3 › desktop followup › 결정함은 목록 로딩·오류를 빈 상태와 구분하고 상태와 재시도를 표시한다 ─
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('결정 대기', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('결정 대기', { exact: true }) with timeout 5000ms
+      - waiting for getByText('결정 대기', { exact: true })
+
+
+      292 |       seedDecisionCard(); decisionCards.push({ id: randomUUID(), title: "합성 검토 카드", deadline: "2026-10-05", status: "needs_review" });
+      293 |       await panel.getByRole("button", { name: "카드 새로고침" }).click();
+    > 294 |       await expect(panel.getByText("결정 대기", { exact: true })).toBeVisible();
+          |                                                               ^
+      295 |       await expect(panel.getByText("검토 필요", { exact: true })).toBeVisible();
+      296 |       await expect(panel.getByText("마감 미정")).toBeVisible();
+      297 |       await expect(panel.getByText("2026-10-05")).toBeVisible();
+        at D:\바이브코딩\sasu\.vercel\desktop-decision-flow\desktop\tests\e2e\followup.spec.ts:294:63
+
+    Error Context: test-results\followup-desktop-followup--384d1-류를-빈-상태와-구분하고-상태와-재시도를-표시한다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--384d1-류를-빈-상태와-구분하고-상태와-재시도를-표시한다\error-context.md
+
+  2) tests\e2e\followup.spec.ts:363:3 › desktop followup › 결정함 처리 실패는 초안을 유지하고 연타와 자동 재전송을 막는다 ─────
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator: getByLabel('이유', { exact: true })
+    Expected: "보존할 합성 이유"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('이유', { exact: true }) with timeout 5000ms
+      - waiting for getByLabel('이유', { exact: true })
+
+
+      379 |         await expect(panel.getByRole("button", { name: "결정하기", exact: true })).toBeEnabled();
+      380 |         await expect(panel.getByLabel("결과", { exact: true })).toHaveValue("보존할 합성 결과");
+    > 381 |         await expect(panel.getByLabel("이유", { exact: true })).toHaveValue("보존할 합성 이유");
+          |                                                               ^
+      382 |       }
+      383 |       expect(decisionBodies.length).toBe(4);
+      384 |       decideMode = "normal"; inboxMode = "error";
+        at D:\바이브코딩\sasu\.vercel\desktop-decision-flow\desktop\tests\e2e\followup.spec.ts:381:63
+
+    Error Context: test-results\followup-desktop-followup--3b01d-패는-초안을-유지하고-연타와-자동-재전송을-막는다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--3b01d-패는-초안을-유지하고-연타와-자동-재전송을-막는다\error-context.md
+
+  2 failed
+    tests\e2e\followup.spec.ts:277:3 › desktop followup › 결정함은 목록 로딩·오류를 빈 상태와 구분하고 상태와 재시도를 표시한다 ──
+    tests\e2e\followup.spec.ts:363:3 › desktop followup › 결정함 처리 실패는 초안을 유지하고 연타와 자동 재전송을 막는다 ──────
+  3 passed (31.1s)

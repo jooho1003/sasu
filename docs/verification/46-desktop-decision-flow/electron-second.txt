@@ -1,0 +1,70 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep 결정함
+
+
+Running 7 tests using 1 worker
+
+(node:25492) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:8316) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 436ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 23ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-BO0xEHAl.js   697.53 kB
+✓ built in 811ms
+  ok 1 tests\e2e\followup.spec.ts:278:3 › desktop followup › 결정함은 목록 로딩·오류를 빈 상태와 구분하고 상태와 재시도를 표시한다 (1.7s)
+  ok 2 tests\e2e\followup.spec.ts:308:3 › desktop followup › 결정함 상세 연타는 한 번이며 현재 근거 없는 카드와 권한 실패는 읽지 않는다 (1.9s)
+  ok 3 tests\e2e\followup.spec.ts:336:3 › desktop followup › 결정함 결정·보류·반려·이미 결정된 응답은 목록 복귀와 현재 갱신으로 끝난다 (2.9s)
+  ok 4 tests\e2e\followup.spec.ts:364:3 › desktop followup › 결정함 처리 실패는 초안을 유지하고 연타와 자동 재전송을 막는다 (2.0s)
+  ok 5 tests\e2e\followup.spec.ts:397:3 › desktop followup › 결정함 늦은 상세와 처리 응답은 탭 이탈·목록 복귀·로그아웃 뒤 화면을 바꾸지 않는다 (2.3s)
+  ok 6 tests\e2e\followup.spec.ts:434:3 › desktop followup › 결정함 늦은 읽음 오류와 로그아웃 뒤 상세 응답은 다음 화면에 남지 않는다 (1.8s)
+  x  7 tests\e2e\followup.spec.ts:475:3 › desktop followup › 결정함 처리 뒤 갱신은 처리 전 자동 조회의 늦은 스냅샷을 다시 쓰지 않는다 (6.3s)
+
+
+  1) tests\e2e\followup.spec.ts:475:3 › desktop followup › 결정함 처리 뒤 갱신은 처리 전 자동 조회의 늦은 스냅샷을 다시 쓰지 않는다
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      480 |       await panel.clock.install(); inboxMode = "delayed";
+      481 |       await panel.clock.runFor(30_000);
+    > 482 |       await expect.poll(() => !!releaseInbox).toBe(true);
+          |                                               ^
+      483 |       const before = inboxRequests;
+      484 |       await panel.getByRole("button", { name: "미루기", exact: true }).click();
+      485 |       await expect(panel.getByRole("heading", { name: "결정할 카드" })).toBeVisible();
+        at D:\바이브코딩\sasu\.vercel\desktop-decision-flow\desktop\tests\e2e\followup.spec.ts:482:47
+
+    Error Context: test-results\followup-desktop-followup--cb652--전-자동-조회의-늦은-스냅샷을-다시-쓰지-않는다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--cb652--전-자동-조회의-늦은-스냅샷을-다시-쓰지-않는다\error-context.md
+
+  1 failed
+    tests\e2e\followup.spec.ts:475:3 › desktop followup › 결정함 처리 뒤 갱신은 처리 전 자동 조회의 늦은 스냅샷을 다시 쓰지 않는다
+  6 passed (22.6s)

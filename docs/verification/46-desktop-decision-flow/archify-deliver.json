@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "3287f16d-3190-412d-b196-243617521d1a",
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\.vercel\\desktop-decision-flow\\docs\\verification\\46-desktop-decision-flow\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-decision-flow\\.vercel\\desktop-decision-flow.html",
+  "specification": {
+    "sha256": "a16605361dc159f9a7bf04286b530f8db32cb5629bd152cb2b58e919e1720379",
+    "bytes": 2050
+  },
+  "artifact": {
+    "sha256": "505054f7ee390badb60fa66209c92539d5255ce7c6c6c05a6aea1e4b3ba0a87c",
+    "bytes": 754804
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "standard",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-01T18:23:03.876Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

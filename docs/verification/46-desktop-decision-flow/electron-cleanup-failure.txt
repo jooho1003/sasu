@@ -1,0 +1,110 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts
+
+
+Running 25 tests using 1 worker
+
+(node:36800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:25036) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 694ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 24ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-BO0xEHAl.js   697.53 kB
+✓ built in 1.07s
+  ok  1 tests\e2e\followup.spec.ts:278:3 › desktop followup › 결정함은 목록 로딩·오류를 빈 상태와 구분하고 상태와 재시도를 표시한다 (4.8s)
+  ok  2 tests\e2e\followup.spec.ts:308:3 › desktop followup › 결정함 상세 연타는 한 번이며 현재 근거 없는 카드와 권한 실패는 읽지 않는다 (5.1s)
+  x   3 tests\e2e\followup.spec.ts:342:3 › desktop followup › 결정함 결정·보류·반려·이미 결정된 응답은 목록 복귀와 현재 갱신으로 끝난다 (8.0s)
+(node:16492) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:29304) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 587ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 42ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-BO0xEHAl.js   697.53 kB
+✓ built in 2.04s
+  ok  4 tests\e2e\followup.spec.ts:370:3 › desktop followup › 결정함 처리 실패는 초안을 유지하고 연타와 자동 재전송을 막는다 (5.7s)
+  ok  5 tests\e2e\followup.spec.ts:403:3 › desktop followup › 결정함 늦은 상세와 처리 응답은 탭 이탈·목록 복귀·로그아웃 뒤 화면을 바꾸지 않는다 (3.7s)
+  ok  6 tests\e2e\followup.spec.ts:440:3 › desktop followup › 결정함 늦은 읽음 오류와 로그아웃 뒤 상세 응답은 다음 화면에 남지 않는다 (3.6s)
+  ok  7 tests\e2e\followup.spec.ts:481:3 › desktop followup › 결정함 처리 뒤 갱신은 처리 전 자동 조회의 늦은 스냅샷을 다시 쓰지 않는다 (11.7s)
+  ok  8 tests\e2e\followup.spec.ts:506:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 (1.9s)
+  ok  9 tests\e2e\followup.spec.ts:544:3 › desktop followup › 최근 작업은 오류 재시도·권한 회수·웹 열기 실패를 빈 목록이나 읽음으로 처리하지 않는다 (1.9s)
+  ok 10 tests\e2e\followup.spec.ts:578:3 › desktop followup › 최근 작업의 늦은 상세 응답은 탭 이탈·로그아웃 뒤 웹과 읽음을 열지 않는다 (1.8s)
+  ok 11 tests\e2e\followup.spec.ts:605:3 › desktop followup › 최근 작업 새로고침은 30초 갱신과 공유하고 팀원에게 목록을 표시하지 않는다 (10.7s)
+  ok 12 tests\e2e\followup.spec.ts:637:3 › desktop followup › 최근 작업 읽음 저장의 늦은 오류는 떠난 화면에 표시하지 않는다 (1.8s)
+  ok 13 tests\e2e\followup.spec.ts:670:3 › desktop followup › 최근 자료의 늦은 목록 재확인은 탭 이탈·로그아웃 뒤 열지 않는다 (1.7s)
+  ok 14 tests\e2e\followup.spec.ts:695:3 › desktop followup › 질문 이력에서 이어 묻기와 새 질문 전환은 부모와 초안을 보존한다 (2.4s)
+  ok 15 tests\e2e\followup.spec.ts:738:3 › desktop followup › 질문 이력은 오류 재시도·빈 상태·중복 없는 페이지와 현재 권한을 표시한다 (1.7s)
+  ok 16 tests\e2e\followup.spec.ts:767:3 › desktop followup › 새 질문 실패 후 이전 답의 취소된 폴링은 기록 안내로 끝난다 (1.8s)
+  ok 17 tests\e2e\followup.spec.ts:789:3 › desktop followup › 완료 답의 인용을 열고 오프라인으로 이어 묻기 후 부모를 유지해 전송한다 (2.2s)
+  ok 18 tests\e2e\followup.spec.ts:821:3 › desktop followup › 질문 이력의 늦은 목록과 상세 응답은 떠난 화면을 바꾸지 않는다 (2.5s)
+  ok 19 tests\e2e\followup.spec.ts:849:5 › desktop followup › 설정 로그아웃 뒤 재로그인에 이전 답·기록·설정을 남기지 않는다 (2.6s)
+  ok 20 tests\e2e\followup.spec.ts:849:5 › desktop followup › 서버 401 뒤 재로그인에 이전 답·기록·설정을 남기지 않는다 (2.2s)
+  ok 21 tests\e2e\followup.spec.ts:900:3 › desktop followup › 부서 연결 대기 중 현재 세대 401도 세션을 종료한다 (1.3s)
+  ok 22 tests\e2e\followup.spec.ts:916:3 › desktop followup › 실제 본체의 동시 오프라인 보관과 응답 오류 재전송 금지 (1.6s)
+  ok 23 tests\e2e\followup.spec.ts:949:3 › desktop followup › 실제 암호화 설정의 동시 열람·위치·선호와 IPC 제한 (1.6s)
+  ok 24 tests\e2e\followup.spec.ts:978:3 › desktop followup › 폴링 실패 안내·화면 이동 뒤 취소·완료 답 열람 보존 (4.3s)
+  ok 25 tests\e2e\followup.spec.ts:1040:3 › desktop followup › 실제 본체 hostname을 기존 E02 요청과 앱 정보에 같이 사용한다 (1.3s)
+
+
+  1) tests\e2e\followup.spec.ts:342:3 › desktop followup › 결정함 결정·보류·반려·이미 결정된 응답은 목록 복귀와 현재 갱신으로 끝난다
+
+    Error: EPERM, Permission denied: \\?\C:\Users\ÀÌÁÖÈ£\AppData\Local\Temp\sasu-desktop-followup-UTkmd6 '\\?\C:\Users\����ȣ\AppData\Local\Temp\sasu-desktop-followup-UTkmd6'
+
+      364 |       await app.close();
+      365 |       if (!userData.startsWith(resolve(tmpdir(), "sasu-desktop-followup-"))) throw new Error("unsafe_temp_path");
+    > 366 |       rmSync(userData, { recursive: true, force: true });
+          |       ^
+      367 |     }
+      368 |   });
+      369 |
+        at D:\바이브코딩\sasu\.vercel\desktop-decision-flow\desktop\tests\e2e\followup.spec.ts:366:7
+
+    Error Context: test-results\followup-desktop-followup--4df33--결정된-응답은-목록-복귀와-현재-갱신으로-끝난다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--4df33--결정된-응답은-목록-복귀와-현재-갱신으로-끝난다\error-context.md
+
+  1 failed
+    tests\e2e\followup.spec.ts:342:3 › desktop followup › 결정함 결정·보류·반려·이미 결정된 응답은 목록 복귀와 현재 갱신으로 끝난다
+  24 passed (1.6m)

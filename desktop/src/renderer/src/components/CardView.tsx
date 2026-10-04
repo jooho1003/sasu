@@ -1,6 +1,7 @@
-import { useState } from "react";
+// Design Ref: desktop-decision-flow §5 — a successful server action returns to the current inbox.
+import { useEffect, useRef, useState } from "react";
 import type { Card } from "../../../shared/contracts";
-import { message } from "../App";
+import { message } from "../../../shared/messages";
 import { Evidence } from "./Evidence";
 export function CardView({
   card,
@@ -18,9 +19,15 @@ export function CardView({
   const [outcome, setOutcome] = useState("");
   const [rationale, setRationale] = useState("");
   const [busy, setBusy] = useState(false);
+  const generation = useRef(0);
+  const locked = useRef(false);
+  useEffect(() => () => { generation.current += 1; }, []);
   if (!card.citations.length)
     return (
-      <p className="notice">근거를 확인하지 못해 내용을 보여 주지 않습니다.</p>
+      <section className="detail">
+        <button onClick={onBack}>목록으로 돌아가기</button>
+        <p className="notice">근거를 확인하지 못해 내용을 보여 주지 않습니다.</p>
+      </section>
     );
   const evidence = {
     id: card.card.id,
@@ -38,8 +45,12 @@ export function CardView({
   const decide = async (
     status: "decided" | "deferred" | "rejected",
   ): Promise<void> => {
-    if (busy) return;
+    if (locked.current) return;
+    locked.current = true;
+    const version = ++generation.current;
+    const current = (): boolean => version === generation.current;
     setBusy(true);
+    onNotice("");
     try {
       const result = await window.sasu.card.decide({
         id: card.card.id,
@@ -47,12 +58,13 @@ export function CardView({
         outcome,
         rationale,
       });
+      if (!current()) return;
       onNotice(result.message ?? "처리했습니다.");
       onChanged();
     } catch (cause) {
-      onNotice(message(cause));
+      if (current()) onNotice(message(cause));
     } finally {
-      setBusy(false);
+      if (current()) { locked.current = false; setBusy(false); }
     }
   };
   const actionable =
