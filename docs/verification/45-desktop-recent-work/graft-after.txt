@@ -1,0 +1,21 @@
+node:internal/modules/cjs/loader:2029
+  return process.dlopen(module, path.toNamespacedPath(filename));
+                 ^
+
+Error: \\?\D:\바이브코??.sasu-graft-20260923\tool\node_modules\@nanonets\graft\node_modules\tree-sitter-kotlin\build\Release\tree_sitter_kotlin_binding.node is not a valid Win32 application.
+
+\\?\D:\바이브코딩\.sasu-graft-20260923\tool\node_modules\@nanonets\graft\node_modules\tree-sitter-kotlin\build\Release\tree_sitter_kotlin_binding.node
+    at Object..node (node:internal/modules/cjs/loader:2029:18)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1617:12)
+    at require (node:internal/modules/helpers:153:16)
+    at load (D:\바이브코딩\.sasu-graft-20260923\tool\node_modules\node-gyp-build\node-gyp-build.js:22:10)
+    at Object.<anonymous> (D:\바이브코딩\.sasu-graft-20260923\tool\node_modules\@nanonets\graft\node_modules\tree-sitter-kotlin\bindings\node\index.js:3:43)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10) {
+  code: 'ERR_DLOPEN_FAILED'
+}
+
+Node.js v24.18.0

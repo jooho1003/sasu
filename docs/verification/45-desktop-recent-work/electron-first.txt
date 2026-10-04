@@ -1,0 +1,150 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts -g 최근 작업
+
+
+Running 3 tests using 1 worker
+
+(node:32152) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:29760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 634ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 26ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-UKEmtoVM.js   694.54 kB
+✓ built in 1.21s
+  x  1 tests\e2e\followup.spec.ts:209:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 (6.9s)
+(node:32100) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:32780) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 328ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 19ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-UKEmtoVM.js   694.54 kB
+✓ built in 988ms
+  x  2 tests\e2e\followup.spec.ts:247:3 › desktop followup › 최근 작업은 오류 재시도·권한 회수·웹 열기 실패를 빈 목록이나 읽음으로 처리하지 않는다 (6.9s)
+(node:29692) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:10924) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 337ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 25ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-UKEmtoVM.js   694.54 kB
+✓ built in 999ms
+  ok 3 tests\e2e\followup.spec.ts:281:3 › desktop followup › 최근 작업의 늦은 상세 응답은 탭 이탈·로그아웃 뒤 웹과 읽음을 열지 않는다 (2.1s)
+
+
+  1) tests\e2e\followup.spec.ts:209:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 ───
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      226 |         (node as HTMLButtonElement).click(); (node as HTMLButtonElement).click();
+      227 |       });
+    > 228 |       await expect.poll(async () => (await webEvents(app)).length).toBe(1);
+          |                                                                    ^
+      229 |       expect((await webEvents(app))[0]).toBe(`${fixtureOrigin}/d/${deptId}/reviews/${reviewId}`);
+      230 |       await expect.poll(async () => panel.evaluate(async () => (await window.sasu.settings.get()).seen)).toContain(reviewId);
+      231 |       await panel.getByRole("button", { name: /영업 원문 검토 1/ }).click();
+        at D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:228:68
+
+    Error Context: test-results\followup-desktop-followup--cc845--목록을-다시-열고-성공-후에만-읽음으로-기록한다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--cc845--목록을-다시-열고-성공-후에만-읽음으로-기록한다\error-context.md
+
+  2) tests\e2e\followup.spec.ts:247:3 › desktop followup › 최근 작업은 오류 재시도·권한 회수·웹 열기 실패를 빈 목록이나 읽음으로 처리하지 않는다
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText(/합성 웹 열기 실패/)
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText(/합성 웹 열기 실패/) with timeout 5000ms
+      - waiting for getByText(/합성 웹 열기 실패/)
+
+
+      270 |       salesMode = "normal"; await trackWeb(app, true);
+      271 |       await panel.getByRole("button", { name: /영업 원문 검토 1/ }).click();
+    > 272 |       await expect(panel.getByText(/합성 웹 열기 실패/)).toBeVisible();
+          |                                                   ^
+      273 |       expect(await panel.evaluate(async () => (await window.sasu.settings.get()).seen)).not.toContain(salesId);
+      274 |     } finally {
+      275 |       await app.close();
+        at D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:272:51
+
+    Error Context: test-results\followup-desktop-followup--2cbc0-열기-실패를-빈-목록이나-읽음으로-처리하지-않는다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--2cbc0-열기-실패를-빈-목록이나-읽음으로-처리하지-않는다\error-context.md
+
+  2 failed
+    tests\e2e\followup.spec.ts:209:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 ────
+    tests\e2e\followup.spec.ts:247:3 › desktop followup › 최근 작업은 오류 재시도·권한 회수·웹 열기 실패를 빈 목록이나 읽음으로 처리하지 않는다
+  1 passed (26.2s)

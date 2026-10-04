@@ -1,0 +1,202 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts -g 최근 작업
+
+
+Running 4 tests using 1 worker
+
+(node:22608) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:24100) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 362ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 25ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-UKEmtoVM.js   694.54 kB
+✓ built in 839ms
+  x  1 tests\e2e\followup.spec.ts:224:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 (1.2s)
+(node:6388) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:19612) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 414ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 31ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-UKEmtoVM.js   694.54 kB
+✓ built in 917ms
+  x  2 tests\e2e\followup.spec.ts:262:3 › desktop followup › 최근 작업은 오류 재시도·권한 회수·웹 열기 실패를 빈 목록이나 읽음으로 처리하지 않는다 (952ms)
+(node:16200) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:7080) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 401ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 28ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-UKEmtoVM.js   694.54 kB
+✓ built in 763ms
+  x  3 tests\e2e\followup.spec.ts:296:3 › desktop followup › 최근 작업의 늦은 상세 응답은 탭 이탈·로그아웃 뒤 웹과 읽음을 열지 않는다 (1.2s)
+(node:3672) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:31448) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 364ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 17ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-UKEmtoVM.js   694.54 kB
+✓ built in 685ms
+  x  4 tests\e2e\followup.spec.ts:323:3 › desktop followup › 최근 작업 새로고침은 30초 갱신과 공유하고 팀원에게 목록을 표시하지 않는다 (892ms)
+
+
+  1) tests\e2e\followup.spec.ts:224:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 ───
+
+    Error: page.evaluate: Error: Error invoking remote method 'auth:verifyCode': Error: 로그인 코드를 확인하지 못했습니다.:요청을 처리하지 못했습니다.
+
+      203 |
+      204 |   async function login(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    > 205 |     await panel.evaluate(async (id) => {
+          |                 ^
+      206 |       await window.sasu.auth.verifyCode("synthetic@example.test", "123456");
+      207 |       await window.sasu.link.create({ dept_id: id });
+      208 |     }, deptId);
+        at login (D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:205:17)
+        at D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:234:34
+
+    Error Context: test-results\followup-desktop-followup--cc845--목록을-다시-열고-성공-후에만-읽음으로-기록한다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--cc845--목록을-다시-열고-성공-후에만-읽음으로-기록한다\error-context.md
+
+  2) tests\e2e\followup.spec.ts:262:3 › desktop followup › 최근 작업은 오류 재시도·권한 회수·웹 열기 실패를 빈 목록이나 읽음으로 처리하지 않는다
+
+    Error: page.evaluate: Error: Error invoking remote method 'auth:verifyCode': Error: 로그인 코드를 확인하지 못했습니다.:요청을 처리하지 못했습니다.
+
+      203 |
+      204 |   async function login(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    > 205 |     await panel.evaluate(async (id) => {
+          |                 ^
+      206 |       await window.sasu.auth.verifyCode("synthetic@example.test", "123456");
+      207 |       await window.sasu.link.create({ dept_id: id });
+      208 |     }, deptId);
+        at login (D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:205:17)
+        at D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:266:34
+
+    Error Context: test-results\followup-desktop-followup--2cbc0-열기-실패를-빈-목록이나-읽음으로-처리하지-않는다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--2cbc0-열기-실패를-빈-목록이나-읽음으로-처리하지-않는다\error-context.md
+
+  3) tests\e2e\followup.spec.ts:296:3 › desktop followup › 최근 작업의 늦은 상세 응답은 탭 이탈·로그아웃 뒤 웹과 읽음을 열지 않는다
+
+    Error: page.evaluate: Error: Error invoking remote method 'auth:verifyCode': Error: 로그인 코드를 확인하지 못했습니다.:요청을 처리하지 못했습니다.
+
+      203 |
+      204 |   async function login(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    > 205 |     await panel.evaluate(async (id) => {
+          |                 ^
+      206 |       await window.sasu.auth.verifyCode("synthetic@example.test", "123456");
+      207 |       await window.sasu.link.create({ dept_id: id });
+      208 |     }, deptId);
+        at login (D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:205:17)
+        at D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:300:34
+
+    Error Context: test-results\followup-desktop-followup--65653-은-탭-이탈·로그아웃-뒤-웹과-읽음을-열지-않는다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--65653-은-탭-이탈·로그아웃-뒤-웹과-읽음을-열지-않는다\error-context.md
+
+  4) tests\e2e\followup.spec.ts:323:3 › desktop followup › 최근 작업 새로고침은 30초 갱신과 공유하고 팀원에게 목록을 표시하지 않는다
+
+    Error: page.evaluate: Error: Error invoking remote method 'auth:verifyCode': Error: 로그인 코드를 확인하지 못했습니다.:요청을 처리하지 못했습니다.
+
+      203 |
+      204 |   async function login(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
+    > 205 |     await panel.evaluate(async (id) => {
+          |                 ^
+      206 |       await window.sasu.auth.verifyCode("synthetic@example.test", "123456");
+      207 |       await window.sasu.link.create({ dept_id: id });
+      208 |     }, deptId);
+        at login (D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:205:17)
+        at D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:327:13
+
+    Error Context: test-results\followup-desktop-followup--4e941--갱신과-공유하고-팀원에게-목록을-표시하지-않는다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--4e941--갱신과-공유하고-팀원에게-목록을-표시하지-않는다\error-context.md
+
+  4 failed
+    tests\e2e\followup.spec.ts:224:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 ────
+    tests\e2e\followup.spec.ts:262:3 › desktop followup › 최근 작업은 오류 재시도·권한 회수·웹 열기 실패를 빈 목록이나 읽음으로 처리하지 않는다
+    tests\e2e\followup.spec.ts:296:3 › desktop followup › 최근 작업의 늦은 상세 응답은 탭 이탈·로그아웃 뒤 웹과 읽음을 열지 않는다
+    tests\e2e\followup.spec.ts:323:3 › desktop followup › 최근 작업 새로고침은 30초 갱신과 공유하고 팀원에게 목록을 표시하지 않는다

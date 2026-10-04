@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "최근 맡긴 작업 다시 열기", "subtitle": "최근 24시간의 작업을 현재 권한으로 확인합니다", "output": "desktop-recent-work.html", "visual_preset": "blueprint", "viewBox": [1200, 620] },
+  "components": [
+    { "id": "list", "type": "frontend", "label": "일 맡기기 목록", "sublabel": "문서·음성·영업 상태", "pos": [35,110], "size": [180,70] },
+    { "id": "refresh", "type": "backend", "label": "공유 inbox 갱신", "sublabel": "30초·수동 조회 중복 방지", "pos": [290,110], "size": [180,70] },
+    { "id": "scope", "type": "database", "label": "기존 E05·RLS", "sublabel": "본인·부서·24시간", "pos": [545,110], "size": [180,70] },
+    { "id": "check", "type": "security", "label": "선택 후 권한 재확인", "sublabel": "자료 E05·영업 E16", "pos": [800,110], "size": [180,70] },
+    { "id": "web", "type": "backend", "label": "웹에서 확인", "sublabel": "HTTPS·동일 origin", "pos": [800,370], "size": [180,70] },
+    { "id": "seen", "type": "frontend", "label": "읽음 저장", "sublabel": "웹 열기 성공 후 기록", "pos": [545,370], "size": [180,70] },
+    { "id": "cleanup", "type": "security", "label": "탭 이탈·세션 종료", "sublabel": "늦은 요청 결과 폐기", "pos": [35,370], "size": [180,70] }
+  ],
+  "connections": [
+    { "id": "l-r", "from": "list", "to": "refresh", "label": "갱신", "labelAt": [252,95] },
+    { "id": "r-s", "from": "refresh", "to": "scope", "label": "Bearer 조회", "labelAt": [507,95] },
+    { "id": "s-c", "from": "scope", "to": "check", "label": "작업 선택", "labelAt": [763,95] },
+    { "id": "c-w", "from": "check", "to": "web", "label": "허용 경로", "labelAt": [1000,265] },
+    { "id": "w-s", "from": "web", "to": "seen", "label": "성공", "labelAt": [763,455] },
+    { "id": "c-l", "from": "cleanup", "to": "list", "label": "요청 세대 무효화", "variant": "security", "labelAt": [150,280] }
+  ]
+}

@@ -1,0 +1,67 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts -g 최근 작업은 한국어
+
+
+Running 1 test using 1 worker
+
+(node:15736) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:31028) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 1.01s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 27ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 42 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-BwlkngNZ.js   689.05 kB
+✓ built in 2.87s
+  x  1 tests\e2e\followup.spec.ts:209:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 (22.2s)
+
+
+  1) tests\e2e\followup.spec.ts:209:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 ───
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: '최근 맡긴 작업' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: '최근 맡긴 작업' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: '최근 맡긴 작업' })
+
+
+      219 |       await trackWeb(app); await login(panel);
+      220 |       await panel.getByRole("button", { name: "일 맡기기", exact: true }).click();
+    > 221 |       await expect(panel.getByRole("heading", { name: "최근 맡긴 작업" })).toBeVisible();
+          |                                                                      ^
+      222 |       await expect(panel.getByText("최근 24시간")).toBeVisible();
+      223 |       await expect(panel.getByRole("button", { name: /합성 계약 자료/ })).toBeVisible();
+      224 |       for (const label of ["검토 중", "업로드 중", "처리 실패", "취소됨", "근거 부족"]) await expect(panel.getByText(label, { exact: true })).toBeVisible();
+        at D:\바이브코딩\sasu\.vercel\desktop-recent-work\desktop\tests\e2e\followup.spec.ts:221:70
+
+    Error Context: test-results\followup-desktop-followup--cc845--목록을-다시-열고-성공-후에만-읽음으로-기록한다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--cc845--목록을-다시-열고-성공-후에만-읽음으로-기록한다\error-context.md
+
+  1 failed
+    tests\e2e\followup.spec.ts:209:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 ────

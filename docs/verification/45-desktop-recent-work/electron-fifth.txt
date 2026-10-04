@@ -1,0 +1,41 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep 최근 작업
+
+
+Running 4 tests using 1 worker
+
+(node:31200) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:31392) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 383ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 18ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-3Jr112DW.js   694.63 kB
+✓ built in 917ms
+  ok 1 tests\e2e\followup.spec.ts:233:3 › desktop followup › 최근 작업은 한국어 목록을 다시 열고 성공 후에만 읽음으로 기록한다 (2.3s)
+  ok 2 tests\e2e\followup.spec.ts:271:3 › desktop followup › 최근 작업은 오류 재시도·권한 회수·웹 열기 실패를 빈 목록이나 읽음으로 처리하지 않는다 (2.1s)
+  ok 3 tests\e2e\followup.spec.ts:305:3 › desktop followup › 최근 작업의 늦은 상세 응답은 탭 이탈·로그아웃 뒤 웹과 읽음을 열지 않는다 (1.8s)
+  ok 4 tests\e2e\followup.spec.ts:332:3 › desktop followup › 최근 작업 새로고침은 30초 갱신과 공유하고 팀원에게 목록을 표시하지 않는다 (11.4s)
+
+  4 passed (20.9s)

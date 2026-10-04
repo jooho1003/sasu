@@ -390,6 +390,8 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 
 DC-13(ADR-083): `HistoryTab → questions.list → /api/companion/questions`로 본인 이력을 다시 읽고, 선택 시 `answer.get`으로 현재 인용 권한을 확인한다. `AskTab`의 명시적인 부모 선택은 메모리에만 두고 `ask.send(question, parent_id) → OutboxService → /api/companion/ask → startAsk → ask_question`을 재사용한다. SQL만 소유자·부서·현재 인용 권한과 한도를 판정한다. 실패 시 초안/부모를 유지하고 새 질문은 부모만 명시적으로 해제한다. UI 요청 세대와 unmount cleanup으로 늦은 이력/답 콜백을 폐기하며 세션 종료 시 기존 `SessionApp` 재마운트로 질문 상태를 초기화한다.
 
+DC-14(ADR-084): App의 기존 E05 받은 일 요청을 중복 없이 공유하고 세션/요청 세대가 만료된 응답을 폐기한다. WorkTab의 RecentWork는 메모리의 자료·영업 요약만 렌더한다. 다시 열기는 E05에서 현재 본인 자료의 존재를 재확인하거나 E16 영업 상태를 다시 읽고, 기존 app:openWeb의 출처 제한을 거쳐 웹으로 인계한다. 읽음은 링크 요청 성공 후 기록한다. 서버·RLS·웹 상세 권한 판정은 기존 경로 그대로다.
+
 ## 7. 만들지 않는 것 (되살리지 말 것)
 
 | 항목 | 대신 | 근거 |

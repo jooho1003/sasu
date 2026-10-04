@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CompanionInbox } from "@sasu/contracts";
 import type {
   Answer,
@@ -38,9 +38,10 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
   const petWindow = location.hash === "#pet";
   const [screen, setScreen] = useState<Screen>(petWindow ? "panel" : signedOut ? "email" : "loading");
   const active = useRef(true);
+  const inboxGeneration = useRef(0);
   useEffect(() => {
     active.current = true;
-    return () => { active.current = false; };
+    return () => { active.current = false; inboxGeneration.current += 1; };
   }, []);
   const [tab, setTab] = useState<Tab>("ask");
   const [context, setContext] = useState<Awaited<
@@ -48,6 +49,9 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
   > | null>(null);
   const [settings, setSettings] = useState<DesktopSettings | null>(null);
   const [inbox, setInbox] = useState<CompanionInbox | null>(null);
+  const [inboxLoading, setInboxLoading] = useState(true);
+  const [inboxError, setInboxError] = useState("");
+  const inboxRequest = useRef<Promise<CompanionInbox | null> | null>(null);
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [answerQuestion, setAnswerQuestion] = useState("");
   const [card, setCard] = useState<Card | null>(null);
@@ -56,18 +60,38 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
   const [petState, setPetState] = useState("idle");
   const [update, setUpdate] = useState<{ status: string; percent?: number }>({ status: "unavailable" });
   const questionFocus = useRef<() => void>(() => undefined);
-  const loadInbox = (): void => {
-    void window.sasu.inbox
-      .get()
-      .then(({ inbox: next }) => setInbox(next))
-      .catch(() => undefined);
-  };
-  const rememberSeen = async (id: string): Promise<void> => {
-    if (!active.current) return;
+  // Design Ref: desktop-recent-work §2 — share refreshes and discard expired session responses.
+  const loadInbox = useCallback((): Promise<CompanionInbox | null> => {
+    if (!active.current) return Promise.resolve(null);
+    if (inboxRequest.current) return inboxRequest.current;
+    const generation = inboxGeneration.current;
+    const current = (): boolean => active.current && generation === inboxGeneration.current;
+    setInboxLoading(true);
+    setInboxError("");
+    const request = window.sasu.inbox.get()
+      .then(({ inbox: next }) => {
+        if (!current()) return null;
+        setInbox(next);
+        return next;
+      })
+      .catch((cause) => {
+        if (current()) { setInbox(null); setInboxError(message(cause)); }
+        return null;
+      })
+      .finally(() => {
+        if (inboxRequest.current === request) inboxRequest.current = null;
+        if (current()) setInboxLoading(false);
+      });
+    inboxRequest.current = request;
+    return request;
+  }, []);
+  const rememberSeen = async (id: string, stillCurrent: () => boolean = () => true): Promise<void> => {
+    if (!active.current || !stillCurrent()) return;
     try {
-      setSettings(await window.sasu.settings.markSeen(id));
+      const next = await window.sasu.settings.markSeen(id);
+      if (active.current && stillCurrent()) setSettings(next);
     } catch (cause) {
-      setNotice(message(cause));
+      if (active.current && stillCurrent()) setNotice(message(cause));
     }
   };
   useEffect(() => {
@@ -109,10 +133,10 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
   );
   useEffect(() => {
     if (screen !== "panel" || petWindow) return;
-    loadInbox();
+    void loadInbox();
     const timer = window.setInterval(loadInbox, 30_000);
     return () => window.clearInterval(timer);
-  }, [screen, petWindow]);
+  }, [screen, petWindow, loadInbox]);
   if (petWindow)
     return (
       <PetCanvas
@@ -210,6 +234,10 @@ function SessionApp({ signedOut }: { signedOut: boolean }) {
             deptId={context?.dept.id ?? ""}
             onNotice={setNotice}
             onSeen={rememberSeen}
+            inbox={inbox}
+            loading={inboxLoading}
+            error={inboxError}
+            onRefresh={loadInbox}
           />
         )}
         {tab === "settings" && (
