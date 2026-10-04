@@ -1,0 +1,68 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep sales start 자료 조회
+
+
+Running 1 test using 1 worker
+
+(node:24216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:21484) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 1.26s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 37ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.58 kB
+../../out/renderer/assets/index-YPx8uoVV.css    3.16 kB
+../../out/renderer/assets/index-CNXyiqpS.js   703.17 kB
+✓ built in 2.17s
+  x  1 tests\e2e\followup.spec.ts:332:3 › desktop followup › sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다 (6.5s)
+
+
+  1) tests\e2e\followup.spec.ts:332:3 › desktop followup › sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+      Object {
+    -   "bundleType": 1,
+    -   "cleanupGeneration": 1,
+    +   "bundleType": 0,
+    +   "cleanupGeneration": 0,
+        "strictEffects": true,
+      }
+
+      350 |         });
+      351 |         // DevTools observes the actual development renderer and cleanup of its mounted StrictMode subtree.
+    > 352 |         expect(replay).toEqual({ bundleType: 1, strictEffects: true, cleanupGeneration: 1 });
+          |                        ^
+      353 |         console.log("strictmode_actual_replay", replay);
+      354 |       }
+      355 |       await expect(panel.getByText("자료를 불러오는 중입니다.")).toBeVisible();
+        at D:\바이브코딩\sasu\.vercel\desktop-sales-flow\desktop\tests\e2e\followup.spec.ts:352:24
+
+    Error Context: test-results\followup-desktop-followup--dfdd5-동-재조회와-현재-distinct-원칙을-구분한다\error-context.md
+
+    Error Context: test-results\followup-desktop-followup--dfdd5-동-재조회와-현재-distinct-원칙을-구분한다\error-context.md
+
+  1 failed
+    tests\e2e\followup.spec.ts:332:3 › desktop followup › sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다

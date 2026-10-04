@@ -328,6 +328,16 @@
       "report": "docs/04-report/features/desktop-decision-flow.report.md",
       "production_deployed": false,
       "note": "결정함 로딩·오류 재시도·현재 상세·처리 성공 복귀/새 조회·실패 초안 보존 구현. Electron 25·desktop 78·root 1,834·SQL 316/권한 2,016·webpack build 통과. 독립 정적 8/8·성공 조건 5/5. 기본 Turbopack junction/Graft native 오류와 수동 대조 범위 기록. 운영 0.1.1 유지, 메일 연결 보류."
+    },
+    {
+      "dir": "47-desktop-sales-flow",
+      "status": "completed",
+      "design": "docs/02-design/features/desktop-sales-flow.design.md",
+      "verification": "docs/verification/47-desktop-sales-flow/verification.md",
+      "analysis": "docs/03-analysis/desktop-sales-flow.analysis.md",
+      "report": "docs/04-report/features/desktop-sales-flow.report.md",
+      "production_deployed": false,
+      "note": "영업 자료·시작·진행·현재 결과 열기 회복 구현. step0~2 순차 서브에이전트 완료. StrictMode 갭 보완 후 production Electron 37·별도 개발 6·단위 1,912·SQL 316/권한 2,016·webpack build 통과. 독립 10/10·SC6/6·대상 가중100%. 기본 Turbopack junction/Graft native 오류 및 미실행 조합 기록. 운영 0.1.1 유지, 메일 연결 보류."
     }
   ]
 }

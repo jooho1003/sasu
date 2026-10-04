@@ -1,0 +1,16 @@
+{
+  "project": "sasu",
+  "phase": "47-desktop-sales-flow",
+  "plan": "docs/01-plan/features/desktop-sales-flow.plan.md",
+  "design": "docs/02-design/features/desktop-sales-flow.design.md",
+  "status": "completed",
+  "verification": "docs/verification/47-desktop-sales-flow/verification.md",
+  "analysis": "docs/03-analysis/desktop-sales-flow.analysis.md",
+  "report": "docs/04-report/features/desktop-sales-flow.report.md",
+  "production_deployed": false,
+  "steps": [
+    { "step": 0, "name": "sales-start", "status": "completed", "summary": "App workKey + 영업 자료/시작 loading·오류·수동 retry·선택별 UUID/ref 잠금·이탈 세대. Electron sales start 6/6 PASS, lint exit 0. docs/verification/47-desktop-sales-flow/step0.md; status/open은 step1 인계." },
+    { "step": 1, "name": "sales-status", "status": "completed", "summary": "한국어 5상태·5초 status/open 공유 잠금·오류 stop/manual retry·terminal 새 검토·현재 ready→open 성공→onSeen(current). Electron sales status 6/6 및 sales start 회귀 6/6 PASS, lint exit 0. docs/verification/47-desktop-sales-flow/step1.md; 전체 회귀·도구·독립 분석은 step2 인계." },
+    { "step": 2, "name": "verification-report", "status": "completed", "summary": "최종 production Electron 37/37 PASS(3.8분)·desktop lint/build/78 unit PASS. 실제 개발 Strict G1 red→보완→6 PASS. root lint 0/default Turbopack 1(junction)/webpack 0·1834 unit·isolated SQL 316/권한 2016 PASS. Graft native 실패/수동 범위, Archify 9/9·containment PASS, 380px screenshot. 독립 10/10·SC 6/6·가중 100% analysis/report 확정; docs/verification/47-desktop-sales-flow/step2.md. 운영 0.1.1·SMTP 보류, root 커밋/초안 PR 인계." }
+  ]
+}
