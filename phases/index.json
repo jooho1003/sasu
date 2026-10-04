@@ -298,6 +298,16 @@
       "session_verification": "docs/verification/43-desktop-companion/session-outbox.md",
       "production_record": "docs/verification/desktop-companion-production-2026-10-02.md",
       "installer_verification": "docs/verification/43-desktop-companion/production-install.md"
+    },
+    {
+      "dir": "44-desktop-question-followup",
+      "status": "completed",
+      "design": "docs/02-design/features/desktop-question-followup.design.md",
+      "verification": "docs/verification/44-desktop-question-followup/verification.md",
+      "analysis": "docs/03-analysis/desktop-question-followup.analysis.md",
+      "report": "docs/04-report/features/desktop-question-followup.report.md",
+      "production_deployed": false,
+      "note": "질문 이력 자동 조회·현재 답 재열람·이어 묻기·새 질문 전환 구현. Electron12·desktop78·root1834·SQL316/권한2016 통과. 운영 미반영. 메일 연결은 사용자 보류."
     }
   ]
 }

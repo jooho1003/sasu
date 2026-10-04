@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "00304e73-4f3e-48bf-bf04-05d5371987e5",
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\44-desktop-question-followup\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-question-followup.html",
+  "specification": {
+    "sha256": "c79c32de711fc944ccd1c4d926fc843d555bd55fbe7fb3003d875f39897632dd",
+    "bytes": 3281
+  },
+  "artifact": {
+    "sha256": "9f27e07509b4389122714cb89ee285ce6dd4411ad5d9b27c7d78369617133733",
+    "bytes": 755024
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "standard",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-01T18:23:03.876Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}
