@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+[1/1] [chromium] › tests\e2e\sales-review-literal-comparison-local.spec.ts:29:5 › 팀장이 실제 견적 문구 차이를 원문으로 확인하고 권한 변경 뒤에는 거절된다
+  1 passed (7.2s)
+exit=0

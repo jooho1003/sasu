@@ -1,0 +1,45 @@
+
+Running 6 tests using 1 worker
+
+[1/6] tests\e2e\demo-meeting-recorder.spec.ts:22:5 › 심사위원은 로컬 녹음을 재생·내려받고 합성 전사와 분리해 본다
+[2/6] tests\e2e\demo-meeting-recorder.spec.ts:86:5 › 마이크 거절 뒤에도 준비된 합성 회의를 끝까지 체험한다
+[3/6] tests\e2e\demo-reviewer.spec.ts:38:5 › 공개 링크가 심사위원 계정으로 연결되고 전체 기능을 연다
+  1) tests\e2e\demo-reviewer.spec.ts:38:5 › 공개 링크가 심사위원 계정으로 연결되고 전체 기능을 연다 ────────────────────────
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('.demo-feature-grid > li')
+    Expected: 12
+    Received: 13
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" locator('.demo-feature-grid > li') with timeout 5000ms
+      - waiting for locator('.demo-feature-grid > li')
+        14 × locator resolved to 13 elements
+           - unexpected value "13"
+
+
+      40 |   await page.goto("/demo");
+      41 |   await expect(page.getByText("심사위원 데모 계정으로 접속했습니다")).toBeVisible();
+    > 42 |   await expect(page.locator(".demo-feature-grid > li")).toHaveCount(DEMO_FEATURES.length);
+         |                                                         ^
+      43 |
+      44 |   for (const feature of DEMO_FEATURES) {
+      45 |     const response = await page.goto(feature.href);
+        at D:\바이브코딩\sasu-csp-enforce-20261003\tests\e2e\demo-reviewer.spec.ts:42:57
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    C:\Users\이주호\AppData\Local\Temp\claude\D--------sasu\6add918b-f191-4630-80c7-8b5f30b38eb5\scratchpad\prod-demo-results\demo-reviewer-공개-링크가-심사위원-계정으로-연결되고-전체-기능을-연다\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: C:\Users\이주호\AppData\Local\Temp\claude\D--------sasu\6add918b-f191-4630-80c7-8b5f30b38eb5\scratchpad\prod-demo-results\demo-reviewer-공개-링크가-심사위원-계정으로-연결되고-전체-기능을-연다\error-context.md
+
+
+[4/6] tests\e2e\demo-reviewer.spec.ts:51:5 › 각 기능 화면이 데이터를 불러온 뒤에도 오류 화면으로 바뀌지 않는다
+[5/6] tests\e2e\demo-reviewer.spec.ts:104:5 › 390px에서도 기능 지도와 추천 시작점이 잘리지 않는다
+[6/6] tests\e2e\demo-reviewer.spec.ts:114:5 › 결정·기록·질문·자료 검토를 브라우저 안에서 끝까지 체험한다
+  1 failed
+    tests\e2e\demo-reviewer.spec.ts:38:5 › 공개 링크가 심사위원 계정으로 연결되고 전체 기능을 연다 ─────────────────────────
+  5 passed (1.3m)
+exit=1

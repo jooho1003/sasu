@@ -1,0 +1,78 @@
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › tests\e2e\csp-routes-local.spec.ts:282:5 › 로그인 화면 전체가 CSP enforce 모드에서 위반 없이 열린다
+[chromium] › tests\e2e\csp-routes-local.spec.ts:282:5 › 로그인 화면 전체가 CSP enforce 모드에서 위반 없이 열린다
+[csp:enforce] lead /d/:dept status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/ask status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/ledger status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/documents status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/roles status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/reviews status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/reviews/glossary status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/reviews/record status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/retention status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/settings status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/sales-review status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/retros status=200 violations=0 console=0
+
+[csp:enforce] lead /consent status=200 violations=0 console=0
+
+[csp:enforce] lead /admin status=200 violations=0 console=0
+
+[csp:enforce] lead /admin/members status=200 violations=0 console=0
+
+[csp:enforce] lead /admin/sources status=200 violations=0 console=0
+
+[csp:enforce] lead /admin/security status=200 violations=0 console=0
+
+[csp:enforce] lead /admin/audit status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/cards/:id status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/reviews/:id status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/evidence/:id status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept?item=:id status=200 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/trailers status=404 violations=0 console=0
+
+[csp:enforce] lead /d/:dept/trailers/new status=404 violations=0 console=0
+
+[csp:enforce] member /d/:dept status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/ask status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/ledger status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/documents status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/roles status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/reviews status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/reviews/glossary status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/retention status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/settings status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/sales-review status=200 violations=0 console=0
+
+[csp:enforce] member /d/:dept/retros status=200 violations=0 console=0
+
+[2/2] [chromium] › tests\e2e\settings-devices-local.spec.ts:44:5 › 내 기기만 보고 한 기기를 해제할 수 있다
+  2 passed (1.7m)
+exit=0

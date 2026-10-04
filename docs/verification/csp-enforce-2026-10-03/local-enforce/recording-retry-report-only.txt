@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+[1/1] tests\e2e\recording-product.spec.ts:19:5 › authenticated production build records and saves synthetic audio through real local services
+  1 passed (52.3s)
+exit=0
