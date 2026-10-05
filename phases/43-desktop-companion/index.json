@@ -133,7 +133,9 @@
       "started_at": "2026-10-02T09:03:28+09:00",
       "summary": "운영 웹·DB와 공개 Windows 0.1.1 게시 완료. 현재 PC NSIS 설치 16.94초, 운영 테스트 코드 인증/부서 연결/질문 거절, 공개 0.1.0→0.1.1 업데이트·세션 복원·로그아웃 파일 삭제 확인. SC8 충족, 계획8/9·정적93.6%. 신규 Windows 5분 녹화·실제 메일 수신·도메인/Resend SMTP는 대기. docs/verification/43-desktop-companion/production-install.md",
       "blocked_reason": "신규 Windows 계정의 설치·실제 메일 수신·5분 전체 녹화와 발신 도메인 등록/Resend SMTP 연결 대기. 운영 반영 승인은 받았으며 웹·DB·공개 설치 파일·업데이트·6자리 OTP/메일 템플릿은 확인 완료(docs/verification/43-desktop-companion/production-install.md).",
-      "blocked_at": "2026-10-02T09:55:30+09:00"
+      "blocked_at": "2026-10-02T09:55:30+09:00",
+      "mail_delivery_check": "docs/verification/43-desktop-companion/mail-delivery-2026-10-05.md",
+      "mail_delivery_note": "2026-10-05 기본 발송기로 실제 사용자 Gmail 수신(1분 이내)·6자리 코드 로그인 확인. 일반 신규 사용자 수신은 도메인/Resend SMTP 뒤 재확인, 신규 Windows 5분 녹화는 대기."
     },
     {
       "step": 13,

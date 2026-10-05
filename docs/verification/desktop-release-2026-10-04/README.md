@@ -56,7 +56,7 @@ PR #30(질문 이력) → #33(최근 맡긴 작업) → #34(결정함) → #35(�
 - **패키지 실행 run01~03 실패(실행 환경):** 이 Claude Code 세션은 Windows 세션 0(비대화형 로그온)에서 돌아 DPAPI `CryptProtectData`가 "액세스가 거부되었습니다(0x5)"를 냈다. 샌드박스 해제 여부와 무관했고, 이미 동작이 확인된 설치본 0.1.1도 같은 방식으로 `app_start_failed`가 났다. 그래서 일회용 예약 작업(로그온 유형 Interactive, 제한 권한)으로 로그인된 데스크톱 세션 1에서 실행했고, 끝난 뒤 작업을 삭제했다.
 - **패키지 실행 run04 실패:** 세션 1 첫 실행에서 `electron.launch` 45초 시간 초과, 프로필 비어 있음. 같은 인자를 진단 로그와 함께 다시 실행한 run05에서 앱 시작~app_ready 약 20초로 통과했다. run05 진단에서 예약 작업 인자의 한글 경로가 정상 전달됨(`exists=True`)을 확인했다. 첫 실행의 시간 초과를 통과로 바꾸지 않는다.
 - **업데이트 run01 실패:** 게시 약 1분 뒤 0.1.1의 GitHub feed 확인이 `latest version: 0.1.1`로 응답해 `published_update_not_available`로 끝났다([receipt](package/update-run01-failure.json)). 직후 `releases.atom`에 v0.1.2가 보이는 것을 확인하고 같은 프로필로 run02를 실행해 통과했다. run01은 로그아웃 전에 끝나 `session.bin`이 남아 있었고, run02의 0.1.1 시작도 재로그인 없이 세션을 복원했다.
-- 실행 로그의 앱 이벤트([runtime-events.txt](package/runtime-events.txt)): `ipc_failed window_forbidden`(`update:get`)은 0.1.1과 0.1.2 시작 때 모두 1회 나타난다(기존 동작, 이번 변경 아님). `inbox_poll_failed ApiError` 1회는 로그아웃 처리 시점(06:10:20Z)에 진행 중이던 조회다. 둘 다 이번 판정을 바꾸지 않으며 별도 확인 대상이다.
+- 실행 로그의 앱 이벤트([runtime-events.txt](package/runtime-events.txt)): `ipc_failed window_forbidden`(`update:get`)은 0.1.1과 0.1.2 시작 때 모두 1회 나타난다(기존 동작, 이번 변경 아님). `inbox_poll_failed ApiError` 1회는 로그아웃 처리 시점(06:10:20Z)에 진행 중이던 조회다. 둘 다 이번 판정을 바꾸지 않는다. `window_forbidden`의 원인은 `desktop/src/renderer/src/App.tsx`의 업데이트 상태 effect가 펫 창(`#pet`)에서도 `update.get()`을 호출하고, main의 `update:get`은 패널 창만 허용하기 때문이다. 렌더러가 오류를 무시하므로 사용자 영향은 없고 로그 잡음이다. 게시된 0.1.2 소스와 어긋나지 않도록 이번에는 고치지 않고 다음 릴리스에서 펫 창 조건을 추가한다.
 
 ## 남은 사람 게이트
 
