@@ -1,4 +1,4 @@
-import { expect, test, _electron as electron } from "@playwright/test";
+import { expect, test, _electron as electron, type ElectronApplication, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -28,8 +28,12 @@ test.describe("desktop followup", () => {
   let askBodies: { question: string; parent_id: string | null }[] = [];
   let historyMode = "normal";
   let historyRequests = 0;
+  let historyUrls: string[] = [];
+  let historyResponses = 0;
   let releaseHistory: (() => void) | null = null;
   let answerMode = "normal";
+  let answerRequests = 0;
+  let answerResponses = 0;
   let releaseAnswer: (() => void) | null = null;
   const olderId = randomUUID();
   let contextRole = "member";
@@ -61,9 +65,11 @@ test.describe("desktop followup", () => {
   let decideMode = "normal";
   let releaseDecision: (() => void) | null = null;
   let decisionBodies: { status: string; outcome: string; rationale: string }[] = [];
+  const ownedApps = new WeakMap<Page, ElectronApplication>();
   test.beforeEach(() => {
     askMode = "accepted"; revoked = false; askRequests = 0; previousQuestion = ""; currentUserId = userId;
     askBodies = []; historyMode = "normal"; historyRequests = 0; answerMode = "normal";
+    historyUrls = []; historyResponses = 0; answerRequests = 0; answerResponses = 0;
     releaseHistory = null; releaseAnswer = null;
     contextRole = "member"; inboxMode = "normal"; salesMode = "normal"; salesState = "ready";
     workReviews = []; workSales = []; releaseInbox = null; releaseSales = null; salesRequests = 0; inboxRequests = 0;
@@ -179,6 +185,9 @@ test.describe("desktop followup", () => {
           await new Promise((resolve) => setTimeout(resolve, 200));
           response.statusCode = 403;
           response.end(JSON.stringify({ code: "ask_parent_forbidden", error: "이 질문을 이어갈 수 없습니다. 새 질문으로 시작해주세요." }));
+        } else if (askMode === "limit") {
+          response.statusCode = 429;
+          response.end(JSON.stringify({ code: "ask_daily_limit", error: "오늘 질문 한도를 모두 사용했습니다." }));
         } else if (askMode === "offline") {
           response.statusCode = 503;
           response.end(JSON.stringify({ code: "temporarily_unavailable", error: "잠시 후 다시 시도해 주세요." }));
@@ -189,6 +198,7 @@ test.describe("desktop followup", () => {
           response.end(JSON.stringify({ answer_id: answerId, job_id: linkId, truncated: false }));
         }
       } else if (path === `/api/companion/answers/${answerId}`) {
+        answerRequests += 1;
         if (answerMode === "pending") {
           response.end(JSON.stringify({ id: answerId, status: "pending", answer: null, refused: false, citations: [] }));
           return;
@@ -204,17 +214,23 @@ test.describe("desktop followup", () => {
           return;
         }
         response.end(JSON.stringify({ id: answerId, status: "refused", answer: null, refused: true, citations: [] }));
+        answerResponses += 1;
       } else if (path === "/api/companion/questions") {
         historyRequests += 1;
+        historyUrls.push(request.url!);
+        // Snapshot at request time: a released old-session response must carry
+        // old-session content even after the fixture has switched users.
+        const requestedQuestion = previousQuestion;
+        const before = new URL(request.url!, fixtureOrigin).searchParams.has("before");
         if (historyMode === "delayed") await new Promise<void>((resolve) => { releaseHistory = resolve; });
-        if (historyMode === "error") {
+        if (historyMode === "error" || (historyMode === "page-error" && before)) {
           response.statusCode = 503;
           response.end(JSON.stringify({ code: "unavailable", error: "질문 기록을 불러오지 못했습니다." }));
         } else {
-          const before = new URL(request.url!, fixtureOrigin).searchParams.has("before");
-          const first = { id: answerId, question: previousQuestion, status: "refused", created_at: "2026-10-01T12:00:00Z", parent_id: null };
-          response.end(JSON.stringify({ questions: before ? [first, { ...first, id: olderId, question: "더 오래된 합성 후속 질문", status: "done", parent_id: answerId }] : previousQuestion ? [first] : [], next: historyMode === "pages" && !before ? { before: first.created_at, before_id: answerId } : null }));
+          const first = { id: answerId, question: requestedQuestion, status: "refused", created_at: "2026-10-01T12:00:00Z", parent_id: null };
+          response.end(JSON.stringify({ questions: before ? [first, { ...first, id: olderId, question: "더 오래된 합성 후속 질문", status: "done", parent_id: answerId }] : requestedQuestion ? [first] : [], next: ["pages", "page-error"].includes(historyMode) && !before ? { before: first.created_at, before_id: answerId } : null }));
         }
+        historyResponses += 1;
       } else {
         response.statusCode = 404;
         response.end(JSON.stringify({ code: "not_found", error: "합성 경로를 찾지 못했습니다." }));
@@ -271,9 +287,18 @@ test.describe("desktop followup", () => {
       await expect.poll(() => app.windows().some((page) => page.url().includes("#panel")) && app.windows().some((page) => page.url().includes("#pet")), { timeout: 30_000 }).toBe(true);
       const panel = app.windows().find((page) => page.url().includes("#panel"))!;
       const pet = app.windows().find((page) => page.url().includes("#pet"))!;
+      // Electron can expose a loaded page while its native panel is hidden.
+      // Focus only this fixture's window before dispatching user input.
+      await app.evaluate(({ BrowserWindow }) => {
+        const ownedPanel = BrowserWindow.getAllWindows().find((window) => window.webContents.getURL().includes("#panel"));
+        if (!ownedPanel) throw new Error("fixture_panel_missing");
+        ownedPanel.show();
+        ownedPanel.focus();
+      });
       await expect(panel.getByRole("heading", { name: "사수 시작하기" })).toBeVisible({ timeout: 30_000 });
       // Rendering may precede main's authorized sender assignment.
       await expect.poll(async () => panel.evaluate(async () => window.sasu.app.info().then(() => true).catch(() => false))).toBe(true);
+      ownedApps.set(panel, app);
       return { app, panel, pet, userData };
     } catch (cause) {
       await app.close();
@@ -281,6 +306,24 @@ test.describe("desktop followup", () => {
       await removeUserData(userData);
       throw cause;
     }
+  }
+
+  async function prepareOwnedPanel(panel: Page, stage: string) {
+    // Supported per-profile pinning keeps OS focus changes from hiding this
+    // ASK/WORK fixture. Product blur handling and window tests remain intact.
+    await panel.evaluate(() => window.sasu.settings.set({ panelPinned: true }));
+    await showOwnedPanel(panel, stage);
+  }
+  async function showOwnedPanel(panel: Page, stage: string) {
+    const app = ownedApps.get(panel);
+    if (!app) throw new Error("fixture_app_missing");
+    const state = await app.evaluate(({ BrowserWindow }) => {
+      const window = BrowserWindow.getAllWindows().find((candidate) => candidate.webContents.getURL().includes("#panel"));
+      if (!window) throw new Error("fixture_panel_missing");
+      window.show(); window.focus();
+      return { visible: window.isVisible(), focused: window.isFocused(), minimized: window.isMinimized() };
+    });
+    console.log("followup_owned_panel", stage, state);
   }
 
   async function login(panel: Awaited<ReturnType<typeof launch>>["panel"]) {
@@ -301,7 +344,10 @@ test.describe("desktop followup", () => {
       await window.sasu.link.create({ dept_id: id });
     }, deptId);
     await panel.reload();
-    await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible();
+    // Match launch's bounded readiness wait; keep behavior assertions at their
+    // existing timeouts even when a loaded Windows host delays app startup.
+    await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible({ timeout: 30_000 });
+    await prepareOwnedPanel(panel, "login-before-input");
   }
 
   async function trackWeb(app: Awaited<ReturnType<typeof launch>>["app"], fail = false) {
@@ -369,6 +415,7 @@ test.describe("desktop followup", () => {
       expect(await panel.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
       const screenshots = resolve(process.cwd(), "../docs/verification/47-desktop-sales-flow/screenshots");
       mkdirSync(screenshots, { recursive: true });
+      await prepareOwnedPanel(panel, "sales-before-screenshot");
       await panel.screenshot({ path: resolve(screenshots, "sales-form.png") });
       await salesSection.screenshot({ path: resolve(screenshots, "sales-form-section.png") });
       await expect(panel.getByText("합성 인용은 선택창에서 답으로 보여주지 않습니다.")).toHaveCount(0);
@@ -1241,6 +1288,121 @@ test.describe("desktop followup", () => {
     }
   });
 
+  test("질문 한도 429는 이어 묻기 초안·부모를 보존하고 보관·자동 재전송하지 않는다", async () => {
+    previousQuestion = "질문 한도 테스트의 합성 부모 질문입니다.";
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel);
+      await panel.getByRole("button", { name: "기록", exact: true }).click();
+      await panel.getByRole("button", { name: /질문 한도 테스트의 합성 부모/ }).click();
+      await panel.getByRole("button", { name: "이어 묻기", exact: true }).click();
+      const draft = "한도를 넘긴 합성 후속 질문을 보존해 주세요.";
+      await panel.getByLabel("질문 내용").fill(draft);
+      askMode = "limit";
+      await panel.getByRole("button", { name: "질문하기", exact: true }).click();
+      await expect(panel.getByText("오늘 질문 한도를 모두 사용했습니다.")).toBeVisible();
+      await expect(panel.getByLabel("질문 내용")).toHaveValue(draft);
+      await expect(panel.getByText("이 질문에 이어 묻습니다.")).toBeVisible();
+      expect(askBodies).toEqual([{ question: draft, parent_id: answerId }]);
+      expect((await panel.evaluate(async () => window.sasu.inbox.get())).outbox_count).toBe(0);
+      expect(askBodies).toHaveLength(1);
+      expect(existsSync(resolve(userData, "outbox.bin"))).toBe(false);
+      const screenshots = resolve(process.cwd(), "../docs/verification/44-desktop-question-followup/screenshots");
+      mkdirSync(screenshots, { recursive: true });
+      await panel.screenshot({ path: resolve(screenshots, "followup-429.png") });
+      askMode = "accepted";
+      await panel.getByRole("button", { name: "질문하기", exact: true }).click();
+      await expect.poll(() => askBodies.length).toBe(2);
+      expect(askBodies[1]).toEqual({ question: draft, parent_id: answerId });
+    } finally {
+      await app.close();
+      await removeUserData(userData);
+    }
+  });
+
+  test("페이지 오류 뒤 목록과 cursor를 보존하고 빠른 상세 연타는 한 번만 조회한다", async () => {
+    previousQuestion = "페이지 실패에도 남아야 하는 합성 첫 질문";
+    historyMode = "pages";
+    const { app, panel, userData } = await launch();
+    try {
+      await login(panel);
+      await panel.getByRole("button", { name: "기록", exact: true }).click();
+      const first = panel.getByRole("button", { name: /페이지 실패에도 남아야/ });
+      await expect(first).toBeVisible();
+      historyMode = "page-error";
+      await panel.getByRole("button", { name: "더 보기", exact: true }).click();
+      await expect(panel.getByText("질문 기록을 불러오지 못했습니다.")).toBeVisible();
+      await expect(first).toBeVisible();
+      await expect(panel.getByRole("button", { name: "더 보기", exact: true })).toBeEnabled();
+      expect(historyRequests).toBe(2);
+      const failedCursor = historyUrls[1];
+      historyMode = "pages";
+      await panel.getByRole("button", { name: "더 보기", exact: true }).click();
+      await expect(panel.getByRole("button", { name: /더 오래된 합성 후속 질문/ })).toBeVisible();
+      expect(historyRequests).toBe(3);
+      expect(historyUrls[2]).toBe(failedCursor);
+      await expect(first).toHaveCount(1);
+      answerMode = "delayed";
+      // Two clicks in the same event-loop turn exercise the synchronous ref
+      // lock, before React has rendered disabled=true.
+      await first.evaluate((button) => { (button as HTMLButtonElement).click(); (button as HTMLButtonElement).click(); });
+      await expect.poll(() => !!releaseAnswer).toBe(true);
+      await expect(first).toBeDisabled();
+      expect(answerRequests).toBe(1);
+      releaseAnswer!();
+      await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible();
+      await expect(panel.getByText("근거가 부족해 답하지 못했습니다.")).toBeVisible();
+      expect(answerRequests).toBe(1);
+    } finally {
+      releaseAnswer?.();
+      await app.close();
+      await removeUserData(userData);
+    }
+  });
+
+  for (const delayed of ["목록", "상세"] as const) {
+    test(`이전 세션의 늦은 ${delayed} 응답은 로그아웃·새 로그인 뒤 표시되지 않는다`, async () => {
+      previousQuestion = "이전 사용자만 보던 지연된 합성 질문";
+      if (delayed === "목록") historyMode = "delayed";
+      else answerMode = "delayed";
+      const { app, panel, userData } = await launch();
+      try {
+        await login(panel);
+        await panel.getByRole("button", { name: "기록", exact: true }).click();
+        if (delayed === "목록") await expect.poll(() => !!releaseHistory).toBe(true);
+        else {
+          await panel.getByRole("button", { name: /이전 사용자만 보던/ }).click();
+          await expect.poll(() => !!releaseAnswer).toBe(true);
+        }
+        await panel.getByRole("button", { name: "설정", exact: true }).click();
+        await panel.getByRole("button", { name: "로그아웃하기", exact: true }).click();
+        await expect(panel.getByRole("heading", { name: "사수 시작하기" })).toBeVisible();
+        previousQuestion = ""; currentUserId = randomUUID(); historyMode = "normal";
+        await panel.getByLabel("이메일").fill("synthetic-next@example.test");
+        await panel.getByRole("button", { name: "코드 받기", exact: true }).click();
+        await panel.getByLabel("6자리 코드").fill("123456");
+        await panel.getByRole("button", { name: "로그인하기", exact: true }).click();
+        await panel.getByRole("button", { name: "합성 부서", exact: true }).click();
+        await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible();
+        const completedBeforeRelease = delayed === "목록" ? historyResponses : answerResponses;
+        if (delayed === "목록") releaseHistory!();
+        else releaseAnswer!();
+        await expect.poll(() => delayed === "목록" ? historyResponses : answerResponses).toBe(completedBeforeRelease + 1);
+        await panel.getByRole("button", { name: "기록", exact: true }).click();
+        await expect(panel.getByText("아직 질문 기록이 없습니다.")).toBeVisible();
+        await expect(panel.getByText(/이전 사용자만 보던/)).toHaveCount(0);
+        await panel.getByRole("button", { name: "질문", exact: true }).click();
+        await expect(panel.getByText("근거가 부족해 답하지 못했습니다.")).toHaveCount(0);
+        await expect(panel.getByLabel("질문 내용")).toHaveValue("");
+        expect((await panel.evaluate(async () => window.sasu.settings.get())).seen).toEqual([]);
+      } finally {
+        releaseHistory?.(); releaseAnswer?.();
+        await app.close();
+        await removeUserData(userData);
+      }
+    });
+  }
+
   for (const reason of ["설정 로그아웃", "서버 401"] as const) {
     test(`${reason} 뒤 재로그인에 이전 답·기록·설정을 남기지 않는다`, async () => {
       const { app, panel, pet, userData } = await launch();
@@ -1251,6 +1413,7 @@ test.describe("desktop followup", () => {
         }, deptId);
         await panel.reload();
         await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible();
+        await prepareOwnedPanel(panel, "session-before-question");
         await panel.getByPlaceholder("질문을 적어 주세요.").fill("이전 사용자의 합성 질문 기록입니다.");
         await panel.getByRole("button", { name: "질문하기" }).click();
         await expect(panel.getByText("근거가 부족해 답하지 못했습니다.")).toBeVisible();
@@ -1272,17 +1435,24 @@ test.describe("desktop followup", () => {
         expect((await pet.evaluate(async () => window.sasu.settings.get())).pet).toBe("green");
         const screenshots = resolve(process.cwd(), "../docs/verification/43-desktop-companion/screenshots");
         mkdirSync(screenshots, { recursive: true });
+        // Cleanup assertions above and default settings below must stay real;
+        // restore native visibility without writing a preference after logout.
+        await showOwnedPanel(panel, "session-after-logout-before-screenshot");
         await panel.screenshot({ path: resolve(screenshots, reason === "설정 로그아웃" ? "desktop-session-logout.png" : "desktop-session-401.png") });
 
         revoked = false; previousQuestion = ""; currentUserId = randomUUID();
         await panel.getByLabel("이메일").fill("synthetic-next@example.test");
+        await showOwnedPanel(panel, "session-before-code-request");
         await panel.getByRole("button", { name: "코드 받기" }).click();
         await expect(panel.getByText("로그인 코드를 보냈습니다.")).toBeVisible();
         await panel.getByLabel("6자리 코드").fill("123456");
+        await showOwnedPanel(panel, "session-before-ui-login");
         await panel.getByRole("button", { name: "로그인하기" }).click();
+        await showOwnedPanel(panel, "session-before-link");
         await panel.getByRole("button", { name: "합성 부서", exact: true }).click();
         await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible();
         await expect(panel.getByText("근거가 부족해 답하지 못했습니다.")).toHaveCount(0);
+        await showOwnedPanel(panel, "session-before-history");
         await panel.getByRole("button", { name: "기록", exact: true }).click();
         await expect(panel.getByText("이전 사용자의 합성 질문 기록입니다.")).toHaveCount(0);
         expect(await panel.evaluate(async () => window.sasu.settings.get())).toMatchObject({ seen: [], pet: "green", panelPinned: false });
@@ -1387,7 +1557,7 @@ test.describe("desktop followup", () => {
       }, answerId);
       await panel.reload();
       await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible();
-      await panel.evaluate(async () => window.sasu.settings.set({ panelPinned: true }));
+      await prepareOwnedPanel(panel, "polling-before-input");
       await panel.getByPlaceholder("질문을 적어 주세요.").fill("합성 질문의 답변을 확인해 주세요.");
       await panel.getByRole("button", { name: "질문하기" }).click();
       await expect(panel.getByText(/연결을 확인해 주세요.*기록에서 답/u)).toBeVisible();
