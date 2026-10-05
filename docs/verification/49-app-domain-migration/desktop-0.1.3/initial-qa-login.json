@@ -1,0 +1,12 @@
+{
+  "started": "2026-10-05T11:14:34.027Z",
+  "expectedVersion": "0.1.2",
+  "emailDeliveryVerified": false,
+  "questionWrites": 0,
+  "modelCalls": 0,
+  "authenticated": true,
+  "deviceLinked": true,
+  "inboxReceived": true,
+  "sessionEncrypted": true,
+  "completed": "2026-10-05T11:14:45.021Z"
+}

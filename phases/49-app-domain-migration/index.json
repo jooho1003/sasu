@@ -3,7 +3,7 @@
   "phase": "49-app-domain-migration",
   "plan": "docs/01-plan/features/app-domain-migration.plan.md",
   "design": "docs/02-design/features/app-domain-migration.design.md",
-  "status": "pending",
+  "status": "completed",
   "steps": [
     {
       "step": 0,
@@ -32,5 +32,10 @@
   ],
   "analysis": "docs/03-analysis/app-domain-migration.analysis.md",
   "verification": "docs/verification/49-app-domain-migration/verification.md",
-  "production_deployed": false
+  "production_deployed": true,
+  "completed_at": "2026-10-05",
+  "deployed_at": "2026-10-05T19:20:00+09:00",
+  "deployment": "docs/verification/49-app-domain-migration/production-cutover.md",
+  "report": "docs/04-report/features/app-domain-migration.report.md",
+  "installer_version": "0.1.3"
 }
