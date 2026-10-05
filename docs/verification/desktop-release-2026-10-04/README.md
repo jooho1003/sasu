@@ -50,6 +50,10 @@ PR #30(질문 이력) → #33(최근 맡긴 작업) → #34(결정함) → #35(�
 | 실제 업데이트 | [update-complete.json](package/update-complete.json): 설치된 0.1.1이 10/4 초기 인증 QA 프로필 세션만으로 시작(`initialSessionRestored`) → 0.1.2 발견·차등 다운로드(ready 06:09:51Z) → 종료 시 silent 설치 → 설치된 ASAR 0.1.2 → 새 실행 세션 복원(`reloginCalls: 0`, `restoredWithoutRelogin: true`) → 최신 feed 확인 → 로그아웃 완료 뒤 session/settings/outbox 파일 삭제. 질문 쓰기·모델 호출 0. 설치 후 `%LOCALAPPDATA%\Programs\사수\resources\app.asar` SHA-256이 감사 ASAR와 일치 |
 | 화면 | [업데이트 준비(0.1.1)](package/installed-update-ready.png) · [업데이트 적용(0.1.2)](package/installed-update-applied.png). 같은 QA 부서 연결 상태에서 설정 탭 버전 표기만 0.1.1→0.1.2 |
 
+### main 병합과 운영 웹 재배포
+
+PR #36을 2026-10-05에 main으로 병합했다(병합 커밋 `d4c9785`). 이 PR의 main 대비 변경은 `docs/`·`desktop/`·`phases/`뿐이고 웹 코드 변경은 0줄이라(`git diff origin/main..HEAD -- . ':!docs' ':!desktop' ':!phases'` 빈 결과) 같은 웹 코드가 다시 배포됐다. 병합 직전 운영 배포는 `81f10a9`(2026-10-04T13:43:51Z)였다. Vercel 운영 배포 `d4c9785`가 07:35:42Z에 성공했고, `/`·`/login` 200, `/demo` → `/demo/access` 307을 확인했다. 운영 게스트 Playwright 5개(1440/390px 완주·실제 부서 차단·잘못된 서명 거부·열람 전후 AI 호출/DB 행 증가 0)가 통과했다: [production-guest-after-merge.txt](production-guest-after-merge.txt). 테스트 뒤 작업 트리 변경은 없었다.
+
 ### 실패·재실행 기록
 
 - **감사 run01 실패(도구 결함):** `audit.mjs`가 ASAR 안의 중첩 파일을 `out/main/index.js`처럼 `/` 경로로 꺼내 `@electron/asar` 3.4.1이 Windows에서 찾지 못했다. ASAR 목록을 직접 대조해 `out/main`·`out/preload`·`out/renderer` 10개 항목이 설치본 0.1.1과 같은 구조로 들어 있음을 확인했다. 0.1.1 도구처럼 `join()`으로 경로를 만들도록 ignored 도구 두 줄만 고친 뒤 run02에서 통과했다. 빌드 산출물은 바꾸지 않았다.
