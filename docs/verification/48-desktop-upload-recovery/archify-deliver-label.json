@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "deliver",
+  "stage": "render",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\48-desktop-upload-recovery\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-upload-recovery.html",
+  "error": "Architecture layout validation failed:\n- Label \"각 await current\" overlaps component \"members\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [242, 270, 87, 14]\n  component \"members\" rect: [40, 240, 220, 80]\n  Suggested fix: labelAt [285, 334] or labelDy +54 (below); or labelAt [285, 236] or labelDy -44 (above)",
+  "diagnostics": [
+    {
+      "code": "layout/constraint",
+      "severity": "error",
+      "message": "Label \"각 await current\" overlaps component \"members\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [242, 270, 87, 14]\n  component \"members\" rect: [40, 240, 220, 80]\n  Suggested fix: labelAt [285, 334] or labelDy +54 (below); or labelAt [285, 236] or labelDy -44 (above)",
+      "subject": {
+        "diagramType": "architecture"
+      },
+      "evidence": {},
+      "supportedFixes": []
+    }
+  ]
+}

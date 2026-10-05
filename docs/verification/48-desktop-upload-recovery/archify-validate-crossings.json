@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "validate",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\48-desktop-upload-recovery\\flow.json",
+  "checks": [
+    {
+      "name": "single_svg",
+      "ok": true,
+      "details": [
+        "found 1 <svg> block(s)"
+      ]
+    },
+    {
+      "name": "finite_svg",
+      "ok": true,
+      "details": []
+    },
+    {
+      "name": "orthogonal_arrows",
+      "ok": true,
+      "details": []
+    },
+    {
+      "name": "label_route_clearance",
+      "ok": true,
+      "details": [
+        "[composition/label-route-clearance] standard label \"각 await current\" on relationship id \"c-p\" (\"cleanup\" -> \"prepare\") is 0px from relationship id \"e-d\" (\"retry\" -> \"draft\") segment 2 [300, 550] -> [300, 140] with 14px hidden by the mask (minimum 2px) — use renderer-supported label controls (message y for sequence; otherwise labelAt, labelDx, labelDy, or labelSegment), or adjust the other relationship route/via/channel."
+      ]
+    },
+    {
+      "name": "relationship_crossings",
+      "ok": true,
+      "details": [
+        "[composition/proper-crossing] standard relationship id \"c-p\" (\"cleanup\" -> \"prepare\") crosses relationship id \"e-d\" (\"retry\" -> \"draft\") at [300, 420]"
+      ]
+    },
+    {
+      "name": "relationship_corridors",
+      "ok": true,
+      "details": []
+    },
+    {
+      "name": "container_border_runs",
+      "ok": true,
+      "details": []
+    },
+    {
+      "name": "route_rhythm",
+      "ok": true,
+      "details": []
+    },
+    {
+      "name": "legend_clearance",
+      "ok": true,
+      "details": []
+    }
+  ],
+  "composition": {
+    "schemaVersion": 1,
+    "profile": "standard",
+    "status": "pass",
+    "summary": {
+      "errors": 0,
+      "warnings": 2
+    },
+    "metrics": {
+      "properCrossings": 1,
+      "ambiguousCorridors": 0,
+      "containerBorderRuns": 0,
+      "labelRouteClearanceIssues": 1,
+      "minLabelRouteClearance": 0,
+      "desktopReadabilityIssues": 0,
+      "minProjectedNodeTextPx": null,
+      "maxBends": 3,
+      "routesOverSuggestedBends": 1,
+      "maxStretch": 1.159,
+      "routesOverSuggestedStretch": 0,
+      "minSegmentPx": 40,
+      "minInteriorSegmentPx": 280,
+      "shortSegmentCount": 0,
+      "shortEndpointSegmentCount": 0,
+      "shortInteriorSegmentCount": 0,
+      "microSegmentCount": 0
+    },
+    "suggestedLimits": {
+      "bendsPerRelationship": 2,
+      "stretch": 1.35,
+      "segmentPx": 16,
+      "microSegmentPx": 8
+    },
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "composition/label-route-clearance",
+        "label": "각 await current",
+        "labelRelationship": {
+          "id": "c-p",
+          "from": "cleanup",
+          "to": "prepare",
+          "label": "각 await current",
+          "collectionIndex": 4,
+          "artifactIndex": 5
+        },
+        "otherRelationship": {
+          "id": "e-d",
+          "from": "retry",
+          "to": "draft",
+          "label": "사람의 새 시도",
+          "collectionIndex": 8,
+          "artifactIndex": 9
+        },
+        "segmentIndex": 2,
+        "labelRect": {
+          "x": 241.6,
+          "y": 324,
+          "width": 86.8,
+          "height": 14
+        },
+        "clearance": 0,
+        "intersectionLength": 14,
+        "threshold": 2,
+        "from": [
+          300,
+          550
+        ],
+        "to": [
+          300,
+          140
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "composition/proper-crossing",
+        "relationship": {
+          "id": "c-p",
+          "from": "cleanup",
+          "to": "prepare",
+          "label": "각 await current",
+          "collectionIndex": 4,
+          "artifactIndex": 5
+        },
+        "otherRelationship": {
+          "id": "e-d",
+          "from": "retry",
+          "to": "draft",
+          "label": "사람의 새 시도",
+          "collectionIndex": 8,
+          "artifactIndex": 9
+        },
+        "point": [
+          300,
+          420
+        ]
+      }
+    ]
+  }
+}

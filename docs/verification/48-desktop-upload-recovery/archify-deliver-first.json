@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "deliver",
+  "stage": "render",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\48-desktop-upload-recovery\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-upload-recovery.html",
+  "error": "architecture schema validation failed:\n  /components/4/type (id/label: \"seen\") must be equal to one of the allowed values {\"allowedValues\":[\"frontend\",\"backend\",\"database\",\"cloud\",\"security\",\"messagebus\",\"external\"]}",
+  "diagnostics": [
+    {
+      "code": "schema/enum",
+      "severity": "error",
+      "message": "/components/4/type (id/label: \"seen\") must be equal to one of the allowed values {\"allowedValues\":[\"frontend\",\"backend\",\"database\",\"cloud\",\"security\",\"messagebus\",\"external\"]}",
+      "subject": {
+        "diagramType": "architecture",
+        "path": "/components/4/type",
+        "identity": "seen"
+      },
+      "evidence": {
+        "keyword": "enum",
+        "allowedValues": [
+          "frontend",
+          "backend",
+          "database",
+          "cloud",
+          "security",
+          "messagebus",
+          "external"
+        ]
+      },
+      "supportedFixes": [
+        "choose one of [\"frontend\",\"backend\",\"database\",\"cloud\",\"security\",\"messagebus\",\"external\"]"
+      ]
+    }
+  ]
+}

@@ -390,6 +390,8 @@ ADR-036 이후 회의 봇은 현재 입력 경로가 아니다. ADR-054의 음�
 
 DC-13(ADR-083): `HistoryTab → questions.list → /api/companion/questions`로 본인 이력을 다시 읽고, 선택 시 `answer.get`으로 현재 인용 권한을 확인한다. `AskTab`의 명시적인 부모 선택은 메모리에만 두고 `ask.send(question, parent_id) → OutboxService → /api/companion/ask → startAsk → ask_question`을 재사용한다. SQL만 소유자·부서·현재 인용 권한과 한도를 판정한다. 실패 시 초안/부모를 유지하고 새 질문은 부모만 명시적으로 해제한다. UI 요청 세대와 unmount cleanup으로 늦은 이력/답 콜백을 폐기하며 세션 종료 시 기존 `SessionApp` 재마운트로 질문 상태를 초기화한다.
 
+DC-09 구현 복구(phase 48): `WorkReviewUpload → 파일 읽기/음성 decode/해시 → 기존 upload.review → 접수 ID → app.openWeb → rememberSeen(current)` 순서를 유지한다. 준비부터 접수까지 ref 잠금과 현재 화면 세대를 검사하며 접수 전 UUID는 결과 링크로 표시하지 않는다. 음성 참여자 읽기는 종류별 요청 세대·단일 요청으로 처리한다. 구간별 전역 progress에는 업로드 ID가 없으므로 수신하지 않고 현재 화면의 로컬 단계만 표시한다. App의 기존 workKey/세션 재마운트·main/preload·서버/Storage/RLS 경계는 바꾸지 않는다.
+
 DC-14(ADR-084): App의 기존 E05 받은 일 요청을 중복 없이 공유하고 세션/요청 세대가 만료된 응답을 폐기한다. WorkTab의 RecentWork는 메모리의 자료·영업 요약만 렌더한다. 다시 열기는 E05에서 현재 본인 자료의 존재를 재확인하거나 E16 영업 상태를 다시 읽고, 기존 app:openWeb의 출처 제한을 거쳐 웹으로 인계한다. 읽음은 링크 요청 성공 후 기록한다. 서버·RLS·웹 상세 권한 판정은 기존 경로 그대로다.
 
 DC-15(ADR-085): CardsTab은 공유 E05 로딩/오류·수동 갱신을 표시하고 선택한 E09 상세의 세대/연타를 검사한다. CardView의 E10 성공은 목록 복귀 후 E05 갱신, 실패는 입력 보존이다. 읽음/처리 결과는 발신 화면과 세션이 현재일 때만 반영한다. 인용 없는 상세는 내용·행동을 숨기고 복귀만 제공한다. 서버 권한·원장·멱등은 기존 경로다.

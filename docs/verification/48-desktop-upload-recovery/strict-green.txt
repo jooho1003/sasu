@@ -1,0 +1,62 @@
+
+> sasu-desktop@0.1.2 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts tests/e2e/upload-recovery.spec.ts --grep 참여자 단일 조회|늦은 파일 hash|합성 음성 --max-failures=1
+
+
+Running 3 tests using 1 worker
+
+(node:26036) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:40612) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 1.01s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 32ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                     0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css      2.99 kB
+../../out/renderer/assets/index-D145IkQa.js   1,212.18 kB
+✓ built in 3.43s
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122910973
+upload_fixture_close app-closed 1791122911149
+upload_fixture_close profile-removed 1791122911163
+  ok 1 tests\e2e\upload-recovery.spec.ts:204:50 › desktop upload recovery › 늦은 파일 hash 뒤 새 업로드 IPC 없음 (3.2s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_view_actual_strict_replay { bundleType: 1, strictEffects: true, cleanupGeneration: 1 }
+upload_fixture_close begin 1791122913951
+upload_fixture_close app-closed 1791122914117
+upload_fixture_close profile-removed 1791122914132
+  ok 2 tests\e2e\upload-recovery.spec.ts:224:3 › desktop upload recovery › 참여자 단일 조회·loading/error/retry/empty·종류 전환 폐기 (3.0s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122916203
+upload_fixture_close app-closed 1791122916338
+upload_fixture_close profile-removed 1791122916351
+  ok 3 tests\e2e\upload-recovery.spec.ts:282:3 › desktop upload recovery › 합성 음성은 현재 동의 참여자와 기존 WAV 업로드 계약을 유지한다 (2.2s)
+
+  3 passed (15.6s)
+exit_code=0

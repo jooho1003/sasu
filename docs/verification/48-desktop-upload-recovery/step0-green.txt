@@ -1,0 +1,167 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts tests/e2e/upload-recovery.spec.ts --max-failures=1
+
+
+Running 14 tests using 1 worker
+
+(node:40548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:39992) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 1.01s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 35ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-BqUheSNu.js   707.85 kB
+✓ built in 965ms
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_stage draft-prepared
+upload_fixture_stage parts-pending
+upload_fixture_stage parts-released
+upload_fixture_close begin 1791122778369
+upload_fixture_close app-closed 1791122778494
+upload_fixture_close profile-removed 1791122778506
+  ok  1 tests\e2e\upload-recovery.spec.ts:138:3 › desktop upload recovery › 접수 전 링크 없음·연타 1회·입력 동결·성공 웹/읽음 (2.6s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122782320
+upload_fixture_close app-closed 1791122782539
+upload_fixture_close profile-removed 1791122782555
+  ok  2 tests\e2e\upload-recovery.spec.ts:167:3 › desktop upload recovery › 업로드 실패 링크 없음·초안 동의 보존·자동 재전송 없음·수동 retry (4.0s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122785280
+upload_fixture_close app-closed 1791122790657
+upload_fixture_close profile-removed 1791122790671
+  ok  3 tests\e2e\upload-recovery.spec.ts:178:3 › desktop upload recovery › 웹 실패 읽음 없음·오류 안내·retry와 지연 연타 한 번 (8.1s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122795938
+upload_fixture_close app-closed 1791122797312
+upload_fixture_close profile-removed 1791122797327
+  ok  4 tests\e2e\upload-recovery.spec.ts:193:63 › desktop upload recovery › 늦은 업로드 완료는 tab 뒤 notice/링크 없음 (6.6s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122800013
+upload_fixture_close app-closed 1791122801309
+upload_fixture_close profile-removed 1791122801322
+  ok  5 tests\e2e\upload-recovery.spec.ts:193:63 › desktop upload recovery › 늦은 업로드 완료는 same 뒤 notice/링크 없음 (4.0s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122805081
+upload_fixture_close app-closed 1791122805212
+upload_fixture_close profile-removed 1791122805224
+  ok  6 tests\e2e\upload-recovery.spec.ts:193:63 › desktop upload recovery › 늦은 업로드 완료는 logout 뒤 notice/링크 없음 (3.9s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122807340
+upload_fixture_close app-closed 1791122807554
+upload_fixture_close profile-removed 1791122807578
+  ok  7 tests\e2e\upload-recovery.spec.ts:204:50 › desktop upload recovery › 늦은 파일 read 뒤 새 업로드 IPC 없음 (2.3s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122811490
+upload_fixture_close app-closed 1791122813580
+upload_fixture_close profile-removed 1791122813597
+  ok  8 tests\e2e\upload-recovery.spec.ts:204:50 › desktop upload recovery › 늦은 파일 hash 뒤 새 업로드 IPC 없음 (6.0s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122820221
+upload_fixture_close app-closed 1791122820340
+upload_fixture_close profile-removed 1791122820352
+  ok  9 tests\e2e\upload-recovery.spec.ts:224:3 › desktop upload recovery › 참여자 단일 조회·loading/error/retry/empty·종류 전환 폐기 (6.7s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122822376
+upload_fixture_close app-closed 1791122822560
+upload_fixture_close profile-removed 1791122822574
+  ok 10 tests\e2e\upload-recovery.spec.ts:257:3 › desktop upload recovery › 지연 웹 열기 뒤 탭 이탈은 읽음을 시작하지 않는다 (2.2s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122824626
+upload_fixture_close app-closed 1791122824838
+upload_fixture_close profile-removed 1791122824850
+  ok 11 tests\e2e\upload-recovery.spec.ts:267:3 › desktop upload recovery › 늦은 읽음 오류는 발신 화면 이탈 뒤 notice를 바꾸지 않는다 (2.3s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122827128
+upload_fixture_close app-closed 1791122828561
+upload_fixture_close profile-removed 1791122828583
+  ok 12 tests\e2e\upload-recovery.spec.ts:282:3 › desktop upload recovery › 합성 음성은 현재 동의 참여자와 기존 WAV 업로드 계약을 유지한다 (3.7s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122831723
+upload_fixture_close app-closed 1791122831847
+upload_fixture_close profile-removed 1791122831859
+  ok 13 tests\e2e\upload-recovery.spec.ts:293:3 › desktop upload recovery › 음성 decode 지연 뒤 이탈은 업로드를 시작하지 않는다 (3.3s)
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_close begin 1791122834585
+upload_fixture_close app-closed 1791122835579
+upload_fixture_close profile-removed 1791122835591
+  ok 14 tests\e2e\upload-recovery.spec.ts:311:3 › desktop upload recovery › AudioContext 정리 실패도 접수 결과와 입력 잠금 해제를 보존한다 (3.7s)
+
+  14 passed (1.1m)
+exit_code=0

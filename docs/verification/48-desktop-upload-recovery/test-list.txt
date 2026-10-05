@@ -1,0 +1,19 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts tests/e2e/upload-recovery.spec.ts --list
+
+Listing tests:
+  upload-recovery.spec.ts:118:3 › desktop upload recovery › 접수 전 링크 없음·연타 1회·입력 동결·성공 웹/읽음
+  upload-recovery.spec.ts:139:3 › desktop upload recovery › 업로드 실패 링크 없음·초안 동의 보존·자동 재전송 없음·수동 retry
+  upload-recovery.spec.ts:150:3 › desktop upload recovery › 웹 실패 읽음 없음·오류 안내·retry와 지연 연타 한 번
+  upload-recovery.spec.ts:165:63 › desktop upload recovery › 늦은 업로드 완료는 tab 뒤 notice/링크 없음
+  upload-recovery.spec.ts:165:63 › desktop upload recovery › 늦은 업로드 완료는 same 뒤 notice/링크 없음
+  upload-recovery.spec.ts:165:63 › desktop upload recovery › 늦은 업로드 완료는 logout 뒤 notice/링크 없음
+  upload-recovery.spec.ts:176:50 › desktop upload recovery › 늦은 파일 read 뒤 새 업로드 IPC 없음
+  upload-recovery.spec.ts:176:50 › desktop upload recovery › 늦은 파일 hash 뒤 새 업로드 IPC 없음
+  upload-recovery.spec.ts:196:3 › desktop upload recovery › 참여자 단일 조회·loading/error/retry/empty·종류 전환 폐기
+  upload-recovery.spec.ts:214:3 › desktop upload recovery › 지연 웹 열기 뒤 탭 이탈은 읽음을 시작하지 않는다
+  upload-recovery.spec.ts:224:3 › desktop upload recovery › 늦은 읽음 오류는 발신 화면 이탈 뒤 notice를 바꾸지 않는다
+  upload-recovery.spec.ts:239:3 › desktop upload recovery › 합성 음성은 현재 동의 참여자와 기존 WAV 업로드 계약을 유지한다
+Total: 12 tests in 1 file
+exit_code=0
