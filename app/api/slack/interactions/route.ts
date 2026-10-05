@@ -3,6 +3,7 @@ import { after as nextAfter } from "next/server";
 import { verifySlackSignature } from "@/lib/slack/verify";
 import { buildDecisionModal } from "@/lib/slack/blocks";
 import { openModal, postMessage, updateMessage } from "@/lib/slack/post";
+import { metadataBase } from "@/lib/site";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 
 import { slackWorkspaceForTeam, withSlackCredentials, currentSlackWorkspace } from "@/lib/slack/workspace";
@@ -108,14 +109,6 @@ function isDecisionStatus(value: unknown): value is DecisionStatus {
 
 function relation<T>(value: T | T[]): T {
   return Array.isArray(value) ? value[0] : value;
-}
-
-function appBaseUrl(): string {
-  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (configured) return configured.replace(/\/$/u, "");
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-  if (vercelUrl) return `https://${vercelUrl}`;
-  return "http://localhost:3000";
 }
 
 async function originThreadForCard(
@@ -394,9 +387,8 @@ async function handleViewSubmission(payload: InteractionPayload): Promise<Respon
     });
 
     if (typeof metadata.channelId === "string" && typeof metadata.messageTs === "string") {
-      const baseUrl = appBaseUrl();
       const deptPath = typeof metadata.deptId === "string" ? `/d/${metadata.deptId}` : "";
-      const ledgerHref = `${baseUrl}${deptPath}/ledger#decision-${result.decisionId ?? metadata.requestId}`;
+      const ledgerHref = new URL(`${deptPath}/ledger#decision-${result.decisionId ?? metadata.requestId}`, metadataBase()).toString();
       after(() =>
         Promise.all([
           updateMessage({

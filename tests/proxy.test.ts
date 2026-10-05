@@ -95,4 +95,45 @@ describe("request nonce and session boundaries", () => {
     expect(apiResponse.headers.get("Referrer-Policy")).not.toBe("no-referrer");
     expect(mock.create).not.toHaveBeenCalled();
   });
+  it("gives the mail login confirm route no-referrer at the proxy, where next.config headers cannot override it", async () => {
+    const confirm = await proxy(new NextRequest("https://sasu.test/auth/confirm?token_hash=abc&type=email"));
+    expect(confirm.headers.get("Referrer-Policy")).toBe("no-referrer");
+    const trailing = await proxy(new NextRequest("https://sasu.test/auth/confirm/?token_hash=abc&type=email"));
+    expect(trailing.headers.get("Referrer-Policy")).toBe("no-referrer");
+    const callback = await proxy(new NextRequest("https://sasu.test/auth/callback?code=abc"));
+    expect(callback.headers.get("Referrer-Policy")).not.toBe("no-referrer");
+  });
+});
+
+describe("legacy host redirect", () => {
+  beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://getsasu.com");
+    vi.stubEnv("SASU_LEGACY_HOSTS", "sasu-alpha.vercel.app");
+  });
+  it("308 redirects a legacy-host page to the canonical origin with no-store", async () => {
+    const response = await proxy(new NextRequest("https://sasu-alpha.vercel.app/login?next=%2Fd", { headers: { host: "sasu-alpha.vercel.app" } }));
+    expect(response.status).toBe(308);
+    expect(response.headers.get("Location")).toBe("https://getsasu.com/login?next=%2Fd");
+    expect(response.headers.get("Cache-Control")).toContain("no-store");
+    expect(mock.create).not.toHaveBeenCalled();
+  });
+  it("never redirects /api/* on the legacy host", async () => {
+    const response = await proxy(new NextRequest("https://sasu-alpha.vercel.app/api/companion/ask", { method: "POST", headers: { host: "sasu-alpha.vercel.app" } }));
+    expect(response.status).not.toBe(308);
+    expect(response.headers.get("Location")).toBeNull();
+  });
+  it("redirects a legacy-host page POST with 308 so the method is preserved", async () => {
+    const response = await proxy(new NextRequest("https://sasu-alpha.vercel.app/consent", { method: "POST", headers: { host: "sasu-alpha.vercel.app" } }));
+    expect(response.status).toBe(308);
+    expect(response.headers.get("Location")).toBe("https://getsasu.com/consent");
+  });
+  it("leaves other hosts untouched", async () => {
+    const response = await proxy(new NextRequest("https://sasu.test/login", { headers: { host: "sasu.test" } }));
+    expect(response.status).not.toBe(308);
+  });
+  it("keeps existing behavior when SASU_LEGACY_HOSTS is unset", async () => {
+    vi.stubEnv("SASU_LEGACY_HOSTS", "");
+    const response = await proxy(new NextRequest("https://sasu-alpha.vercel.app/login", { headers: { host: "sasu-alpha.vercel.app" } }));
+    expect(response.status).not.toBe(308);
+  });
 });

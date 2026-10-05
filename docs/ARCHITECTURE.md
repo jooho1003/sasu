@@ -398,6 +398,12 @@ DC-15(ADR-085): CardsTab은 공유 E05 로딩/오류·수동 갱신을 표시하
 
 DC-16(ADR-086): App의 일 맡기기 nav key가 동일 탭 재클릭에도 WorkTab 하위 요청 세대를 폐기한다. WorkSalesReview는 E14 자료 조회/실패/빈 상태와 선택을 메모리에 유지하고 E15 시작에 ref 잠금과 선택별 request_id를 둔다. 같은 선택의 수동 retry는 ID를 유지하고 task 접수 뒤에는 새 시작을 막는다. 진행 E16은 5초·단일 flight이며 오류 시 정지/수동 재확인, terminal 상태의 명시적인 새 검토만 선택 단계로 돌아간다. 결과 열기는 현재 E16의 ready 확인→기존 제한된 app:openWeb→성공 뒤 onSeen(task_id,current) 순서다. 각 await 뒤 현재 화면/세션 검사로 늦은 콜백을 폐기한다. source_unavailable/not_found는 해당 자료/상태·결과를 숨기고 수동 조회로 서버 재검사를 받는다. 원문 권한·작업 멱등은 기존 공용 서버/SQL이 판정하며 API/IPC/DB는 바꾸지 않는다.
 
+### 6-13. 운영 주소 (ADR-088, PRD §8) — phase 49
+
+51. **서버가 만드는 절대 주소는 `metadataBase()` 하나에서 나온다.** Slack 링크·버튼, OAuth `redirect_uri`, Origin 검사, 메타데이터·사이트맵, 동의 DM이 모두 이 함수를 부른다. 라우트·파이프라인에 `NEXT_PUBLIC_APP_URL`·`VERCEL_URL`을 직접 읽는 두 번째 계산을 만들지 않는다. 사용자가 연 호스트를 따라야 하는 초대·예고편 링크와 인증 리디렉션만 요청 주소를 쓴다.
+52. **옛 주소는 화면만 옮기고 API는 그대로 처리한다.** `SASU_LEGACY_HOSTS`의 호스트로 온 `/api/` 밖 경로만 `proxy.ts`가 정식 주소의 같은 경로·쿼리로 308 이동한다. `/api/*`를 리디렉션하지 않는다 — 설치된 데스크톱은 빌드 때 들어간 주소로 Bearer를 보내고, 다른 출처로 리디렉션되면 헤더가 빠져 401과 세션 삭제로 이어진다. 정식 호스트와 같거나 정식 주소가 https가 아니면 이동하지 않는다.
+53. **메일 로그인 링크는 우리 주소의 `/auth/confirm`이 확인한다.** `token_hash`와 허용된 `type`(`email`·`magiclink`)만 받아 서버에서 `verifyOtp`하고, 로그인 후 경로는 `/auth/callback`과 같은 `resolvePostLoginPath`로 정한다. 두 번째 판정 로직을 만들지 않는다. 토큰은 로그·Referer로 내보내지 않는다.
+
 ## 7. 만들지 않는 것 (되살리지 말 것)
 
 | 항목 | 대신 | 근거 |

@@ -2,7 +2,7 @@
 
 > 2026-10-02 사용자 결정: 로그인 메일 발신자는 **사수 / `sasu@getsasu.com`**, provider는 Resend로 정한다. 인증할 도메인은 `getsasu.com`이다. 도메인 소유/DNS 인증·Resend SMTP 연결·실제 수신 확인은 사용자가 나중에 진행하도록 보류했다. 주소를 정한 것만으로 운영 발송이 활성화된 것은 아니다. 기존 6자리 OTP 설정은 유지한다.
 >
-> **2026-10-05 연결 완료(사용자 승인):** `getsasu.com`을 Cloudflare Registrar에서 1년 등록(자동 갱신, Cloudflare DNS) → Resend 기존 계정에 도메인 추가(Tokyo 리전, DKIM TXT·발송 CNAME 2개·DMARC `p=none` 수동 입력, 링크 추적 없음) → 인증 `verified` → `getsasu.com` 전용 Sending access 키로 Supabase Auth 사용자 지정 SMTP(`smtp.resend.com:465`, 사용자 `resend`, 발신 `사수 <sasu@getsasu.com>`) 저장. 키는 Supabase에만 있고 리포·`.env`에는 없다. 실제 수신·코드 로그인 확인과 Gmail 스팸 분류 한계는 [메일 수신 기록](verification/43-desktop-companion/mail-delivery-2026-10-05.md). 되돌리기는 Supabase → Authentication → Emails → SMTP Settings에서 "Enable custom SMTP"를 끈다. `getsasu.com`·`www`는 Cloudflare Redirect Rule로 운영 웹(`sasu-alpha.vercel.app`, 같은 경로·302)에 넘긴다.
+> **2026-10-05 연결 완료(사용자 승인):** `getsasu.com`을 Cloudflare Registrar에서 1년 등록(자동 갱신, Cloudflare DNS) → Resend 기존 계정에 도메인 추가(Tokyo 리전, DKIM TXT·발송 CNAME 2개·DMARC `p=none` 수동 입력, 링크 추적 없음) → 인증 `verified` → `getsasu.com` 전용 Sending access 키로 Supabase Auth 사용자 지정 SMTP(`smtp.resend.com:465`, 사용자 `resend`, 발신 `사수 <sasu@getsasu.com>`) 저장. 키는 Supabase에만 있고 리포·`.env`에는 없다. 실제 수신·코드 로그인 확인과 Gmail 스팸 분류 한계는 [메일 수신 기록](verification/43-desktop-companion/mail-delivery-2026-10-05.md). 되돌리기는 Supabase → Authentication → Emails → SMTP Settings에서 "Enable custom SMTP"를 끈다. `getsasu.com`·`www`는 Cloudflare Redirect Rule로 운영 웹(`sasu-alpha.vercel.app`, 같은 경로·302)에 넘긴다. phase 49 전환 때 이 규칙은 삭제한다 (아래 "16. 운영 주소 이전").
 
 - 작성일: 2026-09-08
 - 대상: 이 프로젝트를 혼자 진행하는 개발자 본인
@@ -273,3 +273,31 @@ D12(9/19)에 영상·스크린샷·제출서를 만들고 **제출** 버튼까�
 로컬 QA: `node scripts/verify-retro-collector.mjs`는 실제 개인 기록을 열지 않는 합성 SQLite 검증이다. `node scripts/verify-retro-sql.mjs "D:/바이브코딩/.sasu-qa-db"`는 격리 DB 권한·동시성·롤백을 검증한다. 로컬 Supabase 검증 서버는 `SASU_RETRO_ENABLED=true`, `E2E_RETROS=1`로 `node scripts/review-qa.mjs build`, `start`, `retro-test`를 차례로 실행한다. 운영에서는 매분 `/api/jobs/run` 트리거가 필요하다. 로컬 E2E는 같은 워커 엔드포인트를 직접 호출해 cron을 재현한다.
 
 Vercel CLI가 설치되지 않은 환경에서는 운영 설정·배포 로그 확인 전에 `npm i -g vercel` 설치를 권장한다. 이번 작업은 로컬 커밋·머지까지이며 배포 명령은 실행하지 않는다.
+
+## 16. 운영 주소 이전 (ADR-088)
+
+운영 주소를 `sasu-alpha.vercel.app`에서 `https://getsasu.com`으로 옮긴다. 근거는 ADR-088, 범위는 PRD §8 "운영 주소 이전 범위", 불변식은 ARCHITECTURE §6-13이다. 이 절은 절차 기록이며 **아직 전환하지 않았다**. 위 4절·메일 기록 등의 현재 운영 값은 전환 단계 완료 시점에 맞춰 갱신한다. 각 단계는 사용자 승인 뒤 한 번에 하나씩 진행하고, 확인값을 못 얻으면 다음 단계로 가지 말고 "되돌리기"를 실행한다.
+
+환경변수 두 개(`.env.example` 참고): `NEXT_PUBLIC_APP_URL`(정식 주소) · `SASU_LEGACY_HOSTS`(서버 전용, 옛 호스트 쉼표 목록, `/api/*`는 이동하지 않음). 코드를 병합해도 `SASU_LEGACY_HOSTS`가 비어 있으면 이동이 없고, `/auth/confirm`은 메일 템플릿을 바꾸기 전까지 호출되지 않는다.
+
+| # | 작업 | 확인값 | 되돌리기 |
+|---|---|---|---|
+| T1 | PR 병합 → Vercel 자동 배포 | `/`·`/login` 200, 옛 주소 이동 없음(env 미설정) | PR revert |
+| T2 | Vercel 프로젝트에 `getsasu.com` 추가, `www.getsasu.com` → `getsasu.com` 308 | Vercel이 안내하는 DNS 값을 기록 | 도메인 제거 |
+| T3 | Cloudflare: Single Redirect 규칙과 더미 A(`@`·`www`) 삭제 → Vercel 안내 값으로 `@`·`www`를 DNS only로 설정 | `dig`로 새 값 확인, 메일 레코드(DKIM·SPF·DMARC) 그대로 | 이전 레코드·규칙을 기록해 둔 값으로 복원 |
+| T4 | 새 주소 확인 | TLS 유효, `https://getsasu.com/` 200, `www` 308 | (확인만) |
+| T5 | Supabase Auth: Site URL `https://getsasu.com`, Redirect URLs에 `https://getsasu.com/**` 추가(옛 항목 유지) | 대시보드 재조회로 값 확인 | 이전 값 복원 |
+| T6 | Slack: OAuth Redirect URL 추가(옛 것 유지), Events·Interactivity Request URL을 새 주소로. 회고 커넥터 provider가 운영 env에 있으면 각 콘솔에 `https://getsasu.com/api/retro/connect/<provider>/callback` 추가 | Events URL `Verified` | 옛 URL 복원 |
+| T7 | Vercel Production env `NEXT_PUBLIC_APP_URL=https://getsasu.com`, `SASU_LEGACY_HOSTS=sasu-alpha.vercel.app` → 재배포 | 옛 주소 `/` → 308, `/api/jobs/run` 401/200(비이동), 메타데이터가 새 주소 | env 복원 후 재배포 |
+| T8 | `npx tsx scripts/setup-worker-cron.ts https://getsasu.com` | 10분 cron 성공, HTTP 200 | 옛 URL로 같은 명령 재실행 |
+| T9 | Supabase 메일 템플릿(Magic link 또는 OTP · Confirm signup) 링크를 `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`로 바꾸고 `{{ .Token }}`(코드 로그인)은 유지 | 실제 메일 링크 도메인이 `getsasu.com`, 다른 브라우저에서 로그인 완료 | 템플릿 복원 |
+| T10 | 운영 E2E(새 주소, 쓰기 없음) + 옛 주소 이동/API, 데스크톱 0.1.2의 Bearer 요청 정상 | 실행 로그 | (확인만) |
+| T11 | 데스크톱 0.1.3: `SASU_APP_URL=https://getsasu.com`·버전 → 빌드·감사(새 주소 포함·옛 주소 미포함) → 공개 → 0.1.2에서 업데이트 시 재로그인 없음 | 감사 JSON·업데이트 기록 | 릴리스 draft 되돌림 |
+| T12 | 문서: setup-guide·submission-checklist 주소 갱신, 검증 기록, PDCA report | — | — |
+
+주의:
+- T3에서 Cloudflare 302 규칙은 **삭제**한다. 남기면 새 주소가 다시 옛 주소로 돌아간다. 삭제 전 규칙 설정을 기록한다.
+- T7 전에 T5·T6이 끝나 있어야 한다. 순서가 바뀌면 로그인 redirect나 Slack 검증이 깨진다.
+- T7 직전에 옛 주소에서 요청한 로그인 메일의 링크는 T7 뒤 새 주소로 이동되면서 PKCE 쿠키가 없어 `/login?error=auth_callback`이 된다. 새 주소에서 메일을 다시 요청하면 된다(ADR-088 "새 주소에서 다시 로그인").
+- 옛 주소 `/api/*`는 계속 응답해야 한다(데스크톱 0.1.x Bearer 보존, 불변식 52). 옛 주소 도메인을 지우지 않는다.
+- 값(키·토큰·DNS 비밀)은 이 문서와 검증 기록에 옮기지 않는다.

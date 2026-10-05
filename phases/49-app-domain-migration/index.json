@@ -1,0 +1,36 @@
+{
+  "project": "sasu",
+  "phase": "49-app-domain-migration",
+  "plan": "docs/01-plan/features/app-domain-migration.plan.md",
+  "design": "docs/02-design/features/app-domain-migration.design.md",
+  "status": "pending",
+  "steps": [
+    {
+      "step": 0,
+      "name": "url-resolver",
+      "status": "completed",
+      "summary": "send-slack 카드·원장, interactions 원장, 동의 DM의 로컬 appBaseUrl() 3개 삭제 → new URL(path, metadataBase()). red 4 → green 16(4파일), tests/slack-decision-link.test.ts 신규, consent-route의 VERCEL_URL stub 제거. app/lib에 APP_URL·VERCEL_URL 직접 읽기 0건. docs/verification/49-app-domain-migration/step0.md"
+    },
+    {
+      "step": 1,
+      "name": "legacy-redirect",
+      "status": "completed",
+      "summary": "lib/site.ts legacyHostRedirect(SASU_LEGACY_HOSTS, /api 비이동, https·루프 방지) + proxy.ts protect 직후 308. root 리뷰에서 //evil 경로 오픈 리디렉션 발견 → origin 복사 후 pathname·search만 설정으로 수정. site/proxy/site-guide 56 passed. docs/verification/49-app-domain-migration/step1.md"
+    },
+    {
+      "step": 2,
+      "name": "auth-confirm",
+      "status": "completed",
+      "summary": "lib/auth-login.ts(parseEmailConfirm·postLoginPath) 신규, /auth/confirm GET(verifyOtp, no-store), /auth/callback 공유 리팩터. red→green 24, 회귀 org-admin 13. root 보완: no-referrer를 proxy.ts에서 부여(next.config 헤더 우선 문제). E1 tests/e2e/auth-confirm.spec.ts 작성·--list 2건, 실행은 step 3. 로그인 CSRF·요청 로그 토큰은 ADR-088 경계에 수용 기록. docs/verification/49-app-domain-migration/step2.md"
+    },
+    {
+      "step": 3,
+      "name": "verification",
+      "status": "completed",
+      "summary": ".env.example(NEXT_PUBLIC_APP_URL·SASU_LEGACY_HOSTS)·setup-guide §16 전환 T1~T12. lint 0 blocking·unit 186files 1880 passed·build 통과(첫 시도는 동시 next build로 재실행)·review-qa E2E 14 passed(auth-confirm 2·guest 5·security-headers 4·site 3). 운영 무변경. docs/verification/49-app-domain-migration/verification.md"
+    }
+  ],
+  "analysis": "docs/03-analysis/app-domain-migration.analysis.md",
+  "verification": "docs/verification/49-app-domain-migration/verification.md",
+  "production_deployed": false
+}
