@@ -833,3 +833,11 @@ HubSpot은 토큰 introspection에서 사용자 단위 앱과 동일 사용자 I
 - 전환 순서: 코드 병합(동작 변화 없음) → Vercel에 도메인 추가 → Cloudflare DNS → 새 주소 TLS·응답 확인 → Supabase Site URL·redirect 허용 목록 추가 → Slack OAuth redirect 추가·Events/Interactivity 주소 변경 → Vercel `NEXT_PUBLIC_APP_URL`·`SASU_LEGACY_HOSTS` 설정과 재배포 → 워커 `jobs_run_url` 변경 → 메일 템플릿 → 운영 E2E·옛 주소 이동/API 확인 → 데스크톱 0.1.3. 단계마다 승인받고, 실패하면 그 단계를 되돌리고 멈춘다. 옛 주소가 계속 응답하므로 어느 단계에서 되돌려도 서비스가 끊기지 않는다.
 - 대안: (A) `app.getsasu.com` 하위 도메인 — 루트를 별도 사이트로 남길 수 있지만 웹사이트와 앱이 이미 한 Next.js라 주소만 길어진다. (B) 두 주소 모두 그대로 처리 — Origin 검사 POST 8개가 옛 주소에서 403이 되고 세션이 갈린다. (C) Cloudflare에서 옛 주소 전체 리디렉션 — `vercel.app`은 우리 DNS가 아니라 불가능하고, API까지 이동하면 데스크톱 Bearer가 빠진다. (D) Supabase 쿠키 도메인 공유 — 두 호스트가 다른 등록 도메인이라 불가능.
 - 경계: `can_see()`·RLS·세션/Bearer 경계·CSP(`'self'` 기준)·Origin 검사 로직은 바꾸지 않는다. 대회 플랫폼에 제출한 주소는 바꾸지 않는다. 이미 보낸 Slack 메시지·초대 링크의 옛 주소는 화면 이동으로 계속 열린다. 웹 사용자는 새 주소에서 다시 로그인해야 한다. 이메일 보안 스캐너가 링크를 먼저 열면 일회용 토큰이 소모될 수 있는 점은 기존 `supabase.co` 링크와 같으며, 이 경우 로그인 메일을 다시 요청한다(데스크톱은 6자리 코드). token_hash 링크는 PKCE verifier 없이 세션을 만들므로, 부서 멤버인 공격자가 자기 로그인 링크를 피해자에게 열게 하면 피해자가 공격자 계정으로 로그인되는 로그인 CSRF가 남는다. 조직이 초대제라 공격자가 실제 멤버여야 하고 화면에 계정·부서가 보이므로 "다른 브라우저에서도 열림"을 위해 받아들인다. `Referrer-Policy: no-referrer`는 next.config 공통 헤더가 라우트 값을 덮지 않도록 `proxy.ts`에서 붙인다. 쿼리의 토큰은 Vercel 요청 로그에 남을 수 있으나 첫 검증에서 소모된다(기존 `?code=`·Supabase verify 링크와 같다).
+
+## ADR-089 — 웹 로그아웃은 그 브라우저 세션만 끝낸다 (2026-10-05)
+
+- 상태: 사용자 결정(2026-10-05 "웹 로그아웃을 현재 기기만으로 변경"). 원천 PRD §8 "웹 로그아웃 범위". phase 50.
+- 배경: phase 49 운영 검증에서 웹 `POST /auth/signout`을 부르자 같은 계정의 다른 웹 세션이 함께 끝났다. `supabase.auth.signOut()`의 기본 범위가 `global`이라 그 사용자의 모든 refresh token을 폐기한다. 데스크톱 앱은 기기 전용 Supabase 세션(불변식 46·47)을 쓰므로, 웹에서 로그아웃하면 데스크톱도 다음 요청에서 401 → 세션 삭제가 된다. 데스크톱 자신의 로그아웃은 이미 `scope: "local"`이다. `/demo/access`의 심사 계정 확인 실패 정리도 같은 기본값을 쓴다.
+- 결정: `app/auth/signout/route.ts`와 `app/demo/access/route.ts`의 `signOut()`을 `signOut({ scope: "local" })`로 바꾼다. 응답·리디렉션·쿠키 정리는 그대로다.
+- 대안: (A) 그대로 두기 — 웹 로그아웃이 데스크톱을 예고 없이 끊는다. (B) "모든 기기에서 로그아웃" 버튼 추가 — 세션 목록·확인 UI가 필요하고 지금 요구가 없다. 필요해지면 `scope: "global"`을 별도 버튼으로 추가한다.
+- 경계: 서버 세션 검증·RLS·기기 연결 검사(매 요청)·연결 해제 RPC는 바꾸지 않는다. 도난·분실 대응의 전체 세션 폐기는 운영자가 Supabase 대시보드에서 사용자 세션을 끊는 기존 절차로 한다.
