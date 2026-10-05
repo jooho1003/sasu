@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  legacyHostRedirect,
   metadataBase,
   siteLinks,
   trailerDemoHref,
@@ -123,5 +124,54 @@ describe("메타데이터 기준 URL", () => {
     expect(metadataBase({ NEXT_PUBLIC_APP_URL: "javascript:alert(1)" }).href).toBe(
       "http://localhost:3000/",
     );
+  });
+});
+
+describe("옛 호스트 리디렉션", () => {
+  const env = { NEXT_PUBLIC_APP_URL: "https://getsasu.com", SASU_LEGACY_HOSTS: "sasu-alpha.vercel.app" };
+  const go = (host: string | null, pathname: string, search = "", e: Record<string, string | undefined> = env) =>
+    legacyHostRedirect({ host, pathname, search }, e);
+
+  it("목록이 비었거나 미설정이면 null", () => {
+    expect(go("sasu-alpha.vercel.app", "/", "", { NEXT_PUBLIC_APP_URL: "https://getsasu.com" })).toBeNull();
+    expect(go("sasu-alpha.vercel.app", "/", "", { ...env, SASU_LEGACY_HOSTS: "" })).toBeNull();
+  });
+  it("목록 호스트의 루트를 정식 주소로 보낸다", () => {
+    expect(go("sasu-alpha.vercel.app", "/")).toBe("https://getsasu.com/");
+  });
+  it("경로와 쿼리를 보존한다", () => {
+    expect(go("sasu-alpha.vercel.app", "/demo", "?x=1")).toBe("https://getsasu.com/demo?x=1");
+  });
+  it.each(["/api", "/api/companion/ask"])("%s 는 이동하지 않는다", (p) => {
+    expect(go("sasu-alpha.vercel.app", p)).toBeNull();
+  });
+  it("/apix 는 이동한다", () => {
+    expect(go("sasu-alpha.vercel.app", "/apix")).toBe("https://getsasu.com/apix");
+  });
+  it("대문자·포트 호스트를 정규화한다", () => {
+    expect(go("SASU-Alpha.Vercel.App:443", "/login")).toBe("https://getsasu.com/login");
+  });
+  it("쉼표 여러 개·공백·잘못된 항목을 처리한다", () => {
+    const e = { ...env, SASU_LEGACY_HOSTS: " Old.Example.com , bad host,, https://x.com ,sasu-alpha.vercel.app" };
+    expect(go("old.example.com", "/", "", e)).toBe("https://getsasu.com/");
+    expect(go("sasu-alpha.vercel.app", "/", "", e)).toBe("https://getsasu.com/");
+    expect(go("x.com", "/", "", e)).toBeNull();
+    expect(go("bad", "/", "", e)).toBeNull();
+  });
+  it("목록에 없는 호스트·호스트 없음은 null", () => {
+    expect(go("other.example.com", "/")).toBeNull();
+    expect(go(null, "/")).toBeNull();
+  });
+  it("정식 호스트와 같으면 null (루프 방지)", () => {
+    expect(go("getsasu.com", "/", "", { ...env, SASU_LEGACY_HOSTS: "getsasu.com" })).toBeNull();
+  });
+  it("정식 주소가 https가 아니면 null", () => {
+    expect(go("sasu-alpha.vercel.app", "/", "", { ...env, NEXT_PUBLIC_APP_URL: "http://getsasu.com" })).toBeNull();
+    expect(go("sasu-alpha.vercel.app", "/", "", { SASU_LEGACY_HOSTS: "sasu-alpha.vercel.app" })).toBeNull();
+  });
+  it.each(["//evil.example/x", "/\\evil.example/x", "/\\/evil.example"])("경로 %s 가 목적지 호스트를 바꾸지 못한다", (p) => {
+    const target = new URL(go("sasu-alpha.vercel.app", p, "?a=1") ?? "");
+    expect(target.origin).toBe("https://getsasu.com");
+    expect(target.search).toBe("?a=1");
   });
 });

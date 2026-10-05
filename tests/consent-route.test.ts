@@ -53,9 +53,10 @@ function request(body: Record<string, unknown>) {
 describe("웹 동의와 lead 동의 요청", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    // Each test names its own URL env; links come only from metadataBase() (invariant 51).
+    vi.unstubAllEnvs();
     vi.stubEnv("SLACK_TOKEN_ENCRYPTION_KEY", Buffer.alloc(32,17).toString("base64"));
     mocks.workspace.mockResolvedValue({ data: { org_id: "org", team_id: "TTEST", encrypted_token: encryptSlackToken("xoxb-test", "org", "TTEST") }, error: null });
-    vi.stubEnv("VERCEL_URL", "sasu.example");
     mocks.requireMembership.mockResolvedValue({
       userId: "11111111-1111-4111-8111-111111111111",
       deptId: DEPT_ID,
@@ -105,6 +106,26 @@ describe("웹 동의와 lead 동의 요청", () => {
     expect(mocks.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ channel: "D_U_ONE", blocks: [{ type: "section" }] }),
     );
+  });
+
+  async function sendRequestAndGetConsentUrl(): Promise<string> {
+    const builder = query([{ slack_user_id: "U_ONE", consented_at: null }]);
+    mocks.createClient.mockResolvedValue({ from: vi.fn(() => builder) });
+    await POST(request({ action: "request" }), { params: Promise.resolve({ dept: DEPT_ID }) });
+    return (mocks.consentBlocks.mock.calls[0] as unknown as [{ consentUrl: string }])[0].consentUrl;
+  }
+
+  it("동의 DM 링크는 NEXT_PUBLIC_APP_URL을 쓰고 VERCEL_URL·APP_URL은 무시한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://getsasu.com");
+    vi.stubEnv("VERCEL_URL", "preview-x.vercel.app");
+    vi.stubEnv("APP_URL", "https://wrong.example");
+    expect((await sendRequestAndGetConsentUrl()).startsWith("https://getsasu.com/consent?next=")).toBe(true);
+  });
+
+  it("NEXT_PUBLIC_APP_URL이 없으면 VERCEL_PROJECT_PRODUCTION_URL을 쓴다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "getsasu.com");
+    expect((await sendRequestAndGetConsentUrl()).startsWith("https://getsasu.com/consent?next=")).toBe(true);
   });
 
   it("팀원은 다른 멤버에게 동의 요청 DM을 보낼 수 없다", async () => {

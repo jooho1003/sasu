@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { trailerPublishEnabled } from "@/lib/features";
 import { isDemoReviewer } from "@/lib/demo-access";
 import { contentSecurityPolicy } from "@/lib/security-headers";
+import { legacyHostRedirect } from "@/lib/site";
 
 export async function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString("base64");
@@ -15,13 +16,20 @@ export async function proxy(request: NextRequest) {
   request.headers.set("Content-Security-Policy", policy);
   const protect = (response: NextResponse) => {
     response.headers.set(policyHeader, policy);
-    if (/^\/t\/i\/[^/]+\/?$/u.test(request.nextUrl.pathname)) {
+    // Candidate invite tokens and mail login token_hash links must not leak through Referer.
+    if (/^\/t\/i\/[^/]+\/?$/u.test(request.nextUrl.pathname) || /^\/auth\/confirm\/?$/u.test(request.nextUrl.pathname)) {
       response.headers.set("Referrer-Policy", "no-referrer");
     }
     // A response carrying a request nonce must never be replayed by a shared cache.
     response.headers.set("Cache-Control", "private, no-store, max-age=0");
     return response;
   };
+  const legacyTarget = legacyHostRedirect({
+    host: request.headers.get("host"),
+    pathname: request.nextUrl.pathname,
+    search: request.nextUrl.search,
+  });
+  if (legacyTarget) return protect(NextResponse.redirect(legacyTarget, 308));
   // Close disabled pages before the parent department layout redirects to login.
   if (!trailerPublishEnabled() && /^\/d\/[^/]+\/trailers(?:\/|$)/u.test(request.nextUrl.pathname)) {
     return protect(new NextResponse("페이지를 찾을 수 없습니다.", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } }));

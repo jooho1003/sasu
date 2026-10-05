@@ -58,3 +58,29 @@ export function metadataBase(env: SiteEnvironment = process.env): URL {
   }
   return new URL("http://localhost:3000/");
 }
+
+// /api/*는 옛 호스트에서도 이동하지 않는다: 설치된 데스크톱(0.1.0~0.1.2)이 옛 주소로 Bearer를 보내고, 다른 출처 308은 Authorization을 떼어 401로 세션이 지워진다(불변식 52).
+export function legacyHostRedirect(
+  input: { host: string | null; pathname: string; search: string },
+  env: SiteEnvironment = process.env,
+): string | null {
+  const legacyHosts = (env.SASU_LEGACY_HOSTS ?? "")
+    .split(",")
+    .map((entry) => entry.trim().toLowerCase())
+    .filter((entry) => /^[a-z0-9.-]+$/u.test(entry));
+  if (legacyHosts.length === 0 || !input.host) return null;
+
+  const requestHost = input.host.trim().toLowerCase().replace(/:\d+$/u, "");
+  if (!legacyHosts.includes(requestHost)) return null;
+
+  const canonical = metadataBase(env);
+  if (canonical.protocol !== "https:") return null;
+  if (requestHost === canonical.hostname.toLowerCase()) return null;
+
+  if (input.pathname === "/api" || input.pathname.startsWith("/api/")) return null;
+  // 경로를 상대 URL로 풀면 "//evil.example"이 호스트가 된다. 정식 origin에 경로만 덮어쓴다.
+  const target = new URL(canonical);
+  target.pathname = input.pathname;
+  target.search = input.search;
+  return target.toString();
+}

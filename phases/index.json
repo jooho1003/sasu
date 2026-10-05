@@ -1,6 +1,11 @@
 {
   "phases": [
     {
+      "dir": "49-app-domain-migration",
+      "status": "pending",
+      "note": "운영 웹 getsasu.com 이전(ADR-088). 코드 step 0~3 뒤 운영 전환 T1~T12는 단계마다 사용자 승인."
+    },
+    {
       "dir": "42-sales-source-review-history",
       "status": "completed",
       "production_deployed": true,

@@ -2,6 +2,7 @@ import { withSlackDepartment } from "@/lib/slack/workspace";
 import { CONSENT_SECTIONS, CONSENT_VERSION } from "@/lib/consent";
 import { consentBlocks } from "@/lib/slack/blocks";
 import { openDirectMessage, postMessage } from "@/lib/slack/post";
+import { metadataBase } from "@/lib/site";
 import { requireMembership } from "@/lib/supabase/membership";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -9,16 +10,6 @@ type ConsentRequestMember = {
   slack_user_id: string | null;
   consented_at: string | null;
 };
-
-function appBaseUrl(): string {
-  const configured = process.env.APP_URL?.trim();
-  if (configured) return configured.replace(/\/$/u, "");
-  const vercelUrl =
-    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ??
-    process.env.VERCEL_URL?.trim();
-  if (vercelUrl) return `https://${vercelUrl}`;
-  return "http://localhost:3000";
-}
 
 async function sendConsentRequests(
   membership: Awaited<ReturnType<typeof requireMembership>>,
@@ -54,7 +45,7 @@ async function sendConsentRequests(
     (member): member is ConsentRequestMember & { slack_user_id: string } =>
       Boolean(member.slack_user_id),
   );
-  const consentUrl = `${appBaseUrl()}/consent?next=${encodeURIComponent(`/d/${membership.deptId}`)}`;
+  const consentUrl = new URL(`/consent?next=${encodeURIComponent(`/d/${membership.deptId}`)}`, metadataBase()).toString();
   const blocks = consentBlocks({ deptId: membership.deptId, consentUrl });
   const deliveryResults = await Promise.all(
     targets.map(async (member) => {

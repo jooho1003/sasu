@@ -1,4 +1,5 @@
 import { registerHandler } from "@/lib/jobs";
+import { metadataBase } from "@/lib/site";
 import {
   buildCardBlocks,
   type SlackCardCitation,
@@ -76,20 +77,6 @@ function ensureNoDatabaseError(error: unknown): void {
 
 function relation<T>(value: T | T[]): T {
   return Array.isArray(value) ? value[0] : value;
-}
-
-function appBaseUrl(): string {
-  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (configured) {
-    return configured.replace(/\/$/u, "");
-  }
-
-  const vercelUrl = process.env.VERCEL_URL?.trim();
-  if (vercelUrl) {
-    return `https://${vercelUrl}`;
-  }
-
-  return "http://localhost:3000";
 }
 
 function sourceHref(item: ItemRow, cardUrl: string): string {
@@ -216,7 +203,7 @@ export async function sendSlackCard(requestId: string): Promise<void> {
     return;
   }
 
-  const cardUrl = `${appBaseUrl()}/d/${card.dept_id}/cards/${card.id}`;
+  const cardUrl = new URL(`/d/${card.dept_id}/cards/${card.id}`, metadataBase()).toString();
   const itemsResult =
     itemIds(citations).length === 0
       ? { data: [] as ItemRow[], error: null }
@@ -275,7 +262,7 @@ export async function sendSlackCard(requestId: string): Promise<void> {
         return [{
           explanation: conflict.explanation,
           decided_at: decision.decided_at,
-          href: `${appBaseUrl()}/d/${card.dept_id}/ledger#decision-${decision.id}`,
+          href: new URL(`/d/${card.dept_id}/ledger#decision-${decision.id}`, metadataBase()).toString(),
         }];
       }),
     },

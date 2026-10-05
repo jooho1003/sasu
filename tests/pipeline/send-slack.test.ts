@@ -176,6 +176,31 @@ describe("Slack 결정 카드 발송", () => {
     );
   });
 
+  it("카드 링크는 NEXT_PUBLIC_APP_URL을 쓰고 VERCEL_URL·APP_URL은 무시한다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://getsasu.com");
+    vi.stubEnv("VERCEL_URL", "preview-x.vercel.app");
+    vi.stubEnv("APP_URL", "https://wrong.example");
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(createClient().client);
+    moduleMocks.openDirectMessage.mockResolvedValue({ id: "D123" });
+    moduleMocks.postMessage.mockResolvedValue({ channel: "D123", ts: "1.2" });
+    await sendSlackCard("card-1");
+    const sent = JSON.stringify(moduleMocks.postMessage.mock.calls);
+    expect(sent).toContain("https://getsasu.com/d/dept-1/cards/card-1");
+    expect(sent).not.toContain("preview-x.vercel.app");
+    vi.unstubAllEnvs();
+  });
+
+  it("NEXT_PUBLIC_APP_URL이 없으면 VERCEL_PROJECT_PRODUCTION_URL로 카드 링크를 만든다", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+    vi.stubEnv("VERCEL_PROJECT_PRODUCTION_URL", "getsasu.com");
+    moduleMocks.createServiceSupabaseClient.mockReturnValue(createClient().client);
+    moduleMocks.openDirectMessage.mockResolvedValue({ id: "D123" });
+    moduleMocks.postMessage.mockResolvedValue({ channel: "D123", ts: "1.2" });
+    await sendSlackCard("card-1");
+    expect(JSON.stringify(moduleMocks.postMessage.mock.calls)).toContain("https://getsasu.com/d/dept-1/cards/card-1");
+    vi.unstubAllEnvs();
+  });
+
   it("send_slack handler를 등록한다", () => {
     registerSendSlackHandler();
     expect(moduleMocks.registerHandler).toHaveBeenCalledWith(
