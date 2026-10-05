@@ -84,5 +84,8 @@
       "verification": "docs/verification/retro-provider-contract-2026-09-20.md"
     }
   ],
-  "production_deployed": false
+  "production_deployed": true,
+  "deployed_at": "2026-09-20T12:30:00+09:00",
+  "deployment": "docs/verification/production-rollout-2026-09-20.md",
+  "production_note": "코드·DB 운영 반영(2026-09-20, 커밋 d30c6d0에 phase 30 포함, 마이그레이션 0037~0051 적용 상태). 제공자 RETRO_*_CLIENT_ID/SECRET은 운영에 미설정이라 실제 OAuth 연결은 안 된다(production-rollout-2026-09-20.md 켜지지 않은 것). 이전에 false였던 값은 이 반영 전 상태 그대로 남아 phases/index.json과 어긋났다."
 }

@@ -1,0 +1,40 @@
+
+Running 2 tests using 1 worker
+
+  -  1 [chromium] › tests\e2e\trailer-invites.spec.ts:11:5 › A: 초대 플래그가 꺼진 배포에서는 지원자 링크 API가 열리지 않는다
+  x  2 [chromium] › tests\e2e\trailer-invites.spec.ts:20:7 › B: QA 조직의 발급·목록·철회 › 발급·동의·3퀘스트·실제 채점·부서장 점수표·철회 (2.1m)
+
+
+  1) [chromium] › tests\e2e\trailer-invites.spec.ts:20:7 › B: QA 조직의 발급·목록·철회 › 발급·동의·3퀘스트·실제 채점·부서장 점수표·철회 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "scored"
+    Received: "scoring"
+
+    Call Log:
+    - Timeout 120000ms exceeded while waiting on the predicate
+
+      49 |       await guest.screenshot({path:`${evidence}/candidate-submitted.png`,fullPage:true});
+      50 |       const worker=await context.request.post("/api/jobs/run",{headers:{"x-jobs-secret":requiredEnv("JOBS_TRIGGER_SECRET")},timeout:120000});expect(worker.status()).toBe(200);
+    > 51 |       await expect.poll(async()=>{const row=await service.from("trailer_attempts").select("status").eq("invite_id",invite.invite_id).maybeSingle();return row.data?.status;},{timeout:120000,intervals:[2000]}).toBe("scored");
+         |                                                                                                                                                                                                                 ^
+      52 |       await page.goto(`/d/${dept}/trailers/${trailer}`);await page.getByRole("tab",{name:"지원자 제출",exact:true}).click();
+      53 |       await expect(page.getByText(email,{exact:false})).toBeVisible();await expect(page.getByRole("button",{name:/점수순/})).toHaveCount(0);
+      54 |       await page.screenshot({path:`${evidence}/lead-scores.png`,fullPage:true});
+        at D:\바이브코딩\sasu\tests\e2e\trailer-invites.spec.ts:51:209
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\trailer-invites-B-QA-조직의-발-bb132-발급·동의·3퀘스트·실제-채점·부서장-점수표·철회-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\trailer-invites-B-QA-조직의-발-bb132-발급·동의·3퀘스트·실제-채점·부서장-점수표·철회-chromium\test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\trailer-invites-B-QA-조직의-발-bb132-발급·동의·3퀘스트·실제-채점·부서장-점수표·철회-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\trailer-invites.spec.ts:20:7 › B: QA 조직의 발급·목록·철회 › 발급·동의·3퀘스트·실제 채점·부서장 점수표·철회 
+  1 skipped
+exit=1

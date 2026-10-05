@@ -1,0 +1,61 @@
+{
+  "demoOrgIssueStatus": 403,
+  "demoOrgInviteRows": 0,
+  "inviteHtmlLeaks": {
+    "dept_id": false,
+    "org_id": false,
+    "trailer_id": false,
+    "deptUuid": false,
+    "orgUuid": false,
+    "trailerUuid": false
+  },
+  "candidateAfterConsentScreen": {
+    "cookies": 0,
+    "storage": {
+      "local": 0,
+      "session": 0
+    }
+  },
+  "candidateAfterSubmit": {
+    "cookies": 0,
+    "storage": {
+      "local": 0,
+      "session": 0
+    }
+  },
+  "candidateResponseLeaks": {
+    "dept_id": false,
+    "org_id": false,
+    "trailer_id": false,
+    "deptUuid": false,
+    "orgUuid": false,
+    "trailerUuid": false,
+    "responsesInspected": 7
+  },
+  "anonSelect": {
+    "trailer_invites": {
+      "rows": null,
+      "error": "42501"
+    },
+    "trailer_attempts_candidate": {
+      "rows": 0,
+      "error": null
+    },
+    "trailer_attempts_all_demo_synthetic_policy": {
+      "rows": 3
+    }
+  },
+  "serviceInvitesInDept": 1,
+  "purged": {
+    "email_normalized": null,
+    "email_hash": null,
+    "withdrawn": true
+  },
+  "revoke": {
+    "issue": 200,
+    "revoke": 204,
+    "revokedAtSet": true,
+    "error": null
+  },
+  "trailerScoreLlmCalls": 1
+}

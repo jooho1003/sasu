@@ -1,0 +1,8 @@
+
+Running 2 tests using 1 worker
+
+  ok 1 [chromium] › tests\e2e\demo-retros.spec.ts:3:5 › 합성 회고 체험은 필터·근거·복사만 제공하며 쓰기가 없다 (4.2s)
+  ok 2 [chromium] › tests\e2e\retros.spec.ts:8:5 › 합성 번들부터 실제 생성·수정·공유·내보내기까지 (24.7s)
+
+  2 passed (30.2s)
+exit=0

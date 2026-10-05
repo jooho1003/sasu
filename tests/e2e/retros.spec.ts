@@ -52,6 +52,7 @@ test("합성 번들부터 실제 생성·수정·공유·내보내기까지",asy
     expect(readFileSync((await file.path())!,"utf8")).toContain("[^A1]");
     const exported=await context.request.get(`${endpoint}/export`);expect(exported.headers()["cache-control"]).toMatch(/private, no-store(?:, max-age=0)?/);
     expect((await second.request.get(endpoint)).status()).toBe(404);
+    page.once("dialog",d=>d.accept()); // phase 30 added a share-consent confirm()
     await page.getByLabel("볼 수 있는 사람").selectOption("dept");
     await expect.poll(async()=>(await second.request.get(endpoint)).status()).toBe(200);
     await page.getByText("내보내기",{exact:true}).click();

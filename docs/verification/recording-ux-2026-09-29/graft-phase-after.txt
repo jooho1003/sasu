@@ -1,0 +1,43 @@
+Graft 0.19.0 phase-level after snapshot (commit 122b88d, 2026-10-05 Docker).
+Source: 658 files, phase 33 녹음 화면 UX 구현 완료.
+Build: 3,025 nodes, 7,636 edges, 658 cards. Deep/meaning layer not built.
+graph check: OK — the wiring graph is in sync with the code.
+
+Change summary (after - before):
+- Files: 634 → 658 (+24)
+- Nodes: 2,912 → 3,025 (+113)
+  · Functions: 1,564 → 1,635 (+71)
+  · Files: 634 → 658 (+24)
+  · Types: 480 → 498 (+18)
+  · Methods: 189 → 189 (unchanged)
+  · Classes: 45 → 45 (unchanged)
+- Edges: 7,352 → 7,636 (+284)
+
+=== Phase 33 Recording UX Implementation Complete ===
+Implemented changes:
+- lib/recording/recorder-copy.ts: 9 functions, 2 types (신규 테스트 35개 통과)
+- lib/recording/recorder-start.ts: start() 플로우 (입력 선택→세션→키→사전검사→캡처)
+- lib/recording/browser/cleanup.ts: 종료 확인·이탈 보호·타이머 알림
+- lib/recording/browser/display.ts: 구간 플레이어·탐색 확정
+- components/meeting-recorder.tsx: 3단계 표시·복구 목록·폐기 분리·구간 플레이어 탐색
+- components/recording-segment-player.tsx: 포인터 놓기·키보드 300ms 탐색·AbortController
+- components/review-detail.tsx: 입력 과다 경고 클래스·이어진 기록 nav 전환
+- components/admin/review-settings.tsx: 진행 중 건수 미리보기·설명 aria-describedby 연결
+- app/globals.css: 신규 CSS (recorder-notice, recorder-progress, recorder-stage-chip, recorder-timer, recorder-stop-confirm)
+
+Quality checks:
+- Unit tests: 151 files, 1,664 cases (통과)
+- Synthetic E2E: 20 cases (통과), 1 skip
+- Review UI E2E: 27 cases (통과)
+- Local product E2E: 9/9 (통과)
+- lint·build check: 통과
+
+Wiring/dependency analysis tools (graft deep layer): not built for phase-level review.
+Run 'graft build --deep' in each worktree to expand concept-level detail.
+
+Related work:
+- phase 23 step4-B (녹음 전사 정확도 강화): 같은 commit에 포함됨
+  · segment 시각 기반 소유 단어 계산
+  · 전사 창 순서 처리 (ADR-072)
+  · 부서 용어집 (ADR-064)
+  · CER·precision/recall 측정 도구

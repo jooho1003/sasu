@@ -17,6 +17,8 @@ for (const envFile of [".env", ".env.local"]) {
 
 const DEPARTMENT_ID = "22222222-2222-4222-8222-222222222222";
 const PUBLIC_CHANNEL_ID = "seed-public-channel";
+// Since ADR-052 events resolve the workspace by team_id; the seed channels belong to the pilot workspace.
+const SLACK_TEAM_ID = process.env.E2E_SLACK_TEAM_ID ?? "T0870U4PE90";
 
 test.beforeEach(async ({ context }) => {
   const trustedSourceToken = process.env.VERCEL_OIDC_TOKEN?.trim();
@@ -227,6 +229,7 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
   const message = agenda.slackMessage;
   const envelope = {
     type: "event_callback",
+    team_id: SLACK_TEAM_ID,
     event_id: eventId,
     event: {
       type: "message",
@@ -296,7 +299,7 @@ test("실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 
     if (await completedText.isVisible()) return;
 
     await page.getByLabel("왜 그렇게 정했나요").fill(rationale);
-    await page.getByRole("button", { name: "결정", exact: true }).click();
+    await page.getByRole("button", { name: "결정하기", exact: true }).click();
     await expect(completedText).toBeVisible({ timeout: 5_000 });
   }).toPass({ timeout: 60_000 });
 
@@ -353,6 +356,8 @@ test("슬랙 질문과 회의 보류가 카드 1장으로 병합된다", async (
   page,
   request,
 }) => {
+  // Two classifications, a meeting summary and a card merge run through the real model; production latency needs more than 2 minutes.
+  test.setTimeout(300_000);
   test.skip(process.env.E2E_ALLOW_EXTERNAL_WRITES !== "1", "실제 DB 쓰기·워커·Slack 발송을 포함하므로 승인된 테스트 환경에서 E2E_ALLOW_EXTERNAL_WRITES=1로 실행합니다.");
   const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
   const { supabase } = await signInLead(context, baseURL);
@@ -365,6 +370,7 @@ test("슬랙 질문과 회의 보류가 카드 1장으로 병합된다", async (
     .padStart(6, "0")}`;
   const envelope = {
     type: "event_callback",
+    team_id: SLACK_TEAM_ID,
     event_id: eventId,
     event: {
       type: "message",

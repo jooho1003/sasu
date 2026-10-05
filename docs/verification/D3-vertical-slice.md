@@ -59,6 +59,8 @@ setup-guide §2의 판정 결과를 기록한다.
 - [ ] 수집 채널에 봇 초대 — **남음**. 봇 스코프에 `channels:read`·`channels:join`이 없어 API로 못 넣는다(setup-guide §4의 8개 스코프에 없음). 채널에서 `/invite @SASU`를 직접 실행해야 한다
 - 마지막 Slack 이벤트 수신 시각: `__________________________`
 
+> **후속 확인 (2026-10-05, 위 체크리스트는 작성 시점 기록)**: Interactivity '미등록'과 봇 '채널 미초대'는 이후 해소됐다. [continuity-production-2026-09-16.md](continuity-production-2026-09-16.md)(21~28행, 78행)에 실제 Slack 채널 글 → 카드 DM, 채널 @SASU 질문 → 인용 답변 전달, DM 질문·후속 질문 답변, Slack 카드 결정 버튼 → 모달 → 원장 1행이 기록돼 있다. 2026-10-05 phase 49 T6에서 Slack 앱의 Events/Interactivity Request URL을 `https://getsasu.com/api/slack/events`·`/api/slack/interactions`로 바꿨다([49-app-domain-migration/production-cutover.md](49-app-domain-migration/production-cutover.md)). step 15 스톱워치·판정란은 이 노트로 채우지 않는다.
+
 봇 토큰(`SLACK_BOT_TOKEN`)·서명 시크릿(`SLACK_SIGNING_SECRET`)은 `.env`와 Vercel(Production·Preview) 양쪽에 주입 완료. `auth.test` 200 확인.
 
 ## 자동 검증
@@ -91,7 +93,7 @@ E2E_BASE_URL=https://<배포도메인> npx playwright test tests/e2e/vertical-sl
 - unit test: `[통과]` · 92 tests · 2026-09-10 KST
 - RLS test: `[통과]` · 6 tests · 2026-09-10 KST
 - Playwright 목록: `[통과]` · 1 test · 2026-09-10 KST
-- 배포 E2E: `[ ] 통과  [ ] 실패` · 기록: `____________________________`
+- 배포 E2E: `[x] 통과` (세로 슬라이스) · 기록: 2026-10-05 `E2E_BASE_URL=https://getsasu.com E2E_ALLOW_SHOWCASE_WRITES=1 E2E_ALLOW_EXTERNAL_WRITES=1 npx playwright test tests/e2e/vertical-slice.spec.ts` — "실제 Slack 이벤트가 분류·카드·결정·원장까지 한 번만 흐른다" **passed**(3.8m 실행 중). 스펙 보정 2건: ADR-052 이후 필수인 `team_id`(파일럿 워크스페이스)를 합성 이벤트에 추가, phase 31에서 바뀐 버튼 이름 `결정`→`결정하기`. 같은 파일의 "슬랙 질문과 회의 보류가 카드 1장으로 병합된다"는 **미통과**: 앞선 실패 실행들이 공유 파일럿 부서에 남긴 비슷한 주제의 열린 카드 때문에 회의 항목이 `merge_confirm` 3회 뒤 새 카드로 생성됐다(운영 공유 데이터 오염, 격리 DB 검증 대상). 남은 테스트 카드는 모두 `돌려보냄`으로 정리했다.
 
 ## D3 스톱워치 판정
 
@@ -99,21 +101,23 @@ E2E_BASE_URL=https://<배포도메인> npx playwright test tests/e2e/vertical-sl
 
 | 흐름 | 시작 | 종료 | 소요 | 결과 |
 |---|---:|---:|---:|---|
-| Slack 메시지 → 대시보드 `결정 필요` | `____:____` | `____:____` | `____분 ____초` | `[ ]` |
-| 대시보드 → 카드 → 인용 원문 링크 | `____:____` | `____:____` | `____분 ____초` | `[ ]` |
-| 카드 결정 → 원장·리드타임 표시 | `____:____` | `____:____` | `____분 ____초` | `[ ]` |
-| 전체 세로 슬라이스 | `____:____` | `____:____` | `____분 ____초` | `[ ] 5분 이내  [ ] 초과` |
+| Slack 메시지 → 대시보드 `결정 필요` | `21:55:49.9` | `21:56:46.0` | `0분 56.1초` | `[x]` |
+| 대시보드 → 카드 → 인용 원문 링크 | `21:56:46.0` | `21:56:53.5` | `0분 7.5초` | `[x]` |
+| 카드 결정 → 원장·리드타임 표시 | `21:56:53.5` | `21:57:10.2` | `0분 16.7초` | `[x]` |
+| 전체 세로 슬라이스 | `21:55:49.9` | `21:57:10.2` | `1분 20.4초` | `[x] 5분 이내` |
 
-- 판정자: `_______________________________________________`
-- 판정 일시(KST): `_______________________________________`
-- D3 결과: `[ ] 통과 → D4 진행  [ ] 실패 → 아래 강등 반영`
+- 판정자: `Claude Code 에이전트 실측(사용자가 2026-10-05에 에이전트 실측을 판정 근거로 인정)` — 사람 스톱워치가 아니다. Aside 브라우저(로그인 세션)로 Slack 웹 게시·대시보드 새로고침·카드·결정을 조작하고 시각은 스크립트가 기록했다.
+- 판정 일시(KST): `2026-10-05 21:57` · 운영 `https://getsasu.com`, Slack #소셜(C087PNU14UQ), 파일럿 부서, lead 이주호 웹 세션. 증거: [원장 화면](D3-stopwatch-2026-10-05/ledger.png), 결정 기록 `#478ac971`
+- D3 결과: `[x] 통과` (게이트 자체는 이미 지난 일정이며, 이 기록은 판정 재료를 채운 것이다)
+- 앞선 시도(숨기지 않음): run A(21:24)는 classify job이 모델의 자연어 마감 힌트("오늘 23시")를 `timestamptz`로 캐스팅하다 3회 실패 → 버그 수정 PR #41 운영 반영 후 재분류 성공. run B(21:40)는 6분 51초 — 서버는 21초 만에 분류·38초 만에 카드였으나 카드 Slack DM 실패(`slack_dm_unavailable`, 담당자 선택 버그 → PR #43) 조사와 Aside 재연결로 운영자 지연이 섞였다. run C(21:50)는 Aside 연결 끊김으로 중단. run D가 끊김 없는 측정이다.
+- 이 실측 중 발견·수정·운영 반영: PR #41(분류 마감 힌트), PR #43(카드 담당자 DM 가능 lead 우선·대시보드 결정 기록 연결). 반영 후 새 카드 DM `sent`와 대시보드 `→ 결정 기록` 링크를 운영에서 확인했다.
 
 ## PRD §11 시점 검증
 
-- [ ] `DECIDE` — 실제 Slack 항목을 카드에서 결정하고 원장에 표시
-- [ ] `보안` — [Step 14 RLS 실행 기록](../../phases/0-vertical-slice/index.json)에 anon/member/lead 및 insert 차단 결과가 있다
-- [ ] `엣지·에러` — 동일 카드 재제출이 결정을 1건으로 유지하고 중복 안내를 반환
-- [ ] `엣지·에러` — 동일 `event_id` 재전송이 item을 1건으로 유지
+- [x] `DECIDE` — 실제 Slack 항목을 카드에서 결정하고 원장에 표시 (2026-10-05 run D, 결정 `#478ac971`)
+- [x] `보안` — [Step 14 RLS 실행 기록](../../phases/0-vertical-slice/index.json)에 anon/member/lead 및 insert 차단 결과가 있다
+- [x] `엣지·에러` — 동일 카드 재제출이 결정을 1건으로 유지하고 중복 안내를 반환 (2026-10-05 운영 vertical-slice E2E 통과, D10 기록 [D10-completion.md](D10-completion.md))
+- [x] `엣지·에러` — 동일 `event_id` 재전송이 item을 1건으로 유지 (같은 E2E)
 
 ## 실패 시 그날 반영할 강등
 

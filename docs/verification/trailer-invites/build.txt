@@ -1,0 +1,80 @@
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local, .env
+✓ Running next.config.ts took 220ms
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.6min
+  Running TypeScript ...
+  Finished TypeScript in 11.4s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/50) ...
+  Generating static pages using 7 workers (12/50) 
+  Generating static pages using 7 workers (24/50) 
+  Generating static pages using 7 workers (37/50) 
+✓ Generating static pages using 7 workers (50/50) in 430ms
+  Finalizing page optimization ...
+Route (app)
+┌ ƒ /
+├ ƒ /_not-found
+├ ƒ /admin
+├ ƒ /admin/audit
+├ ƒ /admin/members
+├ ƒ /admin/security
+├ ƒ /admin/sources
+├ ƒ /api/admin/departments
+├ ƒ /api/admin/departments/[deptId]/first-lead-invite
+├ ƒ /api/admin/invites/[inviteId]/revoke
+├ ƒ /api/admin/members/demote
+├ ƒ /api/admin/members/remove
+├ ƒ /api/admin/notion
+├ ƒ /api/admin/notion/roots
+├ ƒ /api/admin/notion/top-level
+├ ƒ /api/admin/review-settings
+├ ƒ /api/admin/slack
+├ ƒ /api/admin/trailer-publishing
+├ ƒ /api/admin/trailers/[id]/unpublish
+├ ƒ /api/cards/[id]/decide
+├ ƒ /api/companion/answers/[id]
+├ ƒ /api/companion/ask
+├ ƒ /api/companion/cards/[id]
+├ ƒ /api/companion/cards/[id]/decide
+├ ƒ /api/companion/departments
+├ ƒ /api/companion/inbox
+├ ƒ /api/companion/link
+├ ƒ /api/companion/members
+├ ƒ /api/companion/questions
+├ ƒ /api/companion/reviews
+├ ƒ /api/companion/reviews/[id]/parts
+├ ƒ /api/companion/sales-review
+├ ƒ /api/companion/sales-review/[taskId]
+├ ƒ /api/companion/sales-review/sources
+├ ƒ /api/companion/transcripts
+├ ƒ /api/d/[dept]/answers/[id]
+├ ƒ /api/d/[dept]/ask
+├ ƒ /api/d/[dept]/backfill
+├ ƒ /api/d/[dept]/cards
+├ ƒ /api/d/[dept]/cards/[id]/reminder
+├ ƒ /api/d/[dept]/decisions
+├ ƒ /api/d/[dept]/decisions/correct
+├ ƒ /api/d/[dept]/documents
+├ ƒ /api/d/[dept]/evidence/[id]
+├ ƒ /api/d/[dept]/glossary
+├ ƒ /api/d/[dept]/invites
+├ ƒ /api/d/[dept]/invites/[inviteId]/revoke
+├ ƒ /api/d/[dept]/items
+├ ƒ /api/d/[dept]/ledger
+├ ƒ /api/d/[dept]/meetings/transcript
+├ ƒ /api/d/[dept]/members/[userId]/demote
+├ ƒ /api/d/[dept]/members/[userId]/promote
+├ ƒ /api/d/[dept]/members/[userId]/remove
+├ ƒ /api/d/[dept]/questions
+├ ƒ /api/d/[dept]/recordings
+├ ƒ /api/d/[dept]/recordings/[id]
+├ ƒ /api/d/[dept]/recordings/[id]/discard
+├ ƒ /api/d/[dept]/recordings/[id]/finalize
+├ ƒ /api/d/[dept]/recordings/[id]/key
+├ ƒ /api/d/[dept]/recordings/[id]/save
+├ ƒ /api/d/[dept]/retention
+├ ƒ /api/d/[dept]/retention/export
+├ ƒ /api/d/[dept]/retention/originals
+├ ƒ /api/d/[dept]/retros
+├ ƒ /api/d/[dept]/retros/[id]
