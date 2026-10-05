@@ -154,5 +154,6 @@
   ],
   "production_deployed": true,
   "created_at": "2026-10-01T22:13:36+09:00",
-  "installer_verification": "docs/verification/43-desktop-companion/production-install.md"
+  "installer_verification": "docs/verification/43-desktop-companion/production-install.md",
+  "followup_release_verification": "docs/verification/desktop-release-2026-10-04/README.md"
 }

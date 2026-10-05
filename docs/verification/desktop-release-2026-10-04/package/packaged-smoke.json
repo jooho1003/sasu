@@ -1,0 +1,9 @@
+{
+  "version": "0.1.2",
+  "packaged": true,
+  "encryption": true,
+  "loginVisible": true,
+  "ipcReady": true,
+  "authenticated": false,
+  "verifiedAt": "2026-10-05T06:06:27.566Z"
+}

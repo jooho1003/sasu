@@ -8,7 +8,7 @@
   "report": "docs/04-report/features/desktop-upload-recovery.report.md",
   "verification": "docs/verification/48-desktop-upload-recovery/verification.md",
   "completed_at": "2026-10-04",
-  "production_deployed": false,
+  "production_deployed": true,
   "steps": [
     {
       "step": 0,
@@ -22,5 +22,8 @@
       "status": "completed",
       "summary": "독립 U1~7/S1~2 설계9/9(100%)·계약3/3 정적 일치·SC1~5 대표 실행 충족. 변경 후 기존 고유41은34+5+2 실행 간 PASS(단일41PASS 아님). 실제 L1/runtime overall/coverage N/A, members pending replay 미확보. step1·verification·PDCA report 완료, production_deployed false; root 릴리스 인계."
     }
-  ]
+  ],
+  "installer_version": "0.1.2",
+  "deployed_at": "2026-10-05T15:07:03+09:00",
+  "deployment": "docs/verification/desktop-release-2026-10-04/README.md"
 }

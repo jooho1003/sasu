@@ -3,7 +3,7 @@
   "phase": "45-desktop-recent-work",
   "design": "docs/02-design/features/desktop-recent-work.design.md",
   "plan": "docs/01-plan/features/desktop-recent-work.plan.md",
-  "production_deployed": false,
+  "production_deployed": true,
   "steps": [
     {
       "step": 0,
@@ -19,5 +19,8 @@
       "completed_at": "2026-10-03T01:27:40.8025806+09:00",
       "verification": "docs/verification/45-desktop-recent-work/verification.md"
     }
-  ]
+  ],
+  "installer_version": "0.1.2",
+  "deployed_at": "2026-10-05T15:07:03+09:00",
+  "deployment": "docs/verification/desktop-release-2026-10-04/README.md"
 }

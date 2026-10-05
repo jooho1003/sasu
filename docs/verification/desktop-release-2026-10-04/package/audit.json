@@ -1,0 +1,18 @@
+{
+  "version": "0.1.2",
+  "bytes": 114138285,
+  "sha256": "0f868c18482ab3f274d3b5a7b3aa42420475f9acd2794b71b7b481eb1fab6deb",
+  "sha512": "EJE+rwRgwfhHmIEqir3F8DJZt0NVXO5rynlZP/bRH/sl7akgRXAnBdbdY3eWpfFPUQUb3VlJPy1uM0QLdG71ZA==",
+  "blockmapSha256": "5ca815af026de20087b0fd35f6d59d218cf33458d90a73e41228b11eb4840966",
+  "asarSha256": "cb2f5d4f3f3abb6e6c85862e6e761e114cc315c272148c206ed5e18d119bbe7b",
+  "productionUrl": "https://sasu-alpha.vercel.app",
+  "publicKeyOnly": true,
+  "privateFiles": 0,
+  "secretMatches": 0,
+  "dependenciesPresent": true,
+  "developmentAdvisoryPackageInAsar": false,
+  "codeFilesScanned": 5,
+  "feed": "jooho1003/sasu-desktop-releases",
+  "manifestMatches": true,
+  "staged": true
+}

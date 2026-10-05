@@ -297,7 +297,8 @@
       "followup_verification": "docs/verification/43-desktop-companion/followup.md",
       "session_verification": "docs/verification/43-desktop-companion/session-outbox.md",
       "production_record": "docs/verification/desktop-companion-production-2026-10-02.md",
-      "installer_verification": "docs/verification/43-desktop-companion/production-install.md"
+      "installer_verification": "docs/verification/43-desktop-companion/production-install.md",
+      "followup_release_verification": "docs/verification/desktop-release-2026-10-04/README.md"
     },
     {
       "dir": "44-desktop-question-followup",
@@ -306,8 +307,11 @@
       "verification": "docs/verification/44-desktop-question-followup/verification.md",
       "analysis": "docs/03-analysis/desktop-question-followup.analysis.md",
       "report": "docs/04-report/features/desktop-question-followup.report.md",
-      "production_deployed": false,
-      "note": "질문 이력 자동 조회·현재 답 재열람·이어 묻기·새 질문 전환 구현. Electron12·desktop78·root1834·SQL316/권한2016 통과. 운영 미반영. 메일 연결은 사용자 보류."
+      "production_deployed": true,
+      "note": "질문 이력 자동 조회·현재 답 재열람·이어 묻기·새 질문 전환 구현. Electron12·desktop78·root1834·SQL316/권한2016 통과. 2026-10-05 공개 Windows 0.1.2 게시·현재 PC 0.1.1→0.1.2 실제 업데이트 확인. 메일 연결 보류.",
+      "installer_version": "0.1.2",
+      "deployed_at": "2026-10-05T15:07:03+09:00",
+      "deployment": "docs/verification/desktop-release-2026-10-04/README.md"
     },
     {
       "dir": "45-desktop-recent-work",
@@ -316,8 +320,11 @@
       "verification": "docs/verification/45-desktop-recent-work/verification.md",
       "analysis": "docs/03-analysis/desktop-recent-work.analysis.md",
       "report": "docs/04-report/features/desktop-recent-work.report.md",
-      "production_deployed": false,
-      "note": "최근 24시간 본인 자료·영업 작업 목록/현재 권한 재열람 구현. Electron18·desktop78·root1834·SQL316/권한2016·webpack build 통과, 기본 Turbopack은 junction 환경 실패. 독립 정적8/8·대상 일치율100%. 운영 미반영, 메일 연결 보류."
+      "production_deployed": true,
+      "note": "최근 24시간 본인 자료·영업 작업 목록/현재 권한 재열람 구현. Electron18·desktop78·root1834·SQL316/권한2016·webpack build 통과, 기본 Turbopack은 junction 환경 실패. 독립 정적8/8·대상 일치율100%. 2026-10-05 공개 Windows 0.1.2 게시·현재 PC 0.1.1→0.1.2 실제 업데이트 확인. 메일 연결 보류.",
+      "installer_version": "0.1.2",
+      "deployed_at": "2026-10-05T15:07:03+09:00",
+      "deployment": "docs/verification/desktop-release-2026-10-04/README.md"
     },
     {
       "dir": "46-desktop-decision-flow",
@@ -326,8 +333,11 @@
       "verification": "docs/verification/46-desktop-decision-flow/verification.md",
       "analysis": "docs/03-analysis/desktop-decision-flow.analysis.md",
       "report": "docs/04-report/features/desktop-decision-flow.report.md",
-      "production_deployed": false,
-      "note": "결정함 로딩·오류 재시도·현재 상세·처리 성공 복귀/새 조회·실패 초안 보존 구현. Electron 25·desktop 78·root 1,834·SQL 316/권한 2,016·webpack build 통과. 독립 정적 8/8·성공 조건 5/5. 기본 Turbopack junction/Graft native 오류와 수동 대조 범위 기록. 운영 0.1.1 유지, 메일 연결 보류."
+      "production_deployed": true,
+      "note": "결정함 로딩·오류 재시도·현재 상세·처리 성공 복귀/새 조회·실패 초안 보존 구현. Electron 25·desktop 78·root 1,834·SQL 316/권한 2,016·webpack build 통과. 독립 정적 8/8·성공 조건 5/5. 기본 Turbopack junction/Graft native 오류와 수동 대조 범위 기록. 2026-10-05 공개 Windows 0.1.2 게시·현재 PC 0.1.1→0.1.2 실제 업데이트 확인. 메일 연결 보류.",
+      "installer_version": "0.1.2",
+      "deployed_at": "2026-10-05T15:07:03+09:00",
+      "deployment": "docs/verification/desktop-release-2026-10-04/README.md"
     },
     {
       "dir": "47-desktop-sales-flow",
@@ -336,8 +346,24 @@
       "verification": "docs/verification/47-desktop-sales-flow/verification.md",
       "analysis": "docs/03-analysis/desktop-sales-flow.analysis.md",
       "report": "docs/04-report/features/desktop-sales-flow.report.md",
-      "production_deployed": false,
-      "note": "영업 자료·시작·진행·현재 결과 열기 회복 구현. step0~2 순차 서브에이전트 완료. StrictMode 갭 보완 후 production Electron 37·별도 개발 6·단위 1,912·SQL 316/권한 2,016·webpack build 통과. 독립 10/10·SC6/6·대상 가중100%. 기본 Turbopack junction/Graft native 오류 및 미실행 조합 기록. 운영 0.1.1 유지, 메일 연결 보류."
+      "production_deployed": true,
+      "note": "영업 자료·시작·진행·현재 결과 열기 회복 구현. step0~2 순차 서브에이전트 완료. StrictMode 갭 보완 후 production Electron 37·별도 개발 6·단위 1,912·SQL 316/권한 2,016·webpack build 통과. 독립 10/10·SC6/6·대상 가중100%. 기본 Turbopack junction/Graft native 오류 및 미실행 조합 기록. 2026-10-05 공개 Windows 0.1.2 게시·현재 PC 0.1.1→0.1.2 실제 업데이트 확인. 메일 연결 보류.",
+      "installer_version": "0.1.2",
+      "deployed_at": "2026-10-05T15:07:03+09:00",
+      "deployment": "docs/verification/desktop-release-2026-10-04/README.md"
+    },
+    {
+      "dir": "48-desktop-upload-recovery",
+      "status": "completed",
+      "design": "docs/02-design/features/desktop-upload-recovery.design.md",
+      "verification": "docs/verification/48-desktop-upload-recovery/verification.md",
+      "analysis": "docs/03-analysis/desktop-upload-recovery.analysis.md",
+      "report": "docs/04-report/features/desktop-upload-recovery.report.md",
+      "production_deployed": true,
+      "installer_version": "0.1.2",
+      "deployed_at": "2026-10-05T15:07:03+09:00",
+      "deployment": "docs/verification/desktop-release-2026-10-04/README.md",
+      "note": "DC-09 자료 업로드 복구: 준비 중 입력 고정·연타 1회, 접수 성공 뒤에만 웹 링크, 실패 초안 보존·자동 재전송 없음, 화면 이탈 뒤 늦은 응답 무시. production Electron 14·development StrictMode 3·desktop 단위 78 통과, 설계 9/9. 2026-10-05 공개 Windows 0.1.2에 포함·현재 PC 업데이트 확인. 메일 연결 보류."
     }
   ]
 }
