@@ -46,6 +46,14 @@ async function saveClassification(
   return data === true;
 }
 
+// The model may answer "오늘 23시"; the RPC casts deadline_hint to timestamptz, so a free-form
+// hint would fail the whole classification. Keep only real ISO dates, normalized to UTC.
+function isoDeadline(value: string | null): string | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/u.test(value.trim())) return null;
+  const parsed = new Date(value.trim());
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}
+
 async function enqueueEmbedding(itemId: string, version: number): Promise<void> {
   await enqueue("embed", { itemId, contentVersion: version }, { dedupeKey: `${itemId}:${version}` });
 }
@@ -133,7 +141,7 @@ export async function classifyItem(itemId: string, expectedVersion?: number): Pr
 
   const classification = result.data;
   const deadlineHint =
-    ruleSignal.deadlineHint?.toISOString() ?? classification.deadline_hint;
+    ruleSignal.deadlineHint?.toISOString() ?? isoDeadline(classification.deadline_hint);
 
   const saved = await saveClassification({
     item_id: itemId,
