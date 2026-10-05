@@ -26,6 +26,8 @@ type Member = {
   userId: string;
   displayName: string;
   role: "lead" | "member";
+  slackUserId?: string | null;
+  consentedAt?: string | null;
 };
 
 type OriginItemRow = {
@@ -104,6 +106,8 @@ type MemberRow = {
   user_id: string;
   display_name: string;
   role: string;
+  slack_user_id?: string | null;
+  consented_at?: string | null;
 };
 
 type CardInput = {
@@ -193,7 +197,13 @@ export function resolveAssignee(args: {
   members: Member[];
   visibility: Visibility;
 }): string {
-  const lead = args.members.find((member) => member.role === "lead");
+  const leads = args.members
+    .filter((member) => member.role === "lead")
+    .sort((a, b) => (a.userId < b.userId ? -1 : a.userId > b.userId ? 1 : 0));
+  // DM 가능(슬랙 연결 + 동의)한 lead 를 우선한다. 없으면 결정적으로 첫 lead.
+  const lead =
+    leads.find((member) => Boolean(member.slackUserId) && Boolean(member.consentedAt)) ??
+    leads[0];
   if (!lead) {
     throw new CardPipelineDatabaseError();
   }
@@ -572,7 +582,7 @@ export async function makeCard(itemId: string, expectedVersion?: number): Promis
       client.rpc("recent_decisions_for_card", { p_dept: origin.dept_id, p_limit: 3 }),
       client
         .from("members")
-        .select("user_id, display_name, role")
+        .select("user_id, display_name, role, slack_user_id, consented_at")
         .eq("dept_id", origin.dept_id),
       findSimilarDecisions(client, origin.dept_id, originEmbedding),
     ]);
@@ -609,6 +619,8 @@ export async function makeCard(itemId: string, expectedVersion?: number): Promis
       userId: member.user_id,
       displayName: member.display_name,
       role: member.role as Member["role"],
+      slackUserId: member.slack_user_id ?? null,
+      consentedAt: member.consented_at ?? null,
     }));
 
   let similarItems = sameSourceItems;

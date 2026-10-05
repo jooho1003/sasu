@@ -167,7 +167,33 @@ export async function GET(
   const decisionCitations = rows.length ? await supabase.from("citations")
     .select("item_id,owner_id").eq("owner_kind", "decision").in("item_id", rows.map(row => row.id)) : {data:[],error:null};
   if (decisionCitations.error) return Response.json({error:"결정 기록을 불러오지 못했습니다. 잠시 후 다시 시도하세요."},{status:500});
-  const decisionByItem = new Map((decisionCitations.data ?? []).map(citation => [citation.item_id,citation.owner_id]));
+  const decisionByItem = new Map<string, string>((decisionCitations.data ?? []).map(citation => [citation.item_id,citation.owner_id]));
+  // 카드(decision_request)에서 내린 결정: origin_item_id 또는 카드 citation 으로 원본 item 과 연결한다.
+  const unlinkedIds = rows.map(row => row.id).filter(id => !decisionByItem.has(id));
+  if (unlinkedIds.length) {
+    const [requestsByOrigin, requestCitations] = await Promise.all([
+      supabase.from("decision_requests").select("id,origin_item_id").eq("dept_id", membership.deptId).in("origin_item_id", unlinkedIds),
+      supabase.from("citations").select("item_id,owner_id").eq("owner_kind", "decision_request").in("item_id", unlinkedIds),
+    ]);
+    if (requestsByOrigin.error || requestCitations.error) return Response.json({error:"결정 기록을 불러오지 못했습니다. 잠시 후 다시 시도하세요."},{status:500});
+    const requestByItem = new Map<string, string[]>();
+    const addRequest = (itemId: string | null, requestId: string | null) => {
+      if (!itemId || !requestId) return;
+      requestByItem.set(itemId, [...(requestByItem.get(itemId) ?? []), requestId]);
+    };
+    for (const request of requestsByOrigin.data ?? []) addRequest(request.origin_item_id, request.id);
+    for (const citation of requestCitations.data ?? []) addRequest(citation.item_id, citation.owner_id);
+    const requestIds = [...new Set([...requestByItem.values()].flat())];
+    if (requestIds.length) {
+      const cardDecisions = await supabase.from("decisions").select("id,request_id").in("request_id", requestIds);
+      if (cardDecisions.error) return Response.json({error:"결정 기록을 불러오지 못했습니다. 잠시 후 다시 시도하세요."},{status:500});
+      const decisionByRequest = new Map<string, string>((cardDecisions.data ?? []).map(decision => [decision.request_id, decision.id]));
+      for (const [itemId, ids] of requestByItem) {
+        const found = ids.map(id => decisionByRequest.get(id)).find(Boolean);
+        if (found) decisionByItem.set(itemId, found);
+      }
+    }
+  }
   const items = rows.map((row) => {
     const source = firstRelation(row.sources);
     const classification = firstOptionalRelation(row.classifications);

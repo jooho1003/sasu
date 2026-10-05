@@ -518,6 +518,60 @@ describe("card pipeline pure rules", () => {
     ).toBe("lead-1");
   });
 
+  it("lead 폴백은 슬랙 DM 가능한 lead 를 우선한다 (힌트 없음)", () => {
+    expect(
+      resolveAssignee({
+        assigneeHint: null,
+        members: [
+          { userId: "lead-a", displayName: "A", role: "lead", slackUserId: null, consentedAt: null },
+          { userId: "lead-b", displayName: "B", role: "lead", slackUserId: "U2", consentedAt: "2026-10-01T00:00:00Z" },
+        ],
+        visibility: "dept",
+      }),
+    ).toBe("lead-b");
+  });
+
+  it("leads_only 에서도 DM 가능한 lead 를 고르고 여러 명이면 user_id 순으로 고른다", () => {
+    const reach = { slackUserId: "U", consentedAt: "2026-10-01T00:00:00Z" };
+    expect(
+      resolveAssignee({
+        assigneeHint: "김팀원",
+        members: [
+          { userId: "lead-z", displayName: "Z", role: "lead", ...reach },
+          { userId: "lead-n", displayName: "N", role: "lead", slackUserId: null, consentedAt: null },
+          { userId: "lead-c", displayName: "C", role: "lead", ...reach },
+        ],
+        visibility: "leads_only",
+      }),
+    ).toBe("lead-c");
+  });
+
+  it("DM 가능한 lead 가 없으면 결정적으로 user_id 가 가장 앞선 lead 를 고른다", () => {
+    expect(
+      resolveAssignee({
+        assigneeHint: null,
+        members: [
+          { userId: "lead-b", displayName: "B", role: "lead", slackUserId: null, consentedAt: null },
+          { userId: "lead-a", displayName: "A", role: "lead", slackUserId: "U1", consentedAt: null },
+        ],
+        visibility: "dept",
+      }),
+    ).toBe("lead-a");
+  });
+
+  it("힌트와 일치하는 멤버는 DM 가능 여부와 무관하게 그대로 담당자다", () => {
+    expect(
+      resolveAssignee({
+        assigneeHint: "김팀원",
+        members: [
+          { userId: "lead-b", displayName: "B", role: "lead", slackUserId: "U2", consentedAt: "2026-10-01T00:00:00Z" },
+          { userId: "member-1", displayName: "김팀원", role: "member", slackUserId: null, consentedAt: null },
+        ],
+        visibility: "dept",
+      }),
+    ).toBe("member-1");
+  });
+
   it("유사 결정 우선으로 최대 3건을 고르고 최근 결정으로 부족분만 채운다", () => {
     const selected = prioritizeSimilarDecisions(
       [
