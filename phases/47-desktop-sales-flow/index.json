@@ -7,7 +7,10 @@
   "verification": "docs/verification/47-desktop-sales-flow/verification.md",
   "analysis": "docs/03-analysis/desktop-sales-flow.analysis.md",
   "report": "docs/04-report/features/desktop-sales-flow.report.md",
-  "production_deployed": false,
+  "production_deployed": true,
+  "installer_version": "0.1.2",
+  "deployed_at": "2026-10-05T15:07:03+09:00",
+  "deployment": "docs/verification/desktop-release-2026-10-04/README.md",
   "steps": [
     { "step": 0, "name": "sales-start", "status": "completed", "summary": "App workKey + 영업 자료/시작 loading·오류·수동 retry·선택별 UUID/ref 잠금·이탈 세대. Electron sales start 6/6 PASS, lint exit 0. docs/verification/47-desktop-sales-flow/step0.md; status/open은 step1 인계." },
     { "step": 1, "name": "sales-status", "status": "completed", "summary": "한국어 5상태·5초 status/open 공유 잠금·오류 stop/manual retry·terminal 새 검토·현재 ready→open 성공→onSeen(current). Electron sales status 6/6 및 sales start 회귀 6/6 PASS, lint exit 0. docs/verification/47-desktop-sales-flow/step1.md; 전체 회귀·도구·독립 분석은 step2 인계." },

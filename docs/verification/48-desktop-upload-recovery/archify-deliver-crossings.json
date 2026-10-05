@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\48-desktop-upload-recovery\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-upload-recovery.html",
+  "specification": {
+    "sha256": "4ac9418a893e64e90ed55fdb32fc83001f12a61a8d00ffcf7fc061c3ab1c7309",
+    "bytes": 4375
+  },
+  "artifact": {
+    "sha256": "96d31c68aa35630ee1035a6dabfae338d4112b7bdaa0fa8f39a4b1d3a3e021b6",
+    "bytes": 808354
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "standard",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 2
+  }
+}

@@ -1,0 +1,84 @@
+
+> sasu-desktop@0.1.2 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep 뒤 재로그인에 이전 답|부서 연결 대기|실제 본체의 동시|실제 암호화 설정|폴링 실패 안내|실제 본체 hostname --max-failures=1
+
+
+Running 7 tests using 1 worker
+
+(node:26264) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.2 build
+> electron-vite build
+
+(node:39152) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 623ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 30ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-BqUheSNu.js   707.85 kB
+✓ built in 1.29s
+followup_owned_panel session-before-question { visible: true, focused: true, minimized: false }
+followup_owned_panel session-after-logout-before-screenshot { visible: true, focused: true, minimized: false }
+followup_owned_panel session-before-code-request { visible: true, focused: true, minimized: false }
+followup_owned_panel session-before-ui-login { visible: true, focused: true, minimized: false }
+followup_owned_panel session-before-link { visible: true, focused: true, minimized: false }
+followup_owned_panel session-before-history { visible: true, focused: true, minimized: false }
+  ok 1 tests\e2e\followup.spec.ts:1407:5 › desktop followup › 설정 로그아웃 뒤 재로그인에 이전 답·기록·설정을 남기지 않는다 (2.9s)
+followup_owned_panel session-before-question { visible: true, focused: false, minimized: false }
+followup_owned_panel session-after-logout-before-screenshot { visible: true, focused: false, minimized: false }
+followup_owned_panel session-before-code-request { visible: true, focused: false, minimized: false }
+followup_owned_panel session-before-ui-login { visible: true, focused: false, minimized: false }
+followup_owned_panel session-before-link { visible: true, focused: false, minimized: false }
+followup_owned_panel session-before-history { visible: true, focused: false, minimized: false }
+  ok 2 tests\e2e\followup.spec.ts:1407:5 › desktop followup › 서버 401 뒤 재로그인에 이전 답·기록·설정을 남기지 않는다 (2.3s)
+  ok 3 tests\e2e\followup.spec.ts:1466:3 › desktop followup › 부서 연결 대기 중 현재 세대 401도 세션을 종료한다 (1.1s)
+  ok 4 tests\e2e\followup.spec.ts:1482:3 › desktop followup › 실제 본체의 동시 오프라인 보관과 응답 오류 재전송 금지 (1.3s)
+  ok 5 tests\e2e\followup.spec.ts:1515:3 › desktop followup › 실제 암호화 설정의 동시 열람·위치·선호와 IPC 제한 (1.2s)
+  x  6 tests\e2e\followup.spec.ts:1544:3 › desktop followup › 폴링 실패 안내·화면 이동 뒤 취소·완료 답 열람 보존 (31.0s)
+Testing stopped early after 1 maximum allowed failures.
+
+
+  1) tests\e2e\followup.spec.ts:1544:3 › desktop followup › 폴링 실패 안내·화면 이동 뒤 취소·완료 답 열람 보존 ─────────
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: '질문하기' })
+        - locator resolved to <button>질문하기</button>
+      - attempting click action
+        - waiting for element to be visible, enabled and stable
+
+
+      1560 |       await panel.evaluate(async () => window.sasu.settings.set({ panelPinned: true }));
+      1561 |       await panel.getByPlaceholder("질문을 적어 주세요.").fill("합성 질문의 답변을 확인해 주세요.");
+    > 1562 |       await panel.getByRole("button", { name: "질문하기" }).click();
+           |                                                         ^
+      1563 |       await expect(panel.getByText(/연결을 확인해 주세요.*기록에서 답/u)).toBeVisible();
+      1564 |       await expect(panel.getByText("답 확인을 멈췄습니다. 기록에서 다시 확인해 주세요.")).toBeVisible();
+      1565 |       await expect(panel.getByText(/network|Error:|answer:get/u)).toHaveCount(0);
+        at D:\바이브코딩\sasu\desktop\tests\e2e\followup.spec.ts:1562:57
+
+    Error Context: test-results\followup-desktop-followup-폴링-실패-안내·화면-이동-뒤-취소·완료-답-열람-보존\error-context.md
+
+    Error Context: test-results\followup-desktop-followup-폴링-실패-안내·화면-이동-뒤-취소·완료-답-열람-보존\error-context.md
+
+  1 failed
+    tests\e2e\followup.spec.ts:1544:3 › desktop followup › 폴링 실패 안내·화면 이동 뒤 취소·완료 답 열람 보존 ──────────
+  1 did not run
+  5 passed (45.6s)
+  1 error was not a part of any test, see above for details

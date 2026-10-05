@@ -1,0 +1,41 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep 질문 한도 429|페이지 오류 뒤|이전 세션의 늦은
+
+
+Running 4 tests using 1 worker
+
+(node:29144) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:26940) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 6.13s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 198ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-C7O3IVXC.js   703.26 kB
+✓ built in 4.00s
+  ok 1 tests\e2e\followup.spec.ts:1259:3 › desktop followup › 질문 한도 429는 이어 묻기 초안·부모를 보존하고 보관·자동 재전송하지 않는다 (46.6s)
+  ok 2 tests\e2e\followup.spec.ts:1292:3 › desktop followup › 페이지 오류 뒤 목록과 cursor를 보존하고 빠른 상세 연타는 한 번만 조회한다 (8.3s)
+  ok 3 tests\e2e\followup.spec.ts:1334:5 › desktop followup › 이전 세션의 늦은 목록 응답은 로그아웃·새 로그인 뒤 표시되지 않는다 (5.9s)
+  ok 4 tests\e2e\followup.spec.ts:1334:5 › desktop followup › 이전 세션의 늦은 상세 응답은 로그아웃·새 로그인 뒤 표시되지 않는다 (4.2s)
+
+  4 passed (1.7m)

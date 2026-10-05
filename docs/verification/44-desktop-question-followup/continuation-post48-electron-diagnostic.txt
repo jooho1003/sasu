@@ -1,0 +1,46 @@
+
+> sasu-desktop@0.1.2 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep sales start 자료 조회는|sales start source_unavailable|sales start 자료·시작 늦은 응답은 (other|same) --max-failures=1
+
+
+Running 4 tests using 1 worker
+
+(node:23368) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.2 build
+> electron-vite build
+
+(node:8096) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 602ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 27ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-BqUheSNu.js   707.85 kB
+✓ built in 1.28s
+followup_owned_panel login-before-input { visible: true, focused: false, minimized: false }
+followup_owned_panel sales-before-screenshot { visible: true, focused: false, minimized: false }
+  ok 1 tests\e2e\followup.spec.ts:374:3 › desktop followup › sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다 (3.0s)
+followup_owned_panel login-before-input { visible: true, focused: false, minimized: false }
+  ok 2 tests\e2e\followup.spec.ts:475:3 › desktop followup › sales start source_unavailable은 후보를 숨기고 수동 재검사 뒤 같은 선택을 보존한다 (1.7s)
+followup_owned_panel login-before-input { visible: true, focused: false, minimized: false }
+  ok 3 tests\e2e\followup.spec.ts:492:5 › desktop followup › sales start 자료·시작 늦은 응답은 other 이탈 뒤 안내·task를 바꾸지 않는다 (2.4s)
+followup_owned_panel login-before-input { visible: true, focused: false, minimized: false }
+  ok 4 tests\e2e\followup.spec.ts:492:5 › desktop followup › sales start 자료·시작 늦은 응답은 same 이탈 뒤 안내·task를 바꾸지 않는다 (2.6s)
+
+  4 passed (14.3s)

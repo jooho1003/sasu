@@ -3,7 +3,7 @@
   "phase": "44-desktop-question-followup",
   "design": "docs/02-design/features/desktop-question-followup.design.md",
   "plan": "docs/01-plan/features/desktop-question-followup.plan.md",
-  "production_deployed": false,
+  "production_deployed": true,
   "steps": [
     {
       "step": 0,
@@ -18,6 +18,18 @@
       "status": "completed",
       "completed_at": "2026-10-03T00:22:45.1135234+09:00",
       "verification": "docs/verification/44-desktop-question-followup/verification.md"
+    },
+    {
+      "step": 2,
+      "name": "windows-release-verification",
+      "status": "completed",
+      "design": "docs/02-design/features/desktop-companion.design.md",
+      "verification": "docs/verification/desktop-release-2026-10-04/README.md",
+      "completed_at": "2026-10-05T15:10:20+09:00",
+      "summary": "소스 47개 HEAD b0d3ebf 일치 → 운영 공개 설정 build/dist exit0 → ASAR 감사 통과(비공개0·비밀값0·manifest SHA-512 일치) → 패키지 실행 0.1.2·safeStorage·로그인 화면 PASS(세션0 DPAPI 거부로 대화형 예약 작업 실행, run04 시간 초과 1회 기록) → v0.1.2 공개 게시·공개 파일 해시 일치 → 현재 PC 0.1.1→0.1.2 실제 업데이트·재로그인 없는 세션 복원·로그아웃 파일 삭제 PASS(run01은 게시 1분 뒤 feed 캐시로 실패 기록). 신규 Windows 녹화·메일 수신 게이트는 phase 43 step 12 유지."
     }
-  ]
+  ],
+  "installer_version": "0.1.2",
+  "deployed_at": "2026-10-05T15:07:03+09:00",
+  "deployment": "docs/verification/desktop-release-2026-10-04/README.md"
 }

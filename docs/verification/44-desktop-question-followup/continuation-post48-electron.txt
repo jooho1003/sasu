@@ -1,0 +1,123 @@
+
+> sasu-desktop@0.1.2 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts
+
+
+Running 41 tests using 1 worker
+
+(node:2052) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.2 build
+> electron-vite build
+
+(node:33064) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 3.39s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 33ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-BqUheSNu.js   707.85 kB
+✓ built in 2.43s
+  x   1 tests\e2e\followup.spec.ts:356:3 › desktop followup › sales start 자료 조회는 지연·empty·오류·수동 재조회와 현재 distinct 원칙을 구분한다 (52.9s)
+(node:10616) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.2 build
+> electron-vite build
+
+(node:39356) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 552ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 28ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-BqUheSNu.js   707.85 kB
+✓ built in 924ms
+  ok  2 tests\e2e\followup.spec.ts:423:3 › desktop followup › sales start 연타 잠금과 선택별 동일 ID 수동 재시도·새 선택·접수 뒤 중복 금지 (3.8s)
+  x   3 tests\e2e\followup.spec.ts:456:3 › desktop followup › sales start source_unavailable은 후보를 숨기고 수동 재검사 뒤 같은 선택을 보존한다 (31.6s)
+(node:16912) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.2 build
+> electron-vite build
+
+(node:38416) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 467ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 22ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-BqUheSNu.js   707.85 kB
+✓ built in 838ms
+  x   4 tests\e2e\followup.spec.ts:473:5 › desktop followup › sales start 자료·시작 늦은 응답은 other 이탈 뒤 안내·task를 바꾸지 않는다 (31.1s)
+(node:1860) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.2 build
+> electron-vite build
+
+(node:15376) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 689ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 18ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-BqUheSNu.js   707.85 kB
+✓ built in 1.48s

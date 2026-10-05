@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "deliver",
+  "stage": "render",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\48-desktop-upload-recovery\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-upload-recovery.html",
+  "error": "Architecture layout validation failed:\n- [clean-flow/edge-through-node] architecture connections[5] id \"m-d\" \"members\" -> \"draft\" crosses component \"cleanup\" (unrelated to this relationship) on segment 0 [150, 570] -> [150, 180] (2px clearance) — adjust fromSide/toSide, set route/via, or move the component.",
+  "diagnostics": [
+    {
+      "code": "clean-flow/edge-through-node",
+      "severity": "error",
+      "message": "[clean-flow/edge-through-node] architecture connections[5] id \"m-d\" \"members\" -> \"draft\" crosses component \"cleanup\" (unrelated to this relationship) on segment 0 [150, 570] -> [150, 180] (2px clearance) — adjust fromSide/toSide, set route/via, or move the component.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 5,
+        "id": "m-d",
+        "from": "members",
+        "to": "draft"
+      },
+      "evidence": {
+        "obstacleKind": "component",
+        "obstacleId": "cleanup",
+        "segmentIndex": 0,
+        "from": [
+          150,
+          570
+        ],
+        "to": [
+          150,
+          180
+        ],
+        "clearancePx": 2
+      },
+      "supportedFixes": [
+        "adjust fromSide/toSide, set route/via, or move the component"
+      ]
+    }
+  ]
+}

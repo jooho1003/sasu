@@ -1,0 +1,16 @@
+{
+  "started": "2026-10-05T06:07:57.539Z",
+  "fromVersion": "0.1.1",
+  "toVersion": "0.1.2",
+  "states": [
+    {
+      "at": "2026-10-05T06:08:05.938Z",
+      "status": "current"
+    }
+  ],
+  "reloginCalls": 0,
+  "modelCalls": 0,
+  "questionWrites": 0,
+  "initialSessionRestored": true,
+  "failureCode": "published_update_not_available"
+}

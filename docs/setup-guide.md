@@ -1,6 +1,8 @@
 # 사수 — 사람이 직접 해야 하는 준비 가이드
 
 > 2026-10-02 사용자 결정: 로그인 메일 발신자는 **사수 / `sasu@getsasu.com`**, provider는 Resend로 정한다. 인증할 도메인은 `getsasu.com`이다. 도메인 소유/DNS 인증·Resend SMTP 연결·실제 수신 확인은 사용자가 나중에 진행하도록 보류했다. 주소를 정한 것만으로 운영 발송이 활성화된 것은 아니다. 기존 6자리 OTP 설정은 유지한다.
+>
+> **2026-10-05 연결 완료(사용자 승인):** `getsasu.com`을 Cloudflare Registrar에서 1년 등록(자동 갱신, Cloudflare DNS) → Resend 기존 계정에 도메인 추가(Tokyo 리전, DKIM TXT·발송 CNAME 2개·DMARC `p=none` 수동 입력, 링크 추적 없음) → 인증 `verified` → `getsasu.com` 전용 Sending access 키로 Supabase Auth 사용자 지정 SMTP(`smtp.resend.com:465`, 사용자 `resend`, 발신 `사수 <sasu@getsasu.com>`) 저장. 키는 Supabase에만 있고 리포·`.env`에는 없다. 실제 수신·코드 로그인 확인과 Gmail 스팸 분류 한계는 [메일 수신 기록](verification/43-desktop-companion/mail-delivery-2026-10-05.md). 되돌리기는 Supabase → Authentication → Emails → SMTP Settings에서 "Enable custom SMTP"를 끈다.
 
 - 작성일: 2026-09-08
 - 대상: 이 프로젝트를 혼자 진행하는 개발자 본인

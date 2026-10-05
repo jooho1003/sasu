@@ -1,0 +1,29 @@
+# packaged smoke run04 (task, interactive session) — first launch timeout
+TimeoutError: Timeout 45000ms exceeded.
+
+# update run01 — updater feed check 1 min after publish
+Checking for update
+[sasu-desktop] {"event":"app_ready"}
+Update for version 0.1.1 is not available (latest version: 0.1.1, d
+
+# update run02 — updater events
+2026-10-05T06:09:47.269Z Checking for update
+2026-10-05T06:09:47.269Z [sasu-desktop] {"event":"update_check_started"}
+2026-10-05T06:09:47.355Z [sasu-desktop] {"event":"app_ready"}
+2026-10-05T06:09:48.538Z Found version 0.1.2 (url: sasu-desktop-setup-0.1.2.exe)
+2026-10-05T06:09:48.538Z Downloading update from sasu-desktop-setup-0.1.2.exe
+2026-10-05T06:09:48.539Z updater cache dir: %LOCALAPPDATA%\sasu-desktop-updater
+2026-10-05T06:09:49.560Z Differential download: https://github.com/jooho1003/sasu-desktop-re
+2026-10-05T06:09:50.307Z New version 0.1.2 has been downloaded (local cache path omitted)
+2026-10-05T06:09:52.101Z Auto install update on quit
+2026-10-05T06:09:52.101Z Install: isSilent: true, isForceRunAfter: false
+2026-10-05T06:09:52.101Z Executing: %LOCALAPPDATA%\sasu-desktop-updater\pending
+2026-10-05T06:10:15.096Z Checking for update
+2026-10-05T06:10:15.096Z [sasu-desktop] {"event":"update_check_started"}
+2026-10-05T06:10:15.181Z [sasu-desktop] {"event":"app_ready"}
+2026-10-05T06:10:15.290Z Update for version 0.1.2 is not available (latest version: 0.1.2, 
+
+# update run02 — stderr events from the app logger
+2026-10-05T06:09:47.434Z [sasu-desktop] {"event":"ipc_failed","code":"window_forbidden"}
+2026-10-05T06:10:15.474Z [sasu-desktop] {"event":"ipc_failed","code":"window_forbidden"}
+2026-10-05T06:10:20.451Z [sasu-desktop] {"event":"inbox_poll_failed","code":"ApiError"}

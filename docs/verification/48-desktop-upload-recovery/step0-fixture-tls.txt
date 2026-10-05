@@ -1,0 +1,155 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts tests/e2e/upload-recovery.spec.ts --grep 접수 전 링크|업로드 실패 링크|늦은 파일 hash
+
+
+Running 3 tests using 1 worker
+
+(node:31340) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:22736) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 1.35s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 44ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-C7O3IVXC.js   703.26 kB
+✓ built in 2.25s
+  x  1 tests\e2e\upload-recovery.spec.ts:118:3 › desktop upload recovery › 접수 전 링크 없음·연타 1회·입력 동결·성공 웹/읽음 (1.7s)
+(node:30452) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:41468) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 1.06s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 34ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-C7O3IVXC.js   703.26 kB
+✓ built in 2.57s
+  x  2 tests\e2e\upload-recovery.spec.ts:139:3 › desktop upload recovery › 업로드 실패 링크 없음·초안 동의 보존·자동 재전송 없음·수동 retry (2.7s)
+(node:31328) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:26448) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 546ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 30ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-C7O3IVXC.js   703.26 kB
+✓ built in 2.47s
+  x  3 tests\e2e\upload-recovery.spec.ts:176:50 › desktop upload recovery › 늦은 파일 hash 뒤 새 업로드 IPC 없음 (2.4s)
+
+
+  1) tests\e2e\upload-recovery.spec.ts:118:3 › desktop upload recovery › 접수 전 링크 없음·연타 1회·입력 동결·성공 웹/읽음 
+
+    Error: page.evaluate: Error: Error invoking remote method 'link:create': Error: network:서버에 연결하지 못했습니다.
+
+      91 |         Reflect.set(window, "__REACT_DEVTOOLS_GLOBAL_HOOK__", { supportsFiber: true, inject: (renderer: { bundleType: number }) => { Reflect.set(window, "uploadReactBundleType", renderer.bundleType); return 1; }, onCommitFiberRoot: () => undefined, onCommitFiberUnmount: () => undefined, checkDCE: () => undefined });
+      92 |       });
+    > 93 |       await panel.evaluate(async (dept) => { await window.sasu.auth.verifyCode("synthetic@example.test", "123456"); await window.sasu.link.create({ dept_id: dept }); }, deptId);
+         |                   ^
+      94 |       await panel.reload();
+      95 |       await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible({ timeout: 30_000 });
+      96 |       await panel.getByRole("button", { name: "일 맡기기", exact: true }).click();
+        at launch (D:\바이브코딩\sasu\desktop\tests\e2e\upload-recovery.spec.ts:93:19)
+        at D:\바이브코딩\sasu\desktop\tests\e2e\upload-recovery.spec.ts:120:35
+
+    Error Context: test-results\upload-recovery-desktop-up-ba2dc-전-링크-없음·연타-1회·입력-동결·성공-웹-읽음\error-context.md
+
+    Error Context: test-results\upload-recovery-desktop-up-ba2dc-전-링크-없음·연타-1회·입력-동결·성공-웹-읽음\error-context.md
+
+  2) tests\e2e\upload-recovery.spec.ts:139:3 › desktop upload recovery › 업로드 실패 링크 없음·초안 동의 보존·자동 재전송 없음·수동 retry 
+
+    Error: page.evaluate: Error: Error invoking remote method 'link:create': Error: network:서버에 연결하지 못했습니다.
+
+      91 |         Reflect.set(window, "__REACT_DEVTOOLS_GLOBAL_HOOK__", { supportsFiber: true, inject: (renderer: { bundleType: number }) => { Reflect.set(window, "uploadReactBundleType", renderer.bundleType); return 1; }, onCommitFiberRoot: () => undefined, onCommitFiberUnmount: () => undefined, checkDCE: () => undefined });
+      92 |       });
+    > 93 |       await panel.evaluate(async (dept) => { await window.sasu.auth.verifyCode("synthetic@example.test", "123456"); await window.sasu.link.create({ dept_id: dept }); }, deptId);
+         |                   ^
+      94 |       await panel.reload();
+      95 |       await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible({ timeout: 30_000 });
+      96 |       await panel.getByRole("button", { name: "일 맡기기", exact: true }).click();
+        at launch (D:\바이브코딩\sasu\desktop\tests\e2e\upload-recovery.spec.ts:93:19)
+        at D:\바이브코딩\sasu\desktop\tests\e2e\upload-recovery.spec.ts:140:52
+
+    Error Context: test-results\upload-recovery-desktop-up-f8a6e-초안-동의-보존·자동-재전송-없음·수동-retry\error-context.md
+
+    Error Context: test-results\upload-recovery-desktop-up-f8a6e-초안-동의-보존·자동-재전송-없음·수동-retry\error-context.md
+
+  3) tests\e2e\upload-recovery.spec.ts:176:50 › desktop upload recovery › 늦은 파일 hash 뒤 새 업로드 IPC 없음 
+
+    Error: page.evaluate: Error: Error invoking remote method 'link:create': Error: network:서버에 연결하지 못했습니다.
+
+      91 |         Reflect.set(window, "__REACT_DEVTOOLS_GLOBAL_HOOK__", { supportsFiber: true, inject: (renderer: { bundleType: number }) => { Reflect.set(window, "uploadReactBundleType", renderer.bundleType); return 1; }, onCommitFiberRoot: () => undefined, onCommitFiberUnmount: () => undefined, checkDCE: () => undefined });
+      92 |       });
+    > 93 |       await panel.evaluate(async (dept) => { await window.sasu.auth.verifyCode("synthetic@example.test", "123456"); await window.sasu.link.create({ dept_id: dept }); }, deptId);
+         |                   ^
+      94 |       await panel.reload();
+      95 |       await expect(panel.getByRole("heading", { name: "무엇이 궁금한가요?" })).toBeVisible({ timeout: 30_000 });
+      96 |       await panel.getByRole("button", { name: "일 맡기기", exact: true }).click();
+        at launch (D:\바이브코딩\sasu\desktop\tests\e2e\upload-recovery.spec.ts:93:19)
+        at D:\바이브코딩\sasu\desktop\tests\e2e\upload-recovery.spec.ts:177:30
+
+    Error Context: test-results\upload-recovery-desktop-up-37a4f-y-늦은-파일-hash-뒤-새-업로드-IPC-없음\error-context.md
+
+    Error Context: test-results\upload-recovery-desktop-up-37a4f-y-늦은-파일-hash-뒤-새-업로드-IPC-없음\error-context.md
+
+  3 failed
+    tests\e2e\upload-recovery.spec.ts:118:3 › desktop upload recovery › 접수 전 링크 없음·연타 1회·입력 동결·성공 웹/읽음 
+    tests\e2e\upload-recovery.spec.ts:139:3 › desktop upload recovery › 업로드 실패 링크 없음·초안 동의 보존·자동 재전송 없음·수동 retry 
+    tests\e2e\upload-recovery.spec.ts:176:50 › desktop upload recovery › 늦은 파일 hash 뒤 새 업로드 IPC 없음 ─
+exit_code=1

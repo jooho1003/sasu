@@ -1,0 +1,47 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts tests/e2e/upload-recovery.spec.ts --grep 접수 전 링크 --max-failures=1
+
+
+Running 1 test using 1 worker
+
+(node:332) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:27388) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 6.32s
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 80ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-BqUheSNu.js   707.85 kB
+✓ built in 9.18s
+upload_fixture_stage launch
+upload_fixture_stage main-connected
+upload_fixture_stage sender-ready
+upload_fixture_stage panel-ready
+upload_fixture_stage work-entered
+upload_fixture_stage draft-prepared
+upload_fixture_stage parts-pending
+upload_fixture_stage parts-released
+  ok 1 tests\e2e\upload-recovery.spec.ts:135:3 › desktop upload recovery › 접수 전 링크 없음·연타 1회·입력 동결·성공 웹/읽음 (1.5m)
+
+  1 passed (2.1m)
+exit_code=0
