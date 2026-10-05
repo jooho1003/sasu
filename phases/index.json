@@ -286,11 +286,10 @@
     },
     {
       "dir": "43-desktop-companion",
-      "status": "blocked",
+      "status": "completed",
       "design": "docs/02-design/features/desktop-companion.design.md",
-      "note": "운영 웹·DB와 공개 Windows 0.1.1 게시 완료. 현재 PC NSIS 설치 16.94초, 운영 테스트 코드 인증/부서 연결/질문 거절, 공개 0.1.0→0.1.1 업데이트·세션 복원·로그아웃 파일 삭제 확인. SC8 충족, 계획8/9·정적93.6%. 신규 Windows 5분 녹화·실제 메일 수신·도메인/Resend SMTP는 대기. docs/verification/43-desktop-companion/production-install.md",
+      "note": "운영 웹·DB와 공개 Windows 0.1.1 게시 완료. 현재 PC NSIS 설치 16.94초, 운영 테스트 코드 인증/부서 연결/질문 거절, 공개 0.1.0→0.1.1 업데이트·세션 복원·로그아웃 파일 삭제 확인. SC8 충족, 계획8/9·정적93.6%. 2026-10-05 getsasu.com Resend SMTP 연결·실제 수신 확인, 신규 계정 첫 실행 자동 녹화(설치→인용 답 93.5초, 사람 실측 아님)로 step 12 완료. docs/verification/43-desktop-companion/production-install.md",
       "production_deployed": true,
-      "blocked_at": "2026-10-02T09:55:30+09:00",
       "verification": "docs/verification/desktop-companion-2026-10-02.md",
       "analysis": "docs/03-analysis/desktop-companion.analysis.md",
       "report": "docs/04-report/features/desktop-companion.report.md",
@@ -298,7 +297,10 @@
       "session_verification": "docs/verification/43-desktop-companion/session-outbox.md",
       "production_record": "docs/verification/desktop-companion-production-2026-10-02.md",
       "installer_verification": "docs/verification/43-desktop-companion/production-install.md",
-      "followup_release_verification": "docs/verification/desktop-release-2026-10-04/README.md"
+      "followup_release_verification": "docs/verification/desktop-release-2026-10-04/README.md",
+      "completed_at": "2026-10-05T17:07:02+09:00",
+      "previous_blocked_at": "2026-10-02T09:55:30+09:00",
+      "first_run_recording": "docs/verification/43-desktop-companion/first-run-2026-10-05.md"
     },
     {
       "dir": "44-desktop-question-followup",
