@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "f5ae677c-02b6-419b-b126-97e1dab0d471",
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "D:\\바이브코딩\\sasu\\docs\\verification\\47-desktop-sales-flow\\flow.json",
+  "output": "D:\\바이브코딩\\sasu\\.vercel\\desktop-continuation-20261004.html",
+  "specification": {
+    "sha256": "454c6821b41f9af6c58855d69990759bc32b4a9290a23a27ccec546faa69f971",
+    "bytes": 5233
+  },
+  "artifact": {
+    "sha256": "41c76313a7216fe1b9e5c3e505f5b3a3f39e227e7f0a4f062be0d8602e5f7b74",
+    "bytes": 766460
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "standard",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "update": {
+    "status": "unavailable",
+    "installedVersion": null,
+    "availableVersion": null,
+    "releaseNotes": null,
+    "checkedAt": null,
+    "source": null,
+    "noticeRequired": false,
+    "noticeText": null,
+    "reason": "timeout"
+  }
+}

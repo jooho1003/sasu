@@ -1,0 +1,39 @@
+
+> sasu-desktop@0.1.1 e2e
+> node ../node_modules/@playwright/test/cli.js test --config playwright.e2e.config.ts followup.spec.ts --grep 최근 작업 새로고침은|새 질문 실패 후
+
+
+Running 2 tests using 1 worker
+
+(node:21640) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> sasu-desktop@0.1.1 build
+> electron-vite build
+
+(node:21836) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+out/main/index.js  79.44 kB
+✓ built in 630ms
+vite v7.3.6 building ssr environment for production...
+transforming...
+✓ 1 modules transformed.
+rendering chunks...
+out/preload/index.js  3.90 kB
+✓ built in 39ms
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+../../out/renderer/index.html                   0.57 kB
+../../out/renderer/assets/index-CoGv_D0p.css    2.99 kB
+../../out/renderer/assets/index-C7O3IVXC.js   703.26 kB
+✓ built in 1.76s
+  ok 1 tests\e2e\followup.spec.ts:1018:3 › desktop followup › 최근 작업 새로고침은 30초 갱신과 공유하고 팀원에게 목록을 표시하지 않는다 (16.5s)
+  ok 2 tests\e2e\followup.spec.ts:1180:3 › desktop followup › 새 질문 실패 후 이전 답의 취소된 폴링은 기록 안내로 끝난다 (6.4s)
+
+  2 passed (28.7s)

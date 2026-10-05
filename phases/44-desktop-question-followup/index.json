@@ -18,6 +18,13 @@
       "status": "completed",
       "completed_at": "2026-10-03T00:22:45.1135234+09:00",
       "verification": "docs/verification/44-desktop-question-followup/verification.md"
+    },
+    {
+      "step": 2,
+      "name": "windows-release-verification",
+      "status": "pending",
+      "design": "docs/02-design/features/desktop-companion.design.md",
+      "verification": "docs/verification/desktop-release-2026-10-04/README.md"
     }
   ]
 }
