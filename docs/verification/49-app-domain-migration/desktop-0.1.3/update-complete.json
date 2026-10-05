@@ -1,0 +1,34 @@
+{
+  "started": "2026-10-05T11:19:45.778Z",
+  "fromVersion": "0.1.2",
+  "toVersion": "0.1.3",
+  "states": [
+    {
+      "at": "2026-10-05T11:19:55.962Z",
+      "status": "downloading",
+      "percent": 63
+    },
+    {
+      "at": "2026-10-05T11:20:02.765Z",
+      "status": "downloading",
+      "percent": 81
+    },
+    {
+      "at": "2026-10-05T11:20:02.988Z",
+      "status": "ready"
+    }
+  ],
+  "reloginCalls": 0,
+  "modelCalls": 0,
+  "questionWrites": 0,
+  "initialSessionRestored": true,
+  "downloaded": true,
+  "quitAt": "2026-10-05T11:20:03.209Z",
+  "sessionRestored": true,
+  "restoredWithoutRelogin": true,
+  "updatedAt": "2026-10-05T11:20:48.258Z",
+  "latestVersionConfirmed": true,
+  "loggedOut": true,
+  "localFilesRemoved": true,
+  "completed": "2026-10-05T11:20:50.299Z"
+}

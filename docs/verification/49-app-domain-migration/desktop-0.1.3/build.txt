@@ -1,0 +1,44 @@
+{"version":"0.1.3","productionUrl":"https://getsasu.com","publicConfigurationOnly":true}
+> sasu-desktop@0.1.3 build
+> electron-vite build
+[36mvite v7.3.6 [32mbuilding ssr environment for production...[36m[39m
+transforming...
+[32m✓[39m 21 modules transformed.
+rendering chunks...
+[2mout/main/[22m[36mindex.js  [39m[1m[2m79.64 kB[22m[1m[22m
+[32m✓ built in 355ms[39m
+[36mvite v7.3.6 [32mbuilding ssr environment for production...[36m[39m
+transforming...
+[32m✓[39m 1 modules transformed.
+rendering chunks...
+[2mout/preload/[22m[36mindex.js  [39m[1m[2m3.90 kB[22m[1m[22m
+[32m✓ built in 13ms[39m
+[36mvite v7.3.6 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 43 modules transformed.
+rendering chunks...
+[2m../../out/renderer/[22m[32mindex.html                 [39m[1m[2m  0.58 kB[22m[1m[22m
+[2m../../out/renderer/[22m[35massets/index-YPx8uoVV.css  [39m[1m[2m  3.16 kB[22m[1m[22m
+[2m../../out/renderer/[22m[36massets/index-haIpJVtx.js   [39m[1m[33m707.85 kB[39m[22m
+[32m✓ built in 2.03s[39m
+> sasu-desktop@0.1.3 dist
+> electron-builder --win --publish never
+  • electron-builder  version=26.15.3 os=10.0.26200
+  • loaded configuration  file=<repo>\.vercel\desktop-release-013-source\desktop\electron-builder.yml
+  • description is missed in the package.json  appPackageFile=<repo>\.vercel\desktop-release-013-source\desktop\package.json
+  • author is missed in the package.json  appPackageFile=<repo>\.vercel\desktop-release-013-source\desktop\package.json
+  • executing @electron/rebuild  electronVersion=44.5.1 arch=x64 buildFromSource=false workspaceRoot=<repo>\.vercel\desktop-release-013-source\desktop projectDir=./ appDir=./
+  • installing native dependencies  arch=x64
+  • completed installing native dependencies
+  • packaging       platform=win32 arch=x64 electron=44.5.1 appOutDir=release\win-unpacked
+  • downloaded      label=electron progress=100%
+  • downloaded electron zip extracted successfully  output=<repo>\.vercel\desktop-release-013-source\desktop\release\win-unpacked
+  • searching for node modules  pm=npm searchDir=<repo>\.vercel\desktop-release-013-source\desktop
+  • updating asar integrity executable resource  executablePath=release\win-unpacked\사수.exe
+  • default Electron icon is used  reason=application icon is not set
+  • signing with signtool.exe  path=release\win-unpacked\사수.exe
+  • building        target=nsis file=release\sasu-desktop-setup-0.1.3.exe archs=x64 oneClick=false perMachine=false
+  • signing with signtool.exe  path=release\win-unpacked\resources\elevate.exe
+  • signing with signtool.exe  path=release\sasu-desktop-setup-0.1.3.__uninstaller.exe
+  • signing with signtool.exe  path=release\sasu-desktop-setup-0.1.3.exe
+  • building block map  blockMapFile=release\sasu-desktop-setup-0.1.3.exe.blockmap

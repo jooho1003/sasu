@@ -1,0 +1,19 @@
+{
+  "version": "0.1.3",
+  "bytes": 114138173,
+  "sha256": "5186a2b236aca58992a2fd2297ea004e12b53664a0c719d1c1fe9e63a57d182b",
+  "sha512": "mt7X4vjGtaTgFmQTqvDHUs/cwQjMwiDARP/I0+xrx1MTAdUo6d3PNX0SO60lw6lxYxZGBbeBx6tFdSYX3I38OA==",
+  "blockmapSha256": "7ac4ff1a9506eb1bb687fdc6bd99bd36a495feed1dd18640e111ed1935923640",
+  "asarSha256": "f62d919464eda386c0775cd7dd2de80c9e554d66ed2d6443cac6d2b8f34da6ee",
+  "productionUrl": "https://getsasu.com",
+  "legacyUrlAbsent": true,
+  "publicKeyOnly": true,
+  "privateFiles": 0,
+  "secretMatches": 0,
+  "dependenciesPresent": true,
+  "developmentAdvisoryPackageInAsar": false,
+  "codeFilesScanned": 5,
+  "feed": "jooho1003/sasu-desktop-releases",
+  "manifestMatches": true,
+  "staged": true
+}

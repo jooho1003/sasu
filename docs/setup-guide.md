@@ -2,7 +2,7 @@
 
 > 2026-10-02 사용자 결정: 로그인 메일 발신자는 **사수 / `sasu@getsasu.com`**, provider는 Resend로 정한다. 인증할 도메인은 `getsasu.com`이다. 도메인 소유/DNS 인증·Resend SMTP 연결·실제 수신 확인은 사용자가 나중에 진행하도록 보류했다. 주소를 정한 것만으로 운영 발송이 활성화된 것은 아니다. 기존 6자리 OTP 설정은 유지한다.
 >
-> **2026-10-05 연결 완료(사용자 승인):** `getsasu.com`을 Cloudflare Registrar에서 1년 등록(자동 갱신, Cloudflare DNS) → Resend 기존 계정에 도메인 추가(Tokyo 리전, DKIM TXT·발송 CNAME 2개·DMARC `p=none` 수동 입력, 링크 추적 없음) → 인증 `verified` → `getsasu.com` 전용 Sending access 키로 Supabase Auth 사용자 지정 SMTP(`smtp.resend.com:465`, 사용자 `resend`, 발신 `사수 <sasu@getsasu.com>`) 저장. 키는 Supabase에만 있고 리포·`.env`에는 없다. 실제 수신·코드 로그인 확인과 Gmail 스팸 분류 한계는 [메일 수신 기록](verification/43-desktop-companion/mail-delivery-2026-10-05.md). 되돌리기는 Supabase → Authentication → Emails → SMTP Settings에서 "Enable custom SMTP"를 끈다. `getsasu.com`·`www`는 Cloudflare Redirect Rule로 운영 웹(`sasu-alpha.vercel.app`, 같은 경로·302)에 넘긴다. phase 49 전환 때 이 규칙은 삭제한다 (아래 "16. 운영 주소 이전").
+> **2026-10-05 연결 완료(사용자 승인):** `getsasu.com`을 Cloudflare Registrar에서 1년 등록(자동 갱신, Cloudflare DNS) → Resend 기존 계정에 도메인 추가(Tokyo 리전, DKIM TXT·발송 CNAME 2개·DMARC `p=none` 수동 입력, 링크 추적 없음) → 인증 `verified` → `getsasu.com` 전용 Sending access 키로 Supabase Auth 사용자 지정 SMTP(`smtp.resend.com:465`, 사용자 `resend`, 발신 `사수 <sasu@getsasu.com>`) 저장. 키는 Supabase에만 있고 리포·`.env`에는 없다. 실제 수신·코드 로그인 확인과 Gmail 스팸 분류 한계는 [메일 수신 기록](verification/43-desktop-companion/mail-delivery-2026-10-05.md). 되돌리기는 Supabase → Authentication → Emails → SMTP Settings에서 "Enable custom SMTP"를 끈다. **2026-10-05 운영 주소 이전 완료(phase 49, ADR-088):** 운영 웹은 `https://getsasu.com`이다. Cloudflare는 DNS만 맡고(`@`·`www` CNAME → Vercel, DNS only), 이전의 Redirect Rule과 더미 A 레코드는 삭제했다. 옛 주소 `sasu-alpha.vercel.app`은 화면만 새 주소로 308 이동하고 `/api/*`는 그대로 처리한다. 로그인 메일 링크는 `https://getsasu.com/auth/confirm`이다. 절차·되돌리기는 아래 "16. 운영 주소 이전".
 
 - 작성일: 2026-09-08
 - 대상: 이 프로젝트를 혼자 진행하는 개발자 본인
@@ -276,7 +276,7 @@ Vercel CLI가 설치되지 않은 환경에서는 운영 설정·배포 로그 �
 
 ## 16. 운영 주소 이전 (ADR-088)
 
-운영 주소를 `sasu-alpha.vercel.app`에서 `https://getsasu.com`으로 옮긴다. 근거는 ADR-088, 범위는 PRD §8 "운영 주소 이전 범위", 불변식은 ARCHITECTURE §6-13이다. 이 절은 절차 기록이며 **아직 전환하지 않았다**. 위 4절·메일 기록 등의 현재 운영 값은 전환 단계 완료 시점에 맞춰 갱신한다. 각 단계는 사용자 승인 뒤 한 번에 하나씩 진행하고, 확인값을 못 얻으면 다음 단계로 가지 말고 "되돌리기"를 실행한다.
+운영 주소를 `sasu-alpha.vercel.app`에서 `https://getsasu.com`으로 옮긴다. 근거는 ADR-088, 범위는 PRD §8 "운영 주소 이전 범위", 불변식은 ARCHITECTURE §6-13이다. **2026-10-05에 T1~T12를 모두 실행했다**(단계마다 사용자 승인). 실행 기록은 [전환 기록](verification/49-app-domain-migration/production-cutover.md), 되돌리기용 원래 값은 [rollback-values](verification/49-app-domain-migration/rollback-values.md). 실제 실행에서 바뀐 점: T5 허용 목록은 `/**` 대신 정확한 `https://getsasu.com/auth/callback`, T8은 trigger secret을 다시 쓰지 않도록 스크립트 대신 `jobs_run_url` 한 행만 update. 각 단계는 사용자 승인 뒤 한 번에 하나씩 진행하고, 확인값을 못 얻으면 다음 단계로 가지 말고 "되돌리기"를 실행한다.
 
 환경변수 두 개(`.env.example` 참고): `NEXT_PUBLIC_APP_URL`(정식 주소) · `SASU_LEGACY_HOSTS`(서버 전용, 옛 호스트 쉼표 목록, `/api/*`는 이동하지 않음). 코드를 병합해도 `SASU_LEGACY_HOSTS`가 비어 있으면 이동이 없고, `/auth/confirm`은 메일 템플릿을 바꾸기 전까지 호출되지 않는다.
 
