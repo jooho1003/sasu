@@ -1,0 +1,24 @@
+{
+  "user": "sasu-newuser",
+  "startedAt": "2026-10-05T08:05:15.392Z",
+  "steps": {
+    "start": 0.3,
+    "downloaded": 1.6,
+    "install_started": 1.6,
+    "installed": 12.8,
+    "app_started": 15.1,
+    "login_screen": 16.1,
+    "code_requested": 17.3,
+    "code_received_from_mailbox": 72.1,
+    "department_screen": 75.8,
+    "question_screen": 78.7,
+    "question_sent": 81.1,
+    "answer_shown": 95.1,
+    "logged_out": 106.6
+  },
+  "outcome": "cited",
+  "citations": 2,
+  "installToAnswerSeconds": 93.5,
+  "totalSeconds": 95.1,
+  "finishedAt": "2026-10-05T08:07:02.145Z"
+}

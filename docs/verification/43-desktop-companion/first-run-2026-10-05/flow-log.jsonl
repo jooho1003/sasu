@@ -1,0 +1,13 @@
+{"at":"2026-10-05T08:05:15.685Z","t":0.3,"step":"start","account":"sasu-newuser","email":"tjr***@gmail.com"}
+{"at":"2026-10-05T08:05:17.037Z","t":1.6,"step":"downloaded","mb":"114.1","sha256Match":true}
+{"at":"2026-10-05T08:05:17.039Z","t":1.6,"step":"install_started"}
+{"at":"2026-10-05T08:05:28.155Z","t":12.8,"step":"installed","exit":0,"folder":"sasu-desktop"}
+{"at":"2026-10-05T08:05:30.458Z","t":15.1,"step":"app_started","version":"0.1.2"}
+{"at":"2026-10-05T08:05:31.475Z","t":16.1,"step":"login_screen"}
+{"at":"2026-10-05T08:05:32.695Z","t":17.3,"step":"code_requested","email":"tjr***@gmail.com"}
+{"at":"2026-10-05T08:06:27.491Z","t":72.1,"step":"code_received_from_mailbox"}
+{"at":"2026-10-05T08:06:31.205Z","t":75.8,"step":"department_screen"}
+{"at":"2026-10-05T08:06:34.084Z","t":78.7,"step":"question_screen"}
+{"at":"2026-10-05T08:06:36.510Z","t":81.1,"step":"question_sent"}
+{"at":"2026-10-05T08:06:50.456Z","t":95.1,"step":"answer_shown","outcome":"cited","citations":2}
+{"at":"2026-10-05T08:07:01.970Z","t":106.6,"step":"logged_out"}

@@ -127,15 +127,18 @@
     {
       "step": 12,
       "name": "desktop-release-verify",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
       "started_at": "2026-10-02T09:03:28+09:00",
-      "summary": "운영 웹·DB와 공개 Windows 0.1.1 게시 완료. 현재 PC NSIS 설치 16.94초, 운영 테스트 코드 인증/부서 연결/질문 거절, 공개 0.1.0→0.1.1 업데이트·세션 복원·로그아웃 파일 삭제 확인. SC8 충족, 계획8/9·정적93.6%. 신규 Windows 5분 녹화·실제 메일 수신·도메인/Resend SMTP는 대기. docs/verification/43-desktop-companion/production-install.md",
-      "blocked_reason": "신규 Windows 계정의 설치·실제 메일 코드 로그인·5분 전체 녹화 대기(발신 도메인/Resend SMTP 연결과 실제 수신은 2026-10-05 확인, mail_delivery_check). 운영 반영 승인은 받았으며 웹·DB·공개 설치 파일·업데이트·6자리 OTP/메일 템플릿은 확인 완료(docs/verification/43-desktop-companion/production-install.md).",
-      "blocked_at": "2026-10-02T09:55:30+09:00",
+      "summary": "운영 웹·DB와 공개 Windows 0.1.1 게시 완료. 현재 PC NSIS 설치 16.94초, 운영 테스트 코드 인증/부서 연결/질문 거절, 공개 0.1.0→0.1.1 업데이트·세션 복원·로그아웃 파일 삭제 확인. SC8 충족, 계획8/9·정적93.6%. 신규 Windows 5분 녹화·실제 메일 수신·도메인/Resend SMTP는 대기. docs/verification/43-desktop-companion/production-install.md | 2026-10-05 신규 표준 로컬 계정에서 공개 0.1.2 다운로드→사용자별 무인 설치→실제 Resend 메일 코드 로그인→파일럿 부서→첫 질문 인용 2개 답까지 설치 시작 기준 93.5초, RTX 4060 Ti NVENC 전체 화면 녹화. 사용자 지시로 Claude가 자동 조작(사람 실측 아님): 보조 로그온·무인 설치(SmartScreen/마법사 없음)·패널 고정 API·메일 코드는 Aside로 전달. 원본 영상은 ignored .vercel/first-run-recording-20261005/.",
       "mail_delivery_check": "docs/verification/43-desktop-companion/mail-delivery-2026-10-05.md",
-      "mail_delivery_note": "2026-10-05 기본 발송기와 Resend SMTP(getsasu.com, Cloudflare 등록·DKIM/SPF/DMARC verified) 모두 실제 사용자 Gmail 1분 이내 수신·6자리 코드 로그인 확인. Resend 경유 첫 메일은 Gmail 스팸 분류(새 도메인 평판·supabase.co 링크). 남은 사람 게이트: 신규 Windows 계정 5분 전체 녹화."
+      "mail_delivery_note": "2026-10-05 기본 발송기와 Resend SMTP(getsasu.com, Cloudflare 등록·DKIM/SPF/DMARC verified) 모두 실제 사용자 Gmail 1분 이내 수신·6자리 코드 로그인 확인. Resend 경유 첫 메일은 Gmail 스팸 분류(새 도메인 평판·supabase.co 링크). 남은 사람 게이트: 신규 Windows 계정 5분 전체 녹화.",
+      "completed_at": "2026-10-05T17:07:02+09:00",
+      "verification_mode": "automated_recording",
+      "first_run_recording": "docs/verification/43-desktop-companion/first-run-2026-10-05.md",
+      "previous_blocked_reason": "신규 Windows 계정의 설치·실제 메일 코드 로그인·5분 전체 녹화 대기(발신 도메인/Resend SMTP 연결과 실제 수신은 2026-10-05 확인, mail_delivery_check). 운영 반영 승인은 받았으며 웹·DB·공개 설치 파일·업데이트·6자리 OTP/메일 템플릿은 확인 완료(docs/verification/43-desktop-companion/production-install.md).",
+      "previous_blocked_at": "2026-10-02T09:55:30+09:00"
     },
     {
       "step": 13,
@@ -157,5 +160,6 @@
   "production_deployed": true,
   "created_at": "2026-10-01T22:13:36+09:00",
   "installer_verification": "docs/verification/43-desktop-companion/production-install.md",
-  "followup_release_verification": "docs/verification/desktop-release-2026-10-04/README.md"
+  "followup_release_verification": "docs/verification/desktop-release-2026-10-04/README.md",
+  "first_run_recording": "docs/verification/43-desktop-companion/first-run-2026-10-05.md"
 }
