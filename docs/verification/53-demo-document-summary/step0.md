@@ -1,6 +1,6 @@
-# phase 52 step 0 — demo-summary-read-path 검증 기록
+# phase 53 step 0 — demo-summary-read-path 검증 기록
 
-2026-10-07 · ADR-091 · design `docs/02-design/features/demo-document-summary.design.md` §2 M1~M5, §8 S1·U1~U4·U6
+2026-10-07 · ADR-092 · design `docs/02-design/features/demo-document-summary.design.md` §2 M1~M5, §8 S1·U1~U4·U6
 worktree `D:\바이브코딩\sasu\.vercel\wt-demo-docs` (branch `feat/demo-document-summary-20261007`). 커밋·푸시·운영 DB 접속·`npm run build` 없음.
 
 ## 변경

@@ -1,6 +1,6 @@
 import type { DocumentSummary } from "@/lib/contracts";
 
-// 문서 요약을 원문 문자열로 검증하는 순수 함수. 파이프라인(저장 전)과 게스트 데모(렌더 전)가 같이 쓴다 (ADR-090·091).
+// 문서 요약을 원문 문자열로 검증하는 순수 함수. 파이프라인(저장 전)과 게스트 데모(렌더 전)가 같이 쓴다 (ADR-090·092).
 // LLM·job·DB 의존을 두지 않는다.
 
 export type SummaryGroup = Exclude<keyof DocumentSummary, "citations" | "overview">;

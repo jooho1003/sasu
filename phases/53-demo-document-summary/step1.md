@@ -1,8 +1,8 @@
 # Step 1: demo-summary-screen-and-seed
 
 ## 읽어야 할 파일
-- `/AGENTS.md` · ADR-091 · PRD §6-7·§8 · design §2 M6~M9, §8 U5·E1·E2
-- step 0 결과(`docs/verification/52-demo-document-summary/step0.md`)
+- `/AGENTS.md` · ADR-092 · PRD §6-7·§8 · design §2 M6~M9, §8 U5·E1·E2
+- step 0 결과(`docs/verification/53-demo-document-summary/step0.md`)
 - `components/document-assistant.tsx`, `components/demo-document-workspace.tsx`, `app/demo/d/[dept]/documents/page.tsx`
 - `scripts/seed-demo.ts`, `tests/seed-demo.test.ts`, `lib/demo-access.ts`
 - 데모 E2E: `tests/e2e/demo-public-workspace.spec.ts`, `tests/e2e/demo-reviewer.spec.ts`, `tests/e2e/guest.spec.ts`
@@ -21,7 +21,7 @@ npm run lint && npm run test
 npx tsc --noEmit
 # 로컬 QA 가능 시: E2E_BASE_URL=http://localhost:3011 npx playwright test <E1 스펙> demo-public-workspace.spec.ts demo-reviewer.spec.ts guest.spec.ts
 ```
-기록: `docs/verification/52-demo-document-summary/step1.md` + 1440·390 캡처.
+기록: `docs/verification/53-demo-document-summary/step1.md` + 1440·390 캡처.
 
 ## 금지사항
 - 데모 화면에 업로드·정리 시작·저장 등 쓰기 버튼 추가 금지. 게스트 라우트 LLM 호출 금지.

@@ -26,6 +26,8 @@ html { scrollbar-gutter: stable; }
 .demo-source > summary span { display: block; color: var(--muted); font-size: 13px; margin-top: 8px; }
 .demo-source[open] > summary { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 16px; }
 .demo-source-actions { margin: 16px 0; }
+.demo-document-summary { display: grid; gap: 24px; }
+.demo-document-summary .document-citations blockquote { display: grid; margin: 0; padding: 17px 19px; border: 1px solid var(--line); border-left: 3px solid #8fac97; border-radius: 0 10px 10px 0; }
 .demo-source-originals { margin-top: 20px; }
 .demo-source-originals summary { cursor: pointer; font-weight: 600; padding: 12px 0; }
 .demo-source-originals .document-citations { max-height: 480px; overflow-y: auto; }

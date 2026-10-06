@@ -1,4 +1,4 @@
-// ADR-091 phase 52 S1: anonymous demo read path for document_summaries.
+// ADR-092 phase 53 S1: anonymous demo read path for document_summaries.
 // Isolated SQL scenarios; no environment files, production data or network.
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";

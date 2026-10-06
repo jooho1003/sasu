@@ -1,6 +1,6 @@
 # demo-document-summary — Plan
 
-2026-10-07 · bkit PDCA · phase 52 · 원천 PRD §6-7 "데모 문서 요약"·§8 "데모 문서 요약 범위", ADR-091.
+2026-10-07 · bkit PDCA · phase 53 · 원천 PRD §6-7 "데모 문서 요약"·§8 "데모 문서 요약 범위", ADR-092.
 
 ## Executive Summary
 
@@ -19,7 +19,7 @@
 | WHO | 로그인 없는 데모 방문자(심사위원·잠재 고객) |
 | RISK | 익명 읽기 범위가 데모 밖으로 새는 것 · 재시드가 다른 데모 화면을 바꾸는 것 |
 | SUCCESS | SC1 SQL: 익명은 데모 요약만 읽고 쓰기 불가 · SC2 단위: 읽기 시 재검증(원문에 없는 문장 비렌더) · SC3 E2E: 데모 문서 화면에 요약 구역과 원문 문장 overview · SC4 lint·test·build·기존 데모 E2E 회귀 |
-| SCOPE | PRD §6-7·§8 / ADR-091 |
+| SCOPE | PRD §6-7·§8 / ADR-092 |
 
 ## 2. Scope
 

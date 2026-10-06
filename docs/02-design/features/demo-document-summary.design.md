@@ -1,6 +1,6 @@
 # demo-document-summary — Design
 
-2026-10-07 · phase 52 · ADR-091 · [plan](../../01-plan/features/demo-document-summary.plan.md)
+2026-10-07 · phase 53 · ADR-092 · [plan](../../01-plan/features/demo-document-summary.plan.md)
 
 ## Context Anchor
 
@@ -10,11 +10,11 @@
 | WHO | 로그인 없는 데모 방문자 |
 | RISK | 익명 읽기 범위 확장 · 재시드 회귀 |
 | SUCCESS | SC1~SC4 (plan §4) |
-| SCOPE | PRD §6-7·§8 / ADR-091 |
+| SCOPE | PRD §6-7·§8 / ADR-092 |
 
 ## 1. 선택한 설계
 
-설계안 A(사용자 선택 2026-10-07): DB 데모 읽기 정책 + 시드 + 읽기 시 재검증. 대안 B(코드 정적 데이터)·C(데모 전용 RPC)는 ADR-091 대안 참조.
+설계안 A(사용자 선택 2026-10-07): DB 데모 읽기 정책 + 시드 + 읽기 시 재검증. 대안 B(코드 정적 데이터)·C(데모 전용 RPC)는 ADR-092 대안 참조.
 
 ## 2. 구성
 
@@ -28,7 +28,7 @@
 | M6 | `components/document-summary-sections.tsx` (신규) | 실제 화면의 `SECTION_LABELS`와 한눈에 보기 + 항목 구역 렌더를 옮긴 공유 컴포넌트 `DocumentSummarySections({ summary })`. 마크업·클래스(`document-overview`, `summary-section`)는 그대로. |
 | M7 | `components/document-assistant.tsx` | M6 사용으로 교체(출력 불변). 원문 근거·하단 버튼은 그대로. |
 | M8 | `components/demo-document-workspace.tsx` | `!ledger`이고 `data.summaries[source.id]`가 있으면 기존 고정 "한눈에 보기" 문단 대신 M6 + "원문 근거 N"(인용 `blockquote`, 링크 없음)을 렌더. 요약이 없으면 기존 표시 유지. 쓰기 버튼 없음. |
-| M9 | `scripts/seed-demo.ts` | (a) `applicantSummary` overview = 검증 항목 앞 2개 문장을 공백으로 연결(원문 문장). (b) 개발 부서 합성 문서 `20000000-0000-4000-8000-000000000107` "배포 점검 회의록 (합성)"(kind `document`, visibility `dept`)과 items `…0171`~`…0175`: 핵심 내용 1·결정·정책 2·다음 할 일 1·확인이 필요한 질문 1. 작성자는 기존 개발 부서 인물(도윤·서연·개발 리드). 요약은 모든 항목 text·인용 quote가 원문 그대로, overview는 원문 두 문장. classification label은 내용에 맞게(info/decision/action/info). |
+| M9 | `scripts/seed-demo.ts` | (a) `applicantSummary` overview = 검증 항목 앞 2개 문장을 공백으로 연결(원문 문장). (b) 개발 부서 합성 문서 `20000000-0000-4000-8000-000000000110`(…0107은 개발 부서 노션 소스가 이미 사용 — step 1에서 확인) "배포 점검 회의록 (합성)"(kind `document`, visibility `dept`)과 items `…0171`~`…0175`: 핵심 내용 1·결정·정책 2·다음 할 일 1·확인이 필요한 질문 1. 작성자는 기존 개발 부서 인물(도윤·서연·개발 리드). 요약은 모든 항목 text·인용 quote가 원문 그대로, overview는 원문 두 문장. classification label은 내용에 맞게(info/decision/action/info). |
 
 ## 3. 비교 목록 (`/pdca analyze`용)
 

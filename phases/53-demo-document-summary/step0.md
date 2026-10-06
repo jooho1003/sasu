@@ -1,7 +1,7 @@
 # Step 0: demo-summary-read-path
 
 ## 읽어야 할 파일
-- `/AGENTS.md` · `/docs/ADR.md` ADR-091(·ADR-090) · `/docs/PRD.md` §6-7 "데모 문서 요약", §8 "데모 문서 요약 범위"
+- `/AGENTS.md` · `/docs/ADR.md` ADR-092(·ADR-090) · `/docs/PRD.md` §6-7 "데모 문서 요약", §8 "데모 문서 요약 범위"
 - `/docs/02-design/features/demo-document-summary.design.md` §2 M1~M5, §8 S1·U1~U4·U6
 - `supabase/migrations/0002_can_see_rls.sql`(데모 읽기 정책 형태), `0011_document_assistant.sql`, `0034_reviewed_materials.sql`(document_summaries 정책)
 - `lib/pipeline/document-summary.ts`, `tests/pipeline/document-summary.test.ts`, `lib/supabase/demo-workspace.ts`, `lib/demo-workspace.ts`, `lib/contracts.ts`(DocumentSummary)
@@ -21,7 +21,7 @@ node scripts/verify-security-sql.mjs <pglite 폴더>
 npm run lint && npm run test
 npx tsc --noEmit
 ```
-기록: `docs/verification/52-demo-document-summary/step0.md`(명령·결과 요약·red→green·SQL 하니스 통과 수).
+기록: `docs/verification/53-demo-document-summary/step0.md`(명령·결과 요약·red→green·SQL 하니스 통과 수).
 
 ## 금지사항
 - 쓰기 정책·RPC·새 테이블 추가 금지. anon 읽기 조건에서 `is_demo_department`를 빼지 마라.

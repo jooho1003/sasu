@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { DemoWorkspaceData, DemoDecision } from "@/lib/demo-workspace";
 import { useDemoWorkspace } from "./demo-workspace-state";
+import { DocumentSummarySections } from "./document-summary-sections";
 
 export function DemoDocumentWorkspace({ dept, data, ledger = false, initialSource }: { dept: string; data: DemoWorkspaceData; ledger?: boolean; initialSource?: string }) {
   const { decisions: added, append } = useDemoWorkspace();
@@ -35,9 +36,13 @@ export function DemoDocumentWorkspace({ dept, data, ledger = false, initialSourc
     {visible.map(source => {
       const records = data.items.filter(item => item.source_id === source.id);
       const rows = decisions.filter(row => belongsTo(row, source.id));
+      const summary = data.summaries[source.id];
       return <details className="panel demo-source" key={source.id} open={sourceId !== "all" || undefined}>
         <summary><strong>{source.title}</strong><span>{records.length}개 기록 · 결정 완료 {rows.filter(row => row.status === "decided").length}개 · 미루기 {rows.filter(isPending).length}개</span></summary>
-        {!ledger ? <><h3>한눈에 보기</h3><p>원문 {records.length}개에서 결정과 후속 작업의 근거를 확인하세요.</p></> : null}
+        {!ledger ? summary ? <div className="demo-document-summary">
+          <DocumentSummarySections summary={summary} />
+          <section className="summary-section"><h4>원문 근거 <span className="count-label">{summary.citations.length}</span></h4><div className="document-citations">{summary.citations.map(citation => <blockquote key={`${citation.item_id}-${citation.quote}`}><q>{citation.quote}</q></blockquote>)}</div></section>
+        </div> : <><h3>한눈에 보기</h3><p>원문 {records.length}개에서 결정과 후속 작업의 근거를 확인하세요.</p></> : null}
         <div className="demo-source-actions"><Link className="text-link" href={`/demo/d/${dept}/${ledger ? "documents" : "ledger"}?source=${encodeURIComponent(source.id)}`}>{ledger ? "문서 원문 보기" : "이 문서의 결정 기록 보기"} →</Link></div>
         {rows.length ? rows.map(row => <article className="ledger-entry" id={`source-${source.id}-decision-${row.id}`} key={row.id}>
           <span className={`badge ${row.status === "deferred" ? "badge-urgent" : "badge-green"}`}>{row.status === "deferred" ? decisions.some(next => next.supersedes_id === row.id) ? "미루기 이력 · 다음 결정 완료" : "미루기" : row.supersedes_id ? "다음 결정 완료" : "결정 완료"}</span>

@@ -13,7 +13,7 @@ export async function readDemoWorkspace(dept: string): Promise<DemoWorkspaceData
   ]);
   if (sources.error || items.error || decisions.error) throw new Error("데모 문서 조회 실패");
   // 요약은 보조 구역이다. 조회가 실패해도 데모 문서 화면 전체를 깨지 않도록 빈 요약으로 둔다.
-  // 표시 여부는 RLS(document_summaries_demo_read)가 정하고, 여기서는 그 부서 원문으로 다시 검증만 한다 (ADR-091).
+  // 표시 여부는 RLS(document_summaries_demo_read)가 정하고, 여기서는 그 부서 원문으로 다시 검증만 한다 (ADR-092).
   const summaries = summaryRows.error ? {} : verifiedDemoSummaries(summaryRows.data ?? [], items.data ?? []);
   const ids = (decisions.data ?? []).map(row => row.id);
   const citations = ids.length ? await client.from("citations").select("owner_id,item_id,quote").eq("owner_kind", "decision").in("owner_id", ids) : { data: [], error: null };

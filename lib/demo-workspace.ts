@@ -3,7 +3,7 @@ import type { DocumentSummary } from "@/lib/contracts";
 export type DemoSource = { id: string; title: string; kind: string };
 export type DemoItem = { id: string; source_id: string; content: string; author: string | null; label: string; spoken_at?: string | null };
 export type DemoDecision = { id: string; source_id: string; source_ids?: string[]; outcome: string; rationale: string; quote: string; status: "decided" | "deferred"; supersedes_id?: string; request_id?: string };
-// summaries: 원문으로 다시 검증한 문서 요약(source_id → 요약). 요약이 없는 자료는 키가 없다 (ADR-091).
+// summaries: 원문으로 다시 검증한 문서 요약(source_id → 요약). 요약이 없는 자료는 키가 없다 (ADR-092).
 export type DemoWorkspaceData = { sources: DemoSource[]; items: DemoItem[]; decisions: DemoDecision[]; summaries: Record<string, DocumentSummary> };
 
 const topics = [

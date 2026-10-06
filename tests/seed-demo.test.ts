@@ -5,7 +5,7 @@ import { DocumentSummary } from "../lib/contracts";
 import { MASK_PATTERNS } from "../lib/mask";
 import { verifyDocumentSummary } from "../lib/pipeline/document-summary";
 import { DEMO_NOTION_EXCLUSIONS, DEMO_NOTION_ROOTS, DEMO_NOTION_SOURCES, DEMO_REVIEWER_ID } from "@/lib/demo-access";
-import { DEMO_AGENT_ROLE, DEMO_DEPARTMENTS, DEMO_MEMBERS, DEMO_RETENTION_EXPORTS, DEMO_RETENTION_SETTINGS, DEMO_TRAILER_SLUG, seedDemoTrailer, seedDemoAttempts } from "../scripts/seed-demo";
+import { DEMO_AGENT_ROLE, DEMO_DEPARTMENTS, DEMO_DOCUMENT_SUMMARIES, DEMO_DEPLOY_REVIEW_SOURCE_ID, DEMO_MEMBERS, DEMO_RETENTION_EXPORTS, DEMO_RETENTION_SETTINGS, DEMO_TRAILER_SLUG, seedDemoTrailer, seedDemoAttempts } from "../scripts/seed-demo";
 
 describe("게스트 데모 시드", () => {
   it("부서 간 소스·항목·카드·답변 ID가 충돌하지 않는다", () => {
@@ -171,23 +171,34 @@ describe("게스트 데모 시드", () => {
     );
   });
 
-  it("문서 어시스턴트 시드 요약은 계약 전체 형태이며 인용·항목이 모두 원문에 있다", () => {
+  it("합성 배포 점검 회의록은 개발 부서 문서이며 네 구역이 모두 채워진다", () => {
+    const development = DEMO_DEPARTMENTS.find((department) => department.id === DEMO_AGENT_ROLE.dept_id);
+    const source = development?.sources.find((entry) => entry.id === DEMO_DEPLOY_REVIEW_SOURCE_ID);
+    const document = DEMO_DOCUMENT_SUMMARIES.find((entry) => entry.source_id === DEMO_DEPLOY_REVIEW_SOURCE_ID);
+
+    expect(source).toMatchObject({ title: "배포 점검 회의록 (합성)", kind: "document", visibility: "dept", is_principles: false });
+    expect(development?.items.filter((item) => item.source_id === DEMO_DEPLOY_REVIEW_SOURCE_ID)).toHaveLength(5);
+    const summary = DocumentSummary.parse(document?.summary);
+    expect(summary.key_points.length).toBeGreaterThanOrEqual(1);
+    expect(summary.decisions.length).toBeGreaterThanOrEqual(1);
+    expect(summary.actions.length).toBeGreaterThanOrEqual(1);
+    expect(summary.open_questions.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("문서 요약 시드(지원서 3건 + 합성 문서)는 계약 전체 형태이며 검증에서 하나도 버려지지 않는다", () => {
     const development = DEMO_DEPARTMENTS.find((department) => department.id === DEMO_AGENT_ROLE.dept_id);
 
     expect(DEMO_AGENT_ROLE.documents).toHaveLength(3);
-    for (const document of DEMO_AGENT_ROLE.documents) {
+    expect(DEMO_DOCUMENT_SUMMARIES).toHaveLength(4);
+    for (const document of DEMO_DOCUMENT_SUMMARIES) {
       const items = new Map(
         (development?.items ?? []).filter((item) => item.source_id === document.source_id).map((item) => [item.id, item.content]),
       );
       const summary = DocumentSummary.parse(document.summary);
       const verified = verifyDocumentSummary(summary, items);
 
-      // overview는 시드 작성 문장이라 원문 문자열이 아닐 수 있다(ADR-090 검증 대체는 dropped 1건으로만 센다). 인용·항목은 전부 유지돼야 한다.
-      expect(verified.valid.citations).toEqual(summary.citations);
-      for (const group of ["key_points", "decisions", "actions", "open_questions"] as const) {
-        expect(verified.valid[group]).toEqual(summary[group]);
-      }
-      expect(verified.dropped).toBeLessThanOrEqual(1);
+      expect(verified.dropped).toBe(0);
+      expect(verified.valid).toEqual(summary);
       expect(verified.valid.citations.length).toBeGreaterThan(0);
       expect(verified.valid.key_points.length).toBeGreaterThan(0);
     }

@@ -10,7 +10,7 @@ import {
   type VerifiedDocumentSummary,
 } from "@/lib/document-summary-check";
 
-// 검증 함수는 게스트 데모와 공유하는 순수 모듈로 옮겼다(ADR-091). 기존 호출부를 위해 같은 이름으로 다시 내보낸다.
+// 검증 함수는 게스트 데모와 공유하는 순수 모듈로 옮겼다(ADR-092). 기존 호출부를 위해 같은 이름으로 다시 내보낸다.
 export { groundedOverview, verifyDocumentSummary, type VerifiedDocumentSummary } from "@/lib/document-summary-check";
 
 type DocumentRow = {

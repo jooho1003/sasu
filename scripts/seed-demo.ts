@@ -146,6 +146,9 @@ const SALES: DemoDepartment = {
   ],
 };
 
+// 개발 부서 합성 문서(배포 점검 회의록). 0107은 Notion 소스가 쓰고 있어 0110을 쓴다.
+export const DEMO_DEPLOY_REVIEW_SOURCE_ID = "20000000-0000-4000-8000-000000000110";
+
 const DEVELOPMENT: DemoDepartment = {
   id: IDS.devDept,
   name: "개발 사수",
@@ -156,6 +159,7 @@ const DEVELOPMENT: DemoDepartment = {
     { id: "20000000-0000-4000-8000-000000000104", kind: "document", external_id: "demo-dev-applicant-a", title: "지원서 — 지원자 A (합성)", visibility: "dept", is_principles: false },
     { id: "20000000-0000-4000-8000-000000000105", kind: "document", external_id: "demo-dev-applicant-b", title: "지원서 — 지원자 B (합성)", visibility: "dept", is_principles: false },
     { id: "20000000-0000-4000-8000-000000000106", kind: "document", external_id: "demo-dev-applicant-c", title: "지원서 — 지원자 C (합성)", visibility: "dept", is_principles: false },
+    { id: DEMO_DEPLOY_REVIEW_SOURCE_ID, kind: "document", external_id: "demo-dev-deploy-review", title: "배포 점검 회의록 (합성)", visibility: "dept", is_principles: false },
   ],
   items: [
     { id: "20000000-0000-4000-8000-000000000111", source_id: "20000000-0000-4000-8000-000000000101", external_ref: "dev-principle-1", author: "개발 원칙", content: "장애 대응은 원인 분석보다 먼저 영향 범위와 롤백 가능 여부를 확인합니다.", label: "info" },
@@ -169,6 +173,11 @@ const DEVELOPMENT: DemoDepartment = {
     { id: "20000000-0000-4000-8000-000000000145", source_id: "20000000-0000-4000-8000-000000000105", external_ref: "applicant-b-2", author: "지원자 B", content: "운영 이슈의 원인과 대응 과정을 짧은 문서로 정리해 공유했습니다.", label: "info" },
     { id: "20000000-0000-4000-8000-000000000146", source_id: "20000000-0000-4000-8000-000000000106", external_ref: "applicant-c-1", author: "지원자 C", content: "사용자 화면의 컴포넌트 구조와 인터랙션을 개선하는 프론트엔드 작업을 주로 했습니다.", label: "info" },
     { id: "20000000-0000-4000-8000-000000000147", source_id: "20000000-0000-4000-8000-000000000106", external_ref: "applicant-c-2", author: "지원자 C", content: "시각적 완성도와 사용 흐름을 다듬는 데 집중했습니다.", label: "info" },
+    { id: "20000000-0000-4000-8000-000000000171", source_id: DEMO_DEPLOY_REVIEW_SOURCE_ID, external_ref: "deploy-review-1", author: "도윤", content: "이번 점검은 결제 모듈 배포 시점과 로그 보관 설정을 함께 확인하는 자리였습니다.", label: "info" },
+    { id: "20000000-0000-4000-8000-000000000172", source_id: DEMO_DEPLOY_REVIEW_SOURCE_ID, external_ref: "deploy-review-2", author: "개발 리드", content: "정책: 금요일 오후에는 운영 배포를 하지 않는다.", label: "decision" },
+    { id: "20000000-0000-4000-8000-000000000173", source_id: DEMO_DEPLOY_REVIEW_SOURCE_ID, external_ref: "deploy-review-3", author: "개발 리드", content: "결론: 결제 모듈 배포는 다음 주 화요일 오전으로 미룬다.", label: "decision" },
+    { id: "20000000-0000-4000-8000-000000000174", source_id: DEMO_DEPLOY_REVIEW_SOURCE_ID, external_ref: "deploy-review-4", author: "서연", content: "서연은 월요일까지 롤백 절차를 체크리스트로 정리한다.", label: "action" },
+    { id: "20000000-0000-4000-8000-000000000175", source_id: DEMO_DEPLOY_REVIEW_SOURCE_ID, external_ref: "deploy-review-5", author: "도윤", content: "서버 로그 보관 기간을 30일로 늘릴지는 아직 정하지 않았다.", label: "info" },
   ],
   request: { id: "20000000-0000-4000-8000-000000000121", origin_item_id: "20000000-0000-4000-8000-000000000112", citation_item_ids: ["20000000-0000-4000-8000-000000000112", "20000000-0000-4000-8000-000000000113"], title: "롤백 플랜 확인 전 배포를 진행할까요?", background: "개발 채널에서 오늘 배포 여부를 물었고, 영향 범위와 롤백 계획 확인이 남아 있습니다.", recommendation: "영향 범위와 롤백 가능 여부를 확인한 뒤 배포하는 방향을 권합니다.", visibility: "leads_only" },
   priorDecision: { id: "20000000-0000-4000-8000-000000000122", outcome: "스테이징 로그 대시보드 추가", rationale: "운영 배포 전에 확인 가능한 관측성을 확보하기로 했습니다.", item_id: "20000000-0000-4000-8000-000000000114" },
@@ -192,9 +201,10 @@ const roleCriteria = (values: Array<Omit<VerifiedCriterion, "key" | "label" | "w
   values.map((value, index) => ({ ...AGENT_ROLE_CRITERIA[index], ...value }));
 
 // 문서 어시스턴트가 읽는 계약(DocumentSummary) 전체 형태. 인용과 핵심 내용은 items 원문 그대로다.
-const applicantSummary = (overview: string, points: Array<[itemId: string, text: string]>): DocumentSummary => ({
+// overview는 검증 항목 앞 2개 문장을 공백으로 연결한 원문 문장이다(ADR-090 검증이 대체하지 않는다).
+const applicantSummary = (points: Array<[itemId: string, text: string]>): DocumentSummary => ({
   citations: points.map(([item_id, quote]) => ({ item_id, decision_id: null, quote })),
-  overview,
+  overview: points.slice(0, 2).map(([, text]) => text).join(" "),
   key_points: points.map(([item_id, text]) => ({ item_id, text })),
   decisions: [],
   actions: [],
@@ -210,16 +220,16 @@ const DEMO_AGENT_ROLE_SEED = {
   created_by: DEMO_DEV_LEAD_ID,
   criteria: AGENT_ROLE_CRITERIA,
   documents: [
-    { source_id: "20000000-0000-4000-8000-000000000104", summary: applicantSummary("지원자 A는 사내 도구 구현과 운영 문서화 경험을 제시했습니다.", [
+    { source_id: "20000000-0000-4000-8000-000000000104", summary: applicantSummary([
       ["20000000-0000-4000-8000-000000000141", "Next.js App Router와 Supabase RLS로 사내 승인 도구를 만들었습니다."],
       ["20000000-0000-4000-8000-000000000142", "결정 기록을 문서화하고 변경 이유를 팀과 함께 검토하는 습관이 있습니다."],
       ["20000000-0000-4000-8000-000000000143", "운영 중에는 영향 범위와 롤백 절차를 체크리스트로 남겼습니다."],
     ]) },
-    { source_id: "20000000-0000-4000-8000-000000000105", summary: applicantSummary("지원자 B는 백엔드 운영 경험을 제시했지만 프로젝트 스택 근거는 없습니다.", [
+    { source_id: "20000000-0000-4000-8000-000000000105", summary: applicantSummary([
       ["20000000-0000-4000-8000-000000000144", "여러 서비스의 API와 데이터 처리 작업을 맡아 백엔드 운영 경험을 쌓았습니다."],
       ["20000000-0000-4000-8000-000000000145", "운영 이슈의 원인과 대응 과정을 짧은 문서로 정리해 공유했습니다."],
     ]) },
-    { source_id: "20000000-0000-4000-8000-000000000106", summary: applicantSummary("지원자 C는 프론트엔드 작업 경험을 제시했고 협업 문서화 근거는 없습니다.", [
+    { source_id: "20000000-0000-4000-8000-000000000106", summary: applicantSummary([
       ["20000000-0000-4000-8000-000000000146", "사용자 화면의 컴포넌트 구조와 인터랙션을 개선하는 프론트엔드 작업을 주로 했습니다."],
       ["20000000-0000-4000-8000-000000000147", "시각적 완성도와 사용 흐름을 다듬는 데 집중했습니다."],
     ]) },
@@ -271,6 +281,38 @@ export const DEMO_AGENT_ROLE = {
     weighted_score: weightedScore(result.result.criteria.map((criterion) => ({ ...criterion }))),
   })),
 };
+
+const I = (n: number) => `20000000-0000-4000-8000-000000000${n}`;
+const deployReviewSentences = {
+  point: "이번 점검은 결제 모듈 배포 시점과 로그 보관 설정을 함께 확인하는 자리였습니다.",
+  policy: "정책: 금요일 오후에는 운영 배포를 하지 않는다.",
+  conclusion: "결론: 결제 모듈 배포는 다음 주 화요일 오전으로 미룬다.",
+  action: "서연은 월요일까지 롤백 절차를 체크리스트로 정리한다.",
+  question: "서버 로그 보관 기간을 30일로 늘릴지는 아직 정하지 않았다.",
+} as const;
+const DEMO_DEPLOY_REVIEW_SUMMARY: DocumentSummary = {
+  citations: [
+    { item_id: I(171), decision_id: null, quote: deployReviewSentences.point },
+    { item_id: I(172), decision_id: null, quote: deployReviewSentences.policy },
+    { item_id: I(173), decision_id: null, quote: deployReviewSentences.conclusion },
+    { item_id: I(174), decision_id: null, quote: deployReviewSentences.action },
+    { item_id: I(175), decision_id: null, quote: deployReviewSentences.question },
+  ],
+  overview: `${deployReviewSentences.policy} ${deployReviewSentences.conclusion}`,
+  key_points: [{ item_id: I(171), text: deployReviewSentences.point }],
+  decisions: [
+    { item_id: I(172), text: deployReviewSentences.policy },
+    { item_id: I(173), text: deployReviewSentences.conclusion },
+  ],
+  actions: [{ item_id: I(174), text: deployReviewSentences.action }],
+  open_questions: [{ item_id: I(175), text: deployReviewSentences.question }],
+};
+
+// 개발 부서 문서 요약 시드: 지원서 3건(역할 평가 데이터 그대로) + 합성 배포 점검 회의록.
+export const DEMO_DOCUMENT_SUMMARIES: Array<{ source_id: string; summary: DocumentSummary }> = [
+  ...DEMO_AGENT_ROLE.documents.map((document) => ({ source_id: document.source_id, summary: document.summary })),
+  { source_id: DEMO_DEPLOY_REVIEW_SOURCE_ID, summary: DEMO_DEPLOY_REVIEW_SUMMARY },
+];
 
 const PLANNING_SOURCE_IDS = {
   principles: "30000000-0000-4000-8000-000000000101",
@@ -734,7 +776,7 @@ async function seedDepartment(
 
   if (department.id === IDS.devDept) {
     const { error: documentSummaryError } = await client.from("document_summaries").insert(
-      DEMO_AGENT_ROLE.documents.map((document) => ({
+      DEMO_DOCUMENT_SUMMARIES.map((document) => ({
         source_id: document.source_id,
         dept_id: department.id,
         status: "summarized",
