@@ -57,10 +57,11 @@
     {
       "step": 7,
       "name": "retro-verification",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "note": "완료 시 blocked로 멈춘다 — 운영 반영은 사람 판정, 9/20 이후"
+      "note": "완료 시 blocked로 멈춘다 — 운영 반영은 사람 판정, 9/20 이후",
+      "summary": "2026-10-05 회귀·retros E2E(스펙 confirm 대화상자 보정)·README·원시 로그, 수집기 dry-run 136/182건(사용자 동의, 건수만), 운영 회고 1일 생성(첫 시도 schema_invalid 2회 → 다시 생성 성공) 후 삭제 확인. ui-regression 9건 실패는 회고 무관 후속 확인 대상. docs/verification/daily-retro-2026-10-05/README.md"
     }
   ]
 }

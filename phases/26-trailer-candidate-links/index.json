@@ -71,7 +71,9 @@
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
       "note": "완료 시 blocked로 멈춘다 — 조직 개시는 사람 판정",
-      "summary": "로컬 SQL·브라우저 검증 완료. 법률 검토·조직 개시와 운영 반영은 사람 판정 대기."
+      "summary": "2026-10-05 로컬 QA 검증 완료: lint·tsc·단위 1,881·SQL 13+316·E2E A 14 통과(3 skipped)·E2E B 통과(1회차는 실제 모델 schema_invalid로 실패 후 재실행 통과)·권한·누출 점검·캡처. 남은 것은 사람 판정뿐: 법률 검토, 조직 개시.",
+      "blocked_reason": "조직 개시(orgs.trailer_assessment_enabled)는 법률 자문(채용절차법 제11조 반환·파기 기간)·처리방침 게시 확인 후 사용자 승인으로만. 운영 DB 적용·플래그 on·배포는 이 step 범위 밖.",
+      "verification": "docs/verification/trailer-invites.md"
     }
   ]
 }

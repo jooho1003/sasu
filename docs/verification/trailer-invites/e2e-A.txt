@@ -1,0 +1,24 @@
+
+Running 17 tests using 1 worker
+
+  ok  1 [trailer-enabled] › tests\e2e\trailer.spec.ts:4:7 › 공간 오피스 3퀘스트 완주·격리 1440px map (1.1m)
+  ok  2 [trailer-enabled] › tests\e2e\trailer.spec.ts:4:7 › 공간 오피스 3퀘스트 완주·격리 1440px list (8.3s)
+  ok  3 [trailer-enabled] › tests\e2e\trailer.spec.ts:4:7 › 공간 오피스 3퀘스트 완주·격리 390px list (10.1s)
+  ok  4 [trailer-enabled] › tests\e2e\trailer.spec.ts:80:5 › 실제 키보드·클릭 이동, 근접 도착 후 대화, 새로고침 초기화 (6.1s)
+  ok  5 [trailer-enabled] › tests\e2e\trailer.spec.ts:107:5 › 모바일 월드 터치 이동·수첩·Escape 복귀 (1.1s)
+  ok  6 [trailer-disabled] › tests\e2e\trailer-disabled.spec.ts:3:5 › 비활성 프리뷰는 404이며 시나리오를 렌더하지 않는다 (89ms)
+  ok  7 [trailer-invites-disabled] › tests\e2e\trailer-invites.spec.ts:11:5 › A: 초대 플래그가 꺼진 배포에서는 지원자 링크 API가 열리지 않는다 (131ms)
+  -   8 [trailer-invites-disabled] › tests\e2e\trailer-invites.spec.ts:20:7 › B: QA 조직의 발급·목록·철회 › 발급·동의·3퀘스트·실제 채점·부서장 점수표·철회
+  ok  9 [trailer-invite-page] › tests\e2e\trailer-invite-page.spec.ts:6:5 › 플래그가 꺼지면 지원자 초대 페이지는 404다 (42ms)
+  ok 10 [trailer-invite-page] › tests\e2e\trailer-invite-page.spec.ts:11:5 › 존재하지 않는 링크는 이메일 폼 뒤 같은 오류만 보이고 브라우저에 저장하지 않는다 (648ms)
+  ok 11 [trailer-publish-default] › tests\e2e\trailer-publish.spec.ts:20:122 › 예고편 A · 기본 off · DB 쓰기 없음 › /d/fbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/trailers → 404 (31ms)
+  ok 12 [trailer-publish-default] › tests\e2e\trailer-publish.spec.ts:20:122 › 예고편 A · 기본 off · DB 쓰기 없음 › /t/abcdefghijklmnopqrstuv → 404 (31ms)
+  ok 13 [trailer-publish-default] › tests\e2e\trailer-publish.spec.ts:20:122 › 예고편 A · 기본 off · DB 쓰기 없음 › /t/INVALID → 404 (26ms)
+  ok 14 [trailer-publish-default] › tests\e2e\trailer-publish.spec.ts:20:122 › 예고편 A · 기본 off · DB 쓰기 없음 › /demo/d/fbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/trailers → 404 (787ms)
+  ok 15 [trailer-publish-default] › tests\e2e\trailer-publish.spec.ts:21:7 › 예고편 A · 기본 off · DB 쓰기 없음 › 생성 API와 메인·게스트 링크가 닫힘 (3.6s)
+  -  16 [trailer-publish-default] › tests\e2e\trailer-publish.spec.ts:30:7 › 예고편 B · O11 운영 승인 후 › 생성·검토·승인·조직 허용·발행·철회·재발행과 일일 한도
+  -  17 [trailer-publish-default] › tests\e2e\trailer-publish.spec.ts:85:7 › 예고편 B · O11 운영 승인 후 › 게스트 조회는 쓰기·호출 0이며 실제 스냅샷에 원문 겹침 0
+
+  3 skipped
+  14 passed (1.8m)
+exit=0

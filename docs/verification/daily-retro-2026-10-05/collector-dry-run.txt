@@ -1,0 +1,24 @@
+# phase 27 수집기 dry-run 실측 (2026-10-05, 사용자 동의: git·Claude·Codex·Chrome 기록 읽기)
+# 설정: 임시 --config (repos: D:/바이브코딩/sasu, author_emails 2개, claude/codex/memory on, chrome off), tz Asia/Seoul
+# 제목·URL은 기록하지 않는다. 종류별 건수만 남긴다. 임시 설정·출력 파일은 실행 뒤 삭제했다.
+
+$ npx tsx scripts/retro-collect.ts --config <임시> --date 2026-10-05 --dry-run
+exit=0
+kind            count
+git_commit      18
+doc_change      114
+claude_session  4
+activities: 136 · masked: 0 · out: dry-run
+
+$ npx tsx scripts/retro-collect.ts --config <임시> --date 2026-10-05 --chrome --dry-run
+exit=0
+kind            count
+git_commit      18
+doc_change      114
+claude_session  4
+web_visit       46
+activities: 182 · masked: 0 · out: dry-run
+
+# 임시 History 복사본: 실행 전 0 · 실행 후 0 (ls $TEMP $TMP | grep -i history)
+# codex_session·memory_change 0건: 이 PC의 Codex 세션·메모리 경로에 2026-10-05 대상 기록이 없거나 수집기 기본 경로와 다르다(경로는 확인하지 않음).
+# dry-run은 번들 파일을 쓰지 않는다. 첫 5개 제목 표는 터미널에만 출력됐고 이 기록에는 옮기지 않았다.

@@ -1,0 +1,31 @@
+Graft 0.19.0 phase-level before snapshot (commit b5b04d8, 2026-10-05 Docker).
+Source: 634 files, parent of 122b88d.
+Build: 2,912 nodes, 7,352 edges, 634 cards. Deep/meaning layer not built.
+graph check: OK — the wiring graph is in sync with the code.
+
+=== Phase 33 Recording UX - Affected Changes ===
+phase 33 녹음 화면 UX (ADR-071, commit 122b88d parent)
+- 녹음 시작을 한 번의 클릭으로: 입력 선택 → 세션 → 키 → 사전 검사 → 캡처
+- 종료 확인·이탈 보호·단계 표시·복구 목록·폐기 분리, 구간 플레이어 탐색 확정
+- 팀장 진입·조직 스위치 안내, 검토 화면 경고·이어진 기록 탐색
+
+Key components in scope (before state):
+- lib/recording/browser/inputs.ts (캡처 입력 수집)
+- lib/recording/browser/storage.ts (IndexedDB 샘플 저장소)
+- components/meeting-recorder.tsx (녹음 UI 컨테이너)
+- components/recording-segment-player.tsx (구간 플레이어)
+- components/review-detail.tsx (검토 화면)
+- app/(auth)/d/[dept]/reviews/record/page.tsx (녹음 페이지)
+
+Key files changed by phase 33 (176 files total):
+- components/meeting-recorder.tsx (녹음 흐름 단순화)
+- lib/recording/recorder-copy.ts (신규: 키보드 입력 레코더)
+- lib/recording/recorder-start.ts (신규: 시작 플로우)
+- lib/recording/browser/display.ts (신규: 화면 공유 관리)
+- lib/recording/browser/cleanup.ts (신규: 종료 정리)
+- components/recording-segment-player.tsx (구간 탐색)
+- components/meeting-recorder.tsx (3단계 표시, 복구 목록, 확인 화면)
+- app/globals.css (신규 CSS 클래스: recorder-notice, recorder-progress, recorder-timer)
+
+Wiring/dependency analysis tools (graft deep layer): not built for phase-level review.
+Run 'graft build --deep' in each worktree to expand concept-level detail.

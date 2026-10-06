@@ -1,0 +1,6 @@
+{
+  "database": "local Supabase",
+  "flow": "upload-generate-exclude-regenerate-edit-confirm-share-export",
+  "llmCalls": 2,
+  "errors": []
+}

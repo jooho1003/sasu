@@ -7,13 +7,15 @@ date: 2026-10-02
 
 # desktop-companion Completion Report
 
-> **Status**: Partial — 운영 웹·DB·Windows 0.1.1 설치판 게시·현재 PC 설치/업데이트 확인. Plan SC 8/9, 신규 Windows 5분 녹화·도메인/Resend SMTP 대기
+> **Status**: Partial (2026-10-02 시점) — 운영 웹·DB·Windows 0.1.1 설치판 게시·현재 PC 설치/업데이트 확인. Plan SC 8/9, 신규 Windows 5분 녹화·도메인/Resend SMTP 대기
+>
+> **2026-10-05 갱신**: phase 43 step 12 완료(`verification_mode: automated_recording`). SC7은 Claude 자동 조작 녹화로 충족 처리, Plan SC 9/9. 단 사람 실측이 아니다(§12). 아래 본문의 8/9·blocked·대기 서술은 10/02 기록이다.
 >
 > **Project**: 사수 (SASU) · **Version**: 0.1.1 · **Author**: Codex
 >
 > **Completion Date**: 2026-10-02 · **PDCA Cycle**: phase 43 · **Design Match Rate**: 93.6%
 
-원천: [PRD §3-8 DC-01~12·§4·§8-1·§11](../../PRD.md) → [ARCHITECTURE §6-12](../../ARCHITECTURE.md) → [ADR-082](../../ADR.md) → [설계](../../02-design/features/desktop-companion.design.md) → [실행 기록](../../verification/desktop-companion-2026-10-02.md). step 0~11·13·14 완료·step 12는 사람·운영 게이트로 blocked.
+원천: [PRD §3-8 DC-01~12·§4·§8-1·§11](../../PRD.md) → [ARCHITECTURE §6-12](../../ARCHITECTURE.md) → [ADR-082](../../ADR.md) → [설계](../../02-design/features/desktop-companion.design.md) → [실행 기록](../../verification/desktop-companion-2026-10-02.md). step 0~11·13·14 완료·step 12는 사람·운영 게이트로 blocked(10/02 시점; 10/05 step 12 완료, §12).
 
 ## Executive Summary
 
@@ -49,11 +51,11 @@ date: 2026-10-02
 | SC4 | 앱 결정이 원장에 남고 연타 중복 1건(멱등) | ✅ 충족 | Electron E2E 연타 테스트·SQL `request_id unique` |
 | SC5 | 웹 해제 직후 다음 앱 요청 401 → 로그인 화면 | ✅ 충족 | E2E full-flow, `session_invalid` 경로 매핑 |
 | SC6 | 끊김 보관 → 재연결 전송 → 로컬 파일 삭제, 평문 0건 | ✅ 충족 | `outbox.bin` 암호화·파일 삭제 확인·userData 평문 grep 0·로그 ID·길이·코드만 |
-| SC7 | 깨끗한 Windows 설치 → 로그인 → 첫 답 5분(녹화) | ❌ 미충족 | 사람 실측 대기 (C1 패널 펫 클릭 해결 후) |
-| SC8 | 자동 업데이트 1회 실제 적용 | ❌ 미충족 | 배포 저장소·사용자 승인·운영 대기 |
+| SC7 | 깨끗한 Windows 설치 → 로그인 → 첫 답 5분(녹화) | ❌ 미충족 (10/02 시점) → ✅ 2026-10-05 자동 녹화로 충족(사람 실측 아님) | 10/02: 사람 실측 대기. 10/05: [first-run-2026-10-05.md](../../verification/43-desktop-companion/first-run-2026-10-05.md) 설치 시작→첫 답 93.5초·인용 2개 |
+| SC8 | 자동 업데이트 1회 실제 적용 | ❌ 미충족 (10/02 시점) → ✅ 10/02 운영 업데이트로 충족 | 10/02 후반: §11·[production-install.md](../../verification/43-desktop-companion/production-install.md) |
 | SC9 | TDD·하니스·lint/build/test·analyze ≥ 90% | ✅ 충족 | desktop 단위 32·루트 1,834·SQL 8/8·권한 2,016·analyze 93.6% |
 
-**Success Rate: 7/9 (78%)** — 2개 미충족은 사람·운영 게이트. 이월 G2~G4는 step 13에서 해결했다(아래 §9).
+**Success Rate: 7/9 (78%, 10/02 시점; 10/05 기준 9/9)** — 당시 2개 미충족은 사람·운영 게이트. 이월 G2~G4는 step 13에서 해결했다(아래 §9).
 
 ## 1.5 Decision Record Summary
 
@@ -274,10 +276,17 @@ G2~G4 **3/3 해결**. 양쪽 lint/build·root 단위 1,834 통과. Archify deliv
 
 SC8 충족으로 **8/9**, 전체 정적 93.6% 유지. SC7 신규 Windows 계정 설치·실제 이메일 수신·5분 화면 녹화와 Resend SMTP는 도메인 등록/DNS 인증 뒤 확인한다. 전체 phase/step12는 계속 blocked이며 `production_deployed=true`는 웹·DB·설치 파일 게시를 뜻한다.
 
+## 12. 신규 계정 첫 실행·메일 수신 (2026-10-05 갱신)
+
+- 메일: 기본 발송기와 Resend SMTP(`getsasu.com`) 모두 실제 Gmail 수신·6자리 코드 로그인을 확인했다. 첫 Resend 메일은 Gmail 스팸함으로 분류됐고([mail-delivery-2026-10-05.md](../../verification/43-desktop-companion/mail-delivery-2026-10-05.md)), phase 49 이전 후 2026-10-05 19:26 KST 로그인 메일이 **받은편지함**에 도착했다([production-cutover.md](../../verification/49-app-domain-migration/production-cutover.md) T9).
+- SC7: 새 표준 로컬 계정에서 공개 0.1.2 다운로드 → 무인 설치 → 실제 메일 코드 로그인 → 파일럿 부서 → 첫 답(인용 2개), 설치 시작 기준 93.5초, NVENC 전체 화면 녹화([first-run-2026-10-05.md](../../verification/43-desktop-companion/first-run-2026-10-05.md), [phases/43-desktop-companion/index.json](../../../phases/43-desktop-companion/index.json) step 12 `automated_recording`).
+- 한계(해당 기록 그대로): Claude가 Playwright로 입력한 자동 조작이라 사람 사용성 실측이 아니며 "5분 안"의 하한선이다. 새 계정으로 직접 로그인하지 않은 보조 로그온, 무인 설치(`/S`)라 마법사·SmartScreen 단계 없음, 패널 고정 API 사용, 메일 코드는 Claude가 Aside로 전달했다. 코드 서명은 여전히 없다.
+
 ## Version History
 
 | 버전 | 날짜 | 내용 | Author |
 |---|---|---|---|
+| 1.5 | 2026-10-05 | step 12 완료·SC7 자동 녹화 충족(9/9, 사람 실측 아님)·Resend 메일 수신 반영. 본문 8/9·blocked 서술은 10/02 기록으로 유지 | Claude |
 | 1.4 | 2026-10-02 | 운영 0.1.1 게시·현재 PC 설치·실제 업데이트/로그아웃 확인. SC8 충족, SC7·도메인/SMTP 대기 | Codex |
 | 1.3 | 2026-10-02 | 웹 API·DB 운영 반영(PR #25)·0069 적용·auth.sessions 권한 확인 반영. 설치 파일 게시·사람 실측·SMTP·메일 템플릿 대기 유지 | Claude(오케스트레이터) |
 | 1.2 | 2026-10-02 | step14 세션/질문 보관 4/4·desktop76·합성 Electron7·root1834. 기존 운영 게이트 유지 | Codex |

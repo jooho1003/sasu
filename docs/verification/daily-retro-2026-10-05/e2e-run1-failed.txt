@@ -1,0 +1,36 @@
+
+Running 2 tests using 1 worker
+
+  ok 1 [chromium] › tests\e2e\demo-retros.spec.ts:3:5 › 합성 회고 체험은 필터·근거·복사만 제공하며 쓰기가 없다 (4.4s)
+  x  2 [chromium] › tests\e2e\retros.spec.ts:8:5 › 합성 번들부터 실제 생성·수정·공유·내보내기까지 (21.3s)
+
+
+  1) [chromium] › tests\e2e\retros.spec.ts:8:5 › 합성 번들부터 실제 생성·수정·공유·내보내기까지 ────────────────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 404
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      54 |     expect((await second.request.get(endpoint)).status()).toBe(404);
+      55 |     await page.getByLabel("볼 수 있는 사람").selectOption("dept");
+    > 56 |     await expect.poll(async()=>(await second.request.get(endpoint)).status()).toBe(200);
+         |                                                                               ^
+      57 |     await page.getByText("내보내기",{exact:true}).click();
+      58 |     for(const width of [1440,390]){await page.setViewportSize({width,height:960});await page.screenshot({path:`${evidence}/retro-detail-${width}.png`,fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);}
+      59 |     await page.goto(`/d/${dept}/retros`);await expect(page.getByRole("link",{name:"합성 업무 회고 QA"})).toBeVisible();
+        at D:\바이브코딩\sasu\tests\e2e\retros.spec.ts:56:79
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\retros-합성-번들부터-실제-생성·수정·공유·내보내기까지-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\retros-합성-번들부터-실제-생성·수정·공유·내보내기까지-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\retros.spec.ts:8:5 › 합성 번들부터 실제 생성·수정·공유·내보내기까지 ─────────────────────────
+  1 passed (27.7s)
+exit=1

@@ -1,0 +1,12 @@
+lib/trailer-assessment.ts:69 [english] null → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] evidence → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] quote → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [english] ref → 한글로 풀어 쓰세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+lib/trailer-assessment.ts:69 [length] ${AGENT_ROLE_SYSTEM_GUARD} 이번 응답은 예고편 제출 → 문장을 나누세요 (예외: 생성 모델의 출력 계약 지시이며 화면 문구가 아닙니다.)
+banned: 9
+english: 22
+template: 0
+length: 14
+style_mix: 1
+button_noun: 38
+scanned: 266; blocking: 0; warnings: 84

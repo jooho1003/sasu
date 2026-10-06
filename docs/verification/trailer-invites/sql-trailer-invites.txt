@@ -1,0 +1,15 @@
+PASS assessment flag gates real invitation creation and plaintext tokens are never stored
+PASS demo organizations cannot issue links or receive candidate attempts
+PASS only currently published and approved trailers keep issued links usable
+PASS anonymous open returns only the public candidate payload and locks after ten mismatches
+PASS all anonymous mutations preserve failed-email counters and lock after ten failures
+PASS consent precedes one submission and atomically creates one candidate attempt and score job
+PASS candidate withdrawal uses the common purge path and remains visible as metadata only
+PASS only service_role can purge due invitations
+PASS RLS exposes invitation emails only to the owning department lead
+PASS active-email dedupe, revocation replacement, and batch limits are enforced
+PASS trailer deletion cascades invitations and failed candidate scoring alone can be requeued
+PASS new tables and functions have the exact API-role privilege matrix
+PASS 0040 rollback composes before 0028, 0027, and 0026 rollback
+{"passed":13,"failed":0,"database":"isolated PGlite","migrations":"0001-0028 + 0040 + 0048","excluded":["0004_worker_cron.sql (pg_cron/pg_net unavailable)"]}
+exit=0

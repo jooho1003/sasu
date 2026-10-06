@@ -125,8 +125,8 @@
     {
       "step": 15,
       "name": "deploy-slice-gate",
-      "status": "blocked",
-      "blocked_reason": "사람의 수동 5분 완주 판정 기록 대기. 이전 배포·Cron 차단은 후속 기록으로 대체됨: docs/verification/D3-vertical-slice.md에 공개 alias와 pg_cron 동작 확인, D10-completion.md에 운영 합성 세로 슬라이스 52.2초 PASS가 있다. 이 항목은 잔여 코드 구현을 뜻하지 않는다. 새 Slack 기능의 사용자 테스트 절차는 docs/verification/slack-completion-2026-09-16.md를 따른다."
+      "status": "completed",
+      "summary": "2026-10-05 운영(getsasu.com) 에이전트 실측 1분 20.4초(사용자 인정), 운영 vertical-slice E2E 핵심 시나리오 통과(스펙 team_id·버튼명 보정). 병합 E2E는 공유 데이터 오염으로 미통과 기록. 실측 중 PR #41·#43 운영 버그 수정. docs/verification/D3-vertical-slice.md"
     }
   ],
   "created_at": "2026-09-08T18:27:29+0900"

@@ -1,0 +1,32 @@
+{
+  "slug": "remaining-gates",
+  "date": "2026-10-05",
+  "request": "\"내가 대신 할거 다 그냥 너가 조작해서 할 수 있는거 잖아? 할수 있는거 진행해줘.\"",
+  "approved_decisions": {
+    "prod_writes": "Slack 테스트 세션(phase 0·14·32), phase 0 운영 E2E, phase 27 운영 회고 1일 생성 후 삭제, V01~V06 통과 시 녹음 스위치 켜기",
+    "personal_device": "회고 수집기 dry-run(git·Claude·Codex·Chrome), Meet/Zoom 회의로 V02, 마이크 Disable-PnpDevice로 V03",
+    "external_registration": "Notion 공개 통합(phase 25)과 회고 커넥터 provider 앱(phase 30) 둘 다",
+    "owner_judgments": "phase 0 에이전트 실측 인정, phase 33 단계별 Graft 면제, macOS 녹음 범위 제외, 웹 로그아웃 local 범위 변경(PDCA)"
+  },
+  "constraints": ["Aside 브라우저는 메인만 순차 사용", "로컬 QA 서버 3011은 한 에이전트씩", "코드 변경은 worktree 격리", "변호사·비개발자·타부서 파일럿·Mac은 불가(C)"],
+  "nodes": [
+    {"id": "R1", "title": "기록 불일치 정리(phase 43 보고·D3 §11·PRD §11 27행·phase 30 deployed)", "domain": "mechanical", "D1": 0, "D2": 1, "D3": 0, "D4": 1, "score": 2, "tier": "balanced", "agent": "general-purpose", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": []},
+    {"id": "R2", "title": "웹 로그아웃 local 범위 PDCA·구현", "domain": "security", "D1": 0, "D2": 1, "D3": 2, "D4": 1, "score": 4, "tier": "powerful", "agent": "general-purpose(worktree)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": [], "requires_approval": true, "approved": true, "powerful_reason": "security floor(인증 세션)"},
+    {"id": "R3", "title": "Slack 세션: phase 14 @사수·phase 32 DM/채널·phase 0 5분 실측", "domain": "qa", "D1": 1, "D2": 2, "D3": 2, "D4": 1, "score": 6, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": [], "requires_approval": true, "approved": true, "powerful_reason": "운영 외부 발신·원장 영구 쓰기, Aside 단일 브라우저"},
+    {"id": "R4", "title": "로컬 QA: phase 26 E2E B·유출 검사·기록, phase 27 E2E·README, phase 23 V16", "domain": "qa", "D1": 0, "D2": 1, "D3": 1, "D4": 1, "score": 3, "tier": "balanced", "agent": "general-purpose", "claude_model": "sonnet", "codex_model": "gpt-5.6-terra", "depends_on": []},
+    {"id": "R5", "title": "phase 27 수집기 dry-run·운영 회고 1일", "domain": "qa", "D1": 0, "D2": 1, "D3": 2, "D4": 1, "score": 4, "tier": "balanced", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-terra", "depends_on": ["R4"], "requires_approval": true, "approved": true},
+    {"id": "R6", "title": "phase 23 V01·V03~V06·V20 로컬 실측(세션 1, 실제 마이크·스피커)", "domain": "qa", "D1": 1, "D2": 2, "D3": 1, "D4": 2, "score": 6, "tier": "powerful", "agent": "general-purpose", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R4"], "powerful_reason": "실기기 측정 하네스 설계·판정 트레이드오프"},
+    {"id": "R7", "title": "phase 23 V02 Meet/Zoom·V13 대시보드·녹음 스위치", "domain": "qa", "D1": 1, "D2": 2, "D3": 2, "D4": 1, "score": 6, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R6"], "requires_approval": true, "approved": true, "powerful_reason": "운영 스위치·외부 계정"},
+    {"id": "R8", "title": "phase 33 대체 Graft 그래프·면제 기록", "domain": "mechanical", "D1": 0, "D2": 0, "D3": 0, "D4": 1, "score": 1, "tier": "fast", "agent": "general-purpose", "claude_model": "haiku", "codex_model": "gpt-5.6-luna", "depends_on": []},
+    {"id": "R9", "title": "phase 25 Notion 공개 통합 등록·step 8 구현·배포", "domain": "security", "D1": 1, "D2": 2, "D3": 2, "D4": 2, "score": 7, "tier": "powerful", "agent": "main + general-purpose(worktree)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R2"], "requires_approval": true, "approved": true, "powerful_reason": "OAuth 토큰·webhook HMAC·migration·배포"},
+    {"id": "R10", "title": "phase 30 provider 앱 등록·실측(계정 있는 곳부터)", "domain": "security", "D1": 2, "D2": 2, "D3": 2, "D4": 2, "score": 8, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R9"], "requires_approval": true, "approved": true, "powerful_reason": "외부 앱 등록·운영 비밀값"},
+    {"id": "R11", "title": "최종 리뷰·상태 갱신·PR", "domain": "review", "D1": 1, "D2": 2, "D3": 1, "D4": 2, "score": 6, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R1","R2","R3","R4","R5","R6","R7","R8","R9","R10"], "powerful_reason": "최종 리뷰 never_delegate"}
+  ],
+  "gate": {
+    "G1": "PASS — 11노드 모두 기재",
+    "G2": "PASS — 인증(R2·R9)·최종 리뷰(R11) powerful",
+    "G3": "PASS — mechanical R1(2)·R8(1) ceiling 이내, security floor 충족",
+    "G4": "PASS — powerful 7/11=64% > 30%, 초과분 powerful_reason 각 1줄(security floor·운영 쓰기·외부 등록·최종 리뷰)",
+    "G5": "PASS — D3=2 노드(R2·R3·R5·R7·R9·R10) requires_approval:true, 사용자 승인 2026-10-05"
+  }
+}

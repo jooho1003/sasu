@@ -1,0 +1,36 @@
+== verify-retro-sql.mjs (retro 29 PASS lines + total)
+PASS retro: canonical day, masked activities and deterministic retry
+PASS retro: direct writes, server kinds, bounds, consent and demo are denied
+PASS retro: self is invisible to another member and lead
+PASS retro: one lease, stale generation and late completion cannot overwrite
+PASS retro: citations and optimistic revision checks are enforced
+PASS retro: shared readers see only confirmed cited activity and revision
+PASS retro: a narrower citation blocks broad confirmation and sharing
+PASS retro: exclusion, regeneration, timeout and no-citation recovery
+PASS retro: export and deletion are owner-only and delete cascades
+PASS retro: API function privilege matrix is explicit
+PASS retro: provider budget failure remains actionable and cannot create a revision
+PASS retro: NULL lease, empty success and exclusion fence cannot create a draft
+PASS retro: live answer evidence revocation hides activity, revision, sharing and export
+PASS retro: demo anon reads confirmed dept only, no private drafts or self days
+PASS retro: 0047 then 0046 rollback removes only the retrospective schema
+PASS retro connections: direct RPC accepts only implemented providers
+PASS retro connections: company snapshots require live lead role and cannot become personal evidence
+PASS retro connections: bulk manual request is atomic, self-only and throttled once per user
+PASS retro connections: actor/provider binding, expiry, single consumption and completion
+PASS retro connections: secret column, wildcard, private states, legacy RPC and direct writes denied
+PASS retro connections: demo, no consent, endpoint injection, preset role and version denied
+PASS retro connections: deterministic queue, per-user throttle, error retry and one lease
+PASS retro connections: provider/date/200 bounds, metadata masking, stale lease and no automatic draft
+PASS retro connections: calendar records cannot claim attendance through direct SQL
+PASS retro connections: note ownership, 20 cap, kind and masking
+PASS retro connections: separate sharing consent and withdrawal
+PASS retro connections: cited input immutable; revoke deletes only this connection and fences in-flight work
+PASS retro connections: derived activity is self-only, department context cannot be cited, permissions stay live
+PASS retro connections: 0050 + 0049 rollback preserves phase 27 and decision records
+{"passed":316,"failed":0,"matrix":{"organizations":4,"departments":12,"actors":24,"items":72,"assertions":2016},"database":"isolated PGlite","excluded":["0004_worker_cron.sql (pg_cron/pg_net not available)"]}
+exit=0
+
+== verify-security-sql.mjs
+{"passed":316,"failed":0,"matrix":{"organizations":4,"departments":12,"actors":24,"items":72,"assertions":2016},"database":"isolated PGlite","excluded":["0004_worker_cron.sql (pg_cron/pg_net not available)"]}
+exit=0

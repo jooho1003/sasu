@@ -138,3 +138,5 @@ desktop 단위 **76/76**, 합성 Electron **7/7**, root **1,834/1,834**, 양쪽 
 [운영 설치 기록](../verification/43-desktop-companion/production-install.md)에 실제 공개 설치 파일과 현재 PC 실행·DB 확인을 연결했다. 운영 guest 5/5, 패키지 safeStorage·정상 IPC, 6자리 테스트 코드 인증·부서 연결·inbox·새 질문의 근거 없음 거절을 확인했다. 이메일 수신은 시험하지 않았다.
 
 SC8은 공개 0.1.0→0.1.1 업데이트 다운로드·종료 시 설치·새 버전 실행·세션 복원·정상 로그아웃과 로컬 파일 삭제로 충족했다. **Plan SC 8/9**. SC7 신규 Windows 설치·메일 수신·5분 전체 녹화와 발신 도메인/Resend SMTP 연결은 남아 있다. 마지막 전체 정적 점수 93.6%를 유지하며 전 기능 재분석의 새 점수로 계산하지 않는다. phase/step12 blocked 유지, 운영 웹·DB·설치 파일은 게시됨.
+
+> **2026-10-05 후속(위 서술은 10/02 기록)**: SC7이 충족돼 **Plan SC 9/9**, phase 43 step 12는 `completed`(`verification_mode: automated_recording`)다. 근거: [first-run-2026-10-05.md](../verification/43-desktop-companion/first-run-2026-10-05.md)(새 표준 로컬 계정 무인 설치→Resend 메일 코드 로그인→인용 2개 첫 답 93.5초), [mail-delivery-2026-10-05.md](../verification/43-desktop-companion/mail-delivery-2026-10-05.md), [production-cutover.md](../verification/49-app-domain-migration/production-cutover.md) T9(받은편지함 도착). 한계: Claude 자동 조작이며 사람 실측이 아니다(Playwright 입력·보조 로그온·무인 설치). 정적 점수 93.6%는 재계산하지 않았다.

@@ -53,3 +53,5 @@ Resend는 Vercel Marketplace messaging 검색으로 찾았고, CLI에서 Free(0.
 - root unit 1,834·desktop unit 76·합성 Electron 7·양쪽 lint/build는 step 13·14 기록, 이번 변경의 검증은 운영 guest 5·배포 패키지 실행·현재 PC 설치·운영 인증/질문·실제 업데이트다.
 
 전체 마지막 정적 분석 93.6%를 유지한다. Plan SC는 **8/9**이며, SC7 신규 Windows 설치·메일 수신·5분 전체 녹화와 Resend/SMTP 연결은 남아 있다. 운영 웹·DB·설치 파일은 반영됐지만 phase 전체를 완료로 표시하지 않는다.
+
+> **후속 (2026-10-05, 위 서술은 10/02 기록)**: SC7이 [first-run-2026-10-05.md](first-run-2026-10-05.md)(새 표준 로컬 계정·실제 Resend 메일 코드 로그인·첫 답 93.5초)로 충족돼 Plan SC 9/9, phase 43 step 12는 `completed`(`verification_mode: automated_recording`)다. Resend SMTP 연결·메일 수신은 [mail-delivery-2026-10-05.md](mail-delivery-2026-10-05.md), 스팸 해소는 [production-cutover.md](../49-app-domain-migration/production-cutover.md) T9. 한계: Claude 자동 조작이며 사람 실측이 아니다(Playwright 입력·보조 로그온·무인 설치로 SmartScreen/마법사 없음).

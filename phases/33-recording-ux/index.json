@@ -8,74 +8,66 @@
     {
       "step": 0,
       "name": "recorder-copy",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "summary": "lib/recording/recorder-copy.ts 9개 함수·2개 타입, 신규 테스트 35개 통과. 수동 코드 관계와 미실행 기록: docs/verification/recording-ux-2026-09-29/graft-s0-{before,after}.txt. 검증: step0.summary.md",
-      "blocked_reason": "구현·자동 검증은 통과했으나 Plan §4.1의 단계별 Graft 전후 그래프가 Docker 장애 당시 미생성되었다. 현재 그래프로 과거 각 step 스냅샷을 재구성할 수 없어 완료 게이트 미충족."
+      "summary": "lib/recording/recorder-copy.ts 9개 함수·2개 타입, 신규 테스트 35개 통과. 수동 코드 관계와 미실행 기록: docs/verification/recording-ux-2026-09-29/graft-s0-{before,after}.txt. 검증: step0.summary.md (Graft 단계별 게이트는 2026-10-05 사용자 면제, graft-waiver-2026-10-05.md)"
     },
     {
       "step": 1,
       "name": "recorder-start",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "summary": "start() 입력 선택→세션→키 1회→사전 검사→캡처. 기존 두 버튼·prepared 제거. 정상 시작·복구 키 요청 1/2회, 실패 정리 E2E 통과. 캡처: docs/verification/recording-ux-2026-09-29/s1-recording-synthetic.png. 코드 관계: 같은 폴더 graft-s1-{before,after}.txt. 상세: step1.summary.md",
-      "blocked_reason": "구현·자동 검증은 통과했으나 Plan §4.1의 단계별 Graft 전후 그래프가 Docker 장애 당시 미생성되었다. 현재 그래프로 과거 각 step 스냅샷을 재구성할 수 없어 완료 게이트 미충족."
+      "summary": "start() 입력 선택→세션→키 1회→사전 검사→캡처. 기존 두 버튼·prepared 제거. 정상 시작·복구 키 요청 1/2회, 실패 정리 E2E 통과. 캡처: docs/verification/recording-ux-2026-09-29/s1-recording-synthetic.png. 코드 관계: 같은 폴더 graft-s1-{before,after}.txt. 상세: step1.summary.md (Graft 단계별 게이트는 2026-10-05 사용자 면제, graft-waiver-2026-10-05.md)"
     },
     {
       "step": 2,
       "name": "recorder-safety",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "summary": "종료 확인·이탈 보호·탭 제목·tone 알림·타이머/live region 구현. CSS recorder-notice, recorder-progress, recorder-stage-chip, recorder-timer, recorder-stop-confirm. 캡처 docs/verification/recording-ux-2026-09-29/s2-stop-confirm-{1440,390}.png. 수동 관계 graft-s2-{before,after}.txt. 상세 step2.summary.md",
-      "blocked_reason": "구현·자동 검증은 통과했으나 Plan §4.1의 단계별 Graft 전후 그래프가 Docker 장애 당시 미생성되었다. 현재 그래프로 과거 각 step 스냅샷을 재구성할 수 없어 완료 게이트 미충족."
+      "summary": "종료 확인·이탈 보호·탭 제목·tone 알림·타이머/live region 구현. CSS recorder-notice, recorder-progress, recorder-stage-chip, recorder-timer, recorder-stop-confirm. 캡처 docs/verification/recording-ux-2026-09-29/s2-stop-confirm-{1440,390}.png. 수동 관계 graft-s2-{before,after}.txt. 상세 step2.summary.md (Graft 단계별 게이트는 2026-10-05 사용자 면제, graft-waiver-2026-10-05.md)"
     },
     {
       "step": 3,
       "name": "recorder-flow",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "summary": "3단계 표시·비활성 이유·복구 목록·확인하고 저장·새 녹음 화면으로·폐기 분리·입력 표시 구현. 캡처 s3-form-{1440,390}.png 및 s3-recovery-list-1440.png. 수동 관계 graft-s3-{before,after}.txt. 상세 step3.summary.md",
-      "blocked_reason": "구현·자동 검증은 통과했으나 Plan §4.1의 단계별 Graft 전후 그래프가 Docker 장애 당시 미생성되었다. 현재 그래프로 과거 각 step 스냅샷을 재구성할 수 없어 완료 게이트 미충족."
+      "summary": "3단계 표시·비활성 이유·복구 목록·확인하고 저장·새 녹음 화면으로·폐기 분리·입력 표시 구현. 캡처 s3-form-{1440,390}.png 및 s3-recovery-list-1440.png. 수동 관계 graft-s3-{before,after}.txt. 상세 step3.summary.md (Graft 단계별 게이트는 2026-10-05 사용자 면제, graft-waiver-2026-10-05.md)"
     },
     {
       "step": 4,
       "name": "segment-player",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "summary": "포인터 놓기·키보드 300ms 탐색 확정, AbortController, 현재/전체 길이·aria-valuetext. 드래그 중 0건, 확정 후 2건 이하. 캡처 s4-player-{1440,390}.png. 수동 관계 graft-s4-{before,after}.txt. 상세 step4.summary.md",
-      "blocked_reason": "구현·자동 검증은 통과했으나 Plan §4.1의 단계별 Graft 전후 그래프가 Docker 장애 당시 미생성되었다. 현재 그래프로 과거 각 step 스냅샷을 재구성할 수 없어 완료 게이트 미충족."
+      "summary": "포인터 놓기·키보드 300ms 탐색 확정, AbortController, 현재/전체 길이·aria-valuetext. 드래그 중 0건, 확정 후 2건 이하. 캡처 s4-player-{1440,390}.png. 수동 관계 graft-s4-{before,after}.txt. 상세 step4.summary.md (Graft 단계별 게이트는 2026-10-05 사용자 면제, graft-waiver-2026-10-05.md)"
     },
     {
       "step": 5,
       "name": "recording-entry-switch",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "summary": "목록 응답 recording_enabled·original_layout, 팀장 진입 링크·녹음 페이지 off 분기·녹음 자료 배지 구현. 수동 관계 graft-s5-{before,after}.txt, 상세 step5.summary.md",
-      "blocked_reason": "구현·자동 검증은 통과했으나 Plan §4.1의 단계별 Graft 전후 그래프가 Docker 장애 당시 미생성되었다. 현재 그래프로 과거 각 step 스냅샷을 재구성할 수 없어 완료 게이트 미충족."
+      "summary": "목록 응답 recording_enabled·original_layout, 팀장 진입 링크·녹음 페이지 off 분기·녹음 자료 배지 구현. 수동 관계 graft-s5-{before,after}.txt, 상세 step5.summary.md (Graft 단계별 게이트는 2026-10-05 사용자 면제, graft-waiver-2026-10-05.md)"
     },
     {
       "step": 6,
       "name": "review-detail-notices",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "summary": "입력 과다 경고 클래스, 이어진 기록 nav 전환, s6-review-detail-{1440,390}.png, 수동 관계 graft-s6-{before,after}.txt, 상세 step6.summary.md",
-      "blocked_reason": "구현·자동 검증은 통과했으나 Plan §4.1의 단계별 Graft 전후 그래프가 Docker 장애 당시 미생성되었다. 현재 그래프로 과거 각 step 스냅샷을 재구성할 수 없어 완료 게이트 미충족."
+      "summary": "입력 과다 경고 클래스, 이어진 기록 nav 전환, s6-review-detail-{1440,390}.png, 수동 관계 graft-s6-{before,after}.txt, 상세 step6.summary.md (Graft 단계별 게이트는 2026-10-05 사용자 면제, graft-waiver-2026-10-05.md)"
     },
     {
       "step": 7,
       "name": "admin-recording-switch",
-      "status": "blocked",
+      "status": "completed",
       "codex_model": "gpt-5.6-terra",
       "effort": "medium",
-      "summary": "설명·aria-describedby 연결, 진행 중 건수 미리 보기, s7-admin-1440.png, 수동 관계 graft-s7-{before,after}.txt, 상세 step7.summary.md",
-      "blocked_reason": "구현·자동 검증은 통과했으나 Plan §4.1의 단계별 Graft 전후 그래프가 Docker 장애 당시 미생성되었다. 현재 그래프로 과거 각 step 스냅샷을 재구성할 수 없어 완료 게이트 미충족."
+      "summary": "설명·aria-describedby 연결, 진행 중 건수 미리 보기, s7-admin-1440.png, 수동 관계 graft-s7-{before,after}.txt, 상세 step7.summary.md (Graft 단계별 게이트는 2026-10-05 사용자 면제, graft-waiver-2026-10-05.md)"
     },
     {
       "step": 8,
@@ -86,5 +78,6 @@
       "summary": "단위 151파일·1664, 합성 녹음 E2E 20 통과·1 skip, 검토 UI E2E 27, 로컬 제품 E2E 9/9, lint·build·Graft check 통과. 키보드 흐름·U01~U22 결과·캡처·실제 기기 미검증 범위: step8.summary.md 및 README §6."
     }
   ],
-  "graft_limit": "phase 계획 시점과 최종 Graft graph check는 통과했다. Docker 장애 당시 step 0~7 개별 전후 Graft 스냅샷은 생성하지 못했고 당시 수동 관계 기록을 보존했다."
+  "graft_limit": "phase 계획 시점과 최종 Graft graph check는 통과했다. Docker 장애 당시 step 0~7 개별 전후 Graft 스냅샷은 생성하지 못했고 당시 수동 관계 기록을 보존했다.",
+  "status": "completed"
 }

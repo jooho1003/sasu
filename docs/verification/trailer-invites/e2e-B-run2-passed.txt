@@ -1,0 +1,9 @@
+
+Running 2 tests using 1 worker
+
+  -  1 [chromium] › tests\e2e\trailer-invites.spec.ts:11:5 › A: 초대 플래그가 꺼진 배포에서는 지원자 링크 API가 열리지 않는다
+  ok 2 [chromium] › tests\e2e\trailer-invites.spec.ts:20:7 › B: QA 조직의 발급·목록·철회 › 발급·동의·3퀘스트·실제 채점·부서장 점수표·철회 (7.0s)
+
+  1 skipped
+  1 passed (7.9s)
+exit=0
