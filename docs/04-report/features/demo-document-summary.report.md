@@ -1,6 +1,6 @@
 # demo-document-summary Completion Report
 
-> Status: 구현·로컬 검증 완료, 운영 반영(migration → 데모 재시드 → 병합) 사용자 승인 대기.
+> Status: 완료 — 2026-10-07 운영 반영(0070 → 데모 재시드 → PR #46), 운영 E2E 통과. 재시드 사고(데모 심사 계정 자동 연결 약 45분 중단)는 비밀번호 교체·재배포로 복구([기록](../../verification/53-demo-document-summary/production-2026-10-07.md)).
 > Project: 사수(SASU) · phase 53
 > Author: root(Claude Code) · step 0(opus)·step 1(sonnet) 서브에이전트 · 독립 분석 gap-detector
 > Completion Date: 2026-10-07 · PDCA Cycle: phase 53
@@ -35,10 +35,10 @@
 |---|---|:-:|---|
 | SC1 | 익명은 데모 요약만 읽고 쓰기 불가 | ✅ | SQL 하니스 신규 5개 통과 |
 | SC2 | 읽기 시 재검증·시드 dropped 0 | ✅ | U1~U4, seed-demo 14 passed |
-| SC3 | 데모 화면 요약 구역·원문 문장 overview | ✅ 로컬 / ⏳ 운영 | E1 2 passed, 캡처 |
-| SC4 | lint·test·build·데모 회귀 | ⚠️ | E2 61/65(로컬 DB 환경 4건), 운영 반영 후 재확인 |
+| SC3 | 데모 화면 요약 구역·원문 문장 overview | ✅ | 로컬·운영 E1 통과, 운영 캡처 |
+| SC4 | lint·test·build·데모 회귀 | ✅ | 운영 E2E 26 passed + demo-reviewer 5 passed |
 
-Overall: 3/4 확정, 1건 운영 확인 대기.
+Overall: 4/4.
 
 ## 2. Key Decisions & Outcomes
 
