@@ -182,7 +182,12 @@ describe("게스트 데모 시드", () => {
       const summary = DocumentSummary.parse(document.summary);
       const verified = verifyDocumentSummary(summary, items);
 
-      expect(verified.dropped).toBe(0);
+      // overview는 시드 작성 문장이라 원문 문자열이 아닐 수 있다(ADR-090 검증 대체는 dropped 1건으로만 센다). 인용·항목은 전부 유지돼야 한다.
+      expect(verified.valid.citations).toEqual(summary.citations);
+      for (const group of ["key_points", "decisions", "actions", "open_questions"] as const) {
+        expect(verified.valid[group]).toEqual(summary[group]);
+      }
+      expect(verified.dropped).toBeLessThanOrEqual(1);
       expect(verified.valid.citations.length).toBeGreaterThan(0);
       expect(verified.valid.key_points.length).toBeGreaterThan(0);
     }

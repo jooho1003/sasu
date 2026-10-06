@@ -22,6 +22,29 @@ function sectionKey(group: SummaryGroup, itemId: string, text: string): string {
   return JSON.stringify([group, itemId, text]);
 }
 
+const EMPTY_OVERVIEW = "요약할 내용을 찾지 못했습니다.";
+
+function normalizeText(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+export function groundedOverview(
+  overview: string,
+  sourceTexts: string[],
+  validItems: Array<{ text: string }>,
+): { text: string; replaced: boolean } {
+  const sources = sourceTexts.map(normalizeText);
+  const sentences = overview
+    .split(/(?<=[.!?。])\s+|\n+/)
+    .map(normalizeText)
+    .filter((sentence) => sentence.length > 0);
+  if (sentences.length > 0 && sentences.every((sentence) => sources.some((source) => source.includes(sentence)))) {
+    return { text: overview, replaced: false };
+  }
+  const fallback = validItems.slice(0, 2).map((entry) => entry.text).join(" ");
+  return { text: fallback || EMPTY_OVERVIEW, replaced: true };
+}
+
 export function verifyDocumentSummary(
   summary: DocumentSummaryValue,
   items: Map<string, string>,
@@ -42,7 +65,7 @@ export function verifyDocumentSummary(
 
   const valid = {
     citations: validCitations,
-    overview: summary.overview,
+    overview: "",
     key_points: [],
     decisions: [],
     actions: [],
@@ -62,6 +85,14 @@ export function verifyDocumentSummary(
       return [entry];
     });
   }
+
+  const overview = groundedOverview(
+    summary.overview,
+    [...items.values()],
+    [...valid.key_points, ...valid.decisions, ...valid.actions],
+  );
+  valid.overview = overview.text;
+  if (overview.replaced) dropped += 1;
 
   return { valid, dropped };
 }
