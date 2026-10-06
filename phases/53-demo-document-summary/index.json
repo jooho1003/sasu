@@ -1,0 +1,11 @@
+{
+  "project": "sasu",
+  "phase": "53-demo-document-summary",
+  "plan": "docs/01-plan/features/demo-document-summary.plan.md",
+  "design": "docs/02-design/features/demo-document-summary.design.md",
+  "status": "completed",
+  "steps": [
+    { "step": 0, "name": "demo-summary-read-path", "status": "completed", "summary": "0070 anon SELECT 정책(데모 부서+활성 소스)·롤백, 검증 함수 lib/document-summary-check.ts 분리(파이프라인 re-export), verifiedDemoSummaries·데모 로더 summaries 추가; SQL 하니스 321 passed(신규 5), vitest 19 passed, lint·test(1915)·tsc 통과, 기록 docs/verification/53-demo-document-summary/step0.md" },
+    { "step": 1, "name": "demo-summary-screen-and-seed", "status": "completed", "summary": "공유 DocumentSummarySections 추출·데모 문서 화면 요약 구역(쓰기 버튼 없음), 시드 overview 원문 문장화+합성 배포 점검 회의록(source …0110, items …0171~0175)·DEMO_DOCUMENT_SUMMARIES, seed-demo 14 passed(dropped 0); lint·test(1916)·tsc 통과; 로컬 QA E1 2 passed(1440·390), E2 61 passed·4 failed(guest·ui-refresh, 기본 데모 부서 대시보드 — 환경 불일치 추정); 기록 docs/verification/53-demo-document-summary/step1.md" }
+  ]
+}

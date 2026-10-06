@@ -1,0 +1,149 @@
+{
+  "base": "https://getsasu.com",
+  "at": "2026-10-06T15:35:01.441Z",
+  "pages": [
+    {
+      "name": "landing",
+      "url": "https://getsasu.com/",
+      "width": 1440,
+      "status": 200,
+      "title": "사수 — 회의록이 아니라 결정을 만듭니다",
+      "h1": [
+        "대화가 쌓이는 곳에서,사수는 결정을 만듭니다."
+      ],
+      "overflowX": -8,
+      "imgsBroken": [],
+      "smallTapTargets": 9,
+      "consoleErrors": []
+    },
+    {
+      "name": "demo",
+      "url": "https://getsasu.com/demo",
+      "width": 1440,
+      "status": 200,
+      "title": "사수 — 회의록이 아니라 결정을 만듭니다",
+      "h1": [
+        "부서가 다르면,사수의 답도 달라집니다."
+      ],
+      "overflowX": -8,
+      "imgsBroken": [],
+      "smallTapTargets": 10,
+      "consoleErrors": []
+    },
+    {
+      "name": "landing",
+      "url": "https://getsasu.com/",
+      "width": 390,
+      "status": 200,
+      "title": "사수 — 회의록이 아니라 결정을 만듭니다",
+      "h1": [
+        "대화가 쌓이는 곳에서,사수는 결정을 만듭니다."
+      ],
+      "overflowX": -8,
+      "imgsBroken": [],
+      "smallTapTargets": 4,
+      "consoleErrors": []
+    },
+    {
+      "name": "demo",
+      "url": "https://getsasu.com/demo",
+      "width": 390,
+      "status": 200,
+      "title": "사수 — 회의록이 아니라 결정을 만듭니다",
+      "h1": [
+        "부서가 다르면,사수의 답도 달라집니다."
+      ],
+      "overflowX": -8,
+      "imgsBroken": [],
+      "smallTapTargets": 5,
+      "consoleErrors": []
+    },
+    {
+      "name": "dashboard",
+      "url": "https://getsasu.com/d/<pilot-dept>",
+      "width": 1440,
+      "status": 200,
+      "title": "사수 — 회의록이 아니라 결정을 만듭니다",
+      "h1": [
+        "부서 대시보드"
+      ],
+      "overflowX": -8,
+      "imgsBroken": [],
+      "smallTapTargets": 3,
+      "consoleErrors": []
+    },
+    {
+      "name": "documents",
+      "url": "https://getsasu.com/d/<pilot-dept>/documents",
+      "width": 1440,
+      "status": 200,
+      "title": "사수 — 회의록이 아니라 결정을 만듭니다",
+      "h1": [
+        "문서에서 업무를 꺼내세요"
+      ],
+      "overflowX": -8,
+      "imgsBroken": [],
+      "smallTapTargets": 0,
+      "consoleErrors": []
+    },
+    {
+      "name": "dashboard",
+      "url": "https://getsasu.com/d/<pilot-dept>",
+      "width": 390,
+      "status": 200,
+      "title": "사수 — 회의록이 아니라 결정을 만듭니다",
+      "h1": [
+        "부서 대시보드"
+      ],
+      "overflowX": -8,
+      "imgsBroken": [],
+      "smallTapTargets": 3,
+      "consoleErrors": []
+    },
+    {
+      "name": "documents",
+      "url": "https://getsasu.com/d/<pilot-dept>/documents",
+      "width": 390,
+      "status": 200,
+      "title": "사수 — 회의록이 아니라 결정을 만듭니다",
+      "h1": [
+        "문서에서 업무를 꺼내세요"
+      ],
+      "overflowX": -8,
+      "imgsBroken": [],
+      "smallTapTargets": 0,
+      "consoleErrors": []
+    }
+  ],
+  "flow": {
+    "dept": "seed-qa-lead",
+    "reviewId": "<deleted-review>",
+    "reviewStatus": "ready",
+    "documentStatus": "summarized",
+    "statusReason": "citation_invalid_dropped",
+    "overview": "정책: 50만원을 넘는 소모품 구매는 팀장 확인 후 진행한다. 박대리는 이번 주 금요일까지 비품 목록을 정리해 공유한다.",
+    "overviewSentencesNotInSource": [],
+    "keyPoints": [
+      "정책: 50만원을 넘는 소모품 구매는 팀장 확인 후 진행한다."
+    ],
+    "decisions": [],
+    "actions": [
+      "박대리는 이번 주 금요일까지 비품 목록을 정리해 공유한다."
+    ],
+    "openQuestions": [
+      "다음 회의에서 사무용 의자 교체 여부를 결정하기로 했다.",
+      "노트북 교체 주기를 3년으로 할지 4년으로 할지는 아직 정하지 않았다."
+    ],
+    "citations": 4,
+    "overviewVisible1440": true,
+    "overviewText1440": "한눈에 보기\n\n정책: 50만원을 넘는 소모품 구매는 팀장 확인 후 진행한다. 박대리는 이번 주 금요일까지 비품 목록을 정리해 공유한다.",
+    "overflowX1440": -8,
+    "overviewVisible390": true,
+    "overviewText390": "한눈에 보기\n\n정책: 50만원을 넘는 소모품 구매는 팀장 확인 후 진행한다. 박대리는 이번 주 금요일까지 비품 목록을 정리해 공유한다.",
+    "overflowX390": -8,
+    "cleanup": {
+      "status": 200,
+      "documentStillListed": false
+    }
+  }
+}

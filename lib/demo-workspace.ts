@@ -1,7 +1,10 @@
+import type { DocumentSummary } from "@/lib/contracts";
+
 export type DemoSource = { id: string; title: string; kind: string };
 export type DemoItem = { id: string; source_id: string; content: string; author: string | null; label: string; spoken_at?: string | null };
 export type DemoDecision = { id: string; source_id: string; source_ids?: string[]; outcome: string; rationale: string; quote: string; status: "decided" | "deferred"; supersedes_id?: string; request_id?: string };
-export type DemoWorkspaceData = { sources: DemoSource[]; items: DemoItem[]; decisions: DemoDecision[] };
+// summaries: 원문으로 다시 검증한 문서 요약(source_id → 요약). 요약이 없는 자료는 키가 없다 (ADR-092).
+export type DemoWorkspaceData = { sources: DemoSource[]; items: DemoItem[]; decisions: DemoDecision[]; summaries: Record<string, DocumentSummary> };
 
 const topics = [
   ["외주사 B 재입찰", "외주사 B는 1,120만 원으로 12% 인상을 제안했습니다.", "연 10% 이상 인상 시 자동 연장하지 않고 재입찰을 검토합니다.", "대체 업체 C·D의 동일 범위 견적을 받아 재입찰합니다.", "이서연이 9월 21일까지 비교표를 작성합니다."],
@@ -30,6 +33,7 @@ export const salesDemoRecords: DemoWorkspaceData = {
     ].map(([source_id, content, label], j) => ({ id: `sales-item-${i}-${j}`, source_id, content, label, spoken_at: `2026-09-${i < 4 ? "16" : "18"}T01:${String(i * 7 + j).padStart(2, "0")}:00+09:00`, author: ["이서연", "김민수", "박지훈", "최수진"][i % 4] }));
   }),
   decisions: topics.map(([, , rule, decision], i) => ({ id: `sales-decision-${i}`, source_id: `sales-meeting-${i < 4 ? 1 : 2}`, source_ids: [`sales-doc-${i}`], outcome: decision, rationale: rule, quote: decision, status: i % 2 === 1 ? "deferred" : "decided" })),
+  summaries: {},
 };
 
 export type DemoRoleCriterion = { key: string; label: string; description: string; weight: number };

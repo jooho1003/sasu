@@ -5,6 +5,7 @@ import { labelFrom } from "@/lib/labels";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/ui/icon";
+import { DocumentSummarySections } from "@/components/document-summary-sections";
 import { reviewCitationHref, type ReviewCitationTarget } from "@/lib/recording/citation-location";
 
 type SummaryItem = { item_id: string; text: string };
@@ -37,21 +38,6 @@ type UploadState = {
   kind: "idle" | "pending" | "success" | "error";
   message?: string;
 };
-const SECTION_LABELS: Array<
-  [
-    keyof Pick<
-      DocumentSummary,
-      "key_points" | "decisions" | "actions" | "open_questions"
-    >,
-    string,
-  ]
-> = [
-  ["key_points", "핵심 내용"],
-  ["decisions", "결정·정책"],
-  ["actions", "다음 할 일"],
-  ["open_questions", "확인이 필요한 질문"],
-];
-
 function formatDate(value: string): string {
   const date = new Date(value);
   return Number.isNaN(date.getTime())
@@ -545,22 +531,7 @@ function DocumentDetail({
       ) : null}
       {document.status === "summarized" && hasEvidence && summary ? (
         <>
-          <section className="document-overview">
-            <p className="eyebrow">한눈에 보기</p>
-            <p>{summary.overview}</p>
-          </section>
-          {SECTION_LABELS.map(([key, label]) =>
-            summary[key].length > 0 ? (
-              <section className="summary-section" key={key}>
-                <h4>{label}</h4>
-                <ul>
-                  {summary[key].map((item) => (
-                    <li key={`${item.item_id}-${item.text}`}>{item.text}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null,
-          )}
+          <DocumentSummarySections summary={summary} />
           <section className="summary-section">
             <h4>
               원문 근거{" "}

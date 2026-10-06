@@ -3,6 +3,15 @@ import { registerHandler } from "@/lib/jobs";
 import { llm } from "@/lib/llm";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 import { glossarySummaryInstruction, type GlossaryEntry } from "@/lib/recording/glossary";
+import {
+  sectionKey,
+  verifyDocumentSummary,
+  type SummaryGroup,
+  type VerifiedDocumentSummary,
+} from "@/lib/document-summary-check";
+
+// 검증 함수는 게스트 데모와 공유하는 순수 모듈로 옮겼다(ADR-092). 기존 호출부를 위해 같은 이름으로 다시 내보낸다.
+export { groundedOverview, verifyDocumentSummary, type VerifiedDocumentSummary } from "@/lib/document-summary-check";
 
 type DocumentRow = {
   source_id: string;
@@ -11,91 +20,6 @@ type DocumentRow = {
 };
 
 type ItemRow = { id: string; content: string };
-type SummaryGroup = Exclude<keyof DocumentSummaryValue, "citations" | "overview">;
-
-export type VerifiedDocumentSummary = {
-  valid: DocumentSummaryValue;
-  dropped: number;
-};
-
-function sectionKey(group: SummaryGroup, itemId: string, text: string): string {
-  return JSON.stringify([group, itemId, text]);
-}
-
-const EMPTY_OVERVIEW = "요약할 내용을 찾지 못했습니다.";
-
-function normalizeText(text: string): string {
-  return text.replace(/\s+/g, " ").trim();
-}
-
-export function groundedOverview(
-  overview: string,
-  sourceTexts: string[],
-  validItems: Array<{ text: string }>,
-): { text: string; replaced: boolean } {
-  const sources = sourceTexts.map(normalizeText);
-  const sentences = overview
-    .split(/(?<=[.!?。])\s+|\n+/)
-    .map(normalizeText)
-    .filter((sentence) => sentence.length > 0);
-  if (sentences.length > 0 && sentences.every((sentence) => sources.some((source) => source.includes(sentence)))) {
-    return { text: overview, replaced: false };
-  }
-  const fallback = validItems.slice(0, 2).map((entry) => entry.text).join(" ");
-  return { text: fallback || EMPTY_OVERVIEW, replaced: true };
-}
-
-export function verifyDocumentSummary(
-  summary: DocumentSummaryValue,
-  items: Map<string, string>,
-): VerifiedDocumentSummary {
-  let dropped = 0;
-  const validCitations = summary.citations.filter((citation) => {
-    if (citation.item_id === null || citation.decision_id !== null) {
-      dropped += 1;
-      return false;
-    }
-    const source = items.get(citation.item_id);
-    if (!source || !source.includes(citation.quote)) {
-      dropped += 1;
-      return false;
-    }
-    return true;
-  });
-
-  const valid = {
-    citations: validCitations,
-    overview: "",
-    key_points: [],
-    decisions: [],
-    actions: [],
-    open_questions: [],
-  } as DocumentSummaryValue;
-
-  const seen = new Set<string>();
-  for (const group of ["key_points", "decisions", "actions", "open_questions"] as SummaryGroup[]) {
-    valid[group] = summary[group].flatMap((entry) => {
-      const source = items.get(entry.item_id);
-      const key = sectionKey(group, entry.item_id, entry.text);
-      if (!source || !source.includes(entry.text) || seen.has(key)) {
-        dropped += 1;
-        return [];
-      }
-      seen.add(key);
-      return [entry];
-    });
-  }
-
-  const overview = groundedOverview(
-    summary.overview,
-    [...items.values()],
-    [...valid.key_points, ...valid.decisions, ...valid.actions],
-  );
-  valid.overview = overview.text;
-  if (overview.replaced) dropped += 1;
-
-  return { valid, dropped };
-}
 
 export function mergeDocumentSummaries(
   summaries: DocumentSummaryValue[],

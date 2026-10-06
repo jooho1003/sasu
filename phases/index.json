@@ -1,11 +1,20 @@
 {
   "phases": [
     {
-      "dir": "51-document-overview-grounding",
+      "dir": "53-demo-document-summary",
       "status": "completed",
       "production_deployed": false,
+      "verification": "docs/verification/53-demo-document-summary/step1.md",
+      "note": "게스트 데모 「문서」에 문서 요약 표시(ADR-092): anon 데모 읽기 정책 0070, 읽을 때 원문 재검증, 공유 요약 컴포넌트, 합성 배포 점검 회의록 시드. 운영 반영(migration → 데모 재시드 → 병합)은 사용자 승인 대기. 번호는 같은 날 다른 세션의 phase 52·ADR-091(search-observability)과 겹치지 않도록 53·ADR-092."
+    },
+    {
+      "dir": "51-document-overview-grounding",
+      "status": "completed",
+      "production_deployed": true,
+      "deployed_at": "2026-10-07T00:06:12+09:00",
       "verification": "docs/verification/51-document-overview-grounding/step0.md",
-      "note": "문서 요약 overview 원문 문자열 검증(ADR-090). unit 1906·lint·tsc·build, V16 실제 Groq 5회 overview 문서 밖 문장 0/CANARY 0. analyze 100%·report 완료. 운영 반영(PR main 병합)은 사용자 승인 대기. 문서 안 지시문 문장의 항목 채택은 범위 밖 후속."
+      "deployment": "docs/verification/51-document-overview-grounding/production-2026-10-07/README.md",
+      "note": "문서 요약 overview 원문 문자열 검증(ADR-090). unit 1906·lint·tsc·build, V16 실제 Groq 5회 overview 문서 밖 문장 0/CANARY 0. analyze 100%·report 완료. 2026-10-07 PR #45 운영 반영, 운영 합성 문서로 overview 원문 밖 문장 0 확인. 문서 안 지시문 문장의 항목 채택은 범위 밖 후속."
     },
     {
       "dir": "50-web-signout-scope",
