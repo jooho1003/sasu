@@ -1,0 +1,15 @@
+{
+  "project": "sasu",
+  "phase": "51-document-overview-grounding",
+  "plan": "docs/01-plan/features/document-overview-grounding.plan.md",
+  "design": "docs/02-design/features/document-overview-grounding.design.md",
+  "status": "completed",
+  "steps": [
+    {
+      "step": 0,
+      "name": "overview-grounding",
+      "status": "completed",
+      "summary": "overview 문장 원문 포함 검증(groundedOverview)·검증 항목/고정 문구 대체 구현, U1~U5·lint·test·build 통과, R1(V16 실제 Groq 5회 overview 문서 밖 문장 0·CANARY 0)은 2026-10-06 root 실행, 기록 docs/verification/51-document-overview-grounding/step0.md"
+    }
+  ]
+}

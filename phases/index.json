@@ -1,6 +1,13 @@
 {
   "phases": [
     {
+      "dir": "51-document-overview-grounding",
+      "status": "completed",
+      "production_deployed": false,
+      "verification": "docs/verification/51-document-overview-grounding/step0.md",
+      "note": "문서 요약 overview 원문 문자열 검증(ADR-090). unit 1906·lint·tsc·build, V16 실제 Groq 5회 overview 문서 밖 문장 0/CANARY 0. analyze 100%·report 완료. 운영 반영(PR main 병합)은 사용자 승인 대기. 문서 안 지시문 문장의 항목 채택은 범위 밖 후속."
+    },
+    {
       "dir": "50-web-signout-scope",
       "status": "completed",
       "production_deployed": true,

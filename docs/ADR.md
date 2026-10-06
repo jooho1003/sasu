@@ -841,3 +841,11 @@ HubSpot은 토큰 introspection에서 사용자 단위 앱과 동일 사용자 I
 - 결정: `app/auth/signout/route.ts`와 `app/demo/access/route.ts`의 `signOut()`을 `signOut({ scope: "local" })`로 바꾼다. 응답·리디렉션·쿠키 정리는 그대로다.
 - 대안: (A) 그대로 두기 — 웹 로그아웃이 데스크톱을 예고 없이 끊는다. (B) "모든 기기에서 로그아웃" 버튼 추가 — 세션 목록·확인 UI가 필요하고 지금 요구가 없다. 필요해지면 `scope: "global"`을 별도 버튼으로 추가한다.
 - 경계: 서버 세션 검증·RLS·기기 연결 검사(매 요청)·연결 해제 RPC는 바꾸지 않는다. 도난·분실 대응의 전체 세션 폐기는 운영자가 Supabase 대시보드에서 사용자 세션을 끊는 기존 절차로 한다.
+
+## ADR-090 — 문서 요약 overview도 원문 문자열로 검증한다 (2026-10-05)
+
+- 상태: 사용자 지시(2026-10-05 "할 수 있는 것 진행")에 따른 V16 실측 후속. 원천 PRD §8 "문서 요약 overview 근거 검증". phase 51.
+- 배경: `scripts/verify-document-injection.ts`로 지시문 3종을 심은 합성 문서를 실제 Groq로 요약했다(docs/verification/browser-meeting-recording/v16-2026-10-05.md). 항목 `text`와 인용 `quote`는 원문 부분 문자열 검증으로 모두 통과했지만, `overview`는 검증 없이 `components/document-assistant.tsx`에 렌더돼 "CANARY-ALPHA-7731" 같은 지시 문구와 문서에 없는 문장이 표시됐다(1/1, 2/5). CLAUDE.md의 "인용 없는 문장은 렌더하지 않는다"에 어긋난다.
+- 결정: `lib/pipeline/document-summary.ts`에서 chunk별 검증(`validateDocumentSummary` 단계)과 병합 결과 모두에 overview 검증을 적용한다. 모델 overview를 문장 단위(마침표·물음표·느낌표·줄바꿈)로 나눠 각 문장이 같은 문서의 원문에 포함되면 그대로 쓴다. 하나라도 아니면 검증된 항목 문장(`key_points`→`decisions`→`actions`, 최대 2개, 공백 하나로 연결)으로 대체한다. 항목도 없으면 고정 문구 "요약할 내용을 찾지 못했습니다."를 쓴다. 대체가 일어나면 기존 `dropped` 계수에 1을 더한다.
+- 대안: (A) overview 필드 제거 — 화면·저장 형식이 바뀌고 정상 요약의 가독성이 떨어진다. (B) 모델에게 overview 인용을 요구 — 스키마 변경과 추가 실패 경로. (C) 지시문 패턴 감지 — 우회가 쉬워 단독 방어로 부족하다. 문자열 검증 대체가 가장 작고 기존 원칙과 같다.
+- 경계: LLM 호출 수·스키마·DB 저장 형식·인용 검증은 그대로다. 문서 안에 실제로 있는 지시문 문장이 항목으로 채택되는 것은 원문 문자열 검증으로 막을 수 없으며 별도 검토(사람 검토 표시 등)로 남긴다.

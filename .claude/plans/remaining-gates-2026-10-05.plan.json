@@ -20,13 +20,14 @@
     {"id": "R8", "title": "phase 33 대체 Graft 그래프·면제 기록", "domain": "mechanical", "D1": 0, "D2": 0, "D3": 0, "D4": 1, "score": 1, "tier": "fast", "agent": "general-purpose", "claude_model": "haiku", "codex_model": "gpt-5.6-luna", "depends_on": []},
     {"id": "R9", "title": "phase 25 Notion 공개 통합 등록·step 8 구현·배포", "domain": "security", "D1": 1, "D2": 2, "D3": 2, "D4": 2, "score": 7, "tier": "powerful", "agent": "main + general-purpose(worktree)", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R2"], "requires_approval": true, "approved": true, "powerful_reason": "OAuth 토큰·webhook HMAC·migration·배포"},
     {"id": "R10", "title": "phase 30 provider 앱 등록·실측(계정 있는 곳부터)", "domain": "security", "D1": 2, "D2": 2, "D3": 2, "D4": 2, "score": 8, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R9"], "requires_approval": true, "approved": true, "powerful_reason": "외부 앱 등록·운영 비밀값"},
-    {"id": "R11", "title": "최종 리뷰·상태 갱신·PR", "domain": "review", "D1": 1, "D2": 2, "D3": 1, "D4": 2, "score": 6, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R1","R2","R3","R4","R5","R6","R7","R8","R9","R10"], "powerful_reason": "최종 리뷰 never_delegate"}
+    {"id": "R11", "title": "최종 리뷰·상태 갱신·PR", "domain": "review", "D1": 1, "D2": 2, "D3": 1, "D4": 2, "score": 6, "tier": "powerful", "agent": "main", "claude_model": "opus", "codex_model": "gpt-5.6-sol", "depends_on": ["R1","R2","R3","R4","R5","R6","R7","R8","R9","R10","R12"], "powerful_reason": "최종 리뷰 never_delegate"},
+    {"id": "R12", "title": "phase 51 문서 요약 overview 근거 검증(R4 V16 발견 후속)·V16 재실측·PR", "domain": "general", "D1": 0, "D2": 0, "D3": 2, "D4": 1, "score": 3, "tier": "balanced", "agent": "general-purpose(worktree) + main(V16·리뷰)", "claude_model": "sonnet", "codex_model": "gpt-5.6-luna", "depends_on": ["R4"], "requires_approval": true, "approved": false, "added": "2026-10-06 — 실행 중 추가 노드, 운영 반영(main 병합)은 사용자 승인 대기"}
   ],
   "gate": {
-    "G1": "PASS — 11노드 모두 기재",
-    "G2": "PASS — 인증(R2·R9)·최종 리뷰(R11) powerful",
-    "G3": "PASS — mechanical R1(2)·R8(1) ceiling 이내, security floor 충족",
-    "G4": "PASS — powerful 7/11=64% > 30%, 초과분 powerful_reason 각 1줄(security floor·운영 쓰기·외부 등록·최종 리뷰)",
-    "G5": "PASS — D3=2 노드(R2·R3·R5·R7·R9·R10) requires_approval:true, 사용자 승인 2026-10-05"
+    "G1": "PASS — 12노드 모두 기재 (2026-10-06 R12 추가 후 재판정)",
+    "G2": "PASS — 인증(R2·R9)·최종 리뷰(R11) powerful. R12는 하드 오버라이드 대상 아님(LLM 출력 문자열 검증 강화, 인증·권한 변경 없음)",
+    "G3": "PASS — mechanical R1(2)·R8(1) ceiling 이내, security floor 충족, general R12(3) 범위 내",
+    "G4": "PASS — powerful 7/12=58% > 30%, 초과분 powerful_reason 각 1줄(security floor·운영 쓰기·외부 등록·최종 리뷰)",
+    "G5": "PASS — D3=2 노드(R2·R3·R5·R7·R9·R10·R12) requires_approval:true. R2~R10 사용자 승인 2026-10-05, R12 운영 반영은 승인 전 미실행"
   }
 }

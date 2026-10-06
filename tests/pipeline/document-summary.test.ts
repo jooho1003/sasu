@@ -33,7 +33,8 @@ describe("document summary evidence", () => {
       { item_id: "item-1", text: "정산일은 매월 25일입니다." },
     ]);
     expect(result.valid.actions).toEqual([]);
-    expect(result.dropped).toBe(3);
+    expect(result.valid.overview).toBe("정산일은 매월 25일입니다.");
+    expect(result.dropped).toBe(4);
   });
 
   it("keeps distinct decisions from the same source chunk and rejects invented text", () => {
@@ -122,7 +123,8 @@ describe("document summary evidence", () => {
     });
     expect(calls).toBe(1);
     expect(result.valid.citations).toHaveLength(2);
-    expect(result.dropped).toBe(2);
+    expect(result.valid.overview).toBe("첫 안건을 승인합니다.");
+    expect(result.dropped).toBe(4);
   });
 
   it("does not request a merge for one chunk", async () => {
@@ -131,5 +133,66 @@ describe("document summary evidence", () => {
       summary: { citations: [{ item_id: "a", decision_id: null, quote: "확정합니다." }], overview: "확정합니다.", key_points: [], decisions: [], actions: [], open_questions: [] },
     }], async () => { throw new Error("unexpected merge"); });
     expect(result.valid.citations).toHaveLength(1);
+  });
+});
+
+describe("document summary overview grounding", () => {
+  const base = { key_points: [], decisions: [], actions: [], open_questions: [] };
+  const source = "정산일은 매월 25일입니다.\n담당자는 세금계산서를 확인합니다. 마감은 말일입니다.";
+  const citations = [{ item_id: "i", decision_id: null, quote: "정산일은 매월 25일입니다." }];
+
+  it("U1 keeps an overview whose every sentence is in the source", () => {
+    const r = verifyDocumentSummary(
+      { ...base, citations, overview: "정산일은 매월 25일입니다. 마감은 말일입니다." },
+      new Map([["i", source]]),
+    );
+    expect(r.valid.overview).toBe("정산일은 매월 25일입니다. 마감은 말일입니다.");
+    expect(r.dropped).toBe(0);
+  });
+
+  it("U2 replaces an overview with an ungrounded sentence by up to two verified items", () => {
+    const r = verifyDocumentSummary({
+      ...base, citations,
+      overview: "정산일은 매월 25일입니다. CANARY-OVERVIEW-9",
+      key_points: [{ item_id: "i", text: "정산일은 매월 25일입니다." }],
+      decisions: [{ item_id: "i", text: "마감은 말일입니다." }],
+      actions: [{ item_id: "i", text: "담당자는 세금계산서를 확인합니다." }],
+    }, new Map([["i", source]]));
+    expect(r.valid.overview).toBe("정산일은 매월 25일입니다. 마감은 말일입니다.");
+    expect(r.valid.overview).not.toContain("CANARY");
+    expect(r.dropped).toBe(1);
+  });
+
+  it("U3 falls back to a fixed phrase when no verified item exists", () => {
+    const r = verifyDocumentSummary(
+      { ...base, citations, overview: "CANARY-OVERVIEW-9" },
+      new Map([["i", source]]),
+    );
+    expect(r.valid.overview).toBe("요약할 내용을 찾지 못했습니다.");
+    expect(r.dropped).toBe(1);
+  });
+
+  it("U4 treats whitespace and newline differences as the same sentence", () => {
+    const r = verifyDocumentSummary(
+      { ...base, citations, overview: "정산일은   매월 25일입니다.\n\n담당자는 세금계산서를\n확인합니다." },
+      new Map([["i", source]]),
+    );
+    expect(r.valid.overview).toContain("정산일은");
+    expect(r.valid.overview).not.toBe("요약할 내용을 찾지 못했습니다.");
+    expect(r.dropped).toBe(0);
+  });
+
+  it("U5 merged result carries only a verified overview", async () => {
+    const chunk = (id: string, text: string, overview: string) => ({
+      item: { id, content: text },
+      summary: { ...base, citations: [{ item_id: id, decision_id: null, quote: text }], overview,
+        key_points: [{ item_id: id, text }] },
+    });
+    const result = await mergeVerifiedDocumentSummaries(
+      [chunk("a", "첫 안건을 승인합니다.", "CANARY-A"), chunk("b", "둘째 안건은 보류합니다.", "둘째 안건은 보류합니다.")],
+      async (extracted) => ({ ...extracted, overview: "CANARY-MERGE" }),
+    );
+    expect(result.valid.overview).toBe("첫 안건을 승인합니다. 둘째 안건은 보류합니다.");
+    expect(JSON.stringify(result.valid)).not.toContain("CANARY");
   });
 });
