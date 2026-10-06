@@ -273,6 +273,37 @@ describe("classify pipeline", () => {
     );
   });
 
+  it.each(["오늘 23시", "금요일 오후", "2026-13-45T99:00:00Z", ""])(
+    "날짜로 읽히지 않는 LLM deadline_hint(%j)는 버리고 분류는 저장한다",
+    async (hint) => {
+      const fake = useItem({
+        ...baseItem,
+        content: "외주사 견적 인상 건, 재입찰 여부를 결정해야 합니다.",
+      });
+      resolveLlm({ deadline_hint: hint });
+
+      await classifyItem(baseItem.id);
+
+      expect(fake.classificationUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({ deadline_hint: null }),
+      );
+    },
+  );
+
+  it("ISO 날짜 LLM deadline_hint 는 UTC ISO 문자열로 정규화해 저장한다", async () => {
+    const fake = useItem({
+      ...baseItem,
+      content: "외주사 견적 인상 건, 재입찰 여부를 결정해야 합니다.",
+    });
+    resolveLlm({ deadline_hint: "2026-10-05T23:00:00+09:00" });
+
+    await classifyItem(baseItem.id);
+
+    expect(fake.classificationUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ deadline_hint: "2026-10-05T14:00:00.000Z" }),
+    );
+  });
+
   it("항목이 없거나 삭제되었으면 조용히 종료한다", async () => {
     useItem(null);
     await expect(classifyItem("missing-item")).resolves.toBeUndefined();

@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     !signedIn.data.user ||
     signedIn.data.user.id !== DEMO_REVIEWER_ID
   ) {
-    if (signedIn.data.session) await supabase.auth.signOut();
+    if (signedIn.data.session) await supabase.auth.signOut({ scope: "local" });
     return noStoreRedirect(request, "/demo?demo=unavailable");
   }
 

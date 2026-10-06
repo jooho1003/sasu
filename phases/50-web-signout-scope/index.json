@@ -1,0 +1,15 @@
+{
+  "project": "sasu",
+  "phase": "50-web-signout-scope",
+  "plan": "docs/01-plan/features/web-signout-scope.plan.md",
+  "design": "docs/02-design/features/web-signout-scope.design.md",
+  "status": "completed",
+  "steps": [
+    {
+      "step": 0,
+      "name": "signout-scope",
+      "status": "completed",
+      "summary": "E1 /auth/signout·E2 /demo/access 실패 정리 signOut() → signOut({ scope: \"local\" }). U1 tests/auth-signout-route.test.ts 신규 4·U2 tests/demo-access.test.ts 라우트 4 추가: red 4 failed/9 passed → green 26(org-admin 13 회귀 포함). lint 0 errors·문구 blocking 0, 기본 build는 worktree junction Turbopack 거부(환경) → NEXT_PRIVATE_OUTPUT_TRACE_ROOT로 Turbopack build exit 0(50/50), test 187 files 1889 passed. docs/verification/50-web-signout-scope/step0.md"
+    }
+  ]
+}
