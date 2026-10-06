@@ -20,6 +20,7 @@ import { verifyReviewUploadTimeoutSql } from "./verify-review-upload-timeout-sql
 import { verifySalesReviewSql } from "./verify-sales-review-sql.mjs";
 import { verifySalesSourceReviewSql } from "./verify-sales-source-review-sql.mjs";
 import { verifyDeviceLinksSql } from "./verify-device-links-sql.mjs";
+import { verifyDemoDocumentSummariesSql } from "./verify-demo-document-summaries-sql.mjs";
 // Isolated PostgreSQL/WASM checks. Never loads .env or connects to Supabase.
 // npm install --prefix <temporary-directory> @electric-sql/pglite@0.5.8 @electric-sql/pglite-pgvector@0.0.9
 // node scripts/verify-security-sql.mjs <temporary-directory>
@@ -1124,6 +1125,7 @@ try {
   await verifySalesReviewSql({ q, check, asUser, denied, ids });
   await verifySalesSourceReviewSql({q,check,asUser,denied,ids});
   await verifyDeviceLinksSql({q,check});
+  await verifyDemoDocumentSummariesSql({ db, q, check, denied });
   const glossaryIds = { dept: randomUUID(), lead: randomUUID(), member: randomUUID() };
   await q("insert into departments(id,org_id,name) values($1,$2,'Glossary QA')", [glossaryIds.dept,ids.org]);
   await q("insert into auth.users(id) values($1),($2)", [glossaryIds.lead,glossaryIds.member]);
