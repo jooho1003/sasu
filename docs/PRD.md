@@ -1007,6 +1007,8 @@ Lindy의 간결한 진입 동선과 Apple의 여백·타이포그래피를 참�
 
 ## 8. 제약 사항
 
+- **작업 실패 처리(phase 54, ADR-093):** 여러 chunk 문서 요약의 LLM 병합 호출이 실패하면 이미 검증된 chunk 결과의 코드 병합본을 저장한다 — 병합 실패로 요약 전체를 버리지 않는다. 자료 검토 구간의 마무리 RPC가 오류를 내면 같은 lease로 원인 코드(`transcription_boundary_invalid`·`transcription_sections_invalid`·`review_completion_failed`)를 기록해 구간·자료를 `failed`로 남긴다 — 2분 스윕의 `timeout`이 실제 원인을 덮지 않게 한다. DB·migration·스키마·화면 문구·성공 경로의 LLM 호출 수는 바꾸지 않는다.
+
 - **데모 문서 요약 범위(phase 53, ADR-092):** 익명 읽기는 `is_demo_department(dept_id)`이고 활성 소스인 `document_summaries` 행의 SELECT만 연다. 쓰기 정책·새 RPC·새 테이블은 만들지 않는다. 데모 화면은 읽은 요약을 그 부서 원문으로 다시 검증해 인용이 하나도 남지 않으면 요약 구역을 그리지 않는다. 게스트 라우트의 LLM 호출 0회·쓰기 0건·우리 팀 실데이터 0건은 그대로다. 운영 반영은 migration → 데모 시드 재생성(데모 조직만) → 코드 병합 순서이며 단계마다 사용자 승인으로 한다.
 
 - **공개 검색·관측 범위(phase 52, ADR-091):** GA4 측정 ID와 Sentry public DSN은 비밀 토큰이 아닌 공개 수집 식별자다. 서버 환경 변수 `GA4_MEASUREMENT_ID`·`SENTRY_DSN`에서 읽어 필요한 공개 식별자만 브라우저에 전달한다. `SENTRY_AUTH_TOKEN`·service role·OAuth 비밀은 전달하지 않는다. 관측 오류·잘못된 설정·미동의는 제품 기능을 막지 않는다. preview는 noindex·전체 크롤 차단·운영 수집 중단, 로컬은 명시적 테스트 설정으로만 수집한다. 운영 배포는 검증 후 사용자 승인으로 진행한다.

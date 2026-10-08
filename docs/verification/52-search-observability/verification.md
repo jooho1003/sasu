@@ -2,7 +2,7 @@
 
 2026-10-07 · phase 52 · PRD §3-9·§8 / ADR-091.
 
-현재 상태(2026-10-09): 구현·계정 연결·build/단위/E2E 검증 완료. 10/7 CLI 운영 배포는 이후 main 자동 배포가 덮어써 **현재 운영에 없다**(아래 「2026-10-09 운영 상태 재확인」). 최신 main 위 커밋·PR 병합으로 재반영한다. GA4 실시간 콘솔·운영 Sentry 이벤트 UI와 Graft/Archify 결과는 남아 있다.
+현재 상태(2026-10-09): 구현·계정 연결·build/단위/E2E 검증 완료. 10/7 CLI 운영 배포는 이후 main 자동 배포가 덮어써 **현재 운영에 없다**(아래 「2026-10-09 운영 상태 재확인」). 2026-10-09 PR #49 병합으로 운영에 재반영했다(아래 「2026-10-09 운영 재반영」). GA4 실시간 콘솔·운영 Sentry 이벤트 UI와 Graft/Archify 결과는 남아 있다.
 
 ## 실행 기록
 
@@ -88,3 +88,13 @@ Sentry 운영 browser event ID는 `4c5f95b792df493a85f2d864dfe9fa99`다. 이번 
 2026-10-09 공개 요청 확인: `/llms.txt` 404, `/api/telemetry/config` 404, `/` 응답 CSP에 GA4·Sentry 수집 주소 없음. 위 「승인된 운영 배포 및 실제 수집 검증」의 운영 확인은 10/7 03:06~03:38 사이 상태의 기록이다.
 
 조치: 작업을 `feat/search-observability-20261009` 브랜치에 커밋하고 최신 origin/main(phase 53 포함) 위로 리베이스했다. ADR.md·PRD.md의 덧붙임 충돌은 양쪽을 모두 남겨 번호 순서로 정리했다. 실운영 수집 확인용 Playwright 설정은 운영 GA4 ID·Sentry DSN을 하드코딩하지 않고 환경 변수에서 읽게 바꿨고, `e2e-live-results.json`의 DSN 키 부분은 가렸다. 재반영은 PR main 병합(자동 배포)으로 한다. CLI promote는 다음 main 배포가 다시 덮어쓰므로 쓰지 않는다.
+
+## 2026-10-09 운영 재반영
+
+로컬 검증(리베이스 뒤): `npm run lint` exit 0, `npx vitest run` 194 files / 1,926 passed, `npx next build --webpack` exit 0(597초). 로컬 Turbopack 빌드는 이번에도 컴파일 단계에서 멈춰 중단했다. Vercel preview 클라우드 빌드 success.
+
+PR #49를 2026-10-09 00:55 main에 병합했고, 자동 운영 배포 `dpl_F26xYmLTEQ3QCHzz6jfA8Tv9R7HY`(00:55:37 생성)가 getsasu.com에 연결된 것을 `npx vercel inspect getsasu.com`으로 확인했다. 되돌림 기준은 직전 운영 `dpl_B3JpWE6HbNS12qPhmkdeRmnXxL7b`.
+
+운영 확인: `/llms.txt` 200, `/api/telemetry/config` 200(`environment: production`), `/` CSP에 googletagmanager.com·google-analytics.com·sentry.io. `node scripts/verify-search-observability.mjs` exit 0 — robots/sitemap/llms, production telemetry config, 읽기 전용 demo·login noindex, 동의 뒤 GA4 collector 204, 비공개 GA4 중단, 정제된 Sentry browser collector 200(event `178ab23b67fc458bbd19cfb8e0c17adf`). 결과는 operating-results.json(2026-10-08T16:02:29Z)에 덮어썼다.
+
+이어서 PR #48(phase 23 실측·전사 창 61초 보정)을 병합했다. 자동 운영 배포 `dpl_CHupHDiGPJs5GxosqKA9yakmFzeZ`(01:02:48) 뒤 `/`·`/llms.txt`·`/api/telemetry/config` 200. GA4 콘솔 실시간 화면·Sentry 이벤트 UI, Graft/Archify 결과는 여전히 남아 phase 상태는 in_progress다.

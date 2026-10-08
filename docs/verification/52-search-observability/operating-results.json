@@ -1,6 +1,6 @@
 {
   "baseURL": "https://getsasu.com",
-  "checkedAt": "2026-10-06T18:06:00.733Z",
+  "checkedAt": "2026-10-08T16:02:29.766Z",
   "checks": [
     "/robots.txt",
     "/sitemap.xml",
@@ -17,7 +17,7 @@
     200
   ],
   "sentryEventIds": [
-    "4c5f95b792df493a85f2d864dfe9fa99"
+    "178ab23b67fc458bbd19cfb8e0c17adf"
   ],
   "status": "passed"
 }

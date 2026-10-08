@@ -1,0 +1,30 @@
+{
+  "project": "sasu",
+  "phase": "54-pipeline-failure-recovery",
+  "plan": "docs/01-plan/features/pipeline-failure-recovery.plan.md",
+  "design": "docs/02-design/features/pipeline-failure-recovery.design.md",
+  "steps": [
+    {
+      "step": 0,
+      "name": "document-summary-merge-fallback",
+      "status": "completed",
+      "codex_model": "gpt-5.6-luna",
+      "effort": "medium",
+      "started_at": "2026-10-09T01:04:55+0900",
+      "completed_at": "2026-10-09T01:44:28+0900",
+      "summary": "병합 LLM 실패 시 오류 코드 콜백을 기록하고 검증된 chunk 코드 병합본으로 대체하도록 구현·검증했다."
+    },
+    {
+      "step": 1,
+      "name": "review-part-failure-reason",
+      "status": "completed",
+      "codex_model": "gpt-5.6-luna",
+      "effort": "medium",
+      "started_at": "2026-10-09T01:44:39+0900",
+      "completed_at": "2026-10-09T02:08:16+0900",
+      "summary": "마무리 RPC 오류를 허용된 원인 코드로 같은 lease에 기록하고, 재시도·거부 경로를 테스트와 함께 구현했다."
+    }
+  ],
+  "created_at": "2026-10-09T01:04:55+0900",
+  "completed_at": "2026-10-09T02:08:17+0900"
+}
