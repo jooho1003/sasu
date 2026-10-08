@@ -1,0 +1,11 @@
+
+> sasu@0.1.0 build
+> next build
+
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local, .env
+✓ Running next.config.ts took 31.7s
+- Experiments (use with caution):
+  · clientTraceMetadata
+
+  Creating an optimized production build ...

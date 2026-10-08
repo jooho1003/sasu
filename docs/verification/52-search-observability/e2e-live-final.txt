@@ -1,0 +1,11 @@
+[WebServer] (node:26104) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 2 tests using 1 worker
+
+(node:36808) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\telemetry-live.spec.ts:3:5 › real Google tag sends clean page and CTA payloads under enforced CSP (7.4s)
+  ok 2 [chromium] › tests\e2e\telemetry-live.spec.ts:26:5 › real Sentry browser error envelope excludes private URL and original content (667ms)
+
+  2 passed (11.1s)

@@ -469,3 +469,7 @@ DC-16(ADR-086): App의 일 맡기기 nav key가 동일 탭 재클릭에도 WorkT
 공유는 `self` 소유 판정 또는 기존 `can_see()`를 사용한다. `retro_activity_live`와 `retro_revision_live`는 원본 삭제·동의·멤버십·자료 검토 권한·인용 유효성을 재검사하고 RLS와 export에 공통 적용한다. 자료 검토함 파생 활동은 review_editor 권한을 유지하며 부서 전체로 넓히지 않는다. day에는 주제를 복제하지 않는다. 초안은 owner만, 다른 사람은 마지막 확정 revision에 인용된 활동만 읽는다. 생성 claim/renew/finish는 generation·lease·만료·동의를 검사하며 2분 sweep은 같은 행 잠금으로 실행된다.
 
 지원자 익명 경로는 0048의 잠금 누적·보관 중 철회 계약을 사용한다. 채용 UI는 자기 부서의 세션/RLS 조회, 제출과 동의는 익명 최소 RPC, 채점·기한 정리는 워커 내부 service role이다. 기능이 꺼진 조직도 이미 수집한 개인정보의 파기 대상에서 제외하지 않는다.
+
+## 6-14. 공개 검색·방문·오류 관측 (ADR-091)
+
+PRD §3-9·§8을 따른다. metadataBase → 공개 metadata/sitemap/llms/FAQ JSON-LD; public layout → 사용자 분석 선택 → GA4 조회·CTA; instrumentation server/client → Sentry → beforeSend 허용 목록. proxy는 공개 3경로 밖과 preview에 X-Robots-Tag noindex를 설정하며 CSP nonce를 유지하고 설정된 실제 수집 origin만 허용한다. 업무 데이터·사용자 식별자·요청 헤더/본문·인증 query는 관측 provider에 보내지 않는다. Sentry DSN과 GA4 ID만 공개 식별자이고 auth token은 서버 전용이다. 새 DB/job·권한 판정 변경 없음.

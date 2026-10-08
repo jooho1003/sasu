@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import { baselineSecurityHeaders } from "./lib/security-headers";
 
 const nextConfig: NextConfig = {
@@ -10,4 +11,14 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  telemetry: false,
+  silent: true,
+  // Error positions only. Do not publish or upload application source content.
+  sourcemaps: { disable: true },
+  release: { create: false, finalize: false },
+  routeManifestInjection: false,
+  webpack: { autoInstrumentServerFunctions: false, autoInstrumentMiddleware: false, autoInstrumentAppDirectory: false },
+});

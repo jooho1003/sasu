@@ -1,0 +1,32 @@
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+ ❯ tests/recording/session.test.ts (6 tests | 1 failed) 6810ms
+   ❯ meeting recording checkpoints (6)
+     × streams 30 minutes with exactly 1800 bounded checkpoints and ignores further input 6765ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/recording/session.test.ts > meeting recording checkpoints > streams 30 minutes with exactly 1800 bounded checkpoints and ignores further input
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/recording/session.test.ts:74:3
+     72|   });
+     73|
+     74|   it("streams 30 minutes with exactly 1800 bounded checkpoints and ign…
+       |   ^
+     75|     let frames = 0;
+     76|     let largest = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 189 passed (190)
+      Tests  1 failed | 1911 passed (1912)
+   Start at  01:09:50
+   Duration  102.94s (transform 39%, import 34%, tests 25%, worker 2%)
+
+  Transform  transforming modules took 42.23s · 39% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+

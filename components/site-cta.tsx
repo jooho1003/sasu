@@ -25,6 +25,7 @@ export function SiteCta({
       <a
         className={`button button-primary ${compact ? "button-small" : ""}`}
         href="/demo"
+        data-analytics-id="demo"
       >
         데모 보기
       </a>
@@ -32,6 +33,7 @@ export function SiteCta({
         <a
           className={`button button-secondary ${compact ? "button-small" : ""}`}
           href={links.pilotContactUrl}
+          data-analytics-id="pilot_contact"
           {...externalProps}
         >
           파일럿 문의
@@ -41,6 +43,7 @@ export function SiteCta({
         <a
           className="button button-secondary"
           href={links.voteUrl}
+          data-analytics-id="vote"
           {...externalProps}
         >
           투표하기
@@ -50,6 +53,7 @@ export function SiteCta({
         <a
           className="button button-secondary"
           href={links.demoVideoUrl}
+          data-analytics-id="demo_video"
           {...externalProps}
         >
           3분 데모 영상

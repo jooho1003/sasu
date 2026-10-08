@@ -9,7 +9,7 @@ export function baselineSecurityHeaders() {
   ];
 }
 
-export function contentSecurityPolicy(nonce: string, supabaseUrl: string | undefined, development: boolean) {
+export function contentSecurityPolicy(nonce: string, supabaseUrl: string | undefined, development: boolean, telemetry: { ga4?: boolean; sentryDsn?: string | null } = {}) {
   if (!/^[A-Za-z0-9+/=_-]+$/u.test(nonce)) throw new Error("invalid_nonce");
   let origin = "";
   let websocket = "";
@@ -21,15 +21,23 @@ export function contentSecurityPolicy(nonce: string, supabaseUrl: string | undef
       websocket = ` ${url.origin.replace(/^http/u, "ws")}`;
     } catch { throw new Error("invalid_supabase_origin"); }
   }
+  let sentryOrigin = "";
+  if (telemetry.sentryDsn) {
+    try {
+      const url = new URL(telemetry.sentryDsn);
+      if (url.protocol === "https:" && /^o\d+\.ingest(?:\.[a-z]+)?\.sentry\.io$/u.test(url.hostname) && !url.port && !url.password) sentryOrigin = ` ${url.origin}`;
+    } catch { /* An invalid optional collector stays disabled. */ }
+  }
+  const collectors = `${telemetry.ga4 ? " https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com" : ""}${sentryOrigin}`;
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ""}`,
     // Existing components use style attributes. Script execution remains nonce-only.
     "style-src 'self' 'unsafe-inline'",
-    `connect-src 'self'${origin}${websocket}${development ? " ws: http://localhost:* http://127.0.0.1:*" : ""}`,
+    `connect-src 'self'${origin}${websocket}${collectors}${development ? " ws: http://localhost:* http://127.0.0.1:*" : ""}`,
     `media-src 'self' blob:${origin}`,
     "worker-src 'self' blob:",
-    "img-src 'self' data: blob:",
+    `img-src 'self' data: blob:${telemetry.ga4 ? " https://www.google-analytics.com https://region1.google-analytics.com" : ""}`,
     "font-src 'self'",
     "object-src 'none'",
     "base-uri 'self'",

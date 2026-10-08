@@ -1,0 +1,13 @@
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+
+ Test Files  5 passed (5)
+      Tests  12 passed (12)
+   Start at  01:34:45
+   Duration  9.43s (import 64%, transform 32%, tests 2%, worker 2%)
+
+  Transform  transforming modules took 3.11s · 32% of tracked time, re-done on every run
+             persist transforms across runs with fsModuleCache: true
+             learn more: https://vitest.dev/guide/improving-performance#caching-between-reruns
+

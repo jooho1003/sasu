@@ -1,0 +1,25 @@
+Vercel CLI 61.0.0 (Node.js 24.18.0)
+Retrieving project…
+> Found Project wadelee1005-3954s-projects/sasu [592ms]
+
+  General
+
+    ID				prj_W5sgVwi1zbEXKUg8ue4ZcS7u6sxy
+    Name			sasu
+    Owner			wadelee1005-3954's projects
+    Created At			10 September 2026 01:50:33 [27d ago]
+    Root Directory		.
+    Node.js Version		24.x
+
+  Framework Settings
+
+    Framework Preset		Other
+    Build Command		`npm run vercel-build` or `npm run build`
+    Output Directory		`public` if it exists, or `.`
+    Install Command		`yarn install`, `pnpm install`, `npm install`, or `bun install`
+
+  Sandbox
+
+    Region			iad1
+    Failover Regions		None
+

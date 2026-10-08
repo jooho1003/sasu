@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+import { reportClientError } from "@/components/sentry-client";
 
 export default function AppError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => { void reportClientError(error); }, [error]);
   return (
     <main className="mx-auto min-h-screen w-full max-w-2xl px-5 py-16 sm:px-8">
       <section className="grid gap-5 rounded-3xl bg-[var(--surface)] p-8 text-left shadow-sm">

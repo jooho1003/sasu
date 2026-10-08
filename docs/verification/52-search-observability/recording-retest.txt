@@ -1,0 +1,9 @@
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  01:15:10
+   Duration  8.17s (transform 50%, tests 45%, worker 3%, import 2%)
+
