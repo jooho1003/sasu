@@ -1,6 +1,6 @@
 # pipeline-failure-recovery Completion Report
 
-2026-10-09 · SASU · PDCA report · 설계 대비 **100%** · 운영 반영은 PR 병합 승인 대기.
+2026-10-09 · SASU · PDCA report · 설계 대비 **100%** · 2026-10-09 운영 반영(PR #50, `dpl_8N6WYCtoo6fJqqhqNqRZkN7v6mgt`).
 
 ## Executive Summary
 

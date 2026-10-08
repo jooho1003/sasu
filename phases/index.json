@@ -4,12 +4,14 @@
       "dir": "54-pipeline-failure-recovery",
       "status": "completed",
       "design": "docs/02-design/features/pipeline-failure-recovery.design.md",
-      "note": "실기기 실측 결함 3(문서 요약 병합 실패 시 검증된 chunk 결과 대체)·결함 2(녹음 구간 마무리 오류 원인 기록, timeout 덮어쓰기 방지). ADR-093. DB 변경 없음. step0~1 Codex 완료, 단위 1,935·lint·webpack build 통과, analyze 100%·report 완료. 운영 반영(PR 병합)은 사용자 승인 대기.",
+      "note": "실기기 실측 결함 3(문서 요약 병합 실패 시 검증된 chunk 결과 대체)·결함 2(녹음 구간 마무리 오류 원인 기록, timeout 덮어쓰기 방지). ADR-093. DB 변경 없음. step0~1 Codex 완료, 단위 1,935·lint·webpack build 통과, analyze 100%·report 완료. 2026-10-09 사용자 승인 후 PR #50 병합으로 운영 반영(dpl_8N6WYCtoo6fJqqhqNqRZkN7v6mgt), 운영 워커 준비 통과.",
       "completed_at": "2026-10-09T02:08:17+0900",
       "verification": "docs/verification/54-pipeline-failure-recovery/verification.md",
       "analysis": "docs/03-analysis/pipeline-failure-recovery.analysis.md",
       "report": "docs/04-report/features/pipeline-failure-recovery.report.md",
-      "production_deployed": false
+      "production_deployed": true,
+      "deployed_at": "2026-10-09T02:33:52+09:00",
+      "deployment": "docs/verification/54-pipeline-failure-recovery/verification.md"
     },
     {
       "dir": "53-demo-document-summary",
