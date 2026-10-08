@@ -1,0 +1,27 @@
+{
+ "mode": "system",
+ "glossary": "before",
+ "seconds": 1285.6,
+ "sha256": "54a8c6d5c30f9ca3",
+ "ref_chars": 5688,
+ "hyp_chars": 5390,
+ "cer": 0.1014,
+ "term_occurrences": 171,
+ "distinct_terms": 30,
+ "term_cer": 0.4519,
+ "sections": 268,
+ "error_sections": 109,
+ "flagged_sections": 0,
+ "flagged_error_sections": 0,
+ "low_conf_recall": 0.0,
+ "flag_precision": null,
+ "long_runs": [
+  {
+   "op": "D",
+   "len": 7,
+   "text": "고스테이징에서",
+   "section": null,
+   "ref_at": 663
+  }
+ ]
+}

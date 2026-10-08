@@ -1,0 +1,18 @@
+{"t":1791207890733,"iso":"2026-10-05T13:44:50.733Z","event":"open","status":200,"ua":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36","scenario":"noaudio"}
+{"t":1791207890849,"iso":"2026-10-05T13:44:50.849Z","event":"sessions_before","sessions":[]}
+{"t":1791207897174,"iso":"2026-10-05T13:44:57.174Z","event":"picker_view","r":"select type=TabItem"}
+{"t":1791207899034,"iso":"2026-10-05T13:44:59.034Z","event":"picker_source","r":"invoke type=Button"}
+{"t":1791207901201,"iso":"2026-10-05T13:45:01.201Z","event":"picker_audio_state","before":"state:Off type=Button","after":"state:Off type=Button"}
+{"t":1791207901996,"iso":"2026-10-05T13:45:01.996Z","event":"picker_tree","buttons":["화면 1|on","화면 2|on","시스템 오디오와 함께 공유|on","공유|on","취소|on"]}
+{"t":1791207902732,"iso":"2026-10-05T13:45:02.732Z","event":"picker_share","name":"공유","r":"invoke type=Button"}
+{"t":1791207909256,"iso":"2026-10-05T13:45:09.256Z","event":"noaudio_result","view":"전체 화면","alerts":["오류 공유한 화면에서 소리를 찾지 못했습니다. 공유 창에서 오디오 공유를 켜고 다시 시작해 주세요.",""],"status":{"timer":null,"persisted":null,"chip":null,"live":"","notices":["오류 공유한 화면에서 소리를 찾지 못했습니다. 공유 창에서 오디오 공유를 켜고 다시 시작해 주세요."],"buttons":["☰ 메뉴 접기","5초 테스트 녹음","녹음 시작(disabled)","목록 다시 확인"],"meters":[],"title":"사수 — 회의록이 아니라 결정을 만듭니다"},"audioElements":0}
+{"t":1791207909263,"iso":"2026-10-05T13:45:09.263Z","event":"tracks","label":"after_noaudio_전체 화면","tracks":[{"via":"getDisplayMedia","kind":"video","label":"screen:1:0","readyState":"ended","muted":false,"settings":{}}],"errors":[],"live":0}
+{"t":1791207914534,"iso":"2026-10-05T13:45:14.534Z","event":"picker_view","r":"select type=TabItem"}
+{"t":1791207916365,"iso":"2026-10-05T13:45:16.365Z","event":"picker_source","r":"select type=DataItem"}
+{"t":1791207918436,"iso":"2026-10-05T13:45:18.436Z","event":"picker_audio_toggle","r":"toggle:Off type=Button"}
+{"t":1791207919055,"iso":"2026-10-05T13:45:19.055Z","event":"picker_audio_state","before":"state:On type=Button","after":"state:Off type=Button"}
+{"t":1791207919702,"iso":"2026-10-05T13:45:19.702Z","event":"picker_tree","buttons":["탭 오디오와 함께 공유|on","공유|on","취소|on"]}
+{"t":1791207920383,"iso":"2026-10-05T13:45:20.383Z","event":"picker_share","name":"공유","r":"invoke type=Button"}
+{"t":1791207926908,"iso":"2026-10-05T13:45:26.908Z","event":"noaudio_result","view":"Chrome 탭","alerts":["오류 공유한 화면에서 소리를 찾지 못했습니다. 공유 창에서 오디오 공유를 켜고 다시 시작해 주세요.",""],"status":{"timer":null,"persisted":null,"chip":null,"live":"","notices":["오류 공유한 화면에서 소리를 찾지 못했습니다. 공유 창에서 오디오 공유를 켜고 다시 시작해 주세요."],"buttons":["☰ 메뉴 접기","5초 테스트 녹음","녹음 시작(disabled)","목록 다시 확인"],"meters":[],"title":"사수 — 회의록이 아니라 결정을 만듭니다"},"audioElements":0}
+{"t":1791207926910,"iso":"2026-10-05T13:45:26.910Z","event":"tracks","label":"after_noaudio_Chrome 탭","tracks":[{"via":"getDisplayMedia","kind":"video","label":"web-contents-media-stream://00FFE4892E2C2779C163D00BE924CBC2","readyState":"ended","muted":false,"settings":{}}],"errors":[],"live":0}
+{"t":1791207927049,"iso":"2026-10-05T13:45:27.049Z","event":"sessions_after","sessions":[]}

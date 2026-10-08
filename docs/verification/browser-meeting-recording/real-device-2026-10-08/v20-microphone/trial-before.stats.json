@@ -1,0 +1,36 @@
+{
+ "mode": "microphone",
+ "glossary": "before",
+ "seconds": 1250.1,
+ "sha256": "6377746f2e4642be",
+ "ref_chars": 5688,
+ "hyp_chars": 5407,
+ "cer": 0.0941,
+ "term_occurrences": 171,
+ "distinct_terms": 30,
+ "term_cer": 0.3898,
+ "sections": 263,
+ "error_sections": 102,
+ "flagged_sections": 0,
+ "flagged_error_sections": 0,
+ "low_conf_recall": 0.0,
+ "flag_precision": null,
+ "long_runs": [
+  {
+   "op": "I",
+   "len": 6,
+   "text": "많았습니다.",
+   "section": 130,
+   "ref_at": null,
+   "section_start": 566,
+   "section_end": 566.48
+  },
+  {
+   "op": "D",
+   "len": 10,
+   "text": "공유합니다.다섯째,",
+   "section": null,
+   "ref_at": 5490
+  }
+ ]
+}

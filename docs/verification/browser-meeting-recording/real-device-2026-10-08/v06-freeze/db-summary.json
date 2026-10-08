@@ -1,0 +1,87 @@
+{
+ "review": {
+  "id": "afd2275b-bc00-437c-86f9-5d163d15a9e1",
+  "kind": "audio",
+  "title": "V06 페이지 동결(절전 대체)",
+  "status": "ready",
+  "status_reason": null,
+  "duration": 60.9013125,
+  "input_method": "microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 0,
+   "max_pending_samples": 2304,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 48
+  },
+  "levels": {
+   "system": null,
+   "microphone": "AV1qcGRAcmdxYQFmc2ttaF8BcHJzbmxwZwFqcm9uZW5sZgFpZnNgZ2pvYgFvcWpwa2MBZXFweGdrbnRH"
+  },
+  "paused": false,
+  "meeting": {
+   "title": "V06 페이지 동결(절전 대체)",
+   "provider": "in_person"
+  },
+  "interrupted": false,
+  "clipping_ratio": 0,
+  "captured_samples": 974421,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "in_person",
+  "retained_samples": 974421,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "5e81c21d1dd4887d7e4c101ec7ff16e7a26625bd9ab9fda3e88a50ba1824f89d",
+   "object_path": "22222222-2222-4222-8222-222222222222/afd2275b-bc00-437c-86f9-5d163d15a9e1/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 1,
+   "attempt": 1,
+   "sample_count": 14421,
+   "bytes": 28886,
+   "sha256": "58d94a1a977d1d6ff49ecf9dd4b03886c6dba6b9a5ce187c49724dc458f7c172",
+   "object_path": "22222222-2222-4222-8222-222222222222/afd2275b-bc00-437c-86f9-5d163d15a9e1/original-segments/1-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 60.9013125,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 58.98
+  },
+  {
+   "part_index": 1,
+   "start_seconds": 60,
+   "end_seconds": 60.9013125,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 1.36
+  }
+ ],
+ "sections": 12
+}

@@ -1,0 +1,619 @@
+{
+ "review": {
+  "id": "ddae63af-fd56-407e-a02b-0e0bf266a5c1",
+  "kind": "audio",
+  "title": "V04 30분 한도 chrome",
+  "status": "ready",
+  "status_reason": null,
+  "duration": 1800,
+  "input_method": "microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 0,
+   "max_pending_samples": 2944,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 2157
+  },
+  "levels": {
+   "system": null,
+   "microphone": "AQEBAQEBAQEBYGtvZFZya25dAWpybGlpWEt0cHJrbW5jAW11cGljcHFSS2llc2Vna29XX2pxbG1tWgFqcXF5WW11aQFbZ2ZsY29rUlZgb2pmaGFpAXFqamZoa2EBam1vbW5tZQFRZ3BXb2VxW2BxbWhkXm1xQV5ybmxvZmRvbmYBa21wZ2RtZgFrb2xuagFicnJnbmtsa2kBamZvbVxrbGhOXmlqa2tsZgFuaGxnAXlsdG1XZkFddG1oZVBlXU5qY2lnbWJtP2prZ2hvZmprZwFkZmpqYWRvPGFpcXBoagFtcGtqb3Bwbh9cb3BhYmpsZGMBZHJtZWleaGQcZW1tbm1paV0Ba25qbm5dAXBjcVJrZDFpcGhrZ2hxXwFxc2dlaXBzaQFkam5nZnFpUFZjZmZnZGpfN3Fza2ZlZVw0cHdlanFoXgFwaGxoaGNwQF1tbGpraz1aZXZsbWtpH2h1b21sYW9oNWpobmtvbBJebHFmZmhwaF9AcnJpaW9nQ29tcGt0aGdmAWJpaWpqbWUBb21uZ2hyXwFxbmxvZ2trAWxsYG5uP1VyXG9eWnJnAWxtb25famNXOHZjYWxraWABdWlsaWtePXBvbWdeAWxta25naFBjaW9rZ25ualwBb2xkb2psSEttcG1BbWUBYmhtaWgBbmdrY2xrbUlhamxkamxvawFrbWdvaGxmXVRvbV9jamQBaHBzY2lvbUpWbntscG9pXFhubmpnZlsBcWpybGlgTGlsb0NUdWVuZ29pAWhyamZvXnJjAW9va2xva2plYwFsb2dpZlgBbnFgbmZob2cBbWtraGxoawFhaWtrAW9vbW90AWxwaV5rbmlXXG9pcGpwZlJObmtZb29xZ11HZmBpbGZhC2d0aWlubGo1YmdlbW5sVVBta3IyWHBxY2hwaWwBYGhrZ2dnZmBjAWxrbXFoZWlxY0ZJbm5naWxsYwF0bnRnYW5vU2N2Z2VqZnReZz9ebmhtaWxrbwFjamxSWm1sa1VtbGQBbHBtbmFtTmpva2ZXa15lAWxhYWZlY1RYdnFsYWZtZQFtbWVoZWlcUmpqawFta2ZsbWZfAXJncWxjb2guaGtqbGZhc2oNamtsZmpqW2NqcHBgbmkaYGxyanBoDW9vb19taG1iAWtoaGtncFgBc25qa21mAWlubWFpbl0Bb2ptXWdhYAFqamxga2sBaGJobFxqamEBb2drcXBpZQFob2xfaG5qYAFsbXNmbnBmNWFqZ3NBVWxtZGtvAWx0cVVqb3BqR1hxZV9mbGBfAXFva19uaGpcVG1va2hxZgFhbW5ebWdrEG1zcV5lcGhrAWFpamsBa25oamdtD2BpZmtnWm1vbAFqam5lbWtoAW5obHNyaGRaUG9vbW5jaG4cXWlubnNpGl5uam5Qb3BqAWRuaQFmZ25sb0NjampkaWpdAWxnZ2BucWFgAW1eZWpjWwFwcW1qamhoAVtsaWkBcHRob2dqZ19jbnJ1YGpvYwFqcW1mZ2crXGRsZAFuYGhqbWYBdHBwa2BpaFcBbmplYWtsZF0BcG9ya2tdAW9zZgFRX2tsaGlga2lgSll3ZmRdcWxyAVZebHJfb2BcSFJmbmxnYG5sEVNeb25vXmZvcUlWXG9kaW1kaAFfaW5wbmRrYwF2c21vZnJxTFtzaG1pb10BAQEBAWBscGZhcGpvXAFwbWxpbUhTdW92Ym1vYQFuc25oY3BwRktpaHFlaWtvSWBrcG1tbFwBanFweVxudGkBXGhmaWVua1JcaGtpaGZhaAFya2hmaWtdAWpscG9tbWMBXWVxWm9mcEZob2tqX19wbwFpbW5pb2ljcGxmAWxtb2dlbWUBbG5tbmkBZHNyZ21rbmtnAWtlb2xca2xpSF5raWpsa2YBb2duZQF6anRsW2cmaXBsaGRRaFdPaWVnZ21icUplbmRrbGpramcfYmhra1llbktWbXBxaGoBbW9pam9xbnBGXG5saWFrbGdkAV1wbWVoXmlkRGJrbmpwa2hgAWhvaXJjAWtnb1tmaFkBcm5na2hwbAFrcHBaaHFybVwBb2xoaG5uYAFjZ2NjZWpmAWxzaHBcZ2IBanFyaG1uZAFobGxsZmVkawFsbW1qaV4BZW10bmxmXQF0dG1rYG5rXAFvb2pubF8ya25uaG1ob2ABbXFuamxsXwF4bm1pbnFiVlJqaW5BcW8pZW1tbmNvbQFua29pb2tpW1hwZ2dwYgFxZWpaZWxzAWVwbGppaGteAXNoYGlsamkBcGxuaWxiAW1vaWxlAWlnbm1raVkBbW1rbGdvamcBZW9lamtuYgFpcGpnZmhXUmpvaWoQY29pWG9taWQBb21oZmhtb1kBc2pja29oaAFpbmZfaWtDXW9wb1RvbmQBanR4cGlyZAFuaXJXaGgB"
+  },
+  "paused": false,
+  "meeting": {
+   "title": "V04 30분 한도 chrome",
+   "provider": "in_person"
+  },
+  "interrupted": false,
+  "clipping_ratio": 0,
+  "captured_samples": 28800000,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "in_person",
+  "retained_samples": 28800000,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "29a2ab6e8de7985d2621428105e8eed81e54e7c5e756aaca51fa5b96448007ed",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 1,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "1ffcf7f19bae785871c05a0e2bc69cde5af2319a4f646e8e177974c74f97275b",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/1-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 2,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "2e2077a899712998469c79cfbbb5ff803b7ffc7560de139b9b564a47e07882c4",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/2-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 3,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "e753dc17c9246e9149477805e3da09b468e83effdffc3de4aafd803f7b3a54d0",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/3-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 4,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "983f1876e0110fc1460b8cd37e67b517d910aa1a52900598866d2d49e2404ad7",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/4-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 5,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "0ba4a250c1c0cdfeec03285692f87a6203661e037b694c163dc3a801b231d080",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/5-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 6,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "5034a5dfa1ec3f0817150430a2db7d5d4c052d50c14bc143216609fa8532dc52",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/6-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 7,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "d7c06b0fd62da63a429f5ddac7ca790579bedee8f6b4eb6d1571adbd5ee98daa",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/7-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 8,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "a42d72e66db92963c4c9a7ec54da2b7d937a1b95ae0aafea20f3f471124e7c15",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/8-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 9,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "5f0820c391c9a90fa29759d5aee35987179b32e85d5016399bcec0b65a657799",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/9-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 10,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "05e5bd303c716db8a3232f2ee251a10a09177bb8acc9fd14799c53b489f963a4",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/10-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 11,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "68496dacde25aeb2d630deda905ffb62cf2b5c5a061f5abf016d802bd93fe943",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/11-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 12,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "1912d65cb1bc724d7924491da5e641ba736c8d4b543005a60ed439796e66a5fb",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/12-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 13,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "f4d19421cab7ba892e27be534cd9b3d92a626db2871e8fc5d5016af8bfc3082f",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/13-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 14,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "07d5cd4268d61be4d5231ef8d7db7e1d239217e9ec20698c5c44eb3abb74c50a",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/14-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 15,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "512dddc38bfbc2a39ef5a72164a2b0f305e791b489e3f1fcd45e4d54cb4db6e9",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/15-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 16,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "cba497c33824e8399ec25cb8de09b7c3628f68f251586a7f7b3aea1e6617f664",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/16-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 17,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "f3f06862c872d358e78ed5e279bba197916692939c411485f1c686974bff8f84",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/17-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 18,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "c3fc40816e7918bf64000ff1b4f1c0c9aac52f288b5fad4451f07b4ad9d48469",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/18-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 19,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "e31b9492d3e7684e97dbb69b6f2c965c2418ecd39c459f1b52e12ce4378fb39a",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/19-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 20,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "2086ae7c51d80e411b75be22ba27a3909ede65a0497e4a96946bc0c059428661",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/20-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 21,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "e1467a943e3728cf5b9438da33cdfa781b906499d078bc7b158ef3ba130ac4d0",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/21-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 22,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "158205656506af1caf835c23b3eb3d99ca0a3fe8b21a81547459dee71e617294",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/22-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 23,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "eb79316e714fa16d344f86b07e46c5d019f55f0cbadac22d0466fd2b4c557bc1",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/23-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 24,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "4af6fac6e239b5528612a255d1d83334f35470b32b6d572d77651e0b2c7e93e3",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/24-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 25,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "7eb1fb9fd8224664954b0add0e8943ffb7db5cfc9187850e3a72054bbac644a9",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/25-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 26,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "ca6bba189c3e9b567b633ca04be7dfa0e4a2e2b8732a47489949a8a32b86fd36",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/26-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 27,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "ed6a1e7804353a097cbf2cd9218af032b87b9c3d578ef61a978cb5e4b22651d3",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/27-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 28,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "2ecbb24202542b8cee096c4b8d444ee83f642d844490362459fd7bc04c22c1e6",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/28-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 29,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "5889bd3b2ab66ebd7c8e9e42384c88d2958e860f6a067f99c1362f5444544afd",
+   "object_path": "22222222-2222-4222-8222-222222222222/ddae63af-fd56-407e-a02b-0e0bf266a5c1/original-segments/29-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 61,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.04
+  },
+  {
+   "part_index": 1,
+   "start_seconds": 60,
+   "end_seconds": 121,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.7
+  },
+  {
+   "part_index": 2,
+   "start_seconds": 120,
+   "end_seconds": 181,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.08
+  },
+  {
+   "part_index": 3,
+   "start_seconds": 180,
+   "end_seconds": 241,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.66
+  },
+  {
+   "part_index": 4,
+   "start_seconds": 240,
+   "end_seconds": 301,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 61
+  },
+  {
+   "part_index": 5,
+   "start_seconds": 300,
+   "end_seconds": 361,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.22
+  },
+  {
+   "part_index": 6,
+   "start_seconds": 360,
+   "end_seconds": 421,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.92
+  },
+  {
+   "part_index": 7,
+   "start_seconds": 420,
+   "end_seconds": 481,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.4
+  },
+  {
+   "part_index": 8,
+   "start_seconds": 480,
+   "end_seconds": 541,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.04
+  },
+  {
+   "part_index": 9,
+   "start_seconds": 540,
+   "end_seconds": 601,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.4
+  },
+  {
+   "part_index": 10,
+   "start_seconds": 600,
+   "end_seconds": 661,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.94
+  },
+  {
+   "part_index": 11,
+   "start_seconds": 660,
+   "end_seconds": 721,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.38
+  },
+  {
+   "part_index": 12,
+   "start_seconds": 720,
+   "end_seconds": 781,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.16
+  },
+  {
+   "part_index": 13,
+   "start_seconds": 780,
+   "end_seconds": 841,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.24
+  },
+  {
+   "part_index": 14,
+   "start_seconds": 840,
+   "end_seconds": 901,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.96
+  },
+  {
+   "part_index": 15,
+   "start_seconds": 900,
+   "end_seconds": 961,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.02
+  },
+  {
+   "part_index": 16,
+   "start_seconds": 960,
+   "end_seconds": 1021,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.08
+  },
+  {
+   "part_index": 17,
+   "start_seconds": 1020,
+   "end_seconds": 1081,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.02
+  },
+  {
+   "part_index": 18,
+   "start_seconds": 1080,
+   "end_seconds": 1141,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.04
+  },
+  {
+   "part_index": 19,
+   "start_seconds": 1140,
+   "end_seconds": 1201,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60
+  },
+  {
+   "part_index": 20,
+   "start_seconds": 1200,
+   "end_seconds": 1261,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.02
+  },
+  {
+   "part_index": 21,
+   "start_seconds": 1260,
+   "end_seconds": 1321,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.12
+  },
+  {
+   "part_index": 22,
+   "start_seconds": 1320,
+   "end_seconds": 1381,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.02
+  },
+  {
+   "part_index": 23,
+   "start_seconds": 1380,
+   "end_seconds": 1441,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.42
+  },
+  {
+   "part_index": 24,
+   "start_seconds": 1440,
+   "end_seconds": 1501,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.12
+  },
+  {
+   "part_index": 25,
+   "start_seconds": 1500,
+   "end_seconds": 1561,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.3
+  },
+  {
+   "part_index": 26,
+   "start_seconds": 1560,
+   "end_seconds": 1621,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.1
+  },
+  {
+   "part_index": 27,
+   "start_seconds": 1620,
+   "end_seconds": 1681,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.36
+  },
+  {
+   "part_index": 28,
+   "start_seconds": 1680,
+   "end_seconds": 1741,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.04
+  },
+  {
+   "part_index": 29,
+   "start_seconds": 1740,
+   "end_seconds": 1800,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 58.76
+  }
+ ],
+ "sections": 392
+}

@@ -1,0 +1,68 @@
+{
+ "review": {
+  "id": "8c13cb75-11a7-46fe-a0ee-949d286dc0e2",
+  "kind": "audio",
+  "title": "V03 녹음 중 공유 중지",
+  "status": "ready",
+  "status_reason": null,
+  "duration": 27.0693125,
+  "input_method": "system_and_microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 0,
+   "max_pending_samples": 2432,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 40
+  },
+  "levels": {
+   "system": "AMTSs5e2s4qTs6Wzs7GZkrSqrrazpQEBAQEA",
+   "microphone": "X05STUtQT05Qd21gYF+KdG9YUXyJVVpnaF5W"
+  },
+  "paused": false,
+  "meeting": {
+   "title": "V03 녹음 중 공유 중지",
+   "provider": "in_person"
+  },
+  "interrupted": true,
+  "clipping_ratio": 0,
+  "captured_samples": 433109,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "in_person",
+  "retained_samples": 433109,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 433109,
+   "bytes": 866262,
+   "sha256": "6d29b9f9a1ab2869bd9ee557529fbeaa3d3712b1479997055b8435208e50e592",
+   "object_path": "22222222-2222-4222-8222-222222222222/8c13cb75-11a7-46fe-a0ee-949d286dc0e2/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 27.0693125,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 22.12
+  }
+ ],
+ "sections": 3
+}

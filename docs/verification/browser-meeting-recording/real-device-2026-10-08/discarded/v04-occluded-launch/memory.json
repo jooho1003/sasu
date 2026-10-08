@@ -1,0 +1,38 @@
+[
+ {
+  "t": 1791463570824,
+  "label": "start",
+  "ws": 722518016,
+  "priv": 437174272,
+  "byType": {
+   "browser": 51654656,
+   "renderer": 164765696,
+   "gpu-process": 128131072,
+   "utility": 90046464
+  }
+ },
+ {
+  "t": 1791463577528,
+  "label": "m0",
+  "ws": 733650944,
+  "priv": 433106944,
+  "byType": {
+   "browser": 53440512,
+   "renderer": 172916736,
+   "gpu-process": 114077696,
+   "utility": 90095616
+  }
+ },
+ {
+  "t": 1791463593030,
+  "label": "after_stop",
+  "ws": 730165248,
+  "priv": 436744192,
+  "byType": {
+   "browser": 55390208,
+   "renderer": 163016704,
+   "gpu-process": 126787584,
+   "utility": 89112576
+  }
+ }
+]

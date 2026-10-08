@@ -1,0 +1,37 @@
+{
+ "reviewId": "c4efcedc-76e2-410c-a0c8-15ca98920052",
+ "index": 3,
+ "previous": 0.6400000000000006,
+ "lastOwnedWordEnd": null,
+ "boundaryOk": true,
+ "sections": 0,
+ "failing": [],
+ "projected": {
+  "sections": [],
+  "lastOwnedWordEnd": null
+ },
+ "raw": {
+  "text": "핫픽스로 바로잡았습니다.",
+  "segments": [
+   {
+    "text": " 핫픽스로 바로잡았습니다.",
+    "start": 0,
+    "end": 3,
+    "avg_logprob": -0.11456414,
+    "no_speech_prob": 0
+   }
+  ],
+  "words": [
+   {
+    "word": "핫픽스로",
+    "start": 0,
+    "end": 0.62
+   },
+   {
+    "word": "바로잡았습니다.",
+    "start": 0.62,
+    "end": 1.72
+   }
+  ]
+ }
+}

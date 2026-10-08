@@ -1,0 +1,87 @@
+{
+ "review": {
+  "id": "28969d79-f4ca-4ac8-8e6a-1790591347a1",
+  "kind": "audio",
+  "title": "V03 장치 분리 chrome",
+  "status": "ready",
+  "status_reason": null,
+  "duration": 76.16,
+  "input_method": "microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 1,
+   "max_pending_samples": 2432,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 487
+  },
+  "levels": {
+   "system": null,
+   "microphone": "AQEBAQEBAQEBAVRwZEtwcEhPbWdvbGhkX3Bpam1pZgEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAWlqXm5pAWdtYW9vcl4BAQ=="
+  },
+  "paused": false,
+  "meeting": {
+   "title": "V03 장치 분리 chrome",
+   "provider": "in_person"
+  },
+  "interrupted": false,
+  "clipping_ratio": 0,
+  "captured_samples": 1218560,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "in_person",
+  "retained_samples": 1218560,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "7e5861a9a293a7fa31bcf680a041a2ec3de5fca20a9cec91cdd46898431699f7",
+   "object_path": "22222222-2222-4222-8222-222222222222/28969d79-f4ca-4ac8-8e6a-1790591347a1/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 1,
+   "attempt": 1,
+   "sample_count": 258560,
+   "bytes": 517164,
+   "sha256": "462e30dde69f4ca6181a43b8b12104ddafd4b7003ce9701b4cc2d62382f6798c",
+   "object_path": "22222222-2222-4222-8222-222222222222/28969d79-f4ca-4ac8-8e6a-1790591347a1/original-segments/1-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 61,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.08
+  },
+  {
+   "part_index": 1,
+   "start_seconds": 60,
+   "end_seconds": 76.16,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 13.12
+  }
+ ],
+ "sections": 14
+}
