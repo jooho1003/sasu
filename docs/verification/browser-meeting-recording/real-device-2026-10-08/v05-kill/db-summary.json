@@ -1,0 +1,125 @@
+{
+ "review": {
+  "id": "c4efcedc-76e2-410c-a0c8-15ca98920052",
+  "kind": "audio",
+  "title": "V05 kill chrome",
+  "status": "failed",
+  "status_reason": "empty_extraction",
+  "duration": 183,
+  "input_method": "microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 0,
+   "max_pending_samples": 2304,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 0
+  },
+  "levels": {
+   "system": null,
+   "microphone": "AQFsa2tdb2lzZQFedGlsY2cBanNycWdubEhjcXJrY29ubQFhanVYZWxtZwFqa3Ftb2kBWm1yc3NobXVaAWhmbT9ubGcBXG1obGpgZ10idWxlaWNsQGFsb2ttb2lfDmNobGZub2YBbXBtZ1tncGkBcWpubmNsaHJqWlVubmxpamtXVHBtcGpcAWx0bm5uZ2xrXUxuamhuX21mZAFpbGpqcGZVZWptbgF2a3ByYWFhAXJwaWdRZGQB"
+  },
+  "paused": false,
+  "meeting": {
+   "title": "V05 kill chrome",
+   "provider": "in_person"
+  },
+  "interrupted": true,
+  "clipping_ratio": 0,
+  "captured_samples": 2928000,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "in_person",
+  "retained_samples": 2928000,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "2eb674c5dabf08abb12ef196f009a7053e86159dcbe3e52812f0d51923ff639a",
+   "object_path": "22222222-2222-4222-8222-222222222222/c4efcedc-76e2-410c-a0c8-15ca98920052/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 1,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "884cd8cd5a7f14bf0eeac63023dfe18f5c3ee24a3af9ce5a7f6b140c9315ad49",
+   "object_path": "22222222-2222-4222-8222-222222222222/c4efcedc-76e2-410c-a0c8-15ca98920052/original-segments/1-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 2,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "0112495dcc4fa505cf0367531f83b4e8a495ee8ffaf11eb396ce766a7d50a943",
+   "object_path": "22222222-2222-4222-8222-222222222222/c4efcedc-76e2-410c-a0c8-15ca98920052/original-segments/2-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 3,
+   "attempt": 1,
+   "sample_count": 48000,
+   "bytes": 96044,
+   "sha256": "d6789306bbbe72d537c88eef7a3e71a8c0208ce4f8300adf123e5b462531a291",
+   "object_path": "22222222-2222-4222-8222-222222222222/c4efcedc-76e2-410c-a0c8-15ca98920052/original-segments/3-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 61,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.24
+  },
+  {
+   "part_index": 1,
+   "start_seconds": 60,
+   "end_seconds": 121,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.1
+  },
+  {
+   "part_index": 2,
+   "start_seconds": 120,
+   "end_seconds": 181,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.64
+  },
+  {
+   "part_index": 3,
+   "start_seconds": 180,
+   "end_seconds": 183,
+   "status": "failed",
+   "attempt": 1,
+   "error_code": "empty_extraction",
+   "last_word_end_seconds": null
+  }
+ ],
+ "sections": 0
+}

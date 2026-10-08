@@ -1,0 +1,952 @@
+{
+ "run_dir": "v01-chrome-2026-10-05T13-22-37-999Z",
+ "segments": [
+  {
+   "index": 0,
+   "samples": 960000,
+   "bytes": 1920044,
+   "status": "verified"
+  },
+  {
+   "index": 1,
+   "samples": 960000,
+   "bytes": 1920044,
+   "status": "verified"
+  },
+  {
+   "index": 2,
+   "samples": 628309,
+   "bytes": 1256662,
+   "status": "verified"
+  }
+ ],
+ "total_samples": 2548309,
+ "total_seconds": 159.2693125,
+ "segment_rule_ok": true,
+ "level": {
+  "peak": 0.093353271484375,
+  "rms": 0.014730828814208508
+ },
+ "rms_dbfs_per_second": [
+  -76.7,
+  -38.9,
+  -34.2,
+  -34.0,
+  -40.9,
+  -50.1,
+  -39.4,
+  -34.7,
+  -34.1,
+  -37.8,
+  -37.4,
+  -78.5,
+  -34.9,
+  -37.2,
+  -33.3,
+  -33.0,
+  -37.4,
+  -46.0,
+  -40.2,
+  -34.8,
+  -35.1,
+  -33.6,
+  -34.7,
+  -43.3,
+  -44.0,
+  -35.2,
+  -35.5,
+  -34.5,
+  -38.2,
+  -51.7,
+  -38.2,
+  -35.8,
+  -36.4,
+  -34.7,
+  -75.9,
+  -39.8,
+  -34.1,
+  -33.1,
+  -33.9,
+  -33.9,
+  -39.3,
+  -78.4,
+  -36.4,
+  -34.9,
+  -37.3,
+  -37.3,
+  -79.7,
+  -36.7,
+  -34.6,
+  -34.6,
+  -36.3,
+  -79.7,
+  -37.1,
+  -37.2,
+  -34.8,
+  -35.0,
+  -33.5,
+  -77.5,
+  -35.9,
+  -33.6,
+  -32.7,
+  -35.0,
+  -43.0,
+  -44.5,
+  -34.5,
+  -35.7,
+  -37.5,
+  -78.4,
+  -35.8,
+  -35.4,
+  -34.7,
+  -39.0,
+  -79.8,
+  -34.4,
+  -36.4,
+  -33.5,
+  -42.3,
+  -79.4,
+  -36.7,
+  -34.9,
+  -33.9,
+  -40.1,
+  -79.6,
+  -34.6,
+  -36.7,
+  -37.8,
+  -37.0,
+  -38.0,
+  -79.3,
+  -36.0,
+  -35.2,
+  -34.4,
+  -34.1,
+  -36.6,
+  -77.6,
+  -38.3,
+  -36.3,
+  -34.8,
+  -35.7,
+  -42.9,
+  -39.8,
+  -34.6,
+  -34.1,
+  -36.7,
+  -34.2,
+  -35.9,
+  -78.2,
+  -36.1,
+  -35.0,
+  -33.5,
+  -35.2,
+  -49.5,
+  -38.1,
+  -33.6,
+  -34.1,
+  -36.1,
+  -38.7,
+  -62.4,
+  -36.4,
+  -36.3,
+  -33.1,
+  -38.5,
+  -79.7,
+  -79.7,
+  -37.4,
+  -40.9,
+  -38.0,
+  -34.7,
+  -34.7,
+  -79.4,
+  -35.6,
+  -35.6,
+  -32.9,
+  -34.6,
+  -42.7,
+  -45.2,
+  -36.9,
+  -33.8,
+  -34.7,
+  -40.6,
+  -43.0,
+  -34.2,
+  -36.6,
+  -36.8,
+  -38.2,
+  -80.2,
+  -38.2,
+  -34.3,
+  -32.9,
+  -36.0,
+  -38.8,
+  -80.0,
+  -35.3,
+  -37.4,
+  -39.7,
+  -38.9,
+  -42.0,
+  -79.6,
+  -79.8
+ ],
+ "alignment": {
+  "A": {
+   "source_seconds": 122.06,
+   "envelope_score": 0.947,
+   "coarse_offset_s": 1.03,
+   "windows": 60,
+   "windows_scored": 60,
+   "lag_median_samples": 16370,
+   "lag_span_samples": 651,
+   "max_step_samples": 394,
+   "jumps_over_80_samples": [
+    {
+     "at_src_s": 8.0,
+     "step": 243
+    },
+    {
+     "at_src_s": 10.0,
+     "step": -235
+    },
+    {
+     "at_src_s": 16.0,
+     "step": 85
+    },
+    {
+     "at_src_s": 18.0,
+     "step": -163
+    },
+    {
+     "at_src_s": 26.0,
+     "step": 86
+    },
+    {
+     "at_src_s": 32.0,
+     "step": 81
+    },
+    {
+     "at_src_s": 38.0,
+     "step": 87
+    },
+    {
+     "at_src_s": 40.0,
+     "step": -154
+    },
+    {
+     "at_src_s": 52.0,
+     "step": 81
+    },
+    {
+     "at_src_s": 68.0,
+     "step": 225
+    },
+    {
+     "at_src_s": 70.0,
+     "step": -222
+    },
+    {
+     "at_src_s": 74.0,
+     "step": 394
+    },
+    {
+     "at_src_s": 76.0,
+     "step": -164
+    },
+    {
+     "at_src_s": 80.0,
+     "step": -82
+    },
+    {
+     "at_src_s": 82.0,
+     "step": -139
+    },
+    {
+     "at_src_s": 96.0,
+     "step": 82
+    },
+    {
+     "at_src_s": 106.0,
+     "step": 318
+    },
+    {
+     "at_src_s": 110.0,
+     "step": -387
+    }
+   ],
+   "min_window_score": 0.42,
+   "first_lag": 16172,
+   "last_lag": 16449,
+   "drift_ppm": 159.3,
+   "residual_rms_samples": 91.9,
+   "residual_max_samples": 272,
+   "max_persistent_step_samples": 209.6,
+   "max_persistent_step_at_src_s": 74.0,
+   "boundary_windows": [
+    {
+     "boundary_s": 60.0,
+     "lags": [
+      16385,
+      16389,
+      16387,
+      16387,
+      16393,
+      16319
+     ]
+    },
+    {
+     "boundary_s": 120.0,
+     "lags": [
+      16440,
+      16447,
+      16449
+     ]
+    }
+   ],
+   "rec_zero_wall_ms": 1791206572258.875,
+   "sample_windows": [
+    {
+     "src_s": 0.0,
+     "lag_samples": 16172,
+     "score": 0.53
+    },
+    {
+     "src_s": 2.0,
+     "lag_samples": 16100,
+     "score": 0.458
+    },
+    {
+     "src_s": 4.0,
+     "lag_samples": 16177,
+     "score": 0.568
+    },
+    {
+     "src_s": 114.0,
+     "lag_samples": 16440,
+     "score": 0.495
+    },
+    {
+     "src_s": 116.0,
+     "lag_samples": 16447,
+     "score": 0.594
+    },
+    {
+     "src_s": 118.0,
+     "lag_samples": 16449,
+     "score": 0.643
+    }
+   ]
+  },
+  "P": {
+   "source_seconds": 8.88,
+   "envelope_score": 0.517,
+   "coarse_offset_s": 146.32,
+   "windows": 3,
+   "windows_scored": 0,
+   "sample_windows": [
+    {
+     "src_s": 0.0,
+     "lag_samples": 2341515,
+     "score": 0.135
+    },
+    {
+     "src_s": 2.0,
+     "lag_samples": 2341436,
+     "score": 0.18
+    },
+    {
+     "src_s": 4.0,
+     "lag_samples": 2345849,
+     "score": 0.11
+    },
+    {
+     "src_s": 0.0,
+     "lag_samples": 2341515,
+     "score": 0.135
+    },
+    {
+     "src_s": 2.0,
+     "lag_samples": 2341436,
+     "score": 0.18
+    },
+    {
+     "src_s": 4.0,
+     "lag_samples": 2345849,
+     "score": 0.11
+    }
+   ]
+  },
+  "B": {
+   "source_seconds": 34.08,
+   "envelope_score": 0.967,
+   "coarse_offset_s": 123.61,
+   "windows": 16,
+   "windows_scored": 16,
+   "lag_median_samples": 1977690,
+   "lag_span_samples": 405,
+   "max_step_samples": 383,
+   "jumps_over_80_samples": [
+    {
+     "at_src_s": 2.0,
+     "step": 81
+    },
+    {
+     "at_src_s": 6.0,
+     "step": -145
+    },
+    {
+     "at_src_s": 8.0,
+     "step": 225
+    },
+    {
+     "at_src_s": 18.0,
+     "step": 158
+    },
+    {
+     "at_src_s": 22.0,
+     "step": -140
+    },
+    {
+     "at_src_s": 24.0,
+     "step": 227
+    },
+    {
+     "at_src_s": 26.0,
+     "step": -222
+    },
+    {
+     "at_src_s": 28.0,
+     "step": 383
+    },
+    {
+     "at_src_s": 30.0,
+     "step": -243
+    }
+   ],
+   "min_window_score": 0.386,
+   "first_lag": 1977609,
+   "last_lag": 1977708,
+   "drift_ppm": 220.0,
+   "residual_rms_samples": 96.3,
+   "residual_max_samples": 221,
+   "max_persistent_step_samples": -104.7,
+   "max_persistent_step_at_src_s": 10.0,
+   "boundary_windows": [
+    {
+     "boundary_s": 120.0,
+     "lags": [
+      1977609,
+      1977690
+     ]
+    }
+   ],
+   "rec_zero_wall_ms": 1791206582328.375,
+   "sample_windows": [
+    {
+     "src_s": 0.0,
+     "lag_samples": 1977609,
+     "score": 0.449
+    },
+    {
+     "src_s": 2.0,
+     "lag_samples": 1977690,
+     "score": 0.548
+    },
+    {
+     "src_s": 4.0,
+     "lag_samples": 1977691,
+     "score": 0.568
+    },
+    {
+     "src_s": 26.0,
+     "lag_samples": 1977568,
+     "score": 0.386
+    },
+    {
+     "src_s": 28.0,
+     "lag_samples": 1977951,
+     "score": 0.403
+    },
+    {
+     "src_s": 30.0,
+     "lag_samples": 1977708,
+     "score": 0.429
+    }
+   ]
+  }
+ },
+ "excluded_wall_ms_between_A_and_B": 10069.5,
+ "ui_paused_ms": 10057,
+ "sections": [
+  {
+   "start": 1.38,
+   "end": 4.98,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "지금부터 실기기 녹음 검증 회의를 시작하겠습니다."
+  },
+  {
+   "start": 6.56,
+   "end": 6.84,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "오늘"
+  },
+  {
+   "start": 6.84,
+   "end": 10.62,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "첫 번째 안건은 다음 분기 마케팅 예산 배분입니다."
+  },
+  {
+   "start": 12.06,
+   "end": 12.54,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "지난달"
+  },
+  {
+   "start": 12.54,
+   "end": 17.06,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "광고 집행 결과를 보면 검색 광고의 전환율이 가장 높았습니다."
+  },
+  {
+   "start": 18.74,
+   "end": 23.18,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "그래서 검색 광고 예산을 20% 늘리는 방안을 제안합니다."
+  },
+  {
+   "start": 24.82,
+   "end": 25.28,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "반대로"
+  },
+  {
+   "start": 25.28,
+   "end": 28.98,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "오프라인 행사 예산은 절반으로 줄이는 것이 좋겠습니다."
+  },
+  {
+   "start": 30.56,
+   "end": 34.32,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "두번째 안건은 신입개발자 채용일정입니다."
+  },
+  {
+   "start": 35.34,
+   "end": 35.68,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "서류"
+  },
+  {
+   "start": 35.68,
+   "end": 40.5,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "접수는 이번주 금요일에 마감하고 다음주 화요일부터 면접을 봅니다."
+  },
+  {
+   "start": 42,
+   "end": 42.8,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "면접관은"
+  },
+  {
+   "start": 42.8,
+   "end": 45.74,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "각팀에서 2명씩 추천해 주시기 바랍니다."
+  },
+  {
+   "start": 47.3,
+   "end": 47.88,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "세번째"
+  },
+  {
+   "start": 47.88,
+   "end": 50.68,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "안건은 고객문의 응답시간 개선입니다."
+  },
+  {
+   "start": 52.32,
+   "end": 52.7,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "현재"
+  },
+  {
+   "start": 52.7,
+   "end": 56.9,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "평균 응답시간은 4시간인데 목표는 1시간 이내입니다."
+  },
+  {
+   "start": 58.38,
+   "end": 60.16,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "이를 위해 자주 묻는 질문"
+  },
+  {
+   "start": 60.68,
+   "end": 62.04,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "새로 정리하겠습니다."
+  },
+  {
+   "start": 63.74,
+   "end": 66.86,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "네 번째 안건은 사무실 이전 계획입니다."
+  },
+  {
+   "start": 68.14,
+   "end": 72.46000000000001,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "새 사무실은 역에서 걸어서 5분 거리에 있습니다."
+  },
+  {
+   "start": 73.1,
+   "end": 77.16,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "이사는 다음 달 셋째 주 토요일로 잡았습니다."
+  },
+  {
+   "start": 77.92,
+   "end": 81.72,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "각 팀은 이사 전날까지 짐 목록을 제출해주세요."
+  },
+  {
+   "start": 83,
+   "end": 88.24,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "회의실 예약 시스템도 새 사무실에 맞춰 다시 설정해야 합니다."
+  },
+  {
+   "start": 89.16,
+   "end": 94.34,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "주차 공간은 10대로 줄어들기 때문에 대중교통 이용을 권장합니다."
+  },
+  {
+   "start": 95.34,
+   "end": 95.8,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "점심"
+  },
+  {
+   "start": 95.8,
+   "end": 99.75999999999999,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "10대 지원 기준은 지금과 같게 유지하기로 했습니다."
+  },
+  {
+   "start": 100.84,
+   "end": 101.22,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "이전"
+  },
+  {
+   "start": 101.22,
+   "end": 105.96000000000001,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "비용은 총무팀 예산에서 처리하고 부족부는 다음 달에 정산합니다."
+  },
+  {
+   "start": 107.38,
+   "end": 111.03999999999999,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "회의록은 오늘 저녁까지 공유 폴더에 올려두겠습니다."
+  },
+  {
+   "start": 112.58,
+   "end": 113.1,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "질문이"
+  },
+  {
+   "start": 113.1,
+   "end": 116.58,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "있으면 회의가 끝난 뒤 채널에 남겨주시기 바랍니다."
+  },
+  {
+   "start": 118.1,
+   "end": 120.14,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "잠시 쉬었다가 남은 안건을"
+  },
+  {
+   "start": 120.72,
+   "end": 125.34,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "시작하겠습니다."
+  },
+  {
+   "start": 126.34,
+   "end": 130.6,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "다섯번째 안건은 보안교육입니다. 모든"
+  },
+  {
+   "start": 130.6,
+   "end": 135.36,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "직원은 이달 말까지 온라인 보안교육을 마쳐야 합니다."
+  },
+  {
+   "start": 135.82,
+   "end": 139.57999999999998,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "여섯번째 안건은 분기고크샵 장소 선정입니다."
+  },
+  {
+   "start": 140.78,
+   "end": 145.02,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "후보지는 강릉과 여수 두 곳이며 투표로 결정하겠습니다."
+  },
+  {
+   "start": 146.36,
+   "end": 150.9,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "마지막으로 다음 회의는 다음 주 수요일 오후 3시에 열겠습니다."
+  },
+  {
+   "start": 152.2,
+   "end": 152.48,
+   "confidence": null,
+   "boundary_review": false,
+   "text": "오늘"
+  },
+  {
+   "start": 152.48,
+   "end": 155.9,
+   "confidence": "normal",
+   "boundary_review": false,
+   "text": "회의는 여기서 마치겠습니다. 감사합니다."
+  }
+ ],
+ "sentences": [
+  {
+   "part": "A",
+   "id": "A01",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A02",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A03",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A04",
+   "best": 0.808,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A05",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A06",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A07",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A08",
+   "best": 0.952,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A09",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A10",
+   "best": 0.92,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A11",
+   "best": 0.864,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A12",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A13",
+   "best": 0.95,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A14",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A15",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A16",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A17",
+   "best": 0.926,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A18",
+   "best": 0.913,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A19",
+   "best": 0.931,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A20",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A21",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "A",
+   "id": "A22",
+   "best": 0.762,
+   "hits": 1
+  },
+  {
+   "part": "P",
+   "id": "P01",
+   "best": 0.222,
+   "hits": 0
+  },
+  {
+   "part": "B",
+   "id": "B01",
+   "best": 0.913,
+   "hits": 1
+  },
+  {
+   "part": "B",
+   "id": "B02",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "B",
+   "id": "B03",
+   "best": 0.895,
+   "hits": 1
+  },
+  {
+   "part": "B",
+   "id": "B04",
+   "best": 1.0,
+   "hits": 1
+  },
+  {
+   "part": "B",
+   "id": "B05",
+   "best": 0.962,
+   "hits": 1
+  },
+  {
+   "part": "B",
+   "id": "B06",
+   "best": 1.0,
+   "hits": 1
+  }
+ ],
+ "summary": {
+  "sentences_found": 28,
+  "sentences_total": 28,
+  "sentences_duplicated": [],
+  "sentences_missing": [],
+  "pause_sentence_best_similarity": 0.222,
+  "pause_sentence_hits": 0,
+  "pause_keywords_in_transcript": []
+ }
+}

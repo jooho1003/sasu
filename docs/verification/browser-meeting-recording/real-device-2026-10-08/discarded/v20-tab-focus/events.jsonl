@@ -1,0 +1,18 @@
+{"t":1791461635036,"iso":"2026-10-08T12:13:55.036Z","event":"tab_source_ready","duration":1242.955}
+{"t":1791461636748,"iso":"2026-10-08T12:13:56.748Z","event":"api","method":"GET","path":"/api/d/:id/recordings","status":200}
+{"t":1791461636749,"iso":"2026-10-08T12:13:56.749Z","event":"api","method":"GET","path":"/api/d/:id/recordings","status":200}
+{"t":1791461636824,"iso":"2026-10-08T12:13:56.824Z","event":"open","status":200,"ua":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36","userId":"0736f972-0690-47b0-91f1-764c990e5dc2","mode":"tab"}
+{"t":1791461637124,"iso":"2026-10-08T12:13:57.124Z","event":"console_error","text":"Permissions policy violation: camera is not allowed in this document."}
+{"t":1791461651697,"iso":"2026-10-08T12:14:11.697Z","event":"picker_view","r":"select type=TabItem"}
+{"t":1791461654336,"iso":"2026-10-08T12:14:14.336Z","event":"picker_source","r":"select type=DataItem"}
+{"t":1791461665001,"iso":"2026-10-08T12:14:25.001Z","event":"picker_audio_state","before":"state:On type=Button","after":"state:On type=Button"}
+{"t":1791461666650,"iso":"2026-10-08T12:14:26.650Z","event":"picker_tree","buttons":["탭 오디오와 함께 공유|on","오디오와 함께 공유|on","취소|on"]}
+{"t":1791461670410,"iso":"2026-10-08T12:14:30.410Z","event":"picker_share","name":"오디오와 함께 공유","r":"invoke type=Button"}
+{"t":1791461670411,"iso":"2026-10-08T12:14:30.411Z","event":"picker_test","r":"invoke type=Button"}
+{"t":1791461677369,"iso":"2026-10-08T12:14:37.369Z","event":"input_test","meters":[[],[],[],[3.76368021272035e-9,0.0007148100810189345],[0.04361111985543188,0.00029836528988358814],[0.07463614955693441,0.0002644686713276963],[0.06387991915217142,0.0004975166034309727],[0.07333314297412077,0.000307340561554793],[5.624853363107511e-7,0.000588215418818163],[5.601394749599034e-11,0.0005026991130933446],[0.21031904174855656,0.00045046629085362434],[0.14902951490787017,0.0004061718423451242]],"text":"새 녹음\n회의 제목\n녹음 방식\n마이크\n컴퓨터 소리 + 마이크\n회의 출처\n대면 회의\nGoogle Meet\nZoom\n기타\n이어서 녹음\n새 회의 기록\nV04 30분 한도 chrome · 2026. 10. 8. 오후 9:13:38\nV20 microphone 2026-10-08T11:51 · 2026. 10. 8. 오후 8:52:04\nV20 microphone 2026-10-08T11:47 · 2026. 10. 8. 오후 8:47:46\nV05 refresh chrome · 2026. 10. 5. 오후 11:00:43\nV03 장치 분리 chrome · 2026. 10. 5. 오후 10:48:40\nV03 녹음 중 공유 중지 · 2026. 10. 5. 오후 10:46:18\nV01 실기기 edge 13:28:56 · 2026. 10. 5. 오후 10:29:06\nV01 실기기 chrome 13:22:42 · 2026. 10. 5. 오후 10:22:52\n로컬 합성 검증 회의 · 2026. 10. 3. 오전 12:41:22\n로컬 합성 검증 회의 · 2026. 10. 3. 오전 12:37:44\n로컬 합성 검증 회의 · 2026. 10. 3. 오전 12:36:02\n로컬 합성 검증 회의 · 2026. 9. 29. 오후 11:34:47\n로컬 합성 검증 회의 · 2026. 9. 29. 오후 10:25:37\n확정 후 볼 수 있는 사람\n팀장만\n부서 멤버\n동의한 참석자\n합성 팀원\n합성 검토 팀장 (녹음자)\n참석자 전원 녹음 동의를 확인했고, 이 기기의 임시 보관과 비공개 원본 보관을 확인했습니다.\n\n30분까지 녹음할 수 있습니다. 온라인 회의는 공유 창에서 오디오 공유를 선택하세요. 시스템 소리는 알림 등 다른 앱 소리도 담길 수 있습니다.\n\n5초 테스트 녹음\n\n입력 테스트 재생\n\n테스트를 듣고 필요한 입력이 모두 들리는지 확인했습니다.\n녹음 시작\n5초 테스트를 듣고 필요한 소리가 모두 들리는지 확인해 주세요."}
+{"t":1791461680469,"iso":"2026-10-08T12:14:40.469Z","event":"console_error","text":"Permissions policy violation: camera is not allowed in this document."}
+{"t":1791461721114,"iso":"2026-10-08T12:15:21.114Z","event":"picker_view","r":"scope_not_found"}
+{"t":1791461723096,"iso":"2026-10-08T12:15:23.096Z","event":"picker_source","r":"scope_not_found"}
+{"t":1791461725858,"iso":"2026-10-08T12:15:25.858Z","event":"picker_audio_toggle","r":"scope_not_found"}
+{"t":1791461726768,"iso":"2026-10-08T12:15:26.768Z","event":"picker_audio_state","before":"scope_not_found","after":"scope_not_found"}
+{"t":1791461727475,"iso":"2026-10-08T12:15:27.475Z","event":"error","message":"Unexpected token 's', \"scope_not_found\" is not valid JSON"}

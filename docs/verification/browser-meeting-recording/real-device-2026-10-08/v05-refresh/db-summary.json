@@ -1,0 +1,106 @@
+{
+ "review": {
+  "id": "354cf98b-da11-4952-9b77-a5182033ee50",
+  "kind": "audio",
+  "title": "V05 refresh chrome",
+  "status": "ready",
+  "status_reason": null,
+  "duration": 180,
+  "input_method": "microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 0,
+   "max_pending_samples": 2432,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 32
+  },
+  "levels": {
+   "system": null,
+   "microphone": "AQFoam9hbWtrb0ROc2tsZ2wBZXRxc2VvZl5Fc3FtZ2lxbgFWbG5sZWpuagFnbHJrb2tBV2txc3ZkbXZeAWdmbF5qcGgBXW1mam1baGEBdGhsaGRqWlRsa29xbGxhAWBkcGpwbWkBa29qaV1pbmwBa3BsbmdqZnBtXAFwbG5qaWteAXFua2xmAWhzcGtsbWttXwFuZG5tY21mZgFnbGtnb2dfAXFtb0FkdnFzZV9kAXByaGZb"
+  },
+  "paused": false,
+  "meeting": {
+   "title": "V05 refresh chrome",
+   "provider": "in_person"
+  },
+  "interrupted": true,
+  "clipping_ratio": 0,
+  "captured_samples": 2880000,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "in_person",
+  "retained_samples": 2880000,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "d9ee31a1c8db2bbfe6126b95eb85fb02782960a496febd1ad27eddebeffdffa4",
+   "object_path": "22222222-2222-4222-8222-222222222222/354cf98b-da11-4952-9b77-a5182033ee50/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 1,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "d845d43f7fae295debfe4772de0e19cbb92922d9f56f61d053656f9f40a0bed4",
+   "object_path": "22222222-2222-4222-8222-222222222222/354cf98b-da11-4952-9b77-a5182033ee50/original-segments/1-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 2,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "d3cbd3a7363b04718f979abfafd3e1de2aa65b3a34926403819fe3e3dcba87b3",
+   "object_path": "22222222-2222-4222-8222-222222222222/354cf98b-da11-4952-9b77-a5182033ee50/original-segments/2-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 61,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.42
+  },
+  {
+   "part_index": 1,
+   "start_seconds": 60,
+   "end_seconds": 121,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.28
+  },
+  {
+   "part_index": 2,
+   "start_seconds": 120,
+   "end_seconds": 180,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.58
+  }
+ ],
+ "sections": 31
+}

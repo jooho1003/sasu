@@ -1,0 +1,448 @@
+{
+ "review": {
+  "id": "51e8b699-e17d-4398-b475-eedecceedf9b",
+  "kind": "audio",
+  "title": "V20 microphone 2026-10-08T11:51",
+  "status": "failed",
+  "status_reason": "timeout",
+  "duration": 1250.130625,
+  "input_method": "microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 0,
+   "max_pending_samples": 2304,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 291
+  },
+  "levels": {
+   "system": null,
+   "microphone": "AQEBYGxwZltya25aAXBubGlrTlF0b3ZkbW9gAW10b2hicHFHS2lmc2VnbG5SX2twbGxrWQFqcXB5W250aAFcZ2ZrZG9rUltkbWllaGFoAXFraWZoa18Bamxvbm5tZgFYZnJXb2NxVWVwbGpgXm9wKGVubmpvZmRwbGYBa21vZmNtZAFrbWxtaQFkcnJnbWttamgBa2ZvbV1rbGhKXmtqa2xsZwFvaG1mAXprdGxZZzhkcmtnY1FmWk9pZGlobWJxT2NvZGpra2xqaC5haGtrVmpuVlVtb3FnaQFtbmhqcHFub0dbbGpqX2traGMBXXBtZWdeaGVGYGtta3BsZ2EBZ29ra3FdAW1kcxdrZFFlcWhqaGpwYwFuc2xWbHFxbkVfaW5qYnFpXjtmZ2ZjZmpfAW91ZmtjY2ABcG5waHBsXwFtbWlsZWVsW1lta2xqbE5QZW9zbWtqRWB2b21sWm5sTmNta21rbkdZbG9nZ2tuamABcHNnbW9lV1t1b2x1a2dkGF5oaWxdcWcBamxtbmdxYgFvbmtsa2lrBGprZGxtWUhyYm1fWW9sAWxtb2Nra2VbAXZhXW9obGIBdWVvZ2teAXBwZ2pjAWxqbG1pZ1VLb21raGxsal8Ba25ia21rX0Fqcmpfa2cdW2luaWgBaWtrYG1qaV4mcG1lamtscCNecmhqZm5lZwFua2VfZ2oBZW9ybGNsbmABb3Z0dGxsYAFxaW5iaFsBa2xxbmhiAWloa2QDdGhuZmxxMlt1ZGtmanBnAWtvbGtyaGxhaAFnb2tmamEBaHBobmJqbmdGZW9uZWhsaFdXamhuAWRzbW52Q2F0aWNmbWpfAW9pcG1talkBbGpjZnJxZ2MBX2Bua2VjVFl0bmtpbGlfEHBfb2dvYQFsZnFhS25ra2txaWdgVGdtYmxjaGFlAWdsa3NmaGlobFwBbG9ma2xqaQFpdGd2XWtwYAF2bmJsam9mYl4BaXFvYWxqdBVca2VnAW9mbGFra2oBYXNocGZqXgF1bGpdaFxqAWliYmNlY2ABd25sZ2BtaRVramliZ2liAWhpbgFpaWlicWhmAXBmbHBecmVfAXJpbWhUbHJfT3BqamxqYQFwb3BgcV9fRW5vbHBlXxh3bGpkb2xpAWRqYnJgbWgBcmttamxqAWVqb2VnamwIZW1uYGdiZAFoZ25dbGlXAWxnamJpaWgBaGpsc2tsZVUBc2tpYmdxZAFoa3NqZ3JpXAFtaW1nAWtsamNxW1l2c15lb21rYQFqcF5jbV5kAXFraWllbGplAW5raG9sbExaa25iZ2lqXwF4c2RXcGtqXkxra3ABZWxtZWpnZAFraGNrZmhtbVxjZ21ua2ZvJmZta291amFkAWpwb25cbWxdAWtrbXJtYAFwZm9gaXBsXU9sbFtPbWhubmEBbW1nYWhsAWBpaV9ub2tiAWVoZmZnXFZjcnJjb2RpW1FoaW8Ba3Nob2toaGYBZmxzdV9qb1sBanFtZmZnAV5nbmQBb2Noam9jAXVvb2tcamhWAW9pZ19ra2dUWmtwcmtrXURvc2UBUWBrbGhqYGhqXFJedmRkXHJvcAFWXm1zYWxhW05RZW9qZ2JvawFUYW5ub15rbnBCUlNxZmZsZmoBX2RvcW1namYBdnNubGtvcF1UdGRvZHJdAQEBAQE="
+  },
+  "paused": false,
+  "meeting": {
+   "title": "V20 microphone 2026-10-08T11:51",
+   "provider": "in_person"
+  },
+  "interrupted": false,
+  "clipping_ratio": 0,
+  "captured_samples": 20002090,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "in_person",
+  "retained_samples": 20002090,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "920f3540247679c64c43b1c7255c1cd9e3638cca8aeff204345d81789f26b489",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 1,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "9d00a7d9fdc60f96098f56485b9eae2422412855b4dac098b9cf35652ae81b48",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/1-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 2,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "bd77c765ab5a396b2d8158732401d494c8fad23634d357b5d1686911503da2fd",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/2-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 3,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "a083b422911975723803e6d38b98d8cfff95002fd50d2a2a92bb12e82c946ab0",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/3-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 4,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "0633680a14db0b645a8f44eff1b188b6b6396a88c40b3e2aaf8c3a035c8be021",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/4-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 5,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "02031ec04fe09eeac03c60ec8774e7d43ce3425436c59797be234855ee4365c1",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/5-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 6,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "da9e46116334ed10a23103262eac5ae91fb2dedd89409282b5b6f27e38c8f31e",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/6-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 7,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "cb07d65b787a9f0e027abffbf91ebe95c51173f1917b8ba36f1df525110d6a0e",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/7-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 8,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "626fe465bf89bdb686dccbf2b32245e463494649301834384821e33e669d582d",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/8-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 9,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "1888f0189406f99bffe506b5cdc7b080659bc094bdfaa54939765d01a05f5635",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/9-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 10,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "a87f7c258184898cf86220892046811823ce813beec07704dccc3fd587378216",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/10-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 11,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "98e4a3d20ddcde269429ecb43a02428aec441475d0455dbd298df1c5dbf9a1cf",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/11-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 12,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "36dfc415fabc4d2104906dc01ddc728963908bc20e3dc52d4c1f6a14e0e4ff2c",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/12-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 13,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "7f4b557daac51dc1f529b31f84d32234d95dcc74d64f868bee35be221ce45ef8",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/13-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 14,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "13075fa0583849ca3c7fc6e9a9b0549ba2385b3be9b8ac6ff37cc6abb20f4647",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/14-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 15,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "758775596b13c9dc7924717efa22431714dc5fabe7cb8cb72527f5450b42ee94",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/15-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 16,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "ada8e2bca3528e65a12268feadcff859ef30c8f14950510509ebb5ab2e7bd54d",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/16-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 17,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "bfba2104303261474dd610743a650382be541ed55221d6c9db809cf824ce505a",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/17-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 18,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "bafcca40dd5d4c8a18b5dbc5ae727a9fe924038f4d9ff89356bdfeb244bc43df",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/18-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 19,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "7381091b970b376306a734814228efef724cf19040f36ba7f4c5d0b728725cb8",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/19-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 20,
+   "attempt": 1,
+   "sample_count": 802090,
+   "bytes": 1604224,
+   "sha256": "a060e311ea31160ef68bae8e08cce52bf236478bd625a6c3931d33422944df2c",
+   "object_path": "22222222-2222-4222-8222-222222222222/51e8b699-e17d-4398-b475-eedecceedf9b/original-segments/20-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 61,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.74
+  },
+  {
+   "part_index": 1,
+   "start_seconds": 60,
+   "end_seconds": 121,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.02
+  },
+  {
+   "part_index": 2,
+   "start_seconds": 120,
+   "end_seconds": 181,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.84
+  },
+  {
+   "part_index": 3,
+   "start_seconds": 180,
+   "end_seconds": 241,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.08
+  },
+  {
+   "part_index": 4,
+   "start_seconds": 240,
+   "end_seconds": 301,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.12
+  },
+  {
+   "part_index": 5,
+   "start_seconds": 300,
+   "end_seconds": 361,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.68
+  },
+  {
+   "part_index": 6,
+   "start_seconds": 360,
+   "end_seconds": 421,
+   "status": "failed",
+   "attempt": 1,
+   "error_code": "timeout",
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 7,
+   "start_seconds": 420,
+   "end_seconds": 481,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 8,
+   "start_seconds": 480,
+   "end_seconds": 541,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 9,
+   "start_seconds": 540,
+   "end_seconds": 601,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 10,
+   "start_seconds": 600,
+   "end_seconds": 661,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 11,
+   "start_seconds": 660,
+   "end_seconds": 721,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 12,
+   "start_seconds": 720,
+   "end_seconds": 781,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 13,
+   "start_seconds": 780,
+   "end_seconds": 841,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 14,
+   "start_seconds": 840,
+   "end_seconds": 901,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 15,
+   "start_seconds": 900,
+   "end_seconds": 961,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 16,
+   "start_seconds": 960,
+   "end_seconds": 1021,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 17,
+   "start_seconds": 1020,
+   "end_seconds": 1081,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 18,
+   "start_seconds": 1080,
+   "end_seconds": 1141,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 19,
+   "start_seconds": 1140,
+   "end_seconds": 1201,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  },
+  {
+   "part_index": 20,
+   "start_seconds": 1200,
+   "end_seconds": 1250.130625,
+   "status": "queued",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": null
+  }
+ ],
+ "sections": 0
+}

@@ -1,0 +1,106 @@
+{
+ "review": {
+  "id": "06806b5c-91db-4028-8dce-8f44e9c31d87",
+  "kind": "audio",
+  "title": "V01 실기기 edge 13:28:56",
+  "status": "ready",
+  "status_reason": null,
+  "duration": 159.058625,
+  "input_method": "microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 0,
+   "max_pending_samples": 2432,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 58
+  },
+  "levels": {
+   "system": null,
+   "microphone": "AXKCfmsBb4B/eWtPfnqEgnUVcH96gn9BbXl+fHIBeHd/dwF3gn+GfF9bdX55awF6hHlxAXp5en2BAXyFg3xFcHx8bwGAeH9gKYB3gmBWe35/YGN8eHN5aAF+eYCAcwFxgXh4VnOAfnaAeAF+fIR2AXp/gXtmB3p/gWgBXXNkdH98AYB5hHxbZH18gF5sf3pycAFzg4R4bFF+dmV0Th2I"
+  },
+  "paused": true,
+  "meeting": {
+   "title": "V01 실기기 edge 13:28:56",
+   "provider": "in_person"
+  },
+  "interrupted": false,
+  "clipping_ratio": 0,
+  "captured_samples": 2544938,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "in_person",
+  "retained_samples": 2544938,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "75d1103a1d6d3c84790362eca79c424ac0effab92dc40ebb5032c4af5b2ed2ee",
+   "object_path": "22222222-2222-4222-8222-222222222222/06806b5c-91db-4028-8dce-8f44e9c31d87/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 1,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "ee5f0532d4e43d3f8209f4086c19d88ca6b21b6ce4f3ed3e485171193ceb1589",
+   "object_path": "22222222-2222-4222-8222-222222222222/06806b5c-91db-4028-8dce-8f44e9c31d87/original-segments/1-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 2,
+   "attempt": 1,
+   "sample_count": 624938,
+   "bytes": 1249920,
+   "sha256": "ba3cacc3669495e67c94a1a66228f167d3b868004d1602872d8c0a5be1c1e2f2",
+   "object_path": "22222222-2222-4222-8222-222222222222/06806b5c-91db-4028-8dce-8f44e9c31d87/original-segments/2-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 61,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.48
+  },
+  {
+   "part_index": 1,
+   "start_seconds": 60,
+   "end_seconds": 121,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.36
+  },
+  {
+   "part_index": 2,
+   "start_seconds": 120,
+   "end_seconds": 159.058625,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 35.68
+  }
+ ],
+ "sections": 49
+}

@@ -1,0 +1,68 @@
+{
+ "review": {
+  "id": "f4d4ad99-9a26-406c-bab0-5e7d427e5de5",
+  "kind": "audio",
+  "title": "V04 30분 한도 chrome",
+  "status": "ready",
+  "status_reason": null,
+  "duration": 15,
+  "input_method": "microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 0,
+   "max_pending_samples": 2432,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 32
+  },
+  "levels": {
+   "system": null,
+   "microphone": "AQEBAQEBAQEBAQEBAQE="
+  },
+  "paused": false,
+  "meeting": {
+   "title": "V04 30분 한도 chrome",
+   "provider": "in_person"
+  },
+  "interrupted": true,
+  "clipping_ratio": 0,
+  "captured_samples": 304000,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "in_person",
+  "retained_samples": 240000,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 240000,
+   "bytes": 480044,
+   "sha256": "127224638330941376734c1c3c5fe193bfa9394d83deeb6b7ef8109209cf476a",
+   "object_path": "22222222-2222-4222-8222-222222222222/f4d4ad99-9a26-406c-bab0-5e7d427e5de5/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 15,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 6.6
+  }
+ ],
+ "sections": 1
+}

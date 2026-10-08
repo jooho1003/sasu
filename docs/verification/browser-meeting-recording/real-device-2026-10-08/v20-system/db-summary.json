@@ -1,0 +1,467 @@
+{
+ "review": {
+  "id": "0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b",
+  "kind": "audio",
+  "title": "V20 system 2026-10-08T12:46",
+  "status": "ready",
+  "status_reason": null,
+  "duration": 1285.56,
+  "input_method": "system_and_microphone",
+  "original_layout": "audio_segments"
+ },
+ "capture_metadata": {
+  "health": {
+   "backlog_stops": 0,
+   "checkpoint_delays": 2,
+   "max_pending_samples": 3200,
+   "microphone_reselects": 0,
+   "max_sample_wall_gap_ms": 2987
+  },
+  "levels": {
+   "system": "AAAAAMTLxJ+CsaeznwGttbCwrZcBtba5o6+1rQGtt7izrri4oAG1sqqzt7i8pQG8ubi7vKYBrru7t5+4ubaTlLy3t7C8up4BosS7vby2t5C3vLy5vbm1Ab69u7+7wLaUqLjApr7AwKcBx8C9tbW1wZ0BwcC8u6PAuby0OrrAvb28v7giwcC+wLk3tcO5p77AvasBwbzExKTEu7pxv7zAvsHBqQG/xcKat8W9wbq2tQG+wMG+tLe6mKi8xaa9xsC/hsHBxb+9u8HBsAG/v8C9ure/grm/wcC6twG8wMG3rL/BtjmrwcK1t7+9urMBtsG7tL64wLg9vMG+wb2/wKEBxsG/w7ycScW7vKa7tm++xLzBw7vCqgHEwbq2vMTJtxC7xMK8vMG4mK67ura6vb6gocDEvrDBvZ6byMOtvsO3oAHCu8G6vLu6h7i5w8C9u3Wzu8W4vsG3VLvEwr+7r8C1Xby7wL7AtwG7vb+9vKrDtJ2nwca/wL+1ebi/xby7vLi0Aby+u7S2v60BwMDHtMDEogHBwcHEtb+2AbvCusK7fKvCpbm6pMiuAcDBw76uwr2bscG4tr7AwKgBxb3Avb+cqb++u7ieAcPBvMO9t5G4vMK+rsO/t52Zw7q7wry2laq+xLyaw68Bt8PCuLMBv76/tL7BupKtwruwwr/CuQG7v7m+ub25oanBvrS7wbMBv8DEsbvCvJurwMGswr++oJLDw6e6u54Bwr7Fu76ejMDAv5Wlw7vBucGzAbzCvq3Du8OxAcHAvcC7ub68sAG8w76/va4BwMG5wr++vrMBvcK0vcK+ugG7wcC5AcLHw725Ab25v7LDvbtwucTCwMLAu32uw8CsxMbDtZWqvbi/vbu0AcHFu72/wLoBtb7Bv8K9lrjDv74Bv8K5vcDDvLYBt7zHva7Bv7qiAcLCwsS7wL3AuAe7xMe8w8DBqAHExMG0tbvAhrzAvrm4t8S3tgG6v7uxwcLAsQG+v7x8vbzEuau7vaABwr++vbW4hbrFwLuywLmqAca7vr+7uZS6wMS9sMbDqgHAvb29wbuXtcG/swHEvry8v7ydrcW8wLy4xa8BvL25wrXBwbQBwbrBv8C0bra/w7zCu7MBu8C9vcKzAcC9vLi9vbyessC6wqi+vpe1vLzCvcKeAbzDvbW9vJ0Bv8O7u7y5oAHCwry4vrIBube7urvAwZyawMO8q8e9rwG5wb+yur23mVq8wsG6wLutAbzCubwBuMDFsMOyAb7CvbHCwr63HLu+wK/BubWUrsfFxKvKwLyHub3BxMDBrgHCw7q7wL6yAbzAu6+/v8CvAb28wKRfu76xvbu4AbnBvL++q8LDrgG/wcK5vsGoAcG9vsW7u7JRrL7Bwrq5v7gBtLzAw72uAbXDwL2zv8GuAcK/sQG9u8XCtgG3vb2tvb2doL68urbDw7WWpb7CvcS8qwHGx7bHu72uAbzAwqJgyMW8t7nAuaC0w8HFs7m/uwG6vcC+v7yhmL7AuGa+vsDEvrmYsca6v7q4vrMBwri/tcPIvK4BwMLCw8SwAcTBuJGQrsS9vsC4vMOvAbHGvsOvvb6+kp2uucOtwbyqAam7vca+s8LBoperwcLHu6nEwakBtcG/uL+9vJS0ocPBvr3CuUq7vMC9urfCqQHAuLyZyLMBAQEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+   "microphone": "JCQgIICstqyRtKm2py2lua2zrKgxs7i2r6qzrS6st7OwrrG0rS+urr2nrba6rTS5vbW4ubE3r7y8vbu1ur2ik7Wtup+4uLA6qL23trixupi8vLq1t7W+PLK9v7+9vrianbO+uru/v7M5wL+4t625w7Q7xLy5v6y9usK5irm6v7q5vL9cuL69wLtyq8W8vcC+vrY+vbfBwKrAvb2VubrAu8K8t0DDwMCyqMu8xLmtuUDBwL+3ubK/nKfBv72+w73Fmr/AvL3Dur2+uUO4ur6/s7nDkrO8w8G5u0C+wbq7v8C/vHCsv8K0tL7AuLlAuMPCub2xvLmAusLDw8G9vrNBvsO/w8KxQ8W3x6O/uI+9xLu/u73Fsz7ExLy5vsPGvE61vMC4ucW8qai1uru7uL60S8XHvbe2trFxxMi5usK6rz7Bub26ubTCla6/vb2/vpeuucrCwL67gbrIwb++s8G6ib27v7zAvWSvvcG3ubzCubKTxMK6ur+5ksC+wbzFubi3QLW8u728wLdUwb6/ubnErzzCvbvBuL2+Qb6+scDAkKfEr8GwrMa6Qr/AwsGxvbatkMm1s769vbVByby+u76xk8PBv7ivQb29vL+5uqS2u8G+usDAu64/wb63w76/mqLAw8CTwLc+trzCu7s+wrq/tr+/wJq0vL20vL3Bvzy5wLbAub64slXEwLe3vLs/usPGtbjBvbCfwsnBwr25sEDBvry1u648wb/Dv7yzP767wq+cyL3EuMS/PbvFub7AtsS3PsHAvb3Cu765ukbAw7y9vrJExMe4xbq/w7xDw77Aub6+v0W3v8LCQcXDwMHFPrzAua+7wLyPt8LAwb/EvJGtw8Cvx7/Guaidurq/vry2RcPJvbzAwL1AurjAwMW5q63DvcZGtcLEur7Cur9Aubu9u7i9u7i0RcPCwse6vLzEu2GvxMK+vr/AtUDKwMa5tsHClrzEuLW8ucKvuj60w7u9u77DvDy6t7+SuLq+va/BvrJIwcLBurfBl7/Dvbquvba9T8S2uMC7wKDCy8jDtr3BtUfDvbq9ur6eqb7AvEDBurq+wrmzRsi0xb21wrdKu729vLm3xrk6vbi7vLq6k7m8w8G7urk+ubzDu8G5PcLAwK++vruynL66v7m8w6m6wbzAuMGrPL69v7O+va07wcK5tri2tELDwru2wr0+v7i8wrG/vrNjw7/KsL+8tz69wr+wuMG8qzq/xb64vcC0QLa+u8Q9urvAsMS/QcDKvq29wcC+WLHEu669vLqWqMS+v6rBvb2XuLy+wMC9tz22wMG3v7u8PcXDvqy9wMC5P7m/wbk9v8G5vbvAPbW/ucC9qsXGuT2/v8K7ub63O8K8wMe9t7h5rcDBw7u5vb0/t7bBw8K2PLbAu7+ywMK2Ori+uTu8tr/EvDu3wLyxwMCzVcLBub3AxLyinMC6t7+6sUDKxL/Bub24QbXBv7k7x8O9v7zAvbauw8nIvrm9vWa4wL+4vLq0Xr7CwIXAt7u+vr6rr8rEvbq2ubhLv6+9urbAu7ZAu8bBwL+4PsDGvJeOq8C9wrrAu768P6/Ivru1wMHErJqru8C7vrq0Pqy3u8e3tsS+tnSxv8LCt6vFw7M7r72/tL+8vqKnqsXDvr28wIHBxMS6wLjCtDjCssCux7c8Pj08P0A8PkBAPD08PTw7O0A9PTtDQkA9PT4/Ozs8PT08Qjs9Pjs/PA=="
+  },
+  "paused": false,
+  "meeting": {
+   "title": "V20 system 2026-10-08T12:46",
+   "provider": "other"
+  },
+  "interrupted": false,
+  "clipping_ratio": 0,
+  "captured_samples": 20568960,
+  "consent_snapshot": [
+   {
+    "user_id": "0736f972-0690-47b0-91f1-764c990e5dc2",
+    "consented_at": "2026-10-02T00:52:58.189381+00:00"
+   }
+  ],
+  "manifest_version": 1,
+  "meeting_provider": "other",
+  "retained_samples": 20568960,
+  "continues_review_id": null
+ },
+ "recording": null,
+ "segments": [
+  {
+   "segment_index": 0,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "c1badb9fa4dd73bb40cefbe9b3208c8a44cca62545cf3ddd871e3a56d7a1df6b",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/0-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 1,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "a7aef3c20df6f3e3db341fc2ca04651cfc887ed8af3f6d6dc682f6f9394160b7",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/1-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 2,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "9ba6994a66aa9cf7e66d5a85387a925703be0907e3ceace11687e0406913c9c1",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/2-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 3,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "ec981f8c008aeea4faaf424c9ff2d52de6bc11f15b69e7006a0ff278519988d9",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/3-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 4,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "52f364ed16bb7d02fd13fc099f556432b8a9a4516743d1a65f2590df17c8ec4c",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/4-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 5,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "a5f2b0b2fbc4f4ff8b35d9b95eadd6e12337029d98d29a00fbb1cdd4d114ed3b",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/5-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 6,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "4204144a33aae4dff128ea1bc29433736df70741140ced94d05f04a2ca6a4de6",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/6-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 7,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "4b5fdf70e4d38737f5441dfe0ad506289566ee4243c0350a7c9843e2126599c7",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/7-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 8,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "b443397d618376ffe539087bb3a7ad6e9513ed5a0f1638448038aa166a8a3dc5",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/8-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 9,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "2f92c227ca96736eefcf877b5d7992ef73530e6bd9fb59a65d2bf4d3201b3a6a",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/9-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 10,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "786ae7fecbfaa30f470008dfaaad7b7b0b33965903a02ef2289da29f585d9eef",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/10-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 11,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "829bef751fc7d7b3b775c028b2801b8e3ea5191cd7f2721f63d3a2adc54c694c",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/11-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 12,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "5f0350c17bc96c1406acd1d7ce774da3c0be319ec2eae97551dcb7cebde8ef7a",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/12-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 13,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "2d9fc9a91a0c14d3721f8f8a375a3ffd13dfed7a1005a7266af648c7a7ba1975",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/13-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 14,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "f8cc6c891c9b213e900f08d1cf153200c149d6150dae99b2d668688035a56d86",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/14-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 15,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "2b80bc4ccd9a4b5e7cc90dc5c0f3fd82c06cfbdc7f3f49e01448991654886e8a",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/15-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 16,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "fa641ac0aeeff8d9c889b216038b48ac6f0138c82d72114a608db835dbc784e7",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/16-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 17,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "9badcae902870dd309ebf00fc23102ad945a04dd6026300e18b9415a9fd86b48",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/17-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 18,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "8274056e904b417363649fec0a289a0a942c27593c5a4268ca349ffe11ade7cc",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/18-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 19,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "0487393f2626f61e883bda6d591f388a7beb2041d192a5dfeb25603052118c3e",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/19-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 20,
+   "attempt": 1,
+   "sample_count": 960000,
+   "bytes": 1920044,
+   "sha256": "69c3f7998985ab714c406567222b383828df7e11779a1c6bb9f405c8ca2cd0f8",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/20-1.wav",
+   "status": "verified",
+   "error_code": null
+  },
+  {
+   "segment_index": 21,
+   "attempt": 1,
+   "sample_count": 408960,
+   "bytes": 817964,
+   "sha256": "573041f12f8bcad107410ce8e02c28db85027315a2bd000c6226c1ad86ff3f71",
+   "object_path": "22222222-2222-4222-8222-222222222222/0bf2c4c9-b518-4aeb-a23f-62c77d4b0d2b/original-segments/21-1.wav",
+   "status": "verified",
+   "error_code": null
+  }
+ ],
+ "parts": [
+  {
+   "part_index": 0,
+   "start_seconds": 0,
+   "end_seconds": 61,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.32
+  },
+  {
+   "part_index": 1,
+   "start_seconds": 60,
+   "end_seconds": 121,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.06
+  },
+  {
+   "part_index": 2,
+   "start_seconds": 120,
+   "end_seconds": 181,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.7
+  },
+  {
+   "part_index": 3,
+   "start_seconds": 180,
+   "end_seconds": 241,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.26
+  },
+  {
+   "part_index": 4,
+   "start_seconds": 240,
+   "end_seconds": 301,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.28
+  },
+  {
+   "part_index": 5,
+   "start_seconds": 300,
+   "end_seconds": 361,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.52
+  },
+  {
+   "part_index": 6,
+   "start_seconds": 360,
+   "end_seconds": 421,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.36
+  },
+  {
+   "part_index": 7,
+   "start_seconds": 420,
+   "end_seconds": 481,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.02
+  },
+  {
+   "part_index": 8,
+   "start_seconds": 480,
+   "end_seconds": 541,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.06
+  },
+  {
+   "part_index": 9,
+   "start_seconds": 540,
+   "end_seconds": 601,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.44
+  },
+  {
+   "part_index": 10,
+   "start_seconds": 600,
+   "end_seconds": 661,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.26
+  },
+  {
+   "part_index": 11,
+   "start_seconds": 660,
+   "end_seconds": 721,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 59.64
+  },
+  {
+   "part_index": 12,
+   "start_seconds": 720,
+   "end_seconds": 781,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.02
+  },
+  {
+   "part_index": 13,
+   "start_seconds": 780,
+   "end_seconds": 841,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.76
+  },
+  {
+   "part_index": 14,
+   "start_seconds": 840,
+   "end_seconds": 901,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.32
+  },
+  {
+   "part_index": 15,
+   "start_seconds": 900,
+   "end_seconds": 961,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.28
+  },
+  {
+   "part_index": 16,
+   "start_seconds": 960,
+   "end_seconds": 1021,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.12
+  },
+  {
+   "part_index": 17,
+   "start_seconds": 1020,
+   "end_seconds": 1081,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.12
+  },
+  {
+   "part_index": 18,
+   "start_seconds": 1080,
+   "end_seconds": 1141,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.34
+  },
+  {
+   "part_index": 19,
+   "start_seconds": 1140,
+   "end_seconds": 1201,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.18
+  },
+  {
+   "part_index": 20,
+   "start_seconds": 1200,
+   "end_seconds": 1261,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 60.38
+  },
+  {
+   "part_index": 21,
+   "start_seconds": 1260,
+   "end_seconds": 1285.56,
+   "status": "done",
+   "attempt": 1,
+   "error_code": null,
+   "last_word_end_seconds": 18.84
+  }
+ ],
+ "sections": 268
+}

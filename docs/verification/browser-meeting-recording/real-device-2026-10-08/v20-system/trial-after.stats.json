@@ -1,0 +1,43 @@
+{
+ "mode": "system",
+ "glossary": "after",
+ "seconds": 1285.6,
+ "sha256": "54a8c6d5c30f9ca3",
+ "ref_chars": 5688,
+ "hyp_chars": 5463,
+ "cer": 0.1018,
+ "term_occurrences": 171,
+ "distinct_terms": 30,
+ "term_cer": 0.3742,
+ "sections": 199,
+ "error_sections": 85,
+ "flagged_sections": 1,
+ "flagged_error_sections": 1,
+ "low_conf_recall": 0.0118,
+ "flag_precision": 1.0,
+ "long_runs": [
+  {
+   "op": "D",
+   "len": 7,
+   "text": "고스테이징에서",
+   "section": null,
+   "ref_at": 663
+  },
+  {
+   "op": "D",
+   "len": 17,
+   "text": "의견도여러번들어왔습니다.동영상은",
+   "section": null,
+   "ref_at": 3864
+  },
+  {
+   "op": "I",
+   "len": 76,
+   "text": "니다감사합니다.전결,대신,기안,결재선,전결,전결,전결,기안,결재선,롤백,핫픽스,퍼널,유지해,시원하게,기안,결재선,전결,하여공원과함께시원합",
+   "section": 196,
+   "ref_at": null,
+   "section_start": 1242.06,
+   "section_end": 1243.8
+  }
+ ]
+}

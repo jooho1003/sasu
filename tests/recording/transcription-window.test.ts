@@ -22,6 +22,19 @@ describe("전사 창의 단어 소유와 원본 시각", () => {
     expect(result.lastOwnedWordEnd).toBe(59.5);
   });
 
+  it("단어 끝 시각이 61초 창 길이를 넘으면 다음 창 경계 값은 창 길이로 보정한다", () => {
+    // 2026-10-08 실기기 V20: Whisper가 61초 창의 마지막 단어 끝을 61.04초로 돌려줘 완료 함수(≤61)가 거절했다.
+    const result = projectTranscriptionWindow(transcript({
+      words: [
+        { word: "앞", start: 58.9, end: 59.4 },
+        { word: "걸친", start: 59.6, end: 61.04 },
+      ],
+      segments: [{ text: "앞 걸친", start: 58.9, end: 61.04, avg_logprob: -0.2, no_speech_prob: 0.1 }],
+    }), 6, 0.68);
+    expect(result.sections.map((section) => section.text)).toEqual(["앞 걸친"]);
+    expect(result.lastOwnedWordEnd).toBe(61);
+  });
+
   it("다음 창은 앞 창의 마지막 단어가 끝나기 전에 시작한 단어를 버린다", () => {
     const result = projectTranscriptionWindow(transcript({
       words: [

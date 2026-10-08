@@ -1,0 +1,8 @@
+﻿{"t":1791208084869,"event":"watcher_start","status":"OK"}
+{"t":1791208148855,"event":"disable_failed","status":"OK","detail":"일반 오류입니다. "}
+{"t":1791208157509,"event":"enabled","status":"OK"}
+{"t":1791208185670,"event":"watcher_exit","status":"OK"}
+{"t":1791467272602,"event":"watcher_start","status":"OK"}
+{"t":1791467597040,"event":"disabled","status":"Error"}
+{"t":1791467606568,"event":"enabled","status":"OK"}
+{"t":1791467645957,"event":"watcher_exit","status":"OK"}

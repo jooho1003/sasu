@@ -1,0 +1,15 @@
+{"t":1791468319120,"iso":"2026-10-08T14:05:19.120Z","event":"open","status":200,"ua":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36"}
+{"t":1791468319365,"iso":"2026-10-08T14:05:19.365Z","event":"api","label":"tab1","method":"GET","path":"/api/d/:id/recordings","status":200}
+{"t":1791468319367,"iso":"2026-10-08T14:05:19.367Z","event":"api","label":"tab1","method":"GET","path":"/api/d/:id/recordings","status":200}
+{"t":1791468319368,"iso":"2026-10-08T14:05:19.368Z","event":"api","label":"tab1","method":"GET","path":"/api/d/:id/recordings","status":200}
+{"t":1791468319383,"iso":"2026-10-08T14:05:19.383Z","event":"sessions_before","sessions":[],"estimate":{"usage":1394,"quota":10737419634}}
+{"t":1791468333410,"iso":"2026-10-08T14:05:33.410Z","event":"input_test","maxMeter":0.0004250875342361731,"testAudio":{"src":"blob:","duration":4.381428,"error":null}}
+{"t":1791468333481,"iso":"2026-10-08T14:05:33.481Z","event":"quota_overridden","estimate":{"usage":1394,"quota":10737419634}}
+{"t":1791468334098,"iso":"2026-10-08T14:05:34.098Z","event":"api","label":"tab1","method":"POST","path":"/api/d/:id/recordings","status":201}
+{"t":1791468334247,"iso":"2026-10-08T14:05:34.247Z","event":"api","label":"tab1","method":"POST","path":"/api/d/:id/recordings/:id/key","status":200}
+{"t":1791468334556,"iso":"2026-10-08T14:05:34.556Z","event":"api","label":"tab1","method":"GET","path":"/api/d/:id/recordings","status":200}
+{"t":1791468334571,"iso":"2026-10-08T14:05:34.571Z","event":"api","label":"tab1","method":"GET","path":"/api/d/:id/recordings","status":200}
+{"t":1791468337873,"iso":"2026-10-08T14:05:37.873Z","event":"start_result","alerts":[""],"status":{"timer":"0:03 / 30:00","persisted":"이 기기에 저장됨 0:03","chip":"녹음 중","live":"녹음 중","notices":["녹음 중입니다. 확인 저장된 길이를 보면서 진행해 주세요."],"buttons":["☰ 메뉴 접기","녹음 잠시 멈추기","녹음 종료"],"meters":[0.0001164415332515698],"title":"● 녹음 중 0:03 · 사수 — 회의록이 아니라 결정을 만듭니다"}}
+{"t":1791468337880,"iso":"2026-10-08T14:05:37.880Z","event":"tracks","label":"after_refused_start","tracks":[{"via":"getUserMedia","kind":"audio","label":"기본값 - 마이크(fifine Microphone) (3142:0673)","readyState":"ended","muted":false,"settings":{"echoCancellation":true,"noiseSuppression":true,"autoGainControl":false,"sampleRate":48000,"channelCount":1}},{"via":"getUserMedia","kind":"audio","label":"기본값 - 마이크(fifine Microphone) (3142:0673)","readyState":"live","muted":false,"settings":{"echoCancellation":true,"noiseSuppression":true,"autoGainControl":false,"sampleRate":48000,"channelCount":1}}],"errors":[],"live":1}
+{"t":1791468338074,"iso":"2026-10-08T14:05:38.074Z","event":"api","label":"tab1","method":"GET","path":"/api/d/:id/recordings","status":200}
+{"t":1791468338077,"iso":"2026-10-08T14:05:38.077Z","event":"sessions_after","sessions":[{"id":"e478e7b7-afe3-42c5-98bb-8cd57ae5e419","state":"active","title":"V06 저장 공간 부족 사전 검사"}]}
