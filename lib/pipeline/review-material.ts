@@ -13,6 +13,17 @@ import { glossaryPrompt, type GlossaryEntry } from "@/lib/recording/glossary";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
 import type { RecordingManifest, ReviewSection } from "@/lib/contracts";
 
+function finishErrorCode(error: { message?: unknown }):
+  | "transcription_boundary_invalid"
+  | "transcription_sections_invalid"
+  | "review_completion_failed" {
+  if (error.message === "transcription_boundary_invalid")
+    return "transcription_boundary_invalid";
+  if (error.message === "transcription_sections_invalid")
+    return "transcription_sections_invalid";
+  return "review_completion_failed";
+}
+
 const SEGMENT_LIST_PAGE_SIZE = 100;
 
 async function downloadReviewBytes(
@@ -165,7 +176,21 @@ export async function processReviewPart(payload: {
     p_error: failure,
     ...(recording ? { p_last_word_end: lastWordEnd } : {}),
   });
-  if (finish.error) throw new Error("review_completion_failed");
+  if (!finish.error) {
+    if (finish.data === false) {
+      console.warn("review_part_finish_rejected", { partId: payload.partId });
+    }
+    return;
+  }
+
+  const fallback = await client.rpc(recording ? "finish_review_recording_part" : "finish_review_part", {
+    p_part: payload.partId,
+    p_lease: lease,
+    p_sections: [],
+    p_error: finishErrorCode(finish.error),
+    ...(recording ? { p_last_word_end: null } : {}),
+  });
+  if (fallback.error) throw new Error("review_completion_failed");
 }
 
 export async function verifyReviewSegment(payload: {

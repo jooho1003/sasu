@@ -118,6 +118,122 @@ describe("자료 변환 워커", () => {
     expect(completion.p_error).toBe("file_unavailable");
     expect(JSON.stringify(completion)).not.toContain("private raw");
   });
+
+  it("녹음 구간 마무리 오류는 같은 lease로 허용된 원인 코드를 기록하고 정상 종료한다", async () => {
+    const first = wavSegment(0, FULL_SAMPLES, 3);
+    mock.rpc.mockImplementation(async (name: string, args?: Record<string, unknown>) => {
+      if (name === "claim_review_part") {
+        return {
+          data: {
+            part_id: "part",
+            review_id: "review",
+            dept_id: "dept",
+            kind: "audio",
+            filename: "review.wav",
+            object_path: null,
+            part_index: 0,
+            start_seconds: 0,
+            end_seconds: 60,
+            original_layout: "audio_segments",
+            manifest: { version: 1, segments: [first.descriptor] },
+            segment_paths: { current: "current.wav", next: null },
+          },
+          error: null,
+        };
+      }
+      if (name === "finish_review_recording_part" && args?.p_error === null) {
+        return { data: true, error: { message: "transcription_sections_invalid" } };
+      }
+      return { data: true, error: null };
+    });
+    mock.download.mockResolvedValue({ data: new Blob([first.wav]), error: null });
+    mock.transcribe.mockResolvedValue({ data: { text: "완료된 녹음입니다.", segments: [], words: [] } });
+
+    await processReviewPart({ partId: "part", attempt: 1 });
+
+    const finishes = mock.rpc.mock.calls.filter(([name]) => name === "finish_review_recording_part");
+    expect(finishes).toHaveLength(2);
+    expect(finishes[1][1]).toMatchObject({
+      p_part: finishes[0][1].p_part,
+      p_lease: finishes[0][1].p_lease,
+      p_sections: [],
+      p_error: "transcription_sections_invalid",
+      p_last_word_end: null,
+    });
+  });
+
+  it("일반 파일 마무리의 알 수 없는 오류는 원문 없이 대체 실패 코드를 기록한다", async () => {
+    mock.rpc.mockImplementation(async (name: string, args?: Record<string, unknown>) => {
+      if (name === "claim_review_part") {
+        return {
+          data: {
+            part_id: "part",
+            review_id: "review",
+            dept_id: "dept",
+            kind: "document",
+            filename: "notes.txt",
+            object_path: "private/notes.txt",
+            part_index: 0,
+            start_seconds: null,
+            end_seconds: null,
+            original_layout: "single_file",
+          },
+          error: null,
+        };
+      }
+      if (name === "finish_review_part" && args?.p_error === null) {
+        return { data: true, error: { message: "private provider details" } };
+      }
+      return { data: true, error: null };
+    });
+    mock.download.mockResolvedValue({ data: new Blob(["회의 메모입니다."]), error: null });
+
+    await processReviewPart({ partId: "part", attempt: 1 });
+
+    const finishes = mock.rpc.mock.calls.filter(([name]) => name === "finish_review_part");
+    expect(finishes).toHaveLength(2);
+    expect(finishes[1][1].p_error).toBe("review_completion_failed");
+    expect(JSON.stringify(finishes)).not.toContain("private provider details");
+  });
+
+  it("마무리 오류를 두 번 받으면 review_completion_failed를 던진다", async () => {
+    mock.rpc.mockImplementation(async (name: string, args?: Record<string, unknown>) => {
+      if (name === "finish_review_part") {
+        return { data: true, error: { message: args?.p_error ? "second failure" : "first failure" } };
+      }
+      return {
+        data: name === "claim_review_part"
+          ? {
+              part_id: "part", review_id: "review", dept_id: "dept", kind: "document",
+              filename: "notes.txt", object_path: "private/notes.txt", part_index: 0,
+              start_seconds: null, end_seconds: null, original_layout: "single_file",
+            }
+          : true,
+        error: null,
+      };
+    });
+    mock.download.mockResolvedValue({ data: new Blob(["회의 메모입니다."]), error: null });
+
+    await expect(processReviewPart({ partId: "part", attempt: 1 })).rejects.toThrow("review_completion_failed");
+    expect(mock.rpc.mock.calls.filter(([name]) => name === "finish_review_part")).toHaveLength(2);
+  });
+
+  it("마무리 RPC가 false를 반환하면 재호출하거나 오류를 던지지 않는다", async () => {
+    mock.rpc.mockImplementation(async (name: string) => ({
+      data: name === "claim_review_part"
+        ? {
+            part_id: "part", review_id: "review", dept_id: "dept", kind: "document",
+            filename: "notes.txt", object_path: "private/notes.txt", part_index: 0,
+            start_seconds: null, end_seconds: null, original_layout: "single_file",
+          }
+        : false,
+      error: null,
+    }));
+    mock.download.mockResolvedValue({ data: new Blob(["회의 메모입니다."]), error: null });
+
+    await expect(processReviewPart({ partId: "part", attempt: 1 })).resolves.toBeUndefined();
+    expect(mock.rpc.mock.calls.filter(([name]) => name === "finish_review_part")).toHaveLength(1);
+  });
 });
 
 describe("원본 파기 워커", () => {
