@@ -16,8 +16,10 @@
       "verification": "docs/verification/52-search-observability/verification.md",
       "analysis": "docs/03-analysis/search-observability.analysis.md",
       "report": "docs/04-report/features/search-observability.report.md",
-      "production_deployed": false,
-      "note": "공개 검색 metadata·FAQ·robots/sitemap·llms.txt, 동의 기반 GA4, 원문 없는 Sentry(ADR-091). 2026-10-07 03:06 미커밋 작업 트리를 CLI로 운영 promote(dpl_4vZqM84jMxEyu14dVfXiPPMbwoGs)했으나 같은 날 PR #46·#47 병합의 main 자동 배포가 덮어써 운영에서 빠졌다(2026-10-09 /llms.txt·/api/telemetry/config 404 확인). 2026-10-09 최신 main 위 커밋·PR로 재반영 대기. 남은 게이트: GA4 실시간 콘솔·운영 Sentry 이벤트 UI 확인, Graft/Archify 결과."
+      "production_deployed": true,
+      "note": "공개 검색 metadata·FAQ·robots/sitemap·llms.txt, 동의 기반 GA4, 원문 없는 Sentry(ADR-091). 2026-10-07 03:06 미커밋 작업 트리를 CLI로 운영 promote(dpl_4vZqM84jMxEyu14dVfXiPPMbwoGs)했으나 같은 날 PR #46·#47 병합의 main 자동 배포가 덮어써 운영에서 빠졌다(2026-10-09 /llms.txt·/api/telemetry/config 404 확인). 2026-10-09 PR #49 main 병합으로 재반영(dpl_F26xYmLTEQ3QCHzz6jfA8Tv9R7HY), 운영 검사 exit 0·GA4 204·Sentry 200. 남은 게이트: GA4 실시간 콘솔·운영 Sentry 이벤트 UI 확인, Graft/Archify 결과.",
+      "deployed_at": "2026-10-09T00:55:37+09:00",
+      "deployment": "docs/verification/52-search-observability/verification.md"
     },
     {
       "dir": "51-document-overview-grounding",
