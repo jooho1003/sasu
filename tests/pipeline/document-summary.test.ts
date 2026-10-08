@@ -134,6 +134,94 @@ describe("document summary evidence", () => {
     }], async () => { throw new Error("unexpected merge"); });
     expect(result.valid.citations).toHaveLength(1);
   });
+
+  it("U1 uses the verified code merge when the merge call throws", async () => {
+    const chunks = [
+      { item: { id: "a", content: "첫 안건을 승인합니다." }, summary: {
+        citations: [{ item_id: "a", decision_id: null, quote: "첫 안건을 승인합니다." }],
+        overview: "첫 안건을 승인합니다.",
+        key_points: [{ item_id: "a", text: "첫 안건을 승인합니다." }], decisions: [], actions: [], open_questions: [],
+      } },
+      { item: { id: "b", content: "둘째 안건은 보류합니다." }, summary: {
+        citations: [{ item_id: "b", decision_id: null, quote: "둘째 안건은 보류합니다." }],
+        overview: "둘째 안건은 보류합니다.",
+        key_points: [{ item_id: "b", text: "둘째 안건은 보류합니다." }], decisions: [], actions: [], open_questions: [],
+      } },
+    ];
+    const mergeError = Object.assign(new Error("model output must not be logged"), { error_code: "schema_invalid" });
+    const failures: unknown[] = [];
+
+    const result = await mergeVerifiedDocumentSummaries(
+      chunks,
+      async () => { throw mergeError; },
+      (error) => failures.push(error),
+    );
+
+    expect(failures).toEqual([mergeError]);
+    expect(result.valid.citations).toEqual([
+      { item_id: "a", decision_id: null, quote: "첫 안건을 승인합니다." },
+      { item_id: "b", decision_id: null, quote: "둘째 안건은 보류합니다." },
+    ]);
+    expect(result.valid.key_points).toEqual([
+      { item_id: "a", text: "첫 안건을 승인합니다." },
+      { item_id: "b", text: "둘째 안건은 보류합니다." },
+    ]);
+  });
+
+  it("U2 keeps the model merge result when the merge call succeeds", async () => {
+    let calls = 0;
+    const chunks = [
+      { item: { id: "a", content: "첫 안건을 승인합니다." }, summary: {
+        citations: [{ item_id: "a", decision_id: null, quote: "첫 안건을 승인합니다." }],
+        overview: "첫 안건을 승인합니다.", key_points: [{ item_id: "a", text: "첫 안건을 승인합니다." }], decisions: [], actions: [], open_questions: [],
+      } },
+      { item: { id: "b", content: "둘째 안건은 보류합니다." }, summary: {
+        citations: [{ item_id: "b", decision_id: null, quote: "둘째 안건은 보류합니다." }],
+        overview: "둘째 안건은 보류합니다.", key_points: [{ item_id: "b", text: "둘째 안건은 보류합니다." }], decisions: [], actions: [], open_questions: [],
+      } },
+    ];
+
+    const result = await mergeVerifiedDocumentSummaries(
+      chunks,
+      async (extracted) => {
+        calls += 1;
+        return { ...extracted, overview: "첫 안건을 승인합니다." };
+      },
+      () => { throw new Error("fallback must not run"); },
+    );
+
+    expect(calls).toBe(1);
+    expect(result.valid.overview).toBe("첫 안건을 승인합니다.");
+  });
+
+  it("U3 skips the merge call for one chunk", async () => {
+    let calls = 0;
+    const result = await mergeVerifiedDocumentSummaries([{
+      item: { id: "a", content: "확정합니다." },
+      summary: { citations: [{ item_id: "a", decision_id: null, quote: "확정합니다." }], overview: "확정합니다.", key_points: [], decisions: [], actions: [], open_questions: [] },
+    }], async () => {
+      calls += 1;
+      return {} as never;
+    }, () => { throw new Error("fallback must not run"); });
+
+    expect(calls).toBe(0);
+    expect(result.valid.overview).toBe("확정합니다.");
+  });
+
+  it("U4 verifies the fallback output overview before returning it", async () => {
+    const chunk = (id: string, text: string) => ({
+      item: { id, content: text },
+      summary: { citations: [{ item_id: id, decision_id: null, quote: text }], overview: text,
+        key_points: [{ item_id: id, text }], decisions: [], actions: [], open_questions: [] },
+    });
+    const result = await mergeVerifiedDocumentSummaries(
+      [chunk("a", "첫 안건을 승인합니다."), chunk("b", "둘째 안건은 보류합니다.")],
+      async () => { throw new Error("merge failed"); },
+    );
+
+    expect(result.valid.overview).toBe("첫 안건을 승인합니다.");
+    expect(result.valid.overview).not.toContain("merge failed");
+  });
 });
 
 describe("document summary overview grounding", () => {
