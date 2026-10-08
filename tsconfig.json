@@ -27,5 +27,5 @@
     ".next-verify/types/**/*.ts",
     ".next-verify/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "desktop"]
+  "exclude": ["node_modules", "desktop", "docs"]
 }
