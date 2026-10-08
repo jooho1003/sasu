@@ -18,3 +18,12 @@
 - 실제 Groq로 병합 실패를 재현하는 실측(로컬 QA DB·실제 LLM 필요). 단위 테스트가 대체 경로를 검증한다.
 - 실제 녹음 구간 마무리 오류 재현. 단위 테스트가 RPC 오류·이중 실패·`false` 경로를 검증한다.
 - Graft/Archify 실행 결과 없음 — 두 모듈 내부 변경이며 호출 관계·DB 경계는 바뀌지 않았다(design §2 "새 모듈·DB·RPC 없음").
+
+## 운영 반영 (2026-10-09)
+
+사용자 "운영반영해줘" 승인 후 PR #50을 02:34 main에 병합했다. DB 변경이 없어 migration 선행 단계는 없었다. 되돌림 기준은 직전 운영 `dpl_CHupHDiGPJs5GxosqKA9yakmFzeZ`.
+
+- 자동 운영 배포 `dpl_8N6WYCtoo6fJqqhqNqRZkN7v6mgt`(02:33:52 생성) Ready, getsasu.com 연결 확인(`npx vercel inspect getsasu.com`).
+- 공개 경로 `/`·`/llms.txt`·`/api/telemetry/config`·`/login` 200.
+- `POST /api/jobs/run`(`x-jobs-secret`) 200 `{"claimed":0,"done":0,"failed":0}` — 워커 준비 단계(스윕 포함) 통과.
+- 바뀐 실패 경로(병합 실패 대체·마무리 오류 원인 기록)는 운영에서 일부러 일으키지 않았다. 실제 발생 시 `document_summary_merge_fallback`·`review_part_finish_rejected` 로그와 `review_parts.error_code`로 확인한다.
