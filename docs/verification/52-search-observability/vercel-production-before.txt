@@ -1,0 +1,51 @@
+Vercel CLI 61.0.0 (Node.js 24.18.0)
+Fetching deployment "getsasu.com" in wadelee1005-3954s-projects
+> Fetched deployment "sasu-607si33xy-wadelee1005-3954s-projects.vercel.app" in wadelee1005-3954s-projects [426ms]
+
+  General
+
+    id		dpl_4z2gfxf8hJLQqPzq8WmS6RZvQDSk
+    name	sasu
+    target	production
+    status	● Ready
+    url		https://sasu-607si33xy-wadelee1005-3954s-projects.vercel.app
+    created	Wed Oct 07 2026 00:06:16 GMT+0900 (한국 표준시) [2h ago]
+
+
+  Build Machine
+
+    requested build machine basic
+    actual assigned cores   2 vCPU (actual assignment)
+    memory                  8192 MiB
+    selection type          fixed
+    selection source        plan-default
+
+
+  Duration
+
+    build duration	35s
+    post-build duration	25s
+    billable duration	2m
+    CPU Minutes Usage	4 minutes (2m x 2vCPU)
+
+
+  Aliases
+
+    ╶ https://getsasu.com
+    ╶ https://sasu-alpha.vercel.app
+    ╶ https://www.getsasu.com
+    ╶ https://sasu-wadelee1005-3954s-projects.vercel.app
+    ╶ https://sasu-git-main-wadelee1005-3954s-projects.vercel.app
+    
+
+  Builds
+
+    ┌ .        [0ms]
+    ├── λ index (1.57MB) [iad1]
+    ├── λ _not-found (1.57MB) [iad1]
+    ├── λ _not-found.rsc (1.57MB) [iad1]
+    ├── λ admin (1.57MB) [iad1]
+    ├── λ admin.rsc (1.57MB) [iad1]
+    └── 339 output items hidden
+    
+

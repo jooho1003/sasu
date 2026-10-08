@@ -1,0 +1,13 @@
+
+ RUN  v5.0.0 D:/바이브코딩/sasu
+
+
+ Test Files  192 passed (192)
+      Tests  1915 passed (1915)
+   Start at  01:39:13
+   Duration  85.01s (transform 48%, import 45%, tests 6%, worker 1%)
+
+     Import  445 modules were evaluated 680 times · 56.57s total, 45% of tracked time
+             ~6.95s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+

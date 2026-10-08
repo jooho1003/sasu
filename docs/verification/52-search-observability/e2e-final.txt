@@ -1,0 +1,13 @@
+[WebServer] (node:42588) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 4 tests using 1 worker
+
+(node:42312) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\search-observability.spec.ts:3:5 › public metadata and FAQ match, private pages and resources are noindex (4.0s)
+  ok 2 [chromium] › tests\e2e\search-observability.spec.ts:35:5 › GA4 starts only after consent and sends clean public payloads (1.2s)
+  ok 3 [chromium] › tests\e2e\search-observability.spec.ts:62:5 › initial denial and unavailable storage never load GA4 (1.4s)
+  ok 4 [chromium] › tests\e2e\search-observability.spec.ts:79:5 › private navigation removes GA4 before rendering the login page (934ms)
+
+  4 passed (12.6s)

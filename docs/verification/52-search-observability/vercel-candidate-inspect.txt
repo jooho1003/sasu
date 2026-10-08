@@ -1,0 +1,255 @@
+Vercel CLI 61.0.0 (Node.js 24.18.0)
+Fetching deployment "sasu-d04yk8wht-wadelee1005-3954s-projects.vercel.app" in wadelee1005-3954s-projects
+2026-10-06T18:02:16.806Z  Running build in Washington, D.C., USA (East) – iad1
+2026-10-06T18:02:16.807Z  Build machine configuration: 2 cores, 8 GB
+2026-10-06T18:02:16.868Z  Retrieving list of deployment files...
+2026-10-06T18:02:17.257Z  Downloading 546 deployment files...
+2026-10-06T18:02:24.078Z  Restored build cache from previous deployment (4z2gfxf8hJLQqPzq8WmS6RZvQDSk)
+2026-10-06T18:02:24.756Z  Running "vercel build"
+2026-10-06T18:02:24.771Z  Vercel CLI 62.1.0
+2026-10-06T18:02:25.059Z  Installing dependencies...
+2026-10-06T18:02:27.761Z  npm warn ERESOLVE overriding peer dependency
+2026-10-06T18:02:27.762Z  npm warn While resolving: tsconfck@3.1.6
+2026-10-06T18:02:27.762Z  npm warn Found: typescript@6.0.3
+2026-10-06T18:02:27.762Z  npm warn node_modules/typescript
+2026-10-06T18:02:27.768Z  npm warn   dev typescript@"^6.0.3" from the root project
+2026-10-06T18:02:27.768Z  npm warn   10 more (@typescript-eslint/eslint-plugin, ...)
+2026-10-06T18:02:27.768Z  npm warn
+2026-10-06T18:02:27.768Z  npm warn Could not resolve dependency:
+2026-10-06T18:02:27.768Z  npm warn peerOptional typescript@"^5.0.0" from tsconfck@3.1.6
+2026-10-06T18:02:27.768Z  npm warn node_modules/tsconfck
+2026-10-06T18:02:27.768Z  npm warn   tsconfck@"^3.0.3" from vite-tsconfig-paths@6.1.1
+2026-10-06T18:02:27.768Z  npm warn   node_modules/vite-tsconfig-paths
+2026-10-06T18:02:27.768Z  npm warn
+2026-10-06T18:02:27.768Z  npm warn Conflicting peer dependency: typescript@5.9.3
+2026-10-06T18:02:27.768Z  npm warn node_modules/typescript
+2026-10-06T18:02:27.768Z  npm warn   peerOptional typescript@"^5.0.0" from tsconfck@3.1.6
+2026-10-06T18:02:27.768Z  npm warn   node_modules/tsconfck
+2026-10-06T18:02:27.768Z  npm warn     tsconfck@"^3.0.3" from vite-tsconfig-paths@6.1.1
+2026-10-06T18:02:27.769Z  npm warn     node_modules/vite-tsconfig-paths
+2026-10-06T18:02:30.487Z  
+2026-10-06T18:02:30.488Z  added 38 packages in 5s
+2026-10-06T18:02:30.488Z  
+2026-10-06T18:02:30.488Z  164 packages are looking for funding
+2026-10-06T18:02:30.488Z  run `npm fund` for details
+2026-10-06T18:02:30.488Z  npm warn install-scripts 2 packages have install scripts not yet covered by allowScripts:
+2026-10-06T18:02:30.489Z  npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+2026-10-06T18:02:30.489Z  npm warn install-scripts   unrs-resolver@1.12.2 (postinstall: node postinstall.js)
+2026-10-06T18:02:30.489Z  npm warn install-scripts
+2026-10-06T18:02:30.489Z  npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+2026-10-06T18:02:30.550Z  Detected Next.js version: 16.3.4
+2026-10-06T18:02:30.560Z  Running "npm run build"
+2026-10-06T18:02:31.146Z  
+2026-10-06T18:02:31.147Z  > sasu@0.1.0 build
+2026-10-06T18:02:31.147Z  > next build
+2026-10-06T18:02:31.147Z  
+2026-10-06T18:02:31.799Z  ▲ Next.js 16.3.4 (Turbopack)
+2026-10-06T18:02:32.372Z  Applying modifyConfig from Vercel
+2026-10-06T18:02:32.375Z  ✓ Running next.config.ts took 578ms
+2026-10-06T18:02:32.397Z  - Experiments (use with caution):
+2026-10-06T18:02:32.398Z  · clientTraceMetadata
+2026-10-06T18:02:32.398Z  
+2026-10-06T18:02:32.472Z  Creating an optimized production build ...
+2026-10-06T18:03:11.944Z  ✓ Compiled successfully in 38.3s
+2026-10-06T18:03:11.945Z  Running next.config.js provided runAfterProductionCompile ...
+2026-10-06T18:03:12.236Z  ✓ Completed runAfterProductionCompile in 286ms
+2026-10-06T18:03:12.238Z  Running TypeScript ...
+2026-10-06T18:03:38.011Z  Finished TypeScript in 25.8s ...
+2026-10-06T18:03:38.021Z  Collecting page data using 1 worker ...
+2026-10-06T18:03:40.330Z  Generating static pages using 1 worker (0/51) ...
+2026-10-06T18:03:40.547Z  Generating static pages using 1 worker (12/51)
+2026-10-06T18:03:40.578Z  Generating static pages using 1 worker (25/51)
+2026-10-06T18:03:40.595Z  Generating static pages using 1 worker (38/51)
+2026-10-06T18:03:40.718Z  ✓ Generating static pages using 1 worker (51/51) in 389ms
+2026-10-06T18:03:40.730Z  Finalizing page optimization ...
+2026-10-06T18:03:41.235Z  Running onBuildComplete from Vercel
+2026-10-06T18:03:42.081Z  
+2026-10-06T18:03:42.085Z  Route (app)
+2026-10-06T18:03:42.086Z  ┌ ƒ /
+2026-10-06T18:03:42.086Z  ├ ƒ /_not-found
+2026-10-06T18:03:42.086Z  ├ ƒ /admin
+2026-10-06T18:03:42.086Z  ├ ƒ /admin/audit
+2026-10-06T18:03:42.086Z  ├ ƒ /admin/members
+2026-10-06T18:03:42.086Z  ├ ƒ /admin/security
+2026-10-06T18:03:42.086Z  ├ ƒ /admin/sources
+2026-10-06T18:03:42.087Z  ├ ƒ /api/admin/departments
+2026-10-06T18:03:42.087Z  ├ ƒ /api/admin/departments/[deptId]/first-lead-invite
+2026-10-06T18:03:42.087Z  ├ ƒ /api/admin/invites/[inviteId]/revoke
+2026-10-06T18:03:42.087Z  ├ ƒ /api/admin/members/demote
+2026-10-06T18:03:42.087Z  ├ ƒ /api/admin/members/remove
+2026-10-06T18:03:42.088Z  ├ ƒ /api/admin/notion
+2026-10-06T18:03:42.088Z  ├ ƒ /api/admin/notion/roots
+2026-10-06T18:03:42.088Z  ├ ƒ /api/admin/notion/top-level
+2026-10-06T18:03:42.088Z  ├ ƒ /api/admin/review-settings
+2026-10-06T18:03:42.088Z  ├ ƒ /api/admin/slack
+2026-10-06T18:03:42.088Z  ├ ƒ /api/admin/trailer-publishing
+2026-10-06T18:03:42.089Z  ├ ƒ /api/admin/trailers/[id]/unpublish
+2026-10-06T18:03:42.089Z  ├ ƒ /api/cards/[id]/decide
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/answers/[id]
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/ask
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/cards/[id]
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/cards/[id]/decide
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/departments
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/inbox
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/link
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/members
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/questions
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/reviews
+2026-10-06T18:03:42.089Z  ├ ƒ /api/companion/reviews/[id]/parts
+2026-10-06T18:03:42.090Z  ├ ƒ /api/companion/sales-review
+2026-10-06T18:03:42.090Z  ├ ƒ /api/companion/sales-review/[taskId]
+2026-10-06T18:03:42.090Z  ├ ƒ /api/companion/sales-review/sources
+2026-10-06T18:03:42.090Z  ├ ƒ /api/companion/transcripts
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/answers/[id]
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/ask
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/backfill
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/cards
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/cards/[id]/reminder
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/decisions
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/decisions/correct
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/documents
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/evidence/[id]
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/glossary
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/invites
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/invites/[inviteId]/revoke
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/items
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/ledger
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/meetings/transcript
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/members/[userId]/demote
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/members/[userId]/promote
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/members/[userId]/remove
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/questions
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/recordings
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/recordings/[id]
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/recordings/[id]/discard
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/recordings/[id]/finalize
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/recordings/[id]/key
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/recordings/[id]/save
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/retention
+2026-10-06T18:03:42.090Z  ├ ƒ /api/d/[dept]/retention/export
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retention/originals
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros/[id]
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros/[id]/export
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros/[id]/notes
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros/connections
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros/connections/[id]
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros/connections/[id]/pull
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros/connections/pull
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros/preset
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/retros/share-consent
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/reviews
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/reviews/[id]
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/reviews/[id]/original
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/reviews/[id]/parts
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/roles
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/roles/[roleId]
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/roles/[roleId]/runs
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/sales-review
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/sales-review/[taskId]/review
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/sales-review/[taskId]/revision
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/sales-review/ai
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/sales-review/checklist
+2026-10-06T18:03:42.091Z  ├ ƒ /api/d/[dept]/sales-review/compare
+2026-10-06T18:03:42.093Z  ├ ƒ /api/d/[dept]/sales-review/history
+2026-10-06T18:03:42.093Z  ├ ƒ /api/d/[dept]/sales-review/sources
+2026-10-06T18:03:42.093Z  ├ ƒ /api/d/[dept]/settings
+2026-10-06T18:03:42.093Z  ├ ƒ /api/d/[dept]/settings/consent
+2026-10-06T18:03:42.093Z  ├ ƒ /api/d/[dept]/settings/member
+2026-10-06T18:03:42.093Z  ├ ƒ /api/d/[dept]/settings/notion
+2026-10-06T18:03:42.094Z  ├ ƒ /api/d/[dept]/settings/source
+2026-10-06T18:03:42.094Z  ├ ƒ /api/d/[dept]/slack-questions
+2026-10-06T18:03:42.094Z  ├ ƒ /api/d/[dept]/trailers
+2026-10-06T18:03:42.094Z  ├ ƒ /api/d/[dept]/trailers/[id]
+2026-10-06T18:03:42.094Z  ├ ƒ /api/d/[dept]/trailers/[id]/approve
+2026-10-06T18:03:42.094Z  ├ ƒ /api/d/[dept]/trailers/[id]/invites
+2026-10-06T18:03:42.094Z  ├ ƒ /api/d/[dept]/trailers/[id]/invites/[inviteId]
+2026-10-06T18:03:42.094Z  ├ ƒ /api/d/[dept]/trailers/[id]/invites/[inviteId]/revoke
+2026-10-06T18:03:42.095Z  ├ ƒ /api/d/[dept]/trailers/[id]/invites/attempts/[attemptId]/rescore
+2026-10-06T18:03:42.095Z  ├ ƒ /api/d/[dept]/trailers/[id]/publish
+2026-10-06T18:03:42.096Z  ├ ƒ /api/d/[dept]/trailers/[id]/recheck
+2026-10-06T18:03:42.096Z  ├ ƒ /api/d/[dept]/trailers/[id]/regenerate
+2026-10-06T18:03:42.096Z  ├ ƒ /api/d/[dept]/trailers/[id]/unpublish
+2026-10-06T18:03:42.097Z  ├ ƒ /api/d/[dept]/trailers/candidates
+2026-10-06T18:03:42.097Z  ├ ƒ /api/d/[dept]/voice
+2026-10-06T18:03:42.098Z  ├ ƒ /api/devices
+2026-10-06T18:03:42.098Z  ├ ƒ /api/devices/[id]
+2026-10-06T18:03:42.098Z  ├ ƒ /api/invites/accept
+2026-10-06T18:03:42.098Z  ├ ƒ /api/jobs/run
+2026-10-06T18:03:42.098Z  ├ ƒ /api/retro/connect/[provider]/callback
+2026-10-06T18:03:42.098Z  ├ ƒ /api/retro/connect/[provider]/start
+2026-10-06T18:03:42.098Z  ├ ƒ /api/slack/events
+2026-10-06T18:03:42.098Z  ├ ƒ /api/slack/interactions
+2026-10-06T18:03:42.098Z  ├ ƒ /api/slack/oauth/callback
+2026-10-06T18:03:42.099Z  ├ ƒ /api/slack/oauth/start
+2026-10-06T18:03:42.099Z  ├ ƒ /api/t/i/consent
+2026-10-06T18:03:42.099Z  ├ ƒ /api/t/i/open
+2026-10-06T18:03:42.099Z  ├ ƒ /api/t/i/submit
+2026-10-06T18:03:42.099Z  ├ ƒ /api/t/i/withdraw
+2026-10-06T18:03:42.099Z  ├ ƒ /api/telemetry/config
+2026-10-06T18:03:42.099Z  ├ ○ /apple-icon.png
+2026-10-06T18:03:42.099Z  ├ ƒ /auth/callback
+2026-10-06T18:03:42.099Z  ├ ƒ /auth/confirm
+2026-10-06T18:03:42.099Z  ├ ƒ /auth/signout
+2026-10-06T18:03:42.100Z  ├ ƒ /consent
+2026-10-06T18:03:42.100Z  ├ ƒ /d/[dept]
+2026-10-06T18:03:42.100Z  ├ ƒ /d/[dept]/ask
+2026-10-06T18:03:42.100Z  ├ ƒ /d/[dept]/cards/[id]
+2026-10-06T18:03:42.100Z  ├ ƒ /d/[dept]/documents
+2026-10-06T18:03:42.100Z  ├ ƒ /d/[dept]/evidence/[id]
+2026-10-06T18:03:42.100Z  ├ ƒ /d/[dept]/ledger
+2026-10-06T18:03:42.100Z  ├ ƒ /d/[dept]/retention
+2026-10-06T18:03:42.100Z  ├ ƒ /d/[dept]/retros
+2026-10-06T18:03:42.100Z  ├ ƒ /d/[dept]/retros/[id]
+2026-10-06T18:03:42.101Z  ├ ƒ /d/[dept]/reviews
+2026-10-06T18:03:42.101Z  ├ ƒ /d/[dept]/reviews/[id]
+2026-10-06T18:03:42.101Z  ├ ƒ /d/[dept]/reviews/glossary
+2026-10-06T18:03:42.101Z  ├ ƒ /d/[dept]/reviews/record
+2026-10-06T18:03:42.101Z  ├ ƒ /d/[dept]/roles
+2026-10-06T18:03:42.101Z  ├ ƒ /d/[dept]/sales-review
+2026-10-06T18:03:42.101Z  ├ ƒ /d/[dept]/settings
+2026-10-06T18:03:42.101Z  ├ ƒ /d/[dept]/trailers
+2026-10-06T18:03:42.101Z  ├ ƒ /d/[dept]/trailers/[id]
+2026-10-06T18:03:42.102Z  ├ ƒ /d/[dept]/trailers/new
+2026-10-06T18:03:42.102Z  ├ ƒ /demo
+2026-10-06T18:03:42.102Z  ├ ƒ /demo/access
+2026-10-06T18:03:42.102Z  ├ ƒ /demo/admin
+2026-10-06T18:03:42.102Z  ├ ƒ /demo/d/[dept]
+2026-10-06T18:03:42.102Z  ├ ƒ /demo/d/[dept]/ask
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/d/[dept]/cards/[id]
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/d/[dept]/documents
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/d/[dept]/ledger
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/d/[dept]/retention
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/d/[dept]/retros
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/d/[dept]/reviews
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/d/[dept]/roles
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/d/[dept]/settings
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/d/[dept]/trailers
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/features
+2026-10-06T18:03:42.103Z  ├ ƒ /demo/hiring
+2026-10-06T18:03:42.104Z  ├ ƒ /demo/notion
+2026-10-06T18:03:42.104Z  ├ ƒ /demo/retros
+2026-10-06T18:03:42.104Z  ├ ○ /icon.svg
+2026-10-06T18:03:42.104Z  ├ ƒ /invite/[token]
+2026-10-06T18:03:42.104Z  ├ ƒ /llms.txt
+2026-10-06T18:03:42.104Z  ├ ƒ /login
+2026-10-06T18:03:42.104Z  ├ ƒ /no-membership
+2026-10-06T18:03:42.104Z  ├ ○ /opengraph-image.png
+2026-10-06T18:03:42.104Z  ├ ƒ /privacy
+2026-10-06T18:03:42.104Z  ├ ○ /robots.txt
+2026-10-06T18:03:42.105Z  ├ ○ /sitemap.xml
+2026-10-06T18:03:42.105Z  ├ ƒ /t/[slug]
+2026-10-06T18:03:42.105Z  ├ ƒ /t/i/[token]
+2026-10-06T18:03:42.105Z  └ ƒ /trailers
+2026-10-06T18:03:42.105Z  
+2026-10-06T18:03:42.105Z  
+2026-10-06T18:03:42.105Z  ƒ Proxy (Middleware)
+2026-10-06T18:03:42.105Z  
+2026-10-06T18:03:42.106Z  ○  (Static)   prerendered as static content
+2026-10-06T18:03:42.106Z  ƒ  (Dynamic)  server-rendered on demand
+2026-10-06T18:03:42.106Z  
+2026-10-06T18:03:42.713Z  Build Completed in /vercel/output [1m]
+2026-10-06T18:03:42.744Z  Deploying outputs...
+2026-10-06T18:03:54.999Z  Deployment completed
+2026-10-06T18:03:55.006Z  Creating build cache...
+status	● Ready

@@ -1,0 +1,4 @@
+Redundant focused lint repetition was stopped after about five minutes without output.
+Observed session 74060 exit_code=-1 after owned process termination.
+This repetition is not counted as a pass. Prior lint-final.txt and lint-ga-command.txt record successful full and focused checks.
+After the earlier focused check only the read-only demo canonical assertion was added; the latest public E2E still passed 4/4.

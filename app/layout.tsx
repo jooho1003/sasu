@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import { connection } from "next/server";
+import { headers } from "next/headers";
+import { PublicAnalytics } from "@/components/public-analytics";
+import { analyticsId, telemetryEnabled } from "@/lib/telemetry";
 
 import { metadataBase } from "@/lib/site";
 
@@ -14,6 +17,8 @@ const bodyFont = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+  applicationName: "사수",
   metadataBase: metadataBase(),
   title: {
     default: "사수 — 회의록이 아니라 결정을 만듭니다",
@@ -54,9 +59,11 @@ export default async function RootLayout({
   // CSP nonces belong to one request, including public/demo and not-found HTML.
   // Unlike force-dynamic, this does not change explicit data-cache policies.
   await connection();
+  const measurementId = telemetryEnabled() ? analyticsId(process.env.GA4_MEASUREMENT_ID) : null;
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="ko" className={bodyFont.variable} data-scroll-behavior="smooth">
-      <body>{children}</body>
+      <body>{children}{measurementId ? <PublicAnalytics measurementId={measurementId} nonce={nonce} baseUrl={metadataBase().href} /> : null}</body>
     </html>
   );
 }

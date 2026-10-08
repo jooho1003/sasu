@@ -301,3 +301,25 @@ Vercel CLI가 설치되지 않은 환경에서는 운영 설정·배포 로그 �
 - T7 직전에 옛 주소에서 요청한 로그인 메일의 링크는 T7 뒤 새 주소로 이동되면서 PKCE 쿠키가 없어 `/login?error=auth_callback`이 된다. 새 주소에서 메일을 다시 요청하면 된다(ADR-088 "새 주소에서 다시 로그인").
 - 옛 주소 `/api/*`는 계속 응답해야 한다(데스크톱 0.1.x Bearer 보존, 불변식 52). 옛 주소 도메인을 지우지 않는다.
 - 값(키·토큰·DNS 비밀)은 이 문서와 검증 기록에 옮기지 않는다.
+
+## 17. 검색 노출·GA4·Sentry (ADR-091)
+
+정식 주소는 `https://getsasu.com`이다. 공개 검색 대상은 `/`, `/demo`, `/privacy`이며 로그인·업무·초대 화면은 noindex다. 홈의 실제 FAQ와 FAQPage JSON-LD는 동일한 목록을 사용한다. `/llms.txt`는 공개 설명만 제공한다. 검색·AI 답변의 노출 순위는 이 설정의 완료 기준이 아니다.
+
+GA4 새 속성은 `사수 (SASU) — getsasu.com`, 웹 스트림은 `사수 공개 웹`(16054320403), 측정 ID는 `G-HLFXFGBGPD`이다. 스트림의 향상된 측정은 **꺼짐**으로 저장했다. 운영 서버 변수 `GA4_MEASUREMENT_ID`로 전달한다. 공개 화면에서 방문자가 허용해야 Google 태그가 로드되고, 공개 페이지 조회·허용된 CTA 이름만 보낸다. 쿼리·해시·referrer는 전송하지 않는다. 업무 화면 이동 전에 수집을 중단하고 일반 링크는 전체 문서 이동한다. 철회는 태그 중단·쿠키 제거·새로고침으로 적용한다.
+
+Sentry는 기존 로그인 조직 `998dc2461b62`에 새 `sasu` 프로젝트를 만들었다. [프로젝트](https://998dc2461b62.sentry.io/projects/sasu/)에서 확인한다. Vercel Marketplace 설치 화면의 `Missing billingPlanId for installation-only plan integration` 오류를 피하고 직접 생성한 실제 프로젝트를 연결한다. 저장 위치는 해당 조직의 독일 ingest다. `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`를 서버 변수로 설정한다. 브라우저에는 no-store 설정 API로 공개 DSN과 환경만 전달한다. 현재 소스맵 업로드를 사용하지 않으므로 `SENTRY_AUTH_TOKEN`은 필요하지 않다. 오류 메시지는 `application_error`로 바꾸고, 허용된 코드 파일·행·열만 유지한다. 사용자·요청·원문·로그·세션 녹화·성능 추적은 전송하지 않는다.
+
+프로젝트 General Settings에서 JavaScript source fetching을 끄고 Allowed Domains를 `https://getsasu.com`과 `https://www.getsasu.com`으로 제한했다. TLS 검증은 켜져 있다. Security & Privacy에서 IP 저장 방지를 켜고 Advanced Data Scrubbing에 `[Remove] [Anything] from [user]`, `[Remove] [Anything] from [user.geo.*]`를 저장했다. IP 저장 방지와 SDK의 `infer_ip=never`만으로 지역 정보가 사라지지 않아 추가한 수집 후 제거 규칙이다. 이후 합성 오류의 User/Geography가 없는 것을 실제 수신 화면에서 확인했다. 설정은 앞으로 수신하는 이벤트에 적용된다.
+
+2026-10-07 GA4/Sentry의 위 네 변수는 Vercel **Production**에 등록하고 사용자 승인 후 `dpl_4vZqM84jMxEyu14dVfXiPPMbwoGs`에 반영했다. getsasu.com의 검색 파일·canonical·읽기 전용 체험·로그인을 확인했고, 실제 GA4 collector 204 및 정제된 Sentry browser collector 200을 확인했다. 콘솔 실시간 화면은 브라우저 연결 오류로 미확인이다. Preview·일반 로컬은 무수집이며, 로컬 합성 검증 때만 `SASU_TELEMETRY_TEST_ENABLED=true`를 사용한다. `.env.local`은 무시 파일로 유지한다. Vercel CLI 전역 설치를 권장한다: `npm i -g vercel`. 미설치 환경에서는 이번처럼 `npx --yes vercel`로 실행할 수 있다.
+
+운영 반영 절차:
+
+1. [검증 기록](verification/52-search-observability/verification.md)의 lint/build/unit/E2E 및 실제 수신 결과를 확인하고 사용자 배포 승인을 받는다.
+2. 공식 도메인 환경 변수를 사용해 승인된 변경을 배포한다. `NEXT_PUBLIC_APP_URL`은 빌드 전에 설정한다. 정적 robots/sitemap에는 빌드 시 값이 반영된다.
+3. 공개 화면에서 동의 전 Google 요청 0, 허용 후 GA4 page_view/CTA, 로그인 이동 후 수집 중단을 확인한다. GA4 실시간과 Sentry 합성 오류 수신을 확인한다. 실제 업무 내용을 시험 데이터로 사용하지 않는다.
+4. `/robots.txt`, `/sitemap.xml`, `/llms.txt`, 공개 canonical, 로그인 noindex와 기존 게스트·로그인 흐름을 재확인한다.
+5. 수집 문제가 있으면 GA4_MEASUREMENT_ID/SENTRY_DSN을 비우고 재배포한다. 제품 기능 회귀는 이전 배포로 되돌린다. DB 변경은 없다.
+
+구현 계약은 설치된 Next.js 16.3.4 문서·Sentry 11.4.0 타입/소스와 [Google 태그 data layer](https://developers.google.com/tag-platform/tag-manager/datalayer), [Sentry 수집 후 필드 제거](https://docs.sentry.io/product/data-management-settings/scrubbing/advanced-datascrubbing/)를 확인했다. Google 태그 command queue는 공식 bootstrap의 Arguments 객체를 사용한다.

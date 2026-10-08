@@ -1,0 +1,23 @@
+{
+  "baseURL": "https://getsasu.com",
+  "checkedAt": "2026-10-06T18:06:00.733Z",
+  "checks": [
+    "/robots.txt",
+    "/sitemap.xml",
+    "/llms.txt",
+    "production telemetry config",
+    "read-only demo and login",
+    "GA4 consent and actual clean collector receipt",
+    "private GA4 off and actual sanitized production Sentry receipt"
+  ],
+  "gaResponses": [
+    204
+  ],
+  "sentryResponses": [
+    200
+  ],
+  "sentryEventIds": [
+    "4c5f95b792df493a85f2d864dfe9fa99"
+  ],
+  "status": "passed"
+}

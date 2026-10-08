@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
+import { publicMetadata } from "@/lib/search-discovery";
 
-export const metadata: Metadata = { title: "개인정보 처리 안내" };
+export const metadata = publicMetadata("/privacy", "개인정보 처리 안내", "사수의 자료 수집 동의, 접근 권한, 보관·파기와 방문 분석·오류 수집 방법을 확인하세요.");
 
 const processors = [
   ["Supabase", "인증·데이터베이스·비공개 자료 원본 및 파일 메타데이터"],
@@ -8,6 +8,8 @@ const processors = [
   ["Groq", "분류·카드·답변·회의 정리 및 음성 전사"],
   ["Voyage AI", "검색용 임베딩 생성"],
   ["Slack", "동의한 채널의 메시지 수신·알림 전달"],
+  ["구글 애널리틱스", "방문 분석에 동의한 공개 페이지의 조회와 공개 버튼 종류"],
+  ["센트리", "연결 시 업무 원문을 제거한 코드 오류·발생 위치"],
 ];
 
 export default function PrivacyPage() {
@@ -32,6 +34,7 @@ export default function PrivacyPage() {
         <section><h2>4. 처리 위탁·국외 이전 가능성</h2><div className="overflow-x-auto rounded-2xl border border-black/10"><table className="w-full min-w-[34rem] border-collapse text-left"><thead><tr className="bg-black/5"><th className="p-4">제공사</th><th className="p-4">처리 목적</th></tr></thead><tbody>{processors.map(([name, purpose]) => <tr className="border-t border-black/10" key={name}><th className="p-4">{name}</th><td className="p-4 text-[var(--muted)]">{purpose}</td></tr>)}</tbody></table></div><p className="text-sm text-[var(--muted)]">제공사 계정의 데이터 사용 옵트아웃과 보존 설정, 적용 계약은 확인 중입니다. 확인이 끝나기 전에는 무보존(ZDR)이나 학습 미사용을 보장하지 않습니다. 음성 전사를 위해 원본 음성이 Groq에 전송되며, 전사된 텍스트는 마스킹 후 저장됩니다.</p></section>
         <section><h2>5. 권리와 문의</h2><p>정보주체는 자신의 개인정보 열람·정정·삭제·처리 정지를 요청하고 동의를 철회할 수 있습니다. 파일럿 담당자 또는 소속 부서장에게 요청하면 본인 확인 후 처리합니다. 공개 문의처는 운영 환경에 별도로 고지합니다.</p><p>지원자는 자동화된 결정에 대한 설명·거부 요청을 채용 담당자 또는 고지된 문의 이메일로 보낼 수 있습니다.</p></section>
         <section><h2>6. 안전성 확보 조치</h2><p>부서와 소스 가시성은 데이터베이스 행 수준 보안(RLS)으로 집행합니다. 질문자는 자신에게 허용된 기록만 검색하며, 인용이 원문에 존재하는지 확인되지 않은 답변은 표시하지 않습니다. 비밀값과 원문은 로그에 남기지 않습니다.</p></section>
+        <section><h2>7. 방문 분석과 오류 확인</h2><p>구글 애널리틱스 방문 분석은 공개 페이지에서 허용을 선택한 뒤에만 시작합니다. 공개 페이지의 조회와 데모·문의·가이드 같은 버튼 종류를 수집하며, 로그인 화면과 업무 화면은 분석하지 않습니다. 페이지 주소의 쿼리와 로그인 토큰, 업무 내용, 이름과 이메일은 분석 항목에 넣지 않습니다. 광고 개인화와 자동 상호작용 측정은 사용하지 않습니다.</p><p>허용 시 구글 애널리틱스 쿠키를 사용합니다. 공개 페이지의 방문 분석 설정에서 언제든 거절할 수 있으며, 거절하면 수집을 중단하고 분석 쿠키를 삭제합니다. 브라우저 설정에서 쿠키와 사이트 데이터를 삭제할 수도 있습니다. 분석 데이터의 실제 보관 설정은 운영 설정 문서에 기록합니다.</p><p>센트리 연결이 활성화되면 코드 오류의 종류와 발생 위치를 확인합니다. 오류 메시지는 고정 오류 코드로 바꾸고 요청 본문·헤더·쿠키·사용자 정보·업무 원문은 보내지 않습니다. 화면 재생과 입력 기록, 성능 추적, 콘솔 로그 수집은 사용하지 않습니다.</p></section>
       </div>
     </main>
   );

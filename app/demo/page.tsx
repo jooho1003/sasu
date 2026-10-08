@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { publicMetadata } from "@/lib/search-discovery";
+
+export const metadata = publicMetadata("/demo", "사수 체험", "가상 회사 자료로 사수의 결정 카드·결정 기록·근거 답변을 가입 없이 확인하세요.");
 import { redirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-shell";
 import { Icon, type IconName } from "@/components/ui/icon";

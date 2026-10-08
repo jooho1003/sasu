@@ -4,10 +4,15 @@ import { trailerPublishEnabled } from "@/lib/features";
 import { isDemoReviewer } from "@/lib/demo-access";
 import { contentSecurityPolicy } from "@/lib/security-headers";
 import { legacyHostRedirect } from "@/lib/site";
+import { isIndexable } from "@/lib/search-discovery";
+import { analyticsId, sentryDsn, telemetryEnabled } from "@/lib/telemetry";
 
 export async function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString("base64");
-  const policy = contentSecurityPolicy(nonce, process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NODE_ENV === "development");
+  const policy = contentSecurityPolicy(nonce, process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NODE_ENV === "development", {
+    ga4: telemetryEnabled() && Boolean(analyticsId(process.env.GA4_MEASUREMENT_ID)),
+    sentryDsn: telemetryEnabled() ? sentryDsn(process.env.SENTRY_DSN) : null,
+  });
   const policyHeader = process.env.SASU_CSP_ENFORCE === "true"
     ? "Content-Security-Policy"
     : "Content-Security-Policy-Report-Only";
@@ -15,6 +20,7 @@ export async function proxy(request: NextRequest) {
   request.headers.set("x-nonce", nonce);
   request.headers.set("Content-Security-Policy", policy);
   const protect = (response: NextResponse) => {
+    if (!isIndexable(request.nextUrl.pathname)) response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
     response.headers.set(policyHeader, policy);
     // Candidate invite tokens and mail login token_hash links must not leak through Referer.
     if (/^\/t\/i\/[^/]+\/?$/u.test(request.nextUrl.pathname) || /^\/auth\/confirm\/?$/u.test(request.nextUrl.pathname)) {

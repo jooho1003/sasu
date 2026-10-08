@@ -23,7 +23,7 @@ export function SiteHeader({ links }: { links: SiteLinks }) {
             </Link>
           ))}
           {links.guideUrl ? (
-            <a href={links.guideUrl} target="_blank" rel="noopener noreferrer">
+            <a href={links.guideUrl} target="_blank" rel="noopener noreferrer" data-analytics-id="guide">
               사용 가이드<span className="sr-only"> (노션, 새 탭)</span>
             </a>
           ) : null}
@@ -32,7 +32,7 @@ export function SiteHeader({ links }: { links: SiteLinks }) {
           <Link className="text-link site-login" href="/login">
             로그인
           </Link>
-          <a className="button button-primary button-small" href="/demo">
+          <a className="button button-primary button-small" href="/demo" data-analytics-id="demo">
             데모 보기 <Icon name="arrow" size={14} />
           </a>
           <details className="mobile-site-menu">

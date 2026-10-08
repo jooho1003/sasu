@@ -850,6 +850,15 @@ HubSpot은 토큰 introspection에서 사용자 단위 앱과 동일 사용자 I
 - 대안: (A) overview 필드 제거 — 화면·저장 형식이 바뀌고 정상 요약의 가독성이 떨어진다. (B) 모델에게 overview 인용을 요구 — 스키마 변경과 추가 실패 경로. (C) 지시문 패턴 감지 — 우회가 쉬워 단독 방어로 부족하다. 문자열 검증 대체가 가장 작고 기존 원칙과 같다.
 - 경계: LLM 호출 수·스키마·DB 저장 형식·인용 검증은 그대로다. 문서 안에 실제로 있는 지시문 문장이 항목으로 채택되는 것은 원문 문자열 검증으로 막을 수 없으며 별도 검토(사람 검토 표시 등)로 남긴다.
 
+## ADR-091 — 공개 검색 노출과 동의 기반 GA4·원문 없는 Sentry (2026-10-07)
+
+- 상태: 사용자 설정 요청과 GA4·Sentry 신규 생성 답변. 원천 PRD §3-9·§8, ARCHITECTURE §6-14, phase 52.
+- 결정: 기존 metadataBase를 사용해 공개 3경로에 canonical·공유 metadata·절대 sitemap·FAQ/제품 JSON-LD·llms.txt 제공. 공개 사실과 화면 FAQ를 동일 데이터에서 렌더한다. 나머지는 X-Robots-Tag noindex, preview 전체 크롤 차단.
+- GA4: 사수 전용 새 속성/스트림, 향상 측정 전체 off, 공개 페이지 사용자 선택 후 조회/고정 CTA만. 민감 쿼리/fragment·본문·이메일·내부 ID 제외. 비공개 이동은 full navigation으로 SDK를 제거. 거절/철회는 수집 중단과 GA 쿠키 제거.
+- Sentry: 실제 계정 연결 후 Next SDK, 서버·브라우저 오류. SDK 11의 dataCollection.userInfo=false와 infer_ip=never, replay/tracing/logs/breadcrumbs off. beforeSend는 event_id·timestamp·release·environment·level·platform·고정 exception 타입/코드·코드 위치만 재구성한다. 원래 error message·source context·request·사용자·extra/contexts·attachment는 보내지 않는다. 수집 서버의 IP 저장 방지와 사용자·지역 정보 제거 규칙도 적용하고 실제 수신으로 확인한다.
+- 공용 식별자는 서버 GA4_MEASUREMENT_ID/SENTRY_DSN에서 필요한 값만 브라우저에 전달. SENTRY_AUTH_TOKEN은 서버 빌드용. 기존 NEXT_PUBLIC 허용 목록 추가 없음.
+- 대안: A 파일별 inline privacy 로직은 중복, B 독립 분석 proxy/DB는 요구 범위 초과. C 기존 프레임워크 경계+순수 정책 모듈 선택. 약관·계정·이벤트 수신·운영 배포 미완료는 완료로 판정하지 않는다.
+
 ## ADR-092 — 게스트 데모 「문서」에 문서 요약을 보여 준다 (2026-10-07)
 
 - 상태: 사용자 결정(2026-10-07 "문서 요약을 데모에 추가", 설계안 A 선택). PRD §6-7·§8. phase 53.

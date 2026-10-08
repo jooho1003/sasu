@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { SiteCta } from "@/components/site-cta";
 import { Icon, type IconName } from "@/components/ui/icon";
-import { siteLinks } from "@/lib/site";
+import { metadataBase, siteLinks } from "@/lib/site";
+import { publicFaq, publicMetadata, structuredData } from "@/lib/search-discovery";
+
+export const metadata = publicMetadata("/", "사수 — 회의록이 아니라 결정을 만듭니다", "슬랙·회의·문서에 흩어진 결정할 일을 찾고 담당자의 결정과 이유를 기록하며, 팀의 질문에 원문 근거로 답하는 인공지능 동료 사수.");
 
 const benefits: { icon: IconName; title: string; body: string }[] = [
   {
@@ -29,10 +33,12 @@ const steps = [
   ["05", "근거로 답변", "질문자의 권한 안에서 기록을 근거로 씁니다."],
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
   const links = siteLinks();
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <main>
+      <script id="sasu-structured-data" type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData(metadataBase())).replace(/</gu, "\\u003c") }} />
       <section className="marketing-hero">
         <div className="hero-label">
           <span className="status-dot" />
@@ -238,6 +244,13 @@ export default function HomePage() {
           </div>
         </section>
       ) : null}
+      <section className="marketing-section" id="faq" aria-labelledby="faq-title">
+        <p className="eyebrow">사수에 대해 궁금하다면</p>
+        <h2 id="faq-title">자주 묻는 질문</h2>
+        <div className="mt-8 grid gap-4">
+          {publicFaq.map(({ question, answer }) => <details key={question} className="rounded-2xl border border-black/10 bg-white p-5"><summary className="cursor-pointer font-bold">{question}</summary><p className="mb-0 mt-4 leading-7 text-muted">{answer}</p></details>)}
+        </div>
+      </section>
       <section className="marketing-cta" id="pilot">
         <div className="marketing-section">
           <p className="eyebrow">우리 팀의 다음 결정부터</p>

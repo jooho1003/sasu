@@ -1,0 +1,2 @@
+npx eslint components/public-analytics.tsx tests/e2e/search-observability.spec.ts
+Observed unified exec session 37530 completed with exit_code=0 and no output.

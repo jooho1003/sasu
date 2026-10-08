@@ -1,11 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
+import { reportClientError } from "@/components/sentry-client";
+
 export default function GlobalError({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => { void reportClientError(error); }, [error]);
   return (
     <html lang="ko">
       <body style={{ margin: 0, background: "#f6f7f5", color: "#1f2823", fontFamily: "system-ui, sans-serif" }}>
