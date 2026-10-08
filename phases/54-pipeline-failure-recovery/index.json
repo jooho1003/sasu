@@ -1,0 +1,22 @@
+{
+  "project": "sasu",
+  "phase": "54-pipeline-failure-recovery",
+  "plan": "docs/01-plan/features/pipeline-failure-recovery.plan.md",
+  "design": "docs/02-design/features/pipeline-failure-recovery.design.md",
+  "steps": [
+    {
+      "step": 0,
+      "name": "document-summary-merge-fallback",
+      "status": "pending",
+      "codex_model": "gpt-5.6-luna",
+      "effort": "medium"
+    },
+    {
+      "step": 1,
+      "name": "review-part-failure-reason",
+      "status": "pending",
+      "codex_model": "gpt-5.6-luna",
+      "effort": "medium"
+    }
+  ]
+}
