@@ -2,7 +2,7 @@
 
 2026-10-07 · phase 52 · PRD §3-9·§8 / ADR-091.
 
-현재 상태: 구현·계정 연결·최신 build/단위/E2E 검증 완료. 운영 배포·커밋·push 없음. 운영 적용은 사용자 승인 후 진행한다. 실제 GA4 collector 수신과 Graft/Archify 결과는 남아 있다.
+현재 상태(2026-10-09): 구현·계정 연결·build/단위/E2E 검증 완료. 10/7 CLI 운영 배포는 이후 main 자동 배포가 덮어써 **현재 운영에 없다**(아래 「2026-10-09 운영 상태 재확인」). 최신 main 위 커밋·PR 병합으로 재반영한다. GA4 실시간 콘솔·운영 Sentry 이벤트 UI와 Graft/Archify 결과는 남아 있다.
 
 ## 실행 기록
 
@@ -80,3 +80,11 @@ demo canonical은 기존 자동 로그인을 피하는 `/demo?demo=metadata` 요
 Sentry 운영 browser event ID는 `4c5f95b792df493a85f2d864dfe9fa99`다. 이번 collector 요청은 route.fulfill로 가로채지 않고 privacy assertion 뒤 route.continue로 실제 전송했다. HTTP 수신은 서비스 대시보드에서 가공된 이벤트를 확인한 것과 구분한다.
 
 남은 확인: GA4 실시간 콘솔 및 이 운영 Sentry 이벤트의 수신 후 UI. Aside 제어 포트 45103 미연결, CUA 기존 GA4/Sentry 탭은 focus 명령 timeout, 새 GA4 탭은 ERR_FAILED였다. 로그인·보안 우회를 하지 않았다. 이전 합성 서버 이벤트의 수신 후 User/Geography 제거 확인은 위 기록대로 유효하다. Graft/Archify 도구 실행 결과는 계속 미확보이므로 phase 절차를 완료로 표시하지 않는다.
+
+## 2026-10-09 운영 상태 재확인
+
+10/7 03:06 promote한 `dpl_4vZqM84jMxEyu14dVfXiPPMbwoGs`(sasu-d04yk8wht)는 미커밋 작업 트리에서 CLI로 만든 배포였다. 같은 날 PR #46(03:38)·#47(04:21) 병합으로 main 자동 운영 배포가 이어졌고, 그 코드에는 phase 52가 없었다. `npx vercel ls --environment production` 순서: d04yk8wht → qjao0lo46 → e1puhququ → 9bn4ov38u. `npx vercel inspect getsasu.com` 결과 현재 운영은 `dpl_B3JpWE6HbNS12qPhmkdeRmnXxL7b`(2026-10-07 04:22 KST)다.
+
+2026-10-09 공개 요청 확인: `/llms.txt` 404, `/api/telemetry/config` 404, `/` 응답 CSP에 GA4·Sentry 수집 주소 없음. 위 「승인된 운영 배포 및 실제 수집 검증」의 운영 확인은 10/7 03:06~03:38 사이 상태의 기록이다.
+
+조치: 작업을 `feat/search-observability-20261009` 브랜치에 커밋하고 최신 origin/main(phase 53 포함) 위로 리베이스했다. ADR.md·PRD.md의 덧붙임 충돌은 양쪽을 모두 남겨 번호 순서로 정리했다. 실운영 수집 확인용 Playwright 설정은 운영 GA4 ID·Sentry DSN을 하드코딩하지 않고 환경 변수에서 읽게 바꿨고, `e2e-live-results.json`의 DSN 키 부분은 가렸다. 재반영은 PR main 병합(자동 배포)으로 한다. CLI promote는 다음 main 배포가 다시 덮어쓰므로 쓰지 않는다.

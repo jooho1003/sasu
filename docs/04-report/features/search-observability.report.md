@@ -92,3 +92,5 @@ Sentry 합성 오류를 실제 수신했다. 수집 서버가 추가하던 지�
 ## Changelog
 
 2026-10-07: 공개 검색·GA4·Sentry 구현, 최신 build/단위/E2E, 승인된 운영 배포와 실제 collector 응답 확인 완료. 설계 비교 100%. Graft/Archify와 provider 콘솔 확인이 남아 절차 상태는 Partial로 보고.
+
+2026-10-09: 10/7 CLI 운영 배포는 PR #46·#47 병합의 main 자동 배포가 덮어써 운영에서 빠진 것을 확인했다. 최신 main 위로 커밋·리베이스해 PR main 병합으로 재반영한다. 경위는 [실행 기록](../../verification/52-search-observability/verification.md)의 「2026-10-09 운영 상태 재확인」.

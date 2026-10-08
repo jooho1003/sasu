@@ -9,7 +9,7 @@
       "step": 0,
       "name": "search-observability",
       "status": "in_progress",
-      "summary": "사용자 승인 후 getsasu.com 운영배포 dpl_4vZqM84jMxEyu14dVfXiPPMbwoGs Ready. 공개 metadata/FAQ/robots/sitemap/llms·읽기전용 demo·loginnoindex 운영검증 통과. 실제 GA4 collector204·sanitized Sentry production browser collector200, 동의 전0·privateGAoff. 기존1916 unit/lint/build/공개4+SDK2 E2E 통과, cloudTurbopackbuild 성공. GA4 실시간 및 최신 Sentry UI는 브라우저 연결 오류로 미확인. Graft/Archify 결과 미확보로 절차 in_progress 유지. docs/verification/52-search-observability/verification.md, docs/04-report/features/search-observability.report.md"
+      "summary": "사용자 승인 후 getsasu.com 운영배포 dpl_4vZqM84jMxEyu14dVfXiPPMbwoGs Ready. 공개 metadata/FAQ/robots/sitemap/llms·읽기전용 demo·loginnoindex 운영검증 통과. 실제 GA4 collector204·sanitized Sentry production browser collector200, 동의 전0·privateGAoff. 기존1916 unit/lint/build/공개4+SDK2 E2E 통과, cloudTurbopackbuild 성공. GA4 실시간 및 최신 Sentry UI는 브라우저 연결 오류로 미확인. Graft/Archify 결과 미확보로 절차 in_progress 유지. docs/verification/52-search-observability/verification.md, docs/04-report/features/search-observability.report.md | 2026-10-09: 위 운영 배포는 PR #46·#47 병합의 main 자동 배포(최종 dpl_B3JpWE6HbNS12qPhmkdeRmnXxL7b, 10/7 04:22)가 덮어써 운영에서 빠졌다. 최신 main 위로 커밋·PR해 main 병합으로 재반영한다."
     }
   ]
 }
