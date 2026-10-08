@@ -95,7 +95,8 @@ export function projectTranscriptionWindow(
           sensitiveInGroup,
         );
       }),
-      lastOwnedWordEnd: owned.length ? Math.max(...owned.map((word) => word.end)) : null,
+      // Provider word ends can overshoot the 61-second window audio; the completion function accepts 0..61.
+      lastOwnedWordEnd: owned.length ? Math.min(WINDOW_SECONDS + 1, Math.max(...owned.map((word) => word.end))) : null,
     };
   }
 
